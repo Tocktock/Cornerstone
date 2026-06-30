@@ -1,0 +1,352 @@
+{
+  "created_at": "2026-06-30T11:19:46.611641Z",
+  "install_requires_review": false,
+  "manifest": {
+    "after_action_review_template": {
+      "fields": [
+        "outcome",
+        "evidence_refs",
+        "policy_decisions",
+        "sandbox_denials",
+        "rollback_or_followup"
+      ]
+    },
+    "allowed_actions": [
+      "draft_evidence_gap_note"
+    ],
+    "allowed_capabilities": [
+      "artifact.read",
+      "evidence.bundle.read",
+      "tool.local.evaluate",
+      "connector.mock.read"
+    ],
+    "certification": {
+      "audit_coverage": {
+        "activation": true,
+        "emergency_patch": true,
+        "install": true,
+        "registry": true,
+        "rollback": true,
+        "sandbox": true,
+        "update": true
+      },
+      "benchmark_scenarios": [
+        "VS3-TOOL-001",
+        "VS3-TOOL-002",
+        "VS3-TOOL-005"
+      ],
+      "connector_action_boundary_checks": {
+        "connectorhub_mediated": true,
+        "credentials_exposed_to_agent": false,
+        "direct_provider_access": false,
+        "status": "pass"
+      },
+      "human_review": {
+        "replaces_policy_checks": false,
+        "reviewer": "local-fixture",
+        "status": "fixture-reviewed"
+      },
+      "intended_use": "Local VS3 tool registry and sandbox verification.",
+      "llm_judge_rubrics": {
+        "pass_judge": false,
+        "provider": "local_test",
+        "supporting_signal_only": true
+      },
+      "model_compatibility": {
+        "external_model_required": false,
+        "local_test.v0": "pass"
+      },
+      "outcome_history": {
+        "replaces_scenario_certification": false,
+        "sample_size": 1,
+        "source": "local VS3 fixture"
+      },
+      "policy_checks": {
+        "autonomous_action_requires_activation": true,
+        "connectorhub_boundary_required": true,
+        "sandbox_denies_undeclared_access": true,
+        "status": "pass"
+      },
+      "prompt_injection_tests": {
+        "blocked_tool_hijack": true,
+        "external_http_calls": 0,
+        "status": "pass"
+      },
+      "required_capabilities": [
+        "artifact.read",
+        "evidence.bundle.read",
+        "tool.local.evaluate",
+        "connector.mock.read"
+      ],
+      "risk_level": "medium",
+      "rollback_support": {
+        "available": true,
+        "tested": true
+      },
+      "scenario_results": {
+        "scenario_ids": [
+          "VS3-TOOL-001",
+          "VS3-TOOL-002",
+          "VS3-TOOL-005"
+        ],
+        "status": "pass"
+      },
+      "version_history": [
+        {
+          "status": "certified",
+          "version": "1.0.0"
+        }
+      ]
+    },
+    "components": {
+      "playbook_packs": [
+        {
+          "id": "playbook_vs3_tool_gap_review",
+          "top_level_user_object": false
+        }
+      ],
+      "skill_packs": [],
+      "tool_packs": [
+        {
+          "connectorhub_mediated": true,
+          "id": "tool_vs3_local_evidence_checker",
+          "package_artifact": "fixtures/vs3/tool_registry/tool_vs3_local_evidence_checker.wasm.fixture",
+          "top_level_user_object": false
+        }
+      ]
+    },
+    "connector_requirements": [
+      {
+        "capability": "connector.mock.read",
+        "declared_actions_only": true,
+        "mediated_by": "ConnectorHub",
+        "provider": "mock_connector"
+      }
+    ],
+    "evaluation_expectations": {
+      "benchmark_scenarios": [
+        "VS3-TOOL-001",
+        "VS3-TOOL-002",
+        "VS3-TOOL-005"
+      ],
+      "connector_boundary_tests_required": true,
+      "prompt_injection_tests_required": true,
+      "rollback_test_required": true,
+      "sandbox_negative_tests_required": true
+    },
+    "forbidden_runtime": {
+      "direct_api_writeback": false,
+      "extension_owned_credentials": false,
+      "provider_clients": false,
+      "raw_secret_access": false
+    },
+    "judge_rubric": {
+      "checks": [
+        "manifest metadata completeness",
+        "sandbox denial evidence",
+        "connector boundary",
+        "rollback readiness"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": {
+      "cross_namespace": false,
+      "default": "workspace",
+      "writes_product_defaults": false
+    },
+    "model_policy": {
+      "allowed_models": [
+        "local_test.v0"
+      ],
+      "external_model_required": false,
+      "pass_judge": false,
+      "provider": "local_test"
+    },
+    "name": "VS3 Tool Registry Sample Pack",
+    "pack_id": "pack_vs3_tool_registry_sample",
+    "playbooks": [
+      {
+        "evidence_expectations": [
+          "tool manifest",
+          "registry decision",
+          "sandbox negative suite",
+          "audit refs"
+        ],
+        "playbook_id": "pb_vs3_tool_gap_review",
+        "rollback": true,
+        "title": "VS3 evidence gap review"
+      }
+    ],
+    "role_card": {
+      "display_name": "VS3 Evidence Tool",
+      "owner_visible": true,
+      "risk_level": "medium",
+      "summary": "Runs a local deterministic evidence check inside declared sandbox grants."
+    },
+    "role_contract": {
+      "cannot_do": [
+        "read raw provider credentials",
+        "open direct network sockets",
+        "read undeclared files",
+        "write memory, policy, or actions outside explicit activation grants"
+      ],
+      "purpose": "Exercise local VS3 tool registry, activation, sandbox, update, and rollback controls.",
+      "role": "Scoped evidence tool operator"
+    },
+    "runtime_grants": {
+      "connector": [
+        "connector.mock.read"
+      ],
+      "env": [],
+      "file": [
+        {
+          "mode": "read",
+          "path": "artifact://local-dev/personal/default/*",
+          "scope": "workspace_artifacts"
+        }
+      ],
+      "model": [
+        {
+          "model": "local_test.v0",
+          "provider": "local_test",
+          "purpose": "deterministic fixture evaluation"
+        }
+      ],
+      "network": [],
+      "sandbox": "wasm_fixture",
+      "shell": []
+    },
+    "schema_version": "cs.agent_pack_manifest.v0",
+    "security_patches": {
+      "1.0.1-security": {
+        "behavior_changing": false,
+        "compatibility_checks": {
+          "api_compatible": true,
+          "authority_expands": false,
+          "model_policy_compatible": true,
+          "playbook_compatible": true,
+          "status": "pass"
+        },
+        "policy": "emergency_security_patch"
+      }
+    },
+    "supply_chain": {
+      "attestation": {
+        "builder_id": "https://cornerstone.local/builders/vs3-local-fixture",
+        "predicate_type": "https://slsa.dev/provenance/v1",
+        "verified": true
+      },
+      "provenance": {
+        "builder_id": "https://cornerstone.local/builders/vs3-local-fixture",
+        "predicate_type": "https://slsa.dev/provenance/v1",
+        "resolved_dependencies": [
+          "local_test.v0",
+          "mock_connector.v0"
+        ],
+        "subject_digest": "sha256:fixture-vs3-tool-pack"
+      },
+      "sbom": {
+        "digest": "sha256:fixture-vs3-tool-sbom",
+        "format": "spdx-json-fixture",
+        "present": true
+      },
+      "signature": {
+        "certificate_ref": "rekor://fixture/pack_vs3_tool_registry_sample",
+        "scheme": "sigstore-cosign-fixture",
+        "subject_digest": "sha256:fixture-vs3-tool-pack",
+        "verified": true
+      }
+    },
+    "tool_package": {
+      "artifact_ref": "fixtures/vs3/tool_registry/tool_vs3_local_evidence_checker.wasm.fixture",
+      "manifest_ref": "fixtures/vs3/tool_registry/sample_tool_pack_manifest.json",
+      "package_type": "wasm_fixture",
+      "sbom_ref": "fixtures/vs3/tool_registry/sample_tool_pack.sbom.spdx.json",
+      "signature_ref": "fixtures/vs3/tool_registry/sample_tool_pack.signature.json"
+    },
+    "trust": {
+      "certified": true,
+      "public_marketplace_default": false,
+      "publisher": "cornerstone-local-fixture",
+      "risk_label": "medium",
+      "source": "first_party"
+    },
+    "updates": {
+      "1.1.0": {
+        "behavior_changing": true,
+        "diff": {
+          "capabilities": [
+            "tool.local.evaluate"
+          ],
+          "connector_requirements": [
+            "connector.mock.read"
+          ],
+          "migration_notes": "no data migration; owner can test update before approval",
+          "model_policy": "unchanged local_test only",
+          "playbooks": [
+            "pb_vs3_tool_gap_review"
+          ],
+          "risk": "medium",
+          "role_contract": "adds evidence severity tagging",
+          "rollback_path": "pack rollback --to-version 1.0.0"
+        },
+        "evaluation_gate": {
+          "connector_boundary": "pass",
+          "prompt_injection_regression": "pass",
+          "sandbox_negative_suite": "pass",
+          "scenario_results": [
+            "VS3-TOOL-006"
+          ],
+          "status": "pass"
+        },
+        "migration_notes": [
+          "Behavior-changing update cannot silently activate."
+        ],
+        "sandbox_canary_test": {
+          "credentials_exposed_to_agent": false,
+          "external_http_calls": 0,
+          "status": "pass",
+          "undeclared_file_reads": 0
+        }
+      }
+    },
+    "version": "1.0.0"
+  },
+  "manifest_path": "/Users/jiyong/playground/Cornerstone/fixtures/vs3/tool_registry/sample_tool_pack_manifest.json",
+  "name": "VS3 Tool Registry Sample Pack",
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "registry_source": "first_party",
+  "schema_version": "cs.agent_pack_registry_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "source_digest": "9904c38270286ba92bd54fdd85d9130383e384653820f22424e67ed65eccd606",
+  "status": "available",
+  "supply_chain": {
+    "certified": true,
+    "checks": {
+      "attestation_verified": true,
+      "provenance_present": true,
+      "risk_label_present": true,
+      "sbom_present": true,
+      "signature_verified": true,
+      "trusted_registry_source": true,
+      "update_metadata_present": true,
+      "version_declared": true
+    },
+    "registry_source": "first_party",
+    "risk_label": "medium",
+    "verified": true
+  },
+  "trust": {
+    "certified": true,
+    "public_marketplace_default": false,
+    "publisher": "cornerstone-local-fixture",
+    "risk_label": "medium",
+    "source": "first_party"
+  },
+  "version": "1.0.0"
+}

@@ -1,0 +1,68 @@
+{
+  "contract_hash": "d1023bbc630c1e3355b6cb9d98328290ded0009f74fc558edbdf8e2ad57bc449",
+  "created_at": "2026-06-30T11:19:46.614040Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Judge Agent",
+    "purpose": "Evaluate ambiguous outputs as a supporting signal without mutating memory or rules.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Judge Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "evidence.read",
+      "trajectory.read",
+      "rubric.evaluate"
+    ],
+    "audit_expectations": [
+      "agent.judge_result.recorded"
+    ],
+    "escalation_rules": [
+      "escalate unresolved high-risk disagreement"
+    ],
+    "evidence_requirements": [
+      "rubric refs",
+      "outcome refs"
+    ],
+    "forbidden_actions": [
+      "memory.write",
+      "policy.write",
+      "final_success_override"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "rubric coverage",
+        "objective outcome precedence"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "active_mission_only",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Evaluate ambiguous outputs as a supporting signal without mutating memory or rules.",
+    "responsibilities": [
+      "score_output",
+      "explain_disagreement",
+      "recommend_escalation"
+    ],
+    "role_key": "judge",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_judge_3e548f87d142e49b",
+  "role_key": "judge",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

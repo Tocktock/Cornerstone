@@ -1,0 +1,113 @@
+{
+  "activation_id": "packact_d339ae350720dbfb",
+  "allowed_actions": [
+    "draft_evidence_gap_note"
+  ],
+  "capability_disclosure_complete": true,
+  "connectorhub_boundary": {
+    "credentials_exposed_to_agent": false,
+    "declared_actions_only": true,
+    "direct_provider_access": false,
+    "mediated_by": "ConnectorHub"
+  },
+  "created_at": "2026-06-30T11:19:46.615624Z",
+  "dry_run": false,
+  "evaluation_rubric": {
+    "checks": [
+      "manifest metadata completeness",
+      "sandbox denial evidence",
+      "connector boundary",
+      "rollback readiness"
+    ],
+    "llm_signal_is_supporting_only": true
+  },
+  "grant_applied": true,
+  "granted_capabilities": [
+    "artifact.read",
+    "tool.local.evaluate",
+    "connector.mock.read"
+  ],
+  "install_id": "packinst_ede6a574022623a6",
+  "memory_scope": {
+    "cross_namespace": false,
+    "default": "workspace",
+    "writes_product_defaults": false
+  },
+  "mission_id": "mission_vs3_tool_registry",
+  "model_policy": {
+    "allowed_models": [
+      "local_test.v0"
+    ],
+    "external_model_required": false,
+    "pass_judge": false,
+    "provider": "local_test"
+  },
+  "organization_admin_shortcut": {
+    "auditable": true,
+    "bypasses_capability_disclosure": false,
+    "policy_id": null,
+    "rollback_available": true,
+    "used": false,
+    "visible": true
+  },
+  "owner_granted_only_needed_capabilities": true,
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "policy_decision": {
+    "created_at": "2026-06-30T11:19:46.615615Z",
+    "decision": "allow",
+    "policy": "agent_pack_explicit_activation_grants",
+    "policy_decision_id": "policy_ea1705e87e80e9a0",
+    "reason": "Certified Agent Pack activation with explicit owner-scoped capability grants.",
+    "resolution_path": [
+      "Use ConnectorHub-mediated capabilities and audit every action."
+    ],
+    "schema_version": "cs.policy_decision.v0",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "subject": {
+      "id": "pack_vs3_tool_registry_sample",
+      "type": "agent_pack"
+    }
+  },
+  "requested_permissions": [
+    "artifact.read",
+    "evidence.bundle.read",
+    "tool.local.evaluate",
+    "connector.mock.read"
+  ],
+  "required_connector_capabilities": [
+    {
+      "capability": "connector.mock.read",
+      "declared_actions_only": true,
+      "mediated_by": "ConnectorHub",
+      "provider": "mock_connector"
+    }
+  ],
+  "revocation_id": "packrevoke_5d97a8977aa21ba2",
+  "revoked_at": "2026-06-30T11:19:46.617210Z",
+  "risk_level": "medium",
+  "role_card": {
+    "display_name": "VS3 Evidence Tool",
+    "owner_visible": true,
+    "risk_level": "medium",
+    "summary": "Runs a local deterministic evidence check inside declared sandbox grants."
+  },
+  "rollback": {
+    "available": true,
+    "target_version": "1.0.0"
+  },
+  "schema_version": "cs.agent_pack_activation.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "silent_activation": false,
+  "status": "revoked",
+  "version": "1.0.0"
+}

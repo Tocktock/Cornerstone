@@ -1,0 +1,127 @@
+{
+  "approval_collected": false,
+  "audit_refs": [
+    "audit:audit_a765947fa5065408"
+  ],
+  "blank_approval_record": {
+    "decision": null,
+    "evidence_refs": [],
+    "exceptions": [],
+    "redaction_note": null,
+    "reviewed_at": null,
+    "reviewer": null,
+    "scope": null,
+    "signature_ref": null
+  },
+  "claim_boundary": {
+    "dependency_unlock_allowed_by_package": false,
+    "dependency_unlock_allowed_by_validator": false,
+    "h_row_status_after_generation": "HUMAN_REQUIRED",
+    "h_rows_remain_human_required": true,
+    "human_acceptance_claim_allowed": false,
+    "live_provider_readiness_claim_allowed": false,
+    "migration_restore_readiness_claim_allowed": false,
+    "package_is_review_input_only": true,
+    "pass_claim_allowed": false,
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "production_readiness_claim_allowed": false,
+    "real_idp_readiness_claim_allowed": false,
+    "real_network_readiness_claim_allowed": false,
+    "security_acceptance_claim_allowed": false,
+    "structural_validation_is_not_acceptance": true,
+    "validation_surface": "human_gate_package_review_input_only",
+    "vs3_p_unlock_allowed": false,
+    "vs3_p_unlock_allowed_by_package": false
+  },
+  "dependency_claim_boundary": "dependencies_require_signed_human_evidence_not_structural_validation",
+  "dependency_unlock_allowed": false,
+  "depends_on_human_gates": [
+    "VS3-H01",
+    "VS3-H03",
+    "VS3-H04",
+    "VS3-H05"
+  ],
+  "evidence_refs": [
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv",
+    "reports/human-gates/vs3/VS3-H02.json"
+  ],
+  "expected_behavior": "Independent reviewer validates tenant, policy, connector, tool, extension, and egress bypass resistance.",
+  "expected_evidence": "Signed review, test scope/topology, findings, remediation, retest evidence.",
+  "given": "Representative production/on-prem topology is ready for adversarial review.",
+  "package_digest_sha256": "9ddad2f7f277fa98cfe4e442e0b66870f5be6434f29f8994c604a93182a9adeb",
+  "package_id": "vs3_human_gate_vs3_h02",
+  "package_path": "reports/human-gates/vs3/VS3-H02.json",
+  "pass_claim_allowed": false,
+  "product_claim_allowed": false,
+  "redaction_rules": {
+    "allowed_evidence_shape": "redacted transcript, signed approval/rejection, scope, findings, and stable refs",
+    "raw_personal_data_allowed_without_explicit_scope": false,
+    "raw_private_keys_allowed": false,
+    "raw_provider_tokens_allowed": false,
+    "raw_secrets_allowed": false,
+    "raw_session_cookies_allowed": false,
+    "required_redaction_note": "Reviewer must state what was redacted and why raw secrets or tokens are absent."
+  },
+  "reject_conditions": [
+    "Review omits any of tenant isolation, policy, connector authority, tool runtime, extension activation, or egress.",
+    "Open release-blocking finding lacks remediation and retest evidence.",
+    "The topology differs from the one intended for VS3-P/on-prem candidate use."
+  ],
+  "release_impact": "Remains HUMAN_REQUIRED until independent evidence exists; blocks VS3-P.",
+  "required_evidence_fields": [
+    "reviewer",
+    "reviewed_at",
+    "decision",
+    "topology_scope",
+    "tested_bypass_paths",
+    "findings",
+    "remediation_refs",
+    "retest_refs",
+    "evidence_refs",
+    "signature_ref"
+  ],
+  "required_human_action": "Independent security review and retest.",
+  "review_checklist": [
+    "Attach the representative topology and the reviewed attack paths before recording the decision.",
+    "Validate tenant, policy, connector, tool, extension, and egress bypass resistance in the same review scope.",
+    "Record findings, remediation, and retest evidence as separate evidence refs."
+  ],
+  "review_order": 6,
+  "review_record_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_EXCEPTIONS",
+      "REJECT"
+    ],
+    "approval_requires_evidence_refs": true,
+    "approval_requires_signature_ref": true,
+    "package_alone_is_not_human_evidence": true,
+    "raw_secret_values_allowed": false,
+    "required_fields": [
+      "reviewer",
+      "reviewed_at",
+      "decision",
+      "topology_scope",
+      "tested_bypass_paths",
+      "findings",
+      "remediation_refs",
+      "retest_refs",
+      "evidence_refs",
+      "signature_ref"
+    ],
+    "schema_version": "cs.vs3_human_gate_review_record.v0"
+  },
+  "scenario_id": "VS3-H02",
+  "schema_version": "cs.vs3_human_gate_package.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "HUMAN_REQUIRED",
+  "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H02 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>",
+  "when": "Independent security review and retest occur.",
+  "why_ai_cannot_verify": "This row requires a person, real external system, production/on-prem topology, signed review, or subjective operator acceptance outside local deterministic proof."
+}

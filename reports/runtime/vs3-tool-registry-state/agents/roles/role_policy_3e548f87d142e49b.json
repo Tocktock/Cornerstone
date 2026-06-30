@@ -1,0 +1,67 @@
+{
+  "contract_hash": "c3ea8f7f55c05544a0ccd0c7f9ba30aaed0bbd80e91d63208ea281ab7414696c",
+  "created_at": "2026-06-30T11:19:46.614349Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Policy Agent",
+    "purpose": "Evaluate scope, risk, approval, egress, and authority boundaries.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Policy Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "policy.evaluate",
+      "access.check",
+      "audit.write"
+    ],
+    "audit_expectations": [
+      "policy.decision.created"
+    ],
+    "escalation_rules": [
+      "escalate deny",
+      "escalate human approval required"
+    ],
+    "evidence_requirements": [
+      "policy decision refs"
+    ],
+    "forbidden_actions": [
+      "grant_authority_without_contract",
+      "bypass_approval"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "policy cause",
+        "resolution path"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "none",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Evaluate scope, risk, approval, egress, and authority boundaries.",
+    "responsibilities": [
+      "evaluate_scope",
+      "evaluate_risk",
+      "record_resolution_path"
+    ],
+    "role_key": "policy",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_policy_3e548f87d142e49b",
+  "role_key": "policy",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

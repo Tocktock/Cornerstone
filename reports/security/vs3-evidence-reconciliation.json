@@ -1,0 +1,134 @@
+{
+  "artifacts": [
+    {
+      "claim_use": "may_not_be_used_for_broader_vs2_or_vs3_readiness_claim",
+      "classification": "superseded_by_conservative_final_boundary",
+      "id": "vs2_optimistic_generated_report",
+      "path": "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+      "present": true,
+      "product_feature_claims": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+      "read_error": null,
+      "scenario_set": "vs2-policy-tenancy-egress",
+      "sha256": "ce11546e84ecc6dcc9ab82fc67154384cca601bfdc23f294b4f16a3b3d75e276",
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "fail": 0,
+        "human_required": 7,
+        "not_run": 0,
+        "not_verified": 0,
+        "pass": 86,
+        "product_feature_claims": "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+        "scenario_count": 93
+      }
+    },
+    {
+      "claim_use": "current_status_source_for_vs3_0_until_superseded_by_fresh_scenario_specific_evidence",
+      "classification": "canonical_current_vs2_boundary",
+      "id": "vs2_conservative_final_report",
+      "path": "reports/scenario/vs2-policy-tenancy-egress-final.json",
+      "present": true,
+      "product_feature_claims": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+      "read_error": null,
+      "scenario_set": "vs2-policy-tenancy-egress",
+      "sha256": "5a75d731af47e59197a76a4ac1e5e0ab23fd7b8cce7d46f03efe413928b5146d",
+      "status": "failed",
+      "summary": {
+        "blocking": 86,
+        "fail": 0,
+        "human_required": 7,
+        "not_run": 0,
+        "not_verified": 86,
+        "pass": 0,
+        "product_feature_claims": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+        "scenario_count": 93
+      }
+    },
+    {
+      "claim_use": "documents_rejected_local_readiness_claim",
+      "classification": "canonical_human_readable_rejection_context",
+      "id": "vs2_final_verification_report",
+      "path": "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_FINAL_REPORT_2026-06-20.md",
+      "present": true,
+      "product_feature_claims": null,
+      "read_error": null,
+      "scenario_set": null,
+      "sha256": "113e42d51bd6fe9f23864f08b2a49eb6666117f464bc545505a8f955e6d9f1ac",
+      "status": null,
+      "summary": {}
+    },
+    {
+      "claim_use": "not_production_not_real_idp_not_real_network_not_live_provider_not_migration_readiness",
+      "classification": "local_rehearsal_only",
+      "id": "vs2_production_like_local_rehearsal",
+      "path": "reports/security/vs2-production-like-integration-2026-06-27.json",
+      "present": true,
+      "product_feature_claims": null,
+      "read_error": null,
+      "scenario_set": null,
+      "sha256": "cba8136adbf8532590784df343dda3931ec2da5fe261cfdbf59072a337e8a29c",
+      "status": "passed",
+      "summary": {
+        "fail": 0,
+        "human_required": 0,
+        "not_run": 0,
+        "not_verified": 0,
+        "pass": 8,
+        "scenario_count": 8
+      }
+    }
+  ],
+  "audit_refs": [
+    "audit:vs3_evidence_reconciliation:vs2_conflict_classified",
+    "audit:vs3_evidence_reconciliation:canonical_boundary_selected"
+  ],
+  "canonical_status": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+  "canonical_status_artifact": "reports/scenario/vs2-policy-tenancy-egress-final.json",
+  "canonical_status_sha256": "5a75d731af47e59197a76a4ac1e5e0ab23fd7b8cce7d46f03efe413928b5146d",
+  "claim_boundaries": {
+    "human_acceptance": "NOT_CLAIMED",
+    "live_provider": "NOT_CLAIMED",
+    "migration_restore": "NOT_CLAIMED",
+    "production": "NOT_CLAIMED",
+    "production_onprem": "NOT_CLAIMED",
+    "real_idp": "NOT_CLAIMED",
+    "real_network": "NOT_CLAIMED",
+    "security_acceptance": "NOT_CLAIMED",
+    "vs2_current": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+    "vs3_l": "NOT_CLAIMED",
+    "vs3_p": "NOT_CLAIMED"
+  },
+  "claim_boundary": {
+    "human_acceptance": "NOT_CLAIMED",
+    "live_provider": "NOT_CLAIMED",
+    "migration_restore": "NOT_CLAIMED",
+    "production": "NOT_CLAIMED",
+    "production_onprem": "NOT_CLAIMED",
+    "real_idp": "NOT_CLAIMED",
+    "real_network": "NOT_CLAIMED",
+    "security_acceptance": "NOT_CLAIMED",
+    "vs2_current": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+    "vs3_l": "NOT_CLAIMED",
+    "vs3_p": "NOT_CLAIMED"
+  },
+  "conflicting_reports_classified": true,
+  "errors": [],
+  "evidence_refs": [
+    "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+    "reports/scenario/vs2-policy-tenancy-egress-final.json",
+    "docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_FINAL_REPORT_2026-06-20.md",
+    "reports/security/vs3-evidence-reconciliation.json"
+  ],
+  "final_product_claim_string": "VS3_0_LOCAL_STATUS_RECONCILED_REMAINING_NOT_RUN",
+  "negative_evidence": {
+    "human_or_external_gate_marked_pass": 0,
+    "optimistic_vs2_report_used_for_vs3_readiness": 0,
+    "production_or_live_readiness_claimed": 0,
+    "unclassified_conflicting_vs2_reports": 0
+  },
+  "policy_decision_refs": [
+    "policy:vs3_evidence_reconciliation:conservative_vs2_boundary"
+  ],
+  "schema_version": "cs.vs3_evidence_reconciliation.v0",
+  "status": "success"
+}

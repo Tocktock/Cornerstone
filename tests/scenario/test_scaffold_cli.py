@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import shutil
@@ -7,15 +8,92 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli.acceptance import _source_snapshot
-from cornerstone_cli.scenarios import _vs2_regression_guard_enabled, _vs2_regression_guard_transcript
+from cornerstone_cli.scenarios import (
+    _vs2_regression_guard_enabled,
+    _vs2_regression_guard_transcript,
+    _vs3_overclaim_lint,
+)
+from cornerstone_cli.main import (
+    _vs3_human_gate_self_transcript_validation,
+    _vs3_local_checkpoint_self_transcript_validation,
+)
 
 SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
+VS3_HUMAN_GATE_PACKAGE_PATHS = [
+    f"reports/human-gates/vs3/VS3-H{index:02d}.json"
+    for index in range(1, 8)
+]
+VS3_OPERATOR_STATUS_DOM_SNAPSHOT = "reports/observability/vs3-operator-status.dom.html"
+VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS = [
+    "product_claim_allowed",
+    "pass_claim_allowed",
+    "pass_claim_allowed_by_validator",
+    "dependency_unlock_allowed_by_validator",
+    "vs3_p_unlock_allowed",
+    "production_readiness_claim_allowed",
+    "live_provider_readiness_claim_allowed",
+    "real_idp_readiness_claim_allowed",
+    "real_network_readiness_claim_allowed",
+    "migration_restore_readiness_claim_allowed",
+    "security_acceptance_claim_allowed",
+    "human_acceptance_claim_allowed",
+]
+VS3_HUMAN_GATE_VALIDATOR_ZERO_CLAIM_KEYS = [
+    "product_claims_allowed_by_validator",
+    "pass_without_owner_promotion_allowed_by_validator",
+    "vs3_p_unlocked_by_validator",
+    "production_readiness_claimed_by_validator",
+    "live_provider_readiness_claimed_by_validator",
+    "real_idp_readiness_claimed_by_validator",
+    "real_network_readiness_claimed_by_validator",
+    "migration_restore_readiness_claimed_by_validator",
+    "security_acceptance_claimed_by_validator",
+    "human_acceptance_claimed_by_validator",
+]
+VS3_HUMAN_GATE_BATCH_ZERO_CLAIM_KEYS = [
+    "product_claims_allowed_by_batch_validator",
+    "pass_without_owner_promotion_allowed_by_batch_validator",
+    "vs3_p_unlocked_by_batch_validator",
+    "production_readiness_claimed_by_batch_validator",
+    "live_provider_readiness_claimed_by_batch_validator",
+    "real_idp_readiness_claimed_by_batch_validator",
+    "real_network_readiness_claimed_by_batch_validator",
+    "migration_restore_readiness_claimed_by_batch_validator",
+    "security_acceptance_claimed_by_batch_validator",
+    "human_acceptance_claimed_by_batch_validator",
+    "dependency_unlock_allowed_by_batch_validator",
+]
+VS3_SUMMARY_NO_READINESS_CLAIM_KEYS = [
+    "production_readiness_claim_allowed",
+    "live_provider_readiness_claim_allowed",
+    "real_idp_readiness_claim_allowed",
+    "real_network_readiness_claim_allowed",
+    "migration_restore_readiness_claim_allowed",
+    "security_acceptance_claim_allowed",
+    "human_acceptance_claim_allowed",
+]
+
+
+def assert_vs3_no_claim_boundary(testcase: unittest.TestCase, boundary: dict[str, object]) -> None:
+    testcase.assertTrue(boundary["h_rows_remain_human_required"])
+    testcase.assertTrue(boundary["structural_validation_is_not_acceptance"])
+    testcase.assertIn("validation_surface", boundary)
+    for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+        testcase.assertIn(key, boundary)
+        testcase.assertFalse(boundary[key], key)
+
+
+def assert_vs3_summary_no_readiness_claims(testcase: unittest.TestCase, summary: dict[str, object]) -> None:
+    for key in VS3_SUMMARY_NO_READINESS_CLAIM_KEYS:
+        testcase.assertIn(key, summary)
+        testcase.assertFalse(summary[key], key)
 
 
 def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
@@ -53,6 +131,53 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(snapshot["paths"][0]["state"], "present")
             self.assertIsInstance(snapshot["paths"][0]["sha256"], str)
             self.assertEqual(len(snapshot["paths"][0]["sha256"]), 64)
+        finally:
+            if snapshot_root.exists():
+                shutil.rmtree(snapshot_root)
+
+    def test_source_snapshot_excludes_generated_report_roots(self) -> None:
+        snapshot_root = ROOT / "tmp/test-source-snapshot-reports"
+        if snapshot_root.exists():
+            shutil.rmtree(snapshot_root)
+        try:
+            source_file = snapshot_root / "packages/cornerstone_cli/sample.py"
+            source_file.parent.mkdir(parents=True)
+            source_file.write_text("print('source')\n")
+            source_contract = snapshot_root / "docs/scenario-contracts/VS3_TEST_CONTRACT.md"
+            source_contract.parent.mkdir(parents=True)
+            source_contract.write_text("# VS3 test contract\n")
+            for report_path in [
+                "docs/verification-reports/VS3_SCENARIO_GATE_COMPONENT_PROOF_GUARD_CHECKPOINT_2026-06-30.md",
+                "reports/human-gates/vs3/VS3-H01.json",
+                "reports/observability/vs3-observability-proof.json",
+                "reports/runtime/vs3-tool-registry-state/audit/events.jsonl",
+                "reports/security/vs3-final-regression-proof.json",
+            ]:
+                path = snapshot_root / report_path
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{}\n")
+
+            snapshot = _source_snapshot(
+                snapshot_root,
+                "base",
+                "tree",
+                [
+                    {"status": "M", "path": "packages/cornerstone_cli/sample.py"},
+                    {"status": "??", "path": "docs/"},
+                    {"status": "??", "path": "reports/human-gates/"},
+                    {"status": "??", "path": "reports/observability/"},
+                    {"status": "??", "path": "reports/runtime/"},
+                    {"status": "M", "path": "reports/security/vs3-final-regression-proof.json"},
+                ],
+            )
+
+            self.assertEqual(
+                [entry["path"] for entry in snapshot["paths"]],
+                [
+                    "docs/scenario-contracts/VS3_TEST_CONTRACT.md",
+                    "packages/cornerstone_cli/sample.py",
+                ],
+            )
         finally:
             if snapshot_root.exists():
                 shutil.rmtree(snapshot_root)
@@ -139,6 +264,10557 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(counts["MUST_PASS"], 70)
         self.assertEqual(counts["REGRESSION"], 16)
         self.assertEqual(counts["HUMAN_REQUIRED"], 7)
+
+    def test_vs3_scenario_list_count(self) -> None:
+        result = run_cli("scenario", "list", "--set", "vs3-onprem-trusted-extension", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs3-onprem-trusted-extension")
+        self.assertEqual(payload["count"], 57)
+        self.assertEqual(payload["counts"], {"MUST_PASS": 42, "REGRESSION": 8, "HUMAN_REQUIRED": 7})
+        self.assertEqual(
+            payload["phase_counts"],
+            {
+                "VS3-0": 4,
+                "VS3-1": 5,
+                "VS3-2": 6,
+                "VS3-3": 5,
+                "VS3-4": 6,
+                "VS3-5": 6,
+                "VS3-6": 7,
+                "VS3-7": 3,
+                "Final gate": 8,
+                "Human gate": 7,
+            },
+        )
+        self.assertEqual(payload["matrix_source"], "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv")
+        self.assertEqual(payload["contract_source"], "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md")
+        self.assertEqual(payload["full_mapping"]["status"], "mapped")
+        self.assertEqual(payload["full_mapping"]["scenario_count"], 57)
+        self.assertEqual(payload["full_mapping"]["missing_required_field_count"], 0)
+        self.assertEqual(payload["full_mapping"]["duplicate_id_count"], 0)
+        self.assertEqual(
+            payload["full_mapping"]["execution_classification_counts"],
+            {"in_this_slice": 4, "later_slice": 46, "HUMAN_REQUIRED": 7},
+        )
+        self.assertEqual(
+            payload["full_mapping"]["current_slice_ids"],
+            ["VS3-GATE-001", "VS3-GATE-002", "VS3-GATE-003", "VS3-GATE-004"],
+        )
+        self.assertEqual(payload["full_mapping"]["proof_boundary"]["vs3_l"], "NOT_CLAIMED_BY_LIST")
+        self.assertEqual(payload["full_mapping"]["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["full_mapping"]["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["full_mapping"]["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["full_mapping"]["proof_boundary"]["human_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(len(payload["command_transcripts"]), 1)
+        transcript = payload["command_transcripts"][0]
+        self.assertEqual(transcript["schema_version"], "cs.command_transcript.v0")
+        self.assertEqual(transcript["name"], "scenario_list_vs3_onprem_trusted_extension")
+        self.assertEqual(
+            transcript["command"],
+            ["cornerstone", "scenario", "list", "--set", "vs3-onprem-trusted-extension", "--json"],
+        )
+        self.assertEqual(
+            transcript["arguments"],
+            ["scenario", "list", "--set", "vs3-onprem-trusted-extension", "--json"],
+        )
+        self.assertEqual(transcript["exit_code"], 0)
+        self.assertFalse(transcript["timed_out"])
+        self.assertEqual(transcript["output_mode"], "json")
+        self.assertEqual(transcript["json_schema"], "cs.cli.v0")
+        self.assertEqual(transcript["source_json_schema"], "cs.vs3_onprem_trusted_extension_matrix.v0")
+        self.assertEqual(transcript["cli_schema_version"], "cs.cli.v0")
+        self.assertEqual(
+            transcript["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(transcript["evidence_refs"], payload["evidence_refs"])
+        self.assertEqual(transcript["audit_refs"], payload["audit_refs"])
+        self.assertEqual(transcript["policy_decision_refs"], payload["policy_decision_refs"])
+        self.assertEqual(transcript["ref_summary"]["evidence_refs_count"], len(payload["evidence_refs"]))
+        self.assertEqual(transcript["ref_summary"]["audit_refs_count"], len(payload["audit_refs"]))
+        self.assertEqual(
+            transcript["ref_summary"]["policy_decision_refs_count"],
+            len(payload["policy_decision_refs"]),
+        )
+        self.assertGreater(transcript["ref_summary"]["evidence_refs_count"], 0)
+        self.assertTrue(transcript["started_at"].endswith("Z"))
+        self.assertTrue(transcript["ended_at"].endswith("Z"))
+        self.assertLessEqual(transcript["started_at"], transcript["ended_at"])
+        counts = {item["type"]: 0 for item in payload["scenarios"]}
+        for item in payload["scenarios"]:
+            counts[item["type"]] = counts.get(item["type"], 0) + 1
+            for field in payload["full_mapping"]["required_mapping_fields"]:
+                self.assertTrue(item.get(field), f"{item['id']} missing {field}")
+        self.assertEqual(counts["MUST_PASS"], 42)
+        self.assertEqual(counts["REGRESSION"], 8)
+        self.assertEqual(counts["HUMAN_REQUIRED"], 7)
+        gate_rows = [item for item in payload["scenarios"] if item["phase"] == "VS3-0"]
+        self.assertTrue(all(item["execution_classification"] == "in_this_slice" for item in gate_rows))
+        human_rows = [item for item in payload["scenarios"] if item["type"] == "HUMAN_REQUIRED"]
+        self.assertTrue(all(item["owner"] == "Human" for item in human_rows))
+        self.assertTrue(all(item["execution_classification"] == "HUMAN_REQUIRED" for item in human_rows))
+
+    def test_vs3_evidence_reconcile_keeps_conservative_vs2_boundary(self) -> None:
+        result = run_cli("security", "vs3-evidence-reconcile", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["schema_version"], "cs.vs3_evidence_reconciliation.v0")
+        self.assertEqual(payload["canonical_status"], "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED")
+        self.assertTrue(payload["conflicting_reports_classified"])
+        self.assertEqual(payload["negative_evidence"]["unclassified_conflicting_vs2_reports"], 0)
+        self.assertEqual(payload["negative_evidence"]["optimistic_vs2_report_used_for_vs3_readiness"], 0)
+        self.assertEqual(payload["claim_boundary"], payload["claim_boundaries"])
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["live_provider"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertIn("audit:vs3_evidence_reconciliation:vs2_conflict_classified", payload["audit_refs"])
+        self.assertIn("policy:vs3_evidence_reconciliation:conservative_vs2_boundary", payload["policy_decision_refs"])
+        final_report = [
+            row for row in payload["artifacts"] if row["id"] == "vs2_conservative_final_report"
+        ][0]
+        self.assertEqual(final_report["classification"], "canonical_current_vs2_boundary")
+        self.assertEqual(final_report["summary"]["not_verified"], 86)
+
+    def test_vs3_overclaim_lint_cli_preserves_no_claim_boundary(self) -> None:
+        result = run_cli("security", "vs3-overclaim-lint", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "passed")
+        self.assertEqual(payload["schema_version"], "cs.vs3_overclaim_lint.v0")
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"], payload["claim_boundaries"])
+        self.assertTrue(payload["claim_boundary_matches_claim_boundaries"])
+        self.assertEqual(payload["claim_boundary_overclaim_fields"], [])
+        self.assertEqual(payload["claim_boundaries_overclaim_fields"], [])
+        self.assertEqual(payload["negative_evidence"]["claim_boundary_overclaim_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["claim_boundaries_overclaim_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["claim_boundary_alias_mismatch_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["unallowlisted_overclaim_findings"], 0)
+        self.assertIn("reports/security/vs3-overclaim-lint.json", payload["output_path"])
+        self.assertIn("report:reports/security/vs3-overclaim-lint.json", payload["evidence_refs"])
+        self.assertEqual(payload["source_reconciliation_report"], "reports/security/vs3-evidence-reconciliation.json")
+        source_identity = payload["source_reconciliation_report_identity"]
+        source_path = ROOT / source_identity["path"]
+        self.assertEqual(source_identity["path"], "reports/security/vs3-evidence-reconciliation.json")
+        self.assertEqual(len(source_identity["path_sha256"]), 64)
+        self.assertTrue(source_identity["present"])
+        self.assertTrue(source_identity["json_valid"])
+        self.assertEqual(source_identity["schema_version"], "cs.vs3_evidence_reconciliation.v0")
+        self.assertEqual(source_identity["status"], "success")
+        self.assertEqual(len(source_identity["sha256"]), 64)
+        self.assertEqual(len(source_identity["canonical_json_sha256"]), 64)
+        self.assertEqual(source_identity["sha256"], hashlib.sha256(source_path.read_bytes()).hexdigest())
+        self.assertIn("report:reports/security/vs3-evidence-reconciliation.json", payload["evidence_refs"])
+
+    def test_vs3_overclaim_lint_rejects_reconciliation_production_onprem_overclaim(self) -> None:
+        result = run_cli("security", "vs3-evidence-reconcile", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        reconciliation = json.loads(result.stdout)
+        reconciliation["claim_boundary"]["production_onprem"] = "READY"
+
+        lint = _vs3_overclaim_lint(ROOT, reconciliation)
+
+        self.assertEqual(lint["schema_version"], "cs.vs3_overclaim_lint.v0")
+        self.assertEqual(lint["status"], "failed")
+        self.assertEqual(lint["claim_boundary"]["production_onprem"], "READY")
+        self.assertEqual(lint["claim_boundary_overclaim_fields"], ["production_onprem"])
+        self.assertEqual(lint["claim_boundaries_overclaim_fields"], [])
+        self.assertFalse(lint["claim_boundary_matches_claim_boundaries"])
+        self.assertEqual(lint["negative_evidence"]["production_onprem_readiness_claimed"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_overclaim_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundaries_overclaim_count"], 0)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_alias_mismatch_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["unallowlisted_overclaim_findings"], 0)
+
+    def test_vs3_overclaim_lint_rejects_reconciliation_claim_boundaries_overclaim(self) -> None:
+        result = run_cli("security", "vs3-evidence-reconcile", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        reconciliation = json.loads(result.stdout)
+        reconciliation["claim_boundaries"]["production_onprem"] = "READY"
+
+        lint = _vs3_overclaim_lint(ROOT, reconciliation)
+
+        self.assertEqual(lint["schema_version"], "cs.vs3_overclaim_lint.v0")
+        self.assertEqual(lint["status"], "failed")
+        self.assertEqual(lint["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(lint["claim_boundaries"]["production_onprem"], "READY")
+        self.assertEqual(lint["claim_boundary_overclaim_fields"], [])
+        self.assertEqual(lint["claim_boundaries_overclaim_fields"], ["production_onprem"])
+        self.assertFalse(lint["claim_boundary_matches_claim_boundaries"])
+        self.assertEqual(lint["negative_evidence"]["production_onprem_readiness_claimed"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_overclaim_count"], 0)
+        self.assertEqual(lint["negative_evidence"]["claim_boundaries_overclaim_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_alias_mismatch_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["unallowlisted_overclaim_findings"], 0)
+
+    def test_vs3_overclaim_lint_rejects_reconciliation_security_acceptance_overclaim(self) -> None:
+        result = run_cli("security", "vs3-evidence-reconcile", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        reconciliation = json.loads(result.stdout)
+        reconciliation["claim_boundary"]["security_acceptance"] = "READY"
+
+        lint = _vs3_overclaim_lint(ROOT, reconciliation)
+
+        self.assertEqual(lint["schema_version"], "cs.vs3_overclaim_lint.v0")
+        self.assertEqual(lint["status"], "failed")
+        self.assertEqual(lint["claim_boundary"]["security_acceptance"], "READY")
+        self.assertEqual(lint["claim_boundary_overclaim_fields"], ["security_acceptance"])
+        self.assertEqual(lint["claim_boundaries_overclaim_fields"], [])
+        self.assertFalse(lint["claim_boundary_matches_claim_boundaries"])
+        self.assertEqual(lint["negative_evidence"]["security_acceptance_claimed"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_overclaim_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["claim_boundaries_overclaim_count"], 0)
+        self.assertEqual(lint["negative_evidence"]["claim_boundary_alias_mismatch_count"], 1)
+        self.assertEqual(lint["negative_evidence"]["unallowlisted_overclaim_findings"], 0)
+
+    def test_vs3_overclaim_lint_cli_rejects_reconciliation_claim_boundary_overclaim(self) -> None:
+        source_result = run_cli("security", "vs3-evidence-reconcile", "--json")
+        self.assertEqual(source_result.returncode, 0, source_result.stdout + source_result.stderr)
+        tampered_path = ROOT / "tmp/vs3-overclaim-reconciliation.json"
+        output_path = ROOT / "tmp/vs3-overclaim-lint-output.json"
+        try:
+            reconciliation = json.loads(source_result.stdout)
+            reconciliation["claim_boundary"]["production_onprem"] = "READY"
+            tampered_path.parent.mkdir(exist_ok=True)
+            tampered_path.write_text(json.dumps(reconciliation, indent=2, sort_keys=True) + "\n")
+            result = run_cli(
+                "security",
+                "vs3-overclaim-lint",
+                "--reconciliation-report",
+                str(tampered_path.relative_to(ROOT)),
+                "--output",
+                str(output_path.relative_to(ROOT)),
+                "--json",
+            )
+        finally:
+            tampered_path.unlink(missing_ok=True)
+            output_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_OVERCLAIM_LINT_FAILED" for error in payload["errors"]))
+        self.assertEqual(payload["claim_boundary_overclaim_fields"], ["production_onprem"])
+        self.assertEqual(payload["claim_boundaries_overclaim_fields"], [])
+        self.assertFalse(payload["claim_boundary_matches_claim_boundaries"])
+        self.assertEqual(payload["negative_evidence"]["production_onprem_readiness_claimed"], 1)
+        self.assertEqual(payload["negative_evidence"]["claim_boundary_overclaim_count"], 1)
+        self.assertEqual(payload["negative_evidence"]["claim_boundaries_overclaim_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["claim_boundary_alias_mismatch_count"], 1)
+
+    def test_vs3_request_context_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli("security", "vs3-request-context", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_request_context_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["real_idp"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-CTX-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-CTX-005"], "PASS")
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["caller_controlled_scope_accepted"], 0)
+        self.assertEqual(negative["forged_authority_paths_allowed"], 0)
+        self.assertEqual(negative["protected_db_rows_touched_by_forgery"], 0)
+        self.assertEqual(negative["egress_calls_from_forgery"], 0)
+        self.assertEqual(negative["post_revocation_side_effects"], 0)
+        self.assertEqual(negative["downstream_access_on_context_faults"], 0)
+        self.assertEqual(negative["tenant_membership_only_privileged_allows"], 0)
+        self.assertEqual(len({row["request_context_digest"] for row in payload["surface_transcripts"]}), 1)
+
+    def test_vs3_postgres_rls_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli(
+            "security",
+            "vs3-postgres-rls",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_postgres_rls_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_postgres_rls_rehearsal")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_migration_restore"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-RLS-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-RLS-006"], "PASS")
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["nullable_or_missing_required_scope_columns"], 0)
+        self.assertEqual(negative["null_insert_attempts_allowed"], 0)
+        self.assertEqual(negative["foreign_tenant_rows_visible"], 0)
+        self.assertEqual(negative["unauthorized_mutation_effects"], 0)
+        self.assertEqual(negative["pool_context_leaks"], 0)
+        self.assertEqual(negative["ownerless_truth_rows"], 0)
+        self.assertEqual(negative["restore_missing_rows"], 0)
+        self.assertEqual(negative["tenant_export_leaks"], 0)
+        self.assertEqual(negative["production_migration_claimed"], 0)
+        self.assertIn("artifacts", payload["durable_object_families"])
+        self.assertGreaterEqual(payload["pg_policies_inventory"]["policy_count"], 20)
+
+    def test_vs3_opa_policy_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli(
+            "security",
+            "vs3-opa-policy",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_opa_policy_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_opa_rego_control_plane")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["independent_security_review"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-OPA-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-OPA-005"], "PASS")
+        self.assertIn("model_policy.provider", payload["policy_input_schema"]["required_paths"])
+        self.assertEqual(payload["bundle_lifecycle"]["opa_test"]["exit_code"], 0)
+        self.assertNotEqual(payload["bundle_lifecycle"]["invalid_bundle_check"]["exit_code"], 0)
+        self.assertEqual(payload["opa_access_hardening"]["unauthorized_decision_api"]["status_code"], 403)
+        self.assertEqual(payload["opa_access_hardening"]["unauthorized_management_api"]["status_code"], 403)
+        self.assertFalse(payload["decision_log_masking"]["canary_present_after_mask"])
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["caller_authoritative_policy_fields_accepted"], 0)
+        self.assertEqual(negative["missing_model_policy_fields_allowed"], 0)
+        self.assertEqual(negative["unknown_policy_implicit_allows"], 0)
+        self.assertEqual(negative["anonymous_management_api_allows"], 0)
+        self.assertEqual(negative["invalid_bundle_activated"], 0)
+        self.assertEqual(negative["raw_secret_canary_leaks"], 0)
+        self.assertEqual(negative["production_opa_claimed"], 0)
+
+    def test_vs3_egress_sandbox_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli(
+            "security",
+            "vs3-egress-sandbox",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_egress_sandbox_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_process_controlled_sink_and_sandbox_fixture")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["real_network"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-EGR-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-EGR-006"], "PASS")
+        self.assertTrue(payload["runtime_boundary"]["no_grant_attempt"]["tool_runtime_called_network_api"])
+        self.assertTrue(payload["runtime_boundary"]["no_grant_attempt"]["blocked_before_socket_open"])
+        self.assertFalse(payload["runtime_boundary"]["no_grant_attempt"]["application_skip_only"])
+        self.assertEqual(payload["controlled_sinks"]["forbidden"]["requests"], 0)
+        self.assertEqual(payload["controlled_sinks"]["forbidden"]["bytes"], 0)
+        self.assertEqual(payload["controlled_sinks"]["allowed"]["requests"], 1)
+        self.assertEqual(payload["controlled_sinks"]["redirector"]["requests"], 1)
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["forbidden_sink_requests"], 0)
+        self.assertEqual(negative["forbidden_sink_bytes"], 0)
+        self.assertEqual(negative["duplicate_allowed_sink_requests"], 0)
+        self.assertEqual(negative["denied_address_contact_count"], 0)
+        self.assertEqual(negative["direct_socket_successes"], 0)
+        self.assertEqual(negative["proxy_env_successes"], 0)
+        self.assertEqual(negative["alternate_protocol_successes"], 0)
+        self.assertEqual(negative["subprocess_successes"], 0)
+        self.assertEqual(negative["shell_successes"], 0)
+        self.assertEqual(negative["host_filesystem_reads"], 0)
+        self.assertEqual(negative["env_secret_reads"], 0)
+        self.assertEqual(negative["fallback_direct_connections"], 0)
+        self.assertEqual(negative["untrusted_content_egress_calls"], 0)
+        self.assertEqual(negative["untrusted_content_action_approvals"], 0)
+        self.assertEqual(negative["untrusted_content_policy_changes"], 0)
+        self.assertEqual(negative["untrusted_content_tool_executions"], 0)
+        self.assertEqual(negative["raw_secret_leaks"], 0)
+        self.assertEqual(negative["production_network_claimed"], 0)
+
+    def test_vs3_connectorhub_source_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli("security", "vs3-connectorhub-source", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_connectorhub_source_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_connectorhub_source_fixture")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["proof_boundary"]["real_device_capture"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-CON-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-CON-006"], "PASS")
+        self.assertTrue(payload["projection_delivery"]["ack_after_commit_proof"]["ack_outbox_created_after_artifact_commit"])
+        self.assertTrue(payload["projection_delivery"]["ack_after_commit_proof"]["retry_ack_uses_existing_artifact_hash"])
+        self.assertFalse(payload["projection_delivery"]["ack_after_commit_proof"]["uncommitted_projection_acknowledged"])
+        self.assertEqual(payload["github_readonly"]["source_guard_report"]["status"], "pass")
+        self.assertTrue(payload["credential_boundary"]["redacted_sink_metadata"]["credential_ref_only"])
+        self.assertTrue(payload["source_policy"]["after_revoke"]["revoked"])
+        self.assertEqual(payload["capture_fixture"]["scope_config"]["capture_mode"], "summary_only")
+        self.assertFalse(payload["capture_fixture"]["scope_config"]["raw_capture_allowed"])
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["ack_before_commit_count"], 0)
+        self.assertEqual(negative["lost_projection_count"], 0)
+        self.assertEqual(negative["duplicate_truth_records"], 0)
+        self.assertEqual(negative["github_write_mappings"], 0)
+        self.assertEqual(negative["github_mutation_commands_exposed"], 0)
+        self.assertEqual(negative["github_external_mutations"], 0)
+        self.assertEqual(negative["github_write_calls"], 0)
+        self.assertEqual(negative["raw_credentials_exposed"], 0)
+        self.assertEqual(negative["raw_tokens_in_outputs"], 0)
+        self.assertEqual(negative["credential_bearing_urls_exposed"], 0)
+        self.assertEqual(negative["secret_scanner_findings"], 0)
+        self.assertEqual(negative["source_policy_cross_scope_deliveries"], 0)
+        self.assertEqual(negative["source_policy_stale_delivery_after_revoke"], 0)
+        self.assertEqual(negative["silent_capture_sessions"], 0)
+        self.assertEqual(negative["unbounded_capture_sessions"], 0)
+        self.assertEqual(negative["disallowed_raw_capture_outputs"], 0)
+        self.assertEqual(negative["capture_after_revoke"], 0)
+        self.assertEqual(negative["unauthorized_memory_writes"], 0)
+        self.assertEqual(negative["unauthorized_policy_changes"], 0)
+        self.assertEqual(negative["unauthorized_action_approvals"], 0)
+        self.assertEqual(negative["unauthorized_egress_calls"], 0)
+        self.assertEqual(negative["authority_expansions_from_connector_content"], 0)
+        self.assertEqual(negative["live_provider_claimed"], 0)
+        self.assertEqual(negative["vs3_l_claimed"], 0)
+        self.assertEqual(negative["vs3_p_claimed"], 0)
+
+    def test_vs3_tool_registry_proof_is_local_and_negative_evidence_backed(self) -> None:
+        result = run_cli("security", "vs3-tool-registry", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_tool_registry_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_tool_registry_fixture")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["production_registry"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["real_wasm_runtime"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_security_acceptance"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-TOOL-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-TOOL-007"], "PASS")
+        self.assertTrue(payload["manifest_validation"]["signature_verified"])
+        self.assertTrue(payload["manifest_validation"]["sbom_present"])
+        self.assertTrue(payload["manifest_validation"]["provenance_present"])
+        self.assertEqual(payload["registry"]["accepted_package"]["status"], "available")
+        self.assertTrue(all(row["decision"] == "reject" for row in payload["registry"]["negative_tests"]))
+        self.assertFalse(payload["install_boundary"]["install"]["can_act"])
+        self.assertEqual(payload["install_boundary"]["inactive_connector_denial"]["status"], "policy_denied")
+        self.assertEqual(payload["activation_boundary"]["activation_preview"]["status"], "activation_preview")
+        self.assertFalse(payload["activation_boundary"]["activation_preview"]["grant_applied"])
+        self.assertEqual(payload["activation_boundary"]["ungranted_capability_denial"]["status"], "policy_denied")
+        self.assertEqual(payload["activation_boundary"]["post_revocation_denial"]["status"], "policy_denied")
+        self.assertTrue(all(row["decision"] == "deny" for row in payload["sandbox"]["negative_suite"]))
+        self.assertEqual(payload["update_rollback"]["update_without_approval"]["status"], "approval_required")
+        self.assertEqual(payload["update_rollback"]["rollback"]["status"], "rolled_back")
+        self.assertEqual(payload["update_rollback"]["behavior_patch_block"]["status"], "approval_required")
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["missing_required_manifest_fields"], 0)
+        self.assertEqual(negative["missing_runtime_grant_classes"], 0)
+        self.assertEqual(negative["missing_signature"], 0)
+        self.assertEqual(negative["missing_sbom"], 0)
+        self.assertEqual(negative["missing_provenance"], 0)
+        self.assertEqual(negative["unsigned_packages_accepted"], 0)
+        self.assertEqual(negative["tampered_packages_accepted"], 0)
+        self.assertEqual(negative["stale_packages_accepted"], 0)
+        self.assertEqual(negative["revoked_packages_accepted"], 0)
+        self.assertEqual(negative["unknown_source_packages_accepted"], 0)
+        self.assertEqual(negative["install_as_activation_count"], 0)
+        self.assertEqual(negative["inactive_connector_requests_allowed"], 0)
+        self.assertEqual(negative["inactive_capability_attempts_allowed"], 0)
+        self.assertEqual(negative["activation_preview_applied_authority"], 0)
+        self.assertEqual(negative["ungranted_capabilities_allowed"], 0)
+        self.assertEqual(negative["post_revocation_capability_allows"], 0)
+        self.assertEqual(negative["undeclared_file_reads"], 0)
+        self.assertEqual(negative["undeclared_env_reads"], 0)
+        self.assertEqual(negative["undeclared_network_calls"], 0)
+        self.assertEqual(negative["undeclared_shell_processes"], 0)
+        self.assertEqual(negative["undeclared_model_routes"], 0)
+        self.assertEqual(negative["undeclared_connector_calls"], 0)
+        self.assertEqual(negative["undeclared_memory_writes"], 0)
+        self.assertEqual(negative["secret_scanner_findings"], 0)
+        self.assertEqual(negative["silent_behavior_updates_applied"], 0)
+        self.assertEqual(negative["rollback_failures"], 0)
+        self.assertEqual(negative["emergency_patch_authority_expansions"], 0)
+        self.assertEqual(negative["behavior_changing_emergency_patches_applied_without_review"], 0)
+        self.assertEqual(negative["vs3_l_claimed"], 0)
+        self.assertEqual(negative["vs3_p_claimed"], 0)
+
+    def test_vs3_observability_proof_is_local_and_human_gate_backed(self) -> None:
+        result = run_cli("security", "vs3-observability", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_observability_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_observability_fixture")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_operator_acceptance"], "HUMAN_REQUIRED")
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["scenario_status"]["VS3-OBS-001"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-OBS-002"], "PASS")
+        self.assertEqual(payload["scenario_status"]["VS3-OBS-003"], "PASS")
+
+        components = payload["operator_status_snapshot"]["components"]
+        self.assertEqual(
+            set(components),
+            {
+                "postgres_rls",
+                "opa",
+                "egress",
+                "connectorhub",
+                "tool_runtime",
+                "registry",
+                "audit",
+                "backup_restore",
+                "migration",
+                "human_gates",
+            },
+        )
+        self.assertEqual(components["human_gates"]["status"], "HUMAN_REQUIRED")
+        self.assertTrue(all(row["not_misleading_green"] for row in payload["operator_status_snapshot"]["fault_injection_results"]))
+        comparison = payload["status_surface_comparison"]
+        self.assertEqual(comparison["schema_version"], "cs.vs3_status_surface_comparison.v0")
+        self.assertEqual(set(comparison["surfaces"]), {"cli", "api", "ui"})
+        self.assertTrue(all(comparison["comparison_checks"].values()))
+        self.assertEqual(
+            len({surface["truth_digest_sha256"] for surface in comparison["surfaces"].values()}),
+            1,
+        )
+        self.assertEqual(
+            comparison["surfaces"]["cli"]["command"],
+            "cornerstone observe status --scope vs3 --json",
+        )
+        self.assertEqual(comparison["surfaces"]["api"]["route"], "GET /api/vs3/status")
+        self.assertEqual(comparison["ui_dom_snapshot"]["path"], VS3_OPERATOR_STATUS_DOM_SNAPSHOT)
+        self.assertEqual(comparison["surfaces"]["ui"]["dom_snapshot_path"], VS3_OPERATOR_STATUS_DOM_SNAPSHOT)
+        dom_text = (ROOT / VS3_OPERATOR_STATUS_DOM_SNAPSHOT).read_text()
+        self.assertIn('data-surface="vs3-operator-status"', dom_text)
+        self.assertIn(f'data-truth-digest="{comparison["truth_digest_sha256"]}"', dom_text)
+        for component in components:
+            self.assertIn(f'data-component="{component}"', dom_text)
+
+        audit = payload["audit_integrity"]
+        self.assertEqual(audit["clean_verify"]["exit_code"], 0)
+        self.assertEqual(audit["tamper_verify"]["exit_code"], 5)
+        self.assertIn("human_gate.package.generated", audit["event_types"])
+        self.assertFalse(audit["missing_event_types"])
+        self.assertTrue(audit["event_scopes_complete"])
+        self.assertTrue(audit["event_hashes_present"])
+
+        packages = payload["human_gate_packages"]
+        self.assertEqual(packages["package_count"], 7)
+        self.assertEqual(len(packages["package_files"]), 7)
+        self.assertTrue(all(package["status"] == "HUMAN_REQUIRED" for package in packages["packages"]))
+        self.assertTrue(all(package["blank_approval_record"]["decision"] is None for package in packages["packages"]))
+        self.assertTrue(all(package["blank_approval_record"]["redaction_note"] is None for package in packages["packages"]))
+        self.assertTrue(all(len(package["review_checklist"]) >= 3 for package in packages["packages"]))
+        self.assertTrue(all(len(package["required_evidence_fields"]) >= 8 for package in packages["packages"]))
+        self.assertTrue(all(len(package["reject_conditions"]) >= 3 for package in packages["packages"]))
+        self.assertTrue(
+            all(
+                "cornerstone human-gate validate-record --scope vs3" in package["validation_command"]
+                for package in packages["packages"]
+            )
+        )
+        self.assertTrue(
+            all(
+                package["review_record_contract"]["package_alone_is_not_human_evidence"]
+                for package in packages["packages"]
+            )
+        )
+        self.assertTrue(
+            all(
+                package["claim_boundary"]["h_row_status_after_generation"] == "HUMAN_REQUIRED"
+                for package in packages["packages"]
+            )
+        )
+        for package in packages["packages"]:
+            self.assertTrue(package["claim_boundary"]["package_is_review_input_only"])
+            self.assertTrue(package["claim_boundary"]["h_rows_remain_human_required"])
+            self.assertTrue(package["claim_boundary"]["structural_validation_is_not_acceptance"])
+            self.assertEqual(package["claim_boundary"]["validation_surface"], "human_gate_package_review_input_only")
+            for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+                self.assertIn(key, package["claim_boundary"])
+                self.assertFalse(package["claim_boundary"][key], key)
+            self.assertFalse(package["claim_boundary"]["vs3_p_unlock_allowed_by_package"])
+            self.assertFalse(package["claim_boundary"]["dependency_unlock_allowed_by_package"])
+        self.assertFalse(any(package["claim_boundary"]["vs3_p_unlock_allowed_by_package"] for package in packages["packages"]))
+        self.assertFalse(any(package["pass_claim_allowed"] for package in packages["packages"]))
+        self.assertFalse(any(package["product_claim_allowed"] for package in packages["packages"]))
+        self.assertTrue(all(row["review_checklist_ready"] for row in packages["validation"]))
+        self.assertTrue(all(row["required_evidence_fields_ready"] for row in packages["validation"]))
+        self.assertTrue(all(row["reject_conditions_ready"] for row in packages["validation"]))
+        self.assertTrue(all(row["validation_command_ready"] for row in packages["validation"]))
+        self.assertTrue(all(row["review_record_contract_ready"] for row in packages["validation"]))
+        self.assertTrue(all(row["claim_boundary_ready"] for row in packages["validation"]))
+
+        rehearsal = payload["human_gate_validation_rehearsal"]
+        self.assertEqual(rehearsal["schema_version"], "cs.vs3_human_gate_validation_rehearsal.v0")
+        self.assertEqual(rehearsal["status"], "success")
+        self.assertEqual(rehearsal["validation_scope"], "temporary_redacted_records_structure_and_safety_only")
+        self.assertEqual(rehearsal["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(rehearsal["weakest_applicable_scenario_result"], "HUMAN_REQUIRED")
+        self.assertTrue(rehearsal["record_dir"]["temporary_dir"])
+        self.assertFalse(rehearsal["record_dir"]["path_recorded_by_rehearsal"])
+        self.assertTrue(rehearsal["record_dir"]["removed_after_rehearsal"])
+        self.assertEqual(rehearsal["validation_count"], 7)
+        self.assertEqual(rehearsal["record_files_created"], 7)
+        self.assertEqual(rehearsal["structurally_valid_count"], 7)
+        self.assertEqual(rehearsal["structurally_invalid_count"], 0)
+        self.assertEqual(rehearsal["missing_scenario_ids"], [])
+        self.assertEqual(rehearsal["unexpected_scenario_ids"], [])
+        self.assertTrue(rehearsal["claim_boundary"]["rehearsal_is_structure_only"])
+        self.assertTrue(rehearsal["claim_boundary"]["uses_temporary_redacted_sample_records"])
+        self.assertTrue(rehearsal["claim_boundary"]["h_rows_remain_human_required"])
+        self.assertFalse(rehearsal["claim_boundary"]["human_acceptance_claim_allowed"])
+        self.assertFalse(rehearsal["claim_boundary"]["product_claim_allowed"])
+        self.assertFalse(rehearsal["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(rehearsal["non_mutation_evidence"]["approval_collected_by_rehearsal"])
+        self.assertFalse(rehearsal["non_mutation_evidence"]["human_decision_recorded_by_rehearsal"])
+        self.assertFalse(rehearsal["non_mutation_evidence"]["record_bodies_persisted_by_rehearsal"])
+        self.assertFalse(rehearsal["non_mutation_evidence"]["record_paths_persisted_by_rehearsal"])
+        self.assertFalse(rehearsal["non_mutation_evidence"]["field_values_persisted_by_rehearsal"])
+        self.assertEqual(rehearsal["non_mutation_evidence"]["temporary_record_files_persisted_after_rehearsal"], 0)
+        self.assertTrue(all(row["status"] == "record_structurally_valid" for row in rehearsal["validation_summaries"]))
+        self.assertTrue(all(row["final_verdict"] == "HUMAN_REQUIRED" for row in rehearsal["validation_summaries"]))
+        self.assertTrue(all(row["matrix_status_after_validation"] == "HUMAN_REQUIRED" for row in rehearsal["validation_summaries"]))
+        self.assertTrue(all(row["record_file_sha256_present"] for row in rehearsal["validation_summaries"]))
+        self.assertFalse(any(row["record_file_path_recorded"] for row in rehearsal["validation_summaries"]))
+        self.assertFalse(any(row["record_body_persisted_by_validator"] for row in rehearsal["validation_summaries"]))
+        self.assertFalse(any(row["record_path_persisted_by_validator"] for row in rehearsal["validation_summaries"]))
+        self.assertFalse(any(row["raw_record_values_in_output"] for row in rehearsal["validation_summaries"]))
+        self.assertNotIn("redacted-reviewer", json.dumps(rehearsal, sort_keys=True))
+
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["operator_components_missing"], 0)
+        self.assertEqual(negative["misleading_green_fault_statuses"], 0)
+        self.assertEqual(negative["status_cli_api_ui_mismatches"], 0)
+        self.assertEqual(negative["status_ui_dom_snapshot_missing"], 0)
+        self.assertEqual(negative["status_ui_dom_snapshot_missing_components"], 0)
+        self.assertEqual(negative["status_surfaces_without_audit_refs"], 0)
+        self.assertEqual(negative["missing_required_audit_event_families"], 0)
+        self.assertEqual(negative["audit_tamper_accepted"], 0)
+        self.assertEqual(negative["human_gate_packages_missing"], 0)
+        self.assertEqual(negative["human_gate_packages_marked_pass"], 0)
+        self.assertEqual(negative["human_gate_approvals_collected_by_package_generator"], 0)
+        self.assertEqual(negative["human_gate_pass_claims_allowed_by_package_generator"], 0)
+        self.assertEqual(negative["human_gate_product_claims_allowed_by_package_generator"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_review_checklist"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_required_evidence_fields"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_reject_conditions"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_validation_command"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_review_record_contract"], 0)
+        self.assertEqual(negative["human_gate_packages_missing_claim_boundary"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_missing"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_missing_records"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_unexpected_records"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_invalid_records"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_missing_file_hashes"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_record_paths_recorded"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_human_rows_marked_pass"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_product_claims_allowed"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_pass_claims_allowed"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_vs3_p_unlocks"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_record_bodies_persisted"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_record_paths_persisted"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_raw_record_values_in_output"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_sensitive_marker_findings"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_overclaim_marker_findings"], 0)
+        self.assertEqual(negative["human_gate_validation_rehearsal_temp_files_persisted"], 0)
+        self.assertEqual(negative["vs3_l_claimed"], 0)
+        self.assertEqual(negative["vs3_p_claimed"], 0)
+
+    def test_vs3_observability_preserves_human_gate_checkpoint_artifacts(self) -> None:
+        human_gate_dir = ROOT / "reports/human-gates/vs3"
+        human_gate_dir.mkdir(parents=True, exist_ok=True)
+        sentinel_files = [
+            human_gate_dir / "record-scaffold.json",
+            human_gate_dir / "evidence-status.json",
+            human_gate_dir / "vs3-p-gate.json",
+            human_gate_dir / "record-templates" / "manifest.json",
+        ]
+        sentinel_payload = {
+            "sentinel": "preserve checkpoint-owned human-gate artifacts",
+            "vs3_p_claim": "NOT_CLAIMED",
+        }
+        original_files = {
+            path: path.read_bytes() if path.exists() and path.is_file() else None
+            for path in sentinel_files
+        }
+        try:
+            for path in sentinel_files:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps(sentinel_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-observability", "--json")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["human_gate_packages"]["package_count"], 7)
+            self.assertEqual(len(payload["human_gate_packages"]["package_files"]), 7)
+
+            for path in sentinel_files:
+                self.assertTrue(path.exists(), str(path))
+                self.assertEqual(json.loads(path.read_text()), sentinel_payload)
+            self.assertEqual(len(sorted(human_gate_dir.glob("VS3-H*.json"))), 7)
+        finally:
+            for path, original_bytes in original_files.items():
+                if original_bytes is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_bytes(original_bytes)
+
+    def test_vs3_principal_and_access_cli_paths_are_native(self) -> None:
+        context_result = run_cli("principal", "context", "resolve", "--json")
+        self.assertEqual(context_result.returncode, 0, context_result.stdout + context_result.stderr)
+        context_payload = json.loads(context_result.stdout)
+        self.assertEqual(context_payload["request_context_schema_version"], "cs.vs3_request_context.v0")
+        self.assertFalse(
+            context_payload["request_context"]["trusted_principal"]["caller_supplied_authority_used"]
+        )
+        self.assertEqual(context_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertTrue(context_payload["request_context_digest"])
+        self.assertTrue(context_payload["policy_decision_refs"])
+        self.assertTrue(context_payload["audit_refs"])
+
+        allowed_result = run_cli("access", "check", "--operation", "memory_read", "--json")
+        self.assertEqual(allowed_result.returncode, 0, allowed_result.stdout + allowed_result.stderr)
+        allowed_payload = json.loads(allowed_result.stdout)
+        self.assertEqual(allowed_payload["access_check_schema_version"], "cs.vs3_access_check.v0")
+        self.assertEqual(allowed_payload["status"], "allowed")
+        self.assertEqual(allowed_payload["access_check"]["decision"], "allow")
+
+        denied_result = run_cli("access", "check", "--operation", "tool_execute", "--json")
+        self.assertEqual(denied_result.returncode, 2, denied_result.stdout + denied_result.stderr)
+        denied_payload = json.loads(denied_result.stdout)
+        self.assertEqual(denied_payload["status"], "denied")
+        self.assertEqual(denied_payload["access_check"]["decision"], "deny")
+        self.assertEqual(denied_payload["errors"][0]["code"], "CS_VS3_ACCESS_POLICY_DENIED")
+        proof_result = run_cli("security", "vs3-request-context", "--json")
+        self.assertEqual(proof_result.returncode, 0, proof_result.stdout + proof_result.stderr)
+        proof_payload = json.loads(proof_result.stdout)
+        tool_transcript = next(
+            transcript
+            for transcript in proof_payload["command_transcripts"]
+            if transcript["command"] == ["cornerstone", "access", "check", "--operation", "tool_execute", "--json"]
+        )
+        self.assertEqual(tool_transcript["exit_code"], 2)
+
+    def test_vs3_tenant_backup_restore_cli_paths_are_native(self) -> None:
+        seed_result = run_cli(
+            "security",
+            "vs3-postgres-rls",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        inventory_result = run_cli("tenant", "rls-inventory", "--json")
+        self.assertEqual(inventory_result.returncode, 0, inventory_result.stdout + inventory_result.stderr)
+        inventory_payload = json.loads(inventory_result.stdout)
+        self.assertEqual(inventory_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(inventory_payload["vs3_postgres_rls_schema_version"], "cs.vs3_postgres_rls_proof.v0")
+        self.assertEqual(inventory_payload["tenant_rls_inventory_schema_version"], "cs.vs3_tenant_rls_inventory.v0")
+        self.assertEqual(inventory_payload["status"], "success")
+        self.assertTrue(inventory_payload["evidence_refs"])
+        self.assertTrue(inventory_payload["audit_refs"])
+        self.assertIn("pg_policies_inventory", inventory_payload["tenant_rls_inventory"])
+
+        isolation_result = run_cli("tenant", "rls-isolation", "--json")
+        self.assertEqual(isolation_result.returncode, 0, isolation_result.stdout + isolation_result.stderr)
+        isolation_payload = json.loads(isolation_result.stdout)
+        self.assertEqual(isolation_payload["tenant_rls_isolation_schema_version"], "cs.vs3_tenant_rls_isolation.v0")
+        self.assertEqual(isolation_payload["tenant_rls_isolation"]["negative_evidence"]["foreign_tenant_rows_visible"], 0)
+        self.assertTrue(isolation_payload["tenant_rls_isolation"]["mutation_matrix"]["forged_insert_denied"])
+
+        migration_result = run_cli("tenant", "migration-rehearsal", "--json")
+        self.assertEqual(migration_result.returncode, 0, migration_result.stdout + migration_result.stderr)
+        migration_payload = json.loads(migration_result.stdout)
+        self.assertEqual(
+            migration_payload["tenant_migration_rehearsal_schema_version"],
+            "cs.vs3_tenant_migration_rehearsal.v0",
+        )
+        self.assertEqual(
+            migration_payload["tenant_migration_rehearsal"]["migration"]["ownerless_global_truth_count"],
+            0,
+        )
+
+        backup_result = run_cli("backup", "create", "--json")
+        self.assertEqual(backup_result.returncode, 0, backup_result.stdout + backup_result.stderr)
+        backup_payload = json.loads(backup_result.stdout)
+        self.assertEqual(backup_payload["backup_schema_version"], "cs.vs3_backup_manifest.v0")
+        self.assertTrue(backup_payload["backup"]["checks"]["pg_dump_succeeded"])
+
+        restore_result = run_cli("restore", "verify", "--json")
+        self.assertEqual(restore_result.returncode, 0, restore_result.stdout + restore_result.stderr)
+        restore_payload = json.loads(restore_result.stdout)
+        self.assertEqual(restore_payload["restore_schema_version"], "cs.vs3_restore_verification.v0")
+        self.assertTrue(restore_payload["restore_verification"]["checks"]["rls_rechecked_after_restore"])
+
+    def test_vs3_policy_cli_paths_are_native(self) -> None:
+        seed_result = run_cli(
+            "security",
+            "vs3-opa-policy",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        evaluate_result = run_cli(
+            "policy",
+            "evaluate",
+            "--input",
+            "fixtures/vs3/policy/allow_artifact_read.json",
+            "--json",
+        )
+        self.assertEqual(evaluate_result.returncode, 0, evaluate_result.stdout + evaluate_result.stderr)
+        evaluate_payload = json.loads(evaluate_result.stdout)
+        self.assertEqual(evaluate_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(evaluate_payload["policy_evaluate_schema_version"], "cs.vs3_policy_evaluate.v0")
+        self.assertEqual(evaluate_payload["status"], "allowed")
+        self.assertEqual(evaluate_payload["policy_decision"]["decision"], "allow")
+        self.assertTrue(evaluate_payload["policy_decision_refs"])
+        self.assertTrue(evaluate_payload["audit_refs"])
+        self.assertTrue(evaluate_payload["evidence_refs"])
+
+        bundle_result = run_cli("policy", "bundle", "activate", "--dry-run", "--json")
+        self.assertEqual(bundle_result.returncode, 0, bundle_result.stdout + bundle_result.stderr)
+        bundle_payload = json.loads(bundle_result.stdout)
+        self.assertEqual(bundle_payload["policy_bundle_activate_schema_version"], "cs.vs3_policy_bundle_activate.v0")
+        self.assertTrue(bundle_payload["dry_run"])
+        self.assertEqual(bundle_payload["bundle_activation"]["status"], "dry_run_passed")
+        self.assertFalse(bundle_payload["bundle_activation"]["invalid_bundle_activated"])
+        self.assertEqual(bundle_payload["bundle_activation"]["production_activation"], "NOT_CLAIMED")
+
+        non_dry_run_result = run_cli("policy", "bundle", "activate", "--json")
+        self.assertEqual(non_dry_run_result.returncode, 6, non_dry_run_result.stdout + non_dry_run_result.stderr)
+        non_dry_run_payload = json.loads(non_dry_run_result.stdout)
+        self.assertEqual(
+            non_dry_run_payload["policy_bundle_activate_schema_version"],
+            "cs.vs3_policy_bundle_activate.v0",
+        )
+        self.assertFalse(non_dry_run_payload["dry_run"])
+        self.assertEqual(non_dry_run_payload["bundle_activation"]["status"], "blocked_non_dry_run")
+        self.assertEqual(non_dry_run_payload["bundle_activation"]["production_activation"], "NOT_CLAIMED")
+        self.assertEqual(non_dry_run_payload["bundle_activation"]["human_security_acceptance"], "HUMAN_REQUIRED")
+        self.assertEqual(non_dry_run_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertTrue(non_dry_run_payload["evidence_refs"])
+        self.assertTrue(non_dry_run_payload["audit_refs"])
+        self.assertEqual(non_dry_run_payload["errors"][0]["code"], "CS_VS3_POLICY_BUNDLE_DRY_RUN_REQUIRED")
+
+    def test_vs3_egress_and_sandbox_cli_paths_are_native(self) -> None:
+        seed_result = run_cli(
+            "security",
+            "vs3-egress-sandbox",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        egress_result = run_cli("egress", "test", "--profile", "vs3", "--json")
+        self.assertEqual(egress_result.returncode, 0, egress_result.stdout + egress_result.stderr)
+        egress_payload = json.loads(egress_result.stdout)
+        self.assertEqual(egress_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(egress_payload["egress_test_schema_version"], "cs.vs3_egress_test.v0")
+        self.assertEqual(egress_payload["status"], "success")
+        self.assertEqual(egress_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(egress_payload["proof_boundary"]["real_network"], "HUMAN_REQUIRED")
+        self.assertTrue(egress_payload["runtime_boundary"]["no_grant_attempt"]["tool_runtime_called_network_api"])
+        self.assertTrue(egress_payload["runtime_boundary"]["no_grant_attempt"]["blocked_before_socket_open"])
+        self.assertFalse(egress_payload["runtime_boundary"]["no_grant_attempt"]["application_skip_only"])
+        self.assertEqual(egress_payload["controlled_sinks"]["forbidden"]["requests"], 0)
+        self.assertEqual(egress_payload["controlled_sinks"]["forbidden"]["bytes"], 0)
+        self.assertEqual(egress_payload["controlled_sinks"]["allowed"]["requests"], 1)
+        self.assertEqual(
+            egress_payload["controlled_sinks"]["redirector"]["redirect_hop"]["redirect_hop_decision"],
+            "deny",
+        )
+        self.assertFalse(egress_payload["controlled_sinks"]["redirector"]["redirect_hop"]["denied_hop_contacted"])
+        self.assertTrue(egress_payload["url_normalization_matrix"])
+        self.assertTrue(all(row["decision"] == "deny" and not row["contacted"] for row in egress_payload["url_normalization_matrix"]))
+        self.assertEqual(egress_payload["negative_evidence"]["forbidden_sink_requests"], 0)
+        self.assertEqual(egress_payload["negative_evidence"]["denied_address_contact_count"], 0)
+        self.assertEqual(egress_payload["negative_evidence"]["production_network_claimed"], 0)
+        self.assertTrue(egress_payload["policy_decision_refs"])
+        self.assertTrue(egress_payload["audit_refs"])
+        self.assertTrue(egress_payload["evidence_refs"])
+
+        sandbox_result = run_cli("sandbox", "verify", "--json")
+        self.assertEqual(sandbox_result.returncode, 0, sandbox_result.stdout + sandbox_result.stderr)
+        sandbox_payload = json.loads(sandbox_result.stdout)
+        self.assertEqual(sandbox_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(sandbox_payload["sandbox_verify_schema_version"], "cs.vs3_sandbox_verify.v0")
+        self.assertEqual(sandbox_payload["status"], "success")
+        self.assertEqual(sandbox_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertTrue(sandbox_payload["sandbox_matrix"])
+        self.assertTrue(all(row["decision"] == "deny" for row in sandbox_payload["sandbox_matrix"]))
+        self.assertTrue(all(row["host_operations_executed"] == 0 for row in sandbox_payload["sandbox_matrix"]))
+        self.assertTrue(sandbox_payload["outage_matrix"])
+        self.assertTrue(
+            all(
+                row["decision"] == "deny"
+                and row["failure_mode"] == "fail_closed"
+                and not row["fallback_direct_connection"]
+                and row["readiness"] == "degraded"
+                for row in sandbox_payload["outage_matrix"]
+            )
+        )
+        self.assertTrue(sandbox_payload["untrusted_content_matrix"])
+        self.assertTrue(
+            all(
+                row["egress_calls"] == 0
+                and row["action_approvals"] == 0
+                and row["policy_changes"] == 0
+                and row["tool_executions"] == 0
+                and row["untrusted_label"]
+                and not row["trusted_as_instruction"]
+                for row in sandbox_payload["untrusted_content_matrix"]
+            )
+        )
+        self.assertEqual(sandbox_payload["negative_evidence"]["host_filesystem_reads"], 0)
+        self.assertEqual(sandbox_payload["negative_evidence"]["env_secret_reads"], 0)
+        self.assertEqual(sandbox_payload["negative_evidence"]["fallback_direct_connections"], 0)
+        self.assertEqual(sandbox_payload["negative_evidence"]["untrusted_content_egress_calls"], 0)
+
+    def test_vs3_connectorhub_cli_paths_are_native(self) -> None:
+        seed_result = run_cli("security", "vs3-connectorhub-source", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        source_policy_result = run_cli("connector", "source-policy", "show", "--json")
+        self.assertEqual(source_policy_result.returncode, 0, source_policy_result.stdout + source_policy_result.stderr)
+        source_policy_payload = json.loads(source_policy_result.stdout)
+        self.assertEqual(source_policy_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(
+            source_policy_payload["connector_source_policy_show_schema_version"],
+            "cs.vs3_connector_source_policy_show.v0",
+        )
+        self.assertEqual(source_policy_payload["status"], "success")
+        self.assertEqual(source_policy_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(source_policy_payload["proof_boundary"]["live_provider"], "HUMAN_REQUIRED")
+        self.assertTrue(source_policy_payload["source_policy"]["after_revoke"]["revoked"])
+        source_policy_decisions = {
+            row["delivery_id"]: row
+            for row in source_policy_payload["source_policy"]["delivery_decisions"]
+        }
+        self.assertEqual(source_policy_decisions["delivery_vs3_con_before_revoke"]["decision"], "allow")
+        self.assertEqual(source_policy_decisions["delivery_vs3_con_after_revoke"]["decision"], "deny")
+        self.assertEqual(
+            source_policy_decisions["delivery_vs3_con_after_revoke"]["reason_code"],
+            "VS3_SOURCE_POLICY_REVOKED",
+        )
+        self.assertEqual(source_policy_decisions["delivery_vs3_con_cross_scope"]["decision"], "deny")
+        self.assertEqual(source_policy_payload["negative_evidence"]["source_policy_cross_scope_deliveries"], 0)
+        self.assertEqual(source_policy_payload["negative_evidence"]["source_policy_stale_delivery_after_revoke"], 0)
+        self.assertTrue(source_policy_payload["evidence_refs"])
+        self.assertTrue(source_policy_payload["audit_refs"])
+
+        projection_result = run_cli("connector", "projection", "verify", "--json")
+        self.assertEqual(projection_result.returncode, 0, projection_result.stdout + projection_result.stderr)
+        projection_payload = json.loads(projection_result.stdout)
+        self.assertEqual(
+            projection_payload["connector_projection_verify_schema_version"],
+            "cs.vs3_connector_projection_verify.v0",
+        )
+        self.assertTrue(
+            projection_payload["projection_delivery"]["ack_after_commit_proof"]["ack_outbox_created_after_artifact_commit"]
+        )
+        self.assertTrue(projection_payload["projection_delivery"]["artifact"]["immutable"])
+        self.assertTrue(projection_payload["projection_delivery"]["artifact"]["original_preserved"])
+        self.assertTrue(
+            all(
+                attempt["artifact_committed_before_ack"] and not attempt["ack_before_commit"]
+                for attempt in projection_payload["projection_delivery"]["attempts"]
+            )
+        )
+        self.assertTrue(
+            projection_payload["projection_delivery"]["ack_after_commit_proof"]["retry_ack_uses_existing_artifact_hash"]
+        )
+        self.assertFalse(
+            projection_payload["projection_delivery"]["ack_after_commit_proof"]["uncommitted_projection_acknowledged"]
+        )
+        delivery_fault_cases = {
+            row["case_id"]: row
+            for row in projection_payload["delivery_faults"]["cases"]
+        }
+        self.assertEqual(delivery_fault_cases["transient_failure"]["result"], "retry_scheduled")
+        self.assertTrue(delivery_fault_cases["transient_failure"]["idempotent"])
+        self.assertEqual(delivery_fault_cases["transient_failure"]["unauthorized_side_effects"], 0)
+        self.assertEqual(delivery_fault_cases["duplicate_delivery"]["duplicate_truth_records"], 0)
+        self.assertEqual(delivery_fault_cases["stale_delivery"]["result"], "quarantined")
+        self.assertFalse(delivery_fault_cases["stale_delivery"]["stale_truth_promoted"])
+        self.assertEqual(delivery_fault_cases["prompt_injection_payload"]["result"], "quarantined_as_untrusted_evidence")
+        self.assertFalse(delivery_fault_cases["prompt_injection_payload"]["trusted_as_instruction"])
+        self.assertEqual(delivery_fault_cases["prompt_injection_payload"]["memory_writes"], 0)
+        self.assertEqual(projection_payload["delivery_faults"]["quarantine_record"]["status"], "quarantined")
+        self.assertTrue(projection_payload["delivery_faults"]["quarantine_record"]["raw_payload_omitted"])
+        self.assertEqual(projection_payload["negative_evidence"]["ack_before_commit_count"], 0)
+        self.assertEqual(projection_payload["negative_evidence"]["duplicate_truth_records"], 0)
+
+        action_result = run_cli("connector", "action", "dry-run", "--json")
+        self.assertEqual(action_result.returncode, 0, action_result.stdout + action_result.stderr)
+        action_payload = json.loads(action_result.stdout)
+        self.assertEqual(
+            action_payload["connector_action_dry_run_schema_version"],
+            "cs.vs3_connector_action_dry_run.v0",
+        )
+        self.assertEqual(action_payload["dry_run"]["status"], "verified_no_provider_side_effects")
+        self.assertEqual(action_payload["dry_run"]["provider_mutations"], 0)
+        self.assertEqual(action_payload["dry_run"]["real_provider_calls"], 0)
+        self.assertFalse(action_payload["dry_run"]["execution_result_created"])
+        self.assertTrue(action_payload["dry_run"]["read_only_connector"])
+        self.assertEqual(action_payload["dry_run"]["preflight_counted_as_approval"], 0)
+        self.assertEqual(action_payload["github_readonly"]["source_guard_report"]["status"], "pass")
+        self.assertEqual(action_payload["github_readonly"]["capability_manifest"]["declared_actions"], [])
+        self.assertEqual(action_payload["github_readonly"]["capability_manifest"]["mutation_commands"], [])
+        self.assertEqual(action_payload["github_readonly"]["capability_manifest"]["write_mappings"], [])
+        self.assertTrue(
+            all(
+                row["decision"] == "deny" and row["quarantined"] and row["external_mutations"] == 0
+                for row in action_payload["github_readonly"]["runtime_write_attempts"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "denied"
+                and not row["direct_provider_access"]
+                and row["external_http_calls"] == 0
+                and row["provider_mutations"] == 0
+                for row in action_payload["github_readonly"]["source_guard_report"]["controlled_egress_attempts"]
+            )
+        )
+        self.assertEqual(action_payload["credential_boundary"]["credential_custody"], "ConnectorHub")
+        self.assertTrue(action_payload["credential_boundary"]["redacted_sink_metadata"]["credential_ref_only"])
+        self.assertFalse(action_payload["credential_boundary"]["redacted_sink_metadata"]["authorization_header_seen"])
+        self.assertFalse(action_payload["credential_boundary"]["redacted_sink_metadata"]["secret_canary_seen"])
+        self.assertEqual(action_payload["credential_boundary"]["product_visible_payload"]["credential_material"], "[REDACTED]")
+        self.assertEqual(action_payload["credential_boundary"]["product_visible_payload"]["provider_payload"]["token"], "[REDACTED]")
+        self.assertTrue(
+            all(value == 0 for value in action_payload["credential_boundary"]["redaction_scan"].values())
+        )
+        self.assertEqual(action_payload["negative_evidence"]["raw_credentials_exposed"], 0)
+        self.assertEqual(action_payload["negative_evidence"]["github_external_mutations"], 0)
+        self.assertEqual(action_payload["negative_evidence"]["github_write_calls"], 0)
+
+        capture_result = run_cli("connector", "capture", "verify", "--profile", "vs3", "--json")
+        self.assertEqual(capture_result.returncode, 0, capture_result.stdout + capture_result.stderr)
+        capture_payload = json.loads(capture_result.stdout)
+        self.assertEqual(
+            capture_payload["connector_capture_verify_schema_version"],
+            "cs.vs3_connector_capture_verify.v0",
+        )
+        self.assertEqual(capture_payload["profile"], "vs3")
+        self.assertEqual(capture_payload["proof_boundary"]["real_device_capture"], "HUMAN_REQUIRED")
+        self.assertEqual(
+            capture_payload["capture_fixture"]["human_boundary"]["real_chrome_profile_review"],
+            "HUMAN_REQUIRED",
+        )
+        self.assertEqual(
+            capture_payload["capture_fixture"]["human_boundary"]["real_macos_permission_review"],
+            "HUMAN_REQUIRED",
+        )
+        self.assertEqual(capture_payload["capture_fixture"]["consent_record"]["decision"], "allow")
+        self.assertTrue(capture_payload["capture_fixture"]["consent_record"]["scope_visible"])
+        self.assertEqual(capture_payload["capture_fixture"]["scope_config"]["capture_mode"], "summary_only")
+        self.assertFalse(capture_payload["capture_fixture"]["scope_config"]["raw_capture_allowed"])
+        self.assertEqual(capture_payload["capture_fixture"]["capture_summary"]["summary_only"], True)
+        self.assertEqual(capture_payload["capture_fixture"]["capture_summary"]["raw_html_stored"], 0)
+        self.assertEqual(capture_payload["capture_fixture"]["capture_summary"]["screenshots_collected"], 0)
+        capture_transcript = {
+            row["operation"]: row
+            for row in capture_payload["capture_fixture"]["pause_revoke_transcript"]
+        }
+        self.assertEqual(capture_transcript["pause"]["decision"], "paused")
+        self.assertEqual(capture_transcript["pause"]["samples_collected_while_paused"], 0)
+        self.assertEqual(capture_transcript["revoke"]["decision"], "revoked")
+        self.assertEqual(capture_transcript["revoke"]["samples_collected_while_revoked"], 0)
+        self.assertEqual(capture_payload["negative_evidence"]["disallowed_raw_capture_outputs"], 0)
+        self.assertEqual(capture_payload["negative_evidence"]["capture_after_revoke"], 0)
+
+    def test_vs3_tool_registry_cli_paths_are_native(self) -> None:
+        seed_result = run_cli("security", "vs3-tool-registry", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        tool_result = run_cli("tool", "verify", "--json")
+        self.assertEqual(tool_result.returncode, 0, tool_result.stdout + tool_result.stderr)
+        tool_payload = json.loads(tool_result.stdout)
+        self.assertEqual(tool_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(tool_payload["tool_verify_schema_version"], "cs.vs3_tool_verify.v0")
+        self.assertEqual(tool_payload["status"], "success")
+        self.assertEqual(tool_payload["scenario_status"]["VS3-TOOL-001"], "PASS")
+        self.assertEqual(tool_payload["scenario_status"]["VS3-TOOL-007"], "PASS")
+        self.assertEqual(tool_payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(tool_payload["proof_boundary"]["production_registry"], "NOT_CLAIMED")
+        self.assertEqual(tool_payload["proof_boundary"]["real_wasm_runtime"], "NOT_CLAIMED")
+        self.assertEqual(tool_payload["proof_boundary"]["human_security_acceptance"], "HUMAN_REQUIRED")
+        self.assertTrue(tool_payload["manifest_validation"]["required_fields_present"])
+        self.assertTrue(tool_payload["manifest_validation"]["runtime_grant_classes_present"])
+        self.assertTrue(tool_payload["manifest_validation"]["connectorhub_requirements_present"])
+        self.assertTrue(tool_payload["manifest_validation"]["signature_verified"])
+        self.assertTrue(tool_payload["manifest_validation"]["sbom_present"])
+        self.assertTrue(tool_payload["manifest_validation"]["provenance_present"])
+        self.assertEqual(tool_payload["registry"]["accepted_package"]["status"], "available")
+        self.assertEqual(tool_payload["registry"]["certification"]["status"], "certified")
+        self.assertTrue(
+            all(
+                row["decision"] == "reject" and not row["accepted"]
+                for row in tool_payload["registry"]["negative_tests"]
+            )
+        )
+        self.assertTrue(
+            all(
+                row["decision"] == "deny" and row["side_effects"] == 0
+                for row in tool_payload["sandbox"]["negative_suite"]
+            )
+        )
+        self.assertEqual(tool_payload["negative_evidence"]["unsigned_packages_accepted"], 0)
+        self.assertEqual(tool_payload["negative_evidence"]["undeclared_network_calls"], 0)
+        self.assertEqual(tool_payload["negative_evidence"]["silent_behavior_updates_applied"], 0)
+        self.assertEqual(tool_payload["negative_evidence"]["rollback_failures"], 0)
+        self.assertEqual(tool_payload["negative_evidence"]["behavior_changing_emergency_patches_applied_without_review"], 0)
+
+        state_rel = "tmp/test-vs3-tool-registry-cli"
+        state_dir = ROOT / state_rel
+        if state_dir.exists():
+            shutil.rmtree(state_dir)
+        pack_id = "pack_vs3_tool_registry_sample"
+        import_result = run_cli(
+            "pack",
+            "import",
+            "--manifest",
+            "fixtures/vs3/tool_registry/sample_tool_pack_manifest.json",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(import_result.returncode, 0, import_result.stdout + import_result.stderr)
+        import_payload = json.loads(import_result.stdout)
+        self.assertEqual(import_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(import_payload["agent_pack"]["status"], "available")
+        self.assertTrue(import_payload["audit_refs"])
+
+        install_preview_result = run_cli(
+            "pack",
+            "install",
+            pack_id,
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(install_preview_result.returncode, 0, install_preview_result.stdout + install_preview_result.stderr)
+        install_preview_payload = json.loads(install_preview_result.stdout)
+        self.assertEqual(install_preview_payload["install"]["status"], "install_preview")
+        self.assertFalse(install_preview_payload["install"]["can_act"])
+
+        install_result = run_cli("pack", "install", pack_id, "--state-dir", state_rel, "--json")
+        self.assertEqual(install_result.returncode, 0, install_result.stdout + install_result.stderr)
+        install_payload = json.loads(install_result.stdout)
+        self.assertEqual(install_payload["install"]["status"], "installed")
+        self.assertEqual(install_payload["install"]["activation_status"], "inactive")
+
+        activate_preview_result = run_cli(
+            "pack",
+            "activate",
+            pack_id,
+            "--dry-run",
+            "--grant",
+            "artifact.read",
+            "--grant",
+            "tool.local.evaluate",
+            "--grant",
+            "connector.mock.read",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(activate_preview_result.returncode, 0, activate_preview_result.stdout + activate_preview_result.stderr)
+        activate_preview_payload = json.loads(activate_preview_result.stdout)
+        self.assertEqual(activate_preview_payload["activation"]["status"], "activation_preview")
+        self.assertFalse(activate_preview_payload["activation"]["grant_applied"])
+
+        activate_result = run_cli(
+            "pack",
+            "activate",
+            pack_id,
+            "--grant",
+            "artifact.read",
+            "--grant",
+            "tool.local.evaluate",
+            "--grant",
+            "connector.mock.read",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(activate_result.returncode, 0, activate_result.stdout + activate_result.stderr)
+        activate_payload = json.loads(activate_result.stdout)
+        self.assertEqual(activate_payload["activation"]["status"], "active")
+        self.assertTrue(activate_payload["activation"]["grant_applied"])
+        self.assertTrue(activate_payload["policy_decision_refs"])
+
+        revoke_result = run_cli(
+            "pack",
+            "revoke",
+            pack_id,
+            "--reason",
+            "test revoke",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(revoke_result.returncode, 0, revoke_result.stdout + revoke_result.stderr)
+        revoke_payload = json.loads(revoke_result.stdout)
+        self.assertEqual(revoke_payload["revocation"]["status"], "revoked")
+        self.assertEqual(revoke_payload["revocation"]["capabilities_active_after_revoke"], [])
+        self.assertTrue(revoke_payload["audit_refs"])
+
+        update_preview_result = run_cli(
+            "pack",
+            "update",
+            pack_id,
+            "--to-version",
+            "1.1.0",
+            "--dry-run",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(update_preview_result.returncode, 0, update_preview_result.stdout + update_preview_result.stderr)
+        update_preview_payload = json.loads(update_preview_result.stdout)
+        self.assertEqual(update_preview_payload["pack_update"]["status"], "dry_run")
+        self.assertFalse(update_preview_payload["pack_update"]["applied"])
+        self.assertTrue(update_preview_payload["pack_update"]["behavior_changing_update"])
+        self.assertFalse(update_preview_payload["pack_update"]["behavior_changing_silent_apply"])
+        self.assertEqual(update_preview_payload["pack_update"]["evaluation_gate"]["status"], "pass")
+        self.assertTrue(update_preview_payload["pack_update"]["owner_can_test_before_approving"])
+        self.assertIn("rollback_path", update_preview_payload["pack_update"]["diff"])
+
+        update_without_approval_result = run_cli(
+            "pack",
+            "update",
+            pack_id,
+            "--to-version",
+            "1.1.0",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(
+            update_without_approval_result.returncode,
+            8,
+            update_without_approval_result.stdout + update_without_approval_result.stderr,
+        )
+        update_without_approval_payload = json.loads(update_without_approval_result.stdout)
+        self.assertEqual(update_without_approval_payload["status"], "failed")
+        self.assertEqual(update_without_approval_payload["errors"][0]["code"], "CS_PACK_APPROVAL_REQUIRED")
+        self.assertEqual(
+            update_without_approval_payload["policy_decisions"][0]["policy"],
+            "agent_pack_behavior_update_requires_owner_approval",
+        )
+
+        update_approved_result = run_cli(
+            "pack",
+            "update",
+            pack_id,
+            "--to-version",
+            "1.1.0",
+            "--approve",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(update_approved_result.returncode, 0, update_approved_result.stdout + update_approved_result.stderr)
+        update_approved_payload = json.loads(update_approved_result.stdout)
+        self.assertEqual(update_approved_payload["pack_update"]["status"], "approved_applied")
+        self.assertTrue(update_approved_payload["pack_update"]["applied"])
+        self.assertFalse(update_approved_payload["pack_update"]["behavior_changing_silent_apply"])
+
+        rollback_result = run_cli(
+            "pack",
+            "rollback",
+            pack_id,
+            "--to-version",
+            "1.0.0",
+            "--reason",
+            "test rollback",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(rollback_result.returncode, 0, rollback_result.stdout + rollback_result.stderr)
+        rollback_payload = json.loads(rollback_result.stdout)
+        self.assertEqual(rollback_payload["pack_rollback"]["status"], "rolled_back")
+        self.assertEqual(rollback_payload["pack_rollback"]["to_version"], "1.0.0")
+        self.assertTrue(rollback_payload["pack_rollback"]["changes_recorded"])
+
+        emergency_patch_result = run_cli(
+            "pack",
+            "emergency-patch",
+            pack_id,
+            "--patch-version",
+            "1.0.1-security",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(emergency_patch_result.returncode, 0, emergency_patch_result.stdout + emergency_patch_result.stderr)
+        emergency_patch_payload = json.loads(emergency_patch_result.stdout)
+        self.assertEqual(emergency_patch_payload["security_patch"]["status"], "applied")
+        self.assertFalse(emergency_patch_payload["security_patch"]["behavior_change"])
+        self.assertFalse(
+            emergency_patch_payload["security_patch"]["compatibility_checks"]["authority_expands"]
+        )
+
+        behavior_patch_result = run_cli(
+            "pack",
+            "emergency-patch",
+            pack_id,
+            "--patch-version",
+            "1.0.1-security",
+            "--behavior-change",
+            "--state-dir",
+            state_rel,
+            "--json",
+        )
+        self.assertEqual(behavior_patch_result.returncode, 8, behavior_patch_result.stdout + behavior_patch_result.stderr)
+        behavior_patch_payload = json.loads(behavior_patch_result.stdout)
+        self.assertEqual(behavior_patch_payload["status"], "failed")
+        self.assertEqual(behavior_patch_payload["errors"][0]["code"], "CS_PACK_APPROVAL_REQUIRED")
+        self.assertEqual(
+            behavior_patch_payload["policy_decisions"][0]["policy"],
+            "agent_pack_emergency_patch_behavior_change_review",
+        )
+
+    def test_vs3_observability_cli_paths_are_native(self) -> None:
+        seed_result = run_cli("security", "vs3-observability", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        observe_result = run_cli("observe", "status", "--scope", "vs3", "--json")
+        self.assertEqual(observe_result.returncode, 0, observe_result.stdout + observe_result.stderr)
+        observe_payload = json.loads(observe_result.stdout)
+        self.assertEqual(observe_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(observe_payload["observe_status_schema_version"], "cs.vs3_observe_status.v0")
+        self.assertEqual(observe_payload["status"], "success")
+        self.assertEqual(observe_payload["component_count"], 10)
+        self.assertEqual(observe_payload["ui_dom_snapshot_path"], VS3_OPERATOR_STATUS_DOM_SNAPSHOT)
+        self.assertEqual(
+            observe_payload["operator_status_snapshot"]["components"]["human_gates"]["status"],
+            "HUMAN_REQUIRED",
+        )
+        self.assertTrue(all(row["not_misleading_green"] for row in observe_payload["fault_injection_results"]))
+        comparison = observe_payload["status_surface_comparison"]
+        self.assertEqual(comparison["schema_version"], "cs.vs3_status_surface_comparison.v0")
+        self.assertEqual(set(comparison["surfaces"]), {"cli", "api", "ui"})
+        self.assertTrue(all(comparison["comparison_checks"].values()))
+        self.assertEqual(comparison["surfaces"]["ui"]["dom_snapshot_path"], VS3_OPERATOR_STATUS_DOM_SNAPSHOT)
+
+        package_result = run_cli("human-gate", "package", "--scope", "vs3", "--json")
+        self.assertEqual(package_result.returncode, 0, package_result.stdout + package_result.stderr)
+        package_payload = json.loads(package_result.stdout)
+        self.assertEqual(package_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(package_payload["human_gate_package_schema_version"], "cs.vs3_human_gate_package_set.v0")
+        self.assertEqual(package_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(package_payload["package_count"], 7)
+        for package in package_payload["human_gate_packages"]["packages"]:
+            for key in [
+                "scope",
+                "why_ai_cannot_verify",
+                "required_human_action",
+                "expected_evidence",
+                "redaction_rules",
+                "release_impact",
+                "blank_approval_record",
+            ]:
+                self.assertIn(key, package)
+                self.assertTrue(package[key] is not None or key == "blank_approval_record")
+            self.assertIsNone(package["blank_approval_record"]["decision"])
+            self.assertIsNone(package["blank_approval_record"]["redaction_note"])
+            self.assertFalse(package["redaction_rules"]["raw_secrets_allowed"])
+            self.assertFalse(package["redaction_rules"]["raw_provider_tokens_allowed"])
+        self.assertTrue(
+            all(
+                package["review_record_contract"]["raw_secret_values_allowed"] is False
+                for package in package_payload["human_gate_packages"]["packages"]
+            )
+        )
+        self.assertTrue(
+            all(
+                package["claim_boundary"]["package_is_review_input_only"]
+                for package in package_payload["human_gate_packages"]["packages"]
+            )
+        )
+        self.assertFalse(
+            any(
+                package["status"] == "PASS"
+                for package in package_payload["human_gate_packages"]["packages"]
+            )
+        )
+
+        report_result = run_cli("human-gate", "report", "--scope", "vs3", "--use-existing", "--json")
+        self.assertEqual(report_result.returncode, 0, report_result.stdout + report_result.stderr)
+        report_payload = json.loads(report_result.stdout)
+        self.assertEqual(report_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(
+            report_payload["human_gate_readiness_report_schema_version"],
+            "cs.vs3_human_gate_readiness_report.v0",
+        )
+        self.assertEqual(report_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(report_payload["next_scenario_id"], "VS3-H01")
+        self.assertEqual(
+            report_payload["execution_queue_scenario_order"],
+            ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+        )
+        readiness = report_payload["human_gate_readiness_report"]
+        self.assertEqual(readiness["claim_boundary"]["readiness_report_is_operator_queue_only"], True)
+        self.assertEqual(readiness["claim_boundary"]["vs3_p_unlock_allowed"], False)
+        self.assertEqual(readiness["negative_evidence"]["human_gate_rows_marked_pass_by_readiness_report"], 0)
+        self.assertEqual(readiness["negative_evidence"]["structural_validation_treated_as_acceptance"], 0)
+        self.assertTrue(all(row["status"] == "HUMAN_REQUIRED" for row in readiness["queue_rows"]))
+        self.assertTrue(all(row["dependency_unlock_allowed_by_structural_validation"] is False for row in readiness["queue_rows"]))
+
+        next_result = run_cli("human-gate", "next", "--scope", "vs3", "--use-existing", "--json")
+        self.assertEqual(next_result.returncode, 0, next_result.stdout + next_result.stderr)
+        next_payload = json.loads(next_result.stdout)
+        self.assertEqual(next_payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(next_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(next_payload["next_scenario_id"], "VS3-H01")
+        self.assertEqual(next_payload["next_row"]["scenario_id"], "VS3-H01")
+        self.assertEqual(next_payload["next_row"]["status"], "HUMAN_REQUIRED")
+        self.assertFalse(next_payload["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(next_payload["summary"]["product_claim_allowed"])
+
+        clean_audit_result = run_cli(
+            "audit",
+            "verify",
+            "--state-dir",
+            "reports/runtime/vs3-observability-state",
+            "--json",
+        )
+        self.assertEqual(clean_audit_result.returncode, 0, clean_audit_result.stdout + clean_audit_result.stderr)
+        clean_audit_payload = json.loads(clean_audit_result.stdout)
+        self.assertEqual(clean_audit_payload["audit_integrity"]["status"], "success")
+
+        tampered_audit_result = run_cli(
+            "audit",
+            "verify",
+            "--state-dir",
+            "reports/runtime/vs3-observability-tamper-state",
+            "--json",
+        )
+        self.assertEqual(tampered_audit_result.returncode, 5, tampered_audit_result.stdout + tampered_audit_result.stderr)
+        tampered_audit_payload = json.loads(tampered_audit_result.stdout)
+        self.assertEqual(tampered_audit_payload["audit_integrity"]["status"], "failed")
+        self.assertTrue(
+            any(
+                error["code"] == "AUDIT_EVENT_HASH_MISMATCH"
+                for error in tampered_audit_payload["audit_integrity"]["errors"]
+            )
+        )
+
+    def test_vs3_human_gate_review_kit_is_hash_backed_and_preparation_only(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        result = run_cli("human-gate", "review-kit", "--scope", "vs3", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(payload["vs3_human_gate_review_kit_schema_version"], "cs.vs3_human_gate_review_kit.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["summary"]["scenario_count"], 57)
+        self.assertEqual(payload["summary"]["pass"], 50)
+        self.assertEqual(payload["summary"]["human_required"], 7)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["review_queue_count"], 7)
+        self.assertEqual(payload["summary"]["package_count"], 7)
+        self.assertEqual(payload["summary"]["template_count"], 7)
+        self.assertEqual(payload["summary"]["next_scenario_id"], "VS3-H01")
+        self.assertFalse(payload["summary"]["product_claim_allowed"])
+        assert_vs3_summary_no_readiness_claims(self, payload["summary"])
+        self.assertTrue(payload["claim_boundary"]["review_kit_is_human_evidence_preparation_only"])
+        self.assertTrue(payload["claim_boundary"]["h_rows_remain_human_required"])
+        self.assertTrue(payload["claim_boundary"]["blank_templates_are_not_human_evidence"])
+        self.assertFalse(payload["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(payload["claim_boundary"]["live_provider_readiness_claim_allowed"])
+        self.assertFalse(payload["claim_boundary"]["migration_restore_readiness_claim_allowed"])
+        assert_vs3_no_claim_boundary(self, payload["claim_boundary"])
+
+        review_kit = payload["vs3_human_gate_review_kit"]
+        self.assertEqual(review_kit["status"], "ready_for_human_review")
+        assert_vs3_no_claim_boundary(self, review_kit["claim_boundary"])
+        self.assertTrue(all(review_kit["review_kit_conditions"].values()))
+        self.assertEqual(
+            [row["scenario_id"] for row in review_kit["review_queue"]],
+            ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+        )
+        self.assertEqual(
+            review_kit["expected_human_scenario_ids"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            review_kit["actual_human_scenario_ids"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertTrue(review_kit["review_kit_conditions"]["seven_human_rows_present_in_scenario_report"])
+        for row in review_kit["review_queue"]:
+            self.assertEqual(row["status"], "HUMAN_REQUIRED")
+            self.assertTrue(row["claim_boundary"]["package_is_review_input_only"])
+            self.assertTrue(row["claim_boundary"]["h_rows_remain_human_required"])
+            self.assertTrue(row["claim_boundary"]["structural_validation_is_not_acceptance"])
+            self.assertEqual(row["claim_boundary"]["validation_surface"], "human_gate_package_review_input_only")
+            for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+                self.assertIn(key, row["claim_boundary"])
+                self.assertFalse(row["claim_boundary"][key], key)
+            self.assertFalse(row["claim_boundary"]["vs3_p_unlock_allowed_by_package"])
+            self.assertFalse(row["claim_boundary"]["dependency_unlock_allowed_by_package"])
+        package_by_path = {artifact["path"]: artifact for artifact in review_kit["package_artifacts"]}
+        for scenario_id in ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"]:
+            artifact = package_by_path[f"reports/human-gates/vs3/{scenario_id}.json"]
+            self.assertTrue(artifact["present"])
+            self.assertGreater(artifact["bytes"], 0)
+            self.assertEqual(len(artifact["sha256"]), 64)
+
+        template_by_id = {row["scenario_id"]: row for row in review_kit["record_templates"]}
+        h01_template = template_by_id["VS3-H01"]
+        self.assertTrue(h01_template["template_is_blank"])
+        self.assertTrue(h01_template["template_is_not_human_evidence"])
+        self.assertIn("--scenario VS3-H01", h01_template["validation_command"])
+        self.assertEqual(h01_template["template"]["scenario_id"], "VS3-H01")
+        self.assertIn("redaction_note", h01_template["template"])
+        self.assertEqual(
+            h01_template["template"]["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            },
+        )
+        self.assertEqual(h01_template["template"]["evidence_refs"], [])
+        self.assertEqual(h01_template["template"]["signature_ref"], "")
+
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["missing_package_artifacts"], 0)
+        self.assertEqual(negative["package_ids_missing_from_report"], 0)
+        self.assertEqual(negative["missing_human_rows_in_scenario_report"], 0)
+        self.assertEqual(negative["unexpected_human_rows_in_scenario_report"], 0)
+        self.assertEqual(negative["human_rows_marked_pass_by_review_kit"], 0)
+        self.assertEqual(negative["human_rows_marked_pass_in_scenario_report"], 0)
+        self.assertEqual(negative["human_rows_not_human_required"], 0)
+        self.assertEqual(negative["approval_collected_by_review_kit"], 0)
+        self.assertEqual(negative["human_decision_recorded_by_review_kit"], 0)
+        self.assertEqual(negative["record_bodies_persisted_by_review_kit"], 0)
+        self.assertEqual(negative["vs3_p_unlocked_by_review_kit"], 0)
+        self.assertEqual(negative["production_readiness_claimed_by_review_kit"], 0)
+        self.assertEqual(negative["human_acceptance_claimed_by_review_kit"], 0)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 0)
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["negative_evidence"]["self_command_transcript_shape_failures"], 0)
+        transcript = payload["self_command_transcript"]
+        self.assertEqual(
+            transcript["command"],
+            ["cornerstone", "human-gate", "review-kit", "--scope", "vs3", "--json"],
+        )
+        self.assertEqual(transcript["arguments"], ["human-gate", "review-kit", "--scope", "vs3", "--json"])
+        self.assertEqual(transcript["output_mode"], "json")
+        self.assertEqual(transcript["stdout_json"]["status"], "success")
+        self.assertEqual(transcript["stdout_json"]["payload_status"], "success")
+        self.assertEqual(transcript["stdout_json"]["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+        self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+
+    def test_vs3_human_gate_review_kit_rejects_missing_human_rows(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        temp_dir = ROOT / "tmp/vs3-human-gate-review-kit-missing-human-rows-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        try:
+            temp_dir.mkdir(parents=True)
+            source_report = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+            tampered_report = temp_dir / "vs3-missing-human-rows.json"
+            payload = json.loads(source_report.read_text())
+            payload["scenario_results"] = [
+                row
+                for row in payload["scenario_results"]
+                if not str(row.get("id") or row.get("scenario_id") or "").startswith("VS3-H")
+            ]
+            tampered_report.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                str(tampered_report.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            review_payload = json.loads(result.stdout)
+            self.assertEqual(review_payload["status"], "failed")
+            self.assertEqual(review_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(review_payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertFalse(review_payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            review_kit = review_payload["vs3_human_gate_review_kit"]
+            self.assertEqual(review_kit["status"], "incomplete")
+            self.assertEqual(review_kit["actual_human_scenario_ids"], [])
+            self.assertEqual(
+                review_kit["expected_human_scenario_ids"],
+                ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+            )
+            self.assertFalse(review_kit["review_kit_conditions"]["seven_human_rows_present_in_scenario_report"])
+            self.assertFalse(review_kit["review_kit_conditions"]["h_rows_remain_human_required"])
+            negative = review_payload["negative_evidence"]
+            self.assertEqual(negative["missing_human_rows_in_scenario_report"], 7)
+            self.assertEqual(negative["unexpected_human_rows_in_scenario_report"], 0)
+            self.assertEqual(negative["vs3_p_unlocked_by_review_kit"], 0)
+            self.assertTrue(
+                any(
+                    error["code"] == "CS_VS3_HUMAN_GATE_REVIEW_KIT_INCOMPLETE"
+                    and "seven_human_rows_present_in_scenario_report" in error["failed_conditions"]
+                    for error in review_payload["errors"]
+                ),
+                review_payload["errors"],
+            )
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_human_gate_record_scaffold_writes_blank_templates_only(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        scaffold_root = ROOT / "tmp/vs3-human-gate-record-scaffold-test"
+        if scaffold_root.exists():
+            shutil.rmtree(scaffold_root)
+        try:
+            result = run_cli(
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--json",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["schema_version"], "cs.cli.v0")
+            self.assertEqual(
+                payload["vs3_human_gate_record_scaffold_schema_version"],
+                "cs.vs3_human_gate_record_scaffold.v0",
+            )
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(payload["summary"]["scenario_count"], 57)
+            self.assertEqual(payload["summary"]["pass"], 50)
+            self.assertEqual(payload["summary"]["human_required"], 7)
+            self.assertEqual(payload["summary"]["blocking"], 0)
+            self.assertEqual(payload["summary"]["template_count"], 7)
+            self.assertTrue(payload["summary"]["manifest_present"])
+            self.assertEqual(payload["summary"]["next_scenario_id"], "VS3-H01")
+            self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertFalse(payload["summary"]["product_claim_allowed"])
+            self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+            self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+            scaffold = payload["vs3_human_gate_record_scaffold"]
+            self.assertEqual(scaffold["status"], "created")
+            self.assertEqual(
+                scaffold["review_order"],
+                ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+            )
+            self.assertTrue(all(scaffold["scaffold_conditions"].values()))
+            self.assertTrue(scaffold["claim_boundary"]["scaffold_is_template_only"])
+            self.assertTrue(scaffold["claim_boundary"]["templates_are_not_human_evidence"])
+            self.assertFalse(scaffold["claim_boundary"]["vs3_p_unlock_allowed"])
+            assert_vs3_no_claim_boundary(self, payload["claim_boundary"])
+            assert_vs3_no_claim_boundary(self, scaffold["claim_boundary"])
+            self.assertFalse(scaffold["non_mutation_evidence"]["approval_collected_by_scaffold"])
+            self.assertFalse(scaffold["non_mutation_evidence"]["human_decision_recorded_by_scaffold"])
+            self.assertFalse(scaffold["non_mutation_evidence"]["filled_record_bodies_persisted_by_scaffold"])
+
+            manifest_path = scaffold_root / "manifest.json"
+            self.assertTrue(manifest_path.exists())
+            manifest = json.loads(manifest_path.read_text())
+            self.assertEqual(manifest["schema_version"], "cs.vs3_human_gate_record_scaffold_manifest.v0")
+            self.assertEqual(manifest["final_verdict"], "HUMAN_REQUIRED")
+            self.assertFalse(manifest["claim_boundary"]["vs3_p_unlock_allowed"])
+            assert_vs3_no_claim_boundary(self, manifest["claim_boundary"])
+            self.assertEqual(len(scaffold["template_artifacts"]), 7)
+            for artifact in scaffold["template_artifacts"]:
+                path = ROOT / artifact["path"]
+                self.assertTrue(path.exists())
+                self.assertEqual(len(artifact["sha256"]), 64)
+                self.assertEqual(artifact["sha256"], hashlib.sha256(path.read_bytes()).hexdigest())
+                self.assertGreater(artifact["bytes"], 0)
+                self.assertTrue(artifact["template_only"])
+                self.assertTrue(artifact["blank_template_is_not_approval"])
+
+            h01_template_path = scaffold_root / "VS3-H01.review-record.template.json"
+            h01_template = json.loads(h01_template_path.read_text())
+            self.assertEqual(h01_template["scenario_id"], "VS3-H01")
+            self.assertEqual(h01_template["decision"], "")
+            self.assertEqual(h01_template["signature_ref"], "")
+            self.assertEqual(h01_template["evidence_refs"], [])
+            self.assertTrue(h01_template["_template_metadata"]["template_only"])
+            self.assertTrue(h01_template["_template_metadata"]["blank_template_is_not_approval"])
+
+            validation_result = run_cli(
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs3",
+                "--scenario",
+                "VS3-H01",
+                "--record-file",
+                str(h01_template_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(validation_result.returncode, 1, validation_result.stdout + validation_result.stderr)
+            validation_payload = json.loads(validation_result.stdout)
+            validation = validation_payload["vs3_human_gate_record_validation"]
+            self.assertEqual(validation_payload["status"], "blocked")
+            self.assertEqual(validation["status"], "record_structurally_invalid")
+            self.assertEqual(validation["matrix_status_after_validation"], "HUMAN_REQUIRED")
+            self.assertIn("empty_required_fields", validation["structural_errors"])
+            self.assertFalse(validation["pass_claim_allowed_by_validator"])
+            self.assertEqual(validation["negative_evidence"]["vs3_p_unlocked_by_validator"], 0)
+
+            conflict_result = run_cli(
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--json",
+            )
+            self.assertEqual(conflict_result.returncode, 4, conflict_result.stdout + conflict_result.stderr)
+            conflict_payload = json.loads(conflict_result.stdout)
+            self.assertEqual(conflict_payload["status"], "blocked")
+            self.assertGreater(conflict_payload["negative_evidence"]["existing_template_conflicts"], 0)
+            self.assertIn("no_existing_template_conflicts", conflict_payload["errors"][-1]["failed_conditions"])
+            self.assertEqual(conflict_payload["negative_evidence"]["vs3_p_unlocked_by_scaffold"], 0)
+        finally:
+            if scaffold_root.exists():
+                shutil.rmtree(scaffold_root)
+
+    def test_vs3_human_gate_evidence_status_reports_records_without_acceptance(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        scaffold_root = ROOT / "tmp/vs3-human-gate-evidence-status-test"
+        if scaffold_root.exists():
+            shutil.rmtree(scaffold_root)
+        try:
+            scaffold_result = run_cli(
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--json",
+            )
+            self.assertEqual(scaffold_result.returncode, 0, scaffold_result.stdout + scaffold_result.stderr)
+
+            output_path = scaffold_root / "evidence-status.json"
+            status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--output",
+                str(output_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(status_result.returncode, 0, status_result.stdout + status_result.stderr)
+            self.assertTrue(output_path.exists())
+            payload = json.loads(status_result.stdout)
+            self.assertEqual(payload["schema_version"], "cs.cli.v0")
+            self.assertEqual(
+                payload["vs3_human_gate_evidence_status_schema_version"],
+                "cs.vs3_human_gate_evidence_status.v0",
+            )
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(payload["summary"]["scenario_count"], 57)
+            self.assertEqual(payload["summary"]["pass"], 50)
+            self.assertEqual(payload["summary"]["human_required"], 7)
+            self.assertEqual(payload["summary"]["blocking"], 0)
+            self.assertEqual(payload["summary"]["expected_record_count"], 7)
+            self.assertEqual(payload["summary"]["record_status_count"], 7)
+            self.assertEqual(payload["summary"]["structurally_valid_count"], 0)
+            self.assertEqual(payload["summary"]["structurally_invalid_count"], 7)
+            self.assertEqual(payload["summary"]["blank_template_count"], 7)
+            self.assertEqual(payload["summary"]["blank_template_pending_count"], 7)
+            self.assertEqual(payload["summary"]["filled_record_count"], 0)
+            self.assertEqual(payload["summary"]["invalid_filled_record_count"], 0)
+            self.assertEqual(payload["summary"]["evidence_acceptance_candidate_count"], 0)
+            self.assertEqual(payload["summary"]["missing_record_count"], 0)
+            self.assertEqual(payload["summary"]["malformed_record_count"], 0)
+            self.assertEqual(payload["summary"]["unsupported_record_count"], 0)
+            self.assertEqual(payload["summary"]["dependency_blocked_count"], 6)
+            self.assertEqual(payload["summary"]["dependency_blocked_structurally_valid_count"], 0)
+            self.assertEqual(payload["summary"]["dependency_prerequisites_structurally_valid_count"], 0)
+            self.assertEqual(payload["summary"]["next_scenario_id"], "VS3-H01")
+            self.assertEqual(payload["summary"]["next_record_to_fill_scenario_id"], "VS3-H01")
+            self.assertEqual(payload["summary"]["vs3_l_claim"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+            self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertFalse(payload["summary"]["product_claim_allowed"])
+            assert_vs3_summary_no_readiness_claims(self, payload["summary"])
+            self.assertTrue(payload["claim_boundary"]["evidence_status_is_report_only"])
+            self.assertTrue(payload["claim_boundary"]["h_rows_remain_human_required"])
+            self.assertTrue(payload["claim_boundary"]["blank_templates_are_not_human_evidence"])
+            self.assertTrue(payload["claim_boundary"]["structural_validation_is_not_acceptance"])
+            self.assertFalse(payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            assert_vs3_no_claim_boundary(self, payload["claim_boundary"])
+            self.assertFalse(payload["non_mutation_evidence"]["record_bodies_persisted_by_evidence_status"])
+            self.assertFalse(payload["non_mutation_evidence"]["record_paths_persisted_by_evidence_status"])
+
+            status_report = payload["vs3_human_gate_evidence_status"]
+            assert_vs3_no_claim_boundary(self, status_report["claim_boundary"])
+            self.assertTrue(status_report["record_dir"]["manifest_present"])
+            self.assertEqual(
+                status_report["template_intake_summary"]["template_readiness_status"],
+                "awaiting_human_completion",
+            )
+            self.assertEqual(status_report["template_intake_summary"]["blank_template_pending_count"], 7)
+            self.assertEqual(status_report["template_intake_summary"]["filled_record_count"], 0)
+            self.assertEqual(status_report["template_intake_summary"]["invalid_filled_record_count"], 0)
+            self.assertEqual(status_report["template_intake_summary"]["evidence_acceptance_candidate_count"], 0)
+            self.assertEqual(
+                status_report["template_intake_summary"]["dependency_blocked_structurally_valid_count"],
+                0,
+            )
+            self.assertEqual(
+                status_report["template_intake_summary"]["dependency_prerequisites_structurally_valid_count"],
+                0,
+            )
+            self.assertIn(
+                "does not approve evidence",
+                status_report["template_intake_summary"]["acceptance_boundary"],
+            )
+            self.assertEqual(
+                [row["scenario_id"] for row in status_report["record_statuses"]],
+                ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+            )
+            self.assertTrue(all(row["status"] == "blank_template" for row in status_report["record_statuses"]))
+            self.assertTrue(all(row["matrix_status_after_status"] == "HUMAN_REQUIRED" for row in status_report["record_statuses"]))
+            self.assertTrue(all(row["record_file"]["path_recorded_by_status"] is False for row in status_report["record_statuses"]))
+            self.assertEqual(status_report["record_statuses"][0]["dependency_status"], "no_prior_human_gate_dependency")
+            self.assertFalse(status_report["record_statuses"][0]["dependency_promotion_required"])
+            self.assertEqual(status_report["record_statuses"][1]["dependency_status"], "blocked_pending_human_promotion")
+            self.assertTrue(status_report["record_statuses"][1]["dependency_promotion_required"])
+            self.assertFalse(status_report["record_statuses"][1]["dependency_unlock_allowed_by_structural_validation"])
+            self.assertEqual(
+                status_report["record_statuses"][1]["dependency_prerequisite_statuses"],
+                [
+                    {
+                        "matrix_status_after_status": "HUMAN_REQUIRED",
+                        "scenario_id": "VS3-H01",
+                        "status": "blank_template",
+                    }
+                ],
+            )
+            self.assertEqual(len(status_report["ignored_records"]), 1)
+            self.assertEqual(status_report["ignored_records"][0]["kind"], "record_scaffold_manifest")
+
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_rows_marked_pass_by_evidence_status"], 0)
+            self.assertEqual(negative["product_claims_allowed_by_evidence_status"], 0)
+            self.assertEqual(negative["vs3_p_unlocked_by_evidence_status"], 0)
+            self.assertEqual(negative["record_bodies_persisted_by_evidence_status"], 0)
+            self.assertEqual(negative["record_paths_persisted_by_evidence_status"], 0)
+            self.assertEqual(negative["raw_record_values_in_output"], 0)
+            self.assertEqual(negative["structural_validation_treated_as_acceptance"], 0)
+            self.assertEqual(negative["dependency_unlock_allowed_by_structural_validation"], 0)
+            self.assertEqual(negative["blank_template_pending_count"], 7)
+            self.assertEqual(negative["filled_record_count"], 0)
+            self.assertEqual(negative["invalid_filled_record_count"], 0)
+            self.assertEqual(negative["evidence_acceptance_candidate_count"], 0)
+            self.assertEqual(negative["self_command_transcript_shape_failures"], 0)
+            self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+            transcript = payload["self_command_transcript"]
+            self.assertEqual(
+                transcript["command"],
+                [
+                    "cornerstone",
+                    "human-gate",
+                    "evidence-status",
+                    "--scope",
+                    "vs3",
+                    "--record-dir",
+                    "<redacted-dir>",
+                    "--json",
+                ],
+            )
+            self.assertEqual(transcript["stdout_json"]["status"], "success")
+            self.assertEqual(transcript["stdout_json"]["payload_status"], "success")
+            self.assertEqual(transcript["stdout_json"]["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+            self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+
+            h01_record = {
+                "scenario_id": "VS3-H01",
+                "reviewer": "redacted-reviewer",
+                "reviewed_at": "2026-06-29T10:00:00Z",
+                "decision": "APPROVE_WITH_EXCEPTIONS",
+                "scope": {
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                "architecture_decision": "ref:docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md",
+                "dependency_decision": "no new production dependency approved by this record",
+                "migration_rollback_owner": "redacted-owner",
+                "security_owner": "redacted-owner",
+                "evidence_refs": ["report:reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"],
+                "signature_ref": "sig:redacted-vs3-h01-owner-approval",
+                "exceptions": ["VS3-P remains blocked until all human-required evidence is approved."],
+                "redaction_note": "Reviewer identity is redacted and no raw secrets or provider tokens are included.",
+            }
+            h01_path = scaffold_root / "VS3-H01.review-record.template.json"
+            h01_path.write_text(json.dumps(h01_record, indent=2, sort_keys=True) + "\n")
+
+            partial_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(partial_result.returncode, 0, partial_result.stdout + partial_result.stderr)
+            self.assertNotIn("redacted-reviewer", partial_result.stdout)
+            partial_payload = json.loads(partial_result.stdout)
+            self.assertEqual(partial_payload["final_verdict"], "HUMAN_REQUIRED")
+            assert_vs3_no_claim_boundary(self, partial_payload["claim_boundary"])
+            self.assertEqual(partial_payload["summary"]["structurally_valid_count"], 1)
+            self.assertEqual(partial_payload["summary"]["structurally_invalid_count"], 6)
+            self.assertEqual(partial_payload["summary"]["blank_template_count"], 6)
+            self.assertEqual(partial_payload["summary"]["blank_template_pending_count"], 6)
+            self.assertEqual(partial_payload["summary"]["filled_record_count"], 1)
+            self.assertEqual(partial_payload["summary"]["invalid_filled_record_count"], 0)
+            self.assertEqual(partial_payload["summary"]["evidence_acceptance_candidate_count"], 1)
+            self.assertEqual(partial_payload["summary"]["dependency_blocked_structurally_valid_count"], 0)
+            self.assertEqual(partial_payload["summary"]["dependency_prerequisites_structurally_valid_count"], 2)
+            self.assertEqual(partial_payload["summary"]["next_scenario_id"], "VS3-H01")
+            self.assertEqual(partial_payload["summary"]["next_record_to_fill_scenario_id"], "VS3-H04")
+            self.assertFalse(partial_payload["claim_boundary"]["dependency_unlock_allowed_by_structural_validation"])
+            self.assertFalse(partial_payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            self.assertEqual(
+                partial_payload["vs3_human_gate_evidence_status"]["template_intake_summary"][
+                    "template_readiness_status"
+                ],
+                "awaiting_human_completion",
+            )
+            self.assertEqual(
+                partial_payload["vs3_human_gate_evidence_status"]["template_intake_summary"][
+                    "filled_record_count"
+                ],
+                1,
+            )
+
+            rows_by_id = {
+                row["scenario_id"]: row
+                for row in partial_payload["vs3_human_gate_evidence_status"]["record_statuses"]
+            }
+            self.assertEqual(rows_by_id["VS3-H01"]["status"], "structurally_valid")
+            self.assertEqual(rows_by_id["VS3-H01"]["matrix_status_after_validation"], "HUMAN_REQUIRED")
+            self.assertFalse(rows_by_id["VS3-H01"]["pass_claim_allowed_by_validator"])
+            self.assertFalse(rows_by_id["VS3-H01"]["product_claim_allowed"])
+            self.assertEqual(rows_by_id["VS3-H04"]["status"], "blank_template")
+            self.assertEqual(rows_by_id["VS3-H04"]["dependency_status"], "blocked_pending_human_promotion")
+            self.assertTrue(rows_by_id["VS3-H04"]["dependency_prerequisites_structurally_valid"])
+            self.assertTrue(rows_by_id["VS3-H04"]["dependency_promotion_required"])
+            self.assertFalse(rows_by_id["VS3-H04"]["dependency_unlock_allowed_by_structural_validation"])
+            self.assertEqual(
+                rows_by_id["VS3-H04"]["dependency_prerequisite_statuses"],
+                [
+                    {
+                        "matrix_status_after_status": "HUMAN_REQUIRED",
+                        "scenario_id": "VS3-H01",
+                        "status": "structurally_valid",
+                    }
+                ],
+            )
+            self.assertEqual(partial_payload["negative_evidence"]["vs3_p_unlocked_by_evidence_status"], 0)
+            self.assertEqual(partial_payload["negative_evidence"]["structural_validation_treated_as_acceptance"], 0)
+            self.assertEqual(partial_payload["negative_evidence"]["overclaim_marker_findings"], 0)
+
+            h04_record = {
+                "scenario_id": "VS3-H04",
+                "reviewer": "redacted-reviewer",
+                "reviewed_at": "2026-06-29T10:00:00Z",
+                "decision": "APPROVE_WITH_EXCEPTIONS",
+                "topology_diagram_ref": "ref:redacted-topology-diagram",
+                "deny_default_transcript_ref": "ref:redacted-deny-default-transcript",
+                "approved_exception_transcript_ref": "ref:redacted-approved-exception-transcript",
+                "network_log_refs": ["log:redacted-vs3-h04-network"],
+                "audit_refs": ["audit:redacted-vs3-h04"],
+                "evidence_refs": ["evidence:redacted-vs3-h04"],
+                "signature_ref": "sig:redacted-vs3-h04-network-review",
+                "redaction_note": "Reviewer identity is redacted and no raw secrets or provider tokens are included.",
+            }
+            h04_path = scaffold_root / "VS3-H04.review-record.template.json"
+            h04_path.write_text(json.dumps(h04_record, indent=2, sort_keys=True) + "\n")
+            dependency_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(dependency_result.returncode, 0, dependency_result.stdout + dependency_result.stderr)
+            dependency_payload = json.loads(dependency_result.stdout)
+            self.assertEqual(dependency_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(dependency_payload["summary"]["structurally_valid_count"], 2)
+            self.assertEqual(dependency_payload["summary"]["blank_template_count"], 5)
+            self.assertEqual(dependency_payload["summary"]["filled_record_count"], 2)
+            self.assertEqual(dependency_payload["summary"]["dependency_blocked_count"], 6)
+            self.assertEqual(dependency_payload["summary"]["dependency_blocked_structurally_valid_count"], 1)
+            self.assertEqual(dependency_payload["summary"]["dependency_prerequisites_structurally_valid_count"], 4)
+            dependency_rows_by_id = {
+                row["scenario_id"]: row
+                for row in dependency_payload["vs3_human_gate_evidence_status"]["record_statuses"]
+            }
+            self.assertEqual(dependency_rows_by_id["VS3-H04"]["status"], "structurally_valid")
+            self.assertEqual(dependency_rows_by_id["VS3-H04"]["dependency_status"], "blocked_pending_human_promotion")
+            self.assertTrue(dependency_rows_by_id["VS3-H04"]["dependency_prerequisites_structurally_valid"])
+            self.assertTrue(dependency_rows_by_id["VS3-H04"]["dependency_promotion_required"])
+            self.assertFalse(
+                dependency_rows_by_id["VS3-H04"]["dependency_unlock_allowed_by_structural_validation"]
+            )
+            self.assertFalse(dependency_payload["claim_boundary"]["dependency_unlock_allowed_by_structural_validation"])
+            self.assertEqual(
+                dependency_payload["negative_evidence"]["dependency_unlock_allowed_by_structural_validation"],
+                0,
+            )
+
+            overclaim_h03_record = {
+                "scenario_id": "VS3-H03",
+                "reviewer": "redacted-reviewer",
+                "reviewed_at": "2026-06-29T10:00:00Z",
+                "decision": "APPROVE_WITH_EXCEPTIONS",
+                "idp_name_or_ref": "ref:redacted-idp",
+                "mapping_transcript_ref": "ref:redacted-mapping-transcript",
+                "revocation_transcript_ref": "ref:redacted-revocation-transcript",
+                "policy_decision_refs": ["policy:redacted-vs3-h03"],
+                "audit_refs": ["audit:redacted-vs3-h03"],
+                "evidence_refs": ["evidence:redacted-vs3-h03"],
+                "signature_ref": "sig:redacted-vs3-h03-review",
+                "redaction_note": "Reviewer identity is redacted and no raw secrets or provider tokens are included.",
+                "final_verdict": "PASS",
+                "claim_boundary": {
+                    "real_idp_readiness_claim_allowed": True,
+                    "vs3_p": "READY",
+                },
+            }
+            h03_path = scaffold_root / "VS3-H03.review-record.template.json"
+            h03_path.write_text(json.dumps(overclaim_h03_record, indent=2, sort_keys=True) + "\n")
+            overclaim_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(scaffold_root.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(
+                overclaim_status_result.returncode,
+                0,
+                overclaim_status_result.stdout + overclaim_status_result.stderr,
+            )
+            overclaim_status_payload = json.loads(overclaim_status_result.stdout)
+            self.assertEqual(overclaim_status_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(overclaim_status_payload["summary"]["overclaim_marker_findings"], 3)
+            self.assertEqual(
+                overclaim_status_payload["negative_evidence"]["overclaim_marker_findings"],
+                3,
+            )
+            overclaim_rows_by_id = {
+                row["scenario_id"]: row
+                for row in overclaim_status_payload["vs3_human_gate_evidence_status"]["record_statuses"]
+            }
+            self.assertEqual(overclaim_rows_by_id["VS3-H03"]["status"], "structurally_invalid")
+            self.assertIn(
+                "overclaim_marker_detected",
+                overclaim_rows_by_id["VS3-H03"]["structural_errors"],
+            )
+            self.assertEqual(overclaim_rows_by_id["VS3-H03"]["overclaim_marker_findings"], 3)
+            self.assertFalse(overclaim_status_payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            self.assertEqual(
+                overclaim_status_payload["negative_evidence"]["vs3_p_unlocked_by_evidence_status"],
+                0,
+            )
+        finally:
+            if scaffold_root.exists():
+                shutil.rmtree(scaffold_root)
+
+    def test_vs3_human_gate_validate_record_is_structural_and_redacted(self) -> None:
+        seed_result = run_cli("security", "vs3-observability", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        validation_dir = ROOT / "tmp/vs3-human-gate-validation-test"
+        if validation_dir.exists():
+            shutil.rmtree(validation_dir)
+        validation_dir.mkdir(parents=True)
+        try:
+            record = {
+                "scenario_id": "VS3-H01",
+                "reviewer": "redacted-owner",
+                "reviewed_at": "2026-06-29T10:00:00Z",
+                "decision": "APPROVE_WITH_EXCEPTIONS",
+                "scope": {
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                "architecture_decision": "ref:docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md",
+                "dependency_decision": "no new production dependency approved by this record",
+                "migration_rollback_owner": "redacted-owner",
+                "security_owner": "redacted-owner",
+                "evidence_refs": ["report:reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"],
+                "signature_ref": "sig:redacted-vs3-h01-owner-approval",
+                "exceptions": ["VS3-P remains blocked until VS3-H02 through VS3-H07 have signed evidence."],
+                "redaction_note": "Reviewer identifiers are redacted and no raw secrets or tokens are included.",
+            }
+            record_path = validation_dir / "valid-h01-record.json"
+            record_path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+            output_path = validation_dir / "valid-envelope.json"
+
+            result = run_cli(
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs3",
+                "--scenario",
+                "VS3-H01",
+                "--record-file",
+                str(record_path.relative_to(ROOT)),
+                "--output",
+                str(output_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertTrue(output_path.exists())
+            self.assertNotIn("redacted-owner", result.stdout)
+            payload = json.loads(result.stdout)
+            validation = payload["vs3_human_gate_record_validation"]
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(validation["status"], "record_structurally_valid")
+            self.assertEqual(validation["matrix_status_after_validation"], "HUMAN_REQUIRED")
+            self.assertFalse(validation["product_claim_allowed"])
+            self.assertFalse(validation["pass_claim_allowed_by_validator"])
+            self.assertFalse(validation["dependency_unlock_allowed_by_validator"])
+            self.assertFalse(validation["non_mutation_evidence"]["record_body_persisted_by_validator"])
+            self.assertFalse(validation["non_mutation_evidence"]["record_path_persisted_by_validator"])
+            self.assertFalse(validation["decision_recorded_by_validator"])
+            for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+                self.assertIn(key, payload["claim_boundary"])
+                self.assertIn(key, validation["claim_boundary"])
+                self.assertFalse(payload["claim_boundary"][key], key)
+                self.assertFalse(validation["claim_boundary"][key], key)
+            for key in [
+                "production_readiness_claim_allowed",
+                "live_provider_readiness_claim_allowed",
+                "real_idp_readiness_claim_allowed",
+                "real_network_readiness_claim_allowed",
+                "migration_restore_readiness_claim_allowed",
+                "security_acceptance_claim_allowed",
+                "human_acceptance_claim_allowed",
+            ]:
+                self.assertIn(key, payload["summary"])
+                self.assertFalse(payload["summary"][key], key)
+            self.assertEqual(validation["negative_evidence"]["human_rows_marked_pass_by_validator"], 0)
+            self.assertEqual(validation["negative_evidence"]["vs3_p_unlocked_by_validator"], 0)
+            self.assertEqual(validation["negative_evidence"]["sensitive_marker_findings"], 0)
+            for key in VS3_HUMAN_GATE_VALIDATOR_ZERO_CLAIM_KEYS:
+                self.assertIn(key, validation["negative_evidence"])
+                self.assertEqual(validation["negative_evidence"][key], 0, key)
+            self.assertIn("reviewer", validation["provided_fields"])
+            self.assertNotIn("redacted-owner", output_path.read_text())
+
+            secret = "sk-testsecret1234567890"
+            unsafe_record = dict(record)
+            unsafe_record["redaction_note"] = f"accidental raw token {secret}"
+            unsafe_path = validation_dir / "unsafe-h01-record.json"
+            unsafe_path.write_text(json.dumps(unsafe_record, indent=2, sort_keys=True) + "\n")
+            unsafe_result = run_cli(
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs3",
+                "--scenario",
+                "VS3-H01",
+                "--record-file",
+                str(unsafe_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(unsafe_result.returncode, 1, unsafe_result.stdout + unsafe_result.stderr)
+            self.assertNotIn(secret, unsafe_result.stdout)
+            unsafe_payload = json.loads(unsafe_result.stdout)
+            unsafe_validation = unsafe_payload["vs3_human_gate_record_validation"]
+            self.assertEqual(unsafe_payload["status"], "blocked")
+            self.assertEqual(unsafe_validation["status"], "record_structurally_invalid")
+            self.assertIn("sensitive_marker_detected", unsafe_validation["structural_errors"])
+            self.assertEqual(unsafe_validation["negative_evidence"]["sensitive_marker_findings"], 1)
+            self.assertEqual(unsafe_validation["negative_evidence"]["raw_record_values_in_output"], 0)
+
+            overclaim_record = dict(record)
+            overclaim_record["final_verdict"] = "PASS"
+            overclaim_record["product_claim_allowed"] = True
+            overclaim_record["claim_boundary"] = {
+                "production_readiness_claim_allowed": True,
+                "security_acceptance": "READY",
+            }
+            overclaim_path = validation_dir / "overclaim-h01-record.json"
+            overclaim_path.write_text(json.dumps(overclaim_record, indent=2, sort_keys=True) + "\n")
+            overclaim_result = run_cli(
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs3",
+                "--scenario",
+                "VS3-H01",
+                "--record-file",
+                str(overclaim_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(overclaim_result.returncode, 1, overclaim_result.stdout + overclaim_result.stderr)
+            overclaim_payload = json.loads(overclaim_result.stdout)
+            overclaim_validation = overclaim_payload["vs3_human_gate_record_validation"]
+            self.assertEqual(overclaim_payload["status"], "blocked")
+            self.assertEqual(overclaim_validation["status"], "record_structurally_invalid")
+            self.assertIn("overclaim_marker_detected", overclaim_validation["structural_errors"])
+            self.assertEqual(overclaim_validation["negative_evidence"]["overclaim_marker_findings"], 4)
+            self.assertEqual(overclaim_payload["summary"]["overclaim_marker_findings"], 4)
+            self.assertFalse(overclaim_validation["product_claim_allowed"])
+            self.assertFalse(overclaim_validation["pass_claim_allowed_by_validator"])
+            self.assertFalse(overclaim_validation["dependency_unlock_allowed_by_validator"])
+            self.assertEqual(overclaim_validation["matrix_status_after_validation"], "HUMAN_REQUIRED")
+        finally:
+            if validation_dir.exists():
+                shutil.rmtree(validation_dir)
+
+    def test_vs3_human_gate_validate_record_load_failures_write_redacted_output(self) -> None:
+        validation_dir = ROOT / "tmp/vs3-human-gate-load-failure-test"
+        if validation_dir.exists():
+            shutil.rmtree(validation_dir)
+        validation_dir.mkdir(parents=True)
+        try:
+            def assert_load_failure(
+                *,
+                record_path: Path,
+                output_path: Path,
+                expected_code: str,
+                forbidden_value: str | None = None,
+            ) -> dict[str, Any]:
+                result = run_cli(
+                    "human-gate",
+                    "validate-record",
+                    "--scope",
+                    "vs3",
+                    "--scenario",
+                    "VS3-H01",
+                    "--record-file",
+                    str(record_path.relative_to(ROOT)),
+                    "--output",
+                    str(output_path.relative_to(ROOT)),
+                    "--json",
+                )
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertTrue(output_path.exists())
+                output_text = output_path.read_text()
+                self.assertNotIn(str(record_path), result.stdout)
+                self.assertNotIn(str(record_path.relative_to(ROOT)), result.stdout)
+                self.assertNotIn(str(record_path), output_text)
+                self.assertNotIn(str(record_path.relative_to(ROOT)), output_text)
+                if forbidden_value is not None:
+                    self.assertNotIn(forbidden_value, result.stdout)
+                    self.assertNotIn(forbidden_value, output_text)
+                payload = json.loads(result.stdout)
+                persisted_payload = json.loads(output_text)
+                self.assertEqual(payload, persisted_payload)
+                self.assertEqual(payload["status"], "failed")
+                self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+                self.assertEqual(
+                    payload["vs3_human_gate_record_validation_schema_version"],
+                    "cs.vs3_human_gate_record_validation.v0",
+                )
+                self.assertEqual(payload["errors"][0]["code"], expected_code)
+                self.assertFalse(payload["errors"][0]["record_file_path_recorded"])
+                self.assertEqual(len(payload["errors"][0]["record_file_path_sha256"]), 64)
+                self.assertTrue(payload["claim_boundary"]["load_failure_is_not_human_evidence"])
+                self.assertFalse(payload["claim_boundary"]["record_file_path_recorded"])
+                for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+                    self.assertIn(key, payload["claim_boundary"])
+                    self.assertFalse(payload["claim_boundary"][key], key)
+                self.assertFalse(payload["non_mutation_evidence"]["record_body_persisted_by_validator"])
+                self.assertFalse(payload["non_mutation_evidence"]["record_path_persisted_by_validator"])
+                for key in VS3_HUMAN_GATE_VALIDATOR_ZERO_CLAIM_KEYS:
+                    self.assertIn(key, payload["negative_evidence"])
+                    self.assertEqual(payload["negative_evidence"][key], 0, key)
+                self.assertEqual(payload["negative_evidence"]["record_body_persisted_by_validator"], 0)
+                self.assertEqual(payload["negative_evidence"]["record_path_persisted_by_validator"], 0)
+                self.assertEqual(payload["negative_evidence"]["raw_record_values_in_output"], 0)
+                return payload
+
+            missing_record_path = validation_dir / "missing-h01-record.json"
+            assert_load_failure(
+                record_path=missing_record_path,
+                output_path=validation_dir / "missing-envelope.json",
+                expected_code="CS_VS3_HUMAN_GATE_RECORD_NOT_FOUND",
+            )
+
+            secret = "sk-loadfailure1234567890"
+            invalid_json_path = validation_dir / "invalid-json-h01-record.json"
+            invalid_json_path.write_text('{"redaction_note": "' + secret + '"')
+            assert_load_failure(
+                record_path=invalid_json_path,
+                output_path=validation_dir / "invalid-json-envelope.json",
+                expected_code="CS_VS3_HUMAN_GATE_RECORD_INVALID_JSON",
+                forbidden_value=secret,
+            )
+
+            raw_reviewer_value = "redacted-owner-load-failure"
+            invalid_shape_path = validation_dir / "invalid-shape-h01-record.json"
+            invalid_shape_path.write_text(json.dumps([raw_reviewer_value]) + "\n")
+            assert_load_failure(
+                record_path=invalid_shape_path,
+                output_path=validation_dir / "invalid-shape-envelope.json",
+                expected_code="CS_VS3_HUMAN_GATE_RECORD_INVALID_SHAPE",
+                forbidden_value=raw_reviewer_value,
+            )
+        finally:
+            if validation_dir.exists():
+                shutil.rmtree(validation_dir)
+
+    def test_vs3_human_gate_validate_records_batches_without_acceptance(self) -> None:
+        seed_result = run_cli("security", "vs3-observability", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        validation_dir = ROOT / "tmp/vs3-human-gate-batch-validation-test"
+        record_dir = validation_dir / "records"
+        output_dir = validation_dir / "outputs"
+        if validation_dir.exists():
+            shutil.rmtree(validation_dir)
+        record_dir.mkdir(parents=True)
+        output_dir.mkdir(parents=True)
+        try:
+            package_dir = ROOT / "reports/human-gates/vs3"
+            package_paths = sorted(package_dir.glob("VS3-H*.json"))
+            self.assertEqual(len(package_paths), 7)
+
+            def record_value(scenario_id: str, field: str) -> object:
+                if field == "scenario_id":
+                    return scenario_id
+                if field == "reviewer":
+                    return "redacted-reviewer"
+                if field == "reviewed_at":
+                    return "2026-06-29T10:00:00Z"
+                if field == "decision":
+                    return "APPROVE_WITH_EXCEPTIONS"
+                if field == "scope":
+                    return {
+                        "tenant_id": "local-dev",
+                        "owner_id": "local-user",
+                        "namespace_id": "personal",
+                        "workspace_id": "default",
+                    }
+                if field in {"evidence_refs", "audit_refs", "policy_decision_refs", "exceptions"}:
+                    return [f"ref:{scenario_id}:{field}"]
+                if field == "redaction_note":
+                    return "Reviewer identity is redacted and no raw secrets or provider tokens are included."
+                if field == "signature_ref":
+                    return f"sig:redacted-{scenario_id.lower()}-review"
+                return f"ref:{scenario_id}:{field}"
+
+            for package_path in package_paths:
+                package = json.loads(package_path.read_text())
+                scenario_id = package["scenario_id"]
+                record = {
+                    "scenario_id": scenario_id,
+                    "reviewer": "redacted-reviewer",
+                    "reviewed_at": "2026-06-29T10:00:00Z",
+                    "decision": "APPROVE_WITH_EXCEPTIONS",
+                    "scope": {
+                        "tenant_id": "local-dev",
+                        "owner_id": "local-user",
+                        "namespace_id": "personal",
+                        "workspace_id": "default",
+                    },
+                    "evidence_refs": [f"report:redacted-{scenario_id.lower()}-evidence"],
+                    "signature_ref": f"sig:redacted-{scenario_id.lower()}-review",
+                    "exceptions": ["VS3-P remains blocked until all human-required evidence is approved."],
+                    "redaction_note": "Reviewer identity is redacted and no raw secrets or provider tokens are included.",
+                }
+                for field in package["review_record_contract"]["required_fields"]:
+                    record.setdefault(field, record_value(scenario_id, field))
+                (record_dir / f"{scenario_id}.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+
+            output_path = output_dir / "valid-set-envelope.json"
+            result = run_cli(
+                "human-gate",
+                "validate-records",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(record_dir.relative_to(ROOT)),
+                "--output",
+                str(output_path.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertTrue(output_path.exists())
+            self.assertNotIn("redacted-reviewer", result.stdout)
+            self.assertNotIn("redacted-reviewer", output_path.read_text())
+            payload = json.loads(result.stdout)
+            validation_set = payload["vs3_human_gate_record_validation_set"]
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(
+                payload["vs3_human_gate_record_validation_set_schema_version"],
+                "cs.vs3_human_gate_record_validation_set.v0",
+            )
+            self.assertEqual(validation_set["status"], "record_set_structurally_valid")
+            self.assertEqual(validation_set["validation_count"], 7)
+            self.assertEqual(validation_set["structurally_valid_count"], 7)
+            self.assertEqual(validation_set["dependency_blocked_structurally_valid_count"], 6)
+            self.assertEqual(validation_set["missing_record_scenario_ids"], [])
+            self.assertEqual(validation_set["duplicate_record_scenario_ids"], [])
+            self.assertEqual(validation_set["matrix_status_after_validation"], "HUMAN_REQUIRED")
+            self.assertFalse(validation_set["claim_boundary"]["vs3_p_unlock_allowed"])
+            self.assertEqual(validation_set["dependency_order_guard"]["status"], "passed")
+            self.assertEqual(
+                validation_set["dependency_order_guard"]["structurally_valid_dependent_records"],
+                6,
+            )
+            self.assertFalse(
+                validation_set["dependency_order_guard"]["dependency_unlock_allowed_by_batch_validator"]
+            )
+            self.assertTrue(
+                validation_set["dependency_order_guard"]["promotion_required_before_dependency_unlock"]
+            )
+            for key in VS3_HUMAN_GATE_NO_CLAIM_FALSE_KEYS:
+                self.assertIn(key, payload["claim_boundary"])
+                self.assertIn(key, validation_set["claim_boundary"])
+                self.assertFalse(payload["claim_boundary"][key], key)
+                self.assertFalse(validation_set["claim_boundary"][key], key)
+            self.assertFalse(validation_set["non_mutation_evidence"]["record_bodies_persisted_by_batch_validator"])
+            self.assertEqual(validation_set["negative_evidence"]["human_rows_marked_pass_by_batch_validator"], 0)
+            self.assertEqual(validation_set["negative_evidence"]["vs3_p_unlocked_by_batch_validator"], 0)
+            self.assertEqual(validation_set["negative_evidence"]["dependency_unlock_allowed_by_batch_validator"], 0)
+            self.assertEqual(validation_set["negative_evidence"]["dependency_blocked_structurally_valid_count"], 6)
+            self.assertEqual(validation_set["negative_evidence"]["sensitive_marker_findings"], 0)
+            self.assertEqual(validation_set["negative_evidence"]["overclaim_marker_findings"], 0)
+            for key in VS3_HUMAN_GATE_BATCH_ZERO_CLAIM_KEYS:
+                self.assertIn(key, validation_set["negative_evidence"])
+                self.assertEqual(validation_set["negative_evidence"][key], 0, key)
+                self.assertIn(key, payload["negative_evidence"])
+                self.assertEqual(payload["negative_evidence"][key], 0, key)
+            for key in [
+                "production_readiness_claim_allowed",
+                "live_provider_readiness_claim_allowed",
+                "real_idp_readiness_claim_allowed",
+                "real_network_readiness_claim_allowed",
+                "migration_restore_readiness_claim_allowed",
+                "security_acceptance_claim_allowed",
+                "human_acceptance_claim_allowed",
+            ]:
+                self.assertIn(key, payload["summary"])
+                self.assertFalse(payload["summary"][key], key)
+            self.assertTrue(
+                all(
+                    validation["matrix_status_after_validation"] == "HUMAN_REQUIRED"
+                    for validation in validation_set["record_validations"]
+                )
+            )
+            self.assertEqual(payload["summary"]["dependency_blocked_structurally_valid_count"], 6)
+            validations_by_id = {
+                validation["scenario_id"]: validation
+                for validation in validation_set["record_validations"]
+            }
+            self.assertEqual(validations_by_id["VS3-H01"]["dependency_status"], "no_prior_human_gate_dependency")
+            self.assertEqual(validations_by_id["VS3-H01"]["depends_on_human_gates"], [])
+            self.assertEqual(validations_by_id["VS3-H04"]["depends_on_human_gates"], ["VS3-H01"])
+            self.assertEqual(validations_by_id["VS3-H04"]["dependency_status"], "blocked_pending_human_promotion")
+            self.assertFalse(validations_by_id["VS3-H04"]["dependency_unlock_allowed_by_structural_validation"])
+            self.assertEqual(
+                validations_by_id["VS3-H02"]["depends_on_human_gates"],
+                ["VS3-H01", "VS3-H03", "VS3-H04", "VS3-H05"],
+            )
+
+            overclaim_record_path = record_dir / "VS3-H03.json"
+            overclaim_record = json.loads(overclaim_record_path.read_text())
+            overclaim_record["final_verdict"] = "PASS"
+            overclaim_record["claim_boundary"] = {
+                "real_idp_readiness_claim_allowed": True,
+                "vs3_p": "READY",
+            }
+            overclaim_record_path.write_text(json.dumps(overclaim_record, indent=2, sort_keys=True) + "\n")
+            overclaim_result = run_cli(
+                "human-gate",
+                "validate-records",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(record_dir.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(overclaim_result.returncode, 1, overclaim_result.stdout + overclaim_result.stderr)
+            overclaim_payload = json.loads(overclaim_result.stdout)
+            overclaim_set = overclaim_payload["vs3_human_gate_record_validation_set"]
+            self.assertEqual(overclaim_payload["status"], "blocked")
+            self.assertEqual(overclaim_set["status"], "record_set_structurally_invalid")
+            self.assertEqual(overclaim_set["structurally_valid_count"], 6)
+            self.assertEqual(overclaim_set["structurally_invalid_count"], 1)
+            self.assertEqual(overclaim_set["negative_evidence"]["overclaim_marker_findings"], 3)
+            self.assertEqual(overclaim_payload["summary"]["overclaim_marker_findings"], 3)
+            self.assertEqual(overclaim_set["matrix_status_after_validation"], "HUMAN_REQUIRED")
+            overclaim_record.pop("final_verdict")
+            overclaim_record.pop("claim_boundary")
+            overclaim_record_path.write_text(json.dumps(overclaim_record, indent=2, sort_keys=True) + "\n")
+
+            secret = "sk-batchsecret1234567890"
+            unsafe_record_path = record_dir / "VS3-H05.json"
+            unsafe_record = json.loads(unsafe_record_path.read_text())
+            unsafe_record["redaction_note"] = f"accidental raw token {secret}"
+            unsafe_record_path.write_text(json.dumps(unsafe_record, indent=2, sort_keys=True) + "\n")
+            unsafe_result = run_cli(
+                "human-gate",
+                "validate-records",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                str(record_dir.relative_to(ROOT)),
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(unsafe_result.returncode, 1, unsafe_result.stdout + unsafe_result.stderr)
+            self.assertNotIn(secret, unsafe_result.stdout)
+            unsafe_payload = json.loads(unsafe_result.stdout)
+            unsafe_set = unsafe_payload["vs3_human_gate_record_validation_set"]
+            self.assertEqual(unsafe_payload["status"], "blocked")
+            self.assertEqual(unsafe_set["status"], "record_set_structurally_invalid")
+            self.assertEqual(unsafe_set["structurally_valid_count"], 6)
+            self.assertEqual(unsafe_set["structurally_invalid_count"], 1)
+            self.assertEqual(unsafe_set["negative_evidence"]["sensitive_marker_findings"], 1)
+            self.assertEqual(unsafe_set["negative_evidence"]["raw_record_values_in_output"], 0)
+            self.assertEqual(unsafe_set["matrix_status_after_validation"], "HUMAN_REQUIRED")
+        finally:
+            if validation_dir.exists():
+                shutil.rmtree(validation_dir)
+
+    def test_vs3_p_gate_blocks_on_human_evidence_not_ai_rows(self) -> None:
+        seed_result = run_cli(
+            "scenario",
+            "verify",
+            "vs3-onprem-trusted-extension",
+            "--json",
+            "--output",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        gate = payload["vs3_p_human_gate"]
+        self.assertEqual(payload["status"], "blocked")
+        self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["vs3_p_gate_schema_version"], "cs.vs3_p_human_gate.v0")
+        self.assertFalse(gate["vs3_p_ready"])
+        self.assertEqual(gate["status"], "blocked_on_human_required_evidence")
+        self.assertEqual(payload["summary"]["ai_blocking_rows"], 0)
+        self.assertEqual(payload["summary"]["unresolved_human_required_rows"], 7)
+        self.assertEqual(payload["summary"]["vs3_l_claim"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        self.assertFalse(payload["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(payload["claim_boundary"]["production_readiness_claim_allowed"])
+        self.assertFalse(payload["claim_boundary"]["live_provider_readiness_claim_allowed"])
+        self.assertFalse(payload["claim_boundary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(payload["claim_boundary"]["human_acceptance_claim_allowed"])
+        assert_vs3_no_claim_boundary(self, payload["claim_boundary"])
+        assert_vs3_no_claim_boundary(self, gate["claim_boundary"])
+        assert_vs3_summary_no_readiness_claims(self, payload["summary"])
+        self.assertEqual(
+            [row["scenario_id"] for row in gate["human_required_blockers"]],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            gate["expected_human_required_ids"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            gate["actual_human_required_ids"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(gate["missing_human_required_ids"], [])
+        self.assertEqual(gate["unexpected_human_required_ids"], [])
+        self.assertEqual(gate["duplicate_human_required_ids"], [])
+        self.assertEqual(gate["negative_evidence"]["vs3_p_unlocked_by_gate"], 0)
+        self.assertEqual(gate["negative_evidence"]["production_readiness_claimed_by_gate"], 0)
+        self.assertEqual(gate["negative_evidence"]["security_acceptance_claimed_by_gate"], 0)
+        self.assertEqual(gate["negative_evidence"]["human_required_rows_marked_pass_in_scenario_report"], 0)
+        self.assertEqual(gate["negative_evidence"]["human_required_row_identity_mismatches"], 0)
+        self.assertEqual(gate["negative_evidence"]["missing_human_required_rows_in_scenario_report"], 0)
+        self.assertEqual(gate["negative_evidence"]["unexpected_human_required_rows_in_scenario_report"], 0)
+        self.assertEqual(gate["negative_evidence"]["duplicate_human_required_rows_in_scenario_report"], 0)
+        self.assertEqual(gate["negative_evidence"]["overclaim_boundary_violations"], 0)
+        self.assertEqual(gate["non_mutation_evidence"]["approval_collected_by_vs3_p_gate"], False)
+        self.assertEqual(gate["non_mutation_evidence"]["production_or_onprem_checks_executed_by_vs3_p_gate"], 0)
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_P_GATE_HUMAN_EVIDENCE_REQUIRED" for error in payload["errors"])
+        )
+        self.assertEqual(payload["negative_evidence"]["self_command_transcript_shape_failures"], 0)
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        transcript = payload["self_command_transcript"]
+        self.assertEqual(
+            transcript["command"],
+            [
+                "cornerstone",
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "<redacted-path>",
+                "--json",
+            ],
+        )
+        self.assertEqual(transcript["exit_code"], 4)
+        self.assertEqual(transcript["stdout_json"]["status"], "failed")
+        self.assertEqual(transcript["stdout_json"]["payload_status"], "blocked")
+        self.assertEqual(transcript["stdout_json"]["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+        self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+
+    def test_vs3_p_gate_rejects_missing_human_rows_before_owner_promotion(self) -> None:
+        seed_result = run_cli(
+            "scenario",
+            "verify",
+            "vs3-onprem-trusted-extension",
+            "--json",
+            "--output",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        temp_dir = ROOT / "tmp/vs3-p-gate-missing-human-rows-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            source_report = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+            tampered_report = json.loads(source_report.read_text())
+            tampered_report["scenario_results"] = [
+                row
+                for row in tampered_report["scenario_results"]
+                if row.get("owner") != "Human"
+                and not str(row.get("scenario_id") or row.get("id") or "").startswith("VS3-H")
+            ]
+            tampered_report_path = temp_dir / "vs3-missing-human-rows.json"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                str(tampered_report_path.relative_to(ROOT)),
+                "--json",
+            )
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            gate = payload["vs3_p_human_gate"]
+            self.assertEqual(payload["status"], "blocked")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(gate["status"], "blocked_on_human_row_identity_mismatch")
+            self.assertFalse(gate["vs3_p_ready"])
+            self.assertEqual(payload["summary"]["human_required"], 0)
+            self.assertEqual(payload["summary"]["expected_human_required_rows"], 7)
+            self.assertEqual(payload["summary"]["missing_human_required_rows"], 7)
+            self.assertEqual(payload["summary"]["unresolved_human_required_rows"], 0)
+            self.assertEqual(gate["actual_human_required_ids"], [])
+            self.assertEqual(
+                gate["missing_human_required_ids"],
+                ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+            )
+            self.assertEqual(gate["duplicate_human_required_ids"], [])
+            self.assertEqual(gate["negative_evidence"]["human_required_row_identity_mismatches"], 1)
+            self.assertEqual(gate["negative_evidence"]["missing_human_required_rows_in_scenario_report"], 7)
+            self.assertEqual(gate["negative_evidence"]["duplicate_human_required_rows_in_scenario_report"], 0)
+            self.assertEqual(gate["negative_evidence"]["vs3_p_unlocked_by_gate"], 0)
+            self.assertEqual(gate["negative_evidence"]["production_readiness_claimed_by_gate"], 0)
+            self.assertEqual(gate["negative_evidence"]["human_acceptance_claimed_by_gate"], 0)
+            self.assertTrue(
+                any(error["code"] == "CS_VS3_P_GATE_HUMAN_ROWS_MISMATCH" for error in payload["errors"])
+            )
+            self.assertFalse(
+                any(error["code"] == "CS_VS3_P_GATE_OWNER_PROMOTION_REQUIRED" for error in payload["errors"])
+            )
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_p_gate_rejects_duplicate_and_unexpected_human_rows_before_owner_promotion(self) -> None:
+        seed_result = run_cli(
+            "scenario",
+            "verify",
+            "vs3-onprem-trusted-extension",
+            "--json",
+            "--output",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        temp_dir = ROOT / "tmp/vs3-p-gate-human-row-identity-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            source_report = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+            original_report = json.loads(source_report.read_text())
+
+            duplicate_report = json.loads(json.dumps(original_report))
+            duplicate_source_row = next(
+                row
+                for row in duplicate_report["scenario_results"]
+                if str(row.get("scenario_id") or row.get("id") or "") == "VS3-H01"
+            )
+            duplicate_report["scenario_results"].append(json.loads(json.dumps(duplicate_source_row)))
+            duplicate_report_path = temp_dir / "vs3-duplicate-human-row.json"
+            duplicate_report_path.write_text(json.dumps(duplicate_report, indent=2, sort_keys=True) + "\n")
+
+            unexpected_report = json.loads(json.dumps(original_report))
+            unexpected_source_row = next(
+                row
+                for row in unexpected_report["scenario_results"]
+                if str(row.get("scenario_id") or row.get("id") or "") == "VS3-H01"
+            )
+            unexpected_source_row["scenario_id"] = "VS3-H99"
+            unexpected_source_row["id"] = "VS3-H99"
+            unexpected_report_path = temp_dir / "vs3-unexpected-human-row.json"
+            unexpected_report_path.write_text(json.dumps(unexpected_report, indent=2, sort_keys=True) + "\n")
+
+            cases = [
+                (
+                    duplicate_report_path,
+                    ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07", "VS3-H01"],
+                    [],
+                    [],
+                    ["VS3-H01"],
+                    8,
+                ),
+                (
+                    unexpected_report_path,
+                    ["VS3-H99", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+                    ["VS3-H01"],
+                    ["VS3-H99"],
+                    [],
+                    7,
+                ),
+            ]
+            for report_path, actual_ids, missing_ids, unexpected_ids, duplicate_ids, unresolved_count in cases:
+                with self.subTest(report_path=report_path.name):
+                    result = run_cli(
+                        "human-gate",
+                        "vs3-p-gate",
+                        "--scope",
+                        "vs3",
+                        "--scenario-report",
+                        str(report_path.relative_to(ROOT)),
+                        "--json",
+                    )
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    gate = payload["vs3_p_human_gate"]
+                    self.assertEqual(payload["status"], "blocked")
+                    self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+                    self.assertEqual(gate["status"], "blocked_on_human_row_identity_mismatch")
+                    self.assertFalse(gate["vs3_p_ready"])
+                    self.assertEqual(gate["actual_human_required_ids"], actual_ids)
+                    self.assertEqual(gate["missing_human_required_ids"], missing_ids)
+                    self.assertEqual(gate["unexpected_human_required_ids"], unexpected_ids)
+                    self.assertEqual(gate["duplicate_human_required_ids"], duplicate_ids)
+                    self.assertEqual(payload["summary"]["missing_human_required_rows"], len(missing_ids))
+                    self.assertEqual(payload["summary"]["unexpected_human_required_rows"], len(unexpected_ids))
+                    self.assertEqual(payload["summary"]["duplicate_human_required_rows"], len(duplicate_ids))
+                    self.assertEqual(payload["summary"]["unresolved_human_required_rows"], unresolved_count)
+                    self.assertEqual(gate["negative_evidence"]["human_required_row_identity_mismatches"], 1)
+                    self.assertEqual(
+                        gate["negative_evidence"]["missing_human_required_rows_in_scenario_report"],
+                        len(missing_ids),
+                    )
+                    self.assertEqual(
+                        gate["negative_evidence"]["unexpected_human_required_rows_in_scenario_report"],
+                        len(unexpected_ids),
+                    )
+                    self.assertEqual(
+                        gate["negative_evidence"]["duplicate_human_required_rows_in_scenario_report"],
+                        len(duplicate_ids),
+                    )
+                    self.assertEqual(gate["negative_evidence"]["vs3_p_unlocked_by_gate"], 0)
+                    self.assertEqual(gate["negative_evidence"]["production_readiness_claimed_by_gate"], 0)
+                    self.assertEqual(gate["negative_evidence"]["human_acceptance_claimed_by_gate"], 0)
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_P_GATE_HUMAN_ROWS_MISMATCH" for error in payload["errors"])
+                    )
+                    self.assertFalse(
+                        any(error["code"] == "CS_VS3_P_GATE_OWNER_PROMOTION_REQUIRED" for error in payload["errors"])
+                    )
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_p_gate_rejects_human_pass_claims_without_promotion_record(self) -> None:
+        seed_result = run_cli(
+            "scenario",
+            "verify",
+            "vs3-onprem-trusted-extension",
+            "--json",
+            "--output",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        temp_dir = ROOT / "tmp/vs3-p-gate-human-pass-claim-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            source_report = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+            tampered_report = json.loads(source_report.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row.get("owner") == "Human" or str(row.get("scenario_id", "")).startswith("VS3-H"):
+                    row["status"] = "PASS"
+            tampered_report["claim_boundaries"]["production_onprem"] = "READY"
+            tampered_report["summary"]["pass"] = 57
+            tampered_report["summary"]["human_required"] = 0
+            tampered_report_path = temp_dir / "vs3-human-pass-claim.json"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                str(tampered_report_path.relative_to(ROOT)),
+                "--json",
+            )
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            gate = payload["vs3_p_human_gate"]
+            self.assertEqual(payload["status"], "blocked")
+            self.assertEqual(payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(gate["status"], "blocked_on_human_pass_claim_without_promotion_evidence")
+            self.assertFalse(gate["vs3_p_ready"])
+            self.assertEqual(payload["summary"]["unresolved_human_required_rows"], 0)
+            self.assertEqual(payload["summary"]["human_required_rows_marked_pass"], 7)
+            self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertFalse(payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            self.assertFalse(payload["claim_boundary"]["human_acceptance_claim_allowed"])
+            self.assertEqual(gate["negative_evidence"]["human_required_rows_marked_pass_in_scenario_report"], 7)
+            self.assertEqual(gate["negative_evidence"]["human_pass_claims_rejected_by_gate"], 7)
+            self.assertEqual(gate["negative_evidence"]["vs3_p_unlocked_by_gate"], 0)
+            self.assertEqual(gate["negative_evidence"]["production_readiness_claimed_by_gate"], 0)
+            self.assertEqual(gate["negative_evidence"]["overclaim_boundary_violations"], 1)
+            self.assertEqual(gate["claim_boundaries"]["production_onprem"], "READY")
+            self.assertEqual(
+                [row["scenario_id"] for row in gate["human_pass_claim_rows"]],
+                ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+            )
+            self.assertTrue(
+                any(error["code"] == "CS_VS3_P_GATE_HUMAN_PASS_CLAIM_REJECTED" for error in payload["errors"])
+            )
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_final_regression_gate_is_native_and_boundary_safe(self) -> None:
+        result = run_cli("security", "vs3-regression-gate", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.vs3_final_regression_proof.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_final_regression_gate")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["security_acceptance_gate"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["proof_boundary"]["human_operator_acceptance"], "HUMAN_REQUIRED")
+        self.assertEqual(
+            payload["scenario_status"],
+            {
+                "VS3-REG-001": "PASS",
+                "VS3-REG-002": "PASS",
+                "VS3-REG-003": "PASS",
+                "VS3-REG-004": "PASS",
+                "VS3-REG-005": "PASS",
+                "VS3-REG-006": "PASS",
+                "VS3-REG-007": "PASS",
+                "VS3-REG-008": "PASS",
+            },
+        )
+        self.assertTrue(all(payload["checks"].values()))
+        self.assertEqual(payload["vs0_regression"]["evux_summary"]["blocking"], 0)
+        self.assertEqual(payload["vs0_regression"]["operator_summary"]["blocking"], 0)
+        self.assertEqual(payload["vs0_regression"]["guardrails_summary"]["blocking"], 0)
+        self.assertEqual(payload["vs1_regression"]["summary"]["blocking"], 0)
+        self.assertEqual(
+            payload["coverage_audit_mutation"]["mutated_matrix_status"],
+            "failed",
+        )
+        self.assertIn(
+            "tool.execution.denied",
+            payload["coverage_audit_mutation"]["mutated_missing_event_types"],
+        )
+        overclaim_review = payload["overclaim_manifest_review"]
+        self.assertEqual(overclaim_review["status"], "passed")
+        self.assertEqual(overclaim_review["findings"], [])
+        for checked_path in [
+            "reports/security/vs3-final-regression-proof.json",
+            "reports/human-gates/vs3/record-scaffold.json",
+            "reports/human-gates/vs3/evidence-status.json",
+            "reports/human-gates/vs3/review-kit.json",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            *VS3_HUMAN_GATE_PACKAGE_PATHS,
+        ]:
+            self.assertIn(checked_path, overclaim_review["checked_paths"])
+        self.assertTrue(payload["product_ux_admin_separation"]["normal_user_product_first"])
+        self.assertEqual(payload["supply_chain_review"]["changed_dependency_paths"], [])
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["vs0_regression_failures"], 0)
+        self.assertEqual(negative["vs1_regression_failures"], 0)
+        self.assertEqual(negative["authority_expansions_from_prompt_or_connector_content"], 0)
+        self.assertEqual(negative["coverage_omission_not_detected"], 0)
+        self.assertEqual(negative["audit_omission_not_detected"], 0)
+        self.assertEqual(negative["normal_user_admin_first_regressions"], 0)
+        self.assertEqual(negative["unapproved_dependency_changes"], 0)
+        self.assertEqual(negative["permissive_default_egress"], 0)
+        self.assertEqual(negative["permissive_default_policy"], 0)
+        self.assertEqual(negative["arbitrary_shell_default_allowed"], 0)
+        self.assertEqual(negative["tenant_isolation_default_leaks"], 0)
+        self.assertEqual(negative["activation_active_by_default"], 0)
+        self.assertEqual(negative["high_risk_actions_without_approval"], 0)
+        self.assertEqual(negative["vs3_p_claimed"], 0)
+        self.assertEqual(negative["production_onprem_claimed"], 0)
+        self.assertEqual(negative["security_acceptance_claimed"], 0)
+        self.assertEqual(negative["human_acceptance_claimed"], 0)
+
+        existing_result = run_cli("security", "vs3-regression-gate", "--use-existing", "--json")
+        self.assertEqual(existing_result.returncode, 0, existing_result.stdout + existing_result.stderr)
+        existing_payload = json.loads(existing_result.stdout)
+        self.assertEqual(existing_payload["status"], "success")
+        self.assertEqual(existing_payload["scenario_status"]["VS3-REG-008"], "PASS")
+
+    def test_vs3_final_regression_gate_rejects_human_gate_overclaim(self) -> None:
+        seed_result = run_cli("security", "vs3-regression-gate", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        self.assertTrue(review_kit_path.exists(), "VS3 review-kit report must exist before mutation")
+        original_review_kit = review_kit_path.read_text()
+        try:
+            mutated_review_kit = json.loads(original_review_kit)
+            mutated_review_kit["unsafe_operator_note"] = "VS3-P READY"
+            review_kit_path.write_text(json.dumps(mutated_review_kit, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["schema_version"], "cs.vs3_final_regression_proof.v0")
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["scenario_status"]["VS3-REG-005"], "FAIL")
+            self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+            overclaim_review = payload["overclaim_manifest_review"]
+            self.assertEqual(overclaim_review["status"], "failed")
+            self.assertTrue(
+                any(
+                    finding["path"] == "reports/human-gates/vs3/review-kit.json"
+                    and "VS3-P READY" in finding["text"]
+                    for finding in overclaim_review["findings"]
+                ),
+                overclaim_review["findings"],
+            )
+            self.assertGreater(
+                payload["negative_evidence"]["unallowlisted_overclaim_findings"],
+                0,
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_onprem_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed"], 0)
+        finally:
+            review_kit_path.write_text(original_review_kit)
+            restored_result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(restored_result.returncode, 0, restored_result.stdout + restored_result.stderr)
+
+    def test_vs3_final_regression_gate_rejects_security_acceptance_overclaim(self) -> None:
+        seed_result = run_cli("security", "vs3-regression-gate", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        self.assertTrue(review_kit_path.exists(), "VS3 review-kit report must exist before mutation")
+        original_review_kit = review_kit_path.read_text()
+        try:
+            mutated_review_kit = json.loads(original_review_kit)
+            mutated_review_kit["unsafe_security_note"] = "security acceptance READY"
+            mutated_review_kit["unsafe_penetration_note"] = "penetration-tested APPROVED"
+            review_kit_path.write_text(json.dumps(mutated_review_kit, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["schema_version"], "cs.vs3_final_regression_proof.v0")
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["scenario_status"]["VS3-REG-005"], "FAIL")
+            self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            overclaim_review = payload["overclaim_manifest_review"]
+            self.assertEqual(overclaim_review["status"], "failed")
+            self.assertTrue(
+                any(
+                    finding["path"] == "reports/human-gates/vs3/review-kit.json"
+                    and "security acceptance READY" in finding["text"]
+                    for finding in overclaim_review["findings"]
+                ),
+                overclaim_review["findings"],
+            )
+            self.assertTrue(
+                any(
+                    finding["path"] == "reports/human-gates/vs3/review-kit.json"
+                    and "penetration-tested APPROVED" in finding["text"]
+                    for finding in overclaim_review["findings"]
+                ),
+                overclaim_review["findings"],
+            )
+            self.assertGreater(
+                payload["negative_evidence"]["unallowlisted_overclaim_findings"],
+                0,
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_onprem_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed"], 0)
+        finally:
+            review_kit_path.write_text(original_review_kit)
+            restored_result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(restored_result.returncode, 0, restored_result.stdout + restored_result.stderr)
+
+    def test_vs3_final_regression_gate_rejects_middle_human_gate_package_overclaim(self) -> None:
+        seed_result = run_cli("security", "vs3-regression-gate", "--json")
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+        package_path = ROOT / "reports/human-gates/vs3/VS3-H04.json"
+        self.assertTrue(package_path.exists(), "VS3-H04 package report must exist before mutation")
+        original_package = package_path.read_text()
+        try:
+            mutated_package = json.loads(original_package)
+            mutated_package["unsafe_operator_note"] = "VS3-P READY"
+            package_path.write_text(json.dumps(mutated_package, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["schema_version"], "cs.vs3_final_regression_proof.v0")
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["scenario_status"]["VS3-REG-005"], "FAIL")
+            self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["human_operator_acceptance"], "HUMAN_REQUIRED")
+            overclaim_review = payload["overclaim_manifest_review"]
+            self.assertEqual(overclaim_review["status"], "failed")
+            self.assertTrue(
+                any(
+                    finding["path"] == "reports/human-gates/vs3/VS3-H04.json"
+                    and "VS3-P READY" in finding["text"]
+                    for finding in overclaim_review["findings"]
+                ),
+                overclaim_review["findings"],
+            )
+            self.assertGreater(
+                payload["negative_evidence"]["unallowlisted_overclaim_findings"],
+                0,
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_onprem_claimed"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed"], 0)
+        finally:
+            package_path.write_text(original_package)
+            restored_result = run_cli("security", "vs3-regression-gate", "--json")
+            self.assertEqual(restored_result.returncode, 0, restored_result.stdout + restored_result.stderr)
+
+    def _seed_vs3_local_checkpoint_artifacts(self) -> None:
+        seed_commands = [
+            ("security", "vs3-evidence-reconcile", "--json"),
+            ("security", "vs3-overclaim-lint", "--json"),
+            ("security", "vs3-request-context", "--json"),
+            (
+                "security",
+                "vs3-postgres-rls",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            (
+                "security",
+                "vs3-opa-policy",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            (
+                "security",
+                "vs3-egress-sandbox",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            ("security", "vs3-connectorhub-source", "--json"),
+            ("security", "vs3-tool-registry", "--json"),
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        vs3_p_gate_result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--output",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            "--json",
+        )
+        self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+    def _refresh_vs3_human_gate_derived_artifacts(self) -> None:
+        evidence_status_result = run_cli(
+            "human-gate",
+            "evidence-status",
+            "--scope",
+            "vs3",
+            "--record-dir",
+            "reports/human-gates/vs3/record-templates",
+            "--use-existing",
+            "--json",
+            "--output",
+            "reports/human-gates/vs3/evidence-status.json",
+        )
+        self.assertEqual(
+            evidence_status_result.returncode,
+            0,
+            evidence_status_result.stdout + evidence_status_result.stderr,
+        )
+        review_kit_result = run_cli(
+            "human-gate",
+            "review-kit",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--use-existing",
+            "--json",
+            "--output",
+            "reports/human-gates/vs3/review-kit.json",
+        )
+        self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+        vs3_p_gate_result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--output",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            "--json",
+        )
+        self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+    def test_vs3_local_checkpoint_manifest_is_hash_backed_and_boundary_safe(self) -> None:
+        seed_commands = [
+            ("security", "vs3-evidence-reconcile", "--json"),
+            ("security", "vs3-overclaim-lint", "--json"),
+            ("security", "vs3-request-context", "--json"),
+            (
+                "security",
+                "vs3-postgres-rls",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            (
+                "security",
+                "vs3-opa-policy",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            (
+                "security",
+                "vs3-egress-sandbox",
+                "--reuse-vs2-local-range-report",
+                "reports/security/vs2-local-range.json",
+                "--json",
+            ),
+            ("security", "vs3-connectorhub-source", "--json"),
+            ("security", "vs3-tool-registry", "--json"),
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        vs3_p_gate_result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--output",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            "--json",
+        )
+        self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+        result = run_cli("security", "vs3-local-checkpoint", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["schema_version"], "cs.cli.v0")
+        self.assertEqual(payload["vs3_local_checkpoint_schema_version"], "cs.vs3_local_checkpoint.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(
+            payload["final_verdict"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["live_provider"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["real_idp"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["real_network"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["migration_restore"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+        self.assertTrue(payload["claim_boundary"]["structural_validation_is_not_acceptance"])
+        self.assertEqual(payload["claim_boundaries"], payload["claim_boundary"])
+        self.assertEqual(payload["summary"]["scenario_count"], 57)
+        self.assertEqual(payload["summary"]["pass"], 50)
+        self.assertEqual(payload["summary"]["human_required"], 7)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(
+            payload["summary"]["product_feature_claims"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED",
+        )
+        self.assertEqual(payload["summary"]["missing_required_artifacts"], 0)
+        self.assertEqual(payload["summary"]["ai_blocking_rows"], 0)
+        self.assertEqual(payload["summary"]["unresolved_human_required_rows"], 7)
+        self.assertFalse(payload["summary"]["product_claim_allowed"])
+        self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["live_provider_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["real_idp_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["real_network_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["migration_restore_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertTrue(all(payload["checkpoint_conditions"].values()))
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_traceability_valid"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_source_tree_current"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_claim_boundary_present"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_claim_boundaries_present"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_claim_boundary_matches_claim_boundaries"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_claim_boundary_vs3_l_local_only"])
+        self.assertTrue(payload["checkpoint_conditions"]["scenario_report_claim_boundary_no_production_or_human_overclaims"])
+        self.assertTrue(payload["checkpoint_conditions"]["self_command_transcript_shape_valid"])
+        self.assertTrue(payload["checkpoint_conditions"]["human_gate_evidence_status_dependency_order_guard"])
+        self.assertTrue(payload["checkpoint_conditions"]["human_gate_evidence_status_self_command_transcript_valid"])
+        self.assertTrue(payload["checkpoint_conditions"]["human_gate_review_kit_self_command_transcript_valid"])
+        self.assertTrue(payload["checkpoint_conditions"]["vs3_p_gate_self_command_transcript_valid"])
+        traceability = payload["scenario_report_traceability"]
+        self.assertEqual(
+            traceability["schema_version"],
+            "cs.vs3_local_checkpoint_scenario_traceability.v0",
+        )
+        self.assertEqual(traceability["status"], "passed")
+        self.assertEqual(traceability["corpus_pack_id"], "fixtures/vs3/local-dev")
+        self.assertEqual(traceability["model_provider"], "local_test")
+        self.assertEqual(traceability["model_name"], "deterministic-local-test")
+        self.assertEqual(traceability["scenario_id_count"], 57)
+        self.assertEqual(traceability["row_count"], 57)
+        self.assertEqual(traceability["human_required_row_count"], 7)
+        self.assertEqual(traceability["missing_fields"], [])
+        self.assertEqual(traceability["invalid_fields"], [])
+        self.assertEqual(traceability["row_missing_fields"], [])
+        self.assertEqual(traceability["row_invalid_fields"], [])
+        self.assertEqual(payload["scenario_report"]["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["scenario_report"]["claim_boundary"], payload["scenario_report"]["claim_boundaries"])
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary"]["vs3_l"],
+            "LOCAL_DEV_ASSURANCE_VERIFIED",
+        )
+        self.assertEqual(payload["scenario_report"]["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary"]["production_onprem"],
+            "NOT_CLAIMED",
+        )
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary"]["security_acceptance"],
+            "NOT_CLAIMED",
+        )
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary_validation"]["status"],
+            "passed",
+        )
+        self.assertTrue(
+            payload["scenario_report"]["claim_boundary_validation"][
+                "claim_boundary_matches_claim_boundaries"
+            ]
+        )
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary_validation"]["claim_boundary_overclaim_fields"],
+            {},
+        )
+        self.assertEqual(
+            payload["scenario_report"]["claim_boundary_validation"]["claim_boundaries_overclaim_fields"],
+            {},
+        )
+        self.assertEqual(
+            payload["claim_boundary_from_scenario_report"],
+            payload["scenario_report"]["claim_boundary"],
+        )
+        self.assertEqual(
+            payload["claim_boundaries_from_scenario_report"],
+            payload["scenario_report"]["claim_boundaries"],
+        )
+        self.assertEqual(
+            payload["scenario_report"]["source_tree_current_validation"]["status"],
+            "passed",
+        )
+        self.assertEqual(
+            payload["scenario_report_source_tree_current_validation"]["status"],
+            "passed",
+        )
+        self.assertEqual(
+            payload["summary"]["scenario_report_source_tree_current_status"],
+            "passed",
+        )
+        self.assertEqual(payload["summary"]["scenario_report_traceability_status"], "passed")
+        self.assertEqual(
+            payload["negative_evidence"]["human_gate_evidence_status_dependency_order_guard_failures"],
+            0,
+        )
+        self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_missing_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_invalid_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_row_missing_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_row_invalid_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_source_tree_current_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_missing_claim_boundary"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_missing_claim_boundaries"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_claim_boundary_mismatches"], 0)
+        self.assertEqual(payload["negative_evidence"]["scenario_report_claim_boundary_overclaim_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_evidence_status_self_command_transcript_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_review_kit_self_command_transcript_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["vs3_p_gate_self_command_transcript_failures"], 0)
+        self.assertEqual(
+            payload["human_gate_preparation"]["evidence_status_report"]["self_command_transcript_validation"]["status"],
+            "passed",
+        )
+        self.assertEqual(
+            payload["human_gate_preparation"]["review_kit_report"]["self_command_transcript_validation"]["status"],
+            "passed",
+        )
+        self.assertEqual(payload["vs3_p_gate"]["self_command_transcript_validation"]["status"], "passed")
+        artifact_by_path = {artifact["path"]: artifact for artifact in payload["artifact_manifest"]}
+        for required_path in [
+            "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md",
+            "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv",
+            "docs/agent/VS3_FULL_GOAL_PROMPT.md",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "reports/security/vs3-evidence-reconciliation.json",
+            "reports/security/vs3-overclaim-lint.json",
+            "reports/security/vs3-request-context-proof.json",
+            "reports/db/vs3-postgres-rls-proof.json",
+            "reports/policy/vs3-opa-policy-proof.json",
+            "reports/security/vs3-egress-sandbox-proof.json",
+            "reports/security/vs3-connectorhub-source-proof.json",
+            "reports/security/vs3-tool-registry-proof.json",
+            "reports/observability/vs3-observability-proof.json",
+            "reports/security/vs3-final-regression-proof.json",
+            "reports/human-gates/vs3/record-scaffold.json",
+            "reports/human-gates/vs3/evidence-status.json",
+            "reports/human-gates/vs3/review-kit.json",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            *VS3_HUMAN_GATE_PACKAGE_PATHS,
+        ]:
+            self.assertIn(required_path, artifact_by_path)
+            self.assertTrue(artifact_by_path[required_path]["present"])
+            self.assertGreater(artifact_by_path[required_path]["bytes"], 0)
+            self.assertEqual(len(artifact_by_path[required_path]["sha256"]), 64)
+        self.assertEqual(payload["summary"]["component_proof_report_count"], 9)
+        self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_source_tree_current_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_proof_boundary_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_traceability_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 0)
+        self.assertEqual(payload["summary"]["component_proof_report_policy_decision_ref_failures"], 0)
+        component_proof_by_key = {
+            proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+        }
+        self.assertEqual(
+            sorted(component_proof_by_key),
+            [
+                "connectorhub_source_proof",
+                "egress_sandbox_proof",
+                "evidence_reconciliation",
+                "final_regression_proof",
+                "observability_proof",
+                "opa_policy_proof",
+                "postgres_rls_proof",
+                "request_context_proof",
+                "tool_registry_proof",
+            ],
+        )
+        expected_component_scenario_ids = {
+            "evidence_reconciliation": [],
+            "request_context_proof": ["VS3-CTX-001", "VS3-CTX-002", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"],
+            "postgres_rls_proof": ["VS3-RLS-001", "VS3-RLS-002", "VS3-RLS-003", "VS3-RLS-004", "VS3-RLS-005", "VS3-RLS-006"],
+            "opa_policy_proof": ["VS3-OPA-001", "VS3-OPA-002", "VS3-OPA-003", "VS3-OPA-004", "VS3-OPA-005"],
+            "egress_sandbox_proof": ["VS3-EGR-001", "VS3-EGR-002", "VS3-EGR-003", "VS3-EGR-004", "VS3-EGR-005", "VS3-EGR-006"],
+            "connectorhub_source_proof": ["VS3-CON-001", "VS3-CON-002", "VS3-CON-003", "VS3-CON-004", "VS3-CON-005", "VS3-CON-006"],
+            "tool_registry_proof": ["VS3-TOOL-001", "VS3-TOOL-002", "VS3-TOOL-003", "VS3-TOOL-004", "VS3-TOOL-005", "VS3-TOOL-006", "VS3-TOOL-007"],
+            "observability_proof": ["VS3-OBS-001", "VS3-OBS-002", "VS3-OBS-003"],
+            "final_regression_proof": ["VS3-REG-001", "VS3-REG-002", "VS3-REG-003", "VS3-REG-004", "VS3-REG-005", "VS3-REG-006", "VS3-REG-007", "VS3-REG-008"],
+        }
+        expected_component_check_names = {
+            "evidence_reconciliation": [],
+            "request_context_proof": ["vs3_ctx_001_surface_context_consistent", "vs3_ctx_002_forged_authority_denied", "vs3_ctx_003_revocation_fail_closed", "vs3_ctx_004_context_faults_fail_closed", "vs3_ctx_005_mission_workspace_policy_enforced"],
+            "postgres_rls_proof": ["vs3_rls_001_schema_scope_non_null", "vs3_rls_002_tenant_read_isolation", "vs3_rls_003_cross_tenant_mutation_denied", "vs3_rls_004_pool_worker_context_reset", "vs3_rls_005_migration_quarantine_rollback", "vs3_rls_006_backup_restore_tenant_safe"],
+            "opa_policy_proof": ["vs3_opa_001_policy_input_schema_and_source_map", "vs3_opa_002_policy_decision_contract", "vs3_opa_003_opa_http_access_hardened", "vs3_opa_004_bundle_lifecycle_fail_closed", "vs3_opa_005_decision_log_masked"],
+            "egress_sandbox_proof": ["no_overclaim_or_secret_leak", "supporting_vs2_local_docker_boundary_current", "vs3_egr_001_no_grant_denied_by_runtime_boundary", "vs3_egr_002_one_approved_connectorhub_call", "vs3_egr_003_redirect_dns_url_bypass_denied", "vs3_egr_004_sandbox_denies_undeclared_access", "vs3_egr_005_outage_fail_closed", "vs3_egr_006_untrusted_content_no_authority"],
+            "connectorhub_source_proof": ["no_live_provider_or_human_claim", "vs3_con_001_projection_ack_after_commit", "vs3_con_002_github_readonly_no_write_paths", "vs3_con_003_credentials_stay_connectorhub", "vs3_con_004_source_policy_scoped_revocable", "vs3_con_005_capture_fixture_consent_bounded_revocable", "vs3_con_006_faults_quarantine_no_side_effects"],
+            "tool_registry_proof": ["no_vs3_l_vs3_p_or_production_registry_claim", "vs3_tool_001_manifest_package_signature_sbom", "vs3_tool_002_trusted_registry_rejects_bad_packages", "vs3_tool_003_install_not_activation", "vs3_tool_004_activation_grants_reversible_audited", "vs3_tool_005_runtime_sandbox_denies_undeclared_access", "vs3_tool_006_update_diff_evaluation_gate_no_silent_apply", "vs3_tool_007_rollback_and_emergency_patch_policy"],
+            "observability_proof": ["vs3_obs_001_operator_status_distinguishes_components", "vs3_obs_002_audit_integrity_tamper_evident", "vs3_obs_003_human_gate_packages_generated_without_pass"],
+            "final_regression_proof": ["vs3_reg_001_fresh_vs0_gates", "vs3_reg_002_fresh_vs1_gate_cross_scope", "vs3_reg_003_red_team_authority_zero_expansion", "vs3_reg_004_coverage_and_audit_omissions_detected", "vs3_reg_005_overclaim_lint_and_manifest_review", "vs3_reg_006_product_first_ui_admin_separation", "vs3_reg_007_supply_chain_diff_approval_gate", "vs3_reg_008_secure_defaults_conservative"],
+        }
+        for proof_key, proof_identity in component_proof_by_key.items():
+            self.assertTrue(proof_identity["embedded_present"])
+            self.assertTrue(proof_identity["file_present"])
+            self.assertTrue(proof_identity["file_json_valid"])
+            self.assertTrue(proof_identity["matches_embedded_current_file"])
+            self.assertTrue(proof_identity["embedded_schema_matches_expected"])
+            self.assertTrue(proof_identity["file_schema_matches_expected"])
+            self.assertTrue(proof_identity["embedded_status_success"])
+            self.assertTrue(proof_identity["file_status_success"])
+            if proof_key == "evidence_reconciliation":
+                self.assertFalse(proof_identity["expects_scenario_checks"])
+                self.assertFalse(proof_identity["embedded_source_tree_present"])
+                self.assertFalse(proof_identity["file_source_tree_present"])
+                self.assertTrue(proof_identity["source_tree_identity_success"])
+                self.assertFalse(proof_identity["embedded_proof_boundary_present"])
+                self.assertFalse(proof_identity["file_proof_boundary_present"])
+                self.assertFalse(proof_identity["proof_boundary_matches_embedded_file"])
+                self.assertTrue(proof_identity["proof_boundary_success"])
+                self.assertFalse(proof_identity["embedded_traceability_present"])
+                self.assertFalse(proof_identity["file_traceability_present"])
+                self.assertFalse(proof_identity["traceability_matches_embedded_file"])
+                self.assertTrue(proof_identity["traceability_success"])
+                self.assertFalse(proof_identity["embedded_scenario_status_present"])
+                self.assertFalse(proof_identity["file_scenario_status_present"])
+                self.assertFalse(proof_identity["embedded_checks_present"])
+                self.assertFalse(proof_identity["file_checks_present"])
+            else:
+                self.assertTrue(proof_identity["expects_scenario_checks"])
+                self.assertTrue(proof_identity["embedded_source_tree_present"])
+                self.assertTrue(proof_identity["file_source_tree_present"])
+                self.assertTrue(proof_identity["source_tree_matches_embedded_file"])
+                self.assertTrue(proof_identity["source_tree_identity_success"])
+                self.assertTrue(proof_identity["source_tree_current_success"])
+                self.assertEqual(proof_identity["embedded_source_tree_current_mismatches"], [])
+                self.assertEqual(proof_identity["file_source_tree_current_mismatches"], [])
+                self.assertEqual(
+                    proof_identity["embedded_source_tree_fingerprint"],
+                    proof_identity["current_source_tree_fingerprint"],
+                )
+                self.assertEqual(
+                    proof_identity["file_source_tree_fingerprint"],
+                    proof_identity["current_source_tree_fingerprint"],
+                )
+                self.assertTrue(proof_identity["embedded_proof_boundary_present"])
+                self.assertTrue(proof_identity["file_proof_boundary_present"])
+                self.assertTrue(proof_identity["proof_boundary_matches_embedded_file"])
+                self.assertEqual(proof_identity["embedded_proof_boundary_errors"], [])
+                self.assertEqual(proof_identity["file_proof_boundary_errors"], [])
+                self.assertTrue(proof_identity["proof_boundary_success"])
+                self.assertTrue(proof_identity["embedded_traceability_present"])
+                self.assertTrue(proof_identity["file_traceability_present"])
+                self.assertEqual(proof_identity["embedded_traceability_missing_fields"], [])
+                self.assertEqual(proof_identity["file_traceability_missing_fields"], [])
+                self.assertEqual(proof_identity["embedded_traceability_invalid_fields"], [])
+                self.assertEqual(proof_identity["file_traceability_invalid_fields"], [])
+                self.assertTrue(proof_identity["traceability_matches_embedded_file"])
+                self.assertTrue(proof_identity["traceability_success"])
+                self.assertEqual(
+                    proof_identity["embedded_traceability"],
+                    proof_identity["file_traceability"],
+                )
+                traceability = proof_identity["embedded_traceability"]
+                self.assertTrue(traceability["scenario_run_id"].startswith("scenario-run:"))
+                self.assertTrue(traceability["trace_id"].startswith("trace:"))
+                self.assertEqual(traceability["corpus_pack_id"], "fixtures/vs3/local-dev")
+                self.assertEqual(traceability["model_provider"], "local_test")
+                self.assertEqual(traceability["model_name"], "deterministic-local-test")
+                self.assertIn(proof_identity["path"], traceability["transcript_paths"])
+                self.assertEqual(traceability["scenario_ids"], expected_component_scenario_ids[proof_key])
+                self.assertIn("scope_source", traceability["scope"])
+                self.assertTrue(proof_identity["embedded_scenario_status_present"])
+                self.assertTrue(proof_identity["file_scenario_status_present"])
+                self.assertTrue(proof_identity["embedded_checks_present"])
+                self.assertTrue(proof_identity["file_checks_present"])
+            self.assertTrue(proof_identity["scenario_status_success"])
+            self.assertTrue(proof_identity["scenario_status_coverage_success"])
+            self.assertTrue(proof_identity["checks_success"])
+            self.assertTrue(proof_identity["checks_coverage_success"])
+            self.assertEqual(
+                proof_identity["expected_scenario_ids"],
+                expected_component_scenario_ids[proof_key],
+            )
+            self.assertEqual(proof_identity["embedded_scenario_ids"], expected_component_scenario_ids[proof_key])
+            self.assertEqual(proof_identity["file_scenario_ids"], expected_component_scenario_ids[proof_key])
+            self.assertEqual(proof_identity["embedded_missing_scenario_ids"], [])
+            self.assertEqual(proof_identity["file_missing_scenario_ids"], [])
+            self.assertEqual(proof_identity["embedded_unexpected_scenario_ids"], [])
+            self.assertEqual(proof_identity["file_unexpected_scenario_ids"], [])
+            self.assertEqual(proof_identity["expected_check_names"], expected_component_check_names[proof_key])
+            self.assertEqual(proof_identity["embedded_check_names"], expected_component_check_names[proof_key])
+            self.assertEqual(proof_identity["file_check_names"], expected_component_check_names[proof_key])
+            self.assertEqual(proof_identity["embedded_missing_check_names"], [])
+            self.assertEqual(proof_identity["file_missing_check_names"], [])
+            self.assertEqual(proof_identity["embedded_unexpected_check_names"], [])
+            self.assertEqual(proof_identity["file_unexpected_check_names"], [])
+            self.assertEqual(proof_identity["embedded_scenario_status_non_pass"], {})
+            self.assertEqual(proof_identity["file_scenario_status_non_pass"], {})
+            self.assertEqual(proof_identity["embedded_check_failures"], [])
+            self.assertEqual(proof_identity["file_check_failures"], [])
+            self.assertTrue(proof_identity["embedded_negative_evidence_present"])
+            self.assertTrue(proof_identity["file_negative_evidence_present"])
+            self.assertEqual(proof_identity["embedded_negative_evidence_nonzero"], {})
+            self.assertEqual(proof_identity["file_negative_evidence_nonzero"], {})
+            self.assertTrue(proof_identity["negative_evidence_success"])
+            if proof_key == "evidence_reconciliation":
+                self.assertTrue(proof_identity["embedded_evidence_refs_present"])
+                self.assertTrue(proof_identity["file_evidence_refs_present"])
+                self.assertGreater(proof_identity["embedded_evidence_ref_count"], 0)
+                self.assertGreater(proof_identity["file_evidence_ref_count"], 0)
+                self.assertTrue(proof_identity["embedded_audit_refs_present"])
+                self.assertTrue(proof_identity["file_audit_refs_present"])
+                self.assertGreater(proof_identity["embedded_audit_ref_count"], 0)
+                self.assertGreater(proof_identity["file_audit_ref_count"], 0)
+                self.assertTrue(proof_identity["policy_decision_refs_success"])
+                self.assertFalse(proof_identity["embedded_cli_command_evidence_present"])
+                self.assertFalse(proof_identity["file_cli_command_evidence_present"])
+                self.assertEqual(proof_identity["embedded_command_transcript_count"], 0)
+                self.assertEqual(proof_identity["file_command_transcript_count"], 0)
+                self.assertEqual(proof_identity["embedded_native_cli_command_count"], 0)
+                self.assertEqual(proof_identity["file_native_cli_command_count"], 0)
+                self.assertEqual(proof_identity["embedded_valid_command_transcript_count"], 0)
+                self.assertEqual(proof_identity["file_valid_command_transcript_count"], 0)
+            else:
+                self.assertTrue(proof_identity["embedded_evidence_refs_present"])
+                self.assertTrue(proof_identity["file_evidence_refs_present"])
+                self.assertGreater(proof_identity["embedded_evidence_ref_count"], 0)
+                self.assertGreater(proof_identity["file_evidence_ref_count"], 0)
+                self.assertTrue(proof_identity["embedded_audit_refs_present"])
+                self.assertTrue(proof_identity["file_audit_refs_present"])
+                self.assertGreater(proof_identity["embedded_audit_ref_count"], 0)
+                self.assertGreater(proof_identity["file_audit_ref_count"], 0)
+                self.assertTrue(proof_identity["embedded_policy_decision_refs_present"])
+                self.assertTrue(proof_identity["file_policy_decision_refs_present"])
+                self.assertGreater(proof_identity["embedded_policy_decision_ref_count"], 0)
+                self.assertGreater(proof_identity["file_policy_decision_ref_count"], 0)
+                self.assertTrue(proof_identity["policy_decision_refs_success"])
+                self.assertTrue(proof_identity["embedded_cli_command_evidence_present"])
+                self.assertTrue(proof_identity["file_cli_command_evidence_present"])
+                self.assertGreater(proof_identity["embedded_command_transcript_count"], 0)
+                self.assertGreater(proof_identity["file_command_transcript_count"], 0)
+                self.assertGreater(proof_identity["embedded_valid_command_transcript_count"], 0)
+                self.assertGreater(proof_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(proof_identity["embedded_invalid_command_transcript_entries"], [])
+            self.assertEqual(proof_identity["file_invalid_command_transcript_entries"], [])
+            self.assertEqual(proof_identity["embedded_command_traceability_invalid_entries"], [])
+            self.assertEqual(proof_identity["file_command_traceability_invalid_entries"], [])
+            self.assertEqual(proof_identity["embedded_command_source_tree_mismatches"], [])
+            self.assertEqual(proof_identity["file_command_source_tree_mismatches"], [])
+            self.assertEqual(proof_identity["embedded_unredacted_secret_count"], 0)
+            self.assertEqual(proof_identity["file_unredacted_secret_count"], 0)
+            self.assertTrue(proof_identity["report_secret_scan_success"])
+            self.assertTrue(proof_identity["evidence_refs_success"])
+            self.assertTrue(proof_identity["audit_refs_success"])
+            self.assertTrue(proof_identity["references_success"])
+            self.assertTrue(proof_identity["cli_command_evidence_success"])
+            self.assertTrue(proof_identity["cli_command_evidence_shape_success"])
+            self.assertTrue(proof_identity["semantics_success"])
+            self.assertEqual(proof_identity["semantic_error_codes"], [])
+            self.assertEqual(len(proof_identity["embedded_json_sha256"]), 64)
+            self.assertEqual(proof_identity["embedded_json_sha256"], proof_identity["file_json_sha256"])
+            self.assertEqual(len(proof_identity["path_sha256"]), 64)
+            self.assertIsNone(proof_identity["error_code"])
+        overclaim_identity = payload["overclaim_lint_source_identity"]
+        self.assertTrue(overclaim_identity["lint_report_present"])
+        self.assertTrue(overclaim_identity["lint_report_json_valid"])
+        self.assertTrue(overclaim_identity["source_report_present"])
+        self.assertTrue(overclaim_identity["source_report_json_valid"])
+        self.assertTrue(overclaim_identity["recorded_source_identity_present"])
+        self.assertTrue(overclaim_identity["matches_current_source_file"])
+        self.assertTrue(overclaim_identity["path_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["path_hash_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["sha256_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["canonical_json_sha256_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["schema_version_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["status_matches_current_source_file"])
+        self.assertTrue(overclaim_identity["report_semantics_passed"])
+        self.assertTrue(overclaim_identity["lint_report_status_passed"])
+        self.assertTrue(overclaim_identity["lint_report_schema_valid"])
+        self.assertTrue(overclaim_identity["lint_report_claim_boundary_safe"])
+        self.assertTrue(overclaim_identity["lint_report_claim_boundary_overclaim_fields_empty"])
+        self.assertTrue(overclaim_identity["lint_report_negative_evidence_zero"])
+        self.assertEqual(overclaim_identity["semantic_error_codes"], [])
+        self.assertIsNone(overclaim_identity["error_code"])
+        human_gate_preparation = payload["human_gate_preparation"]
+        self.assertEqual(human_gate_preparation["record_scaffold_report"]["status"], "success")
+        self.assertEqual(human_gate_preparation["record_scaffold_report"]["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(human_gate_preparation["record_scaffold_report"]["summary"]["template_count"], 7)
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["status"], "success")
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["expected_record_count"], 7)
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["blank_template_count"], 7)
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["blank_template_pending_count"], 7)
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["filled_record_count"], 0)
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["invalid_filled_record_count"], 0)
+        self.assertEqual(
+            human_gate_preparation["evidence_status_report"]["summary"]["evidence_acceptance_candidate_count"],
+            0,
+        )
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        evidence_status_scenario_report = human_gate_preparation["evidence_status_report"]["scenario_report"]
+        self.assertEqual(
+            evidence_status_scenario_report["schema_version"],
+            "cs.vs3_onprem_trusted_extension.v0",
+        )
+        self.assertEqual(evidence_status_scenario_report["status"], "success")
+        self.assertTrue(evidence_status_scenario_report["matches_checkpoint_scenario_report_sha256"])
+        self.assertTrue(evidence_status_scenario_report["matches_checkpoint_scenario_report_path_sha256"])
+        self.assertEqual(evidence_status_scenario_report["claim_boundary"], payload["scenario_report"]["claim_boundary"])
+        self.assertEqual(evidence_status_scenario_report["claim_boundaries"], payload["scenario_report"]["claim_boundaries"])
+        self.assertEqual(evidence_status_scenario_report["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(evidence_status_scenario_report["traceability_validation"]["status"], "passed")
+        self.assertEqual(
+            human_gate_preparation["evidence_status_report"]["summary"]["scenario_report_traceability_status"],
+            "passed",
+        )
+        template_intake_summary = human_gate_preparation["evidence_status_report"]["template_intake_summary"]
+        self.assertEqual(template_intake_summary["template_readiness_status"], "awaiting_human_completion")
+        self.assertEqual(template_intake_summary["blank_template_pending_count"], 7)
+        self.assertEqual(template_intake_summary["filled_record_count"], 0)
+        self.assertEqual(template_intake_summary["invalid_filled_record_count"], 0)
+        self.assertEqual(template_intake_summary["evidence_acceptance_candidate_count"], 0)
+        self.assertIn("does not approve evidence", template_intake_summary["acceptance_boundary"])
+        self.assertIn("unlock dependencies", template_intake_summary["acceptance_boundary"])
+        self.assertIn("HUMAN_REQUIRED", template_intake_summary["acceptance_boundary"])
+        self.assertEqual(
+            human_gate_preparation["evidence_status_report"]["expected_human_scenario_ids"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            sorted(human_gate_preparation["evidence_status_report"]["actual_human_scenario_ids"]),
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["missing_human_scenario_ids"], [])
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["unexpected_human_scenario_ids"], [])
+        self.assertEqual(human_gate_preparation["evidence_status_report"]["duplicate_human_scenario_ids"], [])
+        self.assertEqual(human_gate_preparation["review_kit_report"]["status"], "success")
+        self.assertEqual(human_gate_preparation["review_kit_report"]["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(human_gate_preparation["review_kit_report"]["summary"]["status"], "ready_for_human_review")
+        self.assertEqual(human_gate_preparation["review_kit_report"]["summary"]["review_queue_count"], 7)
+        self.assertEqual(human_gate_preparation["review_kit_report"]["summary"]["package_count"], 7)
+        self.assertEqual(human_gate_preparation["review_kit_report"]["summary"]["template_count"], 7)
+        self.assertEqual(human_gate_preparation["review_kit_report"]["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        self.assertFalse(human_gate_preparation["review_kit_report"]["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(human_gate_preparation["review_kit_report"]["claim_boundary"]["production_readiness_claim_allowed"])
+        self.assertFalse(human_gate_preparation["review_kit_report"]["claim_boundary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(human_gate_preparation["review_kit_report"]["claim_boundary"]["human_acceptance_claim_allowed"])
+        assert_vs3_no_claim_boundary(self, human_gate_preparation["review_kit_report"]["claim_boundary"])
+        review_kit_scenario_report = human_gate_preparation["review_kit_report"]["scenario_report"]
+        self.assertEqual(
+            review_kit_scenario_report["schema_version"],
+            "cs.vs3_onprem_trusted_extension.v0",
+        )
+        self.assertEqual(review_kit_scenario_report["status"], "success")
+        self.assertTrue(review_kit_scenario_report["matches_checkpoint_scenario_report_sha256"])
+        self.assertTrue(review_kit_scenario_report["matches_checkpoint_scenario_report_path_sha256"])
+        self.assertEqual(review_kit_scenario_report["claim_boundary"], payload["scenario_report"]["claim_boundary"])
+        self.assertEqual(review_kit_scenario_report["claim_boundaries"], payload["scenario_report"]["claim_boundaries"])
+        self.assertEqual(review_kit_scenario_report["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(review_kit_scenario_report["traceability_validation"]["status"], "passed")
+        self.assertEqual(
+            human_gate_preparation["review_kit_report"]["summary"]["scenario_report_traceability_status"],
+            "passed",
+        )
+        self.assertEqual(
+            [row["scenario_id"] for row in human_gate_preparation["review_kit_report"]["review_queue"]],
+            ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+        )
+        self.assertTrue(
+            all(
+                row["status"] == "HUMAN_REQUIRED"
+                and row["dependency_unlock_allowed_by_structural_validation"] is False
+                for row in human_gate_preparation["review_kit_report"]["review_queue"]
+            )
+        )
+        self.assertFalse(human_gate_preparation["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(human_gate_preparation["claim_boundary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(human_gate_preparation["claim_boundary"]["human_acceptance_claim_allowed"])
+        assert_vs3_no_claim_boundary(self, human_gate_preparation["claim_boundary"])
+        package_semantics = human_gate_preparation["package_semantics"]
+        self.assertEqual(
+            package_semantics["schema_version"],
+            "cs.vs3_human_gate_package_semantics.v0",
+        )
+        self.assertTrue(package_semantics["packages_ready"])
+        self.assertEqual(package_semantics["package_count"], 7)
+        self.assertEqual(package_semantics["semantic_error_count"], 0)
+        self.assertEqual(package_semantics["invalid_package_ids"], [])
+        self.assertEqual(package_semantics["marked_pass_package_ids"], [])
+        self.assertEqual(package_semantics["claim_boundary_violation_ids"], [])
+        self.assertEqual(package_semantics["unlock_or_acceptance_claim_ids"], [])
+        self.assertEqual(package_semantics["digest_mismatch_ids"], [])
+        for package_row in package_semantics["packages"]:
+            self.assertTrue(package_row["schema_valid"])
+            self.assertTrue(package_row["status_human_required"])
+            self.assertTrue(package_row["top_level_no_claims"])
+            self.assertTrue(package_row["claim_boundary_ready"])
+            self.assertTrue(package_row["claim_boundary_no_claims"])
+            self.assertTrue(package_row["blank_approval_record_empty"])
+            self.assertTrue(package_row["package_digest_present"])
+            self.assertTrue(package_row["package_digest_matches"])
+            self.assertEqual(len(package_row["package_digest_sha256"]), 64)
+            self.assertEqual(len(package_row["computed_package_digest_sha256"]), 64)
+            self.assertEqual(package_row["semantic_error_codes"], [])
+        self.assertTrue(
+            all(
+                row["matrix_status_after_status"] == "HUMAN_REQUIRED"
+                and row["dependency_unlock_allowed_by_structural_validation"] is False
+                for row in human_gate_preparation["evidence_status_report"]["record_statuses"]
+            )
+        )
+        assert_vs3_no_claim_boundary(self, human_gate_preparation["evidence_status_report"]["claim_boundary"])
+        vs3_p_gate = payload["vs3_p_gate"]
+        self.assertEqual(vs3_p_gate["status"], "blocked")
+        self.assertEqual(vs3_p_gate["gate_status"], "blocked_on_human_required_evidence")
+        self.assertEqual(vs3_p_gate["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(vs3_p_gate["summary"]["unresolved_human_required_rows"], 7)
+        self.assertEqual(vs3_p_gate["summary"]["human_required_rows_marked_pass"], 0)
+        self.assertEqual(vs3_p_gate["summary"]["scenario_report_traceability_status"], "passed")
+        self.assertEqual(vs3_p_gate["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        self.assertFalse(vs3_p_gate["claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(vs3_p_gate["claim_boundary"]["production_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["claim_boundary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(vs3_p_gate["claim_boundary"]["human_acceptance_claim_allowed"])
+        assert_vs3_no_claim_boundary(self, vs3_p_gate["claim_boundary"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["vs3_p_unlock_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["production_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["live_provider_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["real_idp_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["real_network_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["migration_restore_readiness_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(vs3_p_gate["source_body_claim_boundary"]["human_acceptance_claim_allowed"])
+        self.assertTrue(vs3_p_gate["source_body_claim_boundary"]["structural_validation_is_not_acceptance"])
+        assert_vs3_no_claim_boundary(self, vs3_p_gate["source_body_claim_boundary"])
+        self.assertTrue(vs3_p_gate["scenario_report"]["matches_checkpoint_scenario_report_sha256"])
+        self.assertTrue(vs3_p_gate["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"])
+        self.assertEqual(vs3_p_gate["scenario_report"]["claim_boundary"], payload["scenario_report"]["claim_boundary"])
+        self.assertEqual(vs3_p_gate["scenario_report"]["claim_boundaries"], payload["scenario_report"]["claim_boundaries"])
+        self.assertEqual(vs3_p_gate["scenario_report"]["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(vs3_p_gate["scenario_report"]["traceability_validation"]["status"], "passed")
+        self.assertEqual(vs3_p_gate["negative_evidence"]["vs3_p_unlocked_by_gate"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["human_required_rows_marked_pass_in_scenario_report"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["production_readiness_claimed_by_gate"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["security_acceptance_claimed_by_gate"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["body_claim_boundary_mismatches"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["scenario_report_hash_mismatches"], 0)
+        self.assertEqual(vs3_p_gate["negative_evidence"]["scenario_report_path_hash_mismatches"], 0)
+        self.assertEqual(
+            [row["scenario_id"] for row in payload["human_required_blockers"]],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        negative = payload["negative_evidence"]
+        self.assertEqual(negative["missing_required_artifacts"], 0)
+        self.assertEqual(negative["ai_blocking_rows"], 0)
+        self.assertEqual(negative["human_required_rows_marked_pass"], 0)
+        self.assertEqual(negative["human_required_rows_not_human_required"], 0)
+        self.assertEqual(negative["scenario_product_feature_claim_overclaims"], 0)
+        self.assertEqual(negative["overclaim_boundary_violations"], 0)
+        self.assertEqual(negative["human_gate_package_semantic_violations"], 0)
+        self.assertEqual(negative["human_gate_package_missing_or_invalid"], 0)
+        self.assertEqual(negative["human_gate_package_status_overclaims"], 0)
+        self.assertEqual(negative["human_gate_package_claim_boundary_violations"], 0)
+        self.assertEqual(negative["human_gate_package_unlock_or_acceptance_claims"], 0)
+        self.assertEqual(negative["human_gate_package_blank_approval_records_filled"], 0)
+        self.assertEqual(negative["human_gate_package_review_contract_unsafe"], 0)
+        self.assertEqual(negative["human_gate_package_validation_command_mismatches"], 0)
+        self.assertEqual(negative["human_gate_package_digest_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["live_provider_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["real_idp_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["real_network_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["migration_restore_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["security_acceptance_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        self.assertEqual(negative["structural_validation_treated_as_acceptance"], 0)
+        self.assertEqual(negative["human_gate_scaffold_missing_or_invalid"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_missing_or_invalid"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_unlocked_vs3_p"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_record_bodies_persisted"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_record_paths_persisted"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_missing_expected_record_ids"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_unexpected_record_ids"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_duplicate_record_ids"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_record_id_mismatches"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_missing_summary_records"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_duplicate_summary_records"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_malformed_records"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_unsupported_records"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_template_intake_missing_or_invalid"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_template_intake_count_mismatches"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_template_acceptance_boundary_mismatches"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_scenario_report_hash_mismatches"], 0)
+        self.assertEqual(negative["human_gate_evidence_status_scenario_report_path_hash_mismatches"], 0)
+        self.assertEqual(negative["human_gate_review_kit_missing_or_invalid"], 0)
+        self.assertEqual(negative["human_gate_review_kit_not_ready"], 0)
+        self.assertEqual(negative["human_gate_review_kit_unlocked_vs3_p"], 0)
+        self.assertEqual(negative["human_gate_review_kit_human_pass_claims"], 0)
+        self.assertEqual(negative["human_gate_review_kit_production_claims"], 0)
+        self.assertEqual(negative["human_gate_review_kit_security_acceptance_claims"], 0)
+        self.assertEqual(negative["human_gate_review_kit_human_acceptance_claims"], 0)
+        self.assertEqual(negative["human_gate_review_kit_record_bodies_persisted"], 0)
+        self.assertEqual(negative["human_gate_review_kit_record_paths_persisted"], 0)
+        self.assertEqual(negative["human_gate_review_kit_missing_human_rows_in_scenario_report"], 0)
+        self.assertEqual(negative["human_gate_review_kit_unexpected_human_rows_in_scenario_report"], 0)
+        self.assertEqual(negative["human_gate_review_kit_expected_human_id_mismatches"], 0)
+        self.assertEqual(negative["human_gate_review_kit_actual_human_id_mismatches"], 0)
+        self.assertEqual(negative["human_gate_review_kit_scenario_report_hash_mismatches"], 0)
+        self.assertEqual(negative["human_gate_review_kit_scenario_report_path_hash_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_gate_missing_or_invalid"], 0)
+        self.assertEqual(negative["vs3_p_gate_unlocked_vs3_p"], 0)
+        self.assertEqual(negative["vs3_p_gate_human_pass_claims"], 0)
+        self.assertEqual(negative["vs3_p_gate_production_claims"], 0)
+        self.assertEqual(negative["vs3_p_gate_security_acceptance_claims"], 0)
+        self.assertEqual(negative["vs3_p_gate_summary_claim_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_gate_claim_boundary_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_gate_body_claim_boundary_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_gate_scenario_report_hash_mismatches"], 0)
+        self.assertEqual(negative["vs3_p_gate_scenario_report_path_hash_mismatches"], 0)
+        self.assertEqual(negative["component_proof_report_mismatches"], 0)
+        self.assertEqual(negative["component_proof_report_semantic_failures"], 0)
+        self.assertEqual(negative["component_proof_report_scenario_failures"], 0)
+        self.assertEqual(negative["component_proof_report_scenario_coverage_failures"], 0)
+        self.assertEqual(negative["component_proof_report_check_failures"], 0)
+        self.assertEqual(negative["component_proof_report_check_coverage_failures"], 0)
+        self.assertEqual(negative["component_proof_report_negative_evidence_failures"], 0)
+        self.assertEqual(negative["component_proof_report_evidence_ref_failures"], 0)
+        self.assertEqual(negative["component_proof_report_audit_ref_failures"], 0)
+        self.assertEqual(negative["component_proof_report_policy_decision_ref_failures"], 0)
+        self.assertEqual(negative["component_proof_report_reference_failures"], 0)
+        self.assertEqual(negative["component_proof_report_traceability_failures"], 0)
+        self.assertEqual(negative["component_proof_report_cli_command_evidence_failures"], 0)
+        self.assertEqual(negative["component_proof_report_cli_command_evidence_shape_failures"], 0)
+        self.assertEqual(negative["component_proof_report_missing_or_invalid"], 0)
+        self.assertEqual(negative["overclaim_lint_source_reconciliation_mismatches"], 0)
+        self.assertEqual(negative["overclaim_lint_source_reconciliation_missing_or_invalid"], 0)
+        self.assertEqual(negative["overclaim_lint_report_failed_or_overclaiming"], 0)
+        self.assertEqual(len(payload["command_transcripts"]), 1)
+        transcript = payload["command_transcripts"][0]
+        self.assertEqual(transcript["schema_version"], "cs.command_transcript.v0")
+        self.assertEqual(
+            transcript["command"],
+            ["cornerstone", "security", "vs3-local-checkpoint", "--json"],
+        )
+        self.assertEqual(
+            transcript["arguments"],
+            ["security", "vs3-local-checkpoint", "--json"],
+        )
+        self.assertEqual(transcript["exit_code"], 0)
+        self.assertFalse(transcript["timed_out"])
+        self.assertEqual(transcript["output_mode"], "json")
+        self.assertEqual(transcript["json_schema"], "cs.vs3_local_checkpoint.v0")
+        self.assertEqual(transcript["cli_schema_version"], "cs.cli.v0")
+        self.assertIn("started_at", transcript)
+        self.assertIn("ended_at", transcript)
+        self.assertTrue(transcript["started_at"].endswith("Z"))
+        self.assertTrue(transcript["ended_at"].endswith("Z"))
+        self.assertLessEqual(transcript["started_at"], transcript["ended_at"])
+        self.assertEqual(
+            transcript["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(transcript["evidence_refs"], payload["evidence_refs"])
+        self.assertEqual(transcript["audit_refs"], payload["audit_refs"])
+        self.assertEqual(transcript["policy_decision_refs"], payload["policy_decision_refs"])
+        self.assertEqual(
+            transcript["ref_summary"],
+            {
+                "evidence_refs_count": len(payload["evidence_refs"]),
+                "audit_refs_count": len(payload["audit_refs"]),
+                "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+            },
+        )
+        self.assertGreater(transcript["ref_summary"]["evidence_refs_count"], 0)
+        self.assertGreater(transcript["ref_summary"]["audit_refs_count"], 0)
+        self.assertIn("source_tree", payload)
+        self.assertEqual(transcript["source_tree"], payload["source_tree"])
+        self.assertIn("verified_base_commit", transcript["source_tree"])
+        self.assertIn("verified_base_commit_full", transcript["source_tree"])
+        self.assertIn("verified_source_worktree_hash", transcript["source_tree"])
+        self.assertIn("worktree_dirty_at_verification", transcript["source_tree"])
+        stdout_json = transcript["stdout_json"]
+        self.assertEqual(stdout_json["schema_version"], "cs.cli.v0")
+        self.assertEqual(stdout_json["json_schema"], transcript["json_schema"])
+        stdout_tail_json = json.loads(transcript["stdout_tail"][-1])
+        self.assertEqual(stdout_tail_json["schema_version"], stdout_json["schema_version"])
+        self.assertEqual(stdout_tail_json["json_schema"], stdout_json["json_schema"])
+        self.assertEqual(stdout_tail_json["status"], payload["status"])
+        self.assertEqual(stdout_tail_json["final_verdict"], stdout_json["final_verdict"])
+        self.assertEqual(stdout_json["status"], "success")
+        self.assertEqual(stdout_json["command"], transcript["command"])
+        self.assertEqual(stdout_json["arguments"], transcript["arguments"])
+        self.assertEqual(stdout_json["exit_code"], transcript["exit_code"])
+        self.assertEqual(stdout_json["final_verdict"], payload["final_verdict"])
+        self.assertEqual(stdout_json["evidence_refs"], transcript["evidence_refs"])
+        self.assertEqual(stdout_json["audit_refs"], transcript["audit_refs"])
+        self.assertEqual(stdout_json["policy_decision_refs"], transcript["policy_decision_refs"])
+        self.assertEqual(stdout_json["scope"], transcript["scope"])
+        self.assertEqual(stdout_json["source_tree"], transcript["source_tree"])
+        self.assertEqual(stdout_json["claim_boundary"], payload["claim_boundary"])
+        self.assertEqual(stdout_json["claim_boundaries"], payload["claim_boundaries"])
+        self.assertEqual(
+            stdout_json["claim_boundary_from_scenario_report"],
+            payload["claim_boundary_from_scenario_report"],
+        )
+        self.assertEqual(
+            stdout_json["claim_boundaries_from_scenario_report"],
+            payload["claim_boundaries_from_scenario_report"],
+        )
+        self.assertEqual(
+            stdout_json["scenario_report"]["claim_boundary"],
+            payload["scenario_report"]["claim_boundary"],
+        )
+        self.assertEqual(
+            stdout_json["scenario_report"]["claim_boundaries"],
+            payload["scenario_report"]["claim_boundaries"],
+        )
+        self.assertEqual(
+            stdout_json["scenario_report"]["claim_boundary_validation"],
+            payload["scenario_report"]["claim_boundary_validation"],
+        )
+        self.assertEqual(stdout_json["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(stdout_json["proof_boundary"][boundary_key], "NOT_CLAIMED")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertTrue(payload["self_command_transcript_validation"]["valid"])
+        self.assertEqual(payload["self_command_transcript_validation"]["error_codes"], [])
+        self.assertEqual(payload["summary"]["self_command_transcript_shape_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["self_command_transcript_shape_failures"], 0)
+
+    def test_vs3_local_checkpoint_self_transcript_validator_rejects_tampered_transcript(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        result = run_cli("security", "vs3-local-checkpoint", "--json")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        missing_source_tree_transcript = json.loads(json.dumps(payload["command_transcripts"][0]))
+        missing_source_tree_transcript.pop("source_tree", None)
+
+        missing_source_tree_validation = _vs3_local_checkpoint_self_transcript_validation(
+            missing_source_tree_transcript,
+            checkpoint_payload=payload,
+            expected_source_tree=payload["source_tree"],
+        )
+
+        self.assertEqual(missing_source_tree_validation["status"], "failed")
+        self.assertFalse(missing_source_tree_validation["valid"])
+        self.assertIn("source_tree_missing", missing_source_tree_validation["error_codes"])
+
+        mismatched_ref_summary_transcript = json.loads(json.dumps(payload["command_transcripts"][0]))
+        mismatched_ref_summary_transcript["ref_summary"]["evidence_refs_count"] = -1
+
+        mismatched_ref_summary_validation = _vs3_local_checkpoint_self_transcript_validation(
+            mismatched_ref_summary_transcript,
+            checkpoint_payload=payload,
+            expected_source_tree=payload["source_tree"],
+        )
+
+        self.assertEqual(mismatched_ref_summary_validation["status"], "failed")
+        self.assertFalse(mismatched_ref_summary_validation["valid"])
+        self.assertIn(
+            "ref_summary_mismatch_checkpoint_payload",
+            mismatched_ref_summary_validation["error_codes"],
+        )
+
+        overclaiming_stdout_transcript = json.loads(json.dumps(payload["command_transcripts"][0]))
+        overclaiming_stdout_transcript["stdout_json"]["scenario_report"]["claim_boundary"][
+            "vs3_p"
+        ] = "READY"
+
+        overclaiming_stdout_validation = _vs3_local_checkpoint_self_transcript_validation(
+            overclaiming_stdout_transcript,
+            checkpoint_payload=payload,
+            expected_source_tree=payload["source_tree"],
+        )
+
+        self.assertEqual(overclaiming_stdout_validation["status"], "failed")
+        self.assertFalse(overclaiming_stdout_validation["valid"])
+        self.assertIn(
+            "stdout_json_scenario_report_claim_boundary_mismatch_checkpoint_payload",
+            overclaiming_stdout_validation["error_codes"],
+        )
+
+    def test_vs3_human_gate_self_transcript_validator_rejects_tampered_source_boundary(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        result = run_cli("human-gate", "review-kit", "--scope", "vs3", "--json")
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        transcript = json.loads(json.dumps(payload["self_command_transcript"]))
+        stdout_json = transcript["stdout_json"]
+        self.assertEqual(stdout_json["claim_boundary"], payload["claim_boundary"])
+        self.assertEqual(stdout_json["claim_boundaries"], payload["claim_boundaries"])
+        self.assertEqual(
+            stdout_json["claim_boundary_from_scenario_report"],
+            payload["claim_boundary_from_scenario_report"],
+        )
+        self.assertEqual(
+            stdout_json["claim_boundaries_from_scenario_report"],
+            payload["claim_boundaries_from_scenario_report"],
+        )
+        self.assertEqual(
+            stdout_json["scenario_report"]["claim_boundary"],
+            payload["scenario_report"]["claim_boundary"],
+        )
+        self.assertEqual(
+            stdout_json["scenario_report"]["claim_boundaries"],
+            payload["scenario_report"]["claim_boundaries"],
+        )
+        self.assertEqual(stdout_json["scenario_report"]["claim_boundary_validation"]["status"], "passed")
+
+        tampered_transcript = json.loads(json.dumps(transcript))
+        tampered_transcript["stdout_json"]["scenario_report"]["claim_boundary"]["vs3_p"] = "READY"
+
+        validation = _vs3_human_gate_self_transcript_validation(
+            tampered_transcript,
+            payload=payload,
+            expected_name="human_gate_review_kit_vs3",
+            expected_command=["cornerstone", "human-gate", "review-kit", "--scope", "vs3", "--json"],
+            expected_exit_code=0,
+            expected_json_schema="cs.vs3_human_gate_review_kit.v0",
+            expected_source_tree=transcript["source_tree"],
+        )
+
+        self.assertEqual(validation["status"], "failed")
+        self.assertFalse(validation["valid"])
+        self.assertIn(
+            "stdout_json_scenario_report_claim_boundary_mismatch_human_gate_payload",
+            validation["error_codes"],
+        )
+
+    def test_vs3_local_checkpoint_missing_scenario_report_does_not_claim_vs3_l(self) -> None:
+        missing_report = "tmp/vs3-local-checkpoint-missing-scenario-report.json"
+        missing_path = ROOT / missing_report
+        if missing_path.exists():
+            missing_path.unlink()
+
+        result = run_cli(
+            "security",
+            "vs3-local-checkpoint",
+            "--scenario-report",
+            missing_report,
+            "--json",
+        )
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["summary"]["vs3_l_claim"], "NOT_CLAIMED")
+        self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        self.assertFalse(payload["summary"]["product_claim_allowed"])
+        self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_LOCAL_CHECKPOINT_SCENARIO_REPORT_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+        self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+        self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+
+    def test_vs3_local_checkpoint_invalid_scenario_report_does_not_claim_vs3_l(self) -> None:
+        temp_dir = ROOT / "tmp/vs3-local-checkpoint-invalid-scenario-report-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            invalid_report = temp_dir / "invalid-scenario-report.json"
+            invalid_report.write_text('{"schema_version": "cs.invalid", bad json}\n')
+
+            result = run_cli(
+                "security",
+                "vs3-local-checkpoint",
+                "--scenario-report",
+                str(invalid_report.relative_to(ROOT)),
+                "--json",
+            )
+
+            self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["vs3_l_claim"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertFalse(payload["summary"]["product_claim_allowed"])
+            self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+            self.assertFalse(payload["summary"]["security_acceptance_claim_allowed"])
+            self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+            self.assertTrue(
+                any(error["code"] == "CS_VS3_LOCAL_CHECKPOINT_SCENARIO_REPORT_INVALID_JSON" for error in payload["errors"])
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_local_checkpoint_rejects_scenario_report_missing_traceability(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        original_report = scenario_report_path.read_text()
+        try:
+            scenario_payload = json.loads(original_report)
+            scenario_payload.pop("traceability", None)
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["vs3_l_claim"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["scenario_report_traceability_status"], "failed")
+            self.assertFalse(payload["summary"]["product_claim_allowed"])
+            self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+            self.assertFalse(payload["summary"]["security_acceptance_claim_allowed"])
+            self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("scenario_report_traceability_valid", failed_conditions)
+            traceability = payload["scenario_report_traceability"]
+            self.assertEqual(traceability["status"], "failed")
+            self.assertIn("traceability", traceability["missing_fields"])
+            self.assertEqual(payload["scenario_report"]["traceability_validation"]["status"], "failed")
+            self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_failures"], 1)
+            self.assertGreater(payload["negative_evidence"]["scenario_report_traceability_missing_fields"], 0)
+            self.assertGreater(payload["negative_evidence"]["scenario_report_traceability_invalid_fields"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            scenario_report_path.write_text(original_report)
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+    def test_vs3_local_checkpoint_rejects_stale_scenario_report_source_tree(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            stale_source_tree = dict(scenario_payload["source_tree"])
+            stale_source_tree["verified_source_worktree_hash"] = "0" * 64
+            scenario_payload["source_tree"] = stale_source_tree
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("scenario_report_source_tree_current", failed_conditions)
+            self.assertNotIn("scenario_report_traceability_valid", failed_conditions)
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            self.assertEqual(
+                payload["summary"]["scenario_report_source_tree_current_status"],
+                "failed",
+            )
+            source_tree_validation = payload["scenario_report_source_tree_current_validation"]
+            self.assertEqual(source_tree_validation["status"], "failed")
+            self.assertEqual(
+                source_tree_validation["mismatches"],
+                ["verified_source_worktree_hash_mismatch"],
+            )
+            self.assertEqual(
+                source_tree_validation["scenario_source_tree_fingerprint"]["verified_source_worktree_hash"],
+                "0" * 64,
+            )
+            self.assertNotEqual(
+                source_tree_validation["current_source_tree_fingerprint"]["verified_source_worktree_hash"],
+                "0" * 64,
+            )
+            self.assertEqual(
+                payload["scenario_report"]["source_tree_current_validation"]["status"],
+                "failed",
+            )
+            self.assertEqual(payload["summary"]["scenario_report_traceability_status"], "passed")
+            self.assertEqual(payload["negative_evidence"]["scenario_report_traceability_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["scenario_report_source_tree_current_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_evidence_status_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_review_kit_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_human_gate_derivatives_reject_scenario_report_missing_traceability(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        temp_dir = ROOT / "tmp/vs3-human-gate-missing-traceability-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            source_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+            tampered_report_path = temp_dir / "vs3-no-traceability.json"
+            tampered_payload = json.loads(source_report_path.read_text())
+            tampered_payload.pop("traceability", None)
+            tampered_report_path.write_text(json.dumps(tampered_payload, indent=2, sort_keys=True) + "\n")
+            tampered_report_rel = str(tampered_report_path.relative_to(ROOT))
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--scenario-report",
+                tampered_report_rel,
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(evidence_status_result.returncode, 4, evidence_status_result.stdout + evidence_status_result.stderr)
+            evidence_status_payload = json.loads(evidence_status_result.stdout)
+            self.assertEqual(evidence_status_payload["status"], "blocked")
+            self.assertEqual(evidence_status_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(
+                evidence_status_payload["vs3_human_gate_evidence_status"]["status"],
+                "blocked_on_scenario_report_traceability",
+            )
+            self.assertEqual(
+                evidence_status_payload["summary"]["scenario_report_traceability_status"],
+                "failed",
+            )
+            self.assertEqual(
+                evidence_status_payload["vs3_human_gate_evidence_status"]["scenario_report"]["traceability_validation"]["status"],
+                "failed",
+            )
+            self.assertEqual(evidence_status_payload["negative_evidence"]["scenario_report_traceability_failures"], 1)
+            self.assertTrue(
+                any(
+                    error["code"] == "CS_VS3_HUMAN_GATE_EVIDENCE_STATUS_SCENARIO_TRACEABILITY_INVALID"
+                    for error in evidence_status_payload["errors"]
+                )
+            )
+            self.assertEqual(evidence_status_payload["claim_boundary"]["vs3_p_unlock_allowed"], False)
+            self.assertEqual(evidence_status_payload["claim_boundary"]["human_acceptance_claim_allowed"], False)
+
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                tampered_report_rel,
+                "--use-existing",
+                "--json",
+            )
+            self.assertEqual(review_kit_result.returncode, 4, review_kit_result.stdout + review_kit_result.stderr)
+            review_kit_payload = json.loads(review_kit_result.stdout)
+            self.assertEqual(review_kit_payload["status"], "failed")
+            self.assertEqual(review_kit_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(review_kit_payload["vs3_human_gate_review_kit"]["status"], "incomplete")
+            self.assertFalse(review_kit_payload["vs3_human_gate_review_kit"]["review_kit_conditions"]["scenario_report_traceability_valid"])
+            self.assertEqual(
+                review_kit_payload["summary"]["scenario_report_traceability_status"],
+                "failed",
+            )
+            self.assertEqual(
+                review_kit_payload["vs3_human_gate_review_kit"]["scenario_report"]["traceability_validation"]["status"],
+                "failed",
+            )
+            self.assertEqual(review_kit_payload["negative_evidence"]["scenario_report_traceability_failures"], 1)
+            self.assertTrue(
+                any(
+                    error["code"] == "CS_VS3_REVIEW_KIT_SCENARIO_TRACEABILITY_INVALID"
+                    for error in review_kit_payload["errors"]
+                )
+            )
+            self.assertFalse(review_kit_payload["claim_boundary"]["vs3_p_unlock_allowed"])
+            self.assertFalse(review_kit_payload["claim_boundary"]["human_acceptance_claim_allowed"])
+
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                tampered_report_rel,
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+            vs3_p_gate_payload = json.loads(vs3_p_gate_result.stdout)
+            self.assertEqual(vs3_p_gate_payload["status"], "blocked")
+            self.assertEqual(vs3_p_gate_payload["final_verdict"], "HUMAN_REQUIRED")
+            self.assertEqual(
+                vs3_p_gate_payload["vs3_p_human_gate"]["status"],
+                "blocked_on_scenario_report_traceability",
+            )
+            self.assertEqual(
+                vs3_p_gate_payload["summary"]["scenario_report_traceability_status"],
+                "failed",
+            )
+            self.assertEqual(
+                vs3_p_gate_payload["vs3_p_human_gate"]["scenario_report"]["traceability_validation"]["status"],
+                "failed",
+            )
+            self.assertEqual(vs3_p_gate_payload["negative_evidence"]["scenario_report_traceability_failures"], 1)
+            self.assertTrue(
+                any(
+                    error["code"] == "CS_VS3_P_GATE_SCENARIO_TRACEABILITY_INVALID"
+                    for error in vs3_p_gate_payload["errors"]
+                )
+            )
+            self.assertEqual(vs3_p_gate_payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+            assert_vs3_summary_no_readiness_claims(self, vs3_p_gate_payload["summary"])
+        finally:
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_local_checkpoint_rejects_stale_component_proof_file(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        original_proof = proof_path.read_text()
+        try:
+            proof_payload = json.loads(original_proof)
+            proof_payload["stale_component_identity_test_marker"] = "current-proof-changed-after-aggregate-report"
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["embedded_present"])
+            self.assertTrue(request_context_identity["file_present"])
+            self.assertTrue(request_context_identity["file_json_valid"])
+            self.assertFalse(request_context_identity["matches_embedded_current_file"])
+            self.assertNotEqual(
+                request_context_identity["embedded_json_sha256"],
+                request_context_identity["file_json_sha256"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            proof_path.write_text(original_proof)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_status_failure_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["status"] = "failed"
+            proof_payload.setdefault("errors", []).append(
+                {
+                    "code": "CS_TEST_COMPONENT_FAILED_SEMANTICS",
+                    "message": "controlled tamper",
+                }
+            )
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertFalse(request_context_identity["embedded_status_success"])
+            self.assertFalse(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(request_context_identity["embedded_status"], "failed")
+            self.assertEqual(request_context_identity["file_status"], "failed")
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_STATUS_NOT_SUCCESS"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_inner_status_failure_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["scenario_status"]["VS3-CTX-002"] = "FAIL"
+            proof_payload["checks"]["vs3_ctx_002_forged_authority_denied"] = False
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertFalse(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertFalse(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["embedded_scenario_status_non_pass"],
+                {"VS3-CTX-002": "FAIL"},
+            )
+            self.assertEqual(
+                request_context_identity["file_scenario_status_non_pass"],
+                {"VS3-CTX-002": "FAIL"},
+            )
+            self.assertEqual(
+                request_context_identity["embedded_check_failures"],
+                ["vs3_ctx_002_forged_authority_denied"],
+            )
+            self.assertEqual(
+                request_context_identity["file_check_failures"],
+                ["vs3_ctx_002_forged_authority_denied"],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_NOT_PASS",
+                    "CS_VS3_COMPONENT_PROOF_CHECKS_NOT_TRUE",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_scenario_row_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["scenario_status"].pop("VS3-CTX-002")
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_scenario_status_coverage",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertFalse(request_context_identity["scenario_status_success"])
+            self.assertFalse(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["expected_scenario_ids"],
+                ["VS3-CTX-001", "VS3-CTX-002", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"],
+            )
+            self.assertEqual(
+                request_context_identity["embedded_scenario_ids"],
+                ["VS3-CTX-001", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"],
+            )
+            self.assertEqual(
+                request_context_identity["file_scenario_ids"],
+                ["VS3-CTX-001", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"],
+            )
+            self.assertEqual(request_context_identity["embedded_missing_scenario_ids"], ["VS3-CTX-002"])
+            self.assertEqual(request_context_identity["file_missing_scenario_ids"], ["VS3-CTX-002"])
+            self.assertEqual(request_context_identity["embedded_unexpected_scenario_ids"], [])
+            self.assertEqual(request_context_identity["file_unexpected_scenario_ids"], [])
+            self.assertEqual(request_context_identity["embedded_scenario_status_non_pass"], {})
+            self.assertEqual(request_context_identity["file_scenario_status_non_pass"], {})
+            self.assertEqual(request_context_identity["embedded_check_failures"], [])
+            self.assertEqual(request_context_identity["file_check_failures"], [])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_COVERAGE_MISMATCH"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_check_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["checks"].pop("vs3_ctx_002_forged_authority_denied")
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_checks_coverage",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_coverage",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertFalse(request_context_identity["checks_success"])
+            self.assertFalse(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["expected_check_names"],
+                [
+                    "vs3_ctx_001_surface_context_consistent",
+                    "vs3_ctx_002_forged_authority_denied",
+                    "vs3_ctx_003_revocation_fail_closed",
+                    "vs3_ctx_004_context_faults_fail_closed",
+                    "vs3_ctx_005_mission_workspace_policy_enforced",
+                ],
+            )
+            self.assertEqual(
+                request_context_identity["embedded_check_names"],
+                [
+                    "vs3_ctx_001_surface_context_consistent",
+                    "vs3_ctx_003_revocation_fail_closed",
+                    "vs3_ctx_004_context_faults_fail_closed",
+                    "vs3_ctx_005_mission_workspace_policy_enforced",
+                ],
+            )
+            self.assertEqual(
+                request_context_identity["file_check_names"],
+                [
+                    "vs3_ctx_001_surface_context_consistent",
+                    "vs3_ctx_003_revocation_fail_closed",
+                    "vs3_ctx_004_context_faults_fail_closed",
+                    "vs3_ctx_005_mission_workspace_policy_enforced",
+                ],
+            )
+            self.assertEqual(
+                request_context_identity["embedded_missing_check_names"],
+                ["vs3_ctx_002_forged_authority_denied"],
+            )
+            self.assertEqual(
+                request_context_identity["file_missing_check_names"],
+                ["vs3_ctx_002_forged_authority_denied"],
+            )
+            self.assertEqual(request_context_identity["embedded_unexpected_check_names"], [])
+            self.assertEqual(request_context_identity["file_unexpected_check_names"], [])
+            self.assertEqual(request_context_identity["embedded_scenario_status_non_pass"], {})
+            self.assertEqual(request_context_identity["file_scenario_status_non_pass"], {})
+            self.assertEqual(request_context_identity["embedded_check_failures"], [])
+            self.assertEqual(request_context_identity["file_check_failures"], [])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CHECKS_COVERAGE_MISMATCH"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_nonzero_negative_evidence_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["negative_evidence"]["forged_authority_paths_allowed"] = 1
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_negative_evidence_zero",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertFalse(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["embedded_negative_evidence_nonzero"],
+                {"forged_authority_paths_allowed": 1},
+            )
+            self.assertEqual(
+                request_context_identity["file_negative_evidence_nonzero"],
+                {"forged_authority_paths_allowed": 1},
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_NEGATIVE_EVIDENCE_NONZERO"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_refs_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["evidence_refs"] = []
+            proof_payload["audit_refs"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_evidence_refs_present",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_audit_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_negative_evidence_zero",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertFalse(request_context_identity["embedded_evidence_refs_present"])
+            self.assertFalse(request_context_identity["file_evidence_refs_present"])
+            self.assertEqual(request_context_identity["embedded_evidence_ref_count"], 0)
+            self.assertEqual(request_context_identity["file_evidence_ref_count"], 0)
+            self.assertFalse(request_context_identity["evidence_refs_success"])
+            self.assertFalse(request_context_identity["embedded_audit_refs_present"])
+            self.assertFalse(request_context_identity["file_audit_refs_present"])
+            self.assertEqual(request_context_identity["embedded_audit_ref_count"], 0)
+            self.assertEqual(request_context_identity["file_audit_ref_count"], 0)
+            self.assertFalse(request_context_identity["audit_refs_success"])
+            self.assertTrue(request_context_identity["embedded_policy_decision_refs_present"])
+            self.assertTrue(request_context_identity["file_policy_decision_refs_present"])
+            self.assertGreater(request_context_identity["embedded_policy_decision_ref_count"], 0)
+            self.assertGreater(request_context_identity["file_policy_decision_ref_count"], 0)
+            self.assertTrue(request_context_identity["policy_decision_refs_success"])
+            self.assertFalse(request_context_identity["references_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_EVIDENCE_REFS_MISSING",
+                    "CS_VS3_COMPONENT_PROOF_AUDIT_REFS_MISSING",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_evidence_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_audit_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_policy_decision_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_evidence_ref_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_audit_ref_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_policy_decision_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_policy_decision_refs_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["policy_decision_refs"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_policy_decision_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_evidence_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_audit_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_negative_evidence_zero",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["evidence_refs_success"])
+            self.assertTrue(request_context_identity["audit_refs_success"])
+            self.assertFalse(request_context_identity["embedded_policy_decision_refs_present"])
+            self.assertFalse(request_context_identity["file_policy_decision_refs_present"])
+            self.assertEqual(request_context_identity["embedded_policy_decision_ref_count"], 0)
+            self.assertEqual(request_context_identity["file_policy_decision_ref_count"], 0)
+            self.assertFalse(request_context_identity["policy_decision_refs_success"])
+            self.assertFalse(request_context_identity["references_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_POLICY_DECISION_REFS_MISSING"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_policy_decision_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(
+                payload["negative_evidence"]["component_proof_report_policy_decision_ref_failures"],
+                1,
+            )
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_malformed_refs_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["evidence_refs"] = ["not-a-valid-evidence-ref"]
+            proof_payload["audit_refs"] = ["not-a-valid-audit-ref"]
+            proof_payload["policy_decision_refs"] = ["not-a-valid-policy-ref"]
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_evidence_refs_present",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_audit_refs_present",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_policy_decision_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["embedded_evidence_refs_present"])
+            self.assertTrue(request_context_identity["file_evidence_refs_present"])
+            self.assertEqual(request_context_identity["embedded_malformed_evidence_refs"], ["not-a-valid-evidence-ref"])
+            self.assertEqual(request_context_identity["file_malformed_evidence_refs"], ["not-a-valid-evidence-ref"])
+            self.assertFalse(request_context_identity["evidence_refs_success"])
+            self.assertTrue(request_context_identity["embedded_audit_refs_present"])
+            self.assertTrue(request_context_identity["file_audit_refs_present"])
+            self.assertEqual(request_context_identity["embedded_malformed_audit_refs"], ["not-a-valid-audit-ref"])
+            self.assertEqual(request_context_identity["file_malformed_audit_refs"], ["not-a-valid-audit-ref"])
+            self.assertFalse(request_context_identity["audit_refs_success"])
+            self.assertTrue(request_context_identity["embedded_policy_decision_refs_present"])
+            self.assertTrue(request_context_identity["file_policy_decision_refs_present"])
+            self.assertEqual(
+                request_context_identity["embedded_malformed_policy_decision_refs"],
+                ["not-a-valid-policy-ref"],
+            )
+            self.assertEqual(
+                request_context_identity["file_malformed_policy_decision_refs"],
+                ["not-a-valid-policy-ref"],
+            )
+            self.assertFalse(request_context_identity["policy_decision_refs_success"])
+            self.assertFalse(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_REFS_MALFORMED"],
+            )
+            self.assertIn("reports/", request_context_identity["allowed_evidence_ref_prefixes"])
+            self.assertIn("audit:", request_context_identity["allowed_audit_ref_prefixes"])
+            self.assertIn("policy_", request_context_identity["allowed_policy_decision_ref_prefixes"])
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_evidence_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_audit_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_policy_decision_ref_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_evidence_ref_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_audit_ref_failures"], 1)
+            self.assertEqual(
+                payload["negative_evidence"]["component_proof_report_policy_decision_ref_failures"],
+                1,
+            )
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_reference_failures"], 1)
+            self.assertEqual(
+                payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"],
+                0,
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_source_tree_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload.pop("source_tree", None)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertFalse(request_context_identity["embedded_source_tree_present"])
+            self.assertFalse(request_context_identity["file_source_tree_present"])
+            self.assertFalse(request_context_identity["source_tree_matches_embedded_file"])
+            self.assertFalse(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_SOURCE_TREE_MISSING"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_stale_source_tree_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            stale_source_tree = dict(proof_payload["source_tree"])
+            stale_source_tree["verified_source_worktree_hash"] = "0" * 64
+            proof_payload["source_tree"] = stale_source_tree
+            for transcript in proof_payload.get("command_transcripts", []):
+                transcript["source_tree"] = dict(stale_source_tree)
+                if isinstance(transcript.get("stdout_json"), dict):
+                    transcript["stdout_json"]["source_tree"] = dict(stale_source_tree)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn("component_proof_request_context_proof_source_tree_current", failed_conditions)
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["source_tree_matches_embedded_file"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertFalse(request_context_identity["source_tree_current_success"])
+            self.assertEqual(
+                request_context_identity["embedded_source_tree_current_mismatches"],
+                ["verified_source_worktree_hash_mismatch"],
+            )
+            self.assertEqual(
+                request_context_identity["file_source_tree_current_mismatches"],
+                ["verified_source_worktree_hash_mismatch"],
+            )
+            self.assertEqual(
+                request_context_identity["embedded_source_tree_fingerprint"]["verified_source_worktree_hash"],
+                "0" * 64,
+            )
+            self.assertNotEqual(
+                request_context_identity["current_source_tree_fingerprint"]["verified_source_worktree_hash"],
+                "0" * 64,
+            )
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_SOURCE_TREE_STALE"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_current_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_current_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_source_tree_extra_key_even_when_all_copies_match(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+
+        def add_unexpected_source_tree_key(value: Any) -> None:
+            if isinstance(value, dict):
+                for key, nested_value in list(value.items()):
+                    if key == "source_tree" and isinstance(nested_value, dict):
+                        nested_value["onprem_security_acceptance"] = "CLAIMED"
+                    add_unexpected_source_tree_key(nested_value)
+            elif isinstance(value, list):
+                for item in value:
+                    add_unexpected_source_tree_key(item)
+
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            add_unexpected_source_tree_key(proof_payload)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_source_tree_keys_safe",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_current",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["source_tree_matches_embedded_file"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertFalse(request_context_identity["source_tree_key_success"])
+            self.assertTrue(request_context_identity["source_tree_current_success"])
+            self.assertEqual(request_context_identity["embedded_source_tree_current_mismatches"], [])
+            self.assertEqual(request_context_identity["file_source_tree_current_mismatches"], [])
+            self.assertEqual(
+                request_context_identity["embedded_source_tree_key_errors"],
+                ["source_tree_onprem_security_acceptance_unexpected"],
+            )
+            self.assertEqual(
+                request_context_identity["file_source_tree_key_errors"],
+                ["source_tree_onprem_security_acceptance_unexpected"],
+            )
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_SOURCE_TREE_UNSAFE",
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_current_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_current_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_cli_command_evidence_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["command_transcripts"] = []
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_negative_evidence_zero",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_evidence_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_audit_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["evidence_refs_success"])
+            self.assertTrue(request_context_identity["audit_refs_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertFalse(request_context_identity["embedded_cli_command_evidence_present"])
+            self.assertFalse(request_context_identity["file_cli_command_evidence_present"])
+            self.assertEqual(request_context_identity["embedded_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["embedded_native_cli_command_count"], 0)
+            self.assertEqual(request_context_identity["file_native_cli_command_count"], 0)
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["embedded_invalid_command_transcript_entries"], [])
+            self.assertEqual(request_context_identity["file_invalid_command_transcript_entries"], [])
+            self.assertFalse(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_MISSING"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_reference_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_reference_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_missing_traceability_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+
+        def strip_traceability_fields(proof_payload: dict[str, Any]) -> None:
+            for field in [
+                "scenario_run_id",
+                "trace_id",
+                "corpus_pack_id",
+                "model_provider",
+                "model_name",
+                "scope",
+                "transcript_paths",
+                "scenario_ids",
+            ]:
+                proof_payload.pop(field, None)
+            transcript_rows = proof_payload.get("command_transcripts")
+            rows = (
+                transcript_rows
+                if isinstance(transcript_rows, list)
+                else list(transcript_rows.values())
+                if isinstance(transcript_rows, dict)
+                else []
+            )
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                for field in [
+                    "scenario_run_id",
+                    "trace_id",
+                    "corpus_pack_id",
+                    "model_provider",
+                    "model_name",
+                    "transcript_path",
+                    "scenario_ids",
+                ]:
+                    row.pop(field, None)
+                stdout_json = row.get("stdout_json")
+                if isinstance(stdout_json, dict):
+                    for field in [
+                        "scenario_run_id",
+                        "trace_id",
+                        "corpus_pack_id",
+                        "model_provider",
+                        "model_name",
+                        "transcript_path",
+                        "scenario_ids",
+                    ]:
+                        stdout_json.pop(field, None)
+
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            strip_traceability_fields(proof_payload)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_traceability_success",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_proof_boundary_safe",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertFalse(request_context_identity["embedded_traceability_present"])
+            self.assertFalse(request_context_identity["file_traceability_present"])
+            self.assertFalse(request_context_identity["traceability_matches_embedded_file"])
+            self.assertFalse(request_context_identity["traceability_success"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["proof_boundary_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_command_traceability_invalid_entries"], [])
+            self.assertEqual(request_context_identity["file_command_traceability_invalid_entries"], [])
+            self.assertFalse(request_context_identity["semantics_success"])
+            for field in [
+                "scenario_run_id",
+                "trace_id",
+                "corpus_pack_id",
+                "model_provider",
+                "model_name",
+                "scope",
+                "transcript_paths",
+                "scenario_ids",
+            ]:
+                self.assertIn(field, request_context_identity["embedded_traceability_missing_fields"])
+                self.assertIn(field, request_context_identity["file_traceability_missing_fields"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_TRACEABILITY_MISSING"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_proof_boundary_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_proof_boundary_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_scope_extra_key_even_when_all_copies_match(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+
+        def add_unexpected_scope_key(value: Any) -> None:
+            if isinstance(value, dict):
+                for key, nested_value in list(value.items()):
+                    if key == "scope" and isinstance(nested_value, dict):
+                        nested_value["role"] = "admin"
+                    add_unexpected_scope_key(nested_value)
+            elif isinstance(value, list):
+                for item in value:
+                    add_unexpected_scope_key(item)
+
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            add_unexpected_scope_key(proof_payload)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_traceability_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_current",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_proof_boundary_safe",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["source_tree_key_success"])
+            self.assertTrue(request_context_identity["source_tree_current_success"])
+            self.assertTrue(request_context_identity["proof_boundary_success"])
+            self.assertTrue(request_context_identity["embedded_traceability_present"])
+            self.assertTrue(request_context_identity["file_traceability_present"])
+            self.assertFalse(request_context_identity["traceability_matches_embedded_file"])
+            self.assertFalse(request_context_identity["traceability_success"])
+            self.assertEqual(request_context_identity["embedded_traceability_missing_fields"], [])
+            self.assertEqual(request_context_identity["file_traceability_missing_fields"], [])
+            self.assertEqual(
+                request_context_identity["embedded_traceability_invalid_fields"],
+                ["scope.role"],
+            )
+            self.assertEqual(
+                request_context_identity["file_traceability_invalid_fields"],
+                ["scope.role"],
+            )
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_TRACEABILITY_INVALID",
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_current_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_proof_boundary_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_current_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_proof_boundary_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_report_proof_boundary_overclaim_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_boundary = dict(proof_payload["proof_boundary"])
+            proof_boundary["vs3_p"] = "PRODUCTION_ONPREM_READY"
+            proof_payload["proof_boundary"] = proof_boundary
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_proof_boundary_safe",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["proof_boundary_matches_embedded_file"])
+            self.assertFalse(request_context_identity["proof_boundary_success"])
+            self.assertEqual(
+                request_context_identity["embedded_proof_boundary_errors"],
+                ["proof_boundary_vs3_p_overclaim"],
+            )
+            self.assertEqual(
+                request_context_identity["file_proof_boundary_errors"],
+                ["proof_boundary_vs3_p_overclaim"],
+            )
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_BOUNDARY_UNSAFE"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_proof_boundary_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_proof_boundary_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_report_proof_boundary_extra_key_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_boundary = dict(proof_payload["proof_boundary"])
+            proof_boundary["onprem_security_acceptance"] = "CLAIMED"
+            proof_payload["proof_boundary"] = proof_boundary
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_proof_boundary_safe",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_source_tree_identity",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["proof_boundary_matches_embedded_file"])
+            self.assertFalse(request_context_identity["proof_boundary_success"])
+            self.assertEqual(
+                request_context_identity["embedded_proof_boundary_errors"],
+                ["proof_boundary_onprem_security_acceptance_unexpected"],
+            )
+            self.assertEqual(
+                request_context_identity["file_proof_boundary_errors"],
+                ["proof_boundary_onprem_security_acceptance_unexpected"],
+            )
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_BOUNDARY_UNSAFE"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_proof_boundary_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_source_tree_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_proof_boundary_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_transcript_missing_traceability_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript_rows = proof_payload.get("command_transcripts")
+            rows = (
+                transcript_rows
+                if isinstance(transcript_rows, list)
+                else list(transcript_rows.values())
+                if isinstance(transcript_rows, dict)
+                else []
+            )
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                for field in [
+                    "scenario_run_id",
+                    "trace_id",
+                    "corpus_pack_id",
+                    "model_provider",
+                    "model_name",
+                    "transcript_path",
+                    "scenario_ids",
+                ]:
+                    row.pop(field, None)
+                stdout_json = row.get("stdout_json")
+                if isinstance(stdout_json, dict):
+                    for field in [
+                        "scenario_run_id",
+                        "trace_id",
+                        "corpus_pack_id",
+                        "model_provider",
+                        "model_name",
+                        "transcript_path",
+                        "scenario_ids",
+                    ]:
+                        stdout_json.pop(field, None)
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_traceability_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_traceability_present"])
+            self.assertTrue(request_context_identity["file_traceability_present"])
+            self.assertTrue(request_context_identity["traceability_matches_embedded_file"])
+            self.assertFalse(request_context_identity["traceability_success"])
+            self.assertTrue(request_context_identity["source_tree_identity_success"])
+            self.assertTrue(request_context_identity["proof_boundary_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertGreater(len(request_context_identity["embedded_command_traceability_invalid_entries"]), 0)
+            self.assertGreater(len(request_context_identity["file_command_traceability_invalid_entries"]), 0)
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_TRANSCRIPT_TRACEABILITY_INVALID",
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_traceability_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_malformed_cli_command_evidence_even_when_identity_matches(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["command_transcripts"] = ["cornerstone principal context resolve --json"]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn(
+                "component_proof_request_context_proof_semantics_success",
+                failed_conditions,
+            )
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_matches_current_file",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_scenario_status_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_checks_pass",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_negative_evidence_zero",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_evidence_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_audit_refs_present",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["embedded_schema_matches_expected"])
+            self.assertTrue(request_context_identity["file_schema_matches_expected"])
+            self.assertTrue(request_context_identity["embedded_status_success"])
+            self.assertTrue(request_context_identity["file_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_success"])
+            self.assertTrue(request_context_identity["scenario_status_coverage_success"])
+            self.assertTrue(request_context_identity["checks_success"])
+            self.assertTrue(request_context_identity["checks_coverage_success"])
+            self.assertTrue(request_context_identity["negative_evidence_success"])
+            self.assertTrue(request_context_identity["evidence_refs_success"])
+            self.assertTrue(request_context_identity["audit_refs_success"])
+            self.assertTrue(request_context_identity["references_success"])
+            self.assertTrue(request_context_identity["embedded_cli_command_evidence_present"])
+            self.assertTrue(request_context_identity["file_cli_command_evidence_present"])
+            self.assertEqual(request_context_identity["embedded_command_transcript_count"], 1)
+            self.assertEqual(request_context_identity["file_command_transcript_count"], 1)
+            self.assertEqual(request_context_identity["embedded_native_cli_command_count"], 0)
+            self.assertEqual(request_context_identity["file_native_cli_command_count"], 0)
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["not_object"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["not_object"]}],
+            )
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(request_context_identity["semantics_success"])
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_reference_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_scenario_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_check_coverage_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_evidence_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_audit_ref_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_reference_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_missing_metadata(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["command_transcripts"] = [
+                {
+                    "command": ["cornerstone", "principal", "context", "resolve", "--json"],
+                    "exit_code": 0,
+                    "json_schema": "cs.cli.v0 + cs.vs3_request_context.v0",
+                }
+            ]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            expected_errors = [
+                "arguments_not_list",
+                "output_mode_not_json",
+                "started_at_missing",
+                "ended_at_missing",
+                "timed_out_not_bool",
+                "elapsed_seconds_not_number",
+                "evidence_refs_missing",
+                "audit_refs_missing",
+                "policy_decision_refs_not_list",
+                "scope_missing",
+                "source_tree_missing",
+                "stdout_json_missing",
+            ]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": expected_errors}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": expected_errors}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                    "CS_VS3_COMPONENT_PROOF_SOURCE_TREE_TRANSCRIPT_MISMATCH",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_missing_scope(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            stdout_json = dict(proof_payload["command_transcripts"][0]["stdout_json"])
+            stdout_json["evidence_refs"] = proof_payload["evidence_refs"]
+            stdout_json["audit_refs"] = proof_payload["audit_refs"]
+            stdout_json["policy_decision_refs"] = proof_payload["policy_decision_refs"]
+            stdout_json["source_tree"] = proof_payload["command_transcripts"][0]["source_tree"]
+            proof_payload["command_transcripts"] = [
+                {
+                    "schema_version": "cs.command_transcript.v0",
+                    "cli_schema_version": "cs.cli.v0",
+                    "command": ["cornerstone", "principal", "context", "resolve", "--json"],
+                    "arguments": ["principal", "context", "resolve", "--json"],
+                    "exit_code": 0,
+                    "json_schema": "cs.cli.v0 + cs.vs3_request_context.v0",
+                    "output_mode": "json",
+                    "started_at": "2026-06-29T00:00:00Z",
+                    "ended_at": "2026-06-29T00:00:00Z",
+                    "timed_out": False,
+                    "elapsed_seconds": 0.0,
+                    "evidence_refs": proof_payload["evidence_refs"],
+                    "audit_refs": proof_payload["audit_refs"],
+                    "policy_decision_refs": proof_payload["policy_decision_refs"],
+                    "source_tree": proof_payload["command_transcripts"][0]["source_tree"],
+                    "stdout_json": stdout_json,
+                }
+            ]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["scope_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["scope_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_missing_source_tree(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript.pop("source_tree", None)
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["source_tree_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["source_tree_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_secret_scan_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_source_tree_mismatch(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["source_tree"] = dict(transcript["source_tree"])
+            transcript["source_tree"]["verified_source_worktree_hash"] = "0" * 64
+            transcript["stdout_json"] = dict(transcript["stdout_json"])
+            transcript["stdout_json"]["source_tree"] = dict(transcript["source_tree"])
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["source_tree_mismatch"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["source_tree_mismatch"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                    "CS_VS3_COMPONENT_PROOF_SOURCE_TREE_TRANSCRIPT_MISMATCH",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_missing_stdout_json(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript.pop("stdout_json", None)
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["stdout_json_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["stdout_json_missing"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_stdout_json_overclaim(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            stdout_json = dict(transcript["stdout_json"])
+            proof_boundary = dict(stdout_json["proof_boundary"])
+            proof_boundary["vs3_p"] = "LOCAL_READY_OVERCLAIM"
+            stdout_json["proof_boundary"] = proof_boundary
+            transcript["stdout_json"] = stdout_json
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            expected_invalid_entries = [
+                {"entry_id": "0", "errors": ["stdout_json_proof_boundary_vs3_p_overclaim"]}
+            ]
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_stdout_json_execution_mismatch(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            stdout_json = dict(transcript["stdout_json"])
+            stdout_json["command"] = ["cornerstone", "security", "vs3-local-checkpoint", "--json"]
+            stdout_json["arguments"] = ["security", "vs3-local-checkpoint", "--json"]
+            stdout_json["exit_code"] = 4
+            stdout_json["status"] = "failed"
+            transcript["stdout_json"] = stdout_json
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            expected_invalid_entries = [
+                {
+                    "entry_id": "0",
+                    "errors": [
+                        "stdout_json_command_mismatch",
+                        "stdout_json_arguments_mismatch",
+                        "stdout_json_exit_code_mismatch",
+                        "stdout_json_status_exit_code_mismatch",
+                    ],
+                }
+            ]
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_secret_leak(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["stderr_tail"] = [
+                "provider error token sk-vs3secret0000 should have been redacted"
+            ]
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            expected_invalid_entries = [
+                {"entry_id": "0", "errors": ["unredacted_secret_in_transcript"]}
+            ]
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                expected_invalid_entries,
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                [
+                    "CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID",
+                    "CS_VS3_COMPONENT_PROOF_UNREDACTED_SECRET",
+                ],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_secret_scan_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_report_secret_leak(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-connectorhub-source-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            proof_payload["debug_raw_provider_payload"] = (
+                "accidental raw credential ghp_vs3reportsecret0000 should have been redacted"
+            )
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["connectorhub_source_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_connectorhub_source_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_connectorhub_source_proof_report_secret_scan_clean",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_connectorhub_source_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            connectorhub_identity = component_proof_by_key["connectorhub_source_proof"]
+            self.assertTrue(connectorhub_identity["matches_embedded_current_file"])
+            self.assertTrue(connectorhub_identity["cli_command_evidence_success"])
+            self.assertTrue(connectorhub_identity["cli_command_evidence_shape_success"])
+            self.assertFalse(connectorhub_identity["report_secret_scan_success"])
+            self.assertEqual(connectorhub_identity["embedded_unredacted_secret_count"], 1)
+            self.assertEqual(connectorhub_identity["file_unredacted_secret_count"], 1)
+            self.assertEqual(
+                connectorhub_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_UNREDACTED_SECRET"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_secret_scan_failures"], 1)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_semantic_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_secret_scan_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_negative_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_untrusted_scope_source(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["scope"] = dict(transcript["scope"])
+            transcript["scope"]["scope_source"] = "caller_supplied"
+            transcript["stdout_json"] = dict(transcript["stdout_json"])
+            transcript["stdout_json"]["scope"] = dict(transcript["scope"])
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["scope_source_untrusted"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["scope_source_untrusted"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_wrapped_command(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["command"] = [
+                "python",
+                "-m",
+                "cornerstone",
+                "principal",
+                "context",
+                "resolve",
+                "--json",
+            ]
+            transcript["arguments"] = ["principal", "context", "resolve", "--json"]
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["command_not_native_cornerstone"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["command_not_native_cornerstone"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_argument_mismatch(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["arguments"] = ["principal", "context", "resolve"]
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["arguments_mismatch_command_tail"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["arguments_mismatch_command_tail"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_invalid_timestamp(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["started_at"] = "not-a-timestampZ"
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["started_at_invalid"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["started_at_invalid"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_reversed_timestamp(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["started_at"] = "2026-06-29T00:00:01Z"
+            transcript["ended_at"] = "2026-06-29T00:00:00Z"
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["ended_at_before_started_at"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["ended_at_before_started_at"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_elapsed_seconds_invalid(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["elapsed_seconds"] = -0.001
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["elapsed_seconds_negative"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["elapsed_seconds_negative"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_timeout(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["timed_out"] = True
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["timed_out_true"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["timed_out_true"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_component_proof_cli_command_evidence_exit_code_outside_contract(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        proof_path = ROOT / "reports/security/vs3-request-context-proof.json"
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            proof_path: proof_path.read_text(),
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            proof_payload = json.loads(original_files[proof_path])
+            transcript = dict(proof_payload["command_transcripts"][0])
+            transcript["exit_code"] = 99
+            proof_payload["command_transcripts"] = [transcript]
+            proof_payload["native_cli_commands"] = []
+            scenario_payload = json.loads(original_files[scenario_report_path])
+            scenario_payload["request_context_proof"] = proof_payload
+            proof_path.write_text(json.dumps(proof_payload, indent=2, sort_keys=True) + "\n")
+            scenario_report_path.write_text(json.dumps(scenario_payload, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["human_acceptance"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("component_proof_request_context_proof_semantics_success", failed_conditions)
+            self.assertIn(
+                "component_proof_request_context_proof_cli_command_evidence_shape_valid",
+                failed_conditions,
+            )
+            self.assertNotIn(
+                "component_proof_request_context_proof_cli_command_evidence_present",
+                failed_conditions,
+            )
+            component_proof_by_key = {
+                proof["scenario_report_key"]: proof for proof in payload["component_proof_identity"]
+            }
+            request_context_identity = component_proof_by_key["request_context_proof"]
+            self.assertTrue(request_context_identity["matches_embedded_current_file"])
+            self.assertTrue(request_context_identity["cli_command_evidence_success"])
+            self.assertFalse(request_context_identity["cli_command_evidence_shape_success"])
+            self.assertEqual(request_context_identity["embedded_valid_command_transcript_count"], 0)
+            self.assertEqual(request_context_identity["file_valid_command_transcript_count"], 0)
+            self.assertEqual(
+                request_context_identity["embedded_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["exit_code_outside_contract"]}],
+            )
+            self.assertEqual(
+                request_context_identity["file_invalid_command_transcript_entries"],
+                [{"entry_id": "0", "errors": ["exit_code_outside_contract"]}],
+            )
+            self.assertEqual(
+                request_context_identity["semantic_error_codes"],
+                ["CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID"],
+            )
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_failures"], 0)
+            self.assertEqual(payload["negative_evidence"]["component_proof_report_cli_command_evidence_shape_failures"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_stale_overclaim_lint_source_identity(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        lint_path = ROOT / "reports/security/vs3-overclaim-lint.json"
+        original_lint = lint_path.read_text()
+        try:
+            lint_payload = json.loads(original_lint)
+            lint_payload["source_reconciliation_report_identity"]["sha256"] = "0" * 64
+            lint_path.write_text(json.dumps(lint_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("overclaim_lint_source_reconciliation_matches_current_file", failed_conditions)
+            identity = payload["overclaim_lint_source_identity"]
+            self.assertTrue(identity["recorded_source_identity_present"])
+            self.assertFalse(identity["sha256_matches_current_source_file"])
+            self.assertFalse(identity["matches_current_source_file"])
+            self.assertEqual(identity["error_code"], "CS_VS3_OVERCLAIM_LINT_SOURCE_IDENTITY_MISMATCH")
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_source_reconciliation_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_source_reconciliation_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_report_failed_or_overclaiming"], 0)
+            self.assertTrue(identity["report_semantics_passed"])
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            lint_path.write_text(original_lint)
+
+    def test_vs3_local_checkpoint_rejects_failed_overclaim_lint_report(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        lint_path = ROOT / "reports/security/vs3-overclaim-lint.json"
+        original_lint = lint_path.read_text()
+        try:
+            lint_payload = json.loads(original_lint)
+            lint_payload["status"] = "failed"
+            lint_payload["claim_boundary"]["vs3_p"] = "READY"
+            lint_payload["claim_boundary_overclaim_fields"] = ["vs3_p"]
+            lint_payload["negative_evidence"]["claim_boundary_overclaim_count"] = 1
+            lint_payload["negative_evidence"]["vs3_p_claimed"] = 1
+            lint_path.write_text(json.dumps(lint_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("overclaim_lint_report_passed_without_overclaims", failed_conditions)
+            self.assertNotIn("overclaim_lint_source_reconciliation_matches_current_file", failed_conditions)
+            identity = payload["overclaim_lint_source_identity"]
+            self.assertTrue(identity["matches_current_source_file"])
+            self.assertFalse(identity["report_semantics_passed"])
+            self.assertFalse(identity["lint_report_status_passed"])
+            self.assertFalse(identity["lint_report_claim_boundary_safe"])
+            self.assertFalse(identity["lint_report_claim_boundary_overclaim_fields_empty"])
+            self.assertFalse(identity["lint_report_negative_evidence_zero"])
+            self.assertEqual(identity["error_code"], "CS_VS3_OVERCLAIM_LINT_REPORT_FAILED_OR_OVERCLAIMING")
+            self.assertIn("CS_VS3_OVERCLAIM_LINT_STATUS_NOT_PASSED", identity["semantic_error_codes"])
+            self.assertIn("CS_VS3_OVERCLAIM_LINT_CLAIM_BOUNDARY_UNSAFE", identity["semantic_error_codes"])
+            self.assertIn("CS_VS3_OVERCLAIM_LINT_OVERCLAIM_FIELDS_PRESENT", identity["semantic_error_codes"])
+            self.assertIn("CS_VS3_OVERCLAIM_LINT_NEGATIVE_EVIDENCE_NONZERO", identity["semantic_error_codes"])
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_source_reconciliation_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_source_reconciliation_missing_or_invalid"], 0)
+            self.assertEqual(payload["negative_evidence"]["overclaim_lint_report_failed_or_overclaiming"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            lint_path.write_text(original_lint)
+
+    def test_vs3_local_checkpoint_rejects_scenario_report_product_feature_claim_overclaim(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            tampered_report = json.loads(original_files[scenario_report_path])
+            tampered_report["summary"]["product_feature_claims"] = "VS3_P_PRODUCTION_ONPREM_READY"
+            scenario_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            evidence_status_result = run_cli(
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            )
+            self.assertEqual(
+                evidence_status_result.returncode,
+                0,
+                evidence_status_result.stdout + evidence_status_result.stderr,
+            )
+            review_kit_result = run_cli(
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            )
+            self.assertEqual(review_kit_result.returncode, 0, review_kit_result.stdout + review_kit_result.stderr)
+            vs3_p_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["summary"]["product_feature_claims"], "VS3_P_PRODUCTION_ONPREM_READY")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("scenario_report_product_feature_claims_local_only", failed_conditions)
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            self.assertEqual(payload["negative_evidence"]["scenario_product_feature_claim_overclaims"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_evidence_status_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_review_kit_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_scenario_report_singular_claim_boundary_overclaim(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        vs3_p_gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_files = {
+            scenario_report_path: scenario_report_path.read_text(),
+            evidence_status_path: evidence_status_path.read_text(),
+            review_kit_path: review_kit_path.read_text(),
+            vs3_p_gate_path: vs3_p_gate_path.read_text(),
+        }
+        try:
+            tampered_report = json.loads(original_files[scenario_report_path])
+            self.assertEqual(tampered_report["claim_boundary"], tampered_report["claim_boundaries"])
+            tampered_report["claim_boundary"]["production_onprem"] = "READY"
+            scenario_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            self._refresh_vs3_human_gate_derived_artifacts()
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("scenario_report_claim_boundary_matches_claim_boundaries", failed_conditions)
+            self.assertIn(
+                "scenario_report_claim_boundary_no_production_or_human_overclaims",
+                failed_conditions,
+            )
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            self.assertEqual(
+                payload["scenario_report"]["claim_boundary"]["production_onprem"],
+                "READY",
+            )
+            self.assertEqual(
+                payload["scenario_report"]["claim_boundaries"]["production_onprem"],
+                "NOT_CLAIMED",
+            )
+            self.assertEqual(payload["scenario_report"]["claim_boundary_validation"]["status"], "failed")
+            self.assertFalse(
+                payload["scenario_report"]["claim_boundary_validation"][
+                    "claim_boundary_matches_claim_boundaries"
+                ]
+            )
+            self.assertEqual(
+                payload["scenario_report"]["claim_boundary_validation"]["claim_boundary_overclaim_fields"],
+                {"production_onprem": "READY"},
+            )
+            self.assertEqual(
+                payload["scenario_report"]["claim_boundary_validation"]["claim_boundaries_overclaim_fields"],
+                {},
+            )
+            self.assertEqual(
+                payload["claim_boundary_from_scenario_report"],
+                payload["scenario_report"]["claim_boundary"],
+            )
+            self.assertEqual(
+                payload["claim_boundaries_from_scenario_report"],
+                payload["scenario_report"]["claim_boundaries"],
+            )
+            self.assertEqual(payload["negative_evidence"]["scenario_report_missing_claim_boundary"], 0)
+            self.assertEqual(payload["negative_evidence"]["scenario_report_missing_claim_boundaries"], 0)
+            self.assertEqual(payload["negative_evidence"]["scenario_report_claim_boundary_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["scenario_report_claim_boundary_overclaim_fields"], 1)
+            self.assertEqual(payload["negative_evidence"]["overclaim_boundary_violations"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            for path, contents in original_files.items():
+                path.write_text(contents)
+
+    def test_vs3_local_checkpoint_rejects_human_gate_package_overclaim(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        package_path = ROOT / "reports/human-gates/vs3/VS3-H03.json"
+        original_package = package_path.read_text()
+        try:
+            package = json.loads(original_package)
+            package["status"] = "PASS"
+            package["approval_collected"] = True
+            package["pass_claim_allowed"] = True
+            package["product_claim_allowed"] = True
+            package["dependency_unlock_allowed"] = True
+            package["blank_approval_record"]["decision"] = "APPROVE"
+            package["blank_approval_record"]["reviewer"] = "tampered-reviewer"
+            package["blank_approval_record"]["evidence_refs"] = ["tampered:evidence"]
+            package["claim_boundary"]["h_row_status_after_generation"] = "PASS"
+            package["claim_boundary"]["pass_claim_allowed"] = True
+            package["claim_boundary"]["product_claim_allowed"] = True
+            package["claim_boundary"]["vs3_p_unlock_allowed"] = True
+            package["claim_boundary"]["vs3_p_unlock_allowed_by_package"] = True
+            package["claim_boundary"]["production_readiness_claim_allowed"] = True
+            package["claim_boundary"]["security_acceptance_claim_allowed"] = True
+            package["claim_boundary"]["human_acceptance_claim_allowed"] = True
+            package_path.write_text(json.dumps(package, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("human_gate_package_body_semantics_safe", failed_conditions)
+            self.assertIn("human_gate_package_body_no_pass_or_unlock_claims", failed_conditions)
+            self.assertIn("human_gate_package_body_blank_approval_records", failed_conditions)
+            package_semantics = payload["human_gate_preparation"]["package_semantics"]
+            self.assertFalse(package_semantics["packages_ready"])
+            self.assertIn("VS3-H03", package_semantics["invalid_package_ids"])
+            self.assertEqual(package_semantics["marked_pass_package_ids"], ["VS3-H03"])
+            self.assertEqual(package_semantics["claim_boundary_violation_ids"], ["VS3-H03"])
+            self.assertEqual(package_semantics["unlock_or_acceptance_claim_ids"], ["VS3-H03"])
+            self.assertEqual(package_semantics["filled_blank_approval_record_ids"], ["VS3-H03"])
+            package_row = {
+                row["scenario_id"]: row
+                for row in package_semantics["packages"]
+            }["VS3-H03"]
+            self.assertIn(
+                "CS_VS3_HUMAN_GATE_PACKAGE_STATUS_NOT_HUMAN_REQUIRED",
+                package_row["semantic_error_codes"],
+            )
+            self.assertIn(
+                "CS_VS3_HUMAN_GATE_PACKAGE_TOP_LEVEL_CLAIM",
+                package_row["semantic_error_codes"],
+            )
+            self.assertIn(
+                "CS_VS3_HUMAN_GATE_PACKAGE_CLAIM_BOUNDARY_OVERCLAIM",
+                package_row["semantic_error_codes"],
+            )
+            self.assertIn(
+                "CS_VS3_HUMAN_GATE_PACKAGE_BLANK_APPROVAL_FILLED",
+                package_row["semantic_error_codes"],
+            )
+            self.assertGreater(payload["negative_evidence"]["human_gate_package_semantic_violations"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_status_overclaims"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_claim_boundary_violations"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_unlock_or_acceptance_claims"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_blank_approval_records_filled"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_digest_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            package_path.write_text(original_package)
+
+    def test_vs3_local_checkpoint_rejects_human_gate_package_digest_drift(
+        self,
+    ) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        package_path = ROOT / "reports/human-gates/vs3/VS3-H03.json"
+        original_package = package_path.read_text()
+        try:
+            package = json.loads(original_package)
+            package["expected_evidence"] = (
+                package["expected_evidence"] + " Tampered after digest generation."
+            )
+            package_path.write_text(json.dumps(package, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertEqual(payload["claim_boundary"]["vs3_l"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("human_gate_package_body_semantics_safe", failed_conditions)
+            self.assertIn("human_gate_package_body_digests_match", failed_conditions)
+            self.assertNotIn("human_gate_package_body_no_pass_or_unlock_claims", failed_conditions)
+            self.assertNotIn("human_gate_package_body_blank_approval_records", failed_conditions)
+            package_semantics = payload["human_gate_preparation"]["package_semantics"]
+            self.assertFalse(package_semantics["packages_ready"])
+            self.assertEqual(package_semantics["digest_mismatch_ids"], ["VS3-H03"])
+            self.assertIn("VS3-H03", package_semantics["invalid_package_ids"])
+            package_row = {
+                row["scenario_id"]: row
+                for row in package_semantics["packages"]
+            }["VS3-H03"]
+            self.assertTrue(package_row["package_digest_present"])
+            self.assertFalse(package_row["package_digest_matches"])
+            self.assertNotEqual(
+                package_row["package_digest_sha256"],
+                package_row["computed_package_digest_sha256"],
+            )
+            self.assertEqual(
+                package_row["semantic_error_codes"],
+                ["CS_VS3_HUMAN_GATE_PACKAGE_DIGEST_MISMATCH"],
+            )
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_digest_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_semantic_violations"], 1)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_status_overclaims"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_claim_boundary_violations"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_unlock_or_acceptance_claims"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_gate_package_blank_approval_records_filled"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            package_path.write_text(original_package)
+
+    def test_vs3_local_checkpoint_rejects_stale_vs3_p_gate_scenario_report_hash(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        original_report = scenario_report_path.read_text()
+        try:
+            tampered_report = json.loads(original_report)
+            tampered_report["stale_gate_test_marker"] = "scenario-report-changed-after-vs3-p-gate"
+            scenario_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("vs3_p_gate_scenario_report_path_hash_matches", failed_conditions)
+            self.assertFalse(
+                payload["vs3_p_gate"]["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertTrue(
+                payload["vs3_p_gate"]["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_hash_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_path_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            scenario_report_path.write_text(original_report)
+
+    def test_vs3_local_checkpoint_rejects_vs3_p_gate_from_different_scenario_report_path(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        scenario_report_path = ROOT / "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
+        gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_gate = gate_path.read_text()
+        temp_dir = ROOT / "tmp/vs3-p-gate-path-identity-test"
+        if temp_dir.exists():
+            shutil.rmtree(temp_dir)
+        temp_dir.mkdir(parents=True)
+        try:
+            alt_report_path = temp_dir / "same-content-alt-path.json"
+            shutil.copyfile(scenario_report_path, alt_report_path)
+
+            alt_gate_result = run_cli(
+                "human-gate",
+                "vs3-p-gate",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                str(alt_report_path.relative_to(ROOT)),
+                "--output",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "--json",
+            )
+            self.assertEqual(alt_gate_result.returncode, 4, alt_gate_result.stdout + alt_gate_result.stderr)
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertNotIn("vs3_p_gate_scenario_report_hash_matches", failed_conditions)
+            self.assertIn("vs3_p_gate_scenario_report_path_hash_matches", failed_conditions)
+            self.assertTrue(
+                payload["vs3_p_gate"]["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertFalse(
+                payload["vs3_p_gate"]["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_scenario_report_path_hash_mismatches"], 1)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            gate_path.write_text(original_gate)
+            if temp_dir.exists():
+                shutil.rmtree(temp_dir)
+
+    def test_vs3_local_checkpoint_rejects_human_gate_reports_missing_self_transcript(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        cases = [
+            (
+                ROOT / "reports/human-gates/vs3/evidence-status.json",
+                "human_gate_evidence_status_self_command_transcript_valid",
+                "human_gate_evidence_status_self_command_transcript_failures",
+                ["human_gate_preparation", "evidence_status_report"],
+            ),
+            (
+                ROOT / "reports/human-gates/vs3/review-kit.json",
+                "human_gate_review_kit_self_command_transcript_valid",
+                "human_gate_review_kit_self_command_transcript_failures",
+                ["human_gate_preparation", "review_kit_report"],
+            ),
+            (
+                ROOT / "reports/human-gates/vs3/vs3-p-gate.json",
+                "vs3_p_gate_self_command_transcript_valid",
+                "vs3_p_gate_self_command_transcript_failures",
+                ["vs3_p_gate"],
+            ),
+        ]
+        for report_path, condition_name, counter_name, detail_path in cases:
+            with self.subTest(report_path=report_path.name):
+                original_report = report_path.read_text()
+                try:
+                    tampered_report = json.loads(original_report)
+                    tampered_report.pop("self_command_transcript", None)
+                    report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+                    result = run_cli("security", "vs3-local-checkpoint", "--json")
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertIn(condition_name, payload["errors"][0]["failed_conditions"])
+                    self.assertFalse(payload["checkpoint_conditions"][condition_name])
+                    self.assertEqual(payload["negative_evidence"][counter_name], 1)
+                    detail = payload
+                    for key in detail_path:
+                        detail = detail[key]
+                    self.assertEqual(detail["self_command_transcript_validation"]["status"], "failed")
+                    self.assertIn("not_object", detail["self_command_transcript_validation"]["error_codes"])
+                finally:
+                    report_path.write_text(original_report)
+
+    def test_vs3_local_checkpoint_rejects_evidence_status_missing_dependency_order_guard(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        original_report = evidence_status_path.read_text()
+        try:
+            tampered_report = json.loads(original_report)
+            tampered_report["summary"].pop("dependency_blocked_structurally_valid_count", None)
+            tampered_report["summary"].pop("dependency_prerequisites_structurally_valid_count", None)
+            tampered_report["negative_evidence"].pop("dependency_unlock_allowed_by_structural_validation", None)
+            status_body = tampered_report["vs3_human_gate_evidence_status"]
+            status_body["template_intake_summary"].pop("dependency_blocked_structurally_valid_count", None)
+            status_body["template_intake_summary"].pop("dependency_prerequisites_structurally_valid_count", None)
+            for row in status_body["record_statuses"]:
+                row.pop("dependency_status", None)
+                row.pop("dependency_promotion_required", None)
+                row.pop("dependency_prerequisite_statuses", None)
+            evidence_status_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertIn(
+                "human_gate_evidence_status_dependency_order_guard",
+                payload["errors"][0]["failed_conditions"],
+            )
+            self.assertFalse(payload["checkpoint_conditions"]["human_gate_evidence_status_dependency_order_guard"])
+            self.assertEqual(
+                payload["negative_evidence"]["human_gate_evidence_status_dependency_order_guard_failures"],
+                1,
+            )
+        finally:
+            evidence_status_path.write_text(original_report)
+
+    def test_vs3_local_checkpoint_rejects_stale_evidence_status_scenario_report_hash(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        original_evidence_status = evidence_status_path.read_text()
+        try:
+            evidence_payload = json.loads(original_evidence_status)
+            evidence_payload["vs3_human_gate_evidence_status"]["scenario_report"]["sha256"] = "0" * 64
+            evidence_status_path.write_text(json.dumps(evidence_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_evidence_status_scenario_report_path_hash_matches", failed_conditions)
+            evidence_status_report = payload["human_gate_preparation"]["evidence_status_report"]
+            self.assertFalse(
+                evidence_status_report["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertTrue(
+                evidence_status_report["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_evidence_status_scenario_report_hash_mismatches"], 1)
+            self.assertEqual(negative["human_gate_evidence_status_scenario_report_path_hash_mismatches"], 0)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            evidence_status_path.write_text(original_evidence_status)
+
+    def test_vs3_local_checkpoint_rejects_evidence_status_from_different_scenario_report_path(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        original_evidence_status = evidence_status_path.read_text()
+        try:
+            evidence_payload = json.loads(original_evidence_status)
+            evidence_payload["vs3_human_gate_evidence_status"]["scenario_report"]["path_sha256"] = "f" * 64
+            evidence_status_path.write_text(json.dumps(evidence_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertNotIn("human_gate_evidence_status_scenario_report_hash_matches", failed_conditions)
+            self.assertIn("human_gate_evidence_status_scenario_report_path_hash_matches", failed_conditions)
+            evidence_status_report = payload["human_gate_preparation"]["evidence_status_report"]
+            self.assertTrue(
+                evidence_status_report["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertFalse(
+                evidence_status_report["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_evidence_status_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(negative["human_gate_evidence_status_scenario_report_path_hash_mismatches"], 1)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            evidence_status_path.write_text(original_evidence_status)
+
+    def test_vs3_local_checkpoint_rejects_stale_review_kit_scenario_report_hash(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        original_review_kit = review_kit_path.read_text()
+        try:
+            review_payload = json.loads(original_review_kit)
+            review_payload["vs3_human_gate_review_kit"]["scenario_report"]["sha256"] = "0" * 64
+            review_kit_path.write_text(json.dumps(review_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertNotIn("human_gate_review_kit_scenario_report_path_hash_matches", failed_conditions)
+            review_kit_report = payload["human_gate_preparation"]["review_kit_report"]
+            self.assertFalse(
+                review_kit_report["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertTrue(
+                review_kit_report["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_review_kit_scenario_report_hash_mismatches"], 1)
+            self.assertEqual(negative["human_gate_review_kit_scenario_report_path_hash_mismatches"], 0)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            review_kit_path.write_text(original_review_kit)
+
+    def test_vs3_local_checkpoint_rejects_review_kit_from_different_scenario_report_path(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        original_review_kit = review_kit_path.read_text()
+        try:
+            review_payload = json.loads(original_review_kit)
+            review_payload["vs3_human_gate_review_kit"]["scenario_report"]["path_sha256"] = "f" * 64
+            review_kit_path.write_text(json.dumps(review_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertNotIn("human_gate_review_kit_scenario_report_hash_matches", failed_conditions)
+            self.assertIn("human_gate_review_kit_scenario_report_path_hash_matches", failed_conditions)
+            review_kit_report = payload["human_gate_preparation"]["review_kit_report"]
+            self.assertTrue(
+                review_kit_report["scenario_report"]["matches_checkpoint_scenario_report_sha256"]
+            )
+            self.assertFalse(
+                review_kit_report["scenario_report"]["matches_checkpoint_scenario_report_path_sha256"]
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_review_kit_scenario_report_hash_mismatches"], 0)
+            self.assertEqual(negative["human_gate_review_kit_scenario_report_path_hash_mismatches"], 1)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            review_kit_path.write_text(original_review_kit)
+
+    def test_vs3_local_checkpoint_rejects_vs3_p_gate_summary_overclaim(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_gate = gate_path.read_text()
+        try:
+            gate_payload = json.loads(original_gate)
+            gate_payload["summary"]["status"] = "ready"
+            gate_payload["summary"]["final_verdict"] = "PASS"
+            gate_payload["summary"]["vs3_p_ready"] = True
+            gate_payload["summary"]["vs3_p_claim"] = "LOCAL_VS3_P_READY"
+            gate_payload["summary"]["product_claim_allowed"] = True
+            gate_payload["summary"]["production_readiness_claim_allowed"] = True
+            gate_payload["summary"]["security_acceptance_claim_allowed"] = True
+            gate_payload["summary"]["human_acceptance_claim_allowed"] = True
+            gate_path.write_text(json.dumps(gate_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            for expected_condition in [
+                "vs3_p_gate_summary_status_blocks_on_human_evidence",
+                "vs3_p_gate_summary_final_verdict_human_required",
+                "vs3_p_gate_summary_vs3_p_not_ready",
+                "vs3_p_gate_summary_vs3_p_not_claimed",
+                "vs3_p_gate_summary_product_claim_not_allowed",
+                "vs3_p_gate_summary_production_readiness_not_allowed",
+                "vs3_p_gate_summary_security_acceptance_not_allowed",
+                "vs3_p_gate_summary_human_acceptance_not_allowed",
+            ]:
+                self.assertIn(expected_condition, failed_conditions)
+            self.assertEqual(payload["vs3_p_gate"]["summary"]["vs3_p_claim"], "LOCAL_VS3_P_READY")
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_summary_claim_mismatches"], 8)
+            self.assertEqual(payload["vs3_p_gate"]["negative_evidence"]["summary_claim_mismatches"], 8)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            gate_path.write_text(original_gate)
+
+    def test_vs3_local_checkpoint_rejects_vs3_p_gate_claim_boundary_overclaim(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_gate = gate_path.read_text()
+        try:
+            gate_payload = json.loads(original_gate)
+            gate_boundary = gate_payload["claim_boundary"]
+            for boundary_key in [
+                "production_readiness_claim_allowed",
+                "live_provider_readiness_claim_allowed",
+                "real_idp_readiness_claim_allowed",
+                "real_network_readiness_claim_allowed",
+                "migration_restore_readiness_claim_allowed",
+                "security_acceptance_claim_allowed",
+                "human_acceptance_claim_allowed",
+            ]:
+                gate_boundary[boundary_key] = True
+            gate_boundary["structural_validation_is_not_acceptance"] = False
+            gate_path.write_text(json.dumps(gate_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertNotIn("vs3_p_gate_no_vs3_p_unlock", failed_conditions)
+            for expected_condition in [
+                "vs3_p_gate_boundary_production_readiness_not_allowed",
+                "vs3_p_gate_boundary_live_provider_readiness_not_allowed",
+                "vs3_p_gate_boundary_real_idp_readiness_not_allowed",
+                "vs3_p_gate_boundary_real_network_readiness_not_allowed",
+                "vs3_p_gate_boundary_migration_restore_readiness_not_allowed",
+                "vs3_p_gate_boundary_security_acceptance_not_allowed",
+                "vs3_p_gate_boundary_human_acceptance_not_allowed",
+                "vs3_p_gate_boundary_structural_validation_not_acceptance",
+            ]:
+                self.assertIn(expected_condition, failed_conditions)
+            source_boundary = payload["vs3_p_gate"]["source_claim_boundary"]
+            self.assertTrue(source_boundary["production_readiness_claim_allowed"])
+            self.assertTrue(source_boundary["live_provider_readiness_claim_allowed"])
+            self.assertTrue(source_boundary["real_idp_readiness_claim_allowed"])
+            self.assertTrue(source_boundary["real_network_readiness_claim_allowed"])
+            self.assertTrue(source_boundary["migration_restore_readiness_claim_allowed"])
+            self.assertTrue(source_boundary["security_acceptance_claim_allowed"])
+            self.assertTrue(source_boundary["human_acceptance_claim_allowed"])
+            self.assertFalse(source_boundary["structural_validation_is_not_acceptance"])
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_claim_boundary_mismatches"], 8)
+            self.assertEqual(payload["vs3_p_gate"]["negative_evidence"]["claim_boundary_mismatches"], 8)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            gate_path.write_text(original_gate)
+
+    def test_vs3_local_checkpoint_rejects_vs3_p_gate_body_claim_boundary_overclaim(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        gate_path = ROOT / "reports/human-gates/vs3/vs3-p-gate.json"
+        original_gate = gate_path.read_text()
+        try:
+            gate_payload = json.loads(original_gate)
+            gate_body_boundary = gate_payload["vs3_p_human_gate"]["claim_boundary"]
+            for boundary_key in [
+                "production_readiness_claim_allowed",
+                "live_provider_readiness_claim_allowed",
+                "real_idp_readiness_claim_allowed",
+                "real_network_readiness_claim_allowed",
+                "migration_restore_readiness_claim_allowed",
+                "security_acceptance_claim_allowed",
+                "human_acceptance_claim_allowed",
+            ]:
+                gate_body_boundary[boundary_key] = True
+            gate_body_boundary["structural_validation_is_not_acceptance"] = False
+            gate_path.write_text(json.dumps(gate_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertNotIn("vs3_p_gate_body_boundary_no_vs3_p_unlock", failed_conditions)
+            self.assertNotIn("vs3_p_gate_boundary_production_readiness_not_allowed", failed_conditions)
+            for expected_condition in [
+                "vs3_p_gate_body_boundary_production_readiness_not_allowed",
+                "vs3_p_gate_body_boundary_live_provider_readiness_not_allowed",
+                "vs3_p_gate_body_boundary_real_idp_readiness_not_allowed",
+                "vs3_p_gate_body_boundary_real_network_readiness_not_allowed",
+                "vs3_p_gate_body_boundary_migration_restore_readiness_not_allowed",
+                "vs3_p_gate_body_boundary_security_acceptance_not_allowed",
+                "vs3_p_gate_body_boundary_human_acceptance_not_allowed",
+                "vs3_p_gate_body_boundary_structural_validation_not_acceptance",
+            ]:
+                self.assertIn(expected_condition, failed_conditions)
+            source_body_boundary = payload["vs3_p_gate"]["source_body_claim_boundary"]
+            self.assertTrue(source_body_boundary["production_readiness_claim_allowed"])
+            self.assertTrue(source_body_boundary["live_provider_readiness_claim_allowed"])
+            self.assertTrue(source_body_boundary["real_idp_readiness_claim_allowed"])
+            self.assertTrue(source_body_boundary["real_network_readiness_claim_allowed"])
+            self.assertTrue(source_body_boundary["migration_restore_readiness_claim_allowed"])
+            self.assertTrue(source_body_boundary["security_acceptance_claim_allowed"])
+            self.assertTrue(source_body_boundary["human_acceptance_claim_allowed"])
+            self.assertFalse(source_body_boundary["structural_validation_is_not_acceptance"])
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_claim_boundary_mismatches"], 0)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_gate_body_claim_boundary_mismatches"], 8)
+            self.assertEqual(payload["vs3_p_gate"]["negative_evidence"]["claim_boundary_mismatches"], 0)
+            self.assertEqual(payload["vs3_p_gate"]["negative_evidence"]["body_claim_boundary_mismatches"], 8)
+            self.assertEqual(payload["negative_evidence"]["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(payload["negative_evidence"]["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            gate_path.write_text(original_gate)
+
+    def test_vs3_local_checkpoint_rejects_tampered_review_kit_human_rows(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        vs3_p_gate_result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--output",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            "--json",
+        )
+        self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+        review_kit_path = ROOT / "reports/human-gates/vs3/review-kit.json"
+        original_review_kit = review_kit_path.read_text()
+        try:
+            review_payload = json.loads(original_review_kit)
+            review_kit = review_payload["vs3_human_gate_review_kit"]
+            review_kit["actual_human_scenario_ids"] = []
+            review_kit["review_kit_conditions"]["seven_human_rows_present_in_scenario_report"] = False
+            review_kit_path.write_text(json.dumps(review_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            self.assertIn(
+                "human_gate_review_kit_actual_human_ids_match",
+                payload["errors"][0]["failed_conditions"],
+            )
+            self.assertIn(
+                "human_gate_review_kit_condition_seven_human_rows_present",
+                payload["errors"][0]["failed_conditions"],
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_review_kit_actual_human_id_mismatches"], 1)
+            self.assertEqual(negative["human_gate_review_kit_expected_human_id_mismatches"], 0)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            review_kit_path.write_text(original_review_kit)
+
+    def test_vs3_local_checkpoint_rejects_tampered_evidence_status_human_rows(self) -> None:
+        seed_commands = [
+            ("security", "vs3-observability", "--json"),
+            ("security", "vs3-regression-gate", "--json"),
+            (
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ),
+            (
+                "human-gate",
+                "review-kit",
+                "--scope",
+                "vs3",
+                "--scenario-report",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/review-kit.json",
+            ),
+            (
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--force",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/record-scaffold.json",
+            ),
+            (
+                "human-gate",
+                "evidence-status",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "reports/human-gates/vs3/record-templates",
+                "--use-existing",
+                "--json",
+                "--output",
+                "reports/human-gates/vs3/evidence-status.json",
+            ),
+        ]
+        for command in seed_commands:
+            seed_result = run_cli(*command)
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+
+        vs3_p_gate_result = run_cli(
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            "--output",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            "--json",
+        )
+        self.assertEqual(vs3_p_gate_result.returncode, 4, vs3_p_gate_result.stdout + vs3_p_gate_result.stderr)
+
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        original_evidence_status = evidence_status_path.read_text()
+        try:
+            evidence_payload = json.loads(original_evidence_status)
+            record_statuses = evidence_payload["vs3_human_gate_evidence_status"]["record_statuses"]
+            for row in record_statuses:
+                row["scenario_id"] = "VS3-H01"
+            evidence_status_path.write_text(json.dumps(evidence_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            self.assertIn("human_gate_evidence_status_record_ids_match", failed_conditions)
+            self.assertIn("human_gate_evidence_status_no_missing_record_ids", failed_conditions)
+            self.assertIn("human_gate_evidence_status_no_duplicate_record_ids", failed_conditions)
+            evidence_status = payload["human_gate_preparation"]["evidence_status_report"]
+            self.assertEqual(evidence_status["actual_human_scenario_ids"], ["VS3-H01"] * 7)
+            self.assertEqual(
+                evidence_status["missing_human_scenario_ids"],
+                ["VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+            )
+            self.assertEqual(evidence_status["duplicate_human_scenario_ids"], ["VS3-H01"])
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_evidence_status_record_id_mismatches"], 1)
+            self.assertEqual(negative["human_gate_evidence_status_missing_expected_record_ids"], 6)
+            self.assertEqual(negative["human_gate_evidence_status_duplicate_record_ids"], 1)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            evidence_status_path.write_text(original_evidence_status)
+
+    def test_vs3_local_checkpoint_rejects_tampered_evidence_status_template_intake_summary(self) -> None:
+        self._seed_vs3_local_checkpoint_artifacts()
+
+        evidence_status_path = ROOT / "reports/human-gates/vs3/evidence-status.json"
+        original_evidence_status = evidence_status_path.read_text()
+        try:
+            evidence_payload = json.loads(original_evidence_status)
+            template_intake_summary = evidence_payload["vs3_human_gate_evidence_status"]["template_intake_summary"]
+            template_intake_summary["template_readiness_status"] = "ready_for_acceptance"
+            template_intake_summary["blank_template_pending_count"] = 0
+            template_intake_summary["filled_record_count"] = 7
+            template_intake_summary["invalid_filled_record_count"] = 1
+            template_intake_summary["evidence_acceptance_candidate_count"] = 7
+            template_intake_summary["acceptance_boundary"] = "Structural validity approves evidence."
+            evidence_status_path.write_text(json.dumps(evidence_payload, indent=2, sort_keys=True) + "\n")
+
+            result = run_cli("security", "vs3-local-checkpoint", "--json")
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["final_verdict"], "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED")
+            failed_conditions = payload["errors"][0]["failed_conditions"]
+            for expected_condition in [
+                "human_gate_evidence_status_template_readiness_awaiting_completion",
+                "human_gate_evidence_status_blank_template_pending_count",
+                "human_gate_evidence_status_no_filled_records",
+                "human_gate_evidence_status_no_invalid_filled_records",
+                "human_gate_evidence_status_no_evidence_acceptance_candidates",
+                "human_gate_evidence_status_template_acceptance_boundary_explicit",
+            ]:
+                self.assertIn(expected_condition, failed_conditions)
+            evidence_status = payload["human_gate_preparation"]["evidence_status_report"]
+            self.assertEqual(
+                evidence_status["template_intake_summary"]["template_readiness_status"],
+                "ready_for_acceptance",
+            )
+            negative = payload["negative_evidence"]
+            self.assertEqual(negative["human_gate_evidence_status_template_intake_missing_or_invalid"], 0)
+            self.assertEqual(negative["human_gate_evidence_status_template_intake_count_mismatches"], 5)
+            self.assertEqual(negative["human_gate_evidence_status_template_acceptance_boundary_mismatches"], 1)
+            self.assertEqual(negative["vs3_p_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["production_readiness_claimed_by_checkpoint"], 0)
+            self.assertEqual(negative["human_acceptance_claimed_by_checkpoint"], 0)
+        finally:
+            evidence_status_path.write_text(original_evidence_status)
+
+    def test_vs3_onprem_trusted_extension_verify_dry_run_and_list_are_status_neutral(self) -> None:
+        for flag, expected_mode in [("--dry-run", "dry_run"), ("--list", "list")]:
+            with self.subTest(flag=flag):
+                result = run_cli("scenario", "verify", "vs3-onprem-trusted-extension", flag, "--json")
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                payload = json.loads(result.stdout)
+                self.assertEqual(payload["status"], "success")
+                self.assertEqual(payload["scenario_set"], "vs3-onprem-trusted-extension")
+                self.assertEqual(payload["schema_version"], "cs.vs3_onprem_trusted_extension.dry_run.v0")
+                self.assertEqual(payload["mode"], expected_mode)
+                self.assertEqual(payload["scenario_count"], 57)
+                self.assertEqual(payload["summary"]["scenario_count"], 57)
+                self.assertEqual(payload["summary"]["pass"], 0)
+                self.assertEqual(payload["summary"]["fail"], 0)
+                self.assertEqual(payload["summary"]["not_verified"], 0)
+                self.assertEqual(payload["summary"]["not_run"], 50)
+                self.assertEqual(payload["summary"]["human_required"], 7)
+                self.assertEqual(
+                    payload["summary"]["product_feature_claims"],
+                    "STATUS_NEUTRAL_VS3_VERIFY_DRY_RUN_ONLY",
+                )
+                self.assertEqual(payload["counts"], {"MUST_PASS": 42, "REGRESSION": 8, "HUMAN_REQUIRED": 7})
+                self.assertEqual(payload["execution_classification_counts"]["in_this_slice"], 4)
+                self.assertEqual(payload["execution_classification_counts"]["later_slice"], 46)
+                self.assertEqual(payload["execution_classification_counts"]["HUMAN_REQUIRED"], 7)
+                self.assertEqual(payload["proof_boundary"]["vs3_l"], "NOT_CLAIMED_BY_DRY_RUN")
+                self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+                self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+                self.assertEqual(payload["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+                self.assertEqual(payload["proof_boundary"]["human_acceptance"], "NOT_CLAIMED")
+                self.assertEqual(
+                    payload["proof_boundary"]["human_required_rows"],
+                    ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+                )
+                self.assertEqual(
+                    [row["status"] for row in payload["scenario_results"] if row["type"] != "HUMAN_REQUIRED"],
+                    ["NOT_RUN"] * 50,
+                )
+                self.assertEqual(
+                    [row["scenario_id"] for row in payload["human_required"]],
+                    ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+                )
+                self.assertEqual(payload["cli_coverage"]["status"], "status_neutral")
+                self.assertTrue(payload["cli_coverage"]["status_neutral_before_implementation"])
+                self.assertTrue(payload["cli_coverage"]["current_output_status_neutral"])
+                self.assertTrue(payload["cli_coverage"]["emits_command_transcripts"])
+                self.assertEqual(len(payload["command_transcripts"]), 1)
+                transcript = payload["command_transcripts"][0]
+                self.assertEqual(transcript["exit_code"], 0)
+                self.assertEqual(transcript["output_mode"], "json")
+                self.assertEqual(transcript["command"], ["cornerstone", "scenario", "verify", "vs3-onprem-trusted-extension", flag, "--json"])
+                self.assertEqual(transcript["stdout_json"]["mode"], expected_mode)
+                self.assertEqual(transcript["stdout_json"]["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+
+    def test_vs3_onprem_trusted_extension_verify_closes_local_dev_ai_rows(self) -> None:
+        seed_result = run_cli(
+            "security",
+            "vs3-postgres-rls",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+        opa_seed_result = run_cli(
+            "security",
+            "vs3-opa-policy",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(opa_seed_result.returncode, 0, opa_seed_result.stdout + opa_seed_result.stderr)
+        egress_seed_result = run_cli(
+            "security",
+            "vs3-egress-sandbox",
+            "--reuse-vs2-local-range-report",
+            "reports/security/vs2-local-range.json",
+            "--json",
+        )
+        self.assertEqual(egress_seed_result.returncode, 0, egress_seed_result.stdout + egress_seed_result.stderr)
+        connector_seed_result = run_cli("security", "vs3-connectorhub-source", "--json")
+        self.assertEqual(connector_seed_result.returncode, 0, connector_seed_result.stdout + connector_seed_result.stderr)
+        tool_seed_result = run_cli("security", "vs3-tool-registry", "--json")
+        self.assertEqual(tool_seed_result.returncode, 0, tool_seed_result.stdout + tool_seed_result.stderr)
+        observability_seed_result = run_cli("security", "vs3-observability", "--json")
+        self.assertEqual(observability_seed_result.returncode, 0, observability_seed_result.stdout + observability_seed_result.stderr)
+        final_seed_result = run_cli("security", "vs3-regression-gate", "--json")
+        self.assertEqual(final_seed_result.returncode, 0, final_seed_result.stdout + final_seed_result.stderr)
+        result = run_cli("scenario", "verify", "vs3-onprem-trusted-extension", "--json")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs3-onprem-trusted-extension")
+        self.assertEqual(payload["schema_version"], "cs.vs3_onprem_trusted_extension.v0")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(
+            payload["final_verdict"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["proof_boundary"]["surface"], "local_dev_scenario_verification")
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["real_idp"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["real_network"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["migration_restore"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["security_acceptance_gate"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["proof_boundary"]["human_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_acceptance_gate"], "HUMAN_REQUIRED")
+        self.assertTrue(payload["proof_boundary"]["human_gate_templates_are_not_acceptance"])
+        self.assertEqual(
+            payload["proof_boundary"]["human_required_rows"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertIn(
+            "reports/security/vs3-final-regression-proof.json",
+            payload["evidence_refs"],
+        )
+        self.assertIn(
+            "reports/human-gates/vs3",
+            payload["evidence_refs"],
+        )
+        self.assertGreater(len(payload["audit_refs"]), 0)
+        self.assertGreater(len(payload["policy_decision_refs"]), 0)
+        self.assertEqual(
+            [row["scenario_id"] for row in payload["human_required_blockers"]],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            [row["scenario_id"] for row in payload["human_required"]],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            [row["id"] for row in payload["human_required"]],
+            [row["scenario_id"] for row in payload["human_required"]],
+        )
+        self.assertTrue(all(row["type"] == "HUMAN_REQUIRED" for row in payload["human_required"]))
+        self.assertTrue(all(row["status"] == "HUMAN_REQUIRED" for row in payload["human_required"]))
+        expected_vs3_trace_scope = {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+            "scope_source": "local_vs3_fixture",
+        }
+        traceability = payload["traceability"]
+        self.assertEqual(traceability["schema_version"], "cs.scenario_traceability.v0")
+        self.assertEqual(traceability["scenario_set"], "vs3-onprem-trusted-extension")
+        self.assertEqual(payload["scenario_run_id"], traceability["scenario_run_id"])
+        self.assertEqual(payload["trace_id"], traceability["trace_id"])
+        self.assertTrue(payload["scenario_run_id"].startswith("scenario-run:vs3-onprem-trusted-extension:"))
+        self.assertTrue(payload["trace_id"].startswith("trace:vs3-onprem-trusted-extension:"))
+        self.assertEqual(payload["corpus_pack_id"], "fixtures/vs3/local-dev")
+        self.assertEqual(payload["model_provider"], "local_test")
+        self.assertEqual(payload["model_name"], "deterministic-local-test")
+        self.assertEqual(traceability["scope"], expected_vs3_trace_scope)
+        self.assertEqual(
+            traceability["transcript_paths"],
+            ["reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"],
+        )
+        self.assertEqual(traceability["scenario_ids"], [row["id"] for row in payload["scenario_results"]])
+        self.assertEqual(
+            traceability["human_required_rows"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(
+            payload["summary"],
+            {
+                "scenario_count": 57,
+                "pass": 50,
+                "fail": 0,
+                "not_verified": 0,
+                "not_run": 0,
+                "human_required": 7,
+                "blocking": 0,
+                "product_feature_claims": "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED",
+                "vs3_l_claim": "LOCAL_DEV_ASSURANCE_VERIFIED",
+                "vs3_p_claim": "NOT_CLAIMED",
+                "production_readiness_claim_allowed": False,
+                "live_provider_readiness_claim_allowed": False,
+                "real_idp_readiness_claim_allowed": False,
+                "real_network_readiness_claim_allowed": False,
+                "migration_restore_readiness_claim_allowed": False,
+                "security_acceptance_claim_allowed": False,
+                "human_acceptance_claim_allowed": False,
+            },
+        )
+        gate_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-GATE-")
+        }
+        self.assertEqual(set(gate_rows), {"VS3-GATE-001", "VS3-GATE-002", "VS3-GATE-003", "VS3-GATE-004"})
+        self.assertTrue(all(row["status"] == "PASS" for row in gate_rows.values()))
+        self.assertIn(
+            "audit:vs3_evidence_reconciliation:vs2_conflict_classified",
+            gate_rows["VS3-GATE-001"]["audit_refs"],
+        )
+        self.assertIn(
+            "audit:vs3_matrix_structural_check:matrix_rows_valid",
+            gate_rows["VS3-GATE-002"]["audit_refs"],
+        )
+        self.assertIn(
+            "policy:vs3_matrix_structural_check:status_neutral_contract",
+            gate_rows["VS3-GATE-002"]["policy_decision_refs"],
+        )
+        context_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-CTX-")
+        }
+        self.assertEqual(
+            set(context_rows),
+            {"VS3-CTX-001", "VS3-CTX-002", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"},
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in context_rows.values()))
+        rls_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-RLS-")
+        }
+        self.assertEqual(
+            set(rls_rows),
+            {"VS3-RLS-001", "VS3-RLS-002", "VS3-RLS-003", "VS3-RLS-004", "VS3-RLS-005", "VS3-RLS-006"},
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in rls_rows.values()))
+        self.assertEqual(payload["request_context_proof"]["status"], "success")
+        self.assertTrue(all(payload["request_context_proof"]["checks"].values()))
+        self.assertEqual(payload["postgres_rls_proof"]["status"], "success")
+        self.assertTrue(all(payload["postgres_rls_proof"]["checks"].values()))
+        opa_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-OPA-")
+        }
+        self.assertEqual(
+            set(opa_rows),
+            {"VS3-OPA-001", "VS3-OPA-002", "VS3-OPA-003", "VS3-OPA-004", "VS3-OPA-005"},
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in opa_rows.values()))
+        self.assertEqual(payload["opa_policy_proof"]["status"], "success")
+        self.assertTrue(all(payload["opa_policy_proof"]["checks"].values()))
+        egress_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-EGR-")
+        }
+        self.assertEqual(
+            set(egress_rows),
+            {"VS3-EGR-001", "VS3-EGR-002", "VS3-EGR-003", "VS3-EGR-004", "VS3-EGR-005", "VS3-EGR-006"},
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in egress_rows.values()))
+        self.assertEqual(payload["egress_sandbox_proof"]["status"], "success")
+        self.assertTrue(all(payload["egress_sandbox_proof"]["checks"].values()))
+        connector_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-CON-")
+        }
+        self.assertEqual(
+            set(connector_rows),
+            {"VS3-CON-001", "VS3-CON-002", "VS3-CON-003", "VS3-CON-004", "VS3-CON-005", "VS3-CON-006"},
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in connector_rows.values()))
+        self.assertEqual(payload["connectorhub_source_proof"]["status"], "success")
+        self.assertTrue(all(payload["connectorhub_source_proof"]["checks"].values()))
+        tool_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-TOOL-")
+        }
+        self.assertEqual(
+            set(tool_rows),
+            {
+                "VS3-TOOL-001",
+                "VS3-TOOL-002",
+                "VS3-TOOL-003",
+                "VS3-TOOL-004",
+                "VS3-TOOL-005",
+                "VS3-TOOL-006",
+                "VS3-TOOL-007",
+            },
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in tool_rows.values()))
+        self.assertEqual(payload["tool_registry_proof"]["status"], "success")
+        self.assertTrue(all(payload["tool_registry_proof"]["checks"].values()))
+        obs_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-OBS-")
+        }
+        self.assertEqual(set(obs_rows), {"VS3-OBS-001", "VS3-OBS-002", "VS3-OBS-003"})
+        self.assertTrue(all(row["status"] == "PASS" for row in obs_rows.values()))
+        self.assertEqual(payload["observability_proof"]["status"], "success")
+        self.assertTrue(all(payload["observability_proof"]["checks"].values()))
+        reg_rows = {
+            row["id"]: row
+            for row in payload["scenario_results"]
+            if row["id"].startswith("VS3-REG-")
+        }
+        self.assertEqual(
+            set(reg_rows),
+            {
+                "VS3-REG-001",
+                "VS3-REG-002",
+                "VS3-REG-003",
+                "VS3-REG-004",
+                "VS3-REG-005",
+                "VS3-REG-006",
+                "VS3-REG-007",
+                "VS3-REG-008",
+            },
+        )
+        self.assertTrue(all(row["status"] == "PASS" for row in reg_rows.values()))
+        self.assertEqual(payload["final_regression_proof"]["status"], "success")
+        self.assertTrue(all(payload["final_regression_proof"]["checks"].values()))
+        self.assertIn("VS3-4", payload["gate_metadata"]["completed_slices"])
+        self.assertIn("VS3-5", payload["gate_metadata"]["completed_slices"])
+        self.assertIn("VS3-6", payload["gate_metadata"]["completed_slices"])
+        self.assertIn("VS3-7", payload["gate_metadata"]["completed_slices"])
+        self.assertIn("VS3-FINAL-REGRESSION", payload["gate_metadata"]["completed_slices"])
+        self.assertEqual(
+            payload["gate_metadata"]["current_slice"],
+            [
+                "VS3-H01",
+                "VS3-H02",
+                "VS3-H03",
+                "VS3-H04",
+                "VS3-H05",
+                "VS3-H06",
+                "VS3-H07",
+            ],
+        )
+        self.assertEqual(
+            payload["gate_metadata"]["next_slice"],
+            "VS3-L local/dev checkpoint is complete. VS3-P remains blocked on VS3-H01 through VS3-H07 human/on-prem evidence.",
+        )
+        self.assertEqual(payload["matrix_check"]["status"], "passed")
+        self.assertEqual(payload["matrix_check"]["priority_counts"], {"MUST_PASS": 42, "REGRESSION": 8, "HUMAN_REQUIRED": 7})
+        self.assertEqual(payload["overclaim_lint"]["status"], "passed")
+        self.assertEqual(payload["overclaim_lint"]["findings"], [])
+        for checked_path in [
+            "reports/security/vs3-final-regression-proof.json",
+            "reports/human-gates/vs3/record-scaffold.json",
+            "reports/human-gates/vs3/evidence-status.json",
+            "reports/human-gates/vs3/review-kit.json",
+            "reports/human-gates/vs3/vs3-p-gate.json",
+            *VS3_HUMAN_GATE_PACKAGE_PATHS,
+        ]:
+            self.assertIn(checked_path, payload["overclaim_lint"]["checked_paths"])
+        self.assertEqual(payload["cli_coverage"]["native_command"], "cornerstone scenario verify vs3-onprem-trusted-extension --json")
+        self.assertTrue(payload["cli_coverage"]["initial_coverage_status_neutral_before_implementation"])
+        self.assertFalse(payload["cli_coverage"]["status_neutral_before_implementation"])
+        self.assertFalse(payload["cli_coverage"]["current_output_status_neutral"])
+        self.assertEqual(
+            payload["cli_coverage"]["current_output_claim"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED",
+        )
+        self.assertTrue(payload["cli_coverage"]["emits_command_transcripts"])
+        self.assertEqual(payload["cli_coverage"]["command_transcript_count"], 1)
+        self.assertEqual(len(payload["command_transcripts"]), 1)
+        self.assertEqual(payload["command_transcripts"][0]["schema_version"], "cs.command_transcript.v0")
+        self.assertEqual(
+            payload["command_transcripts"][0]["command"],
+            [
+                "cornerstone",
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ],
+        )
+        self.assertEqual(
+            payload["command_transcripts"][0]["arguments"],
+            [
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+            ],
+        )
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 0)
+        self.assertFalse(payload["command_transcripts"][0]["timed_out"])
+        self.assertEqual(payload["command_transcripts"][0]["output_mode"], "json")
+        self.assertEqual(payload["command_transcripts"][0]["json_schema"], "cs.vs3_onprem_trusted_extension.v0")
+        self.assertEqual(payload["command_transcripts"][0]["cli_schema_version"], "cs.cli.v0")
+        self.assertEqual(
+            payload["command_transcripts"][0]["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(payload["command_transcripts"][0]["evidence_refs"], payload["evidence_refs"])
+        self.assertEqual(payload["command_transcripts"][0]["audit_refs"], payload["audit_refs"])
+        self.assertEqual(payload["command_transcripts"][0]["policy_decision_refs"], payload["policy_decision_refs"])
+        self.assertEqual(
+            payload["command_transcripts"][0]["ref_summary"],
+            {
+                "evidence_refs_count": len(payload["evidence_refs"]),
+                "audit_refs_count": len(payload["audit_refs"]),
+                "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+            },
+        )
+        self.assertGreater(payload["command_transcripts"][0]["ref_summary"]["evidence_refs_count"], 0)
+        self.assertGreater(payload["command_transcripts"][0]["ref_summary"]["audit_refs_count"], 0)
+        self.assertGreater(payload["command_transcripts"][0]["ref_summary"]["policy_decision_refs_count"], 0)
+        self.assertIn("started_at", payload["command_transcripts"][0])
+        self.assertIn("ended_at", payload["command_transcripts"][0])
+        self.assertTrue(payload["command_transcripts"][0]["started_at"].endswith("Z"))
+        self.assertTrue(payload["command_transcripts"][0]["ended_at"].endswith("Z"))
+        self.assertLessEqual(
+            payload["command_transcripts"][0]["started_at"],
+            payload["command_transcripts"][0]["ended_at"],
+        )
+        self.assertEqual(payload["claim_boundaries"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["claim_boundaries"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundaries"]["production"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundaries"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundaries"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"], payload["claim_boundaries"])
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        source_tree = payload["source_tree"]
+        self.assertIn("verified_base_commit", source_tree)
+        self.assertIn("verified_base_commit_full", source_tree)
+        self.assertIn("verified_base_tree_hash", source_tree)
+        self.assertIn("verified_source_worktree_hash", source_tree)
+        self.assertIn("verified_source_snapshot_paths", source_tree)
+        self.assertIn("worktree_dirty_at_verification", source_tree)
+        self.assertIn("dirty_paths", source_tree)
+        self.assertTrue(source_tree["verified_base_commit"])
+        self.assertTrue(source_tree["verified_base_commit_full"])
+        self.assertTrue(source_tree["verified_base_tree_hash"])
+        self.assertTrue(source_tree["verified_source_worktree_hash"])
+        self.assertIsInstance(source_tree["worktree_dirty_at_verification"], bool)
+        self.assertIsInstance(source_tree["dirty_paths"], list)
+        self.assertIsInstance(source_tree["verified_source_snapshot_paths"], list)
+        if source_tree["worktree_dirty_at_verification"]:
+            self.assertGreater(len(source_tree["dirty_paths"]), 0)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], source_tree)
+        self.assertEqual(payload["negative_evidence"]["human_required_rows_marked_pass"], 0)
+        self.assertEqual(payload["negative_evidence"]["unallowlisted_overclaim_findings"], 0)
+        self.assertEqual(payload["negative_evidence"]["security_acceptance_claimed"], 0)
+        self.assertEqual(payload["negative_evidence"]["caller_controlled_scope_accepted"], 0)
+        self.assertEqual(payload["negative_evidence"]["tenant_membership_only_privileged_allows"], 0)
+        self.assertEqual(payload["negative_evidence"]["foreign_tenant_rows_visible"], 0)
+        self.assertEqual(payload["negative_evidence"]["tenant_export_leaks"], 0)
+        self.assertEqual(payload["negative_evidence"]["anonymous_management_api_allows"], 0)
+        self.assertEqual(payload["negative_evidence"]["raw_secret_canary_leaks"], 0)
+        self.assertEqual(payload["negative_evidence"]["forbidden_sink_requests"], 0)
+        self.assertEqual(payload["negative_evidence"]["direct_socket_successes"], 0)
+        self.assertEqual(payload["negative_evidence"]["untrusted_content_tool_executions"], 0)
+        self.assertEqual(payload["negative_evidence"]["ack_before_commit_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["github_write_mappings"], 0)
+        self.assertEqual(payload["negative_evidence"]["raw_credentials_exposed"], 0)
+        self.assertEqual(payload["negative_evidence"]["source_policy_stale_delivery_after_revoke"], 0)
+        self.assertEqual(payload["negative_evidence"]["disallowed_raw_capture_outputs"], 0)
+        self.assertEqual(payload["negative_evidence"]["authority_expansions_from_connector_content"], 0)
+        self.assertEqual(payload["negative_evidence"]["missing_signature"], 0)
+        self.assertEqual(payload["negative_evidence"]["missing_sbom"], 0)
+        self.assertEqual(payload["negative_evidence"]["unsigned_packages_accepted"], 0)
+        self.assertEqual(payload["negative_evidence"]["install_as_activation_count"], 0)
+        self.assertEqual(payload["negative_evidence"]["activation_preview_applied_authority"], 0)
+        self.assertEqual(payload["negative_evidence"]["ungranted_capabilities_allowed"], 0)
+        self.assertEqual(payload["negative_evidence"]["post_revocation_capability_allows"], 0)
+        self.assertEqual(payload["negative_evidence"]["undeclared_network_calls"], 0)
+        self.assertEqual(payload["negative_evidence"]["silent_behavior_updates_applied"], 0)
+        self.assertEqual(payload["negative_evidence"]["behavior_changing_emergency_patches_applied_without_review"], 0)
+        self.assertEqual(payload["negative_evidence"]["operator_components_missing"], 0)
+        self.assertEqual(payload["negative_evidence"]["misleading_green_fault_statuses"], 0)
+        self.assertEqual(payload["negative_evidence"]["status_cli_api_ui_mismatches"], 0)
+        self.assertEqual(payload["negative_evidence"]["status_ui_dom_snapshot_missing"], 0)
+        self.assertEqual(payload["negative_evidence"]["status_ui_dom_snapshot_missing_components"], 0)
+        self.assertEqual(payload["negative_evidence"]["status_surfaces_without_audit_refs"], 0)
+        self.assertEqual(payload["negative_evidence"]["missing_required_audit_event_families"], 0)
+        self.assertEqual(payload["negative_evidence"]["audit_tamper_accepted"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_marked_pass"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_approvals_collected_by_package_generator"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_pass_claims_allowed_by_package_generator"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_product_claims_allowed_by_package_generator"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_review_checklist"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_required_evidence_fields"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_reject_conditions"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_validation_command"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_review_record_contract"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_packages_missing_claim_boundary"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_missing"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_missing_records"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_unexpected_records"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_invalid_records"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_missing_file_hashes"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_record_paths_recorded"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_human_rows_marked_pass"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_product_claims_allowed"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_pass_claims_allowed"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_vs3_p_unlocks"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_record_bodies_persisted"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_record_paths_persisted"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_raw_record_values_in_output"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_sensitive_marker_findings"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_overclaim_marker_findings"], 0)
+        self.assertEqual(payload["negative_evidence"]["human_gate_validation_rehearsal_temp_files_persisted"], 0)
+        self.assertEqual(payload["negative_evidence"]["vs0_regression_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["vs1_regression_failures"], 0)
+        self.assertEqual(payload["negative_evidence"]["authority_expansions_from_prompt_or_connector_content"], 0)
+        self.assertEqual(payload["negative_evidence"]["coverage_omission_not_detected"], 0)
+        self.assertEqual(payload["negative_evidence"]["audit_omission_not_detected"], 0)
+        self.assertEqual(payload["negative_evidence"]["normal_user_admin_first_regressions"], 0)
+        self.assertEqual(payload["negative_evidence"]["unapproved_dependency_changes"], 0)
+        self.assertEqual(payload["negative_evidence"]["permissive_default_egress"], 0)
+        self.assertEqual(payload["negative_evidence"]["permissive_default_policy"], 0)
+        self.assertEqual(payload["negative_evidence"]["arbitrary_shell_default_allowed"], 0)
+        self.assertEqual(payload["negative_evidence"]["tenant_isolation_default_leaks"], 0)
+        self.assertEqual(payload["negative_evidence"]["activation_active_by_default"], 0)
+        self.assertEqual(payload["negative_evidence"]["high_risk_actions_without_approval"], 0)
+        self.assertEqual(payload["negative_evidence"]["production_onprem_claimed"], 0)
+        human_rows = [row for row in payload["scenario_results"] if row["owner"] == "Human"]
+        self.assertEqual(len(human_rows), 7)
+        self.assertTrue(all(row["status"] == "HUMAN_REQUIRED" for row in human_rows))
+        for row in payload["scenario_results"]:
+            self.assertIn("evidence_refs", row)
+            self.assertIn("evidence_paths", row)
+            self.assertIn("source_report_refs", row)
+            self.assertIn("audit_refs", row)
+            self.assertIn("policy_decision_refs", row)
+            self.assertEqual(row["scenario_run_id"], payload["scenario_run_id"])
+            self.assertEqual(row["trace_id"], payload["trace_id"])
+            self.assertEqual(row["corpus_pack_id"], "fixtures/vs3/local-dev")
+            self.assertEqual(row["model_provider"], "local_test")
+            self.assertEqual(row["model_name"], "deterministic-local-test")
+            self.assertEqual(row["scope"], expected_vs3_trace_scope)
+            self.assertEqual(row["transcript_paths"], traceability["transcript_paths"])
+            self.assertEqual(row["evidence_paths"], row["evidence_refs"])
+            self.assertGreater(len(row["evidence_refs"]), 0, row["id"])
+            self.assertGreater(len(row["source_report_refs"]), 0, row["id"])
+        for row in payload["scenario_results"]:
+            if row["owner"] == "AI":
+                self.assertGreater(len(row["audit_refs"]), 0, row["id"])
+        self.assertIn("reports/security/vs3-request-context-proof.json", context_rows["VS3-CTX-001"]["evidence_refs"])
+        self.assertIn("reports/db/vs3-postgres-rls-proof.json", rls_rows["VS3-RLS-001"]["evidence_refs"])
+        self.assertIn("reports/policy/vs3-opa-policy-proof.json", opa_rows["VS3-OPA-001"]["evidence_refs"])
+        self.assertIn("reports/security/vs3-egress-sandbox-proof.json", egress_rows["VS3-EGR-001"]["evidence_refs"])
+        self.assertIn("reports/security/vs3-connectorhub-source-proof.json", connector_rows["VS3-CON-001"]["evidence_refs"])
+        self.assertIn("reports/security/vs3-tool-registry-proof.json", tool_rows["VS3-TOOL-001"]["evidence_refs"])
+        self.assertIn("reports/observability/vs3-observability-proof.json", obs_rows["VS3-OBS-001"]["evidence_refs"])
+        self.assertIn(VS3_OPERATOR_STATUS_DOM_SNAPSHOT, obs_rows["VS3-OBS-001"]["evidence_refs"])
+        self.assertIn("reports/security/vs3-final-regression-proof.json", reg_rows["VS3-REG-001"]["evidence_refs"])
+        self.assertIn("reports/human-gates/vs3", human_rows[0]["evidence_refs"])
 
     @unittest.skipIf(SKIP_VS2_REGRESSION_TESTS, "VS0 regression target excludes VS2-only proof to avoid recursive regression verification")
     def test_vs2_policy_tenancy_egress_verify_requires_scenario_specific_evidence(self) -> None:
@@ -1514,6 +12190,5711 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["status"], "failed")
         self.assertEqual(payload["blocking_count"], 0)
         self.assertEqual(payload["errors"][0]["code"], "CS_SCENARIO_REPORT_FAILED")
+
+    def test_vs3_scenario_gate_preserves_source_proof_boundary_and_transcript(self) -> None:
+        report_rel = "tmp/vs3-gate-source-proof-report.json"
+        report_path = ROOT / report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            seed_payload = json.loads(seed_result.stdout)
+
+            result = run_cli("scenario", "gate", report_rel, "--json")
+        finally:
+            report_path.unlink(missing_ok=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["scenario_count"], 57)
+        self.assertEqual(payload["blocking_count"], 0)
+        self.assertEqual(payload["summary"]["pass"], 50)
+        self.assertEqual(payload["summary"]["human_required"], 7)
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["expected_scenario_count"], 57)
+        self.assertEqual(payload["coverage_validation"]["reported_scenario_count"], 57)
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["row_identity_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["row_classification_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["row_contract_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["mismatched_summary_fields"], [])
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(
+            payload["summary"]["product_feature_claims"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED",
+        )
+        self.assertEqual(payload["summary"]["vs3_l_claim"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["summary"]["vs3_p_claim"], "NOT_CLAIMED")
+        self.assertFalse(payload["summary"]["production_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["live_provider_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["real_idp_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["real_network_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["migration_restore_readiness_claim_allowed"])
+        self.assertFalse(payload["summary"]["security_acceptance_claim_allowed"])
+        self.assertFalse(payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertEqual(
+            payload["final_verdict"],
+            "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["proof_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["proof_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["security_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_acceptance"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundaries"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["claim_boundaries"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundaries"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"], payload["claim_boundaries"])
+        self.assertEqual(payload["claim_boundary"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary"]["production_onprem"], "NOT_CLAIMED")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["source_report"]["claim_boundary_validation"], payload["claim_boundary_validation"])
+        self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+        self.assertEqual(payload["gate_metadata_validation"]["missing_fields"], [])
+        self.assertEqual(payload["gate_metadata_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["gate_metadata_validation"]["unexpected_completed_slices"], [])
+        self.assertEqual(payload["gate_metadata_validation"]["actual"]["vs3_l"], "LOCAL_DEV_ASSURANCE_VERIFIED")
+        self.assertEqual(payload["gate_metadata_validation"]["actual"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(
+            payload["gate_metadata_validation"]["actual"]["current_slice"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(payload["source_report"]["gate_metadata_validation"], payload["gate_metadata_validation"])
+        self.assertEqual(payload["source_report"]["schema_version"], "cs.vs3_onprem_trusted_extension.v0")
+        self.assertEqual(payload["source_report"]["scenario_set"], "vs3-onprem-trusted-extension")
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["traceability_validation"]["missing_fields"], [])
+        self.assertEqual(payload["traceability_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["traceability_validation"]["row_missing_fields"], [])
+        self.assertEqual(payload["traceability_validation"]["row_invalid_fields"], [])
+        self.assertEqual(payload["traceability_validation"]["expected_transcript_paths"], [report_rel])
+        self.assertEqual(payload["traceability_validation"]["actual_transcript_paths"], [report_rel])
+        self.assertEqual(payload["traceability_validation"]["expected_ai_verifiable_rows"], 50)
+        self.assertEqual(payload["traceability_validation"]["actual_ai_verifiable_rows"], 50)
+        self.assertEqual(
+            payload["traceability_validation"]["expected_source_tree_ref"],
+            payload["source_tree"]["verified_source_worktree_hash"],
+        )
+        self.assertEqual(
+            payload["traceability_validation"]["actual_source_tree_ref"],
+            payload["source_tree"]["verified_source_worktree_hash"],
+        )
+        self.assertEqual(payload["source_report"]["traceability_validation"], payload["traceability_validation"])
+        self.assertEqual(
+            payload["source_report"]["traceability"]["transcript_paths"],
+            [report_rel],
+        )
+        self.assertEqual(
+            payload["source_report"]["traceability"]["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_policy_decision_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_evidence_ref_missing_from_evidence_refs"],
+            [],
+        )
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["source_report_ref_missing_from_evidence_refs"],
+            [],
+        )
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_audit_ref_missing_from_audit_refs"],
+            [],
+        )
+        self.assertEqual(
+            payload["aggregate_ref_validation"][
+                "row_policy_decision_ref_missing_from_policy_decision_refs"
+            ],
+            [],
+        )
+        self.assertGreater(payload["aggregate_ref_validation"]["source_evidence_ref_count"], 0)
+        self.assertGreater(payload["aggregate_ref_validation"]["source_audit_ref_count"], 0)
+        self.assertGreater(payload["aggregate_ref_validation"]["source_policy_decision_ref_count"], 0)
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertEqual(payload["source_transcript_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(payload["source_report"]["source_transcript_validation"], payload["source_transcript_validation"])
+        source_transcript = seed_payload["self_command_transcript"]
+        self.assertEqual(
+            source_transcript["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(source_transcript["stdout_json"]["schema_version"], "cs.cli.v0")
+        self.assertEqual(source_transcript["stdout_json"]["json_schema"], source_transcript["json_schema"])
+        source_stdout_tail_json = json.loads(source_transcript["stdout_tail"][-1])
+        self.assertEqual(source_stdout_tail_json["schema_version"], source_transcript["stdout_json"]["schema_version"])
+        self.assertEqual(source_stdout_tail_json["json_schema"], source_transcript["stdout_json"]["json_schema"])
+        self.assertEqual(source_stdout_tail_json["status"], seed_payload["status"])
+        self.assertEqual(source_stdout_tail_json["final_verdict"], source_transcript["stdout_json"]["final_verdict"])
+        self.assertEqual(source_transcript["stdout_json"]["status"], "success")
+        self.assertEqual(source_transcript["stdout_json"]["command"], source_transcript["command"])
+        self.assertEqual(source_transcript["stdout_json"]["arguments"], source_transcript["arguments"])
+        self.assertEqual(source_transcript["stdout_json"]["exit_code"], source_transcript["exit_code"])
+        self.assertEqual(source_transcript["stdout_json"]["final_verdict"], seed_payload["final_verdict"])
+        self.assertEqual(source_transcript["stdout_json"]["evidence_refs"], source_transcript["evidence_refs"])
+        self.assertEqual(source_transcript["stdout_json"]["audit_refs"], source_transcript["audit_refs"])
+        self.assertEqual(source_transcript["stdout_json"]["policy_decision_refs"], source_transcript["policy_decision_refs"])
+        self.assertEqual(source_transcript["stdout_json"]["scope"], source_transcript["scope"])
+        self.assertEqual(source_transcript["stdout_json"]["source_tree"], source_transcript["source_tree"])
+        self.assertEqual(source_transcript["stdout_json"]["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(source_transcript["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(
+            payload["human_required_validation"]["expected_human_required_rows"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertEqual(payload["human_required_validation"]["missing_human_required_rows"], [])
+        self.assertEqual(payload["human_required_validation"]["human_rows_not_required"], [])
+        self.assertEqual(payload["human_required_validation"]["missing_human_required_blockers"], [])
+        self.assertEqual(payload["human_required_validation"]["unexpected_human_required_blockers"], [])
+        self.assertEqual(payload["human_required_validation"]["proof_boundary_missing_human_rows"], [])
+        self.assertEqual(payload["human_required_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["source_report"]["human_required_validation"], payload["human_required_validation"])
+        source_tree = payload["source_tree"]
+        self.assertIn("verified_base_commit", source_tree)
+        self.assertIn("verified_source_worktree_hash", source_tree)
+        self.assertIn("worktree_dirty_at_verification", source_tree)
+        self.assertEqual(payload["source_report"]["source_tree"], source_tree)
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["generated_evidence_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["metadata_mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["missing_current_snapshot_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["stale_snapshot_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["current_duplicate_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["current_invalid_entries"], [])
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["entry_mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["current_duplicate_paths"], [])
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["current_invalid_entries"], [])
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["dirty_path_validation"]["stale_source_dirty_paths"], [])
+        self.assertEqual(payload["dirty_path_validation"]["missing_current_source_dirty_paths"], [])
+        self.assertEqual(payload["dirty_path_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["non_generated_paths"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["stale_paths"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["dirty_path_missing_paths"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["missing_current_generated_dirty_paths"], [])
+        self.assertEqual(payload["generated_dirty_path_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["hash_mismatch"], False)
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["missing_current_snapshot_paths"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["stale_snapshot_paths"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["entry_mismatches"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["duplicate_paths"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["current_duplicate_paths"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["invalid_entries"], [])
+        self.assertEqual(payload["generated_dirty_snapshot_validation"]["current_invalid_entries"], [])
+        self.assertEqual(
+            payload["source_report"]["source_tree_current_validation"],
+            payload["source_tree_current_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["source_tree_snapshot_path_validation"],
+            payload["source_tree_snapshot_path_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["source_tree_snapshot_coverage_validation"],
+            payload["source_tree_snapshot_coverage_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["source_tree_snapshot_entry_validation"],
+            payload["source_tree_snapshot_entry_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["dirty_path_validation"],
+            payload["dirty_path_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["generated_dirty_path_validation"],
+            payload["generated_dirty_path_validation"],
+        )
+        self.assertEqual(
+            payload["source_report"]["generated_dirty_snapshot_validation"],
+            payload["generated_dirty_snapshot_validation"],
+        )
+        self.assertEqual(payload["source_report"]["human_required_blocker_count"], 7)
+        self.assertEqual(
+            payload["source_report"]["human_required_rows"],
+            ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"],
+        )
+        self.assertIn(f"report:{report_rel}", payload["evidence_refs"])
+        self.assertEqual(len(payload["command_transcripts"]), 1)
+        transcript = payload["command_transcripts"][0]
+        self.assertEqual(transcript["schema_version"], "cs.command_transcript.v0")
+        self.assertEqual(transcript["name"], "scenario_gate_vs3_onprem_trusted_extension")
+        self.assertEqual(
+            transcript["command"],
+            [
+                "cornerstone",
+                "scenario",
+                "gate",
+                report_rel,
+                "--json",
+            ],
+        )
+        self.assertEqual(
+            transcript["arguments"],
+            [
+                "scenario",
+                "gate",
+                report_rel,
+                "--json",
+            ],
+        )
+        self.assertEqual(transcript["exit_code"], 0)
+        self.assertFalse(transcript["timed_out"])
+        self.assertEqual(transcript["output_mode"], "json")
+        self.assertEqual(transcript["json_schema"], "cs.cli.v0")
+        self.assertEqual(transcript["source_json_schema"], "cs.vs3_onprem_trusted_extension.v0")
+        self.assertEqual(transcript["cli_schema_version"], "cs.cli.v0")
+        self.assertEqual(
+            transcript["scope"],
+            {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "scope_source": "local_vs3_fixture",
+            },
+        )
+        self.assertEqual(transcript["evidence_refs"], payload["evidence_refs"])
+        self.assertEqual(transcript["audit_refs"], payload["audit_refs"])
+        self.assertEqual(transcript["policy_decision_refs"], payload["policy_decision_refs"])
+        self.assertEqual(transcript["source_tree"], source_tree)
+        self.assertEqual(
+            transcript["ref_summary"],
+            {
+                "evidence_refs_count": len(payload["evidence_refs"]),
+                "audit_refs_count": len(payload["audit_refs"]),
+                "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+            },
+        )
+        self.assertGreater(transcript["ref_summary"]["evidence_refs_count"], 0)
+        self.assertGreater(transcript["ref_summary"]["audit_refs_count"], 0)
+        self.assertGreater(transcript["ref_summary"]["policy_decision_refs_count"], 0)
+        self.assertTrue(transcript["started_at"].endswith("Z"))
+        self.assertTrue(transcript["ended_at"].endswith("Z"))
+        self.assertLessEqual(transcript["started_at"], transcript["ended_at"])
+        stdout_json = transcript["stdout_json"]
+        self.assertEqual(stdout_json["schema_version"], "cs.cli.v0")
+        self.assertEqual(stdout_json["json_schema"], transcript["json_schema"])
+        stdout_tail_json = json.loads(transcript["stdout_tail"][-1])
+        self.assertEqual(stdout_tail_json["schema_version"], stdout_json["schema_version"])
+        self.assertEqual(stdout_tail_json["json_schema"], stdout_json["json_schema"])
+        self.assertEqual(stdout_tail_json["status"], payload["status"])
+        self.assertEqual(stdout_tail_json["checked_report"], stdout_json["checked_report"])
+        self.assertEqual(stdout_tail_json["final_verdict"], stdout_json["final_verdict"])
+        self.assertEqual(stdout_json["status"], "success")
+        self.assertEqual(stdout_json["command"], transcript["command"])
+        self.assertEqual(stdout_json["arguments"], transcript["arguments"])
+        self.assertEqual(stdout_json["exit_code"], transcript["exit_code"])
+        self.assertEqual(stdout_json["checked_report"], payload["checked_report"])
+        self.assertEqual(stdout_json["final_verdict"], payload["final_verdict"])
+        self.assertEqual(stdout_json["evidence_refs"], transcript["evidence_refs"])
+        self.assertEqual(stdout_json["audit_refs"], transcript["audit_refs"])
+        self.assertEqual(stdout_json["policy_decision_refs"], transcript["policy_decision_refs"])
+        self.assertEqual(stdout_json["scope"], transcript["scope"])
+        self.assertEqual(stdout_json["source_tree"], transcript["source_tree"])
+        self.assertEqual(stdout_json["proof_boundary"]["vs3_l"], "LOCAL_COMPONENT_PROOF_ONLY")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(stdout_json["proof_boundary"][boundary_key], "NOT_CLAIMED")
+        self.assertEqual(stdout_json["source_report"]["schema_version"], "cs.vs3_onprem_trusted_extension.v0")
+        self.assertEqual(stdout_json["source_report"]["scenario_set"], "vs3-onprem-trusted-extension")
+        self.assertEqual(stdout_json["source_report"]["status"], "success")
+        self.assertEqual(stdout_json["source_report"]["final_verdict"], payload["final_verdict"])
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertTrue(payload["self_command_transcript_validation"]["valid"])
+        self.assertEqual(payload["self_command_transcript_validation"]["error_codes"], [])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_current"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_coverage"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_entries"])
+        self.assertTrue(payload["scenario_gate_conditions"]["self_command_transcript_shape_valid"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_current_failures"], 0)
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_snapshot_coverage_failures"], 0)
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_snapshot_entry_failures"], 0)
+        self.assertEqual(payload["scenario_gate_summary"]["self_command_transcript_shape_failures"], 0)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_current_failures"], 0)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_snapshot_coverage_failures"], 0)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_snapshot_entry_failures"], 0)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["self_command_transcript_shape_failures"], 0)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_source_tree(self) -> None:
+        source_report_rel = "tmp/vs3-gate-source-tree-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-source-tree.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report.pop("source_tree", None)
+            for transcript in tampered_report.get("command_transcripts", []):
+                transcript.pop("source_tree", None)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertIsNone(payload["source_tree"])
+        self.assertIsNone(payload["source_report"]["source_tree"])
+        self.assertIsNone(payload["command_transcripts"][0]["source_tree"])
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_stale_source_tree(self) -> None:
+        source_report_rel = "tmp/vs3-gate-stale-source-tree-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-stale-source-tree.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            stale_source_tree = dict(tampered_report["source_tree"])
+            stale_source_tree["verified_source_worktree_hash"] = "0" * 64
+            tampered_report["source_tree"] = stale_source_tree
+
+            def use_stale_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = dict(stale_source_tree)
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = dict(stale_source_tree)
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_stale_source_tree(transcript)
+            use_stale_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_METADATA_STALE" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree"]["verified_source_worktree_hash"], "0" * 64)
+        self.assertEqual(payload["source_report"]["source_tree"], payload["source_tree"])
+        source_tree_validation = payload["source_tree_current_validation"]
+        self.assertEqual(source_tree_validation["status"], "failed")
+        self.assertEqual(
+            source_tree_validation["mismatches"],
+            ["verified_source_worktree_hash_mismatch"],
+        )
+        self.assertEqual(
+            source_tree_validation["scenario_source_tree_fingerprint"]["verified_source_worktree_hash"],
+            "0" * 64,
+        )
+        self.assertNotEqual(
+            source_tree_validation["current_source_tree_fingerprint"]["verified_source_worktree_hash"],
+            "0" * 64,
+        )
+        self.assertEqual(payload["source_report"]["source_tree_current_validation"], source_tree_validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertFalse(payload["scenario_gate_conditions"]["source_tree_current"])
+        self.assertTrue(payload["scenario_gate_conditions"]["self_command_transcript_shape_valid"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["scenario_gate_summary"]["self_command_transcript_shape_failures"], 0)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["self_command_transcript_shape_failures"], 0)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_stale_base_tree_hash(self) -> None:
+        source_report_rel = "tmp/vs3-gate-stale-base-tree-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-stale-base-tree.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        stale_base_tree_hash = "0" * 40
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            stale_source_tree = dict(tampered_report["source_tree"])
+            original_base_tree_hash = stale_source_tree["verified_base_tree_hash"]
+            self.assertNotEqual(original_base_tree_hash, stale_base_tree_hash)
+            stale_source_tree["verified_base_tree_hash"] = stale_base_tree_hash
+            tampered_report["source_tree"] = stale_source_tree
+
+            def use_stale_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = dict(stale_source_tree)
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = dict(stale_source_tree)
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_stale_source_tree(transcript)
+            use_stale_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_METADATA_STALE" for error in payload["errors"])
+        )
+        source_tree_validation = payload["source_tree_current_validation"]
+        self.assertEqual(source_tree_validation["status"], "failed")
+        self.assertEqual(
+            source_tree_validation["mismatches"],
+            ["verified_base_tree_hash_mismatch"],
+        )
+        self.assertEqual(
+            source_tree_validation["scenario_source_tree_fingerprint"]["verified_base_tree_hash"],
+            stale_base_tree_hash,
+        )
+        self.assertEqual(
+            source_tree_validation["current_source_tree_fingerprint"]["verified_base_tree_hash"],
+            original_base_tree_hash,
+        )
+        self.assertEqual(payload["source_report"]["source_tree_current_validation"], source_tree_validation)
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertFalse(payload["scenario_gate_conditions"]["source_tree_current"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_coverage"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_entries"])
+        self.assertTrue(payload["scenario_gate_conditions"]["self_command_transcript_shape_valid"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_stale_post_commit_source_tree(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-stale-post-commit-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-stale-post-commit-source.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            stale_source_tree = dict(tampered_report["source_tree"])
+            original_final_commit = stale_source_tree.get("final_commit")
+            original_pending_reason = stale_source_tree.get("final_commit_pending_reason")
+            original_generated_before_commit = stale_source_tree.get("report_generated_before_commit")
+            stale_source_tree["final_commit"] = "0" * 7
+            stale_source_tree["final_commit_pending_reason"] = "tampered_post_commit_state"
+            stale_source_tree["report_generated_before_commit"] = not bool(
+                original_generated_before_commit
+            )
+            tampered_report["source_tree"] = stale_source_tree
+
+            def use_stale_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = dict(stale_source_tree)
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = dict(stale_source_tree)
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_stale_source_tree(transcript)
+            use_stale_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_METADATA_STALE" for error in payload["errors"])
+        )
+        source_tree_validation = payload["source_tree_current_validation"]
+        self.assertEqual(source_tree_validation["status"], "failed")
+        self.assertEqual(
+            source_tree_validation["mismatches"],
+            [
+                "final_commit_mismatch",
+                "final_commit_pending_reason_mismatch",
+                "report_generated_before_commit_mismatch",
+            ],
+        )
+        self.assertEqual(
+            source_tree_validation["scenario_source_tree_fingerprint"]["final_commit"],
+            "0" * 7,
+        )
+        self.assertEqual(
+            source_tree_validation["current_source_tree_fingerprint"]["final_commit"],
+            original_final_commit,
+        )
+        self.assertEqual(
+            source_tree_validation["scenario_source_tree_fingerprint"][
+                "final_commit_pending_reason"
+            ],
+            "tampered_post_commit_state",
+        )
+        self.assertEqual(
+            source_tree_validation["current_source_tree_fingerprint"][
+                "final_commit_pending_reason"
+            ],
+            original_pending_reason,
+        )
+        self.assertEqual(
+            source_tree_validation["current_source_tree_fingerprint"][
+                "report_generated_before_commit"
+            ],
+            original_generated_before_commit,
+        )
+        self.assertEqual(payload["source_report"]["source_tree_current_validation"], source_tree_validation)
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertFalse(payload["scenario_gate_conditions"]["source_tree_current"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_coverage"])
+        self.assertTrue(payload["scenario_gate_conditions"]["source_tree_snapshot_entries"])
+        self.assertTrue(payload["scenario_gate_conditions"]["self_command_transcript_shape_valid"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_current_failures"], 1)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_generated_evidence_source_snapshot_path(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-snapshot-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-generated-evidence-source-snapshot-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        generated_path = (
+            "docs/verification-reports/"
+            "VS3_SOURCE_TREE_SOURCE_DOC_BOUNDARY_GUARD_CHECKPOINT_2026-06-30.md"
+        )
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            polluted_source_tree.setdefault("verified_source_snapshot_paths", []).append(
+                {
+                    "path": generated_path,
+                    "status": "??",
+                    "state": "present",
+                    "sha256": "0" * 64,
+                    "bytes": 1,
+                }
+            )
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_SNAPSHOT_PATHS_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        validation = payload["source_tree_snapshot_path_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertIn(generated_path, validation["generated_evidence_paths"])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["metadata_mismatches"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(payload["source_report"]["source_tree_snapshot_path_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_stale_source_snapshot_path_metadata(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-snapshot-metadata-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-stale-source-snapshot-metadata.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            stale_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            snapshot_paths = stale_source_tree["verified_source_snapshot_paths"]
+            self.assertGreater(len(snapshot_paths), 0)
+            stale_path = snapshot_paths[0]["path"]
+            snapshot_paths[0]["sha256"] = "0" * 64
+            snapshot_paths[0]["bytes"] = 0
+            tampered_report["source_tree"] = stale_source_tree
+
+            def use_stale_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(stale_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(stale_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_stale_source_tree(transcript)
+            use_stale_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_SNAPSHOT_PATHS_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        validation = payload["source_tree_snapshot_path_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["generated_evidence_paths"], [])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(len(validation["metadata_mismatches"]), 1)
+        mismatch = validation["metadata_mismatches"][0]
+        self.assertEqual(mismatch["path"], stale_path)
+        self.assertEqual(mismatch["issue"], "current_file_metadata_mismatch")
+        self.assertEqual(mismatch["recorded_sha256"], "0" * 64)
+        self.assertEqual(mismatch["recorded_bytes"], 0)
+        self.assertNotEqual(mismatch["current_sha256"], "0" * 64)
+        self.assertGreater(mismatch["current_bytes"], 0)
+        self.assertEqual(payload["source_report"]["source_tree_snapshot_path_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_source_snapshot_path(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-snapshot-coverage-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-source-snapshot-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        source_path = "packages/cornerstone_cli/main.py"
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            snapshot_paths = polluted_source_tree["verified_source_snapshot_paths"]
+            self.assertTrue(
+                any(entry.get("path") == source_path for entry in snapshot_paths),
+                snapshot_paths,
+            )
+            polluted_source_tree["verified_source_snapshot_paths"] = [
+                entry for entry in snapshot_paths if entry.get("path") != source_path
+            ]
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_SNAPSHOT_COVERAGE_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        validation = payload["source_tree_snapshot_coverage_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertIn(source_path, validation["missing_current_snapshot_paths"])
+        self.assertEqual(validation["stale_snapshot_paths"], [])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["current_duplicate_paths"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(validation["current_invalid_entries"], [])
+        self.assertEqual(payload["source_report"]["source_tree_snapshot_coverage_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertFalse(payload["scenario_gate_conditions"]["source_tree_snapshot_coverage"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_snapshot_coverage_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_snapshot_coverage_failures"], 1)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_tampered_source_snapshot_status(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-snapshot-entry-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-tampered-source-snapshot-status.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        source_path = "packages/cornerstone_cli/main.py"
+        tampered_status = "tampered-status"
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            snapshot_paths = polluted_source_tree["verified_source_snapshot_paths"]
+            target_entry = next(
+                entry for entry in snapshot_paths if entry.get("path") == source_path
+            )
+            original_status = target_entry["status"]
+            self.assertNotEqual(original_status, tampered_status)
+            target_entry["status"] = tampered_status
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_SNAPSHOT_ENTRIES_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        validation = payload["source_tree_snapshot_entry_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["current_duplicate_paths"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(validation["current_invalid_entries"], [])
+        self.assertEqual(
+            validation["entry_mismatches"],
+            [
+                {
+                    "path": source_path,
+                    "field": "status",
+                    "recorded": tampered_status,
+                    "current": original_status,
+                }
+            ],
+        )
+        self.assertEqual(payload["source_report"]["source_tree_snapshot_entry_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertFalse(payload["scenario_gate_conditions"]["source_tree_snapshot_entries"])
+        self.assertEqual(payload["scenario_gate_summary"]["source_tree_snapshot_entry_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["source_tree_snapshot_entry_failures"], 1)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_path_in_generated_dirty_paths(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-generated-dirty-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-path-in-generated-dirty-paths.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        source_path = "packages/cornerstone_cli/main.py"
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            self.assertIn(source_path, polluted_source_tree["dirty_paths"])
+            polluted_source_tree["generated_dirty_paths"] = [source_path]
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_GENERATED_DIRTY_PATHS_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        validation = payload["generated_dirty_path_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["path_count"], 1)
+        self.assertEqual(validation["non_generated_paths"], [source_path])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["dirty_path_missing_paths"], [])
+        self.assertGreater(len(validation["missing_current_generated_dirty_paths"]), 0)
+        self.assertNotIn(source_path, validation["missing_current_generated_dirty_paths"])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertIn(source_path, validation["stale_paths"])
+        self.assertEqual(payload["source_report"]["generated_dirty_path_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_generated_dirty_paths(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-missing-generated-dirty-paths-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-generated-dirty-paths.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            ignored_generated_paths = {
+                source_report_rel,
+                "reports/human-gates/vs3/evidence-status.json",
+                "reports/human-gates/vs3/review-kit.json",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "reports/human-gates/vs3/vs3-local-checkpoint.json",
+                "reports/security/vs3-local-checkpoint.json",
+            }
+            expected_generated_paths = sorted(
+                path
+                for path in polluted_source_tree["generated_dirty_paths"]
+                if path not in ignored_generated_paths
+            )
+            self.assertGreater(len(expected_generated_paths), 0)
+            polluted_source_tree["generated_dirty_paths"] = []
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_GENERATED_DIRTY_PATHS_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        validation = payload["generated_dirty_path_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["path_count"], 0)
+        self.assertEqual(validation["non_generated_paths"], [])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["stale_paths"], [])
+        self.assertEqual(validation["dirty_path_missing_paths"], [])
+        self.assertEqual(validation["missing_current_generated_dirty_paths"], expected_generated_paths)
+        self.assertNotIn(
+            "reports/security/vs3-local-checkpoint.json",
+            validation["missing_current_generated_dirty_paths"],
+        )
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(payload["source_report"]["generated_dirty_path_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_accepts_local_dev_claim_with_downstream_checkpoint_drift(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-downstream-generated-drift-source.json"
+        source_report_path = ROOT / source_report_rel
+        downstream_rels = [
+            "reports/human-gates/vs3/review-kit.json",
+            "reports/security/vs3-local-checkpoint.json",
+        ]
+        downstream_paths = [ROOT / rel for rel in downstream_rels]
+        original_downstream_bytes: dict[str, bytes | None] = {}
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            for downstream_rel, downstream_path in zip(downstream_rels, downstream_paths):
+                original_downstream_bytes[downstream_rel] = (
+                    downstream_path.read_bytes() if downstream_path.exists() else None
+                )
+                downstream_path.parent.mkdir(parents=True, exist_ok=True)
+                downstream_path.write_bytes(
+                    (
+                        original_downstream_bytes[downstream_rel]
+                        or b'{"status":"local-test"}\n'
+                    )
+                    + b"\n{\"downstream_generated_after_report\":true}\n"
+                )
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            for downstream_rel, downstream_path in zip(downstream_rels, downstream_paths):
+                if downstream_rel not in original_downstream_bytes:
+                    continue
+                original_bytes = original_downstream_bytes[downstream_rel]
+                if original_bytes is None:
+                    downstream_path.unlink(missing_ok=True)
+                else:
+                    downstream_path.write_bytes(original_bytes)
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "success")
+        ignored_paths = {source_report_rel, *downstream_rels}
+        generated_dirty_path_validation = payload["generated_dirty_path_validation"]
+        self.assertEqual(generated_dirty_path_validation["status"], "passed")
+        self.assertTrue(
+            ignored_paths.issubset(set(generated_dirty_path_validation["ignored_paths"]))
+        )
+        for downstream_rel in downstream_rels:
+            self.assertNotIn(
+                downstream_rel,
+                generated_dirty_path_validation["missing_current_generated_dirty_paths"],
+            )
+        self.assertEqual(generated_dirty_path_validation["non_generated_paths"], [])
+        self.assertEqual(generated_dirty_path_validation["stale_paths"], [])
+        generated_dirty_snapshot_validation = payload["generated_dirty_snapshot_validation"]
+        self.assertEqual(generated_dirty_snapshot_validation["status"], "passed")
+        self.assertFalse(generated_dirty_snapshot_validation["hash_mismatch"])
+        self.assertTrue(
+            ignored_paths.issubset(set(generated_dirty_snapshot_validation["ignored_paths"]))
+        )
+        for downstream_rel in downstream_rels:
+            self.assertNotIn(
+                downstream_rel,
+                generated_dirty_snapshot_validation["missing_current_snapshot_paths"],
+            )
+            self.assertNotIn(
+                downstream_rel,
+                {
+                    mismatch["path"]
+                    for mismatch in generated_dirty_snapshot_validation["entry_mismatches"]
+                },
+            )
+        self.assertTrue(payload["scenario_gate_conditions"]["generated_dirty_snapshot"])
+        self.assertEqual(payload["scenario_gate_summary"]["generated_dirty_snapshot_failures"], 0)
+        self.assertEqual(
+            payload["scenario_gate_negative_evidence"]["generated_dirty_snapshot_failures"],
+            0,
+        )
+        self.assertEqual(payload["claim_boundary"]["vs3_p"], "NOT_CLAIMED")
+        self.assertEqual(payload["summary"]["human_required"], 7)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_changed_generated_dirty_bytes(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-generated-dirty-bytes-source.json"
+        source_report_path = ROOT / source_report_rel
+        target_rel = "docs/verification-reports/VS3_SOURCE_TREE_GENERATED_DIRTY_PATH_COVERAGE_GUARD_CHECKPOINT_2026-06-30.md"
+        target_path = ROOT / target_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            source_report = json.loads(source_report_path.read_text())
+            if target_rel not in source_report["source_tree"]["generated_dirty_paths"]:
+                target_rel = sorted(source_report["source_tree"]["generated_dirty_paths"])[0]
+                target_path = ROOT / target_rel
+            recorded_entry = next(
+                entry
+                for entry in source_report["source_tree"]["generated_dirty_snapshot_paths"]
+                if entry.get("path") == target_rel
+            )
+            original_bytes = target_path.read_bytes()
+            self.assertEqual(recorded_entry["sha256"], hashlib.sha256(original_bytes).hexdigest())
+            self.assertEqual(recorded_entry["bytes"], len(original_bytes))
+
+            target_path.write_bytes(
+                original_bytes + b"\n<!-- temporary generated evidence mutation for gate test -->\n"
+            )
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            if "original_bytes" in locals():
+                target_path.write_bytes(original_bytes)
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(
+                error["code"] == "CS_VS3_SOURCE_TREE_GENERATED_DIRTY_SNAPSHOT_INVALID"
+                for error in payload["errors"]
+            )
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_snapshot_entry_validation"]["status"], "passed")
+        self.assertEqual(payload["dirty_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        validation = payload["generated_dirty_snapshot_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertTrue(validation["hash_mismatch"])
+        self.assertEqual(validation["missing_current_snapshot_paths"], [])
+        self.assertEqual(validation["stale_snapshot_paths"], [])
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["current_duplicate_paths"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertEqual(validation["current_invalid_entries"], [])
+        mismatch_fields = {
+            mismatch["field"]
+            for mismatch in validation["entry_mismatches"]
+            if mismatch["path"] == target_rel
+        }
+        self.assertEqual(mismatch_fields, {"sha256", "bytes"})
+        self.assertEqual(payload["source_report"]["generated_dirty_snapshot_validation"], validation)
+        self.assertFalse(payload["scenario_gate_conditions"]["generated_dirty_snapshot"])
+        self.assertEqual(payload["scenario_gate_summary"]["generated_dirty_snapshot_failures"], 1)
+        self.assertEqual(payload["scenario_gate_negative_evidence"]["generated_dirty_snapshot_failures"], 1)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_source_dirty_path(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-dirty-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-source-dirty-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        source_path = "packages/cornerstone_cli/main.py"
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            polluted_source_tree = json.loads(json.dumps(tampered_report["source_tree"]))
+            self.assertIn(source_path, polluted_source_tree["dirty_paths"])
+            polluted_source_tree["dirty_paths"] = [
+                path for path in polluted_source_tree["dirty_paths"] if path != source_path
+            ]
+            tampered_report["source_tree"] = polluted_source_tree
+
+            def use_polluted_source_tree(transcript: dict[str, Any]) -> None:
+                transcript["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["source_tree"] = json.loads(json.dumps(polluted_source_tree))
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                use_polluted_source_tree(transcript)
+            use_polluted_source_tree(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TREE_DIRTY_PATHS_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_tree_current_validation"]["status"], "passed")
+        self.assertEqual(payload["source_tree_current_validation"]["mismatches"], [])
+        self.assertEqual(payload["source_tree_snapshot_path_validation"]["status"], "passed")
+        self.assertEqual(payload["generated_dirty_path_validation"]["status"], "passed")
+        validation = payload["dirty_path_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["duplicate_paths"], [])
+        self.assertEqual(validation["stale_source_dirty_paths"], [])
+        self.assertEqual(validation["invalid_entries"], [])
+        self.assertIn(source_path, validation["missing_current_source_dirty_paths"])
+        self.assertEqual(payload["source_report"]["dirty_path_validation"], validation)
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["source_tree"], payload["source_tree"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_traceability_metadata(self) -> None:
+        source_report_rel = "tmp/vs3-gate-traceability-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-traceability.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report.pop("traceability", None)
+            for field in ["scenario_run_id", "trace_id", "corpus_pack_id", "model_provider", "model_name"]:
+                tampered_report.pop(field, None)
+            for row in tampered_report["scenario_results"]:
+                for field in [
+                    "scenario_run_id",
+                    "trace_id",
+                    "corpus_pack_id",
+                    "model_provider",
+                    "model_name",
+                    "scope",
+                    "transcript_paths",
+                ]:
+                    row.pop(field, None)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["traceability_validation"]["status"], "failed")
+        self.assertIn("traceability", payload["traceability_validation"]["missing_fields"])
+        self.assertIn("traceability.scenario_run_id", payload["traceability_validation"]["missing_fields"])
+        self.assertIn("VS3-GATE-001.scenario_run_id", payload["traceability_validation"]["row_missing_fields"])
+        self.assertIn("VS3-GATE-001.scope", payload["traceability_validation"]["row_invalid_fields"])
+        self.assertEqual(payload["source_report"]["traceability_validation"], payload["traceability_validation"])
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_wrong_traceability_transcript_path(self) -> None:
+        source_report_rel = "tmp/vs3-gate-trace-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-wrong-trace-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_transcript_paths = ["reports/scenario/not-the-checked-vs3-report.json"]
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = bogus_transcript_paths
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = bogus_transcript_paths
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+        )
+        validation = payload["traceability_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["expected_transcript_paths"], [tampered_report_rel])
+        self.assertEqual(validation["actual_transcript_paths"], bogus_transcript_paths)
+        self.assertIn("traceability.transcript_paths", validation["invalid_fields"])
+        self.assertIn("VS3-GATE-001.transcript_paths", validation["row_invalid_fields"])
+        self.assertEqual(payload["source_report"]["traceability_validation"], validation)
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_traceability_count_or_source_ref_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-trace-source-ref-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("ai_verifiable_rows", 49, "traceability.ai_verifiable_rows"),
+                ("source_tree_ref", "stale-source-tree-ref", "traceability.source_tree_ref"),
+            ]
+            for field_name, tampered_value, expected_invalid_field in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report["traceability"][field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    validation = payload["traceability_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["expected_ai_verifiable_rows"], 50)
+                    self.assertEqual(
+                        validation["expected_source_tree_ref"],
+                        base_report["source_tree"]["verified_source_worktree_hash"],
+                    )
+                    self.assertIn(expected_invalid_field, validation["invalid_fields"])
+                    self.assertEqual(validation["row_missing_fields"], [])
+                    self.assertEqual(validation["row_invalid_fields"], [])
+                    self.assertEqual(payload["source_report"]["traceability_validation"], validation)
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_local_verification_identity_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-local-verification-identity-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("corpus_pack_id", "fixtures/vs3/remote-live"),
+                ("model_provider", "openai"),
+                ("model_name", "gpt-5"),
+            ]
+            for field_name, tampered_value in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[field_name] = tampered_value
+                    tampered_report["traceability"][field_name] = tampered_value
+                    for row in tampered_report["scenario_results"]:
+                        row[field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    validation = payload["traceability_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(
+                        validation["expected_local_verification_identity"],
+                        {
+                            "corpus_pack_id": "fixtures/vs3/local-dev",
+                            "model_provider": "local_test",
+                            "model_name": "deterministic-local-test",
+                        },
+                    )
+                    self.assertEqual(validation["actual_local_verification_identity"][field_name], tampered_value)
+                    self.assertEqual(
+                        validation["actual_traceability_local_verification_identity"][field_name],
+                        tampered_value,
+                    )
+                    self.assertIn(field_name, validation["invalid_fields"])
+                    self.assertIn(f"traceability.{field_name}", validation["invalid_fields"])
+                    self.assertIn(f"VS3-GATE-001.{field_name}", validation["row_invalid_fields"])
+                    self.assertEqual(validation["missing_fields"], [])
+                    self.assertEqual(validation["row_missing_fields"], [])
+                    self.assertEqual(payload["source_report"]["traceability_validation"], validation)
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["evidence_reconciliation_validation"]["status"], "passed")
+                    self.assertEqual(payload["matrix_cli_coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["overclaim_lint_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+                    self.assertEqual(payload["negative_evidence_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_trace_identity_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-trace-identity-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+            source_tree_hash = base_report["source_tree"]["verified_source_worktree_hash"]
+            expected_trace_hash = source_tree_hash[:16]
+
+            cases = [
+                (
+                    "scenario_run_id",
+                    "scenario-run:vs3-onprem-trusted-extension:forgedtrace0000",
+                ),
+                ("trace_id", "trace:vs3-onprem-trusted-extension:forgedtrace0000"),
+            ]
+            for field_name, tampered_value in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[field_name] = tampered_value
+                    tampered_report["traceability"][field_name] = tampered_value
+                    for row in tampered_report["scenario_results"]:
+                        row[field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    validation = payload["traceability_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(
+                        validation["expected_trace_identity"],
+                        {
+                            "scenario_run_id": (
+                                "scenario-run:vs3-onprem-trusted-extension:"
+                                f"{expected_trace_hash}"
+                            ),
+                            "trace_id": f"trace:vs3-onprem-trusted-extension:{expected_trace_hash}",
+                        },
+                    )
+                    self.assertEqual(validation["actual_trace_identity"][field_name], tampered_value)
+                    self.assertEqual(
+                        validation["actual_traceability_trace_identity"][field_name],
+                        tampered_value,
+                    )
+                    self.assertIn(field_name, validation["invalid_fields"])
+                    self.assertIn(f"traceability.{field_name}", validation["invalid_fields"])
+                    self.assertIn(f"VS3-GATE-001.{field_name}", validation["row_invalid_fields"])
+                    self.assertEqual(validation["missing_fields"], [])
+                    self.assertEqual(validation["row_missing_fields"], [])
+                    self.assertEqual(payload["source_report"]["traceability_validation"], validation)
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["evidence_reconciliation_validation"]["status"], "passed")
+                    self.assertEqual(payload["matrix_cli_coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["overclaim_lint_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+                    self.assertEqual(payload["negative_evidence_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_top_level_scope_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-top-level-scope-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("tenant_id", "evil-tenant"),
+                ("owner_id", "evil-owner"),
+                ("namespace_id", "evil-namespace"),
+                ("workspace_id", "evil-workspace"),
+            ]
+            for field_name, tampered_value in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_TRACEABILITY_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    validation = payload["traceability_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertIn(field_name, validation["invalid_fields"])
+                    self.assertEqual(
+                        validation["expected_scope"],
+                        {
+                            "tenant_id": "local-dev",
+                            "owner_id": "local-user",
+                            "namespace_id": "personal",
+                            "workspace_id": "default",
+                            "scope_source": "local_vs3_fixture",
+                        },
+                    )
+                    self.assertEqual(validation["actual_top_level_scope"][field_name], tampered_value)
+                    self.assertEqual(validation["row_missing_fields"], [])
+                    self.assertEqual(validation["row_invalid_fields"], [])
+                    self.assertEqual(payload["source_report"]["traceability_validation"], validation)
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_report_identity_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-report-identity-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            expected_identity = {
+                "schema_version": "cs.vs3_onprem_trusted_extension.v0",
+                "scenario_set": "vs3-onprem-trusted-extension",
+                "cli_schema_version": "cs.cli.v0",
+                "command": "cornerstone scenario verify vs3-onprem-trusted-extension",
+                "version": "0.0.0-scaffold",
+            }
+            cases = [
+                ("schema_version", "cs.vs3_onprem_trusted_extension.tampered"),
+                ("scenario_set", "vs3-wrong-set"),
+                ("cli_schema_version", "cs.cli.fake"),
+                ("command", "cornerstone scenario verify wrong --json"),
+                ("version", "999.999.999"),
+            ]
+            for field_name, tampered_value in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_REPORT_IDENTITY_INVALID" for error in payload["errors"])
+                    )
+                    validation = payload["report_identity_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["expected"], expected_identity)
+                    self.assertEqual(validation["actual"][field_name], tampered_value)
+                    self.assertEqual(validation["invalid_fields"], [field_name])
+                    self.assertEqual(payload["source_report"]["report_identity_validation"], validation)
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    if field_name == "schema_version":
+                        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+                        self.assertTrue(
+                            any(
+                                error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING"
+                                for error in payload["errors"]
+                            )
+                        )
+                    else:
+                        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_runtime_metadata_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-runtime-metadata-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            expected_metadata = {
+                "product": "CornerStone",
+                "mode": "local_scaffold",
+                "ids.git_commit": base_report["ids"]["git_commit"],
+                "output_path": str(source_report_path),
+            }
+            cases = [
+                ("product", "NotCornerStone"),
+                ("mode", "production"),
+                ("ids.git_commit", "tampered-git-commit"),
+                ("output_path", "/tmp/forged-vs3-report.json"),
+            ]
+            for field_name, tampered_value in cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    if field_name == "ids.git_commit":
+                        tampered_report["ids"]["git_commit"] = tampered_value
+                    else:
+                        tampered_report[field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(
+                            error["code"] == "CS_VS3_REPORT_RUNTIME_METADATA_INVALID"
+                            for error in payload["errors"]
+                        )
+                    )
+                    validation = payload["report_runtime_metadata_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["expected"], expected_metadata)
+                    self.assertEqual(validation["actual"][field_name], tampered_value)
+                    self.assertEqual(validation["invalid_fields"], [field_name])
+                    self.assertEqual(
+                        payload["source_report"]["report_runtime_metadata_validation"],
+                        validation,
+                    )
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_matrix_or_cli_coverage_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-matrix-cli-coverage-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("cli_coverage", "status", "failed", "cli_coverage.status"),
+                (
+                    "cli_coverage",
+                    "native_command",
+                    "python scripts/raw_vs3_verify.py",
+                    "cli_coverage.native_command",
+                ),
+                (
+                    "cli_coverage",
+                    "emits_per_row_evidence",
+                    False,
+                    "cli_coverage.emits_per_row_evidence",
+                ),
+                ("cli_coverage", "emits_human_rows", False, "cli_coverage.emits_human_rows"),
+                ("cli_coverage", "emits_gate_metadata", False, "cli_coverage.emits_gate_metadata"),
+                (
+                    "cli_coverage",
+                    "command_transcript_count",
+                    0,
+                    "cli_coverage.command_transcript_count",
+                ),
+                ("matrix_check", "status", "failed", "matrix_check.status"),
+                ("matrix_check", "row_count", 56, "matrix_check.row_count"),
+                ("matrix_check", "duplicates", ["VS3-GATE-004"], "matrix_check.duplicates"),
+            ]
+            for section, field_name, tampered_value, expected_invalid_field in cases:
+                with self.subTest(field=f"{section}.{field_name}"):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[section][field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(
+                            error["code"] == "CS_VS3_MATRIX_CLI_COVERAGE_INVALID"
+                            for error in payload["errors"]
+                        )
+                    )
+                    validation = payload["matrix_cli_coverage_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["invalid_fields"], [expected_invalid_field])
+                    self.assertEqual(validation[f"actual_{section}"][field_name], tampered_value)
+                    self.assertEqual(
+                        payload["source_report"]["matrix_cli_coverage_validation"],
+                        validation,
+                    )
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_evidence_reconciliation_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-evidence-reconciliation-source.json"
+        source_report_path = ROOT / source_report_rel
+        reconciliation_path = ROOT / "reports/security/vs3-evidence-reconciliation.json"
+        original_reconciliation = reconciliation_path.read_text()
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            def set_canonical_status(report: dict[str, Any]) -> None:
+                report["evidence_reconciliation"]["canonical_status"] = (
+                    "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING"
+                )
+
+            def set_canonical_artifact(report: dict[str, Any]) -> None:
+                report["evidence_reconciliation"]["canonical_status_artifact"] = (
+                    "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+                )
+
+            def set_final_claim(report: dict[str, Any]) -> None:
+                report["evidence_reconciliation"]["final_product_claim_string"] = (
+                    "VS3_P_PRODUCTION_ONPREM_READY"
+                )
+
+            def set_claim_boundary(report: dict[str, Any]) -> None:
+                report["evidence_reconciliation"]["claim_boundary"]["vs3_p"] = (
+                    "PRODUCTION_ONPREM_READY"
+                )
+
+            def set_artifact_classification(report: dict[str, Any]) -> None:
+                report["evidence_reconciliation"]["artifacts"][0]["classification"] = (
+                    "canonical_current_vs2_boundary"
+                )
+
+            cases = [
+                ("canonical_status", set_canonical_status, ["evidence_reconciliation.canonical_status"]),
+                (
+                    "canonical_status_artifact",
+                    set_canonical_artifact,
+                    ["evidence_reconciliation.canonical_status_artifact"],
+                ),
+                (
+                    "final_product_claim_string",
+                    set_final_claim,
+                    ["evidence_reconciliation.final_product_claim_string"],
+                ),
+                ("claim_boundary", set_claim_boundary, ["evidence_reconciliation.claim_boundary"]),
+                ("artifacts", set_artifact_classification, ["evidence_reconciliation.artifacts"]),
+            ]
+            for case_name, mutate, expected_invalid_fields in cases:
+                with self.subTest(case=case_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    mutate(tampered_report)
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    reconciliation_path.write_text(
+                        json.dumps(
+                            tampered_report["evidence_reconciliation"],
+                            indent=2,
+                            sort_keys=True,
+                        )
+                        + "\n"
+                    )
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(
+                            error["code"] == "CS_VS3_EVIDENCE_RECONCILIATION_INVALID"
+                            for error in payload["errors"]
+                        )
+                    )
+                    validation = payload["evidence_reconciliation_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["invalid_fields"], expected_invalid_fields)
+                    self.assertEqual(
+                        payload["source_report"]["evidence_reconciliation_validation"],
+                        validation,
+                    )
+                    self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["matrix_cli_coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["overclaim_lint_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["negative_evidence_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+                    reconciliation_path.write_text(original_reconciliation)
+        finally:
+            reconciliation_path.write_text(original_reconciliation)
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_overclaim_lint_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-overclaim-lint-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            def set_overclaim_status(report: dict[str, Any]) -> None:
+                report["overclaim_lint"]["status"] = "failed"
+
+            def add_overclaim_finding(report: dict[str, Any]) -> None:
+                report["overclaim_lint"]["findings"] = [
+                    {
+                        "path": "docs/agent/VS3_FULL_GOAL_PROMPT.md",
+                        "term": "production ready",
+                    }
+                ]
+
+            def claim_vs3_p_boundary(report: dict[str, Any]) -> None:
+                report["overclaim_lint"]["claim_boundary"]["vs3_p"] = "PRODUCTION_ONPREM_READY"
+
+            def increment_negative_evidence(report: dict[str, Any]) -> None:
+                report["overclaim_lint"]["negative_evidence"]["vs3_p_claimed"] = 1
+
+            def remove_overclaim_lint(report: dict[str, Any]) -> None:
+                report.pop("overclaim_lint")
+
+            cases = [
+                ("status", set_overclaim_status, ["overclaim_lint.status"]),
+                ("findings", add_overclaim_finding, ["overclaim_lint.findings"]),
+                ("claim_boundary", claim_vs3_p_boundary, ["overclaim_lint.claim_boundary"]),
+                (
+                    "negative_evidence",
+                    increment_negative_evidence,
+                    ["overclaim_lint.negative_evidence"],
+                ),
+                ("missing", remove_overclaim_lint, ["overclaim_lint"]),
+            ]
+            for case_name, mutate, expected_invalid_fields in cases:
+                with self.subTest(case=case_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    mutate(tampered_report)
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(
+                            error["code"] == "CS_VS3_OVERCLAIM_LINT_INVALID"
+                            for error in payload["errors"]
+                        )
+                    )
+                    validation = payload["overclaim_lint_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["invalid_fields"], expected_invalid_fields)
+                    self.assertEqual(
+                        payload["source_report"]["overclaim_lint_validation"],
+                        validation,
+                    )
+                    self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+                    self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["matrix_cli_coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+                    self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+                    self.assertEqual(payload["component_proof_validation"]["status"], "passed")
+                    self.assertEqual(payload["negative_evidence_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_gate_metadata_overclaim(self) -> None:
+        source_report_rel = "tmp/vs3-gate-metadata-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-gate-metadata-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = [tampered_report_rel]
+            gate_metadata = tampered_report["gate_metadata"]
+            gate_metadata["vs3_p"] = "PRODUCTION_ONPREM_READY"
+            gate_metadata["completed_slices"] = [
+                "VS3-0",
+                "VS3-1",
+                "VS3-2",
+                "VS3-3",
+                "VS3-4",
+                "VS3-5",
+                "VS3-6",
+                "VS3-7",
+                "VS3-FINAL-REGRESSION",
+                "VS3-P",
+            ]
+            gate_metadata["next_slice"] = (
+                "VS3-P production/on-prem ready; security accepted; "
+                "human UX accepted; live provider ready."
+            )
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_GATE_METADATA_BOUNDARY_INVALID" for error in payload["errors"])
+        )
+        validation = payload["gate_metadata_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["missing_fields"], [])
+        self.assertIn("gate_metadata.vs3_p", validation["invalid_fields"])
+        self.assertIn("gate_metadata.completed_slices", validation["invalid_fields"])
+        self.assertIn("gate_metadata.next_slice", validation["invalid_fields"])
+        self.assertEqual(validation["unexpected_completed_slices"], ["VS3-P"])
+        self.assertEqual(payload["source_report"]["gate_metadata_validation"], validation)
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_human_required_blocker_overclaim(self) -> None:
+        source_report_rel = "tmp/vs3-gate-human-blocker-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-human-blocker-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = [tampered_report_rel]
+            blocker = tampered_report["human_required_blockers"][0]
+            self.assertEqual(blocker["scenario_id"], "VS3-H01")
+            blocker["status"] = "PASS"
+            blocker["required_human_action"] = "Done and approved."
+            blocker["expected_evidence"] = "APPROVED signed acceptance collected; VS3-P unlocked."
+            blocker["release_impact"] = "VS3-P unblocked; human/security accepted."
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_HUMAN_REQUIRED_BLOCKERS_INVALID" for error in payload["errors"])
+        )
+        validation = payload["human_required_validation"]
+        self.assertEqual(validation["status"], "failed")
+        issue_fields = {
+            issue["field"]
+            for issue in validation["human_required_blocker_content_issues"]
+            if issue["scenario_id"] == "VS3-H01"
+        }
+        self.assertEqual(
+            issue_fields,
+            {
+                "status",
+                "required_human_action",
+                "expected_evidence",
+                "release_impact",
+            },
+        )
+        self.assertEqual(payload["source_report"]["human_required_validation"], validation)
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_human_required_blockers(self) -> None:
+        source_report_rel = "tmp/vs3-gate-human-blocker-shape-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-human-blocker-shape-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        expected_human_rows = [f"VS3-H{index:02d}" for index in range(1, 8)]
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = [tampered_report_rel]
+            tampered_report["human_required_blockers"] = "APPROVED: all human gates accepted by local verifier"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_HUMAN_REQUIRED_BLOCKERS_INVALID" for error in payload["errors"])
+        )
+        validation = payload["human_required_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["human_required_blockers_not_list"], ["human_required_blockers"])
+        self.assertEqual(validation["missing_human_required_blockers"], expected_human_rows)
+        self.assertEqual(validation["unexpected_human_required_blockers"], [])
+        self.assertEqual(validation["duplicate_human_required_blockers"], [])
+        self.assertEqual(validation["human_required_blocker_content_issues"], [])
+        self.assertEqual(payload["source_report"]["human_required_blocker_count"], None)
+        self.assertEqual(payload["source_report"]["human_required_validation"], validation)
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_scenario_results(self) -> None:
+        source_report_rel = "tmp/vs3-gate-scenario-results-shape-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-scenario-results-shape-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            tampered_report["scenario_results"] = "APPROVED: all scenario rows passed by local verifier"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"])
+        )
+        validation = payload["coverage_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["scenario_results_not_list"], ["scenario_results"])
+        self.assertEqual(len(validation["missing_scenario_ids"]), 57)
+        self.assertEqual(validation["reported_scenario_count"], 0)
+        self.assertEqual(payload["source_report"]["coverage_validation"], validation)
+        self.assertEqual(payload["scenario_results_not_list"], ["scenario_results"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_non_object_scenario_row(self) -> None:
+        source_report_rel = "tmp/vs3-gate-scenario-row-shape-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-scenario-row-shape-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = [tampered_report_rel]
+            tampered_report["scenario_results"][0] = "APPROVED: VS3-GATE-001 passed by local verifier"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"])
+        )
+        validation = payload["coverage_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertEqual(validation["scenario_results_not_list"], [])
+        self.assertIn("VS3-GATE-001", validation["missing_scenario_ids"])
+        self.assertEqual(validation["reported_scenario_count"], 57)
+        self.assertEqual(
+            validation["row_identity_issues"][0],
+            {
+                "row_index": 0,
+                "id": None,
+                "scenario_id": None,
+                "issue": "row_not_object",
+            },
+        )
+        self.assertEqual(payload["source_report"]["coverage_validation"], validation)
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_human_required_entry_overclaim(self) -> None:
+        source_report_rel = "tmp/vs3-gate-human-required-entry-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-human-required-entry-overclaim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["traceability"]["transcript_paths"] = [tampered_report_rel]
+            for row in tampered_report["scenario_results"]:
+                row["transcript_paths"] = [tampered_report_rel]
+            entry = tampered_report["human_required"][0]
+            self.assertEqual(entry["scenario_id"], "VS3-H01")
+            entry["status"] = "PASS"
+            entry["type"] = "MUST_PASS"
+            entry["why_ai_cannot_verify"] = "Human approval already accepted by local verifier."
+            entry["required_human_action"] = "Done and approved."
+            entry["expected_evidence"] = "APPROVED signed acceptance collected; VS3-P unlocked."
+            entry["release_impact"] = "VS3-P unblocked; human/security accepted."
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_HUMAN_REQUIRED_ENTRIES_INVALID" for error in payload["errors"])
+        )
+        validation = payload["human_required_validation"]
+        self.assertEqual(validation["status"], "failed")
+        issue_fields = {
+            issue["field"]
+            for issue in validation["human_required_entry_content_issues"]
+            if issue["scenario_id"] == "VS3-H01"
+        }
+        self.assertEqual(
+            issue_fields,
+            {
+                "type",
+                "status",
+                "why_ai_cannot_verify",
+                "required_human_action",
+                "expected_evidence",
+                "release_impact",
+            },
+        )
+        self.assertEqual(payload["source_report"]["human_required_validation"], validation)
+        self.assertEqual(validation["missing_human_required_entries"], [])
+        self.assertEqual(validation["unexpected_human_required_entries"], [])
+        self.assertEqual(validation["duplicate_human_required_entries"], [])
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["gate_metadata_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_row_evidence_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-row-refs.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    row.pop("evidence_refs", None)
+                    row.pop("source_report_refs", None)
+                    row.pop("audit_refs", None)
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], ["VS3-CTX-001"])
+        self.assertEqual(payload["row_ref_validation"]["malformed_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], ["VS3-CTX-001"])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], ["VS3-CTX-001"])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_row_evidence_ref(self) -> None:
+        source_report_rel = "tmp/vs3-gate-malformed-row-evidence-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-row-evidence-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "not-evidence-ref"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-GATE-001":
+                    self.assertEqual(row["phase"], "VS3-0")
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["evidence_refs"] = [bogus_ref]
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["malformed_evidence_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-GATE-001",
+                    "evidence_ref": bogus_ref,
+                    "issue": "unsupported_ref_format",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_row_evidence_path(self) -> None:
+        source_report_rel = "tmp/vs3-gate-missing-row-evidence-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-row-evidence-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "reports/security/DOES_NOT_EXIST_VS3_EVIDENCE.json"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-GATE-001":
+                    self.assertEqual(row["phase"], "VS3-0")
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["evidence_refs"] = [bogus_ref]
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["malformed_evidence_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-GATE-001",
+                    "evidence_ref": bogus_ref,
+                    "issue": "missing",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_row_evidence_or_evidence_paths(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-row-evidence-path-fields-source.json"
+        source_report_path = ROOT / source_report_rel
+        bogus_ref = "reports/security/DOES_NOT_EXIST_VS3_ROW_EVIDENCE.json"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            for field_name in ["evidence", "evidence_paths"]:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    for row in tampered_report["scenario_results"]:
+                        if row["id"] == "VS3-GATE-001":
+                            self.assertEqual(row["phase"], "VS3-0")
+                            self.assertEqual(row["status"], "PASS")
+                            self.assertEqual(row["owner"], "AI")
+                            row[field_name] = [bogus_ref]
+                            break
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+                    self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["malformed_evidence_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["missing_evidence_path_rows"], [])
+                    self.assertEqual(
+                        payload["row_ref_validation"]["malformed_evidence_path_rows"],
+                        [
+                            {
+                                "scenario_id": "VS3-GATE-001",
+                                "field": field_name,
+                                "evidence_path": bogus_ref,
+                                "issue": "missing",
+                            }
+                        ],
+                    )
+                    self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+                    self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+                    self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+                    self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_duplicate_row_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-duplicate-row-refs-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+            target_row = next(row for row in base_report["scenario_results"] if row["id"] == "VS3-CTX-001")
+            duplicate_cases = [
+                ("evidence", "duplicate_evidence_path_rows", {"field": "evidence"}),
+                ("evidence_paths", "duplicate_evidence_path_rows", {"field": "evidence_paths"}),
+                ("evidence_refs", "duplicate_evidence_ref_rows", {}),
+                ("source_report_refs", "duplicate_source_report_ref_rows", {}),
+                ("audit_refs", "duplicate_audit_ref_rows", {}),
+                ("policy_decision_refs", "duplicate_policy_decision_ref_rows", {}),
+            ]
+
+            for field_name, validation_key, extra_expected_fields in duplicate_cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    row = next(row for row in tampered_report["scenario_results"] if row["id"] == "VS3-CTX-001")
+                    duplicate_ref = target_row[field_name][0]
+                    row[field_name].append(duplicate_ref)
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+                    expected_entry = {
+                        "scenario_id": "VS3-CTX-001",
+                        "duplicate_refs": [duplicate_ref],
+                    }
+                    expected_entry.update(extra_expected_fields)
+                    self.assertEqual(payload["row_ref_validation"][validation_key], [expected_entry])
+                    for empty_key in [
+                        "duplicate_evidence_path_rows",
+                        "duplicate_evidence_ref_rows",
+                        "duplicate_source_report_ref_rows",
+                        "duplicate_audit_ref_rows",
+                        "duplicate_policy_decision_ref_rows",
+                    ]:
+                        if empty_key != validation_key:
+                            self.assertEqual(payload["row_ref_validation"][empty_key], [])
+                    self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+                    self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_evidence_ref_missing_from_aggregate_evidence_refs(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-row-evidence-source.json"
+        source_report_path = ROOT / source_report_rel
+        expected_ref = "cornerstone principal context resolve --json"
+
+        def sync_aggregate_refs(report: dict[str, Any], refs: list[str]) -> None:
+            report["evidence_refs"] = refs
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript["evidence_refs"] = refs
+                if isinstance(transcript.get("ref_summary"), dict):
+                    transcript["ref_summary"]["evidence_refs_count"] = len(refs)
+                if isinstance(transcript.get("stdout_json"), dict):
+                    transcript["stdout_json"]["evidence_refs"] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            row = next(row for row in tampered_report["scenario_results"] if row["id"] == "VS3-CTX-001")
+            self.assertIn(expected_ref, row["evidence_refs"])
+            self.assertNotIn(expected_ref, row["source_report_refs"])
+            self.assertIn(expected_ref, tampered_report["evidence_refs"])
+            sync_aggregate_refs(
+                tampered_report,
+                [ref for ref in tampered_report["evidence_refs"] if ref != expected_ref],
+            )
+            self.assertNotIn(expected_ref, tampered_report["evidence_refs"])
+            self.assertIn(expected_ref, row["evidence_refs"])
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_evidence_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_evidence_ref_missing_from_evidence_refs"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "evidence_ref": expected_ref,
+                    "issue": "row_evidence_ref_missing_from_aggregate_evidence_refs",
+                }
+            ],
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["source_report_ref_missing_from_evidence_refs"], [])
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_unowned_aggregate_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-unowned-aggregate-refs-source.json"
+        source_report_path = ROOT / source_report_rel
+        extra_refs = {
+            "evidence_refs": "docs/sot/README.md",
+            "audit_refs": "audit:unused_extra_aggregate_ref",
+            "policy_decision_refs": "policy:unused_extra_aggregate_ref",
+        }
+
+        def sync_extra_aggregate_refs(report: dict[str, Any]) -> None:
+            ref_summary_keys = {
+                "evidence_refs": "evidence_refs_count",
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }
+            for field, extra_ref in extra_refs.items():
+                self.assertNotIn(extra_ref, report[field])
+                report[field].append(extra_ref)
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                for field, extra_ref in extra_refs.items():
+                    transcript.setdefault(field, []).append(extra_ref)
+                    if isinstance(transcript.get("ref_summary"), dict):
+                        transcript["ref_summary"][ref_summary_keys[field]] = len(report[field])
+                    if isinstance(transcript.get("stdout_json"), dict):
+                        transcript["stdout_json"].setdefault(field, []).append(extra_ref)
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            sync_extra_aggregate_refs(tampered_report)
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["duplicate_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["unexpected_evidence_refs"], [extra_refs["evidence_refs"]])
+        self.assertEqual(payload["aggregate_ref_validation"]["unexpected_audit_refs"], [extra_refs["audit_refs"]])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["unexpected_policy_decision_refs"],
+            [extra_refs["policy_decision_refs"]],
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["row_evidence_ref_missing_from_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["source_report_ref_missing_from_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["row_audit_ref_missing_from_audit_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_policy_decision_ref_missing_from_policy_decision_refs"],
+            [],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_duplicate_aggregate_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-duplicate-aggregate-refs-source.json"
+        source_report_path = ROOT / source_report_rel
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "evidence_refs": "evidence_refs_count",
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                if isinstance(transcript.get("ref_summary"), dict):
+                    transcript["ref_summary"][ref_summary_key] = len(refs)
+                if isinstance(transcript.get("stdout_json"), dict):
+                    transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+            duplicate_cases = [
+                ("evidence_refs", "duplicate_evidence_refs"),
+                ("audit_refs", "duplicate_audit_refs"),
+                ("policy_decision_refs", "duplicate_policy_decision_refs"),
+            ]
+
+            for field_name, validation_key in duplicate_cases:
+                with self.subTest(field=field_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    duplicate_ref = tampered_report[field_name][0]
+                    duplicate_refs = [*tampered_report[field_name], duplicate_ref]
+                    sync_aggregate_refs(tampered_report, field_name, duplicate_refs)
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+                    )
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+                    self.assertEqual(payload["aggregate_ref_validation"][validation_key], [duplicate_ref])
+                    for empty_key in [
+                        "duplicate_evidence_refs",
+                        "duplicate_audit_refs",
+                        "duplicate_policy_decision_refs",
+                    ]:
+                        if empty_key != validation_key:
+                            self.assertEqual(payload["aggregate_ref_validation"][empty_key], [])
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+                    self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_unresolved_row_source_report_ref(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-source-report-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-unresolved-row-source-report-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "reports/security/DOES_NOT_EXIST_VS3_PROOF.json"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["source_report_refs"] = [bogus_ref]
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["unresolved_source_report_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "source_report_ref": bogus_ref,
+                    "issue": "missing",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_report_ref_missing_from_evidence_refs(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-evidence-overlap-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-evidence-overlap.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        expected_ref = "reports/security/vs3-request-context-proof.json"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    self.assertEqual(row["source_report_refs"], [expected_ref])
+                    self.assertIn(expected_ref, row["evidence_refs"])
+                    row["evidence_refs"] = [
+                        ref for ref in row["evidence_refs"] if ref != expected_ref
+                    ]
+                    self.assertNotIn(expected_ref, row["evidence_refs"])
+                    self.assertGreater(len(row["evidence_refs"]), 0)
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unexpected_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_expected_source_report_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["source_report_ref_not_in_evidence_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "source_report_ref": expected_ref,
+                    "issue": "source_report_ref_not_in_evidence_refs",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_unexpected_row_source_report_ref(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-row-source-report-lineage-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-row-source-report-lineage.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "docs/sot/README.md"
+        expected_ref = "reports/security/vs3-request-context-proof.json"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["source_report_refs"] = [bogus_ref]
+                    if bogus_ref not in row["evidence_refs"]:
+                        row["evidence_refs"].append(bogus_ref)
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["unexpected_source_report_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "source_report_ref": bogus_ref,
+                    "expected_source_report_refs": [expected_ref],
+                    "issue": "unexpected_source_report_ref",
+                }
+            ],
+        )
+        self.assertEqual(
+            payload["row_ref_validation"]["missing_expected_source_report_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "missing_source_report_refs": [expected_ref],
+                    "issue": "missing_expected_source_report_ref",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["source_report_ref_missing_from_evidence_refs"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "source_report_ref": bogus_ref,
+                    "issue": "source_report_ref_missing_from_aggregate_evidence_refs",
+                }
+            ],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_row_audit_ref(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-audit-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-row-audit-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "not-audit-ref"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["audit_refs"] = [bogus_ref]
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["malformed_audit_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "audit_ref": bogus_ref,
+                    "issue": "unsupported_ref_format",
+                }
+            ],
+        )
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_row_policy_decision_ref(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-policy-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-row-policy-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_ref = "not-policy-ref"
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row["policy_decision_refs"] = [bogus_ref]
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(
+            payload["row_ref_validation"]["malformed_policy_decision_ref_rows"],
+            [
+                {
+                    "scenario_id": "VS3-CTX-001",
+                    "policy_decision_ref": bogus_ref,
+                    "issue": "unsupported_ref_format",
+                }
+            ],
+        )
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_row_policy_decision_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-missing-row-policy-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-row-policy-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-CTX-001":
+                    self.assertEqual(row["status"], "PASS")
+                    self.assertEqual(row["owner"], "AI")
+                    row.pop("policy_decision_refs", None)
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], ["VS3-CTX-001"])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+
+    def test_vs3_scenario_gate_rejects_vs3_0_pass_row_without_audit_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-vs3-0-audit-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-vs3-0-missing-audit.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if row["id"] == "VS3-GATE-001":
+                    self.assertEqual(row["phase"], "VS3-0")
+                    self.assertEqual(row["status"], "PASS")
+                    row["audit_refs"] = []
+                    break
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_ROW_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["row_ref_validation"]["missing_evidence_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["unresolved_source_report_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_audit_ref_rows"], ["VS3-GATE-001"])
+        self.assertEqual(payload["row_ref_validation"]["malformed_audit_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["missing_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["row_ref_validation"]["malformed_policy_decision_ref_rows"], [])
+        self.assertEqual(payload["source_report"]["row_ref_validation"], payload["row_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_aggregate_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-aggregate-refs.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["evidence_refs"] = []
+            tampered_report["audit_refs"] = []
+            tampered_report["policy_decision_refs"] = []
+            for transcript in tampered_report.get("command_transcripts", []):
+                transcript["evidence_refs"] = []
+                transcript["audit_refs"] = []
+                transcript["policy_decision_refs"] = []
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["missing_ref_fields"],
+            ["evidence_refs", "audit_refs", "policy_decision_refs"],
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["source_evidence_ref_count"], 0)
+        self.assertEqual(payload["aggregate_ref_validation"]["source_audit_ref_count"], 0)
+        self.assertEqual(payload["aggregate_ref_validation"]["source_policy_decision_ref_count"], 0)
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_aggregate_evidence_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-evidence-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-aggregate-evidence-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_refs = ["not-evidence-ref"]
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "evidence_refs": "evidence_refs_count",
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            sync_aggregate_refs(tampered_report, "evidence_refs", bogus_refs)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], bogus_refs)
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["source_evidence_ref_count"], 1)
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_aggregate_evidence_path(self) -> None:
+        source_report_rel = "tmp/vs3-gate-missing-aggregate-evidence-path-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-aggregate-evidence-path.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_refs = ["reports/security/DOES_NOT_EXIST_VS3_AGGREGATE_EVIDENCE.json"]
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "evidence_refs": "evidence_refs_count",
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            sync_aggregate_refs(tampered_report, "evidence_refs", bogus_refs)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], bogus_refs)
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["source_evidence_ref_count"], 1)
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_source_report_ref_missing_from_aggregate_evidence_refs(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-source-report-evidence-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-aggregate-source-report-evidence.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        expected_ref = "reports/security/vs3-request-context-proof.json"
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "evidence_refs": "evidence_refs_count",
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            self.assertIn(expected_ref, tampered_report["evidence_refs"])
+            self.assertEqual(
+                [
+                    row["id"]
+                    for row in tampered_report["scenario_results"]
+                    if expected_ref in row.get("source_report_refs", [])
+                ],
+                ["VS3-CTX-001", "VS3-CTX-002", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"],
+            )
+            sync_aggregate_refs(
+                tampered_report,
+                "evidence_refs",
+                [ref for ref in tampered_report["evidence_refs"] if ref != expected_ref],
+            )
+            self.assertNotIn(expected_ref, tampered_report["evidence_refs"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["source_report_ref_missing_from_evidence_refs"],
+            [
+                {
+                    "scenario_id": scenario_id,
+                    "source_report_ref": expected_ref,
+                    "issue": "source_report_ref_missing_from_aggregate_evidence_refs",
+                }
+                for scenario_id in [
+                    "VS3-CTX-001",
+                    "VS3-CTX-002",
+                    "VS3-CTX-003",
+                    "VS3-CTX-004",
+                    "VS3-CTX-005",
+                ]
+            ],
+        )
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_audit_ref_missing_from_aggregate_audit_refs(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-row-audit-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-aggregate-row-audit.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        expected_ref = "audit:vs3_evidence_reconciliation:vs2_conflict_classified"
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            self.assertIn(expected_ref, tampered_report["audit_refs"])
+            row = next(row for row in tampered_report["scenario_results"] if row["id"] == "VS3-GATE-001")
+            self.assertIn(expected_ref, row["audit_refs"])
+            sync_aggregate_refs(
+                tampered_report,
+                "audit_refs",
+                [ref for ref in tampered_report["audit_refs"] if ref != expected_ref],
+            )
+            self.assertNotIn(expected_ref, tampered_report["audit_refs"])
+            self.assertIn(expected_ref, row["audit_refs"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_audit_ref_missing_from_audit_refs"],
+            [
+                {
+                    "scenario_id": "VS3-GATE-001",
+                    "audit_ref": expected_ref,
+                    "issue": "row_audit_ref_missing_from_aggregate_audit_refs",
+                }
+            ],
+        )
+        self.assertEqual(
+            payload["aggregate_ref_validation"][
+                "row_policy_decision_ref_missing_from_policy_decision_refs"
+            ],
+            [],
+        )
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_policy_decision_ref_missing_from_aggregate_policy_decision_refs(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-row-policy-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-aggregate-row-policy.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        expected_ref = "policy:vs3_evidence_reconciliation:conservative_vs2_boundary"
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            self.assertIn(expected_ref, tampered_report["policy_decision_refs"])
+            row = next(row for row in tampered_report["scenario_results"] if row["id"] == "VS3-GATE-001")
+            self.assertIn(expected_ref, row["policy_decision_refs"])
+            sync_aggregate_refs(
+                tampered_report,
+                "policy_decision_refs",
+                [ref for ref in tampered_report["policy_decision_refs"] if ref != expected_ref],
+            )
+            self.assertNotIn(expected_ref, tampered_report["policy_decision_refs"])
+            self.assertIn(expected_ref, row["policy_decision_refs"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(
+            payload["aggregate_ref_validation"]["row_audit_ref_missing_from_audit_refs"],
+            [],
+        )
+        self.assertEqual(
+            payload["aggregate_ref_validation"][
+                "row_policy_decision_ref_missing_from_policy_decision_refs"
+            ],
+            [
+                {
+                    "scenario_id": "VS3-GATE-001",
+                    "policy_decision_ref": expected_ref,
+                    "issue": "row_policy_decision_ref_missing_from_aggregate_policy_decision_refs",
+                }
+            ],
+        )
+        self.assertEqual(payload["source_report"]["aggregate_ref_validation"], payload["aggregate_ref_validation"])
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_aggregate_audit_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-audit-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-aggregate-audit-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_refs = ["not-audit-ref"]
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            sync_aggregate_refs(tampered_report, "audit_refs", bogus_refs)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], bogus_refs)
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["source_audit_ref_count"], 1)
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_malformed_aggregate_policy_decision_refs(self) -> None:
+        source_report_rel = "tmp/vs3-gate-aggregate-policy-ref-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-malformed-aggregate-policy-ref.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        bogus_refs = ["not-policy-ref"]
+
+        def sync_aggregate_refs(report: dict[str, Any], field: str, refs: list[str]) -> None:
+            report[field] = refs
+            ref_summary_key = {
+                "audit_refs": "audit_refs_count",
+                "policy_decision_refs": "policy_decision_refs_count",
+            }[field]
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                transcript[field] = refs
+                transcript["ref_summary"][ref_summary_key] = len(refs)
+                transcript["stdout_json"][field] = refs
+
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            sync_aggregate_refs(tampered_report, "policy_decision_refs", bogus_refs)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "failed")
+        self.assertEqual(payload["aggregate_ref_validation"]["missing_ref_fields"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_evidence_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_audit_refs"], [])
+        self.assertEqual(payload["aggregate_ref_validation"]["malformed_policy_decision_refs"], bogus_refs)
+        self.assertEqual(payload["aggregate_ref_validation"]["source_policy_decision_ref_count"], 1)
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["self_command_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_source_verify_transcript(self) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-source-transcript.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["command_transcripts"] = []
+            tampered_report.pop("self_command_transcript", None)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(
+            payload["source_transcript_validation"]["missing_fields"],
+            [
+                "command_transcripts",
+                "command_transcripts.scenario_verify_vs3",
+                "self_command_transcript",
+            ],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["invalid_fields"], [])
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_transcript_missing_stdout_json(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-stdout-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-transcript-missing-stdout-json.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for transcript in tampered_report.get("command_transcripts", []):
+                transcript.pop("stdout_json", None)
+            tampered_report["self_command_transcript"].pop("stdout_json", None)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_json_missing",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_json_missing",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_transcript_stdout_proof_boundary_extra_key(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-stdout-proof-boundary-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+
+            def add_stdout_proof_boundary_extra_key(transcript: dict[str, Any]) -> None:
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                proof_boundary = stdout_json.get("proof_boundary")
+                self.assertIsInstance(proof_boundary, dict)
+                proof_boundary["onprem_security_acceptance"] = "CLAIMED"
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                add_stdout_proof_boundary_extra_key(transcript)
+            add_stdout_proof_boundary_extra_key(tampered_report["self_command_transcript"])
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_json_proof_boundary_onprem_security_acceptance_unexpected",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_json_proof_boundary_onprem_security_acceptance_unexpected",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["status"], "failed")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_transcript_stdout_elapsed_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-elapsed-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-transcript-elapsed-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+
+            def drift_stdout_elapsed(transcript: dict[str, Any]) -> None:
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["elapsed_seconds"] = float(transcript["elapsed_seconds"]) + 10.0
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                drift_stdout_elapsed(transcript)
+            drift_stdout_elapsed(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_json_elapsed_seconds_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_json_elapsed_seconds_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_transcript_stdout_json_schema_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-stdout-schema-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-transcript-stdout-schema-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+
+            def drift_stdout_json_schema(transcript: dict[str, Any]) -> None:
+                stdout_json = transcript.get("stdout_json")
+                self.assertIsInstance(stdout_json, dict)
+                stdout_json["json_schema"] = "cs.vs3_untrusted_payload.v0"
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                drift_stdout_json_schema(transcript)
+            drift_stdout_json_schema(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_json_json_schema_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_json_json_schema_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_source_transcript_stdout_tail_mismatch(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-source-transcript-tail-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-source-transcript-tail-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+
+            def drift_stdout_tail(transcript: dict[str, Any]) -> None:
+                stdout_tail_json = json.loads(transcript["stdout_tail"][-1])
+                stdout_tail_json["json_schema"] = "cs.vs3_untrusted_tail_payload.v0"
+                stdout_tail_json["final_verdict"] = "VS3_P_READY"
+                transcript["stdout_tail"][-1] = json.dumps(stdout_tail_json, indent=2, sort_keys=True)
+
+            for transcript in tampered_report.get("command_transcripts", []):
+                drift_stdout_tail(transcript)
+            drift_stdout_tail(tampered_report["self_command_transcript"])
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING" for error in payload["errors"])
+        )
+        self.assertEqual(payload["source_transcript_validation"]["status"], "failed")
+        self.assertEqual(payload["source_transcript_validation"]["missing_fields"], [])
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_tail_json_schema_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "command_transcripts.scenario_verify_vs3.stdout_tail_final_verdict_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_tail_json_schema_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertIn(
+            "self_command_transcript.stdout_tail_final_verdict_mismatch",
+            payload["source_transcript_validation"]["invalid_fields"],
+        )
+        self.assertEqual(payload["source_transcript_validation"]["mismatched_ref_fields"], [])
+        self.assertEqual(
+            payload["source_report"]["source_transcript_validation"],
+            payload["source_transcript_validation"],
+        )
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_human_rows_marked_pass(self) -> None:
+        source_report_rel = "tmp/vs3-gate-human-required-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-human-rows-pass.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            for row in tampered_report["scenario_results"]:
+                if str(row["id"]).startswith("VS3-H"):
+                    row["status"] = "PASS"
+            tampered_report["human_required_blockers"] = []
+            tampered_report["summary"]["pass"] = 57
+            tampered_report["summary"]["human_required"] = 0
+            tampered_report["proof_boundary"]["human_required_rows"] = []
+            tampered_report["proof_boundary"]["human_acceptance_gate"] = "NOT_CLAIMED"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_HUMAN_REQUIRED_BOUNDARY_INVALID" for error in payload["errors"])
+        )
+        expected_rows = ["VS3-H01", "VS3-H02", "VS3-H03", "VS3-H04", "VS3-H05", "VS3-H06", "VS3-H07"]
+        self.assertEqual(payload["human_required_validation"]["status"], "failed")
+        self.assertEqual(payload["human_required_validation"]["missing_human_required_rows"], [])
+        self.assertEqual(payload["human_required_validation"]["human_rows_not_required"], expected_rows)
+        self.assertEqual(payload["human_required_validation"]["missing_human_required_blockers"], expected_rows)
+        self.assertEqual(payload["human_required_validation"]["unexpected_human_required_blockers"], [])
+        self.assertEqual(payload["human_required_validation"]["proof_boundary_missing_human_rows"], expected_rows)
+        self.assertEqual(
+            payload["human_required_validation"]["invalid_fields"],
+            ["summary.human_required", "proof_boundary.human_acceptance_gate"],
+        )
+        self.assertEqual(payload["source_report"]["human_required_validation"], payload["human_required_validation"])
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_missing_ai_scenario_row(self) -> None:
+        source_report_rel = "tmp/vs3-gate-coverage-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-ai-row.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["scenario_results"] = [
+                row for row in tampered_report["scenario_results"] if row["id"] != "VS3-CTX-001"
+            ]
+            tampered_report["summary"]["scenario_count"] = 56
+            tampered_report["summary"]["pass"] = 49
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["scenario_count"], 56)
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["expected_scenario_count"], 57)
+        self.assertEqual(payload["coverage_validation"]["reported_scenario_count"], 56)
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], ["VS3-CTX-001"])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(
+            payload["coverage_validation"]["mismatched_summary_fields"],
+            ["scenario_count", "pass"],
+        )
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_summary_blocking_mismatch(self) -> None:
+        source_report_rel = "tmp/vs3-local-dev-summary-blocking-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            self.assertEqual(tampered_report["summary"]["blocking"], 0)
+            tampered_report["summary"]["blocking"] = 999
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["blocking_count"], 0)
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["row_identity_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["row_classification_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["row_contract_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["mismatched_summary_fields"], ["blocking"])
+        self.assertEqual(payload["coverage_validation"]["expected_summary_counts"]["blocking"], 0)
+        self.assertEqual(payload["coverage_validation"]["actual_summary_counts"]["blocking"], 0)
+        self.assertEqual(payload["coverage_validation"]["reported_summary_counts"]["blocking"], 999)
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(payload["report_identity_validation"]["status"], "passed")
+        self.assertEqual(payload["report_runtime_metadata_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_or_source_report_errors(self) -> None:
+        source_report_rel = "tmp/vs3-gate-report-integrity-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                (
+                    "row_errors",
+                    lambda report: report["scenario_results"][0].update(
+                        {
+                            "errors": [
+                                {
+                                    "code": "CS_FAKE_ROW_ERROR",
+                                    "message": "fake row failure",
+                                }
+                            ]
+                        }
+                    ),
+                    {
+                        "row_error_entries": [
+                            {
+                                "row_index": 0,
+                                "scenario_id": "VS3-GATE-001",
+                                "errors": [
+                                    {
+                                        "code": "CS_FAKE_ROW_ERROR",
+                                        "message": "fake row failure",
+                                    }
+                                ],
+                            }
+                        ],
+                        "source_report_issues": [],
+                    },
+                ),
+                (
+                    "source_report_failed",
+                    lambda report: report.update(
+                        {
+                            "source_report": {
+                                "schema_version": "cs.vs3_onprem_trusted_extension.v0",
+                                "scenario_set": "vs3-onprem-trusted-extension",
+                                "status": "failed",
+                                "errors": [],
+                            }
+                        }
+                    ),
+                    {
+                        "row_error_entries": [],
+                        "source_report_issues": [
+                            {
+                                "field": "source_report.status",
+                                "issue": "source_report_status_not_success",
+                                "actual": "failed",
+                            }
+                        ],
+                    },
+                ),
+                (
+                    "source_report_errors",
+                    lambda report: report.update(
+                        {
+                            "source_report": {
+                                "schema_version": "cs.vs3_onprem_trusted_extension.v0",
+                                "scenario_set": "vs3-onprem-trusted-extension",
+                                "status": "success",
+                                "errors": [{"code": "CS_FAKE_SOURCE_ERROR"}],
+                            }
+                        }
+                    ),
+                    {
+                        "row_error_entries": [],
+                        "source_report_issues": [
+                            {
+                                "field": "source_report.errors",
+                                "issue": "source_report_errors_present",
+                                "errors": [{"code": "CS_FAKE_SOURCE_ERROR"}],
+                            }
+                        ],
+                    },
+                ),
+            ]
+
+            for case_name, mutate, expected in cases:
+                with self.subTest(case=case_name):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    mutate(tampered_report)
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_REPORT_INTEGRITY_INVALID" for error in payload["errors"])
+                    )
+                    self.assertEqual(payload["report_integrity_validation"]["status"], "failed")
+                    self.assertEqual(
+                        payload["report_integrity_validation"]["row_error_entries"],
+                        expected["row_error_entries"],
+                    )
+                    self.assertEqual(
+                        payload["report_integrity_validation"]["source_report_issues"],
+                        expected["source_report_issues"],
+                    )
+                    self.assertEqual(
+                        payload["source_report"]["report_integrity_validation"],
+                        payload["report_integrity_validation"],
+                    )
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_duplicate_or_unexpected_rows(self) -> None:
+        source_report_rel = "tmp/vs3-gate-duplicate-coverage-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-duplicate-unexpected-row.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            duplicate_row = next(row for row in tampered_report["scenario_results"] if row["id"] == "VS3-CTX-001")
+            unexpected_row = dict(duplicate_row)
+            unexpected_row["id"] = "VS3-UNKNOWN-999"
+            unexpected_row["scenario_id"] = "VS3-UNKNOWN-999"
+            tampered_report["scenario_results"].extend([duplicate_row, unexpected_row])
+            tampered_report["summary"]["scenario_count"] = 59
+            tampered_report["summary"]["pass"] = 52
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], ["VS3-CTX-001"])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], ["VS3-UNKNOWN-999"])
+        self.assertEqual(
+            payload["coverage_validation"]["mismatched_summary_fields"],
+            ["scenario_count", "pass"],
+        )
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_id_scenario_id_mismatch(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-identity-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-row-identity-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            row = next(row for row in tampered_report["scenario_results"] if row["scenario_id"] == "VS3-GATE-001")
+            self.assertEqual(row["id"], "VS3-GATE-001")
+            row["id"] = "VS3-GATE-999"
+            self.assertEqual(row["scenario_id"], "VS3-GATE-001")
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(
+            payload["coverage_validation"]["row_identity_issues"],
+            [
+                {
+                    "row_index": 0,
+                    "id": "VS3-GATE-999",
+                    "scenario_id": "VS3-GATE-001",
+                    "issue": "id_scenario_id_mismatch",
+                }
+            ],
+        )
+        self.assertEqual(payload["coverage_validation"]["mismatched_summary_fields"], [])
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        for boundary_key in [
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        ]:
+            self.assertEqual(payload["command_transcripts"][0]["stdout_json"]["proof_boundary"][boundary_key], "NOT_CLAIMED")
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_classification_mismatch(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-classification-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-row-classification-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            row = next(row for row in tampered_report["scenario_results"] if row["scenario_id"] == "VS3-GATE-001")
+            self.assertEqual(row["type"], "MUST_PASS")
+            self.assertEqual(row["phase"], "VS3-0")
+            self.assertEqual(row["owner"], "AI")
+            row["type"] = "HUMAN_REQUIRED"
+            row["phase"] = "Human gate"
+            row["owner"] = "Human"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["row_identity_issues"], [])
+        self.assertEqual(
+            payload["coverage_validation"]["row_classification_issues"],
+            [
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "type",
+                    "expected": "MUST_PASS",
+                    "actual": "HUMAN_REQUIRED",
+                    "issue": "row_classification_mismatch",
+                },
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "phase",
+                    "expected": "VS3-0",
+                    "actual": "Human gate",
+                    "issue": "row_classification_mismatch",
+                },
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "owner",
+                    "expected": "AI",
+                    "actual": "Human",
+                    "issue": "row_classification_mismatch",
+                },
+            ],
+        )
+        self.assertEqual(payload["coverage_validation"]["mismatched_summary_fields"], [])
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_row_contract_content_mismatch(self) -> None:
+        source_report_rel = "tmp/vs3-gate-row-contract-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-row-contract-mismatch.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            row = next(row for row in tampered_report["scenario_results"] if row["scenario_id"] == "VS3-GATE-001")
+            expected_verification_method = row["verification_method"]
+            expected_required_evidence = row["required_evidence"]
+            expected_pass_fail_criteria = row["pass_fail_criteria"]
+            row["verification_method"] = "manual vibe check only"
+            row["required_evidence"] = "none"
+            row["pass_fail_criteria"] = "PASS always"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_SCENARIO_COVERAGE_INVALID" for error in payload["errors"]))
+        self.assertEqual(payload["coverage_validation"]["status"], "failed")
+        self.assertEqual(payload["coverage_validation"]["missing_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["unexpected_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["duplicate_scenario_ids"], [])
+        self.assertEqual(payload["coverage_validation"]["row_identity_issues"], [])
+        self.assertEqual(payload["coverage_validation"]["row_classification_issues"], [])
+        self.assertEqual(
+            payload["coverage_validation"]["row_contract_issues"],
+            [
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "verification_method",
+                    "expected": expected_verification_method,
+                    "actual": "manual vibe check only",
+                    "issue": "row_contract_mismatch",
+                },
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "required_evidence",
+                    "expected": expected_required_evidence,
+                    "actual": "none",
+                    "issue": "row_contract_mismatch",
+                },
+                {
+                    "row_index": 0,
+                    "scenario_id": "VS3-GATE-001",
+                    "field": "pass_fail_criteria",
+                    "expected": expected_pass_fail_criteria,
+                    "actual": "PASS always",
+                    "issue": "row_contract_mismatch",
+                },
+            ],
+        )
+        self.assertEqual(payload["coverage_validation"]["mismatched_summary_fields"], [])
+        self.assertEqual(payload["source_report"]["coverage_validation"], payload["coverage_validation"])
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_promoted_to_vs3_p_readiness(self) -> None:
+        source_report_rel = "tmp/vs3-gate-claim-boundary-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-promoted-to-vs3-p.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["final_verdict"] = "VS3_P_PRODUCTION_ONPREM_READY"
+            tampered_report["summary"]["product_feature_claims"] = "VS3_P_PRODUCTION_ONPREM_READY"
+            tampered_report["proof_boundary"]["vs3_p"] = "PRODUCTION_ONPREM_READY"
+            tampered_report["proof_boundary"]["production"] = "CLAIMED"
+            tampered_report["proof_boundary"]["production_onprem"] = "CLAIMED"
+            tampered_report["proof_boundary"]["live_provider"] = "READY"
+            tampered_report["proof_boundary"]["real_idp"] = "READY"
+            tampered_report["proof_boundary"]["real_network"] = "READY"
+            tampered_report["proof_boundary"]["migration_restore"] = "READY"
+            tampered_report["proof_boundary"]["security_acceptance"] = "ACCEPTED"
+            tampered_report["claim_boundaries"]["vs3_p"] = "PRODUCTION_ONPREM_READY"
+            tampered_report["claim_boundaries"]["production"] = "CLAIMED"
+            tampered_report["claim_boundaries"]["production_onprem"] = "CLAIMED"
+            tampered_report["claim_boundaries"]["live_provider"] = "READY"
+            tampered_report["claim_boundaries"]["real_idp"] = "READY"
+            tampered_report["claim_boundaries"]["real_network"] = "READY"
+            tampered_report["claim_boundaries"]["migration_restore"] = "READY"
+            tampered_report["claim_boundaries"]["security_acceptance"] = "ACCEPTED"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_PROOF_BOUNDARY_OVERCLAIM_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "failed")
+        self.assertEqual(
+            payload["claim_boundary_validation"]["invalid_fields"],
+            [
+                "proof_boundary.vs3_p",
+                "proof_boundary.production",
+                "proof_boundary.production_onprem",
+                "proof_boundary.live_provider",
+                "proof_boundary.real_idp",
+                "proof_boundary.real_network",
+                "proof_boundary.migration_restore",
+                "proof_boundary.security_acceptance",
+                "claim_boundaries.vs3_p",
+                "claim_boundaries.production",
+                "claim_boundaries.production_onprem",
+                "claim_boundaries.live_provider",
+                "claim_boundaries.real_idp",
+                "claim_boundaries.real_network",
+                "claim_boundaries.migration_restore",
+                "claim_boundaries.security_acceptance",
+                "final_verdict",
+                "summary.product_feature_claims",
+            ],
+        )
+        self.assertEqual(payload["source_report"]["claim_boundary_validation"], payload["claim_boundary_validation"])
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_boundary_surface_or_vs2_status_drift(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-boundary-exactness-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("proof_boundary", "surface", "production_onprem", "proof_boundary.surface"),
+                (
+                    "claim_boundaries",
+                    "vs2_current",
+                    "LOCAL_VS2_AI_VERIFIED_HUMAN_GATES_PENDING",
+                    "claim_boundaries.vs2_current",
+                ),
+            ]
+            for object_name, field_name, tampered_value, expected_invalid_field in cases:
+                with self.subTest(field=expected_invalid_field):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[object_name][field_name] = tampered_value
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_PROOF_BOUNDARY_OVERCLAIM_INVALID" for error in payload["errors"])
+                    )
+                    validation = payload["claim_boundary_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["invalid_fields"], [expected_invalid_field])
+                    self.assertEqual(payload["source_report"]["claim_boundary_validation"], validation)
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_singular_claim_boundary_overclaim(self) -> None:
+        source_report_rel = "tmp/vs3-gate-singular-claim-boundary-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            self.assertEqual(tampered_report["claim_boundary"], tampered_report["claim_boundaries"])
+            tampered_report["claim_boundary"]["production_onprem"] = "READY"
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+            self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertTrue(
+                any(error["code"] == "CS_VS3_PROOF_BOUNDARY_OVERCLAIM_INVALID" for error in payload["errors"])
+            )
+            self.assertEqual(payload["claim_boundary"]["production_onprem"], "READY")
+            self.assertEqual(payload["claim_boundaries"]["production_onprem"], "NOT_CLAIMED")
+            self.assertEqual(payload["claim_boundary_validation"]["status"], "failed")
+            self.assertEqual(
+                payload["claim_boundary_validation"]["invalid_fields"],
+                ["claim_boundary.production_onprem"],
+            )
+            self.assertEqual(payload["source_report"]["claim_boundary_validation"], payload["claim_boundary_validation"])
+            self.assertEqual(payload["human_required_validation"]["status"], "passed")
+            self.assertEqual(payload["coverage_validation"]["status"], "passed")
+            self.assertEqual(payload["traceability_validation"]["status"], "passed")
+            self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+            self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+            self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+            self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_unexpected_boundary_key(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-boundary-key-taxonomy-source.json"
+        source_report_path = ROOT / source_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            base_report = json.loads(source_report_path.read_text())
+
+            cases = [
+                ("proof_boundary", "proof_boundary.onprem_security_acceptance"),
+                ("claim_boundaries", "claim_boundaries.onprem_security_acceptance"),
+            ]
+            for object_name, expected_invalid_field in cases:
+                with self.subTest(field=expected_invalid_field):
+                    tampered_report = json.loads(json.dumps(base_report))
+                    tampered_report[object_name]["onprem_security_acceptance"] = "CLAIMED"
+                    source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+                    result = run_cli("scenario", "gate", source_report_rel, "--json")
+
+                    self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+                    payload = json.loads(result.stdout)
+                    self.assertEqual(payload["status"], "failed")
+                    self.assertTrue(
+                        any(error["code"] == "CS_VS3_PROOF_BOUNDARY_OVERCLAIM_INVALID" for error in payload["errors"])
+                    )
+                    validation = payload["claim_boundary_validation"]
+                    self.assertEqual(validation["status"], "failed")
+                    self.assertEqual(validation["unexpected_fields"], [expected_invalid_field])
+                    self.assertEqual(validation["invalid_fields"], [expected_invalid_field])
+                    self.assertIn("vs3_p", validation["allowed_claim_boundary_keys"])
+                    self.assertIn("human_required_rows", validation["allowed_proof_boundary_keys"])
+                    self.assertEqual(payload["source_report"]["claim_boundary_validation"], validation)
+                    self.assertEqual(payload["human_required_validation"]["status"], "passed")
+                    self.assertEqual(payload["coverage_validation"]["status"], "passed")
+                    self.assertEqual(payload["traceability_validation"]["status"], "passed")
+                    self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+                    self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+                    self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+    def test_vs3_scenario_gate_rejects_success_report_with_unrecognized_local_dev_claim(self) -> None:
+        source_report_rel = "tmp/vs3-gate-unrecognized-claim-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-unrecognized-success-claim.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["final_verdict"] = "UNSUPPORTED_VS3_LOCAL_DEV_CLAIM"
+            tampered_report["summary"]["product_feature_claims"] = "UNSUPPORTED_VS3_LOCAL_DEV_CLAIM"
+            tampered_report["proof_boundary"]["vs3_l"] = "NOT_CLAIMED"
+            tampered_report["claim_boundaries"]["vs3_l"] = "NOT_CLAIMED"
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_UNRECOGNIZED_LOCAL_DEV_CLAIM_BOUNDARY" for error in payload["errors"])
+        )
+        self.assertEqual(payload["completion_claim_validation"]["status"], "failed")
+        self.assertTrue(payload["completion_claim_validation"]["success_report_claims_ai_scope_complete"])
+        self.assertFalse(payload["completion_claim_validation"]["claims_local_dev_assurance"])
+        self.assertTrue(payload["completion_claim_validation"]["human_rows_preserved"])
+        self.assertEqual(payload["completion_claim_validation"]["actual_ai_pass_count"], 50)
+        self.assertEqual(payload["completion_claim_validation"]["missing_ai_pass_rows"], [])
+        self.assertEqual(payload["source_report"]["completion_claim_validation"], payload["completion_claim_validation"])
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "failed")
+        self.assertEqual(
+            payload["claim_boundary_validation"]["invalid_fields"],
+            ["final_verdict", "summary.product_feature_claims"],
+        )
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_failed_embedded_component_proof(self) -> None:
+        source_report_rel = "tmp/vs3-gate-component-proof-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-failed-component-proof.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            request_context_proof = tampered_report["request_context_proof"]
+            request_context_proof["status"] = "failed"
+            request_context_proof["scenario_status"]["VS3-CTX-001"] = "FAIL"
+            request_context_proof["checks"]["vs3_ctx_001_surface_context_consistent"] = False
+            request_context_proof.setdefault("errors", []).append(
+                {
+                    "code": "TAMPERED_COMPONENT_PROOF_FAILED",
+                    "message": "Regression probe for scenario-gate component proof validation.",
+                }
+            )
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(any(error["code"] == "CS_VS3_COMPONENT_PROOF_INVALID" for error in payload["errors"]))
+        validation = payload["component_proof_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertTrue(validation["required"])
+        self.assertEqual(validation["component_count"], 9)
+        self.assertEqual(validation["expected_component_count"], 9)
+        self.assertIn("request_context_proof", validation["mismatch_keys"])
+        self.assertIn("request_context_proof", validation["semantic_failure_keys"])
+        self.assertIn("request_context_proof", validation["scenario_failure_keys"])
+        self.assertIn("request_context_proof", validation["check_failure_keys"])
+        self.assertEqual(validation["scenario_coverage_failure_keys"], [])
+        self.assertEqual(validation["check_coverage_failure_keys"], [])
+        self.assertEqual(validation["negative_evidence_failure_keys"], [])
+        self.assertIn(
+            "CS_VS3_COMPONENT_PROOF_STATUS_NOT_SUCCESS",
+            validation["semantic_error_codes_by_key"]["request_context_proof"],
+        )
+        self.assertIn(
+            "CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_NOT_PASS",
+            validation["semantic_error_codes_by_key"]["request_context_proof"],
+        )
+        self.assertIn(
+            "CS_VS3_COMPONENT_PROOF_CHECKS_NOT_TRUE",
+            validation["semantic_error_codes_by_key"]["request_context_proof"],
+        )
+        self.assertEqual(payload["source_report"]["component_proof_validation"], validation)
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["negative_evidence_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_without_negative_evidence(self) -> None:
+        source_report_rel = "tmp/vs3-gate-missing-negative-evidence-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-missing-negative-evidence.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report.pop("negative_evidence", None)
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_NEGATIVE_EVIDENCE_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["negative_evidence_validation"]["status"], "failed")
+        self.assertTrue(payload["negative_evidence_validation"]["required"])
+        self.assertFalse(payload["negative_evidence_validation"]["present"])
+        self.assertEqual(payload["negative_evidence_validation"]["count"], 0)
+        self.assertEqual(payload["negative_evidence_validation"]["nonzero_entries"], {})
+        self.assertEqual(payload["negative_evidence_validation"]["malformed_entries"], {})
+        self.assertEqual(payload["source_report"]["negative_evidence_validation"], payload["negative_evidence_validation"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_incomplete_negative_evidence(self) -> None:
+        source_report_rel = "tmp/vs3-gate-incomplete-negative-evidence-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-incomplete-negative-evidence.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["negative_evidence"] = {"untrusted_content_egress_calls": 0}
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_NEGATIVE_EVIDENCE_COVERAGE_INVALID" for error in payload["errors"])
+        )
+        validation = payload["negative_evidence_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertTrue(validation["required"])
+        self.assertTrue(validation["present"])
+        self.assertEqual(validation["count"], 1)
+        self.assertEqual(validation["observed_key_count"], 1)
+        self.assertEqual(validation["required_key_count"], 192)
+        self.assertEqual(len(validation["missing_required_keys"]), 191)
+        self.assertNotIn("untrusted_content_egress_calls", validation["missing_required_keys"])
+        self.assertIn("forbidden_sink_requests", validation["missing_required_keys"])
+        self.assertIn("forged_authority_paths_allowed", validation["missing_required_keys"])
+        self.assertIn("raw_credentials_exposed", validation["missing_required_keys"])
+        self.assertEqual(validation["unexpected_keys"], [])
+        self.assertEqual(validation["nonzero_entries"], {})
+        self.assertEqual(validation["malformed_entries"], {})
+        self.assertEqual(payload["source_report"]["negative_evidence_validation"], validation)
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_unexpected_negative_evidence_key(
+        self,
+    ) -> None:
+        source_report_rel = "tmp/vs3-gate-unexpected-negative-evidence-source.json"
+        source_report_path = ROOT / source_report_rel
+
+        def sync_negative_evidence(report: dict[str, Any]) -> None:
+            for transcript in [*report.get("command_transcripts", []), report.get("self_command_transcript")]:
+                if not isinstance(transcript, dict):
+                    continue
+                if isinstance(transcript.get("stdout_json"), dict):
+                    transcript["stdout_json"]["negative_evidence"] = report["negative_evidence"]
+
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["negative_evidence"]["unexpected_probe_counter"] = 0
+            sync_negative_evidence(tampered_report)
+            source_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", source_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_NEGATIVE_EVIDENCE_COVERAGE_INVALID" for error in payload["errors"])
+        )
+        validation = payload["negative_evidence_validation"]
+        self.assertEqual(validation["status"], "failed")
+        self.assertTrue(validation["required"])
+        self.assertTrue(validation["present"])
+        self.assertEqual(validation["missing_required_keys"], [])
+        self.assertEqual(validation["unexpected_keys"], ["unexpected_probe_counter"])
+        self.assertEqual(validation["nonzero_entries"], {})
+        self.assertEqual(validation["malformed_entries"], {})
+        self.assertEqual(payload["source_report"]["negative_evidence_validation"], validation)
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["traceability_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_nonzero_negative_evidence(self) -> None:
+        source_report_rel = "tmp/vs3-gate-nonzero-negative-evidence-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-nonzero-negative-evidence.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["negative_evidence"]["untrusted_content_egress_calls"] = 1
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_NEGATIVE_EVIDENCE_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["negative_evidence_validation"]["status"], "failed")
+        self.assertTrue(payload["negative_evidence_validation"]["required"])
+        self.assertTrue(payload["negative_evidence_validation"]["present"])
+        self.assertEqual(payload["negative_evidence_validation"]["nonzero_entries"], {"untrusted_content_egress_calls": 1})
+        self.assertEqual(payload["negative_evidence_validation"]["malformed_entries"], {})
+        self.assertEqual(payload["source_report"]["negative_evidence_validation"], payload["negative_evidence_validation"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
+
+    def test_vs3_scenario_gate_rejects_local_dev_claim_with_boolean_negative_evidence(self) -> None:
+        source_report_rel = "tmp/vs3-gate-boolean-negative-evidence-source.json"
+        tampered_report_rel = "tmp/vs3-local-dev-boolean-negative-evidence.json"
+        source_report_path = ROOT / source_report_rel
+        tampered_report_path = ROOT / tampered_report_rel
+        try:
+            source_report_path.parent.mkdir(exist_ok=True)
+            seed_result = run_cli(
+                "scenario",
+                "verify",
+                "vs3-onprem-trusted-extension",
+                "--json",
+                "--output",
+                source_report_rel,
+            )
+            self.assertEqual(seed_result.returncode, 0, seed_result.stdout + seed_result.stderr)
+            tampered_report = json.loads(source_report_path.read_text())
+            tampered_report["negative_evidence"]["forged_authority_acceptances"] = False
+            tampered_report_path.write_text(json.dumps(tampered_report, indent=2, sort_keys=True) + "\n")
+            result = run_cli("scenario", "gate", tampered_report_rel, "--json")
+        finally:
+            source_report_path.unlink(missing_ok=True)
+            tampered_report_path.unlink(missing_ok=True)
+
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "failed")
+        self.assertTrue(
+            any(error["code"] == "CS_VS3_NEGATIVE_EVIDENCE_INVALID" for error in payload["errors"])
+        )
+        self.assertEqual(payload["negative_evidence_validation"]["status"], "failed")
+        self.assertTrue(payload["negative_evidence_validation"]["required"])
+        self.assertTrue(payload["negative_evidence_validation"]["present"])
+        self.assertEqual(payload["negative_evidence_validation"]["nonzero_entries"], {})
+        self.assertEqual(
+            payload["negative_evidence_validation"]["malformed_entries"],
+            {
+                "forged_authority_acceptances": {
+                    "issue": "value_bool_not_counter",
+                    "value": False,
+                }
+            },
+        )
+        self.assertEqual(payload["source_report"]["negative_evidence_validation"], payload["negative_evidence_validation"])
+        self.assertEqual(payload["completion_claim_validation"]["status"], "passed")
+        self.assertEqual(payload["claim_boundary_validation"]["status"], "passed")
+        self.assertEqual(payload["human_required_validation"]["status"], "passed")
+        self.assertEqual(payload["coverage_validation"]["status"], "passed")
+        self.assertEqual(payload["row_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["aggregate_ref_validation"]["status"], "passed")
+        self.assertEqual(payload["source_transcript_validation"]["status"], "passed")
+        self.assertEqual(payload["command_transcripts"][0]["exit_code"], 4)
 
     def test_full_claim_collaboration_verify(self) -> None:
         result = run_cli("scenario", "verify", "full-claim-collaboration", "--json")

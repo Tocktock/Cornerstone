@@ -1,0 +1,33 @@
+{
+  "_template_metadata": {
+    "allowed_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_EXCEPTIONS",
+      "REJECT"
+    ],
+    "blank_template_is_not_approval": true,
+    "package_alone_is_not_human_evidence": true,
+    "package_path": "reports/human-gates/vs3/VS3-H01.json",
+    "redaction_required": true,
+    "template_only": true,
+    "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H01 --record-file <filled-review-record.json> --json"
+  },
+  "architecture_decision": "",
+  "decision": "",
+  "dependency_decision": "",
+  "evidence_refs": [],
+  "migration_rollback_owner": "",
+  "redaction_note": "",
+  "reviewed_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "reviewer": "",
+  "scenario_id": "VS3-H01",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "security_owner": "",
+  "signature_ref": ""
+}

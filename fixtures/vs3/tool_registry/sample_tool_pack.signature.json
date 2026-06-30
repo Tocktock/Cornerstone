@@ -1,0 +1,10 @@
+{
+  "schema_version": "cs.tool_signature_fixture.v0",
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "version": "1.0.0",
+  "scheme": "sigstore-cosign-fixture",
+  "verified": true,
+  "certificate_ref": "rekor://fixture/pack_vs3_tool_registry_sample",
+  "subject_digest": "sha256:fixture-vs3-tool-pack",
+  "signed_manifest_ref": "fixtures/vs3/tool_registry/sample_tool_pack_manifest.json"
+}

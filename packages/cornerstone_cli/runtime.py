@@ -420,6 +420,7 @@ class LocalRuntimeStore:
         self.pack_certification_dir = state_dir / "packs" / "certifications"
         self.pack_update_dir = state_dir / "packs" / "updates"
         self.pack_rollback_dir = state_dir / "packs" / "rollbacks"
+        self.pack_revocation_dir = state_dir / "packs" / "revocations"
         self.pack_patch_dir = state_dir / "packs" / "security_patches"
         self.pack_quarantine_dir = state_dir / "packs" / "quarantine"
         self.pack_playbook_proposal_dir = state_dir / "packs" / "playbook_proposals"
@@ -733,6 +734,9 @@ class LocalRuntimeStore:
 
     def agent_pack_rollback_path(self, rollback_id: str) -> Path:
         return self.pack_rollback_dir / f"{rollback_id}.json"
+
+    def agent_pack_revocation_path(self, revocation_id: str) -> Path:
+        return self.pack_revocation_dir / f"{revocation_id}.json"
 
     def agent_pack_patch_path(self, patch_id: str) -> Path:
         return self.pack_patch_dir / f"{patch_id}.json"
@@ -1727,6 +1731,7 @@ class LocalRuntimeStore:
         mission_id: str | None,
         org_admin_shortcut: bool,
         policy_id: str | None,
+        dry_run: bool = False,
         scope: dict[str, str],
     ) -> dict[str, Any]:
         pack = self.get_agent_pack(pack_id)
@@ -1802,7 +1807,7 @@ class LocalRuntimeStore:
         )
         activation_base = {
             "schema_version": "cs.agent_pack_activation.v0",
-            "status": "active",
+            "status": "activation_preview" if dry_run else "active",
             "scope": scope,
             "pack_id": pack_id,
             "install_id": install["install_id"],
@@ -1836,20 +1841,23 @@ class LocalRuntimeStore:
             "rollback": {"available": True, "target_version": install.get("pinned_version")},
             "policy_decision": decision,
             "silent_activation": False,
+            "dry_run": dry_run,
+            "grant_applied": not dry_run,
             "created_at": utc_now(),
         }
         activation_id = f"packact_{_json_hash(activation_base)[:16]}"
         activation = dict(activation_base)
         activation["activation_id"] = activation_id
-        _write_json(self.agent_pack_activation_path(activation_id), activation)
-        updated_install = dict(install)
-        updated_install["status"] = "active"
-        updated_install["activation_status"] = "active"
-        updated_install["activation_id"] = activation_id
-        updated_install["granted_capabilities"] = requested_grants
-        _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        if not dry_run:
+            _write_json(self.agent_pack_activation_path(activation_id), activation)
+            updated_install = dict(install)
+            updated_install["status"] = "active"
+            updated_install["activation_status"] = "active"
+            updated_install["activation_id"] = activation_id
+            updated_install["granted_capabilities"] = requested_grants
+            _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
         event = self.append_audit(
-            "pack.activated",
+            "pack.activation.previewed" if dry_run else "pack.activated",
             scope,
             {"type": "agent_pack", "id": pack_id},
             {
@@ -1857,9 +1865,59 @@ class LocalRuntimeStore:
                 "grant_count": len(requested_grants),
                 "org_admin_shortcut": org_admin_shortcut,
                 "policy_decision_id": decision["policy_decision_id"],
+                "dry_run": dry_run,
             },
         )
         return {"activation": activation, "policy_decision": decision, "audit_event": event}
+
+    def revoke_agent_pack(self, pack_id: str, *, reason: str, scope: dict[str, str]) -> dict[str, Any]:
+        activation = self._find_agent_pack_activation(pack_id, scope)
+        if activation is None:
+            return {"status": "not_found", "resource": "agent_pack_activation"}
+        decision = self._pack_policy_decision(
+            scope=scope,
+            subject_id=pack_id,
+            decision="allow",
+            policy="agent_pack_activation_revoke",
+            reason="Agent Pack activation grants are reversible and revocable by the namespace owner.",
+            resolution_path=["Re-activate the pack with explicit grants if the capability is needed again."],
+        )
+        revocation_base = {
+            "schema_version": "cs.agent_pack_revocation.v0",
+            "status": "revoked",
+            "scope": scope,
+            "pack_id": pack_id,
+            "activation_id": activation["activation_id"],
+            "reason": redact_text(reason),
+            "policy_decision": decision,
+            "granted_capabilities_before_revoke": activation.get("granted_capabilities", []),
+            "capabilities_active_after_revoke": [],
+            "created_at": utc_now(),
+        }
+        revocation_id = f"packrevoke_{_json_hash(revocation_base)[:16]}"
+        revocation = dict(revocation_base)
+        revocation["revocation_id"] = revocation_id
+        _write_json(self.agent_pack_revocation_path(revocation_id), revocation)
+        revoked_activation = dict(activation)
+        revoked_activation["status"] = "revoked"
+        revoked_activation["revocation_id"] = revocation_id
+        revoked_activation["revoked_at"] = revocation["created_at"]
+        _write_json(self.agent_pack_activation_path(activation["activation_id"]), revoked_activation)
+        install = self._find_agent_pack_install(pack_id, scope)
+        if install is not None:
+            updated_install = dict(install)
+            updated_install["status"] = "installed"
+            updated_install["activation_status"] = "inactive"
+            updated_install["granted_capabilities"] = []
+            updated_install["last_revocation_id"] = revocation_id
+            _write_json(self.agent_pack_install_path(install["install_id"]), updated_install)
+        event = self.append_audit(
+            "pack.activation.revoked",
+            scope,
+            {"type": "agent_pack", "id": pack_id},
+            {"activation_id": activation["activation_id"], "revocation_id": revocation_id},
+        )
+        return {"revocation": revocation, "policy_decision": decision, "audit_event": event}
 
     def certify_agent_pack(self, pack_id: str, scope: dict[str, str]) -> dict[str, Any]:
         pack = self.get_agent_pack(pack_id)

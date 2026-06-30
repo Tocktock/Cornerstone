@@ -1,0 +1,70 @@
+{
+  "contract_hash": "ddfa024f0b1b1eb86d7ef7789d9ba765924d87cbe7b658d2b390ef0ff9d22a85",
+  "created_at": "2026-06-30T11:19:46.613715Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Memory Agent",
+    "purpose": "Draft memory candidates from evidence while leaving approval to governed memory paths.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Memory Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "memory.propose",
+      "evidence.read",
+      "wiki.read"
+    ],
+    "audit_expectations": [
+      "agent.output.created",
+      "memory.proposal.created"
+    ],
+    "escalation_rules": [
+      "escalate approval need",
+      "escalate poisoning risk"
+    ],
+    "evidence_requirements": [
+      "source evidence bundle",
+      "trust-state label"
+    ],
+    "forbidden_actions": [
+      "memory.approve",
+      "raw_memory_as_truth",
+      "cross_namespace_memory_read"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "archive foundation",
+        "owner scope"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "active_workspace_only",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Draft memory candidates from evidence while leaving approval to governed memory paths.",
+    "responsibilities": [
+      "draft_memory_candidate",
+      "explain_source_basis",
+      "flag_poisoning_risk"
+    ],
+    "role_key": "memory",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_memory_3e548f87d142e49b",
+  "role_key": "memory",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

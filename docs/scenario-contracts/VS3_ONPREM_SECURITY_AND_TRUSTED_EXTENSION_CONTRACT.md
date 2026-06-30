@@ -210,7 +210,7 @@ Planned command coverage:
 | Feature family | Required command examples |
 |---|---|
 | VS3 scenario gate | `cornerstone scenario verify vs3-onprem-trusted-extension --json`; `cornerstone scenario gate reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json --json` |
-| Evidence reconciliation | `cornerstone security vs3-evidence-reconcile --json`; `cornerstone release report-lint --scope vs3 --json` |
+| Evidence reconciliation | `cornerstone security vs3-evidence-reconcile --json`; `cornerstone security vs3-overclaim-lint --json` |
 | Identity/context | `cornerstone principal context resolve --json`; `cornerstone access check --json` |
 | RLS/migration | `cornerstone tenant rls-inventory --json`; `cornerstone backup create --json`; `cornerstone restore verify --json` |
 | OPA/policy | `cornerstone policy evaluate --input <file> --json`; `cornerstone policy bundle activate --dry-run --json` |

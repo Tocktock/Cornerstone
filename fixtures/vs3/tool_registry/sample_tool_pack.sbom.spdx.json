@@ -1,0 +1,21 @@
+{
+  "spdxVersion": "SPDX-2.3",
+  "dataLicense": "CC0-1.0",
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "name": "VS3 Tool Registry Sample Pack SBOM",
+  "documentNamespace": "https://cornerstone.local/fixtures/vs3/tool-registry/sample-tool-pack",
+  "packages": [
+    {
+      "name": "tool_vs3_local_evidence_checker",
+      "SPDXID": "SPDXRef-Package-tool-vs3-local-evidence-checker",
+      "versionInfo": "1.0.0",
+      "supplier": "Organization: CornerStone Local Fixture",
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "fixture-vs3-tool-pack"
+        }
+      ]
+    }
+  ]
+}

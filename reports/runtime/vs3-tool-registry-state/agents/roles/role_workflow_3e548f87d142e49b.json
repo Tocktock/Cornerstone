@@ -1,0 +1,71 @@
+{
+  "contract_hash": "bb9ffaea1e0e3e6a22360128daa105495240e61e53f6f8175449352b83b7d091",
+  "created_at": "2026-06-30T11:19:46.613880Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Workflow Agent",
+    "purpose": "Prepare Workflow/Action proposals, dry-runs, and rollback-aware execution plans.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Workflow Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "action.propose",
+      "action.dry_run",
+      "workflow.read"
+    ],
+    "audit_expectations": [
+      "action.card.proposed",
+      "policy.decision.created"
+    ],
+    "escalation_rules": [
+      "escalate high-risk",
+      "escalate missing approval"
+    ],
+    "evidence_requirements": [
+      "claim refs",
+      "policy refs",
+      "dry-run diff"
+    ],
+    "forbidden_actions": [
+      "direct_external_write",
+      "execute_without_policy",
+      "execute_without_required_approval"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "dry-run present",
+        "approval boundary"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "active_mission_only",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Prepare Workflow/Action proposals, dry-runs, and rollback-aware execution plans.",
+    "responsibilities": [
+      "prepare_action_card",
+      "check_dry_run",
+      "record_expected_impact"
+    ],
+    "role_key": "workflow",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_workflow_3e548f87d142e49b",
+  "role_key": "workflow",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

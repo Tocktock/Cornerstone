@@ -1,0 +1,65 @@
+{
+  "activation_id": "packact_d339ae350720dbfb",
+  "activation_status": "inactive",
+  "behavior_changing_updates_apply_silently": false,
+  "can_act": false,
+  "created_at": "2026-06-30T11:19:46.612554Z",
+  "granted_capabilities": [],
+  "install_id": "packinst_ede6a574022623a6",
+  "last_revocation_id": "packrevoke_5d97a8977aa21ba2",
+  "mission_authority": false,
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "pinned_version": "1.0.1-security",
+  "previous_pinned_version": "1.0.0",
+  "review_required": false,
+  "schema_version": "cs.agent_pack_install.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "rolled_back_to_pinned",
+  "supply_chain": {
+    "certified": true,
+    "checks": {
+      "attestation_verified": true,
+      "provenance_present": true,
+      "risk_label_present": true,
+      "sbom_present": true,
+      "signature_verified": true,
+      "trusted_registry_source": true,
+      "update_metadata_present": true,
+      "version_declared": true
+    },
+    "registry_source": "first_party",
+    "risk_label": "medium",
+    "verified": true
+  },
+  "trust": {
+    "certified": true,
+    "public_marketplace_default": false,
+    "publisher": "cornerstone-local-fixture",
+    "risk_label": "medium",
+    "source": "first_party"
+  },
+  "version": "1.0.0",
+  "version_history": [
+    {
+      "from_version": "1.0.0",
+      "to_version": "1.1.0",
+      "update_id": "packupd_310ea0f283bbea83"
+    },
+    {
+      "from_version": "1.1.0",
+      "rollback_id": "packroll_449b9cd0180967ba",
+      "to_version": "1.0.0"
+    },
+    {
+      "from_version": "1.0.0",
+      "security_patch_id": "packpatch_a9310bedf2188256",
+      "to_version": "1.0.1-security"
+    }
+  ],
+  "version_pinned_by_default": true
+}

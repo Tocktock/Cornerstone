@@ -1,0 +1,159 @@
+{
+  "claim_boundary": {
+    "dependency_unlock_allowed_by_validator": false,
+    "h_rows_remain_human_required": true,
+    "human_acceptance_claim_allowed": false,
+    "live_provider_readiness_claim_allowed": false,
+    "migration_restore_readiness_claim_allowed": false,
+    "pass_claim_allowed": false,
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "production_readiness_claim_allowed": false,
+    "real_idp_readiness_claim_allowed": false,
+    "real_network_readiness_claim_allowed": false,
+    "scaffold_is_template_only": true,
+    "security_acceptance_claim_allowed": false,
+    "structural_validation_is_not_acceptance": true,
+    "templates_are_not_human_evidence": true,
+    "validation_surface": "human_gate_record_scaffold_manifest_template_only",
+    "vs3_p_unlock_allowed": false
+  },
+  "final_verdict": "HUMAN_REQUIRED",
+  "manifest_id": "vs3hscaffold_b11220ee3641bd41",
+  "negative_evidence": {
+    "approval_collected_by_scaffold": 0,
+    "existing_template_conflicts": 0,
+    "filled_record_bodies_persisted_by_scaffold": 0,
+    "human_acceptance_claimed_by_scaffold": 0,
+    "human_decision_recorded_by_scaffold": 0,
+    "human_rows_marked_pass_by_scaffold": 0,
+    "human_rows_marked_pass_in_scenario_report": 0,
+    "human_rows_not_human_required": 0,
+    "live_provider_readiness_claimed_by_scaffold": 0,
+    "migration_restore_readiness_claimed_by_scaffold": 0,
+    "missing_package_records": 0,
+    "production_readiness_claimed_by_scaffold": 0,
+    "real_idp_readiness_claimed_by_scaffold": 0,
+    "real_network_readiness_claimed_by_scaffold": 0,
+    "security_acceptance_claimed_by_scaffold": 0,
+    "vs3_p_unlocked_by_scaffold": 0
+  },
+  "review_order": [
+    "VS3-H01",
+    "VS3-H04",
+    "VS3-H03",
+    "VS3-H05",
+    "VS3-H07",
+    "VS3-H02",
+    "VS3-H06"
+  ],
+  "scenario_report": {
+    "path": "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "sha256": "b918b27fe8449b1119face990bb8560a8daafac5eff5ee144ef0ef04e9765741",
+    "summary": {
+      "blocking": 0,
+      "fail": 0,
+      "human_acceptance_claim_allowed": false,
+      "human_required": 7,
+      "live_provider_readiness_claim_allowed": false,
+      "migration_restore_readiness_claim_allowed": false,
+      "not_run": 0,
+      "not_verified": 0,
+      "pass": 50,
+      "product_feature_claims": "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED",
+      "production_readiness_claim_allowed": false,
+      "real_idp_readiness_claim_allowed": false,
+      "real_network_readiness_claim_allowed": false,
+      "scenario_count": 57,
+      "security_acceptance_claim_allowed": false,
+      "vs3_l_claim": "LOCAL_DEV_ASSURANCE_VERIFIED",
+      "vs3_p_claim": "NOT_CLAIMED"
+    }
+  },
+  "schema_version": "cs.vs3_human_gate_record_scaffold_manifest.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "template_artifacts": [
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 983,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H01.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H01",
+      "sha256": "f885f07ac2517378f2d2129960a55f67740a45c9f68becebcbff8916613693d6",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H01 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 881,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H04.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H04",
+      "sha256": "3878f551e8a080e5a5eaa557079bbb11eeff0ee249c8ad725de146ca8873e1bb",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H04 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 867,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H03.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H03",
+      "sha256": "08874153e23a45a40d0b5a58201b1c46a71224787ad8afbfbcb16e9ee8a665fa",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H03 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 893,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H05.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H05",
+      "sha256": "1a3aa3428cd6aa1afd89ad4f6712553a96ffd070b91caadd03781e8871dda29b",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H05 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 945,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H07.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H07",
+      "sha256": "98a1a881320c08bcaeb7891dbfc06796f5a5f4317e9aa9d85157800752a51547",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H07 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 843,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H02.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H02",
+      "sha256": "c0f1aa89c0e66e7fabb000783efdf46a57d0473ba48437a746a27225f5c72edc",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H02 --record-file <filled-review-record.json> --json"
+    },
+    {
+      "blank_template_is_not_approval": true,
+      "bytes": 832,
+      "kind": "human_gate_record_template",
+      "path": "reports/human-gates/vs3/record-templates/VS3-H06.review-record.template.json",
+      "present": true,
+      "scenario_id": "VS3-H06",
+      "sha256": "90c40f3f8dd6ebdb4d3c4eb1ed4419725232c4384815e490509a98daa0297a4b",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H06 --record-file <filled-review-record.json> --json"
+    }
+  ]
+}

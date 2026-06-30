@@ -1,0 +1,98 @@
+{
+  "certification_id": "packcert_0aa3c9e0c755bb22",
+  "created_at": "2026-06-30T11:19:46.612170Z",
+  "evaluation_card": {
+    "audit_coverage": {
+      "activation": true,
+      "emergency_patch": true,
+      "install": true,
+      "registry": true,
+      "rollback": true,
+      "sandbox": true,
+      "update": true
+    },
+    "benchmark_scenarios": [
+      "VS3-TOOL-001",
+      "VS3-TOOL-002",
+      "VS3-TOOL-005"
+    ],
+    "connector_action_boundary_checks": {
+      "connectorhub_mediated": true,
+      "credentials_exposed_to_agent": false,
+      "direct_provider_access": false,
+      "status": "pass"
+    },
+    "human_review": {
+      "replaces_policy_checks": false,
+      "reviewer": "local-fixture",
+      "status": "fixture-reviewed"
+    },
+    "intended_use": "Local VS3 tool registry and sandbox verification.",
+    "llm_judge_rubrics": {
+      "pass_judge": false,
+      "provider": "local_test",
+      "supporting_signal_only": true
+    },
+    "model_compatibility": {
+      "external_model_required": false,
+      "local_test.v0": "pass"
+    },
+    "outcome_history": {
+      "replaces_scenario_certification": false,
+      "sample_size": 1,
+      "source": "local VS3 fixture"
+    },
+    "policy_checks": {
+      "autonomous_action_requires_activation": true,
+      "connectorhub_boundary_required": true,
+      "sandbox_denies_undeclared_access": true,
+      "status": "pass"
+    },
+    "prompt_injection_tests": {
+      "blocked_tool_hijack": true,
+      "external_http_calls": 0,
+      "status": "pass"
+    },
+    "required_capabilities": [
+      "artifact.read",
+      "evidence.bundle.read",
+      "tool.local.evaluate",
+      "connector.mock.read"
+    ],
+    "risk_level": "medium",
+    "rollback_support": {
+      "available": true,
+      "tested": true
+    },
+    "scenario_results": {
+      "scenario_ids": [
+        "VS3-TOOL-001",
+        "VS3-TOOL-002",
+        "VS3-TOOL-005"
+      ],
+      "status": "pass"
+    },
+    "version_history": [
+      {
+        "status": "certified",
+        "version": "1.0.0"
+      }
+    ]
+  },
+  "human_review_is_evidence_input": true,
+  "human_review_replaces_scenario_certification": false,
+  "outcome_history_is_evidence_input": true,
+  "outcome_history_replaces_policy_checks": false,
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "policy_checks_required_for_autonomous_action": true,
+  "scenario_certification_required_for_autonomous_action": true,
+  "schema_version": "cs.agent_pack_certification.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "certified",
+  "version": "1.0.0"
+}

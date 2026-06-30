@@ -1,0 +1,57 @@
+{
+  "applied": true,
+  "approval": {
+    "required": true,
+    "status": "approved"
+  },
+  "behavior_changing_silent_apply": false,
+  "behavior_changing_update": true,
+  "created_at": "2026-06-30T11:19:46.618705Z",
+  "diff": {
+    "capabilities": [
+      "tool.local.evaluate"
+    ],
+    "connector_requirements": [
+      "connector.mock.read"
+    ],
+    "migration_notes": "no data migration; owner can test update before approval",
+    "model_policy": "unchanged local_test only",
+    "playbooks": [
+      "pb_vs3_tool_gap_review"
+    ],
+    "risk": "medium",
+    "role_contract": "adds evidence severity tagging",
+    "rollback_path": "pack rollback --to-version 1.0.0"
+  },
+  "evaluation_gate": {
+    "connector_boundary": "pass",
+    "prompt_injection_regression": "pass",
+    "sandbox_negative_suite": "pass",
+    "scenario_results": [
+      "VS3-TOOL-006"
+    ],
+    "status": "pass"
+  },
+  "from_version": "1.0.0",
+  "migration_notes": [
+    "Behavior-changing update cannot silently activate."
+  ],
+  "owner_can_test_before_approving": true,
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "sandbox_canary_test": {
+    "credentials_exposed_to_agent": false,
+    "external_http_calls": 0,
+    "status": "pass",
+    "undeclared_file_reads": 0
+  },
+  "schema_version": "cs.agent_pack_update.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "approved_applied",
+  "to_version": "1.1.0",
+  "update_id": "packupd_310ea0f283bbea83"
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "cs.reason_code_catalog.vs3.v0",
+  "reason_codes": [
+    "invalid_schema",
+    "cross_tenant_scope",
+    "role_not_allowed",
+    "revoked_principal",
+    "high_risk_requires_approval",
+    "secret_classification_denied",
+    "mission_authority_required",
+    "data_scope_denied",
+    "workspace_mode_denied",
+    "connectorhub_capability_required",
+    "model_policy_denied",
+    "unexpected_authoritative_attribute",
+    "unknown_policy_default_deny",
+    "policy_revision_mismatch",
+    "opa_unavailable_fail_closed",
+    "invalid_bundle_rejected"
+  ],
+  "safe_resolutions": {
+    "invalid_schema": "Retry with cs.policy_input.vs3.v0 derived from trusted RequestContext fields.",
+    "cross_tenant_scope": "Use an explicit tenant-safe reference or approved promotion path.",
+    "role_not_allowed": "Request a role or workspace grant through the owner approval path.",
+    "revoked_principal": "Re-authenticate after membership is restored by an owner.",
+    "high_risk_requires_approval": "Run dry-run and collect the required approval before execution.",
+    "secret_classification_denied": "Use a lower-sensitivity evidence path or request explicit policy approval.",
+    "mission_authority_required": "Activate a mission or workspace grant before using this capability.",
+    "data_scope_denied": "Limit the operation to the approved workspace or namespace scope.",
+    "workspace_mode_denied": "Use an internal workspace mode or collect explicit external-mode approval.",
+    "connectorhub_capability_required": "Route the capability through ConnectorHub with a declared manifest grant.",
+    "model_policy_denied": "Use an approved local/internal model route with an allowed sensitivity.",
+    "unexpected_authoritative_attribute": "Remove caller-supplied authority fields and derive them from trusted stores.",
+    "unknown_policy_default_deny": "Select a known policy path or install a reviewed bundle.",
+    "policy_revision_mismatch": "Reload the active bundle and retry after cache invalidation.",
+    "opa_unavailable_fail_closed": "Restore the policy service or keep protected operations denied.",
+    "invalid_bundle_rejected": "Fix bundle syntax or compatibility and keep last known good active."
+  }
+}

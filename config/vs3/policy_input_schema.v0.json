@@ -1,0 +1,269 @@
+{
+  "$id": "https://cornerstone.local/schemas/cs.policy_input.vs3.v0.json",
+  "additionalProperties": false,
+  "properties": {
+    "action": {
+      "type": "string"
+    },
+    "approval": {
+      "additionalProperties": false,
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": [
+            "not_required",
+            "pending",
+            "approved",
+            "denied"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "required",
+        "status"
+      ],
+      "type": "object"
+    },
+    "capability": {
+      "additionalProperties": false,
+      "properties": {
+        "connectorhub_mediated": {
+          "type": "boolean"
+        },
+        "declared": {
+          "type": "boolean"
+        },
+        "tool_manifest_ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "declared",
+        "connectorhub_mediated",
+        "tool_manifest_ref"
+      ],
+      "type": "object"
+    },
+    "data_scope": {
+      "additionalProperties": false,
+      "properties": {
+        "purpose": {
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "same_workspace",
+            "same_namespace",
+            "cross_namespace",
+            "cross_tenant"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope",
+        "purpose"
+      ],
+      "type": "object"
+    },
+    "environment": {
+      "additionalProperties": false,
+      "properties": {
+        "deployment": {
+          "enum": [
+            "local_test",
+            "local_dev",
+            "onprem_candidate",
+            "production"
+          ],
+          "type": "string"
+        },
+        "network_zone": {
+          "type": "string"
+        },
+        "workspace_mode": {
+          "enum": [
+            "personal",
+            "workspace",
+            "external"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "deployment",
+        "workspace_mode",
+        "network_zone"
+      ],
+      "type": "object"
+    },
+    "mission_authority": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_ref": {
+          "type": "string"
+        },
+        "authorized": {
+          "type": "boolean"
+        },
+        "mission_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mission_id",
+        "authorized",
+        "authority_ref"
+      ],
+      "type": "object"
+    },
+    "model_policy": {
+      "additionalProperties": false,
+      "properties": {
+        "provider": {
+          "enum": [
+            "local_test",
+            "approved_internal",
+            "external"
+          ],
+          "type": "string"
+        },
+        "route": {
+          "type": "string"
+        },
+        "sensitivity": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "route",
+        "sensitivity"
+      ],
+      "type": "object"
+    },
+    "policy_path": {
+      "type": "string"
+    },
+    "resource": {
+      "additionalProperties": false,
+      "properties": {
+        "classification": {
+          "enum": [
+            "public",
+            "internal",
+            "confidential",
+            "restricted",
+            "secret"
+          ],
+          "type": "string"
+        },
+        "namespace_id": {
+          "type": "string"
+        },
+        "resource_id": {
+          "type": "string"
+        },
+        "tenant_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "resource_id",
+        "tenant_id",
+        "namespace_id",
+        "classification"
+      ],
+      "type": "object"
+    },
+    "risk": {
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "cs.policy_input.vs3.v0",
+      "type": "string"
+    },
+    "scope": {
+      "additionalProperties": false,
+      "properties": {
+        "namespace_id": {
+          "type": "string"
+        },
+        "tenant_id": {
+          "type": "string"
+        },
+        "workspace_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "tenant_id",
+        "namespace_id",
+        "workspace_id"
+      ],
+      "type": "object"
+    },
+    "subject": {
+      "additionalProperties": false,
+      "properties": {
+        "membership_revision": {
+          "type": "string"
+        },
+        "principal_id": {
+          "type": "string"
+        },
+        "revoked": {
+          "type": "boolean"
+        },
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "principal_id",
+        "roles",
+        "membership_revision",
+        "revoked"
+      ],
+      "type": "object"
+    },
+    "trace_id": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "trace_id",
+    "subject",
+    "scope",
+    "resource",
+    "action",
+    "risk",
+    "policy_path",
+    "mission_authority",
+    "data_scope",
+    "approval",
+    "capability",
+    "model_policy",
+    "environment"
+  ],
+  "title": "CornerStone VS3 PolicyInput",
+  "type": "object"
+}

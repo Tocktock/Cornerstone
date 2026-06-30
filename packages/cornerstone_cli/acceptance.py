@@ -1822,16 +1822,8 @@ def _git_output(root: Path, args: list[str]) -> str | None:
 
 
 GENERATED_EVIDENCE_PREFIXES = (
-    "reports/audit/",
-    "reports/browser/",
-    "reports/db/",
-    "reports/network/",
-    "reports/policy/",
-    "reports/quickstart/",
-    "reports/release/",
-    "reports/scenario/",
-    "reports/security/",
-    "reports/vs2/",
+    "docs/verification-reports/",
+    "reports/",
     "tmp/",
     "data/local/",
 )
@@ -1905,6 +1897,40 @@ def _source_snapshot(root: Path, base_commit: str | None, base_tree_hash: str | 
     }
 
 
+def _generated_evidence_snapshot(root: Path, entries: list[dict[str, str]]) -> dict[str, Any]:
+    generated_entries = [
+        entry for entry in entries if _is_generated_evidence_path(entry["path"])
+    ]
+    digest = hashlib.sha256()
+    snapshot_paths: list[dict[str, Any]] = []
+    for entry in sorted(generated_entries, key=lambda item: item["path"]):
+        rel_path = entry["path"]
+        path = root / rel_path
+        file_digest = None
+        size = 0
+        state = "missing"
+        if path.exists() and path.is_file():
+            file_digest = sha256_file(path)
+            size = path.stat().st_size
+            state = "present"
+        elif path.exists():
+            state = "non_file"
+        digest.update(f"{entry['status']} {rel_path} {state} {file_digest or ''} {size}\n".encode("utf-8"))
+        snapshot_paths.append(
+            {
+                "path": rel_path,
+                "status": entry["status"],
+                "state": state,
+                "sha256": file_digest,
+                "bytes": size,
+            }
+        )
+    return {
+        "hash": digest.hexdigest(),
+        "paths": snapshot_paths,
+    }
+
+
 def git_verification_metadata(root: Path) -> dict[str, Any]:
     status_result = subprocess.run(
         ["git", "status", "--porcelain=v1"],
@@ -1921,6 +1947,7 @@ def git_verification_metadata(root: Path) -> dict[str, Any]:
     base_commit_full = _git_output(root, ["rev-parse", "HEAD"])
     base_tree_hash = _git_output(root, ["rev-parse", "HEAD^{tree}"])
     source_snapshot = _source_snapshot(root, base_commit_full, base_tree_hash, dirty_entries)
+    generated_evidence_snapshot = _generated_evidence_snapshot(root, dirty_entries)
     return {
         "verified_base_commit": base_commit,
         "verified_base_commit_full": base_commit_full,
@@ -1928,6 +1955,8 @@ def git_verification_metadata(root: Path) -> dict[str, Any]:
         "verified_source_worktree_hash": source_snapshot["hash"],
         "verified_source_snapshot_paths": source_snapshot["paths"],
         "generated_dirty_paths": generated_dirty_paths,
+        "generated_dirty_snapshot_hash": generated_evidence_snapshot["hash"],
+        "generated_dirty_snapshot_paths": generated_evidence_snapshot["paths"],
         "final_commit": base_commit if not status else None,
         "final_commit_pending_reason": None if not status else "worktree_dirty_at_verification",
         "worktree_dirty_at_verification": bool(status),

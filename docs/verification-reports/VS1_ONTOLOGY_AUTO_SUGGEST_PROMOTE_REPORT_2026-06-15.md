@@ -8,9 +8,8 @@
 - HUMAN_REQUIRED rows: 3
 - Blocking rows: 0
 - Product claim: LOCAL_VS1_ONTOLOGY_READY_PRODUCTION_NOT_READY_HUMAN_REQUIRED
-- Human acceptance addendum: VS1-ONT-H01 and VS1-ONT-H02 accepted on 2026-06-17; VS1-ONT-H03 remains HUMAN_REQUIRED.
-- Verified base commit: 22a78b4
-- Verified base tree: ce652a4e780087ce809fcff69971aef8d74ecc9d
+- Verified base commit: d145c8d
+- Verified base tree: 52dbaeced44736b754b11cbaec66439aa42528d2
 - Worktree dirty at verification: True
 - Report generated before commit: True
 
@@ -20,13 +19,11 @@
 - Browser proof: reports/browser/vs1-ontology-suggest-promote-2026-06-15/browser-proof.json
 - Browser screenshot: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png
 - Browser trace: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json
-- Human acceptance note: reports/release/vs1-ontology-suggest-promote-2026-06-17/human-acceptance.md
-- H03 corpus review: reports/release/vs1-ontology-suggest-promote-2026-06-17/h03-live-provider-corpus-review.md
-- SuggestionSet: oset_0fc605cda9edfee2
-- OntologyChangeSet: ochset_bb6b642271878e64
+- SuggestionSet: oset_a23f00fdb5dc1e02
+- OntologyChangeSet: ochset_e0c7967164e97847
 - Promoted object: obj_1a13e0127536c3de
-- Claim: claim_bf57668814f38ffb
-- Action: action_f3dc9281deef7ab2
+- Claim: claim_5e894b63651891d2
+- Action: action_6c23b95edce02ff2
 
 ## Scenario Verification
 
@@ -73,8 +70,8 @@
 | Name | Command | Exit code | Timed out | Elapsed seconds |
 |---|---|---:|---:|---:|
 | VS1 self verifier | `cornerstone scenario verify vs1-ontology-suggest-promote --json --output reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json` | 0 | False | recorded in scenario report |
-| verify-vs0-evux | `make verify-vs0-evux` | 0 | False | 196.393 |
-| verify-vs0-operator-ui | `make verify-vs0-operator-ui` | 0 | False | 2.168 |
+| verify-vs0-evux | `make verify-vs0-evux` | 0 | False | 0.0 |
+| verify-vs0-operator-ui | `make verify-vs0-operator-ui` | 0 | False | 0.0 |
 
 ## Negative Evidence
 
@@ -92,17 +89,15 @@
 ## Boundary
 
 This report claims local VS1 ontology suggestion/review/promotion readiness only.
-Post-review human evidence accepts VS1-ONT-H01 and VS1-ONT-H02 for the local vendor-risk evidence-map UX.
-Post-review H03 evidence selects OpenAlex as a future safe public read-only corpus but does not claim production readiness, live-provider readiness, or LLM-provider semantic readiness.
-VS1-ONT-H03 remains HUMAN_REQUIRED until the actual live-provider or LLM-provider path has approval, redacted transcript, audit refs, and execution/result evidence.
+It does not claim production readiness, live-provider readiness, domain semantic acceptance, or human UX acceptance.
 
 ## Human Required
 
-| ID | Human Decision | Why AI Cannot Verify | Required Human Action | Expected Evidence | Release Impact |
-|---|---|---|---|---|---|
-| VS1-ONT-H01 | ACCEPTED on 2026-06-17 | Human operator UX acceptance is subjective. | JiYong/Tars uses the VS1 UI flow and records accept or reject. | Acceptance note with screenshots/recording or issue list. | No longer blocks local product-accepted VS1 UX claim. |
-| VS1-ONT-H02 | ACCEPTED on 2026-06-17 | Semantic quality requires domain-owner judgment. | Domain owner reviews labels, relationships, and object profiles. | Domain review note with accepted/rejected labels and issues. | No longer blocks local vendor-risk domain-ready VS1 claim. |
-| VS1-ONT-H03 | DEFERRED; OpenAlex corpus selected for future rehearsal | Live provider verification requires credentials and may mutate third-party state. | Human approves and runs live ConnectorHub/provider or production-data test. | Redacted provider transcript, approval result, and audit refs. | Blocks production/live-provider readiness claim until actual live/LLM-provider proof exists. |
+| ID | Why AI Cannot Verify | Required Human Action | Expected Evidence | Release Impact |
+|---|---|---|---|---|
+| VS1-ONT-H01 | Human operator UX acceptance is subjective. | JiYong/Tars uses the VS1 UI flow and records accept or reject. | Acceptance note with screenshots/recording or issue list. | Blocks product-accepted VS1 UX claim. |
+| VS1-ONT-H02 | Semantic quality requires domain-owner judgment. | Domain owner reviews labels, relationships, and object profiles. | Domain review note with accepted/rejected labels and issues. | Blocks domain-ready VS1 claim for that domain. |
+| VS1-ONT-H03 | Live provider verification requires credentials and may mutate third-party state. | Human approves and runs live ConnectorHub/provider or production-data test. | Redacted provider transcript, approval result, and audit refs. | Blocks production/live-provider readiness claim. |
 
 ## Failure Reverse Engineering
 
@@ -110,6 +105,6 @@ None. No AI-owned VS1 row is `FAIL`, `NOT_VERIFIED`, or `NOT_RUN` in this genera
 
 ## Risks
 
-- Human acceptance is recorded as external evidence, not as an AI-owned scenario PASS.
-- VS1-ONT-H02 acceptance is scoped to the local vendor-risk fixture reviewed on 2026-06-17.
-- Production/live-provider readiness and LLM-provider semantic readiness remain unclaimed and require separate approved evidence.
+- Human operator UX acceptance remains outside AI verification.
+- Domain semantic quality remains human/domain-owner reviewed.
+- Production/live-provider readiness remains unclaimed and requires separate approved evidence.

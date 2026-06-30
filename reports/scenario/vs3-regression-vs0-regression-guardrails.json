@@ -1,0 +1,209 @@
+{
+  "audit_refs": [],
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs0-regression-guardrails",
+  "component_summaries": {
+    "audit_ledger": {
+      "event_types": [
+        "artifact.ingested",
+        "artifact.read",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "brief.created",
+        "claim.draft.created",
+        "claim.approved",
+        "policy.egress.denied",
+        "policy.sandbox_access.denied"
+      ],
+      "negative_evidence": {
+        "events_without_hashes": 0,
+        "events_without_review_details": 0,
+        "events_without_scope": 0,
+        "missing_required_event_types": 0,
+        "tamper_accepted": 0
+      },
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 1,
+        "product_feature_claims": "PARTIAL_VS0_AUDIT_LEDGER_ONLY",
+        "scenario_count": 1
+      },
+      "tamper_detection_exit_code": 5
+    },
+    "claim_evidence": {
+      "negative_evidence": {
+        "autonomous_action_allowed_from_claim": 0,
+        "evidence_claim_approval_blocked": 0,
+        "unsupported_approval_allowed": 0
+      },
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 2,
+        "product_feature_claims": "PARTIAL_VS0_CLAIM_EVIDENCE_ONLY",
+        "scenario_count": 2
+      },
+      "trust_states": {
+        "approved": "approved",
+        "evidence_backed": "evidence_backed",
+        "unsupported": "draft"
+      }
+    },
+    "namespace_isolation": {
+      "negative_evidence": {
+        "cross_namespace_results": 0,
+        "cross_scope_access_allowed": 0,
+        "implicit_promotions": 0,
+        "ownerless_records": 0
+      },
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 2,
+        "product_feature_claims": "PARTIAL_VS0_NAMESPACE_ISOLATION_ONLY",
+        "scenario_count": 2
+      }
+    },
+    "search_evidence": {
+      "negative_evidence": {},
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 3,
+        "product_feature_claims": "PARTIAL_VS0_SEARCH_EVIDENCE_ONLY",
+        "scenario_count": 3
+      }
+    },
+    "security": {
+      "negative_evidence": {
+        "action_cards_created_from_untrusted_artifact": 0,
+        "authority_expanded": 0,
+        "external_http_calls": 0,
+        "tool_calls_created": 0,
+        "unredacted_secret_occurrences": 0
+      },
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 5,
+        "product_feature_claims": "PARTIAL_VS0_SECURITY_ONLY",
+        "scenario_count": 5
+      }
+    },
+    "security_policy": {
+      "egress_external_http_calls": 0,
+      "negative_evidence": {
+        "egress_allowed": 0,
+        "environment_reads": 0,
+        "external_http_calls": 0,
+        "filesystem_reads": 0,
+        "host_operations_executed": 0,
+        "sandbox_access_allowed": 0,
+        "shell_commands_executed": 0
+      },
+      "sandbox_cases": [
+        "sandbox_environment",
+        "sandbox_filesystem",
+        "sandbox_host",
+        "sandbox_shell"
+      ],
+      "status": "success",
+      "summary": {
+        "blocking": 0,
+        "pass": 2,
+        "product_feature_claims": "PARTIAL_VS0_SECURITY_POLICY_ONLY",
+        "scenario_count": 2
+      }
+    }
+  },
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [],
+  "ids": {
+    "git_commit": "d145c8d"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "audit_guardrail_failed": 0,
+    "evidence_guardrail_failed": 0,
+    "security_guardrail_failed": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs3-regression-vs0-regression-guardrails.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "scenario_results": [
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-claim-evidence --json",
+        "cornerstone scenario verify vs0-search-evidence --json"
+      ],
+      "id": "CS-REG-016",
+      "notes": "Evidence requirements and trust states remain visible through unsupported draft, evidence-backed claim, approved claim, and evidence bundle checks.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-audit-ledger --json"
+      ],
+      "id": "CS-REG-017",
+      "notes": "Critical implemented events still appear in the tamper-evident audit ledger and tampering is detected.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "cornerstone scenario verify vs0-security-policy --json",
+        "cornerstone scenario verify vs0-security --json",
+        "cornerstone scenario verify vs0-namespace-isolation --json",
+        "cornerstone scenario verify vs0-claim-evidence --json"
+      ],
+      "id": "CS-REG-018",
+      "notes": "Default egress deny, sandbox denial, namespace isolation, policy checks, redaction, prompt-injection defense, and claim approval gates remain intact.",
+      "owner": "AI",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs0-regression-guardrails",
+  "schema_version": "cs.cli.v0",
+  "self_command_transcript": {
+    "command": [
+      "cornerstone",
+      "scenario",
+      "verify",
+      "vs0-regression-guardrails",
+      "--json",
+      "--output",
+      "reports/scenario/vs3-regression-vs0-regression-guardrails.json"
+    ],
+    "elapsed_seconds": 5.794,
+    "ended_at": "2026-06-30T11:19:39.248150Z",
+    "exit_code": 0,
+    "name": "scenario_verify_vs0-regression-guardrails",
+    "required": true,
+    "schema_version": "cs.command_transcript.v0",
+    "source": "observed",
+    "started_at": "2026-06-30T11:19:33.454125Z",
+    "stderr_tail": [],
+    "stdout_tail": [
+      "{\"final_verdict\": null, \"json_schema\": \"cs.cli.v0\", \"scenario_set\": \"vs0-regression-guardrails\", \"schema_version\": \"cs.cli.v0\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"pass\": 3, \"product_feature_claims\": \"PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY\", \"scenario_count\": 3}}"
+    ],
+    "timed_out": false
+  },
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "pass": 3,
+    "product_feature_claims": "PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY",
+    "scenario_count": 3
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

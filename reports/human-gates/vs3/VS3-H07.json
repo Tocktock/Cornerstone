@@ -1,0 +1,131 @@
+{
+  "approval_collected": false,
+  "audit_refs": [
+    "audit:audit_11a3578c598a2845"
+  ],
+  "blank_approval_record": {
+    "decision": null,
+    "evidence_refs": [],
+    "exceptions": [],
+    "redaction_note": null,
+    "reviewed_at": null,
+    "reviewer": null,
+    "scope": null,
+    "signature_ref": null
+  },
+  "claim_boundary": {
+    "dependency_unlock_allowed_by_package": false,
+    "dependency_unlock_allowed_by_validator": false,
+    "h_row_status_after_generation": "HUMAN_REQUIRED",
+    "h_rows_remain_human_required": true,
+    "human_acceptance_claim_allowed": false,
+    "live_provider_readiness_claim_allowed": false,
+    "migration_restore_readiness_claim_allowed": false,
+    "package_is_review_input_only": true,
+    "pass_claim_allowed": false,
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "production_readiness_claim_allowed": false,
+    "real_idp_readiness_claim_allowed": false,
+    "real_network_readiness_claim_allowed": false,
+    "security_acceptance_claim_allowed": false,
+    "structural_validation_is_not_acceptance": true,
+    "validation_surface": "human_gate_package_review_input_only",
+    "vs3_p_unlock_allowed": false,
+    "vs3_p_unlock_allowed_by_package": false
+  },
+  "dependency_claim_boundary": "dependencies_require_signed_human_evidence_not_structural_validation",
+  "dependency_unlock_allowed": false,
+  "depends_on_human_gates": [
+    "VS3-H01",
+    "VS3-H04"
+  ],
+  "evidence_refs": [
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv",
+    "reports/human-gates/vs3/VS3-H07.json"
+  ],
+  "expected_behavior": "Migration, backup, restore, rollback, quarantine, RLS, policy, and audit drill passes under approved data rules.",
+  "expected_evidence": "Signed transcript, before/after counts/hashes, restore/rollback result, RLS/policy inventory.",
+  "given": "Real or representative production-like data, retention rules, backup tooling, and rollback authority are available.",
+  "package_digest_sha256": "90790b51528b0589eb2167125db1400606e63251ec390cf308e1474aa3073fab",
+  "package_id": "vs3_human_gate_vs3_h07",
+  "package_path": "reports/human-gates/vs3/VS3-H07.json",
+  "pass_claim_allowed": false,
+  "product_claim_allowed": false,
+  "redaction_rules": {
+    "allowed_evidence_shape": "redacted transcript, signed approval/rejection, scope, findings, and stable refs",
+    "raw_personal_data_allowed_without_explicit_scope": false,
+    "raw_private_keys_allowed": false,
+    "raw_provider_tokens_allowed": false,
+    "raw_secrets_allowed": false,
+    "raw_session_cookies_allowed": false,
+    "required_redaction_note": "Reviewer must state what was redacted and why raw secrets or tokens are absent."
+  },
+  "reject_conditions": [
+    "Drill uses destructive production mutation without explicit owner approval.",
+    "Before/after counts or hashes do not reconcile and no quarantine or remediation is recorded.",
+    "Rollback, restore, RLS, policy, or audit evidence is missing while claiming migration readiness."
+  ],
+  "release_impact": "Remains HUMAN_REQUIRED until signed drill evidence exists; blocks migration/restore readiness claim.",
+  "required_evidence_fields": [
+    "reviewer",
+    "reviewed_at",
+    "decision",
+    "data_scope",
+    "retention_policy_ref",
+    "before_counts_hashes",
+    "after_counts_hashes",
+    "restore_result_ref",
+    "rollback_result_ref",
+    "rls_policy_inventory_ref",
+    "audit_refs",
+    "evidence_refs",
+    "signature_ref"
+  ],
+  "required_human_action": "Human-supervised non-destructive drill.",
+  "review_checklist": [
+    "Use approved real or representative production-like data and retention rules before the drill.",
+    "Run a non-destructive migration, backup, restore, rollback, quarantine, RLS, policy, and audit drill under supervision.",
+    "Record before/after counts, hashes, restore/rollback result, RLS/policy inventory, and operator sign-off."
+  ],
+  "review_order": 5,
+  "review_record_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_EXCEPTIONS",
+      "REJECT"
+    ],
+    "approval_requires_evidence_refs": true,
+    "approval_requires_signature_ref": true,
+    "package_alone_is_not_human_evidence": true,
+    "raw_secret_values_allowed": false,
+    "required_fields": [
+      "reviewer",
+      "reviewed_at",
+      "decision",
+      "data_scope",
+      "retention_policy_ref",
+      "before_counts_hashes",
+      "after_counts_hashes",
+      "restore_result_ref",
+      "rollback_result_ref",
+      "rls_policy_inventory_ref",
+      "audit_refs",
+      "evidence_refs",
+      "signature_ref"
+    ],
+    "schema_version": "cs.vs3_human_gate_review_record.v0"
+  },
+  "scenario_id": "VS3-H07",
+  "schema_version": "cs.vs3_human_gate_package.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "HUMAN_REQUIRED",
+  "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H07 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>",
+  "when": "Human-supervised non-destructive drill occurs.",
+  "why_ai_cannot_verify": "This row requires a person, real external system, production/on-prem topology, signed review, or subjective operator acceptance outside local deterministic proof."
+}

@@ -1,0 +1,79 @@
+{
+  "contract_hash": "9213d9357c4b6fad757b4236a68f19f9436980a0efa11217aa94496e30fe89f0",
+  "created_at": "2026-06-30T11:19:46.612838Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Orchestrator Agent",
+    "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Orchestrator Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "mission.read",
+      "evidence.read",
+      "policy.evaluate",
+      "workflow.propose",
+      "audit.read"
+    ],
+    "audit_expectations": [
+      "agent.orchestrated",
+      "agent.delegated",
+      "agent.after_action_review.created"
+    ],
+    "escalation_rules": [
+      "escalate missing authority",
+      "escalate high-risk or external action",
+      "escalate unresolved specialist conflict"
+    ],
+    "evidence_requirements": [
+      "delegation rationale",
+      "evidence refs for durable outputs",
+      "gap label when evidence is insufficient"
+    ],
+    "forbidden_actions": [
+      "direct_truth_mutation",
+      "direct_source_write",
+      "cross_namespace_access",
+      "silent_authority_expansion"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "evidence coverage",
+        "policy compliance",
+        "mission outcome quality"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "active_workspace_only",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Own mission planning, delegation, synthesis, authority gaps, and after-action review.",
+    "responsibilities": [
+      "plan_mission",
+      "delegate_specialists",
+      "merge_results",
+      "ask_for_missing_authority",
+      "produce_after_action_review"
+    ],
+    "role_key": "orchestrator",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_orchestrator_3e548f87d142e49b",
+  "role_key": "orchestrator",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

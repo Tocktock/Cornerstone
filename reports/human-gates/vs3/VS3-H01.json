@@ -1,0 +1,122 @@
+{
+  "approval_collected": false,
+  "audit_refs": [
+    "audit:audit_1404872f607dda7b"
+  ],
+  "blank_approval_record": {
+    "decision": null,
+    "evidence_refs": [],
+    "exceptions": [],
+    "redaction_note": null,
+    "reviewed_at": null,
+    "reviewer": null,
+    "scope": null,
+    "signature_ref": null
+  },
+  "claim_boundary": {
+    "dependency_unlock_allowed_by_package": false,
+    "dependency_unlock_allowed_by_validator": false,
+    "h_row_status_after_generation": "HUMAN_REQUIRED",
+    "h_rows_remain_human_required": true,
+    "human_acceptance_claim_allowed": false,
+    "live_provider_readiness_claim_allowed": false,
+    "migration_restore_readiness_claim_allowed": false,
+    "package_is_review_input_only": true,
+    "pass_claim_allowed": false,
+    "pass_claim_allowed_by_validator": false,
+    "product_claim_allowed": false,
+    "production_readiness_claim_allowed": false,
+    "real_idp_readiness_claim_allowed": false,
+    "real_network_readiness_claim_allowed": false,
+    "security_acceptance_claim_allowed": false,
+    "structural_validation_is_not_acceptance": true,
+    "validation_surface": "human_gate_package_review_input_only",
+    "vs3_p_unlock_allowed": false,
+    "vs3_p_unlock_allowed_by_package": false
+  },
+  "dependency_claim_boundary": "dependencies_require_signed_human_evidence_not_structural_validation",
+  "dependency_unlock_allowed": false,
+  "depends_on_human_gates": [],
+  "evidence_refs": [
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv",
+    "reports/human-gates/vs3/VS3-H01.json"
+  ],
+  "expected_behavior": "JiYong/Tars or authorized owner approves architecture, dependency scope, migration/rollback plan, and security ownership.",
+  "expected_evidence": "Dated APPROVE/REJECT record with scope, exceptions, rollback owner, dependency decision.",
+  "given": "VS3 architecture adds or changes authz, tenant isolation, durable migration, OPA, sandbox, registry, signing, or production dependencies.",
+  "package_digest_sha256": "cc0993182e44d257a3bd1be05ddf0299f48046b9f26046ffd41f1418361119ff",
+  "package_id": "vs3_human_gate_vs3_h01",
+  "package_path": "reports/human-gates/vs3/VS3-H01.json",
+  "pass_claim_allowed": false,
+  "product_claim_allowed": false,
+  "redaction_rules": {
+    "allowed_evidence_shape": "redacted transcript, signed approval/rejection, scope, findings, and stable refs",
+    "raw_personal_data_allowed_without_explicit_scope": false,
+    "raw_private_keys_allowed": false,
+    "raw_provider_tokens_allowed": false,
+    "raw_secrets_allowed": false,
+    "raw_session_cookies_allowed": false,
+    "required_redaction_note": "Reviewer must state what was redacted and why raw secrets or tokens are absent."
+  },
+  "reject_conditions": [
+    "No named owner for tenant isolation, OPA/policy, registry/signing, or migration rollback.",
+    "Approval text grants production readiness or VS3-P without the remaining H-row evidence.",
+    "Dependency, authz, sandbox, or rollback scope is materially changed without review."
+  ],
+  "release_impact": "Remains HUMAN_REQUIRED until signed owner evidence exists; blocks VS3-P and security-sensitive implementation gates as applicable.",
+  "required_evidence_fields": [
+    "reviewer",
+    "reviewed_at",
+    "decision",
+    "scope",
+    "architecture_decision",
+    "dependency_decision",
+    "migration_rollback_owner",
+    "security_owner",
+    "evidence_refs",
+    "signature_ref"
+  ],
+  "required_human_action": "Human architecture/security review.",
+  "review_checklist": [
+    "Review the final VS3-L aggregate report and the final regression proof before any approval decision.",
+    "Confirm the architecture ownership, dependency scope, migration/rollback owner, and security owner are named.",
+    "Record each exception or deferred risk explicitly instead of granting a blanket approval."
+  ],
+  "review_order": 1,
+  "review_record_contract": {
+    "allowed_decisions": [
+      "APPROVE",
+      "APPROVE_WITH_EXCEPTIONS",
+      "REJECT"
+    ],
+    "approval_requires_evidence_refs": true,
+    "approval_requires_signature_ref": true,
+    "package_alone_is_not_human_evidence": true,
+    "raw_secret_values_allowed": false,
+    "required_fields": [
+      "reviewer",
+      "reviewed_at",
+      "decision",
+      "scope",
+      "architecture_decision",
+      "dependency_decision",
+      "migration_rollback_owner",
+      "security_owner",
+      "evidence_refs",
+      "signature_ref"
+    ],
+    "schema_version": "cs.vs3_human_gate_review_record.v0"
+  },
+  "scenario_id": "VS3-H01",
+  "schema_version": "cs.vs3_human_gate_package.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "HUMAN_REQUIRED",
+  "validation_command": "cornerstone human-gate validate-record --scope vs3 --scenario VS3-H01 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>",
+  "when": "Human architecture/security review occurs.",
+  "why_ai_cannot_verify": "This row requires a person, real external system, production/on-prem topology, signed review, or subjective operator acceptance outside local deterministic proof."
+}

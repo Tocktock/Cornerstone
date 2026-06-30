@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import shlex
 import subprocess
 import sys
@@ -27,8 +29,11 @@ from cornerstone_cli.acceptance import (
     command_transcript_entry,
     collect_release_evidence,
     finalize_release_evidence,
+    git_verification_metadata,
     run_evux_quickstart,
+    utc_now,
     write_json,
+    _is_generated_evidence_path,
 )
 from cornerstone_cli.connector import (
     CAPTURE_CONSENT_DECISIONS,
@@ -52,14 +57,50 @@ from cornerstone_cli.connector import (
     read_delivery_file,
 )
 from cornerstone_cli.scenarios import (
+    DEFAULT_VS3_CONNECTORHUB_SOURCE_REPORT,
+    DEFAULT_VS3_EGRESS_SANDBOX_REPORT,
+    DEFAULT_VS3_FINAL_REGRESSION_REPORT,
+    DEFAULT_VS3_GOAL_PROMPT,
+    DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+    DEFAULT_VS3_OBSERVABILITY_REPORT,
+    DEFAULT_VS3_OPERATOR_STATUS_DOM_SNAPSHOT,
+    DEFAULT_VS3_OPA_POLICY_REPORT,
+    DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT,
+    DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX,
+    DEFAULT_VS3_POSTGRES_RLS_REPORT,
+    DEFAULT_VS3_RECONCILIATION_REPORT,
+    DEFAULT_VS3_REQUEST_CONTEXT_REPORT,
+    DEFAULT_VS3_SCENARIO_REPORT,
+    VS3_SCENARIO_CORPUS_PACK_ID,
+    VS3_SCENARIO_MODEL_NAME,
+    VS3_SCENARIO_MODEL_PROVIDER,
+    VS3_SCENARIO_VERIFY_SCOPE,
+    DEFAULT_VS3_TOOL_REGISTRY_REPORT,
+    VS3_HUMAN_GATE_DEPENDENCIES,
+    VS3_HUMAN_GATE_REVIEW_ORDER,
+    _vs3_overclaim_lint,
     coverage_report,
+    evaluate_vs3_policy_input,
     list_scenarios,
+    reconcile_vs3_evidence,
+    run_vs3_connectorhub_source_proof,
+    run_vs3_egress_sandbox_proof,
+    run_vs3_final_regression_proof,
+    run_vs3_observability_proof,
+    run_vs3_opa_policy_proof,
+    run_vs3_postgres_rls_proof,
+    run_vs3_request_context_proof,
+    run_vs3_tool_registry_proof,
+    validate_vs3_human_gate_review_record,
+    vs3_human_gate_no_claim_boundary,
+    vs3_human_gate_readiness_report,
     verify_connector_contract_adapter,
     verify_vs0_evux,
     verify_vs0_evux_governance,
     verify_vs0_operator_acceptance_ui,
     verify_vs1_ontology_suggest_promote,
     verify_vs2_policy_tenancy_egress,
+    verify_vs3_onprem_trusted_extension,
     verify_vs0_runtime_acceptance,
     verify_vs0_product_runtime,
     verify_full_agent_orchestration,
@@ -95,6 +136,7 @@ from cornerstone_cli.scenarios import (
 )
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
 from cornerstone_cli.runtime import LocalRuntimeStore
+from cornerstone_cli.validators import count_unredacted_secrets
 from cornerstone_cli.vs2_security import run_vs2_local_security_proof
 from cornerstone_cli.vs2_production_like import REPORT_PATH as VS2_PRODUCTION_LIKE_REPORT_PATH
 from cornerstone_cli.vs2_production_like import run_vs2_production_like_integration
@@ -118,12 +160,60 @@ from cornerstone_cli.vs2_local_range import (
 SCHEMA_VERSION = "cs.cli.v0"
 EXIT_SUCCESS = 0
 EXIT_INVALID = 1
+EXIT_PERMISSION_DENIED = 2
 EXIT_NOT_FOUND = 3
 EXIT_EVIDENCE_MISSING = 4
 EXIT_RUNTIME_FAILURE = 5
 EXIT_SCOPE_DENIED = 6
 EXIT_CONNECTOR_UNAVAILABLE = 7
 EXIT_POLICY_DENIED = 8
+DEFAULT_VS3_OVERCLAIM_LINT_REPORT = "reports/security/vs3-overclaim-lint.json"
+VS3_CLI_TRANSCRIPT_EXIT_CODES = set(range(0, 9))
+VS3_CLI_TRANSCRIPT_SCOPE_SOURCES = {
+    "local_vs3_fixture",
+    "trusted_request_context",
+}
+VS3_SCOPE_ALLOWED_KEYS = frozenset(
+    {
+        "tenant_id",
+        "owner_id",
+        "namespace_id",
+        "workspace_id",
+        "scope_source",
+    }
+)
+VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L = "LOCAL_COMPONENT_PROOF_ONLY"
+VS3_CLI_STDOUT_PROOF_BOUNDARY_REQUIRED_NOT_CLAIMED = {
+    "vs3_p",
+    "production_onprem",
+    "security_acceptance",
+    "human_acceptance",
+}
+VS3_CLI_STDOUT_PROOF_BOUNDARY_OPTIONAL_NOT_CLAIMED = {
+    "production",
+    "live_provider",
+    "real_idp",
+    "real_network",
+    "migration_restore",
+}
+VS3_COMPONENT_EVIDENCE_REF_PREFIXES = (
+    "artifact:",
+    "audit_state:",
+    "audit_tamper_state:",
+    "capture_summary:",
+    "config/",
+    "connector_ack_outbox:",
+    "connector_projection:",
+    "connector_source_policy:",
+    "docs/",
+    "fixtures/",
+    "human_gate_validation_rehearsal:",
+    "policies/",
+    "report:",
+    "reports/",
+)
+VS3_COMPONENT_AUDIT_REF_PREFIXES = ("audit:", "audit_")
+VS3_COMPONENT_POLICY_DECISION_REF_PREFIXES = ("policy:", "policy_")
 
 
 def _strip_state_dir_tokens(command: list[str]) -> list[str]:
@@ -625,6 +715,21 @@ def command_audit_list(args: argparse.Namespace) -> int:
 
 def command_egress_test(args: argparse.Namespace) -> int:
     root = repo_root()
+    if getattr(args, "profile", "default") == "vs3":
+        report, report_path = _get_vs3_egress_sandbox_report(args)
+        payload = _vs3_egress_sandbox_base_payload("cornerstone egress test --profile vs3", report, report_path, root)
+        payload["egress_test_schema_version"] = "cs.vs3_egress_test.v0"
+        payload["runtime_boundary"] = report.get("runtime_boundary", {})
+        payload["controlled_sinks"] = report.get("controlled_sinks", {})
+        payload["url_normalization_matrix"] = report.get("url_normalization_matrix", [])
+        payload["command_transcripts"] = [
+            row
+            for row in report.get("command_transcripts", [])
+            if row.get("command") == ["cornerstone", "egress", "test", "--profile", "vs3", "--json"]
+        ]
+        print_payload(payload, args.json)
+        return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
     result = store.deny_egress_attempt(args.url, requested_scope)
@@ -669,6 +774,8095 @@ def command_sandbox_test(args: argparse.Namespace) -> int:
     )
     print_payload(payload, args.json)
     return EXIT_POLICY_DENIED
+
+
+def _vs3_egress_sandbox_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_EGRESS_SANDBOX_REPORT
+
+
+def _load_vs3_egress_sandbox_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_egress_sandbox_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_egress_sandbox_report(args: argparse.Namespace, *, refresh_default: bool = False) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_egress_sandbox_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    reuse_report = getattr(args, "reuse_vs2_local_range_report", None)
+    should_refresh = refresh_default and not use_existing
+    if should_refresh or reuse_report or not report_path.exists():
+        report = run_vs3_egress_sandbox_proof(
+            root,
+            reuse_local_range_report=Path(reuse_report) if reuse_report else None,
+        )
+        return report, report_path
+    existing = _load_vs3_egress_sandbox_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_egress_sandbox_proof(root)
+    return report, report_path
+
+
+def _vs3_egress_sandbox_base_payload(command: str, report: dict[str, Any], report_path: Path, root: Path) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_egress_sandbox_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["source_report"] = report.get("source_report", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_EGRESS_SANDBOX_REPORT}")
+    if report.get("source_report", {}).get("path"):
+        payload["evidence_refs"].append(f"report:{report['source_report']['path']}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend([f"policy:{decision_id}" for decision_id in report.get("policy_decision_refs", [])])
+    return payload
+
+
+def command_security_vs3_egress_sandbox(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_egress_sandbox_report(args, refresh_default=True)
+    payload = _vs3_egress_sandbox_base_payload("cornerstone security vs3-egress-sandbox", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_sandbox_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_egress_sandbox_report(args)
+    payload = _vs3_egress_sandbox_base_payload("cornerstone sandbox verify", report, report_path, root)
+    payload["sandbox_verify_schema_version"] = "cs.vs3_sandbox_verify.v0"
+    payload["sandbox_matrix"] = report.get("sandbox_matrix", [])
+    payload["outage_matrix"] = report.get("outage_matrix", [])
+    payload["untrusted_content_matrix"] = report.get("untrusted_content_matrix", [])
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "sandbox", "verify", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_connectorhub_source_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_CONNECTORHUB_SOURCE_REPORT
+
+
+def _load_vs3_connectorhub_source_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_connectorhub_source_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_connectorhub_source_report(
+    args: argparse.Namespace,
+    *,
+    refresh_default: bool = False,
+) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_connectorhub_source_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    if (refresh_default and not use_existing) or not report_path.exists():
+        report = run_vs3_connectorhub_source_proof(root)
+        return report, report_path
+    existing = _load_vs3_connectorhub_source_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_connectorhub_source_proof(root)
+    return report, report_path
+
+
+def _vs3_connectorhub_source_base_payload(
+    command: str,
+    report: dict[str, Any],
+    report_path: Path,
+    root: Path,
+) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_connectorhub_source_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_CONNECTORHUB_SOURCE_REPORT}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend(report.get("policy_decision_refs", []))
+    return payload
+
+
+def command_security_vs3_connectorhub_source(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_connectorhub_source_report(args, refresh_default=True)
+    payload = _vs3_connectorhub_source_base_payload(
+        "cornerstone security vs3-connectorhub-source",
+        report,
+        report_path,
+        root,
+    )
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_connector_source_policy_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_connectorhub_source_report(args)
+    payload = _vs3_connectorhub_source_base_payload(
+        "cornerstone connector source-policy show",
+        report,
+        report_path,
+        root,
+    )
+    payload["connector_source_policy_show_schema_version"] = "cs.vs3_connector_source_policy_show.v0"
+    payload["source_policy"] = report.get("source_policy", {})
+    payload["evidence_refs"].extend(report.get("source_policy", {}).get("evidence_refs", []))
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "connector", "source-policy", "show", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_connector_projection_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_connectorhub_source_report(args)
+    payload = _vs3_connectorhub_source_base_payload(
+        "cornerstone connector projection verify",
+        report,
+        report_path,
+        root,
+    )
+    projection = report.get("projection_delivery", {})
+    faults = report.get("delivery_faults", {})
+    payload["connector_projection_verify_schema_version"] = "cs.vs3_connector_projection_verify.v0"
+    payload["projection_delivery"] = projection
+    payload["delivery_faults"] = faults
+    payload["evidence_refs"].extend(projection.get("evidence_refs", []))
+    payload["evidence_refs"].extend(faults.get("evidence_refs", []))
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "connector", "projection", "verify", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_connector_action_dry_run(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_connectorhub_source_report(args)
+    payload = _vs3_connectorhub_source_base_payload(
+        "cornerstone connector action dry-run",
+        report,
+        report_path,
+        root,
+    )
+    github_readonly = report.get("github_readonly", {})
+    credential_boundary = report.get("credential_boundary", {})
+    payload["connector_action_dry_run_schema_version"] = "cs.vs3_connector_action_dry_run.v0"
+    payload["dry_run"] = {
+        "status": "verified_no_provider_side_effects" if report.get("status") == "success" else "failed",
+        "provider": "github",
+        "read_only_connector": True,
+        "execution_result_created": False,
+        "provider_mutations": report.get("negative_evidence", {}).get("github_external_mutations"),
+        "real_provider_calls": report.get("negative_evidence", {}).get("github_write_calls"),
+        "preflight_counted_as_approval": 0,
+    }
+    payload["github_readonly"] = github_readonly
+    payload["credential_boundary"] = credential_boundary
+    payload["evidence_refs"].extend(github_readonly.get("evidence_refs", []))
+    payload["evidence_refs"].extend(credential_boundary.get("evidence_refs", []))
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "connector", "action", "dry-run", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_connector_capture_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_connectorhub_source_report(args)
+    payload = _vs3_connectorhub_source_base_payload(
+        "cornerstone connector capture verify",
+        report,
+        report_path,
+        root,
+    )
+    capture_fixture = report.get("capture_fixture", {})
+    payload["connector_capture_verify_schema_version"] = "cs.vs3_connector_capture_verify.v0"
+    payload["profile"] = args.profile
+    payload["capture_fixture"] = capture_fixture
+    payload["evidence_refs"].extend(capture_fixture.get("evidence_refs", []))
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "connector", "capture", "verify", "--profile", "vs3", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_tool_registry_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_TOOL_REGISTRY_REPORT
+
+
+def _load_vs3_tool_registry_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_tool_registry_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_tool_registry_report(
+    args: argparse.Namespace,
+    *,
+    refresh_default: bool = False,
+) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_tool_registry_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    if (refresh_default and not use_existing) or not report_path.exists():
+        report = run_vs3_tool_registry_proof(root)
+        return report, report_path
+    existing = _load_vs3_tool_registry_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_tool_registry_proof(root)
+    return report, report_path
+
+
+def _vs3_tool_registry_base_payload(
+    command: str,
+    report: dict[str, Any],
+    report_path: Path,
+    root: Path,
+) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_tool_registry_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_TOOL_REGISTRY_REPORT}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend(report.get("policy_decision_refs", []))
+    return payload
+
+
+def command_security_vs3_tool_registry(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_tool_registry_report(args, refresh_default=True)
+    payload = _vs3_tool_registry_base_payload("cornerstone security vs3-tool-registry", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_tool_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_tool_registry_report(args)
+    payload = _vs3_tool_registry_base_payload("cornerstone tool verify", report, report_path, root)
+    payload["tool_verify_schema_version"] = "cs.vs3_tool_verify.v0"
+    payload["manifest_validation"] = report.get("manifest_validation", {})
+    payload["registry"] = report.get("registry", {})
+    payload["sandbox"] = report.get("sandbox", {})
+    payload["update_rollback"] = report.get("update_rollback", {})
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "tool", "verify", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_observability_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_OBSERVABILITY_REPORT
+
+
+def _load_vs3_observability_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_observability_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_observability_report(
+    args: argparse.Namespace,
+    *,
+    refresh_default: bool = False,
+) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_observability_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    if (refresh_default and not use_existing) or not report_path.exists():
+        report = run_vs3_observability_proof(root)
+        return report, report_path
+    existing = _load_vs3_observability_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_observability_proof(root)
+    return report, report_path
+
+
+def _vs3_observability_base_payload(
+    command: str,
+    report: dict[str, Any],
+    report_path: Path,
+    root: Path,
+) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_observability_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_OBSERVABILITY_REPORT}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend(report.get("policy_decision_refs", []))
+    return payload
+
+
+def command_security_vs3_observability(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_observability_report(args, refresh_default=True)
+    payload = _vs3_observability_base_payload("cornerstone security vs3-observability", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_final_regression_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_FINAL_REGRESSION_REPORT
+
+
+def _load_vs3_final_regression_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_final_regression_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_final_regression_report(
+    args: argparse.Namespace,
+    *,
+    refresh_default: bool = False,
+) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_final_regression_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    if (refresh_default and not use_existing) or not report_path.exists():
+        report = run_vs3_final_regression_proof(root)
+        return report, report_path
+    existing = _load_vs3_final_regression_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_final_regression_proof(root)
+    return report, report_path
+
+
+def _vs3_final_regression_base_payload(
+    command: str,
+    report: dict[str, Any],
+    report_path: Path,
+    root: Path,
+) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_final_regression_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_FINAL_REGRESSION_REPORT}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend(report.get("policy_decision_refs", []))
+    return payload
+
+
+def command_security_vs3_regression_gate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_final_regression_report(args, refresh_default=True)
+    payload = _vs3_final_regression_base_payload("cornerstone security vs3-regression-gate", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_local_checkpoint_artifact(root: Path, rel_path: str, *, kind: str, required: bool = True) -> dict[str, Any]:
+    path = root / rel_path
+    artifact: dict[str, Any] = {
+        "path": rel_path,
+        "kind": kind,
+        "required": required,
+        "present": path.exists() and path.is_file(),
+    }
+    if artifact["present"]:
+        data = path.read_bytes()
+        artifact.update(
+            {
+                "bytes": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+        )
+    return artifact
+
+
+def _vs3_local_checkpoint_human_gate_package_semantics(
+    root: Path,
+    *,
+    package_dir: str,
+    human_gate_ids: list[str],
+) -> dict[str, Any]:
+    false_top_level_fields = [
+        "approval_collected",
+        "dependency_unlock_allowed",
+        "pass_claim_allowed",
+        "product_claim_allowed",
+    ]
+    false_boundary_fields = [
+        "dependency_unlock_allowed_by_package",
+        "dependency_unlock_allowed_by_validator",
+        "human_acceptance_claim_allowed",
+        "live_provider_readiness_claim_allowed",
+        "migration_restore_readiness_claim_allowed",
+        "pass_claim_allowed",
+        "pass_claim_allowed_by_validator",
+        "product_claim_allowed",
+        "production_readiness_claim_allowed",
+        "real_idp_readiness_claim_allowed",
+        "real_network_readiness_claim_allowed",
+        "security_acceptance_claim_allowed",
+        "vs3_p_unlock_allowed",
+        "vs3_p_unlock_allowed_by_package",
+    ]
+    true_boundary_fields = [
+        "h_rows_remain_human_required",
+        "package_is_review_input_only",
+        "structural_validation_is_not_acceptance",
+    ]
+    blank_approval_empty_fields = [
+        "decision",
+        "redaction_note",
+        "reviewed_at",
+        "reviewer",
+        "scope",
+        "signature_ref",
+    ]
+    package_rows: list[dict[str, Any]] = []
+    for scenario_id in human_gate_ids:
+        rel_path = f"{package_dir}/{scenario_id}.json"
+        package_path = root / rel_path
+        row: dict[str, Any] = {
+            "scenario_id": scenario_id,
+            "path": rel_path,
+            "present": package_path.exists() and package_path.is_file(),
+            "json_valid": False,
+            "schema_valid": False,
+            "status_human_required": False,
+            "ids_match": False,
+            "path_matches": False,
+            "top_level_no_claims": False,
+            "claim_boundary_ready": False,
+            "claim_boundary_no_claims": False,
+            "blank_approval_record_empty": False,
+            "review_record_contract_safe": False,
+            "redaction_rules_safe": False,
+            "review_material_complete": False,
+            "validation_command_matches": False,
+            "package_digest_present": False,
+            "package_digest_matches": False,
+            "semantic_error_codes": [],
+        }
+        if not row["present"]:
+            row["semantic_error_codes"].append("CS_VS3_HUMAN_GATE_PACKAGE_MISSING")
+            package_rows.append(row)
+            continue
+        try:
+            package = json.loads(package_path.read_text())
+        except json.JSONDecodeError:
+            row["semantic_error_codes"].append("CS_VS3_HUMAN_GATE_PACKAGE_INVALID_JSON")
+            package_rows.append(row)
+            continue
+        if not isinstance(package, dict):
+            row["semantic_error_codes"].append("CS_VS3_HUMAN_GATE_PACKAGE_NOT_OBJECT")
+            package_rows.append(row)
+            continue
+
+        row["json_valid"] = True
+        row["schema_version"] = package.get("schema_version")
+        row["status"] = package.get("status")
+        row["package_scenario_id"] = package.get("scenario_id")
+        row["package_path"] = package.get("package_path")
+        row["approval_collected"] = package.get("approval_collected")
+        row["dependency_unlock_allowed"] = package.get("dependency_unlock_allowed")
+        row["pass_claim_allowed"] = package.get("pass_claim_allowed")
+        row["product_claim_allowed"] = package.get("product_claim_allowed")
+        package_digest = package.get("package_digest_sha256")
+        digest_body = dict(package)
+        digest_body.pop("package_digest_sha256", None)
+        computed_package_digest = _vs3_json_identity_sha256(digest_body)
+        row["package_digest_sha256"] = package_digest
+        row["computed_package_digest_sha256"] = computed_package_digest
+        row["package_digest_present"] = isinstance(package_digest, str) and len(package_digest) == 64
+        row["package_digest_matches"] = row["package_digest_present"] and package_digest == computed_package_digest
+        row["schema_valid"] = package.get("schema_version") == "cs.vs3_human_gate_package.v0"
+        row["status_human_required"] = package.get("status") == "HUMAN_REQUIRED"
+        row["ids_match"] = package.get("scenario_id") == scenario_id
+        row["path_matches"] = package.get("package_path") == rel_path
+        row["top_level_no_claims"] = all(package.get(key) is False for key in false_top_level_fields)
+
+        claim_boundary = package.get("claim_boundary")
+        boundary_is_object = isinstance(claim_boundary, dict)
+        row["claim_boundary"] = claim_boundary if boundary_is_object else None
+        if boundary_is_object:
+            row["claim_boundary_ready"] = (
+                all(claim_boundary.get(key) is True for key in true_boundary_fields)
+                and claim_boundary.get("h_row_status_after_generation") == "HUMAN_REQUIRED"
+                and claim_boundary.get("validation_surface") == "human_gate_package_review_input_only"
+            )
+            row["claim_boundary_no_claims"] = all(
+                claim_boundary.get(key) is False for key in false_boundary_fields
+            )
+
+        blank_approval = package.get("blank_approval_record")
+        if isinstance(blank_approval, dict):
+            row["blank_approval_record_empty"] = (
+                all(blank_approval.get(key) is None for key in blank_approval_empty_fields)
+                and blank_approval.get("evidence_refs") == []
+                and blank_approval.get("exceptions") == []
+            )
+
+        review_contract = package.get("review_record_contract")
+        if isinstance(review_contract, dict):
+            row["review_record_contract_safe"] = (
+                review_contract.get("schema_version") == "cs.vs3_human_gate_review_record.v0"
+                and review_contract.get("approval_requires_evidence_refs") is True
+                and review_contract.get("approval_requires_signature_ref") is True
+                and review_contract.get("package_alone_is_not_human_evidence") is True
+                and review_contract.get("raw_secret_values_allowed") is False
+            )
+
+        redaction_rules = package.get("redaction_rules")
+        if isinstance(redaction_rules, dict):
+            row["redaction_rules_safe"] = (
+                redaction_rules.get("raw_secrets_allowed") is False
+                and redaction_rules.get("raw_provider_tokens_allowed") is False
+                and redaction_rules.get("raw_private_keys_allowed") is False
+                and redaction_rules.get("raw_session_cookies_allowed") is False
+            )
+
+        row["review_material_complete"] = (
+            isinstance(package.get("review_checklist"), list)
+            and len(package.get("review_checklist")) > 0
+            and isinstance(package.get("reject_conditions"), list)
+            and len(package.get("reject_conditions")) > 0
+            and isinstance(package.get("required_evidence_fields"), list)
+            and len(package.get("required_evidence_fields")) > 0
+            and bool(package.get("why_ai_cannot_verify"))
+            and bool(package.get("required_human_action"))
+            and bool(package.get("expected_evidence"))
+            and bool(package.get("release_impact"))
+        )
+        validation_command = str(package.get("validation_command") or "")
+        row["validation_command_matches"] = (
+            "cornerstone human-gate validate-record" in validation_command
+            and f"--scenario {scenario_id}" in validation_command
+            and "--json" in validation_command
+        )
+
+        semantic_checks = {
+            "CS_VS3_HUMAN_GATE_PACKAGE_SCHEMA_INVALID": row["schema_valid"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_STATUS_NOT_HUMAN_REQUIRED": row["status_human_required"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_ID_MISMATCH": row["ids_match"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_PATH_MISMATCH": row["path_matches"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_TOP_LEVEL_CLAIM": row["top_level_no_claims"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_CLAIM_BOUNDARY_INVALID": row["claim_boundary_ready"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_CLAIM_BOUNDARY_OVERCLAIM": row["claim_boundary_no_claims"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_BLANK_APPROVAL_FILLED": row["blank_approval_record_empty"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_REVIEW_CONTRACT_UNSAFE": row["review_record_contract_safe"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_REDACTION_RULES_UNSAFE": row["redaction_rules_safe"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_REVIEW_MATERIAL_INCOMPLETE": row["review_material_complete"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_VALIDATION_COMMAND_MISMATCH": row["validation_command_matches"],
+            "CS_VS3_HUMAN_GATE_PACKAGE_DIGEST_MISMATCH": row["package_digest_matches"],
+        }
+        row["semantic_error_codes"].extend(
+            error_code for error_code, passed in semantic_checks.items() if not passed
+        )
+        package_rows.append(row)
+
+    invalid_package_ids = [
+        str(row["scenario_id"]) for row in package_rows if row["semantic_error_codes"]
+    ]
+    missing_package_ids = [
+        str(row["scenario_id"]) for row in package_rows if "CS_VS3_HUMAN_GATE_PACKAGE_MISSING" in row["semantic_error_codes"]
+    ]
+    invalid_json_package_ids = [
+        str(row["scenario_id"]) for row in package_rows if "CS_VS3_HUMAN_GATE_PACKAGE_INVALID_JSON" in row["semantic_error_codes"]
+    ]
+    marked_pass_package_ids = [
+        str(row["scenario_id"]) for row in package_rows if row.get("status") == "PASS"
+    ]
+    claim_boundary_violation_ids = [
+        str(row["scenario_id"])
+        for row in package_rows
+        if not row.get("claim_boundary_ready") or not row.get("claim_boundary_no_claims")
+    ]
+    unlock_or_acceptance_claim_ids = [
+        str(row["scenario_id"])
+        for row in package_rows
+        if row.get("approval_collected") is not False
+        or row.get("dependency_unlock_allowed") is not False
+        or row.get("pass_claim_allowed") is not False
+        or row.get("product_claim_allowed") is not False
+        or (
+            isinstance(row.get("claim_boundary"), dict)
+            and any(row["claim_boundary"].get(key) is not False for key in false_boundary_fields)
+        )
+    ]
+    filled_blank_approval_ids = [
+        str(row["scenario_id"]) for row in package_rows if not row.get("blank_approval_record_empty")
+    ]
+    unsafe_review_contract_ids = [
+        str(row["scenario_id"]) for row in package_rows if not row.get("review_record_contract_safe")
+    ]
+    validation_command_mismatch_ids = [
+        str(row["scenario_id"]) for row in package_rows if not row.get("validation_command_matches")
+    ]
+    digest_mismatch_ids = [
+        str(row["scenario_id"]) for row in package_rows if not row.get("package_digest_matches")
+    ]
+    semantic_error_count = sum(len(row["semantic_error_codes"]) for row in package_rows)
+    return {
+        "schema_version": "cs.vs3_human_gate_package_semantics.v0",
+        "expected_human_scenario_ids": human_gate_ids,
+        "actual_human_scenario_ids": [
+            str(row.get("package_scenario_id") or row["scenario_id"])
+            for row in package_rows
+        ],
+        "package_count": len(package_rows),
+        "packages_ready": semantic_error_count == 0 and len(package_rows) == len(human_gate_ids),
+        "semantic_error_count": semantic_error_count,
+        "invalid_package_ids": invalid_package_ids,
+        "missing_package_ids": missing_package_ids,
+        "invalid_json_package_ids": invalid_json_package_ids,
+        "marked_pass_package_ids": marked_pass_package_ids,
+        "claim_boundary_violation_ids": claim_boundary_violation_ids,
+        "unlock_or_acceptance_claim_ids": unlock_or_acceptance_claim_ids,
+        "filled_blank_approval_record_ids": filled_blank_approval_ids,
+        "unsafe_review_record_contract_ids": unsafe_review_contract_ids,
+        "validation_command_mismatch_ids": validation_command_mismatch_ids,
+        "digest_mismatch_ids": digest_mismatch_ids,
+        "packages": package_rows,
+    }
+
+
+def _vs3_json_identity_sha256(value: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+    ).hexdigest()
+
+
+def _vs3_report_file_identity(root: Path, report_path: str | Path) -> dict[str, Any]:
+    path = Path(report_path)
+    if not path.is_absolute():
+        path = root / path
+    try:
+        rel_path = str(path.relative_to(root))
+    except ValueError:
+        rel_path = str(path)
+    identity: dict[str, Any] = {
+        "path": rel_path,
+        "path_sha256": hashlib.sha256(rel_path.encode("utf-8")).hexdigest(),
+        "present": path.exists() and path.is_file(),
+        "json_valid": False,
+    }
+    if not identity["present"]:
+        return identity
+    data = path.read_bytes()
+    identity["bytes"] = len(data)
+    identity["sha256"] = hashlib.sha256(data).hexdigest()
+    try:
+        loaded = json.loads(data)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        identity["error_code"] = "CS_VS3_REPORT_INVALID_JSON"
+        return identity
+    identity["json_valid"] = True
+    identity["canonical_json_sha256"] = _vs3_json_identity_sha256(loaded)
+    if isinstance(loaded, dict):
+        identity["schema_version"] = loaded.get("schema_version")
+        identity["status"] = loaded.get("status")
+    return identity
+
+
+def _vs3_cli_command_transcript_rows(value: Any) -> list[tuple[str, Any]]:
+    if isinstance(value, list):
+        return [(str(index), entry) for index, entry in enumerate(value)]
+    if isinstance(value, dict):
+        return [(str(key), entry) for key, entry in value.items()]
+    return []
+
+
+def _vs3_parse_utc_z_timestamp(value: Any) -> datetime | None:
+    if not isinstance(value, str) or not value.endswith("Z") or "T" not in value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
+        return None
+    if parsed.utcoffset() != timezone.utc.utcoffset(parsed):
+        return None
+    return parsed
+
+
+def _vs3_cli_command_transcript_errors(
+    entry: Any,
+    *,
+    expected_source_tree: dict[str, Any] | None = None,
+    require_stdout_tail: bool = False,
+    expected_traceability: dict[str, Any] | None = None,
+) -> list[str]:
+    if not isinstance(entry, dict):
+        return ["not_object"]
+    errors: list[str] = []
+    if count_unredacted_secrets(json.dumps(entry, sort_keys=True, default=str)):
+        errors.append("unredacted_secret_in_transcript")
+    validate_ref_taxonomy = expected_traceability is not None
+    command = entry.get("command")
+    command_is_string_list = isinstance(command, list) and all(isinstance(part, str) for part in command)
+    if not isinstance(command, list) or not all(isinstance(part, str) for part in command):
+        errors.append("command_not_list")
+    else:
+        if "cornerstone" not in command:
+            errors.append("command_missing_cornerstone")
+        elif not command or command[0] != "cornerstone":
+            errors.append("command_not_native_cornerstone")
+        if "--json" not in command:
+            errors.append("command_missing_json_flag")
+    arguments = entry.get("arguments")
+    if not isinstance(arguments, list) or not all(isinstance(part, str) for part in arguments):
+        errors.append("arguments_not_list")
+    elif command_is_string_list and command and command[0] == "cornerstone" and arguments != command[1:]:
+        errors.append("arguments_mismatch_command_tail")
+    exit_code = entry.get("exit_code")
+    if not isinstance(exit_code, int) or isinstance(exit_code, bool):
+        errors.append("exit_code_not_int")
+    elif exit_code not in VS3_CLI_TRANSCRIPT_EXIT_CODES:
+        errors.append("exit_code_outside_contract")
+    command_valid_for_stdout = (
+        command_is_string_list
+        and bool(command)
+        and command[0] == "cornerstone"
+        and "--json" in command
+    )
+    arguments_valid_for_stdout = (
+        isinstance(arguments, list)
+        and all(isinstance(part, str) for part in arguments)
+        and (
+            not command_is_string_list
+            or not command
+            or command[0] != "cornerstone"
+            or arguments == command[1:]
+        )
+    )
+    exit_code_valid_for_stdout = (
+        isinstance(exit_code, int)
+        and not isinstance(exit_code, bool)
+        and exit_code in VS3_CLI_TRANSCRIPT_EXIT_CODES
+    )
+    schema_value = entry.get("json_schema") or entry.get("schema_version") or entry.get("cli_schema_version")
+    if not isinstance(schema_value, str) or not schema_value.strip():
+        errors.append("schema_metadata_missing")
+    output_mode = entry.get("output_mode")
+    if output_mode != "json":
+        errors.append("output_mode_not_json")
+    started_at = entry.get("started_at")
+    parsed_started_at: datetime | None = None
+    if not isinstance(started_at, str) or not started_at.endswith("Z"):
+        errors.append("started_at_missing")
+    else:
+        parsed_started_at = _vs3_parse_utc_z_timestamp(started_at)
+        if parsed_started_at is None:
+            errors.append("started_at_invalid")
+    ended_at = entry.get("ended_at")
+    parsed_ended_at: datetime | None = None
+    if not isinstance(ended_at, str) or not ended_at.endswith("Z"):
+        errors.append("ended_at_missing")
+    else:
+        parsed_ended_at = _vs3_parse_utc_z_timestamp(ended_at)
+        if parsed_ended_at is None:
+            errors.append("ended_at_invalid")
+    if parsed_started_at is not None and parsed_ended_at is not None and parsed_ended_at < parsed_started_at:
+        errors.append("ended_at_before_started_at")
+    if not isinstance(entry.get("timed_out"), bool):
+        errors.append("timed_out_not_bool")
+    elif entry.get("timed_out") is True:
+        errors.append("timed_out_true")
+    elapsed_seconds = entry.get("elapsed_seconds")
+    if not isinstance(elapsed_seconds, (int, float)) or isinstance(elapsed_seconds, bool):
+        errors.append("elapsed_seconds_not_number")
+    elif not math.isfinite(float(elapsed_seconds)):
+        errors.append("elapsed_seconds_not_finite")
+    elif elapsed_seconds < 0:
+        errors.append("elapsed_seconds_negative")
+    elapsed_seconds_valid_for_stdout = (
+        isinstance(elapsed_seconds, (int, float))
+        and not isinstance(elapsed_seconds, bool)
+        and math.isfinite(float(elapsed_seconds))
+        and elapsed_seconds >= 0
+    )
+    evidence_refs = entry.get("evidence_refs")
+    if not isinstance(evidence_refs, list) or not all(isinstance(ref, str) for ref in evidence_refs) or not evidence_refs:
+        errors.append("evidence_refs_missing")
+    elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(evidence_refs, ref_kind="evidence_refs"):
+        errors.append(_vs3_component_ref_error_suffix("evidence_refs"))
+    audit_refs = entry.get("audit_refs")
+    if not isinstance(audit_refs, list) or not all(isinstance(ref, str) for ref in audit_refs) or not audit_refs:
+        errors.append("audit_refs_missing")
+    elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(audit_refs, ref_kind="audit_refs"):
+        errors.append(_vs3_component_ref_error_suffix("audit_refs"))
+    policy_decision_refs = entry.get("policy_decision_refs")
+    if not isinstance(policy_decision_refs, list) or not all(
+        isinstance(ref, str) for ref in policy_decision_refs
+    ):
+        errors.append("policy_decision_refs_not_list")
+    elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(
+        policy_decision_refs,
+        ref_kind="policy_decision_refs",
+    ):
+        errors.append(_vs3_component_ref_error_suffix("policy_decision_refs"))
+    scope = entry.get("scope")
+    if not isinstance(scope, dict):
+        errors.append("scope_missing")
+    else:
+        errors.extend(_vs3_scope_key_errors(scope))
+        for key in ["tenant_id", "owner_id", "namespace_id", "workspace_id"]:
+            if not isinstance(scope.get(key), str) or not scope[key].strip():
+                errors.append(f"scope_{key}_missing")
+        scope_source = scope.get("scope_source")
+        if not isinstance(scope_source, str) or not scope_source.strip():
+            errors.append("scope_source_missing")
+        elif scope_source not in VS3_CLI_TRANSCRIPT_SCOPE_SOURCES:
+            errors.append("scope_source_untrusted")
+    source_tree = entry.get("source_tree")
+    if not isinstance(source_tree, dict) or not source_tree:
+        errors.append("source_tree_missing")
+    else:
+        errors.extend(_vs3_source_tree_key_errors(source_tree))
+        for key in ["verified_base_commit", "verified_base_commit_full", "verified_source_worktree_hash"]:
+            if not isinstance(source_tree.get(key), str) or not source_tree[key].strip():
+                errors.append(f"source_tree_{key}_missing")
+        if not isinstance(source_tree.get("worktree_dirty_at_verification"), bool):
+            errors.append("source_tree_worktree_dirty_flag_missing")
+        if expected_source_tree is not None and source_tree != expected_source_tree:
+            errors.append("source_tree_mismatch")
+    if expected_traceability is not None:
+        for field in VS3_COMPONENT_TRACE_SCALAR_FIELDS:
+            actual = entry.get(field)
+            expected = expected_traceability.get(field)
+            if not _vs3_trace_string(actual):
+                errors.append(f"traceability_{field}_missing")
+            elif _vs3_trace_string(expected) and actual != expected:
+                errors.append(f"traceability_{field}_mismatch")
+        expected_scope = expected_traceability.get("scope")
+        if isinstance(expected_scope, dict) and isinstance(scope, dict) and scope != expected_scope:
+            errors.append("traceability_scope_mismatch")
+        transcript_path = entry.get("transcript_path")
+        expected_transcript_paths = expected_traceability.get("transcript_paths")
+        if not _vs3_trace_string(transcript_path):
+            errors.append("traceability_transcript_path_missing")
+        elif (
+            isinstance(expected_transcript_paths, list)
+            and expected_transcript_paths
+            and transcript_path not in expected_transcript_paths
+        ):
+            errors.append("traceability_transcript_path_mismatch")
+        expected_scenario_ids = expected_traceability.get("scenario_ids")
+        if isinstance(expected_scenario_ids, list) and expected_scenario_ids:
+            scenario_ids = entry.get("scenario_ids")
+            if not isinstance(scenario_ids, list) or not all(_vs3_trace_string(item) for item in scenario_ids):
+                errors.append("traceability_scenario_ids_missing")
+            elif scenario_ids != expected_scenario_ids:
+                errors.append("traceability_scenario_ids_mismatch")
+    stdout_json = entry.get("stdout_json")
+    if not isinstance(stdout_json, dict) or not stdout_json:
+        errors.append("stdout_json_missing")
+    else:
+        stdout_schema = stdout_json.get("schema_version")
+        if not isinstance(stdout_schema, str) or not stdout_schema.strip():
+            errors.append("stdout_json_schema_missing")
+        entry_json_schema = entry.get("json_schema")
+        stdout_payload_schema = stdout_json.get("json_schema")
+        if isinstance(entry_json_schema, str) and entry_json_schema.strip():
+            if isinstance(stdout_schema, str) and stdout_schema.strip():
+                if stdout_schema != entry_json_schema:
+                    if stdout_payload_schema != entry_json_schema:
+                        errors.append("stdout_json_json_schema_mismatch")
+                elif stdout_payload_schema is not None and stdout_payload_schema != entry_json_schema:
+                    errors.append("stdout_json_json_schema_mismatch")
+            elif stdout_payload_schema != entry_json_schema:
+                errors.append("stdout_json_json_schema_mismatch")
+        entry_cli_schema = entry.get("cli_schema_version")
+        if isinstance(entry_cli_schema, str) and entry_cli_schema.strip():
+            expected_stdout_schemas = {entry_cli_schema}
+            if isinstance(entry_json_schema, str) and entry_json_schema.strip():
+                expected_stdout_schemas.add(entry_json_schema)
+            if isinstance(stdout_schema, str) and stdout_schema.strip() and stdout_schema not in expected_stdout_schemas:
+                errors.append("stdout_json_schema_version_unexpected")
+        stdout_status = stdout_json.get("status")
+        if not isinstance(stdout_status, str) or not stdout_status.strip():
+            errors.append("stdout_json_status_missing")
+        stdout_command = stdout_json.get("command")
+        if not isinstance(stdout_command, list) or not all(isinstance(part, str) for part in stdout_command):
+            errors.append("stdout_json_command_not_list")
+        elif command_valid_for_stdout and stdout_command != command:
+            errors.append("stdout_json_command_mismatch")
+        stdout_arguments = stdout_json.get("arguments")
+        if not isinstance(stdout_arguments, list) or not all(isinstance(part, str) for part in stdout_arguments):
+            errors.append("stdout_json_arguments_not_list")
+        elif arguments_valid_for_stdout and stdout_arguments != arguments:
+            errors.append("stdout_json_arguments_mismatch")
+        stdout_exit_code = stdout_json.get("exit_code")
+        if not isinstance(stdout_exit_code, int) or isinstance(stdout_exit_code, bool):
+            errors.append("stdout_json_exit_code_not_int")
+        elif exit_code_valid_for_stdout and stdout_exit_code != exit_code:
+            errors.append("stdout_json_exit_code_mismatch")
+        stdout_elapsed_seconds = stdout_json.get("elapsed_seconds")
+        if not isinstance(stdout_elapsed_seconds, (int, float)) or isinstance(stdout_elapsed_seconds, bool):
+            errors.append("stdout_json_elapsed_seconds_not_number")
+        elif not math.isfinite(float(stdout_elapsed_seconds)):
+            errors.append("stdout_json_elapsed_seconds_not_finite")
+        elif stdout_elapsed_seconds < 0:
+            errors.append("stdout_json_elapsed_seconds_negative")
+        elif elapsed_seconds_valid_for_stdout and float(stdout_elapsed_seconds) != float(elapsed_seconds):
+            errors.append("stdout_json_elapsed_seconds_mismatch")
+        if isinstance(stdout_status, str) and stdout_status.strip() and exit_code_valid_for_stdout:
+            expected_stdout_status = "success" if exit_code == 0 else "failed"
+            if stdout_status != expected_stdout_status:
+                errors.append("stdout_json_status_exit_code_mismatch")
+        stdout_evidence_refs = stdout_json.get("evidence_refs")
+        if (
+            not isinstance(stdout_evidence_refs, list)
+            or not stdout_evidence_refs
+            or not all(isinstance(ref, str) for ref in stdout_evidence_refs)
+        ):
+            errors.append("stdout_json_evidence_refs_missing")
+        elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(
+            stdout_evidence_refs,
+            ref_kind="evidence_refs",
+        ):
+            errors.append("stdout_json_evidence_refs_malformed")
+        elif isinstance(evidence_refs, list) and stdout_evidence_refs != evidence_refs:
+            errors.append("stdout_json_evidence_refs_mismatch")
+        stdout_audit_refs = stdout_json.get("audit_refs")
+        if (
+            not isinstance(stdout_audit_refs, list)
+            or not stdout_audit_refs
+            or not all(isinstance(ref, str) for ref in stdout_audit_refs)
+        ):
+            errors.append("stdout_json_audit_refs_missing")
+        elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(
+            stdout_audit_refs,
+            ref_kind="audit_refs",
+        ):
+            errors.append("stdout_json_audit_refs_malformed")
+        elif isinstance(audit_refs, list) and stdout_audit_refs != audit_refs:
+            errors.append("stdout_json_audit_refs_mismatch")
+        stdout_policy_decision_refs = stdout_json.get("policy_decision_refs")
+        if not isinstance(stdout_policy_decision_refs, list) or not all(
+            isinstance(ref, str) for ref in stdout_policy_decision_refs
+        ):
+            errors.append("stdout_json_policy_decision_refs_not_list")
+        elif validate_ref_taxonomy and _vs3_component_ref_malformed_entries(
+            stdout_policy_decision_refs,
+            ref_kind="policy_decision_refs",
+        ):
+            errors.append("stdout_json_policy_decision_refs_malformed")
+        elif isinstance(policy_decision_refs, list) and stdout_policy_decision_refs != policy_decision_refs:
+            errors.append("stdout_json_policy_decision_refs_mismatch")
+        stdout_scope = stdout_json.get("scope")
+        if not isinstance(stdout_scope, dict) or not stdout_scope:
+            errors.append("stdout_json_scope_missing")
+        else:
+            errors.extend(_vs3_scope_key_errors(stdout_scope, prefix="stdout_json_scope"))
+            if isinstance(scope, dict) and stdout_scope != scope:
+                errors.append("stdout_json_scope_mismatch")
+        stdout_source_tree = stdout_json.get("source_tree")
+        if not isinstance(stdout_source_tree, dict) or not stdout_source_tree:
+            errors.append("stdout_json_source_tree_missing")
+        else:
+            errors.extend(_vs3_source_tree_key_errors(stdout_source_tree, prefix="stdout_json_source_tree"))
+            if isinstance(source_tree, dict) and stdout_source_tree != source_tree:
+                errors.append("stdout_json_source_tree_mismatch")
+        stdout_proof_boundary = stdout_json.get("proof_boundary")
+        if not isinstance(stdout_proof_boundary, dict) or not stdout_proof_boundary:
+            errors.append("stdout_json_proof_boundary_missing")
+        else:
+            expected_stdout_proof_boundary_keys = {
+                "vs3_l",
+                *VS3_CLI_STDOUT_PROOF_BOUNDARY_REQUIRED_NOT_CLAIMED,
+                *VS3_CLI_STDOUT_PROOF_BOUNDARY_OPTIONAL_NOT_CLAIMED,
+            }
+            for key in sorted(set(stdout_proof_boundary) - expected_stdout_proof_boundary_keys):
+                errors.append(f"stdout_json_proof_boundary_{key}_unexpected")
+            if stdout_proof_boundary.get("vs3_l") != VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L:
+                errors.append("stdout_json_proof_boundary_vs3_l_invalid")
+            for key in sorted(VS3_CLI_STDOUT_PROOF_BOUNDARY_REQUIRED_NOT_CLAIMED):
+                value = stdout_proof_boundary.get(key)
+                if value is None:
+                    errors.append(f"stdout_json_proof_boundary_{key}_missing")
+                elif value != "NOT_CLAIMED":
+                    errors.append(f"stdout_json_proof_boundary_{key}_overclaim")
+            for key in sorted(VS3_CLI_STDOUT_PROOF_BOUNDARY_OPTIONAL_NOT_CLAIMED):
+                value = stdout_proof_boundary.get(key)
+                if value not in {None, "NOT_CLAIMED"}:
+                    errors.append(f"stdout_json_proof_boundary_{key}_overclaim")
+        if expected_traceability is not None:
+            for field in VS3_COMPONENT_TRACE_SCALAR_FIELDS:
+                actual = stdout_json.get(field)
+                expected = expected_traceability.get(field)
+                if not _vs3_trace_string(actual):
+                    errors.append(f"stdout_json_traceability_{field}_missing")
+                elif _vs3_trace_string(expected) and actual != expected:
+                    errors.append(f"stdout_json_traceability_{field}_mismatch")
+            expected_scope = expected_traceability.get("scope")
+            stdout_scope_for_trace = stdout_json.get("scope")
+            if (
+                isinstance(expected_scope, dict)
+                and isinstance(stdout_scope_for_trace, dict)
+                and stdout_scope_for_trace != expected_scope
+            ):
+                errors.append("stdout_json_traceability_scope_mismatch")
+            stdout_transcript_path = stdout_json.get("transcript_path")
+            expected_transcript_paths = expected_traceability.get("transcript_paths")
+            if not _vs3_trace_string(stdout_transcript_path):
+                errors.append("stdout_json_traceability_transcript_path_missing")
+            elif (
+                isinstance(expected_transcript_paths, list)
+                and expected_transcript_paths
+                and stdout_transcript_path not in expected_transcript_paths
+            ):
+                errors.append("stdout_json_traceability_transcript_path_mismatch")
+            expected_scenario_ids = expected_traceability.get("scenario_ids")
+            if isinstance(expected_scenario_ids, list) and expected_scenario_ids:
+                stdout_scenario_ids = stdout_json.get("scenario_ids")
+                if not isinstance(stdout_scenario_ids, list) or not all(
+                    _vs3_trace_string(item) for item in stdout_scenario_ids
+                ):
+                    errors.append("stdout_json_traceability_scenario_ids_missing")
+                elif stdout_scenario_ids != expected_scenario_ids:
+                    errors.append("stdout_json_traceability_scenario_ids_mismatch")
+        stdout_tail = entry.get("stdout_tail")
+        if require_stdout_tail or stdout_tail is not None:
+            if not isinstance(stdout_tail, list) or not all(isinstance(line, str) for line in stdout_tail):
+                errors.append("stdout_tail_not_list")
+            elif require_stdout_tail and not stdout_tail:
+                errors.append("stdout_tail_missing")
+            elif stdout_tail:
+                stdout_tail_json: Any | None = None
+                try:
+                    parsed_stdout_tail = json.loads(stdout_tail[-1])
+                except ValueError:
+                    if require_stdout_tail:
+                        errors.append("stdout_tail_json_invalid")
+                else:
+                    if not isinstance(parsed_stdout_tail, dict):
+                        if require_stdout_tail:
+                            errors.append("stdout_tail_json_not_object")
+                    else:
+                        stdout_tail_json = parsed_stdout_tail
+                if stdout_tail_json is not None:
+                    tail_schema = stdout_tail_json.get("schema_version")
+                    tail_payload_schema = stdout_tail_json.get("json_schema")
+                    tail_status = stdout_tail_json.get("status")
+                    tail_final_verdict = stdout_tail_json.get("final_verdict")
+                    tail_scenario_set = stdout_tail_json.get("scenario_set")
+                    tail_checked_report = stdout_tail_json.get("checked_report")
+                    expected_tail_status = stdout_json.get("payload_status") or stdout_json.get("status")
+                    if require_stdout_tail:
+                        if not isinstance(tail_schema, str) or not tail_schema.strip():
+                            errors.append("stdout_tail_schema_missing")
+                        if not isinstance(tail_payload_schema, str) or not tail_payload_schema.strip():
+                            errors.append("stdout_tail_json_schema_missing")
+                        if not isinstance(tail_status, str) or not tail_status.strip():
+                            errors.append("stdout_tail_status_missing")
+                    if tail_schema is not None and tail_schema != stdout_json.get("schema_version"):
+                        errors.append("stdout_tail_schema_version_mismatch")
+                    if tail_payload_schema is not None and tail_payload_schema != stdout_json.get("json_schema"):
+                        errors.append("stdout_tail_json_schema_mismatch")
+                    if tail_status is not None and tail_status != expected_tail_status:
+                        errors.append("stdout_tail_status_mismatch")
+                    if tail_final_verdict is not None and tail_final_verdict != stdout_json.get("final_verdict"):
+                        errors.append("stdout_tail_final_verdict_mismatch")
+                    if tail_scenario_set is not None and tail_scenario_set != stdout_json.get("scenario_set"):
+                        errors.append("stdout_tail_scenario_set_mismatch")
+                    if tail_checked_report is not None and tail_checked_report != stdout_json.get("checked_report"):
+                        errors.append("stdout_tail_checked_report_mismatch")
+    return errors
+
+
+def _vs3_cli_command_transcript_shape(
+    value: Any,
+    *,
+    expected_source_tree: dict[str, Any] | None = None,
+    expected_traceability: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    rows = _vs3_cli_command_transcript_rows(value)
+    invalid_entries = []
+    for entry_id, entry in rows:
+        errors = _vs3_cli_command_transcript_errors(
+            entry,
+            expected_source_tree=expected_source_tree,
+            expected_traceability=expected_traceability,
+        )
+        if errors:
+            invalid_entries.append({"entry_id": entry_id, "errors": errors})
+    return {
+        "entry_count": len(rows),
+        "valid_count": len(rows) - len(invalid_entries),
+        "invalid_entries": invalid_entries,
+    }
+
+
+def _vs3_local_checkpoint_self_transcript_validation(
+    entry: Any,
+    *,
+    checkpoint_payload: dict[str, Any],
+    expected_source_tree: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    expected_command = ["cornerstone", "security", "vs3-local-checkpoint", "--json"]
+    expected_scope = {
+        "tenant_id": checkpoint_payload.get("tenant_id"),
+        "owner_id": checkpoint_payload.get("owner_id"),
+        "namespace_id": checkpoint_payload.get("namespace_id"),
+        "workspace_id": checkpoint_payload.get("workspace_id"),
+        "scope_source": "local_vs3_fixture",
+    }
+    errors = _vs3_cli_command_transcript_errors(
+        entry,
+        expected_source_tree=expected_source_tree,
+        require_stdout_tail=True,
+    )
+    if isinstance(entry, dict):
+        expected_exit_code = (
+            EXIT_SUCCESS
+            if checkpoint_payload.get("status") == "success"
+            else EXIT_EVIDENCE_MISSING
+        )
+        if entry.get("name") != "security_vs3_local_checkpoint":
+            errors.append("name_mismatch")
+        if entry.get("command") != expected_command:
+            errors.append("command_mismatch")
+        if entry.get("arguments") != expected_command[1:]:
+            errors.append("arguments_mismatch")
+        if entry.get("exit_code") != expected_exit_code:
+            errors.append("exit_code_mismatch_checkpoint_status")
+        if entry.get("json_schema") != checkpoint_payload.get("vs3_local_checkpoint_schema_version"):
+            errors.append("json_schema_mismatch")
+        if entry.get("cli_schema_version") != checkpoint_payload.get("cli_schema_version"):
+            errors.append("cli_schema_version_mismatch")
+        if entry.get("scope") != expected_scope:
+            errors.append("scope_mismatch_checkpoint_scope")
+        for ref_field in ["evidence_refs", "audit_refs", "policy_decision_refs"]:
+            if entry.get(ref_field) != checkpoint_payload.get(ref_field):
+                errors.append(f"{ref_field}_mismatch_checkpoint_payload")
+        expected_ref_summary = {
+            "evidence_refs_count": len(checkpoint_payload.get("evidence_refs") or []),
+            "audit_refs_count": len(checkpoint_payload.get("audit_refs") or []),
+            "policy_decision_refs_count": len(checkpoint_payload.get("policy_decision_refs") or []),
+        }
+        if entry.get("ref_summary") != expected_ref_summary:
+            errors.append("ref_summary_mismatch_checkpoint_payload")
+        stdout_json = entry.get("stdout_json")
+        if isinstance(stdout_json, dict):
+            if stdout_json.get("final_verdict") != checkpoint_payload.get("final_verdict"):
+                errors.append("stdout_json_final_verdict_mismatch")
+            if stdout_json.get("scope") != expected_scope:
+                errors.append("stdout_json_scope_mismatch_checkpoint_scope")
+            if stdout_json.get("claim_boundary") != checkpoint_payload.get("claim_boundary"):
+                errors.append("stdout_json_claim_boundary_mismatch_checkpoint_payload")
+            if stdout_json.get("claim_boundaries") != checkpoint_payload.get("claim_boundaries"):
+                errors.append("stdout_json_claim_boundaries_mismatch_checkpoint_payload")
+            if stdout_json.get("claim_boundary_from_scenario_report") != checkpoint_payload.get(
+                "claim_boundary_from_scenario_report"
+            ):
+                errors.append(
+                    "stdout_json_claim_boundary_from_scenario_report_mismatch_checkpoint_payload"
+                )
+            if stdout_json.get("claim_boundaries_from_scenario_report") != checkpoint_payload.get(
+                "claim_boundaries_from_scenario_report"
+            ):
+                errors.append(
+                    "stdout_json_claim_boundaries_from_scenario_report_mismatch_checkpoint_payload"
+                )
+            stdout_scenario_report = stdout_json.get("scenario_report")
+            checkpoint_scenario_report = checkpoint_payload.get("scenario_report")
+            if not isinstance(stdout_scenario_report, dict):
+                errors.append("stdout_json_scenario_report_missing")
+            elif not isinstance(checkpoint_scenario_report, dict):
+                errors.append("checkpoint_scenario_report_missing")
+            else:
+                for field_name in [
+                    "path",
+                    "path_recorded",
+                    "path_sha256",
+                    "sha256",
+                    "schema_version",
+                    "status",
+                    "claim_boundary",
+                    "claim_boundaries",
+                    "claim_boundary_validation",
+                ]:
+                    if stdout_scenario_report.get(field_name) != checkpoint_scenario_report.get(field_name):
+                        errors.append(
+                            f"stdout_json_scenario_report_{field_name}_mismatch_checkpoint_payload"
+                        )
+        else:
+            errors.append("stdout_json_missing")
+    return {
+        "status": "passed" if not errors else "failed",
+        "valid": not errors,
+        "error_codes": errors,
+        "expected_command": expected_command,
+        "expected_scope": expected_scope,
+        "expected_source_tree_present": isinstance(expected_source_tree, dict) and bool(expected_source_tree),
+    }
+
+
+def _vs3_scenario_gate_self_transcript_validation(
+    entry: Any,
+    *,
+    gate_payload: dict[str, Any],
+    expected_command: list[str],
+    expected_source_tree: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    expected_scope = {
+        "tenant_id": gate_payload.get("tenant_id"),
+        "owner_id": gate_payload.get("owner_id"),
+        "namespace_id": gate_payload.get("namespace_id"),
+        "workspace_id": gate_payload.get("workspace_id"),
+        "scope_source": "local_vs3_fixture",
+    }
+    errors = _vs3_cli_command_transcript_errors(
+        entry,
+        expected_source_tree=expected_source_tree,
+        require_stdout_tail=True,
+    )
+    if isinstance(entry, dict):
+        expected_exit_code = EXIT_SUCCESS if gate_payload.get("status") == "success" else EXIT_EVIDENCE_MISSING
+        if entry.get("name") != "scenario_gate_vs3_onprem_trusted_extension":
+            errors.append("name_mismatch")
+        if entry.get("command") != expected_command:
+            errors.append("command_mismatch")
+        if entry.get("arguments") != expected_command[1:]:
+            errors.append("arguments_mismatch")
+        if entry.get("exit_code") != expected_exit_code:
+            errors.append("exit_code_mismatch_gate_status")
+        if entry.get("json_schema") != gate_payload.get("schema_version"):
+            errors.append("json_schema_mismatch")
+        source_report = gate_payload.get("source_report") if isinstance(gate_payload.get("source_report"), dict) else {}
+        if entry.get("source_json_schema") != source_report.get("schema_version"):
+            errors.append("source_json_schema_mismatch")
+        if entry.get("cli_schema_version") != gate_payload.get("cli_schema_version"):
+            errors.append("cli_schema_version_mismatch")
+        if entry.get("scope") != expected_scope:
+            errors.append("scope_mismatch_gate_scope")
+        for ref_field in ["evidence_refs", "audit_refs", "policy_decision_refs"]:
+            if entry.get(ref_field) != gate_payload.get(ref_field):
+                errors.append(f"{ref_field}_mismatch_gate_payload")
+        expected_ref_summary = {
+            "evidence_refs_count": len(gate_payload.get("evidence_refs") or []),
+            "audit_refs_count": len(gate_payload.get("audit_refs") or []),
+            "policy_decision_refs_count": len(gate_payload.get("policy_decision_refs") or []),
+        }
+        if entry.get("ref_summary") != expected_ref_summary:
+            errors.append("ref_summary_mismatch_gate_payload")
+        stdout_json = entry.get("stdout_json")
+        if isinstance(stdout_json, dict):
+            if stdout_json.get("final_verdict") != gate_payload.get("final_verdict"):
+                errors.append("stdout_json_final_verdict_mismatch")
+            if stdout_json.get("checked_report") != gate_payload.get("checked_report"):
+                errors.append("stdout_json_checked_report_mismatch")
+            if stdout_json.get("scope") != expected_scope:
+                errors.append("stdout_json_scope_mismatch_gate_scope")
+            stdout_source_report = stdout_json.get("source_report")
+            if not isinstance(stdout_source_report, dict):
+                errors.append("stdout_json_source_report_missing")
+            elif stdout_source_report.get("schema_version") != source_report.get("schema_version"):
+                errors.append("stdout_json_source_report_schema_mismatch")
+        else:
+            errors.append("stdout_json_missing")
+    return {
+        "status": "passed" if not errors else "failed",
+        "valid": not errors,
+        "error_codes": errors,
+        "expected_command": expected_command,
+        "expected_scope": expected_scope,
+        "expected_source_tree_present": isinstance(expected_source_tree, dict) and bool(expected_source_tree),
+    }
+
+
+def _vs3_cli_stdout_proof_boundary() -> dict[str, str]:
+    return {
+        "vs3_l": VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L,
+        "vs3_p": "NOT_CLAIMED",
+        "production": "NOT_CLAIMED",
+        "production_onprem": "NOT_CLAIMED",
+        "live_provider": "NOT_CLAIMED",
+        "real_idp": "NOT_CLAIMED",
+        "real_network": "NOT_CLAIMED",
+        "migration_restore": "NOT_CLAIMED",
+        "security_acceptance": "NOT_CLAIMED",
+        "human_acceptance": "NOT_CLAIMED",
+    }
+
+
+def _vs3_component_proof_boundary_errors(proof_boundary: Any) -> list[str]:
+    if not isinstance(proof_boundary, dict) or not proof_boundary:
+        return ["proof_boundary_missing"]
+
+    errors: list[str] = []
+    surface = proof_boundary.get("surface")
+    if not isinstance(surface, str) or not surface.strip():
+        errors.append("proof_boundary_surface_missing")
+
+    allowed_vs3_l_values = {
+        "NOT_CLAIMED",
+        "LOCAL_DEV_ASSURANCE_VERIFIED",
+        VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L,
+    }
+    if proof_boundary.get("vs3_l") not in allowed_vs3_l_values:
+        errors.append("proof_boundary_vs3_l_invalid")
+
+    if proof_boundary.get("vs3_p") != "NOT_CLAIMED":
+        errors.append("proof_boundary_vs3_p_overclaim")
+
+    no_overclaim_values = {"NOT_CLAIMED", "HUMAN_REQUIRED"}
+    overclaim_keys = {
+        "production",
+        "production_onprem",
+        "live_provider",
+        "real_idp",
+        "real_network",
+        "migration_restore",
+        "security_acceptance",
+        "human_acceptance",
+    }
+    human_gate_boundary_keys = {
+        "human_migration_restore",
+        "human_network_review",
+        "human_operator_acceptance",
+        "human_security_acceptance",
+        "independent_security_review",
+        "real_device_capture",
+        "real_provider_credentials",
+        "real_topology",
+    }
+    local_fixture_boundary_keys = {
+        "notes",
+        "production_registry",
+        "real_wasm_runtime",
+    }
+    gate_keys = {"security_acceptance_gate", "human_acceptance_gate"}
+    allowed_keys = (
+        {"surface", "vs3_l", "vs3_p"}
+        | overclaim_keys
+        | human_gate_boundary_keys
+        | local_fixture_boundary_keys
+        | gate_keys
+    )
+    for key in sorted(set(proof_boundary) - allowed_keys):
+        errors.append(f"proof_boundary_{key}_unexpected")
+
+    for key in sorted(overclaim_keys):
+        if key in proof_boundary and proof_boundary.get(key) not in no_overclaim_values:
+            errors.append(f"proof_boundary_{key}_overclaim")
+
+    for key in sorted(gate_keys):
+        if key in proof_boundary and proof_boundary.get(key) != "HUMAN_REQUIRED":
+            errors.append(f"proof_boundary_{key}_invalid")
+
+    return errors
+
+
+def _vs3_component_nonempty_string_refs(values: Any) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    refs: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if not isinstance(value, str):
+            continue
+        ref = value.strip()
+        if not ref or ref in seen:
+            continue
+        seen.add(ref)
+        refs.append(ref)
+    return refs
+
+
+def _vs3_component_ref_malformed_entries(values: Any, *, ref_kind: str) -> list[Any]:
+    if not isinstance(values, list):
+        return []
+    if ref_kind == "evidence_refs":
+        allowed_prefixes = VS3_COMPONENT_EVIDENCE_REF_PREFIXES
+    elif ref_kind == "audit_refs":
+        allowed_prefixes = VS3_COMPONENT_AUDIT_REF_PREFIXES
+    elif ref_kind == "policy_decision_refs":
+        allowed_prefixes = VS3_COMPONENT_POLICY_DECISION_REF_PREFIXES
+    else:
+        return list(values)
+    malformed: list[Any] = []
+    for value in values:
+        if not isinstance(value, str):
+            malformed.append(value)
+            continue
+        ref = value.strip()
+        if not ref or not any(ref.startswith(prefix) for prefix in allowed_prefixes):
+            malformed.append(value)
+    return malformed
+
+
+def _vs3_component_ref_error_suffix(ref_kind: str) -> str:
+    if ref_kind == "evidence_refs":
+        return "evidence_refs_malformed"
+    if ref_kind == "audit_refs":
+        return "audit_refs_malformed"
+    if ref_kind == "policy_decision_refs":
+        return "policy_decision_refs_malformed"
+    return f"{ref_kind}_malformed"
+
+
+VS3_COMPONENT_TRACE_SCALAR_FIELDS = (
+    "scenario_run_id",
+    "trace_id",
+    "corpus_pack_id",
+    "model_provider",
+    "model_name",
+)
+
+
+def _vs3_trace_string(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def _vs3_trace_string_list(value: Any) -> bool:
+    return isinstance(value, list) and bool(value) and all(_vs3_trace_string(item) for item in value)
+
+
+def _vs3_scope_key_errors(scope: Any, *, prefix: str = "scope") -> list[str]:
+    if not isinstance(scope, dict) or not scope:
+        return [f"{prefix}_missing"]
+    return [
+        f"{prefix}_{key}_unexpected"
+        for key in sorted(set(scope) - VS3_SCOPE_ALLOWED_KEYS)
+    ]
+
+
+def _vs3_component_traceability_state(
+    proof: Any,
+    *,
+    expected_scenario_ids: list[str],
+    expected_path: str,
+) -> dict[str, Any]:
+    missing_fields: list[str] = []
+    invalid_fields: list[str] = []
+    traceability: dict[str, Any] = {}
+    if not isinstance(proof, dict):
+        return {
+            "present": False,
+            "missing_fields": ["component_proof"],
+            "invalid_fields": [],
+            "traceability": traceability,
+        }
+
+    for field in VS3_COMPONENT_TRACE_SCALAR_FIELDS:
+        value = proof.get(field)
+        traceability[field] = value
+        if not _vs3_trace_string(value):
+            missing_fields.append(field)
+
+    expected_scalar_values = {
+        "corpus_pack_id": VS3_SCENARIO_CORPUS_PACK_ID,
+        "model_provider": VS3_SCENARIO_MODEL_PROVIDER,
+        "model_name": VS3_SCENARIO_MODEL_NAME,
+    }
+    for field, expected in expected_scalar_values.items():
+        if _vs3_trace_string(proof.get(field)) and proof.get(field) != expected:
+            invalid_fields.append(field)
+
+    scope = proof.get("scope")
+    traceability["scope"] = scope
+    if not isinstance(scope, dict):
+        missing_fields.append("scope")
+    else:
+        for error in _vs3_scope_key_errors(scope):
+            if error.startswith("scope_") and error.endswith("_unexpected"):
+                unexpected_key = error.removeprefix("scope_").removesuffix("_unexpected")
+                invalid_fields.append(f"scope.{unexpected_key}")
+        for key in ["tenant_id", "owner_id", "namespace_id", "workspace_id"]:
+            if not _vs3_trace_string(scope.get(key)):
+                missing_fields.append(f"scope.{key}")
+        scope_source = scope.get("scope_source")
+        if not _vs3_trace_string(scope_source):
+            missing_fields.append("scope.scope_source")
+        elif scope_source not in VS3_CLI_TRANSCRIPT_SCOPE_SOURCES:
+            invalid_fields.append("scope.scope_source")
+
+    transcript_paths = proof.get("transcript_paths")
+    traceability["transcript_paths"] = transcript_paths
+    if not _vs3_trace_string_list(transcript_paths):
+        missing_fields.append("transcript_paths")
+    elif expected_path not in transcript_paths:
+        invalid_fields.append("transcript_paths")
+
+    scenario_ids = proof.get("scenario_ids")
+    traceability["scenario_ids"] = scenario_ids
+    if not isinstance(scenario_ids, list) or not all(_vs3_trace_string(item) for item in scenario_ids):
+        missing_fields.append("scenario_ids")
+    elif list(scenario_ids) != expected_scenario_ids:
+        invalid_fields.append("scenario_ids")
+
+    return {
+        "present": not missing_fields,
+        "missing_fields": missing_fields,
+        "invalid_fields": invalid_fields,
+        "traceability": traceability,
+    }
+
+
+def _vs3_traceability_error_entries(invalid_entries: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        entry
+        for entry in invalid_entries
+        if any(
+            isinstance(error, str)
+            and (
+                error.startswith("traceability_")
+                or error.startswith("stdout_json_traceability_")
+            )
+            for error in entry.get("errors", [])
+        )
+    ]
+
+
+def _vs3_payload_scope_with_source(payload: dict[str, Any]) -> dict[str, str]:
+    return {
+        "tenant_id": str(payload.get("tenant_id") or ""),
+        "owner_id": str(payload.get("owner_id") or ""),
+        "namespace_id": str(payload.get("namespace_id") or ""),
+        "workspace_id": str(payload.get("workspace_id") or ""),
+        "scope_source": "local_vs3_fixture",
+    }
+
+
+VS3_SOURCE_TREE_FINGERPRINT_FIELDS = (
+    "verified_base_commit",
+    "verified_base_commit_full",
+    "verified_base_tree_hash",
+    "verified_source_worktree_hash",
+    "worktree_dirty_at_verification",
+    "final_commit",
+    "final_commit_pending_reason",
+    "report_generated_before_commit",
+)
+
+VS3_SOURCE_TREE_ALLOWED_KEYS = frozenset(
+    (
+        *VS3_SOURCE_TREE_FINGERPRINT_FIELDS,
+        "dirty_paths",
+        "generated_dirty_paths",
+        "generated_dirty_snapshot_hash",
+        "generated_dirty_snapshot_paths",
+        "verified_source_snapshot_paths",
+    )
+)
+
+VS3_SCENARIO_GATE_DOWNSTREAM_GENERATED_EVIDENCE_PATHS = frozenset(
+    (
+        "reports/human-gates/vs3/evidence-status.json",
+        "reports/human-gates/vs3/review-kit.json",
+        "reports/human-gates/vs3/vs3-p-gate.json",
+        "reports/human-gates/vs3/vs3-local-checkpoint.json",
+        "reports/security/vs3-local-checkpoint.json",
+    )
+)
+
+
+VS3_REQUIRED_NEGATIVE_EVIDENCE_KEYS = (
+    "ack_before_commit_count",
+    "activation_active_by_default",
+    "activation_preview_applied_authority",
+    "alternate_dns_successes",
+    "alternate_protocol_successes",
+    "anonymous_management_api_allows",
+    "arbitrary_shell_default_allowed",
+    "audit_events_without_hashes",
+    "audit_events_without_review_details",
+    "audit_events_without_scope",
+    "audit_omission_not_detected",
+    "audit_tamper_accepted",
+    "authority_expansions_from_connector_content",
+    "authority_expansions_from_prompt_or_connector_content",
+    "behavior_changing_emergency_patches_applied_without_review",
+    "caller_authoritative_policy_fields_accepted",
+    "caller_controlled_scope_accepted",
+    "capture_after_revoke",
+    "claim_boundaries_overclaim_count",
+    "claim_boundary_alias_mismatch_count",
+    "claim_boundary_overclaim_count",
+    "connector_calls_from_forgery",
+    "context_faults_fell_open",
+    "coverage_omission_not_detected",
+    "credential_bearing_urls_exposed",
+    "denied_address_contact_count",
+    "destructive_migration_steps",
+    "direct_socket_successes",
+    "disallowed_raw_capture_outputs",
+    "dns_rebinding_contacts",
+    "downstream_access_on_context_faults",
+    "duplicate_allowed_sink_requests",
+    "duplicate_truth_records",
+    "egress_calls_from_forgery",
+    "emergency_patch_authority_expansions",
+    "env_secret_reads",
+    "fail_closed_bypassed",
+    "fallback_direct_connections",
+    "forbidden_sink_bytes",
+    "forbidden_sink_requests",
+    "foreign_tenant_rows_visible",
+    "forged_authority_paths_allowed",
+    "github_external_mutations",
+    "github_mutation_commands_exposed",
+    "github_write_calls",
+    "github_write_mappings",
+    "high_risk_actions_without_approval",
+    "host_filesystem_reads",
+    "human_acceptance_claimed",
+    "human_capture_review_marked_pass",
+    "human_gate_approvals_collected_by_package_generator",
+    "human_gate_package_missing_required_fields",
+    "human_gate_packages_marked_pass",
+    "human_gate_packages_missing",
+    "human_gate_packages_missing_claim_boundary",
+    "human_gate_packages_missing_reject_conditions",
+    "human_gate_packages_missing_required_evidence_fields",
+    "human_gate_packages_missing_review_checklist",
+    "human_gate_packages_missing_review_record_contract",
+    "human_gate_packages_missing_validation_command",
+    "human_gate_pass_claims_allowed_by_package_generator",
+    "human_gate_product_claims_allowed_by_package_generator",
+    "human_gate_validation_rehearsal_human_rows_marked_pass",
+    "human_gate_validation_rehearsal_invalid_records",
+    "human_gate_validation_rehearsal_missing",
+    "human_gate_validation_rehearsal_missing_file_hashes",
+    "human_gate_validation_rehearsal_missing_records",
+    "human_gate_validation_rehearsal_overclaim_marker_findings",
+    "human_gate_validation_rehearsal_pass_claims_allowed",
+    "human_gate_validation_rehearsal_product_claims_allowed",
+    "human_gate_validation_rehearsal_raw_record_values_in_output",
+    "human_gate_validation_rehearsal_record_bodies_persisted",
+    "human_gate_validation_rehearsal_record_paths_persisted",
+    "human_gate_validation_rehearsal_record_paths_recorded",
+    "human_gate_validation_rehearsal_sensitive_marker_findings",
+    "human_gate_validation_rehearsal_temp_files_persisted",
+    "human_gate_validation_rehearsal_unexpected_records",
+    "human_gate_validation_rehearsal_vs3_p_unlocks",
+    "human_migration_restore_marked_pass",
+    "human_network_review_marked_pass",
+    "human_or_external_gate_marked_pass",
+    "human_required_rows_marked_pass",
+    "human_security_review_marked_pass",
+    "implicit_cross_context_use",
+    "inactive_capability_attempts_allowed",
+    "inactive_connector_requests_allowed",
+    "install_as_activation_count",
+    "invalid_bundle_activated",
+    "live_provider_claimed",
+    "live_provider_readiness_claimed",
+    "lost_projection_count",
+    "migration_restore_claimed",
+    "migration_restore_readiness_claimed",
+    "misleading_green_fault_statuses",
+    "missing_model_policy_fields_allowed",
+    "missing_provenance",
+    "missing_required_audit_event_families",
+    "missing_required_manifest_fields",
+    "missing_runtime_grant_classes",
+    "missing_sbom",
+    "missing_signature",
+    "normal_user_admin_first_regressions",
+    "null_insert_attempts_allowed",
+    "nullable_or_missing_required_scope_columns",
+    "operator_components_missing",
+    "optimistic_vs2_report_used_for_vs3_readiness",
+    "outage_allowed_calls",
+    "ownerless_truth_rows",
+    "permissive_default_egress",
+    "permissive_default_policy",
+    "policy_decisions_without_digest_or_audit",
+    "policy_denials_without_reason_code",
+    "pool_context_leaks",
+    "post_revocation_capability_allows",
+    "post_revocation_side_effects",
+    "production_claimed",
+    "production_migration_claimed",
+    "production_network_claimed",
+    "production_onprem_claimed",
+    "production_onprem_readiness_claimed",
+    "production_opa_claimed",
+    "production_or_live_readiness_claimed",
+    "production_or_real_idp_claimed",
+    "production_registry_claimed",
+    "protected_db_rows_touched_by_forgery",
+    "proxy_env_successes",
+    "raw_credentials_exposed",
+    "raw_secret_canary_leaks",
+    "raw_secret_leaks",
+    "raw_secret_values_in_human_gate_packages",
+    "raw_tokens_in_outputs",
+    "real_idp_readiness_claimed",
+    "real_network_readiness_claimed",
+    "real_wasm_runtime_claimed",
+    "redirect_denied_hop_contacts",
+    "repo_split_terms_in_primary_nav",
+    "restore_missing_rows",
+    "revocation_stale_allows",
+    "revoked_packages_accepted",
+    "rollback_failures",
+    "secret_scanner_findings",
+    "security_acceptance_claimed",
+    "shell_successes",
+    "silent_behavior_updates_applied",
+    "silent_capture_sessions",
+    "silent_default_tenant_assignments",
+    "source_policy_cross_scope_deliveries",
+    "source_policy_stale_delivery_after_revoke",
+    "stale_packages_accepted",
+    "stale_permissive_bundle_after_failure",
+    "status_cli_api_ui_mismatches",
+    "status_surfaces_without_audit_refs",
+    "status_ui_dom_snapshot_missing",
+    "status_ui_dom_snapshot_missing_components",
+    "subprocess_successes",
+    "surface_context_digest_mismatches",
+    "surface_policy_outcome_mismatches",
+    "tampered_packages_accepted",
+    "tenant_export_leaks",
+    "tenant_isolation_default_leaks",
+    "tenant_membership_only_privileged_allows",
+    "tool_executions_from_forgery",
+    "unallowlisted_overclaim_findings",
+    "unapproved_dependency_changes",
+    "unauthorized_action_approvals",
+    "unauthorized_egress_calls",
+    "unauthorized_memory_writes",
+    "unauthorized_mutation_effects",
+    "unauthorized_policy_changes",
+    "unbounded_capture_sessions",
+    "unclassified_conflicting_vs2_reports",
+    "undeclared_allowed_sink_requests",
+    "undeclared_connector_calls",
+    "undeclared_env_reads",
+    "undeclared_file_reads",
+    "undeclared_memory_writes",
+    "undeclared_model_routes",
+    "undeclared_network_calls",
+    "undeclared_shell_processes",
+    "ungranted_capabilities_allowed",
+    "unknown_policy_implicit_allows",
+    "unknown_source_packages_accepted",
+    "unsigned_or_unpinned_tool_packages",
+    "unsigned_packages_accepted",
+    "untrusted_content_action_approvals",
+    "untrusted_content_egress_calls",
+    "untrusted_content_policy_changes",
+    "untrusted_content_tool_executions",
+    "vs0_regression_failures",
+    "vs1_regression_failures",
+    "vs3_l_claimed",
+    "vs3_p_claimed",
+)
+
+
+def _vs3_source_tree_fingerprint(source_tree: Any) -> dict[str, Any]:
+    if not isinstance(source_tree, dict):
+        return {}
+    return {field: source_tree.get(field) for field in VS3_SOURCE_TREE_FINGERPRINT_FIELDS}
+
+
+def _vs3_source_tree_key_errors(source_tree: Any, *, prefix: str = "source_tree") -> list[str]:
+    if not isinstance(source_tree, dict) or not source_tree:
+        return [f"{prefix}_missing"]
+    return [
+        f"{prefix}_{key}_unexpected"
+        for key in sorted(set(source_tree) - VS3_SOURCE_TREE_ALLOWED_KEYS)
+    ]
+
+
+def _vs3_source_tree_current_mismatches(recorded: Any, current: Any) -> list[str]:
+    if not isinstance(recorded, dict) or not recorded:
+        return ["source_tree_missing"]
+    if not isinstance(current, dict) or not current:
+        return ["current_source_tree_missing"]
+    errors: list[str] = []
+    for field in VS3_SOURCE_TREE_FINGERPRINT_FIELDS:
+        if field not in recorded:
+            errors.append(f"{field}_missing")
+            continue
+        if field not in current:
+            errors.append(f"current_{field}_missing")
+            continue
+        recorded_value = recorded.get(field)
+        current_value = current.get(field)
+        if recorded_value != current_value:
+            errors.append(f"{field}_mismatch")
+    return errors
+
+
+def _vs3_is_safe_relative_path(path: str) -> bool:
+    path_parts = Path(path).parts
+    return not Path(path).is_absolute() and ".." not in path_parts and "\\" not in path
+
+
+def _vs3_is_sha256(value: Any) -> bool:
+    if not isinstance(value, str) or len(value) != 64:
+        return False
+    return all(character in "0123456789abcdef" for character in value)
+
+
+def _vs3_source_tree_snapshot_path_validation(
+    source_tree: Any,
+    root: Path | None = None,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    generated_evidence_paths: list[str] = []
+    duplicate_paths: list[str] = []
+    metadata_mismatches: list[dict[str, Any]] = []
+    observed_paths: list[str] = []
+    if not isinstance(source_tree, dict) or not source_tree:
+        return {
+            "schema_version": "cs.vs3_source_tree_snapshot_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "generated_evidence_paths": [],
+            "duplicate_paths": [],
+            "metadata_mismatches": [],
+            "invalid_entries": [{"issue": "source_tree_missing"}],
+        }
+    snapshot_paths = source_tree.get("verified_source_snapshot_paths")
+    if not isinstance(snapshot_paths, list):
+        return {
+            "schema_version": "cs.vs3_source_tree_snapshot_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "generated_evidence_paths": [],
+            "duplicate_paths": [],
+            "metadata_mismatches": [],
+            "invalid_entries": [{"issue": "verified_source_snapshot_paths_not_list"}],
+        }
+    for index, entry in enumerate(snapshot_paths):
+        if not isinstance(entry, dict):
+            invalid_entries.append({"index": index, "issue": "entry_not_object"})
+            continue
+        path = entry.get("path")
+        if not isinstance(path, str) or not path.strip():
+            invalid_entries.append({"index": index, "issue": "path_not_nonempty_string"})
+            continue
+        normalized_path = path.strip()
+        if not _vs3_is_safe_relative_path(normalized_path):
+            invalid_entries.append(
+                {"index": index, "path": normalized_path, "issue": "path_not_safe_relative_path"}
+            )
+            continue
+        observed_paths.append(normalized_path)
+        if _is_generated_evidence_path(normalized_path):
+            generated_evidence_paths.append(normalized_path)
+            continue
+        status_value = entry.get("status")
+        state_value = entry.get("state")
+        sha256_value = entry.get("sha256")
+        bytes_value = entry.get("bytes")
+        if not isinstance(status_value, str) or not status_value.strip():
+            invalid_entries.append({"index": index, "path": normalized_path, "issue": "status_not_nonempty_string"})
+        if state_value not in {"present", "missing", "non_file"}:
+            invalid_entries.append({"index": index, "path": normalized_path, "issue": "state_not_supported"})
+            continue
+        if not isinstance(bytes_value, int) or bytes_value < 0:
+            invalid_entries.append({"index": index, "path": normalized_path, "issue": "bytes_not_nonnegative_integer"})
+        current_path = root / normalized_path if root is not None else None
+        if state_value == "present":
+            if not _vs3_is_sha256(sha256_value):
+                invalid_entries.append({"index": index, "path": normalized_path, "issue": "sha256_not_64_hex"})
+            if current_path is not None:
+                if not current_path.exists() or not current_path.is_file():
+                    metadata_mismatches.append(
+                        {
+                            "path": normalized_path,
+                            "issue": "recorded_present_but_current_path_not_file",
+                            "recorded_state": state_value,
+                        }
+                    )
+                else:
+                    current_sha256 = hashlib.sha256(current_path.read_bytes()).hexdigest()
+                    current_bytes = current_path.stat().st_size
+                    if sha256_value != current_sha256 or bytes_value != current_bytes:
+                        metadata_mismatches.append(
+                            {
+                                "path": normalized_path,
+                                "issue": "current_file_metadata_mismatch",
+                                "recorded_sha256": sha256_value,
+                                "current_sha256": current_sha256,
+                                "recorded_bytes": bytes_value,
+                                "current_bytes": current_bytes,
+                            }
+                        )
+        elif state_value == "missing":
+            if sha256_value is not None:
+                invalid_entries.append({"index": index, "path": normalized_path, "issue": "missing_state_sha256_not_null"})
+            if bytes_value != 0:
+                invalid_entries.append({"index": index, "path": normalized_path, "issue": "missing_state_bytes_not_zero"})
+            if current_path is not None and current_path.exists():
+                metadata_mismatches.append(
+                    {
+                        "path": normalized_path,
+                        "issue": "recorded_missing_but_current_path_exists",
+                        "recorded_state": state_value,
+                    }
+                )
+        elif state_value == "non_file":
+            if sha256_value is not None:
+                invalid_entries.append({"index": index, "path": normalized_path, "issue": "non_file_state_sha256_not_null"})
+            if bytes_value != 0:
+                invalid_entries.append({"index": index, "path": normalized_path, "issue": "non_file_state_bytes_not_zero"})
+            if current_path is not None and (not current_path.exists() or current_path.is_file()):
+                metadata_mismatches.append(
+                    {
+                        "path": normalized_path,
+                        "issue": "recorded_non_file_but_current_path_not_non_file",
+                        "recorded_state": state_value,
+                    }
+                )
+    seen_paths: set[str] = set()
+    for path in observed_paths:
+        if path in seen_paths and path not in duplicate_paths:
+            duplicate_paths.append(path)
+        seen_paths.add(path)
+    status = (
+        "failed"
+        if invalid_entries or generated_evidence_paths or duplicate_paths or metadata_mismatches
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_source_tree_snapshot_paths.v0",
+        "status": status,
+        "path_count": len(observed_paths),
+        "generated_evidence_paths": generated_evidence_paths,
+        "duplicate_paths": duplicate_paths,
+        "metadata_mismatches": metadata_mismatches,
+        "invalid_entries": invalid_entries,
+    }
+
+
+def _vs3_source_tree_snapshot_coverage_validation(
+    source_tree: Any,
+    current_source_tree: Any,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    current_invalid_entries: list[dict[str, Any]] = []
+    duplicate_paths: list[str] = []
+    current_duplicate_paths: list[str] = []
+
+    def normalize_snapshot_paths(
+        entries: Any,
+        invalids: list[dict[str, Any]],
+        duplicates: list[str],
+        *,
+        missing_issue: str,
+        not_list_issue: str,
+    ) -> list[str]:
+        if entries is None:
+            invalids.append({"issue": missing_issue})
+            return []
+        if not isinstance(entries, list):
+            invalids.append({"issue": not_list_issue})
+            return []
+        observed_paths: list[str] = []
+        seen_paths: set[str] = set()
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                invalids.append({"index": index, "issue": "entry_not_object"})
+                continue
+            path = entry.get("path")
+            if not isinstance(path, str) or not path.strip():
+                invalids.append({"index": index, "issue": "path_not_nonempty_string"})
+                continue
+            normalized_path = path.strip()
+            if not _vs3_is_safe_relative_path(normalized_path):
+                invalids.append(
+                    {
+                        "index": index,
+                        "path": normalized_path,
+                        "issue": "path_not_safe_relative_path",
+                    }
+                )
+                continue
+            if _is_generated_evidence_path(normalized_path):
+                continue
+            observed_paths.append(normalized_path)
+            if normalized_path in seen_paths and normalized_path not in duplicates:
+                duplicates.append(normalized_path)
+            seen_paths.add(normalized_path)
+        return observed_paths
+
+    if not isinstance(source_tree, dict) or not source_tree:
+        invalid_entries.append({"issue": "source_tree_missing"})
+        recorded_paths: list[str] = []
+    else:
+        recorded_paths = normalize_snapshot_paths(
+            source_tree.get("verified_source_snapshot_paths"),
+            invalid_entries,
+            duplicate_paths,
+            missing_issue="verified_source_snapshot_paths_missing",
+            not_list_issue="verified_source_snapshot_paths_not_list",
+        )
+    if not isinstance(current_source_tree, dict) or not current_source_tree:
+        current_invalid_entries.append({"issue": "current_source_tree_missing"})
+        current_paths: list[str] = []
+    else:
+        current_paths = normalize_snapshot_paths(
+            current_source_tree.get("verified_source_snapshot_paths"),
+            current_invalid_entries,
+            current_duplicate_paths,
+            missing_issue="current_verified_source_snapshot_paths_missing",
+            not_list_issue="current_verified_source_snapshot_paths_not_list",
+        )
+    recorded_path_set = set(recorded_paths)
+    current_path_set = set(current_paths)
+    missing_current_snapshot_paths = sorted(current_path_set - recorded_path_set)
+    stale_snapshot_paths = sorted(recorded_path_set - current_path_set)
+    status = (
+        "failed"
+        if invalid_entries
+        or current_invalid_entries
+        or duplicate_paths
+        or current_duplicate_paths
+        or missing_current_snapshot_paths
+        or stale_snapshot_paths
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_source_tree_snapshot_coverage.v0",
+        "status": status,
+        "recorded_path_count": len(recorded_paths),
+        "current_path_count": len(current_paths),
+        "missing_current_snapshot_paths": missing_current_snapshot_paths,
+        "stale_snapshot_paths": stale_snapshot_paths,
+        "duplicate_paths": duplicate_paths,
+        "current_duplicate_paths": current_duplicate_paths,
+        "invalid_entries": invalid_entries,
+        "current_invalid_entries": current_invalid_entries,
+    }
+
+
+def _vs3_source_tree_snapshot_entry_validation(
+    source_tree: Any,
+    current_source_tree: Any,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    current_invalid_entries: list[dict[str, Any]] = []
+    duplicate_paths: list[str] = []
+    current_duplicate_paths: list[str] = []
+
+    def snapshot_entry_map(
+        entries: Any,
+        invalids: list[dict[str, Any]],
+        duplicates: list[str],
+        *,
+        missing_issue: str,
+        not_list_issue: str,
+    ) -> dict[str, dict[str, Any]]:
+        if entries is None:
+            invalids.append({"issue": missing_issue})
+            return {}
+        if not isinstance(entries, list):
+            invalids.append({"issue": not_list_issue})
+            return {}
+        mapped_entries: dict[str, dict[str, Any]] = {}
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                invalids.append({"index": index, "issue": "entry_not_object"})
+                continue
+            path = entry.get("path")
+            if not isinstance(path, str) or not path.strip():
+                invalids.append({"index": index, "issue": "path_not_nonempty_string"})
+                continue
+            normalized_path = path.strip()
+            if not _vs3_is_safe_relative_path(normalized_path):
+                invalids.append(
+                    {
+                        "index": index,
+                        "path": normalized_path,
+                        "issue": "path_not_safe_relative_path",
+                    }
+                )
+                continue
+            if _is_generated_evidence_path(normalized_path):
+                continue
+            if normalized_path in mapped_entries:
+                if normalized_path not in duplicates:
+                    duplicates.append(normalized_path)
+                continue
+            mapped_entries[normalized_path] = entry
+        return mapped_entries
+
+    if not isinstance(source_tree, dict) or not source_tree:
+        invalid_entries.append({"issue": "source_tree_missing"})
+        recorded_entries: dict[str, dict[str, Any]] = {}
+    else:
+        recorded_entries = snapshot_entry_map(
+            source_tree.get("verified_source_snapshot_paths"),
+            invalid_entries,
+            duplicate_paths,
+            missing_issue="verified_source_snapshot_paths_missing",
+            not_list_issue="verified_source_snapshot_paths_not_list",
+        )
+    if not isinstance(current_source_tree, dict) or not current_source_tree:
+        current_invalid_entries.append({"issue": "current_source_tree_missing"})
+        current_entries: dict[str, dict[str, Any]] = {}
+    else:
+        current_entries = snapshot_entry_map(
+            current_source_tree.get("verified_source_snapshot_paths"),
+            current_invalid_entries,
+            current_duplicate_paths,
+            missing_issue="current_verified_source_snapshot_paths_missing",
+            not_list_issue="current_verified_source_snapshot_paths_not_list",
+        )
+    entry_mismatches: list[dict[str, Any]] = []
+    for path in sorted(set(recorded_entries) & set(current_entries)):
+        recorded_entry = recorded_entries[path]
+        current_entry = current_entries[path]
+        for field in ["status", "state", "sha256", "bytes"]:
+            if recorded_entry.get(field) != current_entry.get(field):
+                entry_mismatches.append(
+                    {
+                        "path": path,
+                        "field": field,
+                        "recorded": recorded_entry.get(field),
+                        "current": current_entry.get(field),
+                    }
+                )
+    status = (
+        "failed"
+        if invalid_entries
+        or current_invalid_entries
+        or duplicate_paths
+        or current_duplicate_paths
+        or entry_mismatches
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_source_tree_snapshot_entries.v0",
+        "status": status,
+        "checked_path_count": len(set(recorded_entries) & set(current_entries)),
+        "entry_mismatches": entry_mismatches,
+        "duplicate_paths": duplicate_paths,
+        "current_duplicate_paths": current_duplicate_paths,
+        "invalid_entries": invalid_entries,
+        "current_invalid_entries": current_invalid_entries,
+    }
+
+
+def _vs3_source_tree_generated_dirty_path_validation(
+    source_tree: Any,
+    current_source_tree: Any,
+    *,
+    ignored_paths: set[str] | None = None,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    non_generated_paths: list[str] = []
+    duplicate_paths: list[str] = []
+    stale_paths: list[str] = []
+    dirty_path_missing_paths: list[str] = []
+    missing_current_generated_dirty_paths: list[str] = []
+    observed_paths: list[str] = []
+    ignored_path_set = {
+        path
+        for path in (ignored_paths or set())
+        if isinstance(path, str)
+        and _vs3_is_safe_relative_path(path)
+        and _is_generated_evidence_path(path)
+    }
+    if not isinstance(source_tree, dict) or not source_tree:
+        return {
+            "schema_version": "cs.vs3_generated_dirty_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "ignored_paths": sorted(ignored_path_set),
+            "non_generated_paths": [],
+            "duplicate_paths": [],
+            "stale_paths": [],
+            "dirty_path_missing_paths": [],
+            "missing_current_generated_dirty_paths": [],
+            "invalid_entries": [{"issue": "source_tree_missing"}],
+        }
+    generated_dirty_paths = source_tree.get("generated_dirty_paths")
+    dirty_paths = source_tree.get("dirty_paths")
+    current_generated_dirty_paths = (
+        current_source_tree.get("generated_dirty_paths")
+        if isinstance(current_source_tree, dict)
+        else None
+    )
+    if not isinstance(generated_dirty_paths, list):
+        return {
+            "schema_version": "cs.vs3_generated_dirty_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "ignored_paths": sorted(ignored_path_set),
+            "non_generated_paths": [],
+            "duplicate_paths": [],
+            "stale_paths": [],
+            "dirty_path_missing_paths": [],
+            "missing_current_generated_dirty_paths": [],
+            "invalid_entries": [{"issue": "generated_dirty_paths_not_list"}],
+        }
+    if not isinstance(dirty_paths, list):
+        invalid_entries.append({"issue": "dirty_paths_not_list"})
+        dirty_path_set: set[str] = set()
+        dirty_paths_valid = False
+    else:
+        dirty_path_set = {path for path in dirty_paths if isinstance(path, str)}
+        dirty_paths_valid = True
+    if not isinstance(current_generated_dirty_paths, list):
+        current_generated_dirty_path_set: set[str] = set()
+        current_generated_dirty_paths_valid = False
+        invalid_entries.append({"issue": "current_generated_dirty_paths_not_list"})
+    else:
+        current_generated_dirty_path_set = {
+            path.strip()
+            for path in current_generated_dirty_paths
+            if isinstance(path, str)
+            and path.strip()
+            and _vs3_is_safe_relative_path(path.strip())
+            and _is_generated_evidence_path(path.strip())
+            and path.strip() not in ignored_path_set
+        }
+        current_generated_dirty_paths_valid = True
+    for index, entry in enumerate(generated_dirty_paths):
+        if not isinstance(entry, str) or not entry.strip():
+            invalid_entries.append({"index": index, "issue": "path_not_nonempty_string"})
+            continue
+        normalized_path = entry.strip()
+        if not _vs3_is_safe_relative_path(normalized_path):
+            invalid_entries.append(
+                {"index": index, "path": normalized_path, "issue": "path_not_safe_relative_path"}
+            )
+            continue
+        observed_paths.append(normalized_path)
+        if normalized_path in ignored_path_set:
+            continue
+        if not _is_generated_evidence_path(normalized_path):
+            non_generated_paths.append(normalized_path)
+        if dirty_paths_valid and normalized_path not in dirty_path_set:
+            dirty_path_missing_paths.append(normalized_path)
+        if (
+            current_generated_dirty_paths_valid
+            and normalized_path not in current_generated_dirty_path_set
+        ):
+            stale_paths.append(normalized_path)
+    seen_paths: set[str] = set()
+    for path in observed_paths:
+        if path in seen_paths and path not in duplicate_paths:
+            duplicate_paths.append(path)
+        seen_paths.add(path)
+    if current_generated_dirty_paths_valid:
+        recorded_generated_dirty_path_set = {
+            path
+            for path in observed_paths
+            if _is_generated_evidence_path(path)
+        }
+        missing_current_generated_dirty_paths = sorted(
+            current_generated_dirty_path_set - recorded_generated_dirty_path_set
+        )
+    status = (
+        "failed"
+        if invalid_entries
+        or non_generated_paths
+        or duplicate_paths
+        or stale_paths
+        or dirty_path_missing_paths
+        or missing_current_generated_dirty_paths
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_generated_dirty_paths.v0",
+        "status": status,
+        "path_count": len(observed_paths),
+        "ignored_paths": sorted(ignored_path_set),
+        "non_generated_paths": non_generated_paths,
+        "duplicate_paths": duplicate_paths,
+        "stale_paths": stale_paths,
+        "dirty_path_missing_paths": dirty_path_missing_paths,
+        "missing_current_generated_dirty_paths": missing_current_generated_dirty_paths,
+        "invalid_entries": invalid_entries,
+    }
+
+
+def _vs3_generated_dirty_snapshot_validation(
+    source_tree: Any,
+    current_source_tree: Any,
+    *,
+    ignored_paths: set[str] | None = None,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    current_invalid_entries: list[dict[str, Any]] = []
+    duplicate_paths: list[str] = []
+    current_duplicate_paths: list[str] = []
+    ignored_path_set = {
+        path
+        for path in (ignored_paths or set())
+        if isinstance(path, str)
+        and _vs3_is_safe_relative_path(path)
+        and _is_generated_evidence_path(path)
+    }
+
+    def snapshot_entry_map(
+        entries: Any,
+        invalids: list[dict[str, Any]],
+        duplicates: list[str],
+        *,
+        missing_issue: str,
+        not_list_issue: str,
+    ) -> dict[str, dict[str, Any]]:
+        if entries is None:
+            invalids.append({"issue": missing_issue})
+            return {}
+        if not isinstance(entries, list):
+            invalids.append({"issue": not_list_issue})
+            return {}
+        mapped_entries: dict[str, dict[str, Any]] = {}
+        for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                invalids.append({"index": index, "issue": "entry_not_object"})
+                continue
+            path = entry.get("path")
+            if not isinstance(path, str) or not path.strip():
+                invalids.append({"index": index, "issue": "path_not_nonempty_string"})
+                continue
+            normalized_path = path.strip()
+            if not _vs3_is_safe_relative_path(normalized_path):
+                invalids.append(
+                    {
+                        "index": index,
+                        "path": normalized_path,
+                        "issue": "path_not_safe_relative_path",
+                    }
+                )
+                continue
+            if not _is_generated_evidence_path(normalized_path):
+                invalids.append(
+                    {
+                        "index": index,
+                        "path": normalized_path,
+                        "issue": "path_not_generated_evidence",
+                    }
+                )
+                continue
+            if normalized_path in ignored_path_set:
+                continue
+            status_value = entry.get("status")
+            state_value = entry.get("state")
+            sha256_value = entry.get("sha256")
+            bytes_value = entry.get("bytes")
+            if not isinstance(status_value, str) or not status_value.strip():
+                invalids.append({"index": index, "path": normalized_path, "issue": "status_not_nonempty_string"})
+            if state_value not in {"present", "missing", "non_file"}:
+                invalids.append({"index": index, "path": normalized_path, "issue": "state_not_supported"})
+                continue
+            if not isinstance(bytes_value, int) or bytes_value < 0:
+                invalids.append({"index": index, "path": normalized_path, "issue": "bytes_not_nonnegative_integer"})
+            if state_value == "present":
+                if not _vs3_is_sha256(sha256_value):
+                    invalids.append({"index": index, "path": normalized_path, "issue": "sha256_not_64_hex"})
+            elif sha256_value is not None:
+                invalids.append({"index": index, "path": normalized_path, "issue": f"{state_value}_state_sha256_not_null"})
+            if state_value != "present" and bytes_value != 0:
+                invalids.append({"index": index, "path": normalized_path, "issue": f"{state_value}_state_bytes_not_zero"})
+            if normalized_path in mapped_entries:
+                if normalized_path not in duplicates:
+                    duplicates.append(normalized_path)
+                continue
+            mapped_entries[normalized_path] = entry
+        return mapped_entries
+
+    def snapshot_map_hash(entries: dict[str, dict[str, Any]]) -> str:
+        digest = hashlib.sha256()
+        for path in sorted(entries):
+            entry = entries[path]
+            digest.update(
+                (
+                    f"{entry.get('status') or ''} {path} {entry.get('state') or ''} "
+                    f"{entry.get('sha256') or ''} {entry.get('bytes') or 0}\n"
+                ).encode("utf-8")
+            )
+        return digest.hexdigest()
+
+    if not isinstance(source_tree, dict) or not source_tree:
+        invalid_entries.append({"issue": "source_tree_missing"})
+        recorded_entries: dict[str, dict[str, Any]] = {}
+        recorded_hash = None
+    else:
+        recorded_hash = source_tree.get("generated_dirty_snapshot_hash")
+        if not _vs3_is_sha256(recorded_hash):
+            invalid_entries.append({"issue": "generated_dirty_snapshot_hash_not_64_hex"})
+        recorded_entries = snapshot_entry_map(
+            source_tree.get("generated_dirty_snapshot_paths"),
+            invalid_entries,
+            duplicate_paths,
+            missing_issue="generated_dirty_snapshot_paths_missing",
+            not_list_issue="generated_dirty_snapshot_paths_not_list",
+        )
+    if not isinstance(current_source_tree, dict) or not current_source_tree:
+        current_invalid_entries.append({"issue": "current_source_tree_missing"})
+        current_entries: dict[str, dict[str, Any]] = {}
+        current_hash = None
+    else:
+        current_hash = current_source_tree.get("generated_dirty_snapshot_hash")
+        if not _vs3_is_sha256(current_hash):
+            current_invalid_entries.append({"issue": "current_generated_dirty_snapshot_hash_not_64_hex"})
+        current_entries = snapshot_entry_map(
+            current_source_tree.get("generated_dirty_snapshot_paths"),
+            current_invalid_entries,
+            current_duplicate_paths,
+            missing_issue="current_generated_dirty_snapshot_paths_missing",
+            not_list_issue="current_generated_dirty_snapshot_paths_not_list",
+        )
+    missing_current_snapshot_paths = sorted(set(current_entries) - set(recorded_entries))
+    stale_snapshot_paths = sorted(set(recorded_entries) - set(current_entries))
+    entry_mismatches: list[dict[str, Any]] = []
+    for path in sorted(set(recorded_entries) & set(current_entries)):
+        recorded_entry = recorded_entries[path]
+        current_entry = current_entries[path]
+        for field in ["status", "state", "sha256", "bytes"]:
+            if recorded_entry.get(field) != current_entry.get(field):
+                entry_mismatches.append(
+                    {
+                        "path": path,
+                        "field": field,
+                        "recorded": recorded_entry.get(field),
+                        "current": current_entry.get(field),
+                    }
+                )
+    effective_recorded_hash = snapshot_map_hash(recorded_entries)
+    effective_current_hash = snapshot_map_hash(current_entries)
+    hash_mismatch = effective_recorded_hash != effective_current_hash
+    status = (
+        "failed"
+        if invalid_entries
+        or current_invalid_entries
+        or duplicate_paths
+        or current_duplicate_paths
+        or missing_current_snapshot_paths
+        or stale_snapshot_paths
+        or entry_mismatches
+        or hash_mismatch
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_generated_dirty_snapshot.v0",
+        "status": status,
+        "recorded_path_count": len(recorded_entries),
+        "current_path_count": len(current_entries),
+        "recorded_hash": recorded_hash,
+        "current_hash": current_hash,
+        "effective_recorded_hash": effective_recorded_hash,
+        "effective_current_hash": effective_current_hash,
+        "hash_mismatch": hash_mismatch,
+        "ignored_paths": sorted(ignored_path_set),
+        "missing_current_snapshot_paths": missing_current_snapshot_paths,
+        "stale_snapshot_paths": stale_snapshot_paths,
+        "entry_mismatches": entry_mismatches,
+        "duplicate_paths": duplicate_paths,
+        "current_duplicate_paths": current_duplicate_paths,
+        "invalid_entries": invalid_entries,
+        "current_invalid_entries": current_invalid_entries,
+    }
+
+
+def _vs3_source_tree_dirty_path_validation(
+    source_tree: Any,
+    current_source_tree: Any,
+) -> dict[str, Any]:
+    invalid_entries: list[dict[str, Any]] = []
+    duplicate_paths: list[str] = []
+    stale_source_dirty_paths: list[str] = []
+    missing_current_source_dirty_paths: list[str] = []
+    observed_paths: list[str] = []
+    source_dirty_paths: list[str] = []
+    if not isinstance(source_tree, dict) or not source_tree:
+        return {
+            "schema_version": "cs.vs3_dirty_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "source_path_count": 0,
+            "duplicate_paths": [],
+            "stale_source_dirty_paths": [],
+            "missing_current_source_dirty_paths": [],
+            "invalid_entries": [{"issue": "source_tree_missing"}],
+        }
+    dirty_paths = source_tree.get("dirty_paths")
+    current_dirty_paths = (
+        current_source_tree.get("dirty_paths")
+        if isinstance(current_source_tree, dict)
+        else None
+    )
+    if not isinstance(dirty_paths, list):
+        return {
+            "schema_version": "cs.vs3_dirty_paths.v0",
+            "status": "failed",
+            "path_count": 0,
+            "source_path_count": 0,
+            "duplicate_paths": [],
+            "stale_source_dirty_paths": [],
+            "missing_current_source_dirty_paths": [],
+            "invalid_entries": [{"issue": "dirty_paths_not_list"}],
+        }
+    if not isinstance(current_dirty_paths, list):
+        invalid_entries.append({"issue": "current_dirty_paths_not_list"})
+        current_source_dirty_path_set: set[str] = set()
+        current_dirty_paths_valid = False
+    else:
+        current_source_dirty_path_set = {
+            path.strip()
+            for path in current_dirty_paths
+            if isinstance(path, str)
+            and path.strip()
+            and _vs3_is_safe_relative_path(path.strip())
+            and not _is_generated_evidence_path(path.strip())
+        }
+        current_dirty_paths_valid = True
+    for index, entry in enumerate(dirty_paths):
+        if not isinstance(entry, str) or not entry.strip():
+            invalid_entries.append({"index": index, "issue": "path_not_nonempty_string"})
+            continue
+        normalized_path = entry.strip()
+        if not _vs3_is_safe_relative_path(normalized_path):
+            invalid_entries.append(
+                {"index": index, "path": normalized_path, "issue": "path_not_safe_relative_path"}
+            )
+            continue
+        observed_paths.append(normalized_path)
+        if not _is_generated_evidence_path(normalized_path):
+            source_dirty_paths.append(normalized_path)
+    seen_paths: set[str] = set()
+    for path in observed_paths:
+        if path in seen_paths and path not in duplicate_paths:
+            duplicate_paths.append(path)
+        seen_paths.add(path)
+    if current_dirty_paths_valid:
+        recorded_source_dirty_path_set = set(source_dirty_paths)
+        stale_source_dirty_paths = sorted(recorded_source_dirty_path_set - current_source_dirty_path_set)
+        missing_current_source_dirty_paths = sorted(current_source_dirty_path_set - recorded_source_dirty_path_set)
+    status = (
+        "failed"
+        if invalid_entries
+        or duplicate_paths
+        or stale_source_dirty_paths
+        or missing_current_source_dirty_paths
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_dirty_paths.v0",
+        "status": status,
+        "path_count": len(observed_paths),
+        "source_path_count": len(source_dirty_paths),
+        "duplicate_paths": duplicate_paths,
+        "stale_source_dirty_paths": stale_source_dirty_paths,
+        "missing_current_source_dirty_paths": missing_current_source_dirty_paths,
+        "invalid_entries": invalid_entries,
+    }
+
+
+def _vs3_current_source_tree(root: Path) -> dict[str, Any]:
+    source_metadata = git_verification_metadata(root)
+    return {
+        "verified_base_commit": source_metadata.get("verified_base_commit"),
+        "verified_base_commit_full": source_metadata.get("verified_base_commit_full"),
+        "verified_base_tree_hash": source_metadata.get("verified_base_tree_hash"),
+        "verified_source_worktree_hash": source_metadata.get("verified_source_worktree_hash"),
+        "worktree_dirty_at_verification": source_metadata.get("worktree_dirty_at_verification"),
+        "final_commit": source_metadata.get("final_commit"),
+        "final_commit_pending_reason": source_metadata.get("final_commit_pending_reason"),
+        "report_generated_before_commit": source_metadata.get("report_generated_before_commit"),
+        "dirty_paths": source_metadata.get("dirty_paths", []),
+        "generated_dirty_paths": source_metadata.get("generated_dirty_paths", []),
+        "generated_dirty_snapshot_hash": source_metadata.get("generated_dirty_snapshot_hash"),
+        "generated_dirty_snapshot_paths": source_metadata.get("generated_dirty_snapshot_paths", []),
+        "verified_source_snapshot_paths": source_metadata.get("verified_source_snapshot_paths", []),
+    }
+
+
+def _vs3_source_tree_from_report_or_current(root: Path, report: dict[str, Any]) -> dict[str, Any]:
+    source_tree = report.get("source_tree") if isinstance(report.get("source_tree"), dict) else {}
+    if source_tree:
+        return dict(source_tree)
+    return _vs3_current_source_tree(root)
+
+
+def _vs3_human_gate_self_transcript_validation(
+    entry: Any,
+    *,
+    payload: dict[str, Any],
+    expected_name: str,
+    expected_command: list[str],
+    expected_exit_code: int,
+    expected_json_schema: str,
+    expected_source_tree: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    expected_scope = _vs3_payload_scope_with_source(payload)
+    errors = _vs3_cli_command_transcript_errors(
+        entry,
+        expected_source_tree=expected_source_tree,
+        require_stdout_tail=True,
+    )
+    if isinstance(entry, dict):
+        if entry.get("name") != expected_name:
+            errors.append("name_mismatch")
+        if entry.get("command") != expected_command:
+            errors.append("command_mismatch")
+        if entry.get("arguments") != expected_command[1:]:
+            errors.append("arguments_mismatch")
+        if entry.get("exit_code") != expected_exit_code:
+            errors.append("exit_code_mismatch_human_gate_status")
+        if entry.get("json_schema") != expected_json_schema:
+            errors.append("json_schema_mismatch")
+        if entry.get("cli_schema_version") != payload.get("cli_schema_version"):
+            errors.append("cli_schema_version_mismatch")
+        if entry.get("scope") != expected_scope:
+            errors.append("scope_mismatch_human_gate_scope")
+        for ref_field in ["evidence_refs", "audit_refs", "policy_decision_refs"]:
+            if entry.get(ref_field) != payload.get(ref_field):
+                errors.append(f"{ref_field}_mismatch_human_gate_payload")
+        expected_ref_summary = {
+            "evidence_refs_count": len(payload.get("evidence_refs") or []),
+            "audit_refs_count": len(payload.get("audit_refs") or []),
+            "policy_decision_refs_count": len(payload.get("policy_decision_refs") or []),
+        }
+        if entry.get("ref_summary") != expected_ref_summary:
+            errors.append("ref_summary_mismatch_human_gate_payload")
+        stdout_json = entry.get("stdout_json")
+        if isinstance(stdout_json, dict):
+            if stdout_json.get("final_verdict") != payload.get("final_verdict"):
+                errors.append("stdout_json_final_verdict_mismatch")
+            if stdout_json.get("payload_status") != payload.get("status"):
+                errors.append("stdout_json_payload_status_mismatch")
+            if stdout_json.get("scope") != expected_scope:
+                errors.append("stdout_json_scope_mismatch_human_gate_scope")
+            for field_name in [
+                "claim_boundary",
+                "claim_boundaries",
+                "claim_boundary_from_scenario_report",
+                "claim_boundaries_from_scenario_report",
+            ]:
+                if field_name in payload and stdout_json.get(field_name) != payload.get(field_name):
+                    errors.append(f"stdout_json_{field_name}_mismatch_human_gate_payload")
+            payload_scenario_report = payload.get("scenario_report")
+            if isinstance(payload_scenario_report, dict) and (
+                "claim_boundary" in payload_scenario_report
+                or "claim_boundaries" in payload_scenario_report
+                or "claim_boundary_validation" in payload_scenario_report
+            ):
+                stdout_scenario_report = stdout_json.get("scenario_report")
+                if not isinstance(stdout_scenario_report, dict):
+                    errors.append("stdout_json_scenario_report_missing")
+                else:
+                    for field_name in [
+                        "path",
+                        "path_recorded",
+                        "path_sha256",
+                        "sha256",
+                        "schema_version",
+                        "status",
+                        "claim_boundary",
+                        "claim_boundaries",
+                        "claim_boundary_validation",
+                    ]:
+                        if stdout_scenario_report.get(field_name) != payload_scenario_report.get(field_name):
+                            errors.append(
+                                f"stdout_json_scenario_report_{field_name}_mismatch_human_gate_payload"
+                            )
+        else:
+            errors.append("stdout_json_missing")
+    return {
+        "status": "passed" if not errors else "failed",
+        "valid": not errors,
+        "error_codes": errors,
+        "expected_command": expected_command,
+        "expected_scope": expected_scope,
+        "expected_source_tree_present": isinstance(expected_source_tree, dict) and bool(expected_source_tree),
+    }
+
+
+def _vs3_scenario_report_claim_boundary_validation(scenario_report: Any) -> dict[str, Any]:
+    scenario_claim_boundary = scenario_report.get("claim_boundary", {}) if isinstance(scenario_report, dict) else {}
+    if not isinstance(scenario_claim_boundary, dict):
+        scenario_claim_boundary = {}
+    claim_boundaries = scenario_report.get("claim_boundaries", {}) if isinstance(scenario_report, dict) else {}
+    if not isinstance(claim_boundaries, dict):
+        claim_boundaries = {}
+    no_claim_keys = sorted(
+        VS3_CLI_STDOUT_PROOF_BOUNDARY_REQUIRED_NOT_CLAIMED
+        | VS3_CLI_STDOUT_PROOF_BOUNDARY_OPTIONAL_NOT_CLAIMED
+    )
+    scenario_claim_boundary_overclaims = {
+        key: scenario_claim_boundary.get(key)
+        for key in no_claim_keys
+        if scenario_claim_boundary.get(key) not in {None, "NOT_CLAIMED"}
+    }
+    claim_boundaries_overclaims = {
+        key: claim_boundaries.get(key)
+        for key in no_claim_keys
+        if claim_boundaries.get(key) not in {None, "NOT_CLAIMED"}
+    }
+    return {
+        "schema_version": "cs.vs3_source_scenario_report_claim_boundary.v0",
+        "status": "passed"
+        if (
+            bool(scenario_claim_boundary)
+            and bool(claim_boundaries)
+            and scenario_claim_boundary == claim_boundaries
+            and scenario_claim_boundary.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+            and not scenario_claim_boundary_overclaims
+            and not claim_boundaries_overclaims
+        )
+        else "failed",
+        "claim_boundary_present": bool(scenario_claim_boundary),
+        "claim_boundaries_present": bool(claim_boundaries),
+        "claim_boundary_matches_claim_boundaries": scenario_claim_boundary == claim_boundaries,
+        "claim_boundary_vs3_l_local_only": scenario_claim_boundary.get("vs3_l")
+        == "LOCAL_DEV_ASSURANCE_VERIFIED",
+        "claim_boundary_overclaim_fields": scenario_claim_boundary_overclaims,
+        "claim_boundaries_overclaim_fields": claim_boundaries_overclaims,
+    }
+
+
+def _vs3_scenario_report_transcript_summary(scenario_report: Any) -> dict[str, Any] | None:
+    if not isinstance(scenario_report, dict):
+        return None
+    return {
+        "path": scenario_report.get("path"),
+        "path_recorded": scenario_report.get("path_recorded"),
+        "path_sha256": scenario_report.get("path_sha256"),
+        "sha256": scenario_report.get("sha256"),
+        "schema_version": scenario_report.get("schema_version"),
+        "status": scenario_report.get("status"),
+        "claim_boundary": scenario_report.get("claim_boundary"),
+        "claim_boundaries": scenario_report.get("claim_boundaries"),
+        "claim_boundary_validation": scenario_report.get("claim_boundary_validation"),
+    }
+
+
+def _vs3_attach_human_gate_self_command_transcript(
+    payload: dict[str, Any],
+    *,
+    name: str,
+    command: list[str],
+    exit_code: int,
+    json_schema: str,
+    started: float,
+    started_at: str,
+    source_tree: dict[str, Any],
+) -> dict[str, Any]:
+    transcript_scope = _vs3_payload_scope_with_source(payload)
+    transcript_evidence_refs = list(payload.get("evidence_refs", []))
+    transcript_audit_refs = list(payload.get("audit_refs", []))
+    transcript_policy_decision_refs = list(payload.get("policy_decision_refs", []))
+    transcript_elapsed_seconds = round(perf_counter() - started, 3)
+    transcript_scenario_report = _vs3_scenario_report_transcript_summary(payload.get("scenario_report"))
+    transcript_stdout_json = {
+        "schema_version": payload.get("schema_version"),
+        "json_schema": json_schema,
+        "status": "success" if exit_code == EXIT_SUCCESS else "failed",
+        "payload_status": payload.get("status"),
+        "command": command,
+        "arguments": command[1:],
+        "exit_code": exit_code,
+        "elapsed_seconds": transcript_elapsed_seconds,
+        "final_verdict": payload.get("final_verdict"),
+        "evidence_refs": transcript_evidence_refs,
+        "audit_refs": transcript_audit_refs,
+        "policy_decision_refs": transcript_policy_decision_refs,
+        "scope": transcript_scope,
+        "source_tree": source_tree,
+        "claim_boundary": payload.get("claim_boundary"),
+        "claim_boundaries": payload.get("claim_boundaries"),
+        "claim_boundary_from_scenario_report": payload.get("claim_boundary_from_scenario_report"),
+        "claim_boundaries_from_scenario_report": payload.get("claim_boundaries_from_scenario_report"),
+        "proof_boundary": _vs3_cli_stdout_proof_boundary(),
+    }
+    if transcript_scenario_report is not None:
+        transcript_stdout_json["scenario_report"] = transcript_scenario_report
+    transcript = command_transcript_entry(
+        name=name,
+        command=command,
+        exit_code=exit_code,
+        timed_out=False,
+        elapsed_seconds=transcript_elapsed_seconds,
+        stdout_tail=[
+            json.dumps(
+                {
+                    "schema_version": transcript_stdout_json.get("schema_version"),
+                    "json_schema": transcript_stdout_json.get("json_schema"),
+                    "status": payload.get("status"),
+                    "payload_status": payload.get("status"),
+                    "final_verdict": payload.get("final_verdict"),
+                    "summary": payload.get("summary"),
+                },
+                sort_keys=True,
+            )
+        ],
+        stderr_tail=[],
+    )
+    transcript.update(
+        {
+            "arguments": command[1:],
+            "started_at": started_at,
+            "ended_at": utc_now(),
+            "output_mode": "json",
+            "json_schema": json_schema,
+            "cli_schema_version": payload.get("cli_schema_version"),
+            "scope": transcript_scope,
+            "evidence_refs": transcript_evidence_refs,
+            "audit_refs": transcript_audit_refs,
+            "policy_decision_refs": transcript_policy_decision_refs,
+            "source_tree": source_tree,
+            "ref_summary": {
+                "evidence_refs_count": len(transcript_evidence_refs),
+                "audit_refs_count": len(transcript_audit_refs),
+                "policy_decision_refs_count": len(transcript_policy_decision_refs),
+            },
+            "stdout_json": transcript_stdout_json,
+        }
+    )
+    validation = _vs3_human_gate_self_transcript_validation(
+        transcript,
+        payload=payload,
+        expected_name=name,
+        expected_command=command,
+        expected_exit_code=exit_code,
+        expected_json_schema=json_schema,
+        expected_source_tree=source_tree,
+    )
+    payload["self_command_transcript"] = transcript
+    payload["command_transcripts"] = [transcript]
+    payload["self_command_transcript_validation"] = validation
+    payload.setdefault("summary", {})
+    if isinstance(payload["summary"], dict):
+        payload["summary"]["self_command_transcript_shape_failures"] = (
+            0 if validation["status"] == "passed" else 1
+        )
+    payload.setdefault("negative_evidence", {})
+    if isinstance(payload["negative_evidence"], dict):
+        payload["negative_evidence"]["self_command_transcript_shape_failures"] = (
+            0 if validation["status"] == "passed" else 1
+        )
+    return validation
+
+
+def _vs3_local_checkpoint_component_proof_identity(root: Path, scenario_report: dict[str, Any]) -> list[dict[str, Any]]:
+    specs = [
+        ("evidence_reconciliation", DEFAULT_VS3_RECONCILIATION_REPORT, "cs.vs3_evidence_reconciliation.v0", False, [], []),
+        ("request_context_proof", DEFAULT_VS3_REQUEST_CONTEXT_REPORT, "cs.vs3_request_context_proof.v0", True, ["VS3-CTX-001", "VS3-CTX-002", "VS3-CTX-003", "VS3-CTX-004", "VS3-CTX-005"], ["vs3_ctx_001_surface_context_consistent", "vs3_ctx_002_forged_authority_denied", "vs3_ctx_003_revocation_fail_closed", "vs3_ctx_004_context_faults_fail_closed", "vs3_ctx_005_mission_workspace_policy_enforced"]),
+        ("postgres_rls_proof", DEFAULT_VS3_POSTGRES_RLS_REPORT, "cs.vs3_postgres_rls_proof.v0", True, ["VS3-RLS-001", "VS3-RLS-002", "VS3-RLS-003", "VS3-RLS-004", "VS3-RLS-005", "VS3-RLS-006"], ["vs3_rls_001_schema_scope_non_null", "vs3_rls_002_tenant_read_isolation", "vs3_rls_003_cross_tenant_mutation_denied", "vs3_rls_004_pool_worker_context_reset", "vs3_rls_005_migration_quarantine_rollback", "vs3_rls_006_backup_restore_tenant_safe"]),
+        ("opa_policy_proof", DEFAULT_VS3_OPA_POLICY_REPORT, "cs.vs3_opa_policy_proof.v0", True, ["VS3-OPA-001", "VS3-OPA-002", "VS3-OPA-003", "VS3-OPA-004", "VS3-OPA-005"], ["vs3_opa_001_policy_input_schema_and_source_map", "vs3_opa_002_policy_decision_contract", "vs3_opa_003_opa_http_access_hardened", "vs3_opa_004_bundle_lifecycle_fail_closed", "vs3_opa_005_decision_log_masked"]),
+        ("egress_sandbox_proof", DEFAULT_VS3_EGRESS_SANDBOX_REPORT, "cs.vs3_egress_sandbox_proof.v0", True, ["VS3-EGR-001", "VS3-EGR-002", "VS3-EGR-003", "VS3-EGR-004", "VS3-EGR-005", "VS3-EGR-006"], ["no_overclaim_or_secret_leak", "supporting_vs2_local_docker_boundary_current", "vs3_egr_001_no_grant_denied_by_runtime_boundary", "vs3_egr_002_one_approved_connectorhub_call", "vs3_egr_003_redirect_dns_url_bypass_denied", "vs3_egr_004_sandbox_denies_undeclared_access", "vs3_egr_005_outage_fail_closed", "vs3_egr_006_untrusted_content_no_authority"]),
+        ("connectorhub_source_proof", DEFAULT_VS3_CONNECTORHUB_SOURCE_REPORT, "cs.vs3_connectorhub_source_proof.v0", True, ["VS3-CON-001", "VS3-CON-002", "VS3-CON-003", "VS3-CON-004", "VS3-CON-005", "VS3-CON-006"], ["no_live_provider_or_human_claim", "vs3_con_001_projection_ack_after_commit", "vs3_con_002_github_readonly_no_write_paths", "vs3_con_003_credentials_stay_connectorhub", "vs3_con_004_source_policy_scoped_revocable", "vs3_con_005_capture_fixture_consent_bounded_revocable", "vs3_con_006_faults_quarantine_no_side_effects"]),
+        ("tool_registry_proof", DEFAULT_VS3_TOOL_REGISTRY_REPORT, "cs.vs3_tool_registry_proof.v0", True, ["VS3-TOOL-001", "VS3-TOOL-002", "VS3-TOOL-003", "VS3-TOOL-004", "VS3-TOOL-005", "VS3-TOOL-006", "VS3-TOOL-007"], ["no_vs3_l_vs3_p_or_production_registry_claim", "vs3_tool_001_manifest_package_signature_sbom", "vs3_tool_002_trusted_registry_rejects_bad_packages", "vs3_tool_003_install_not_activation", "vs3_tool_004_activation_grants_reversible_audited", "vs3_tool_005_runtime_sandbox_denies_undeclared_access", "vs3_tool_006_update_diff_evaluation_gate_no_silent_apply", "vs3_tool_007_rollback_and_emergency_patch_policy"]),
+        ("observability_proof", DEFAULT_VS3_OBSERVABILITY_REPORT, "cs.vs3_observability_proof.v0", True, ["VS3-OBS-001", "VS3-OBS-002", "VS3-OBS-003"], ["vs3_obs_001_operator_status_distinguishes_components", "vs3_obs_002_audit_integrity_tamper_evident", "vs3_obs_003_human_gate_packages_generated_without_pass"]),
+        ("final_regression_proof", DEFAULT_VS3_FINAL_REGRESSION_REPORT, "cs.vs3_final_regression_proof.v0", True, ["VS3-REG-001", "VS3-REG-002", "VS3-REG-003", "VS3-REG-004", "VS3-REG-005", "VS3-REG-006", "VS3-REG-007", "VS3-REG-008"], ["vs3_reg_001_fresh_vs0_gates", "vs3_reg_002_fresh_vs1_gate_cross_scope", "vs3_reg_003_red_team_authority_zero_expansion", "vs3_reg_004_coverage_and_audit_omissions_detected", "vs3_reg_005_overclaim_lint_and_manifest_review", "vs3_reg_006_product_first_ui_admin_separation", "vs3_reg_007_supply_chain_diff_approval_gate", "vs3_reg_008_secure_defaults_conservative"]),
+    ]
+    current_source_tree = _vs3_current_source_tree(root)
+    current_source_tree_fingerprint = _vs3_source_tree_fingerprint(current_source_tree)
+    identities: list[dict[str, Any]] = []
+    for scenario_report_key, rel_path, expected_schema_version, expects_scenario_checks, expected_scenario_ids, expected_check_names in specs:
+        embedded_proof = scenario_report.get(scenario_report_key)
+        embedded_present = isinstance(embedded_proof, dict)
+        proof_path = root / rel_path
+        file_present = proof_path.exists() and proof_path.is_file()
+        file_json_valid = False
+        file_proof: dict[str, Any] | None = None
+        error_code: str | None = None
+        if file_present:
+            try:
+                loaded = json.loads(proof_path.read_text())
+                if isinstance(loaded, dict):
+                    file_proof = loaded
+                    file_json_valid = True
+                else:
+                    error_code = "CS_VS3_COMPONENT_PROOF_NOT_OBJECT"
+            except json.JSONDecodeError:
+                error_code = "CS_VS3_COMPONENT_PROOF_INVALID_JSON"
+        else:
+            error_code = "CS_VS3_COMPONENT_PROOF_MISSING"
+        embedded_sha256 = _vs3_json_identity_sha256(embedded_proof) if embedded_present else None
+        file_json_sha256 = _vs3_json_identity_sha256(file_proof) if file_json_valid else None
+        embedded_schema_version = embedded_proof.get("schema_version") if embedded_present else None
+        file_schema_version = file_proof.get("schema_version") if file_json_valid and file_proof else None
+        embedded_status = embedded_proof.get("status") if embedded_present else None
+        file_status = file_proof.get("status") if file_json_valid and file_proof else None
+        embedded_schema_matches_expected = embedded_schema_version == expected_schema_version
+        file_schema_matches_expected = file_schema_version == expected_schema_version
+        embedded_status_success = embedded_status == "success"
+        file_status_success = file_status == "success"
+        embedded_scenario_status = (
+            embedded_proof.get("scenario_status")
+            if embedded_present and isinstance(embedded_proof.get("scenario_status"), dict)
+            else None
+        )
+        file_scenario_status = (
+            file_proof.get("scenario_status")
+            if file_json_valid and file_proof and isinstance(file_proof.get("scenario_status"), dict)
+            else None
+        )
+        embedded_checks = (
+            embedded_proof.get("checks")
+            if embedded_present and isinstance(embedded_proof.get("checks"), dict)
+            else None
+        )
+        file_checks = (
+            file_proof.get("checks")
+            if file_json_valid and file_proof and isinstance(file_proof.get("checks"), dict)
+            else None
+        )
+        embedded_negative_evidence = (
+            embedded_proof.get("negative_evidence")
+            if embedded_present and isinstance(embedded_proof.get("negative_evidence"), dict)
+            else None
+        )
+        file_negative_evidence = (
+            file_proof.get("negative_evidence")
+            if file_json_valid and file_proof and isinstance(file_proof.get("negative_evidence"), dict)
+            else None
+        )
+        embedded_evidence_refs = (
+            embedded_proof.get("evidence_refs")
+            if embedded_present and isinstance(embedded_proof.get("evidence_refs"), list)
+            else None
+        )
+        file_evidence_refs = (
+            file_proof.get("evidence_refs")
+            if file_json_valid and file_proof and isinstance(file_proof.get("evidence_refs"), list)
+            else None
+        )
+        embedded_audit_refs = (
+            embedded_proof.get("audit_refs")
+            if embedded_present and isinstance(embedded_proof.get("audit_refs"), list)
+            else None
+        )
+        file_audit_refs = (
+            file_proof.get("audit_refs")
+            if file_json_valid and file_proof and isinstance(file_proof.get("audit_refs"), list)
+            else None
+        )
+        embedded_policy_decision_refs = (
+            embedded_proof.get("policy_decision_refs")
+            if embedded_present and isinstance(embedded_proof.get("policy_decision_refs"), list)
+            else None
+        )
+        file_policy_decision_refs = (
+            file_proof.get("policy_decision_refs")
+            if file_json_valid and file_proof and isinstance(file_proof.get("policy_decision_refs"), list)
+            else None
+        )
+        embedded_source_tree = (
+            embedded_proof.get("source_tree")
+            if embedded_present and isinstance(embedded_proof.get("source_tree"), dict)
+            else None
+        )
+        file_source_tree = (
+            file_proof.get("source_tree")
+            if file_json_valid and file_proof and isinstance(file_proof.get("source_tree"), dict)
+            else None
+        )
+        embedded_proof_boundary = (
+            embedded_proof.get("proof_boundary")
+            if embedded_present and isinstance(embedded_proof.get("proof_boundary"), dict)
+            else None
+        )
+        file_proof_boundary = (
+            file_proof.get("proof_boundary")
+            if file_json_valid and file_proof and isinstance(file_proof.get("proof_boundary"), dict)
+            else None
+        )
+        embedded_source_tree_present = isinstance(embedded_source_tree, dict) and bool(embedded_source_tree)
+        file_source_tree_present = isinstance(file_source_tree, dict) and bool(file_source_tree)
+        source_tree_matches_embedded_file = (
+            embedded_source_tree_present
+            and file_source_tree_present
+            and embedded_source_tree == file_source_tree
+        )
+        source_tree_identity_success = (
+            True
+            if not expects_scenario_checks
+            else source_tree_matches_embedded_file
+        )
+        embedded_source_tree_current_mismatches = _vs3_source_tree_current_mismatches(
+            embedded_source_tree,
+            current_source_tree,
+        )
+        file_source_tree_current_mismatches = _vs3_source_tree_current_mismatches(
+            file_source_tree,
+            current_source_tree,
+        )
+        embedded_source_tree_key_errors = (
+            _vs3_source_tree_key_errors(embedded_source_tree)
+            if expects_scenario_checks and embedded_source_tree_present
+            else []
+        )
+        file_source_tree_key_errors = (
+            _vs3_source_tree_key_errors(file_source_tree)
+            if expects_scenario_checks and file_source_tree_present
+            else []
+        )
+        source_tree_key_success = (
+            True
+            if not expects_scenario_checks
+            else not embedded_source_tree_key_errors and not file_source_tree_key_errors
+        )
+        source_tree_current_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                source_tree_identity_success
+                and not embedded_source_tree_current_mismatches
+                and not file_source_tree_current_mismatches
+            )
+        )
+        embedded_proof_boundary_present = isinstance(embedded_proof_boundary, dict) and bool(
+            embedded_proof_boundary
+        )
+        file_proof_boundary_present = isinstance(file_proof_boundary, dict) and bool(
+            file_proof_boundary
+        )
+        proof_boundary_matches_embedded_file = (
+            embedded_proof_boundary_present
+            and file_proof_boundary_present
+            and embedded_proof_boundary == file_proof_boundary
+        )
+        embedded_proof_boundary_errors = _vs3_component_proof_boundary_errors(embedded_proof_boundary)
+        file_proof_boundary_errors = _vs3_component_proof_boundary_errors(file_proof_boundary)
+        proof_boundary_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                proof_boundary_matches_embedded_file
+                and not embedded_proof_boundary_errors
+                and not file_proof_boundary_errors
+            )
+        )
+        embedded_traceability_state = _vs3_component_traceability_state(
+            embedded_proof,
+            expected_scenario_ids=expected_scenario_ids,
+            expected_path=rel_path,
+        )
+        file_traceability_state = _vs3_component_traceability_state(
+            file_proof,
+            expected_scenario_ids=expected_scenario_ids,
+            expected_path=rel_path,
+        )
+        embedded_traceability_present = bool(embedded_traceability_state["present"])
+        file_traceability_present = bool(file_traceability_state["present"])
+        embedded_traceability_invalid_fields = list(embedded_traceability_state["invalid_fields"])
+        file_traceability_invalid_fields = list(file_traceability_state["invalid_fields"])
+        embedded_traceability_missing_fields = list(embedded_traceability_state["missing_fields"])
+        file_traceability_missing_fields = list(file_traceability_state["missing_fields"])
+        traceability_matches_embedded_file = (
+            embedded_traceability_present
+            and file_traceability_present
+            and not embedded_traceability_invalid_fields
+            and not file_traceability_invalid_fields
+            and embedded_traceability_state["traceability"] == file_traceability_state["traceability"]
+        )
+        embedded_expected_traceability = (
+            embedded_traceability_state["traceability"]
+            if embedded_traceability_present and not embedded_traceability_invalid_fields
+            else None
+        )
+        file_expected_traceability = (
+            file_traceability_state["traceability"]
+            if file_traceability_present and not file_traceability_invalid_fields
+            else None
+        )
+        embedded_command_transcripts = (
+            embedded_proof.get("command_transcripts")
+            if embedded_present and isinstance(embedded_proof.get("command_transcripts"), (list, dict))
+            else None
+        )
+        file_command_transcripts = (
+            file_proof.get("command_transcripts")
+            if file_json_valid and file_proof and isinstance(file_proof.get("command_transcripts"), (list, dict))
+            else None
+        )
+        embedded_native_cli_commands = (
+            embedded_proof.get("native_cli_commands")
+            if embedded_present and isinstance(embedded_proof.get("native_cli_commands"), (list, dict))
+            else None
+        )
+        file_native_cli_commands = (
+            file_proof.get("native_cli_commands")
+            if file_json_valid and file_proof and isinstance(file_proof.get("native_cli_commands"), (list, dict))
+            else None
+        )
+        embedded_unredacted_secret_count = (
+            count_unredacted_secrets(json.dumps(embedded_proof, sort_keys=True, default=str))
+            if embedded_present
+            else None
+        )
+        file_unredacted_secret_count = (
+            count_unredacted_secrets(json.dumps(file_proof, sort_keys=True, default=str))
+            if file_json_valid and file_proof
+            else None
+        )
+        report_secret_scan_success = (
+            (embedded_unredacted_secret_count in {None, 0})
+            and (file_unredacted_secret_count in {None, 0})
+        )
+        embedded_scenario_status_present = isinstance(embedded_scenario_status, dict) and bool(embedded_scenario_status)
+        file_scenario_status_present = isinstance(file_scenario_status, dict) and bool(file_scenario_status)
+        embedded_checks_present = isinstance(embedded_checks, dict) and bool(embedded_checks)
+        file_checks_present = isinstance(file_checks, dict) and bool(file_checks)
+        embedded_negative_evidence_present = isinstance(embedded_negative_evidence, dict) and bool(embedded_negative_evidence)
+        file_negative_evidence_present = isinstance(file_negative_evidence, dict) and bool(file_negative_evidence)
+        embedded_evidence_refs_present = isinstance(embedded_evidence_refs, list) and bool(embedded_evidence_refs)
+        file_evidence_refs_present = isinstance(file_evidence_refs, list) and bool(file_evidence_refs)
+        embedded_audit_refs_present = isinstance(embedded_audit_refs, list) and bool(embedded_audit_refs)
+        file_audit_refs_present = isinstance(file_audit_refs, list) and bool(file_audit_refs)
+        embedded_malformed_evidence_refs = _vs3_component_ref_malformed_entries(
+            embedded_evidence_refs,
+            ref_kind="evidence_refs",
+        )
+        file_malformed_evidence_refs = _vs3_component_ref_malformed_entries(
+            file_evidence_refs,
+            ref_kind="evidence_refs",
+        )
+        embedded_malformed_audit_refs = _vs3_component_ref_malformed_entries(
+            embedded_audit_refs,
+            ref_kind="audit_refs",
+        )
+        file_malformed_audit_refs = _vs3_component_ref_malformed_entries(
+            file_audit_refs,
+            ref_kind="audit_refs",
+        )
+        embedded_policy_decision_ref_values = _vs3_component_nonempty_string_refs(
+            embedded_policy_decision_refs
+        )
+        file_policy_decision_ref_values = _vs3_component_nonempty_string_refs(
+            file_policy_decision_refs
+        )
+        embedded_malformed_policy_decision_refs = _vs3_component_ref_malformed_entries(
+            embedded_policy_decision_refs,
+            ref_kind="policy_decision_refs",
+        )
+        file_malformed_policy_decision_refs = _vs3_component_ref_malformed_entries(
+            file_policy_decision_refs,
+            ref_kind="policy_decision_refs",
+        )
+        embedded_policy_decision_refs_present = bool(embedded_policy_decision_ref_values)
+        file_policy_decision_refs_present = bool(file_policy_decision_ref_values)
+        embedded_command_transcript_count = len(embedded_command_transcripts or {})
+        file_command_transcript_count = len(file_command_transcripts or {})
+        embedded_native_cli_command_count = len(embedded_native_cli_commands or {})
+        file_native_cli_command_count = len(file_native_cli_commands or {})
+        embedded_cli_command_evidence_present = bool(
+            embedded_command_transcript_count or embedded_native_cli_command_count
+        )
+        file_cli_command_evidence_present = bool(
+            file_command_transcript_count or file_native_cli_command_count
+        )
+        evidence_refs_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_evidence_refs_present
+                and file_evidence_refs_present
+                and not embedded_malformed_evidence_refs
+                and not file_malformed_evidence_refs
+            )
+        )
+        audit_refs_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_audit_refs_present
+                and file_audit_refs_present
+                and not embedded_malformed_audit_refs
+                and not file_malformed_audit_refs
+            )
+        )
+        policy_decision_refs_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_policy_decision_refs_present
+                and file_policy_decision_refs_present
+                and not embedded_malformed_policy_decision_refs
+                and not file_malformed_policy_decision_refs
+            )
+        )
+        references_success = evidence_refs_success and audit_refs_success and policy_decision_refs_success
+        cli_command_evidence_success = (
+            True
+            if not expects_scenario_checks
+            else embedded_cli_command_evidence_present and file_cli_command_evidence_present
+        )
+        embedded_command_transcript_shape = _vs3_cli_command_transcript_shape(
+            embedded_command_transcripts,
+            expected_source_tree=embedded_source_tree,
+            expected_traceability=embedded_expected_traceability,
+        )
+        file_command_transcript_shape = _vs3_cli_command_transcript_shape(
+            file_command_transcripts,
+            expected_source_tree=file_source_tree,
+            expected_traceability=file_expected_traceability,
+        )
+        embedded_valid_command_transcript_count = int(embedded_command_transcript_shape["valid_count"])
+        file_valid_command_transcript_count = int(file_command_transcript_shape["valid_count"])
+        embedded_invalid_command_transcript_entries = embedded_command_transcript_shape["invalid_entries"]
+        file_invalid_command_transcript_entries = file_command_transcript_shape["invalid_entries"]
+        embedded_command_traceability_invalid_entries = _vs3_traceability_error_entries(
+            embedded_invalid_command_transcript_entries
+        )
+        file_command_traceability_invalid_entries = _vs3_traceability_error_entries(
+            file_invalid_command_transcript_entries
+        )
+        embedded_command_source_tree_mismatches = [
+            entry
+            for entry in embedded_invalid_command_transcript_entries
+            if "source_tree_mismatch" in entry.get("errors", [])
+        ]
+        file_command_source_tree_mismatches = [
+            entry
+            for entry in file_invalid_command_transcript_entries
+            if "source_tree_mismatch" in entry.get("errors", [])
+        ]
+        cli_command_evidence_shape_success = (
+            True
+            if not expects_scenario_checks or not cli_command_evidence_success
+            else embedded_valid_command_transcript_count > 0 and file_valid_command_transcript_count > 0
+        )
+        embedded_scenario_ids = sorted(str(scenario_id) for scenario_id in (embedded_scenario_status or {}))
+        file_scenario_ids = sorted(str(scenario_id) for scenario_id in (file_scenario_status or {}))
+        embedded_missing_scenario_ids = [
+            scenario_id
+            for scenario_id in expected_scenario_ids
+            if scenario_id not in embedded_scenario_ids
+        ]
+        file_missing_scenario_ids = [
+            scenario_id
+            for scenario_id in expected_scenario_ids
+            if scenario_id not in file_scenario_ids
+        ]
+        embedded_unexpected_scenario_ids = [
+            scenario_id
+            for scenario_id in embedded_scenario_ids
+            if scenario_id not in expected_scenario_ids
+        ]
+        file_unexpected_scenario_ids = [
+            scenario_id
+            for scenario_id in file_scenario_ids
+            if scenario_id not in expected_scenario_ids
+        ]
+        scenario_status_coverage_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_scenario_status_present
+                and file_scenario_status_present
+                and not embedded_missing_scenario_ids
+                and not file_missing_scenario_ids
+                and not embedded_unexpected_scenario_ids
+                and not file_unexpected_scenario_ids
+            )
+        )
+        embedded_scenario_status_non_pass = {
+            str(scenario_id): status
+            for scenario_id, status in (embedded_scenario_status or {}).items()
+            if status != "PASS"
+        }
+        file_scenario_status_non_pass = {
+            str(scenario_id): status
+            for scenario_id, status in (file_scenario_status or {}).items()
+            if status != "PASS"
+        }
+        embedded_check_failures = [
+            str(check_name)
+            for check_name, check_value in (embedded_checks or {}).items()
+            if check_value is not True
+        ]
+        file_check_failures = [
+            str(check_name)
+            for check_name, check_value in (file_checks or {}).items()
+            if check_value is not True
+        ]
+        embedded_check_names = sorted(str(check_name) for check_name in (embedded_checks or {}))
+        file_check_names = sorted(str(check_name) for check_name in (file_checks or {}))
+        embedded_missing_check_names = [
+            check_name
+            for check_name in expected_check_names
+            if check_name not in embedded_check_names
+        ]
+        file_missing_check_names = [
+            check_name
+            for check_name in expected_check_names
+            if check_name not in file_check_names
+        ]
+        embedded_unexpected_check_names = [
+            check_name
+            for check_name in embedded_check_names
+            if check_name not in expected_check_names
+        ]
+        file_unexpected_check_names = [
+            check_name
+            for check_name in file_check_names
+            if check_name not in expected_check_names
+        ]
+        checks_coverage_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_checks_present
+                and file_checks_present
+                and not embedded_missing_check_names
+                and not file_missing_check_names
+                and not embedded_unexpected_check_names
+                and not file_unexpected_check_names
+            )
+        )
+        scenario_status_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                scenario_status_coverage_success
+                and not embedded_scenario_status_non_pass
+                and not file_scenario_status_non_pass
+            )
+        )
+        checks_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                checks_coverage_success
+                and not embedded_check_failures
+                and not file_check_failures
+            )
+        )
+        embedded_negative_evidence_nonzero = {
+            str(key): value
+            for key, value in (embedded_negative_evidence or {}).items()
+            if value != 0
+        }
+        file_negative_evidence_nonzero = {
+            str(key): value
+            for key, value in (file_negative_evidence or {}).items()
+            if value != 0
+        }
+        negative_evidence_success = (
+            embedded_negative_evidence_present
+            and file_negative_evidence_present
+            and not embedded_negative_evidence_nonzero
+            and not file_negative_evidence_nonzero
+        )
+        traceability_success = (
+            True
+            if not expects_scenario_checks
+            else (
+                embedded_traceability_present
+                and file_traceability_present
+                and not embedded_traceability_invalid_fields
+                and not file_traceability_invalid_fields
+                and traceability_matches_embedded_file
+                and not embedded_command_traceability_invalid_entries
+                and not file_command_traceability_invalid_entries
+            )
+        )
+        semantic_error_codes = []
+        if not embedded_schema_matches_expected or not file_schema_matches_expected:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SCHEMA_MISMATCH")
+        if not embedded_status_success or not file_status_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_STATUS_NOT_SUCCESS")
+        if expects_scenario_checks and (
+            not embedded_source_tree_present or not file_source_tree_present
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SOURCE_TREE_MISSING")
+        elif expects_scenario_checks and not source_tree_matches_embedded_file:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SOURCE_TREE_MISMATCH")
+        if expects_scenario_checks and (
+            embedded_source_tree_present
+            and file_source_tree_present
+            and not source_tree_current_success
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SOURCE_TREE_STALE")
+        if expects_scenario_checks and not source_tree_key_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SOURCE_TREE_UNSAFE")
+        if expects_scenario_checks and (
+            not embedded_proof_boundary_present or not file_proof_boundary_present
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_BOUNDARY_MISSING")
+        elif expects_scenario_checks and not proof_boundary_matches_embedded_file:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_BOUNDARY_MISMATCH")
+        if expects_scenario_checks and (
+            embedded_proof_boundary_errors or file_proof_boundary_errors
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_BOUNDARY_UNSAFE")
+        if expects_scenario_checks and (
+            not embedded_traceability_present or not file_traceability_present
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_TRACEABILITY_MISSING")
+        elif (
+            expects_scenario_checks
+            and not embedded_traceability_invalid_fields
+            and not file_traceability_invalid_fields
+            and not traceability_matches_embedded_file
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_TRACEABILITY_MISMATCH")
+        if expects_scenario_checks and (
+            embedded_traceability_invalid_fields or file_traceability_invalid_fields
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_TRACEABILITY_INVALID")
+        if expects_scenario_checks and (
+            embedded_command_traceability_invalid_entries or file_command_traceability_invalid_entries
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_TRANSCRIPT_TRACEABILITY_INVALID")
+        if expects_scenario_checks and (
+            not embedded_scenario_status_present or not file_scenario_status_present
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_MISSING")
+        if embedded_scenario_status_non_pass or file_scenario_status_non_pass:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_NOT_PASS")
+        if not scenario_status_coverage_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SCENARIO_STATUS_COVERAGE_MISMATCH")
+        if expects_scenario_checks and (not embedded_checks_present or not file_checks_present):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_CHECKS_MISSING")
+        if not checks_coverage_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_CHECKS_COVERAGE_MISMATCH")
+        if embedded_check_failures or file_check_failures:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_CHECKS_NOT_TRUE")
+        if not embedded_negative_evidence_present or not file_negative_evidence_present:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_NEGATIVE_EVIDENCE_MISSING")
+        if embedded_negative_evidence_nonzero or file_negative_evidence_nonzero:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_NEGATIVE_EVIDENCE_NONZERO")
+        if not evidence_refs_success and (not embedded_evidence_refs_present or not file_evidence_refs_present):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_EVIDENCE_REFS_MISSING")
+        if not audit_refs_success and (not embedded_audit_refs_present or not file_audit_refs_present):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_AUDIT_REFS_MISSING")
+        if not policy_decision_refs_success and (
+            not embedded_policy_decision_refs_present or not file_policy_decision_refs_present
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_POLICY_DECISION_REFS_MISSING")
+        if expects_scenario_checks and (
+            embedded_malformed_evidence_refs
+            or file_malformed_evidence_refs
+            or embedded_malformed_audit_refs
+            or file_malformed_audit_refs
+            or embedded_malformed_policy_decision_refs
+            or file_malformed_policy_decision_refs
+        ):
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_REFS_MALFORMED")
+        if not cli_command_evidence_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_MISSING")
+        if cli_command_evidence_success and not cli_command_evidence_shape_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_CLI_COMMAND_EVIDENCE_INVALID")
+        if embedded_command_source_tree_mismatches or file_command_source_tree_mismatches:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_SOURCE_TREE_TRANSCRIPT_MISMATCH")
+        if not report_secret_scan_success:
+            semantic_error_codes.append("CS_VS3_COMPONENT_PROOF_UNREDACTED_SECRET")
+        matches_embedded_current_file = (
+            embedded_present
+            and file_json_valid
+            and embedded_sha256 == file_json_sha256
+        )
+        semantics_success = (
+            matches_embedded_current_file
+            and embedded_schema_matches_expected
+            and file_schema_matches_expected
+            and embedded_status_success
+            and file_status_success
+            and source_tree_identity_success
+            and source_tree_key_success
+            and source_tree_current_success
+            and proof_boundary_success
+            and traceability_success
+            and scenario_status_success
+            and checks_success
+            and negative_evidence_success
+            and references_success
+            and cli_command_evidence_success
+            and cli_command_evidence_shape_success
+            and report_secret_scan_success
+        )
+        identities.append(
+            {
+                "scenario_report_key": scenario_report_key,
+                "path": rel_path,
+                "path_sha256": hashlib.sha256(str(proof_path).encode("utf-8")).hexdigest(),
+                "expected_schema_version": expected_schema_version,
+                "embedded_present": embedded_present,
+                "file_present": file_present,
+                "file_json_valid": file_json_valid,
+                "embedded_schema_version": embedded_schema_version,
+                "file_schema_version": file_schema_version,
+                "embedded_status": embedded_status,
+                "file_status": file_status,
+                "embedded_schema_matches_expected": embedded_schema_matches_expected,
+                "file_schema_matches_expected": file_schema_matches_expected,
+                "embedded_status_success": embedded_status_success,
+                "file_status_success": file_status_success,
+                "embedded_source_tree_present": embedded_source_tree_present,
+                "file_source_tree_present": file_source_tree_present,
+                "source_tree_matches_embedded_file": source_tree_matches_embedded_file,
+                "source_tree_identity_success": source_tree_identity_success,
+                "current_source_tree_fingerprint": current_source_tree_fingerprint,
+                "embedded_source_tree_fingerprint": _vs3_source_tree_fingerprint(embedded_source_tree),
+                "file_source_tree_fingerprint": _vs3_source_tree_fingerprint(file_source_tree),
+                "allowed_source_tree_keys": sorted(VS3_SOURCE_TREE_ALLOWED_KEYS),
+                "embedded_source_tree_key_errors": embedded_source_tree_key_errors,
+                "file_source_tree_key_errors": file_source_tree_key_errors,
+                "source_tree_key_success": source_tree_key_success,
+                "embedded_source_tree_current_mismatches": embedded_source_tree_current_mismatches,
+                "file_source_tree_current_mismatches": file_source_tree_current_mismatches,
+                "source_tree_current_success": source_tree_current_success,
+                "embedded_proof_boundary_present": embedded_proof_boundary_present,
+                "file_proof_boundary_present": file_proof_boundary_present,
+                "proof_boundary_matches_embedded_file": proof_boundary_matches_embedded_file,
+                "embedded_proof_boundary_errors": embedded_proof_boundary_errors,
+                "file_proof_boundary_errors": file_proof_boundary_errors,
+                "proof_boundary_success": proof_boundary_success,
+                "embedded_traceability": embedded_traceability_state["traceability"],
+                "file_traceability": file_traceability_state["traceability"],
+                "embedded_traceability_present": embedded_traceability_present,
+                "file_traceability_present": file_traceability_present,
+                "embedded_traceability_missing_fields": embedded_traceability_missing_fields,
+                "file_traceability_missing_fields": file_traceability_missing_fields,
+                "embedded_traceability_invalid_fields": embedded_traceability_invalid_fields,
+                "file_traceability_invalid_fields": file_traceability_invalid_fields,
+                "traceability_matches_embedded_file": traceability_matches_embedded_file,
+                "embedded_command_traceability_invalid_entries": embedded_command_traceability_invalid_entries,
+                "file_command_traceability_invalid_entries": file_command_traceability_invalid_entries,
+                "traceability_success": traceability_success,
+                "expects_scenario_checks": expects_scenario_checks,
+                "expected_scenario_ids": expected_scenario_ids,
+                "embedded_scenario_ids": embedded_scenario_ids,
+                "file_scenario_ids": file_scenario_ids,
+                "embedded_scenario_status_present": embedded_scenario_status_present,
+                "file_scenario_status_present": file_scenario_status_present,
+                "embedded_missing_scenario_ids": embedded_missing_scenario_ids,
+                "file_missing_scenario_ids": file_missing_scenario_ids,
+                "embedded_unexpected_scenario_ids": embedded_unexpected_scenario_ids,
+                "file_unexpected_scenario_ids": file_unexpected_scenario_ids,
+                "scenario_status_coverage_success": scenario_status_coverage_success,
+                "embedded_scenario_status_non_pass": embedded_scenario_status_non_pass,
+                "file_scenario_status_non_pass": file_scenario_status_non_pass,
+                "scenario_status_success": scenario_status_success,
+                "embedded_checks_present": embedded_checks_present,
+                "file_checks_present": file_checks_present,
+                "expected_check_names": expected_check_names,
+                "embedded_check_names": embedded_check_names,
+                "file_check_names": file_check_names,
+                "embedded_missing_check_names": embedded_missing_check_names,
+                "file_missing_check_names": file_missing_check_names,
+                "embedded_unexpected_check_names": embedded_unexpected_check_names,
+                "file_unexpected_check_names": file_unexpected_check_names,
+                "checks_coverage_success": checks_coverage_success,
+                "embedded_check_failures": embedded_check_failures,
+                "file_check_failures": file_check_failures,
+                "checks_success": checks_success,
+                "embedded_negative_evidence_present": embedded_negative_evidence_present,
+                "file_negative_evidence_present": file_negative_evidence_present,
+                "embedded_negative_evidence_nonzero": embedded_negative_evidence_nonzero,
+                "file_negative_evidence_nonzero": file_negative_evidence_nonzero,
+                "negative_evidence_success": negative_evidence_success,
+                "embedded_evidence_refs_present": embedded_evidence_refs_present,
+                "file_evidence_refs_present": file_evidence_refs_present,
+                "embedded_evidence_ref_count": len(embedded_evidence_refs or []),
+                "file_evidence_ref_count": len(file_evidence_refs or []),
+                "embedded_malformed_evidence_refs": embedded_malformed_evidence_refs,
+                "file_malformed_evidence_refs": file_malformed_evidence_refs,
+                "allowed_evidence_ref_prefixes": list(VS3_COMPONENT_EVIDENCE_REF_PREFIXES),
+                "evidence_refs_success": evidence_refs_success,
+                "embedded_audit_refs_present": embedded_audit_refs_present,
+                "file_audit_refs_present": file_audit_refs_present,
+                "embedded_audit_ref_count": len(embedded_audit_refs or []),
+                "file_audit_ref_count": len(file_audit_refs or []),
+                "embedded_malformed_audit_refs": embedded_malformed_audit_refs,
+                "file_malformed_audit_refs": file_malformed_audit_refs,
+                "allowed_audit_ref_prefixes": list(VS3_COMPONENT_AUDIT_REF_PREFIXES),
+                "audit_refs_success": audit_refs_success,
+                "embedded_policy_decision_refs_present": embedded_policy_decision_refs_present,
+                "file_policy_decision_refs_present": file_policy_decision_refs_present,
+                "embedded_policy_decision_ref_count": len(embedded_policy_decision_ref_values),
+                "file_policy_decision_ref_count": len(file_policy_decision_ref_values),
+                "embedded_malformed_policy_decision_refs": embedded_malformed_policy_decision_refs,
+                "file_malformed_policy_decision_refs": file_malformed_policy_decision_refs,
+                "allowed_policy_decision_ref_prefixes": list(VS3_COMPONENT_POLICY_DECISION_REF_PREFIXES),
+                "policy_decision_refs_success": policy_decision_refs_success,
+                "references_success": references_success,
+                "embedded_command_transcript_count": embedded_command_transcript_count,
+                "file_command_transcript_count": file_command_transcript_count,
+                "embedded_native_cli_command_count": embedded_native_cli_command_count,
+                "file_native_cli_command_count": file_native_cli_command_count,
+                "embedded_unredacted_secret_count": embedded_unredacted_secret_count,
+                "file_unredacted_secret_count": file_unredacted_secret_count,
+                "report_secret_scan_success": report_secret_scan_success,
+                "embedded_valid_command_transcript_count": embedded_valid_command_transcript_count,
+                "file_valid_command_transcript_count": file_valid_command_transcript_count,
+                "embedded_invalid_command_transcript_entries": embedded_invalid_command_transcript_entries,
+                "file_invalid_command_transcript_entries": file_invalid_command_transcript_entries,
+                "embedded_command_source_tree_mismatches": embedded_command_source_tree_mismatches,
+                "file_command_source_tree_mismatches": file_command_source_tree_mismatches,
+                "embedded_cli_command_evidence_present": embedded_cli_command_evidence_present,
+                "file_cli_command_evidence_present": file_cli_command_evidence_present,
+                "cli_command_evidence_success": cli_command_evidence_success,
+                "cli_command_evidence_shape_success": cli_command_evidence_shape_success,
+                "semantics_success": semantics_success,
+                "semantic_error_codes": semantic_error_codes,
+                "embedded_json_sha256": embedded_sha256,
+                "file_json_sha256": file_json_sha256,
+                "matches_embedded_current_file": matches_embedded_current_file,
+                "error_code": error_code,
+            }
+        )
+    return identities
+
+
+def _vs3_local_checkpoint_overclaim_lint_source_identity(root: Path) -> dict[str, Any]:
+    lint_path = root / DEFAULT_VS3_OVERCLAIM_LINT_REPORT
+    source_identity = _vs3_report_file_identity(root, DEFAULT_VS3_RECONCILIATION_REPORT)
+    zero_negative_keys = [
+        "claim_boundaries_overclaim_count",
+        "claim_boundary_alias_mismatch_count",
+        "claim_boundary_overclaim_count",
+        "unallowlisted_overclaim_findings",
+        "vs3_l_claimed",
+        "vs3_p_claimed",
+        "production_claimed",
+        "production_onprem_readiness_claimed",
+        "live_provider_readiness_claimed",
+        "real_idp_readiness_claimed",
+        "real_network_readiness_claimed",
+        "migration_restore_readiness_claimed",
+        "security_acceptance_claimed",
+        "human_acceptance_claimed",
+    ]
+    no_claim_boundary_keys = [
+        "vs3_l",
+        "vs3_p",
+        "production",
+        "production_onprem",
+        "live_provider",
+        "real_idp",
+        "real_network",
+        "migration_restore",
+        "security_acceptance",
+        "human_acceptance",
+    ]
+    result: dict[str, Any] = {
+        "lint_report_path": DEFAULT_VS3_OVERCLAIM_LINT_REPORT,
+        "source_report_path": DEFAULT_VS3_RECONCILIATION_REPORT,
+        "lint_report_present": lint_path.exists() and lint_path.is_file(),
+        "lint_report_json_valid": False,
+        "source_report_present": source_identity.get("present") is True,
+        "source_report_json_valid": source_identity.get("json_valid") is True,
+        "source_report_identity": source_identity,
+        "recorded_source_identity_present": False,
+        "matches_current_source_file": False,
+        "report_semantics_passed": False,
+        "lint_report_status_passed": False,
+        "lint_report_schema_valid": False,
+        "lint_report_claim_boundary_safe": False,
+        "lint_report_claim_boundary_overclaim_fields_empty": False,
+        "lint_report_negative_evidence_zero": False,
+        "lint_report_zero_negative_keys": zero_negative_keys,
+        "error_code": None,
+        "semantic_error_codes": [],
+    }
+    if not result["lint_report_present"]:
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_REPORT_MISSING"
+        return result
+    try:
+        lint_report = json.loads(lint_path.read_text())
+    except json.JSONDecodeError:
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_REPORT_INVALID_JSON"
+        return result
+    if not isinstance(lint_report, dict):
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_REPORT_NOT_OBJECT"
+        return result
+    result["lint_report_json_valid"] = True
+    negative_evidence = lint_report.get("negative_evidence")
+    claim_boundary = lint_report.get("claim_boundary")
+    claim_boundary_overclaim_fields = lint_report.get("claim_boundary_overclaim_fields")
+    result["lint_report_schema_valid"] = lint_report.get("schema_version") == "cs.vs3_overclaim_lint.v0"
+    result["lint_report_status"] = lint_report.get("status")
+    result["lint_report_status_passed"] = lint_report.get("status") == "passed"
+    result["lint_report_claim_boundary_overclaim_fields"] = (
+        claim_boundary_overclaim_fields if isinstance(claim_boundary_overclaim_fields, list) else None
+    )
+    result["lint_report_claim_boundary_overclaim_fields_empty"] = claim_boundary_overclaim_fields == []
+    result["lint_report_claim_boundary"] = claim_boundary if isinstance(claim_boundary, dict) else None
+    result["lint_report_claim_boundary_safe"] = isinstance(claim_boundary, dict) and all(
+        claim_boundary.get(key) == "NOT_CLAIMED" for key in no_claim_boundary_keys
+    )
+    result["lint_report_negative_evidence"] = negative_evidence if isinstance(negative_evidence, dict) else None
+    result["lint_report_negative_evidence_zero"] = isinstance(negative_evidence, dict) and all(
+        negative_evidence.get(key) == 0 for key in zero_negative_keys
+    )
+    result["report_semantics_passed"] = (
+        result["lint_report_schema_valid"]
+        and result["lint_report_status_passed"]
+        and result["lint_report_claim_boundary_safe"]
+        and result["lint_report_claim_boundary_overclaim_fields_empty"]
+        and result["lint_report_negative_evidence_zero"]
+    )
+    if not result["lint_report_schema_valid"]:
+        result["semantic_error_codes"].append("CS_VS3_OVERCLAIM_LINT_SCHEMA_INVALID")
+    if not result["lint_report_status_passed"]:
+        result["semantic_error_codes"].append("CS_VS3_OVERCLAIM_LINT_STATUS_NOT_PASSED")
+    if not result["lint_report_claim_boundary_safe"]:
+        result["semantic_error_codes"].append("CS_VS3_OVERCLAIM_LINT_CLAIM_BOUNDARY_UNSAFE")
+    if not result["lint_report_claim_boundary_overclaim_fields_empty"]:
+        result["semantic_error_codes"].append("CS_VS3_OVERCLAIM_LINT_OVERCLAIM_FIELDS_PRESENT")
+    if not result["lint_report_negative_evidence_zero"]:
+        result["semantic_error_codes"].append("CS_VS3_OVERCLAIM_LINT_NEGATIVE_EVIDENCE_NONZERO")
+    recorded_identity = lint_report.get("source_reconciliation_report_identity")
+    if not isinstance(recorded_identity, dict):
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_SOURCE_IDENTITY_MISSING"
+        return result
+    result["recorded_source_identity_present"] = True
+    result["recorded_source_identity"] = recorded_identity
+    path_matches = recorded_identity.get("path") == source_identity.get("path")
+    path_hash_matches = recorded_identity.get("path_sha256") == source_identity.get("path_sha256")
+    sha_matches = recorded_identity.get("sha256") == source_identity.get("sha256")
+    canonical_sha_matches = recorded_identity.get("canonical_json_sha256") == source_identity.get("canonical_json_sha256")
+    schema_matches = recorded_identity.get("schema_version") == source_identity.get("schema_version")
+    status_matches = recorded_identity.get("status") == source_identity.get("status")
+    result.update(
+        {
+            "path_matches_current_source_file": path_matches,
+            "path_hash_matches_current_source_file": path_hash_matches,
+            "sha256_matches_current_source_file": sha_matches,
+            "canonical_json_sha256_matches_current_source_file": canonical_sha_matches,
+            "schema_version_matches_current_source_file": schema_matches,
+            "status_matches_current_source_file": status_matches,
+        }
+    )
+    result["matches_current_source_file"] = (
+        result["source_report_present"]
+        and result["source_report_json_valid"]
+        and path_matches
+        and path_hash_matches
+        and sha_matches
+        and canonical_sha_matches
+        and schema_matches
+        and status_matches
+    )
+    if not result["matches_current_source_file"]:
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_SOURCE_IDENTITY_MISMATCH"
+    elif not result["report_semantics_passed"]:
+        result["error_code"] = "CS_VS3_OVERCLAIM_LINT_REPORT_FAILED_OR_OVERCLAIMING"
+    return result
+
+
+def _vs3_local_checkpoint_report_path(root: Path, candidate: str | None) -> tuple[Path, str]:
+    report_path = Path(candidate or DEFAULT_VS3_SCENARIO_REPORT)
+    if not report_path.is_absolute():
+        report_path = root / report_path
+    try:
+        return report_path, str(report_path.relative_to(root))
+    except ValueError:
+        return report_path, "<external-scenario-report-path>"
+
+
+def _vs3_scenario_report_traceability_validation(
+    scenario_report: dict[str, Any],
+    scenario_results: list[Any],
+    *,
+    expected_report_path: str | None = None,
+) -> dict[str, Any]:
+    traceability = (
+        scenario_report.get("traceability")
+        if isinstance(scenario_report.get("traceability"), dict)
+        else {}
+    )
+    scenario_ids = [
+        str(row.get("scenario_id") or row.get("id") or "")
+        for row in scenario_results
+        if isinstance(row, dict) and (row.get("scenario_id") or row.get("id"))
+    ]
+    expected_human_required_rows = [f"VS3-H{index:02d}" for index in range(1, 8)]
+    expected_ai_verifiable_rows = len(
+        [scenario_id for scenario_id in scenario_ids if scenario_id not in expected_human_required_rows]
+    )
+    source_tree = (
+        scenario_report.get("source_tree")
+        if isinstance(scenario_report.get("source_tree"), dict)
+        else {}
+    )
+    expected_source_tree_ref = source_tree.get("verified_source_worktree_hash")
+    source_hash_for_trace = str(expected_source_tree_ref or "unknown-source")
+    trace_hash = source_hash_for_trace[:16] if source_hash_for_trace else "unknown-source"
+    expected_trace_identity_fields = {
+        "scenario_run_id": f"scenario-run:vs3-onprem-trusted-extension:{trace_hash}",
+        "trace_id": f"trace:vs3-onprem-trusted-extension:{trace_hash}",
+    }
+    missing_fields: list[str] = []
+    invalid_fields: list[str] = []
+    row_missing_fields: list[str] = []
+    row_invalid_fields: list[str] = []
+
+    def trace_string(value: Any) -> bool:
+        return isinstance(value, str) and bool(value.strip())
+
+    def trace_string_list(value: Any) -> bool:
+        return (
+            isinstance(value, list)
+            and bool(value)
+            and all(isinstance(item, str) and bool(item.strip()) for item in value)
+        )
+
+    if not traceability:
+        missing_fields.append("traceability")
+    if traceability.get("schema_version") != "cs.scenario_traceability.v0":
+        invalid_fields.append("traceability.schema_version")
+    if traceability.get("scenario_set") != "vs3-onprem-trusted-extension":
+        invalid_fields.append("traceability.scenario_set")
+    if traceability.get("scope") != VS3_SCENARIO_VERIFY_SCOPE:
+        invalid_fields.append("traceability.scope")
+    if traceability.get("scenario_ids") != scenario_ids:
+        invalid_fields.append("traceability.scenario_ids")
+    if traceability.get("human_required_rows") != expected_human_required_rows:
+        invalid_fields.append("traceability.human_required_rows")
+    if "ai_verifiable_rows" not in traceability:
+        missing_fields.append("traceability.ai_verifiable_rows")
+    elif traceability.get("ai_verifiable_rows") != expected_ai_verifiable_rows:
+        invalid_fields.append("traceability.ai_verifiable_rows")
+    if not trace_string(traceability.get("source_tree_ref")):
+        missing_fields.append("traceability.source_tree_ref")
+    elif trace_string(expected_source_tree_ref) and traceability.get("source_tree_ref") != expected_source_tree_ref:
+        invalid_fields.append("traceability.source_tree_ref")
+    traceability_transcript_paths = traceability.get("transcript_paths")
+    expected_transcript_paths = [expected_report_path] if expected_report_path else None
+    if not trace_string_list(traceability_transcript_paths):
+        missing_fields.append("traceability.transcript_paths")
+    elif expected_transcript_paths is not None and traceability_transcript_paths != expected_transcript_paths:
+        invalid_fields.append("traceability.transcript_paths")
+
+    expected_top_level_fields = {
+        "scenario_run_id": expected_trace_identity_fields["scenario_run_id"],
+        "trace_id": expected_trace_identity_fields["trace_id"],
+        "corpus_pack_id": VS3_SCENARIO_CORPUS_PACK_ID,
+        "model_provider": VS3_SCENARIO_MODEL_PROVIDER,
+        "model_name": VS3_SCENARIO_MODEL_NAME,
+    }
+    for field, expected in expected_top_level_fields.items():
+        if not trace_string(traceability.get(field)):
+            missing_fields.append(f"traceability.{field}")
+        if scenario_report.get(field) != expected:
+            invalid_fields.append(field)
+        if traceability.get(field) != expected:
+            invalid_fields.append(f"traceability.{field}")
+    top_level_scope_fields = ["tenant_id", "owner_id", "namespace_id", "workspace_id"]
+    for field in top_level_scope_fields:
+        expected = VS3_SCENARIO_VERIFY_SCOPE[field]
+        actual = scenario_report.get(field)
+        if not trace_string(actual):
+            missing_fields.append(field)
+        elif actual != expected:
+            invalid_fields.append(field)
+
+    for row in scenario_results:
+        row_id = "<unknown>"
+        if isinstance(row, dict):
+            row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>")
+        if not isinstance(row, dict):
+            row_invalid_fields.append(f"{row_id}.row")
+            continue
+        for field, expected in expected_top_level_fields.items():
+            if not trace_string(row.get(field)):
+                row_missing_fields.append(f"{row_id}.{field}")
+            elif row.get(field) != expected:
+                row_invalid_fields.append(f"{row_id}.{field}")
+        if row.get("scope") != VS3_SCENARIO_VERIFY_SCOPE:
+            row_invalid_fields.append(f"{row_id}.scope")
+        row_transcript_paths = row.get("transcript_paths")
+        if not trace_string_list(row_transcript_paths):
+            row_missing_fields.append(f"{row_id}.transcript_paths")
+        elif expected_transcript_paths is not None and row_transcript_paths != expected_transcript_paths:
+            row_invalid_fields.append(f"{row_id}.transcript_paths")
+
+    status = (
+        "failed"
+        if missing_fields or invalid_fields or row_missing_fields or row_invalid_fields
+        else "passed"
+    )
+    return {
+        "schema_version": "cs.vs3_local_checkpoint_scenario_traceability.v0",
+        "status": status,
+        "scenario_run_id": traceability.get("scenario_run_id"),
+        "trace_id": traceability.get("trace_id"),
+        "expected_trace_identity": expected_trace_identity_fields,
+        "corpus_pack_id": traceability.get("corpus_pack_id"),
+        "model_provider": traceability.get("model_provider"),
+        "model_name": traceability.get("model_name"),
+        "scope": traceability.get("scope"),
+        "expected_scope": VS3_SCENARIO_VERIFY_SCOPE,
+        "actual_top_level_scope": {
+            field: scenario_report.get(field)
+            for field in top_level_scope_fields
+        },
+        "transcript_paths": traceability.get("transcript_paths"),
+        "expected_transcript_paths": expected_transcript_paths,
+        "scenario_id_count": len(scenario_ids),
+        "ai_verifiable_rows": traceability.get("ai_verifiable_rows"),
+        "expected_ai_verifiable_rows": expected_ai_verifiable_rows,
+        "source_tree_ref": traceability.get("source_tree_ref"),
+        "expected_source_tree_ref": expected_source_tree_ref,
+        "row_count": len([row for row in scenario_results if isinstance(row, dict)]),
+        "human_required_row_count": len(traceability.get("human_required_rows", []))
+        if isinstance(traceability.get("human_required_rows"), list)
+        else 0,
+        "missing_fields": sorted(set(missing_fields)),
+        "invalid_fields": sorted(set(invalid_fields)),
+        "row_missing_fields": sorted(set(row_missing_fields)),
+        "row_invalid_fields": sorted(set(row_invalid_fields)),
+    }
+
+
+def command_security_vs3_local_checkpoint(args: argparse.Namespace) -> int:
+    root = repo_root()
+    started = perf_counter()
+    started_at = utc_now()
+    requested_scope = scope_args(args)
+    scenario_report_path, scenario_report_rel = _vs3_local_checkpoint_report_path(root, args.scenario_report)
+    expected_product_feature_claims = "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED"
+    human_gate_ids = [f"VS3-H{index:02d}" for index in range(1, 8)]
+    human_gate_record_scaffold_report = f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/record-scaffold.json"
+    human_gate_evidence_status_report = f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/evidence-status.json"
+    human_gate_review_kit_report = f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/review-kit.json"
+    vs3_p_gate_report = f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/vs3-p-gate.json"
+    required_artifact_specs = [
+        (DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT, "contract"),
+        (DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX, "matrix"),
+        (DEFAULT_VS3_GOAL_PROMPT, "goal_prompt"),
+        (scenario_report_rel, "scenario_report"),
+        (DEFAULT_VS3_RECONCILIATION_REPORT, "proof_report"),
+        (DEFAULT_VS3_REQUEST_CONTEXT_REPORT, "proof_report"),
+        (DEFAULT_VS3_POSTGRES_RLS_REPORT, "proof_report"),
+        (DEFAULT_VS3_OPA_POLICY_REPORT, "proof_report"),
+        (DEFAULT_VS3_EGRESS_SANDBOX_REPORT, "proof_report"),
+        (DEFAULT_VS3_CONNECTORHUB_SOURCE_REPORT, "proof_report"),
+        (DEFAULT_VS3_TOOL_REGISTRY_REPORT, "proof_report"),
+        (DEFAULT_VS3_OBSERVABILITY_REPORT, "proof_report"),
+        (DEFAULT_VS3_FINAL_REGRESSION_REPORT, "proof_report"),
+        (DEFAULT_VS3_OVERCLAIM_LINT_REPORT, "overclaim_lint_report"),
+        (human_gate_record_scaffold_report, "human_gate_record_scaffold"),
+        (human_gate_evidence_status_report, "human_gate_evidence_status"),
+        (human_gate_review_kit_report, "human_gate_review_kit"),
+        (vs3_p_gate_report, "vs3_p_human_gate"),
+        *[
+            (f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/{scenario_id}.json", "human_gate_package")
+            for scenario_id in human_gate_ids
+        ],
+    ]
+    artifact_manifest = [
+        _vs3_local_checkpoint_artifact(root, rel_path, kind=kind)
+        for rel_path, kind in required_artifact_specs
+    ]
+    missing_required_artifacts = [
+        artifact["path"]
+        for artifact in artifact_manifest
+        if artifact.get("required") and not artifact.get("present")
+    ]
+
+    payload = base_response("cornerstone security vs3-local-checkpoint", "failed", root)
+    payload.update(requested_scope)
+    payload["vs3_local_checkpoint_schema_version"] = "cs.vs3_local_checkpoint.v0"
+    payload["checkpoint_scope"] = "local_dev_assurance_manifest_only"
+    payload["claim_boundary"] = {
+        "checkpoint_is_local_dev_only": True,
+        "vs3_l": "NOT_CLAIMED",
+        "vs3_p": "NOT_CLAIMED",
+        "production": "NOT_CLAIMED",
+        "production_onprem": "NOT_CLAIMED",
+        "live_provider": "NOT_CLAIMED",
+        "real_idp": "NOT_CLAIMED",
+        "real_network": "NOT_CLAIMED",
+        "migration_restore": "NOT_CLAIMED",
+        "security_acceptance": "NOT_CLAIMED",
+        "human_acceptance": "NOT_CLAIMED",
+        "structural_validation_is_not_acceptance": True,
+    }
+    payload["claim_boundaries"] = payload["claim_boundary"]
+    payload["artifact_manifest"] = artifact_manifest
+    payload["evidence_refs"].extend(
+        f"report:{artifact['path']}"
+        for artifact in artifact_manifest
+        if artifact.get("present")
+    )
+
+    if not scenario_report_path.exists() or not scenario_report_path.is_file():
+        payload["final_verdict"] = "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED"
+        payload["summary"] = {
+            "status": "failed",
+            "final_verdict": payload["final_verdict"],
+            "scenario_report_present": False,
+            "vs3_l_claim": "NOT_CLAIMED",
+            "vs3_p_claim": "NOT_CLAIMED",
+            "product_claim_allowed": False,
+            "production_readiness_claim_allowed": False,
+            "security_acceptance_claim_allowed": False,
+            "human_acceptance_claim_allowed": False,
+        }
+        payload["negative_evidence"] = {
+            "missing_required_artifacts": len(missing_required_artifacts),
+            "ai_blocking_rows": 1,
+            "human_required_rows_marked_pass": 0,
+            "human_required_rows_not_human_required": 0,
+            "vs3_p_claimed_by_checkpoint": 0,
+            "production_readiness_claimed_by_checkpoint": 0,
+            "live_provider_readiness_claimed_by_checkpoint": 0,
+            "real_idp_readiness_claimed_by_checkpoint": 0,
+            "real_network_readiness_claimed_by_checkpoint": 0,
+            "migration_restore_readiness_claimed_by_checkpoint": 0,
+            "security_acceptance_claimed_by_checkpoint": 0,
+            "human_acceptance_claimed_by_checkpoint": 0,
+            "structural_validation_treated_as_acceptance": 0,
+        }
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_LOCAL_CHECKPOINT_SCENARIO_REPORT_MISSING",
+                "message": "VS3 local checkpoint requires the aggregate VS3 scenario report.",
+                "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+                "scenario_report_path": scenario_report_rel,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    try:
+        scenario_report = json.loads(scenario_report_path.read_text())
+    except json.JSONDecodeError as error:
+        payload["final_verdict"] = "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED"
+        payload["summary"] = {
+            "status": "failed",
+            "final_verdict": payload["final_verdict"],
+            "scenario_report_present": True,
+            "vs3_l_claim": "NOT_CLAIMED",
+            "vs3_p_claim": "NOT_CLAIMED",
+            "product_claim_allowed": False,
+            "production_readiness_claim_allowed": False,
+            "security_acceptance_claim_allowed": False,
+            "human_acceptance_claim_allowed": False,
+        }
+        payload["negative_evidence"] = {
+            "missing_required_artifacts": len(missing_required_artifacts),
+            "ai_blocking_rows": 1,
+            "human_required_rows_marked_pass": 0,
+            "human_required_rows_not_human_required": 0,
+            "vs3_p_claimed_by_checkpoint": 0,
+            "production_readiness_claimed_by_checkpoint": 0,
+            "live_provider_readiness_claimed_by_checkpoint": 0,
+            "real_idp_readiness_claimed_by_checkpoint": 0,
+            "real_network_readiness_claimed_by_checkpoint": 0,
+            "migration_restore_readiness_claimed_by_checkpoint": 0,
+            "security_acceptance_claimed_by_checkpoint": 0,
+            "human_acceptance_claimed_by_checkpoint": 0,
+            "structural_validation_treated_as_acceptance": 0,
+        }
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_LOCAL_CHECKPOINT_SCENARIO_REPORT_INVALID_JSON",
+                "message": "VS3 local checkpoint scenario report must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+                "scenario_report_path": scenario_report_rel,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_report_sha256 = hashlib.sha256(scenario_report_path.read_bytes()).hexdigest()
+    scenario_report_path_sha256 = hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest()
+    scenario_source_tree = (
+        scenario_report.get("source_tree")
+        if isinstance(scenario_report.get("source_tree"), dict)
+        else {}
+    )
+    current_source_tree = _vs3_current_source_tree(root)
+    scenario_source_tree_current_mismatches = _vs3_source_tree_current_mismatches(
+        scenario_source_tree,
+        current_source_tree,
+    )
+    scenario_source_tree_current_validation = {
+        "schema_version": "cs.vs3_source_tree_current_validation.v0",
+        "status": "failed" if scenario_source_tree_current_mismatches else "passed",
+        "mismatches": scenario_source_tree_current_mismatches,
+        "scenario_source_tree_fingerprint": _vs3_source_tree_fingerprint(scenario_source_tree),
+        "current_source_tree_fingerprint": _vs3_source_tree_fingerprint(current_source_tree),
+    }
+    summary = scenario_report.get("summary", {})
+    if not isinstance(summary, dict):
+        summary = {}
+    scenario_results = scenario_report.get("scenario_results", [])
+    if not isinstance(scenario_results, list):
+        scenario_results = []
+    scenario_report_traceability = _vs3_scenario_report_traceability_validation(
+        scenario_report,
+        scenario_results,
+        expected_report_path=scenario_report_rel,
+    )
+    scenario_report_claim_boundary_validation = _vs3_scenario_report_claim_boundary_validation(
+        scenario_report
+    )
+    scenario_claim_boundary = scenario_report.get("claim_boundary", {})
+    if not isinstance(scenario_claim_boundary, dict):
+        scenario_claim_boundary = {}
+    claim_boundaries = scenario_report.get("claim_boundaries", {})
+    if not isinstance(claim_boundaries, dict):
+        claim_boundaries = {}
+    human_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and (row.get("owner") == "Human" or str(row.get("scenario_id") or row.get("id") or "").startswith("VS3-H"))
+    ]
+    ai_blocking_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and row.get("owner") != "Human"
+        and row.get("status") != "PASS"
+    ]
+    human_rows_marked_pass = [row for row in human_rows if row.get("status") == "PASS"]
+    human_rows_not_human_required = [row for row in human_rows if row.get("status") != "HUMAN_REQUIRED"]
+    human_ids = [str(row.get("scenario_id") or row.get("id")) for row in human_rows]
+    scaffold_report: dict[str, Any] = {}
+    scaffold_report_path = root / human_gate_record_scaffold_report
+    if scaffold_report_path.exists() and scaffold_report_path.is_file():
+        try:
+            loaded_scaffold_report = json.loads(scaffold_report_path.read_text())
+            if isinstance(loaded_scaffold_report, dict):
+                scaffold_report = loaded_scaffold_report
+        except json.JSONDecodeError:
+            scaffold_report = {}
+    evidence_status_report: dict[str, Any] = {}
+    evidence_status_report_path = root / human_gate_evidence_status_report
+    if evidence_status_report_path.exists() and evidence_status_report_path.is_file():
+        try:
+            loaded_evidence_status_report = json.loads(evidence_status_report_path.read_text())
+            if isinstance(loaded_evidence_status_report, dict):
+                evidence_status_report = loaded_evidence_status_report
+        except json.JSONDecodeError:
+            evidence_status_report = {}
+    scaffold_summary = scaffold_report.get("summary", {}) if isinstance(scaffold_report.get("summary"), dict) else {}
+    scaffold_boundary = scaffold_report.get("claim_boundary", {}) if isinstance(scaffold_report.get("claim_boundary"), dict) else {}
+    scaffold_negative = scaffold_report.get("negative_evidence", {}) if isinstance(scaffold_report.get("negative_evidence"), dict) else {}
+    status_summary = evidence_status_report.get("summary", {}) if isinstance(evidence_status_report.get("summary"), dict) else {}
+    status_boundary = evidence_status_report.get("claim_boundary", {}) if isinstance(evidence_status_report.get("claim_boundary"), dict) else {}
+    status_negative = evidence_status_report.get("negative_evidence", {}) if isinstance(evidence_status_report.get("negative_evidence"), dict) else {}
+    status_report_body = (
+        evidence_status_report.get("vs3_human_gate_evidence_status", {})
+        if isinstance(evidence_status_report.get("vs3_human_gate_evidence_status"), dict)
+        else {}
+    )
+    status_template_intake = (
+        status_report_body.get("template_intake_summary", {})
+        if isinstance(status_report_body.get("template_intake_summary"), dict)
+        else {}
+    )
+    status_scenario_report = (
+        status_report_body.get("scenario_report", {})
+        if isinstance(status_report_body.get("scenario_report"), dict)
+        else {}
+    )
+    status_template_acceptance_boundary = str(status_template_intake.get("acceptance_boundary") or "")
+    status_record_rows = (
+        status_report_body.get("record_statuses", [])
+        if isinstance(status_report_body.get("record_statuses"), list)
+        else []
+    )
+    status_record_ids = [
+        str(row.get("scenario_id") or "")
+        for row in status_record_rows
+        if isinstance(row, dict)
+    ]
+    missing_status_record_ids = [
+        scenario_id for scenario_id in human_gate_ids if scenario_id not in status_record_ids
+    ]
+    unexpected_status_record_ids = [
+        scenario_id for scenario_id in status_record_ids if scenario_id not in human_gate_ids
+    ]
+    duplicate_status_record_ids = sorted(
+        {scenario_id for scenario_id in status_record_ids if status_record_ids.count(scenario_id) > 1}
+    )
+    review_kit_payload: dict[str, Any] = {}
+    review_kit_report_path = root / human_gate_review_kit_report
+    if review_kit_report_path.exists() and review_kit_report_path.is_file():
+        try:
+            loaded_review_kit_report = json.loads(review_kit_report_path.read_text())
+            if isinstance(loaded_review_kit_report, dict):
+                review_kit_payload = loaded_review_kit_report
+        except json.JSONDecodeError:
+            review_kit_payload = {}
+    review_kit_summary = (
+        review_kit_payload.get("summary", {})
+        if isinstance(review_kit_payload.get("summary"), dict)
+        else {}
+    )
+    review_kit_body = (
+        review_kit_payload.get("vs3_human_gate_review_kit", {})
+        if isinstance(review_kit_payload.get("vs3_human_gate_review_kit"), dict)
+        else {}
+    )
+    review_kit_boundary = (
+        review_kit_payload.get("claim_boundary", {})
+        if isinstance(review_kit_payload.get("claim_boundary"), dict)
+        else {}
+    )
+    review_kit_negative = (
+        review_kit_payload.get("negative_evidence", {})
+        if isinstance(review_kit_payload.get("negative_evidence"), dict)
+        else {}
+    )
+    review_kit_queue = (
+        review_kit_body.get("review_queue", [])
+        if isinstance(review_kit_body.get("review_queue"), list)
+        else []
+    )
+    review_kit_templates = (
+        review_kit_body.get("record_templates", [])
+        if isinstance(review_kit_body.get("record_templates"), list)
+        else []
+    )
+    review_kit_expected_human_ids = (
+        review_kit_body.get("expected_human_scenario_ids", [])
+        if isinstance(review_kit_body.get("expected_human_scenario_ids"), list)
+        else []
+    )
+    review_kit_actual_human_ids = (
+        review_kit_body.get("actual_human_scenario_ids", [])
+        if isinstance(review_kit_body.get("actual_human_scenario_ids"), list)
+        else []
+    )
+    review_kit_conditions_payload = (
+        review_kit_body.get("review_kit_conditions", {})
+        if isinstance(review_kit_body.get("review_kit_conditions"), dict)
+        else {}
+    )
+    review_kit_scenario_report = (
+        review_kit_body.get("scenario_report", {})
+        if isinstance(review_kit_body.get("scenario_report"), dict)
+        else {}
+    )
+    vs3_p_gate_payload: dict[str, Any] = {}
+    vs3_p_gate_report_path = root / vs3_p_gate_report
+    if vs3_p_gate_report_path.exists() and vs3_p_gate_report_path.is_file():
+        try:
+            loaded_vs3_p_gate_report = json.loads(vs3_p_gate_report_path.read_text())
+            if isinstance(loaded_vs3_p_gate_report, dict):
+                vs3_p_gate_payload = loaded_vs3_p_gate_report
+        except json.JSONDecodeError:
+            vs3_p_gate_payload = {}
+    vs3_p_gate_summary = (
+        vs3_p_gate_payload.get("summary", {})
+        if isinstance(vs3_p_gate_payload.get("summary"), dict)
+        else {}
+    )
+    vs3_p_gate_body = (
+        vs3_p_gate_payload.get("vs3_p_human_gate", {})
+        if isinstance(vs3_p_gate_payload.get("vs3_p_human_gate"), dict)
+        else {}
+    )
+    vs3_p_gate_body_boundary = (
+        vs3_p_gate_body.get("claim_boundary", {})
+        if isinstance(vs3_p_gate_body.get("claim_boundary"), dict)
+        else {}
+    )
+    vs3_p_gate_boundary = (
+        vs3_p_gate_payload.get("claim_boundary", {})
+        if isinstance(vs3_p_gate_payload.get("claim_boundary"), dict)
+        else {}
+    )
+    vs3_p_gate_negative = (
+        vs3_p_gate_payload.get("negative_evidence", {})
+        if isinstance(vs3_p_gate_payload.get("negative_evidence"), dict)
+        else {}
+    )
+    vs3_p_gate_errors = (
+        vs3_p_gate_payload.get("errors", [])
+        if isinstance(vs3_p_gate_payload.get("errors"), list)
+        else []
+    )
+    vs3_p_gate_scenario_report = (
+        vs3_p_gate_body.get("scenario_report", {})
+        if isinstance(vs3_p_gate_body.get("scenario_report"), dict)
+        else {}
+    )
+    evidence_status_self_transcript_validation = _vs3_human_gate_self_transcript_validation(
+        evidence_status_report.get("self_command_transcript"),
+        payload=evidence_status_report,
+        expected_name="human_gate_evidence_status_vs3",
+        expected_command=[
+            "cornerstone",
+            "human-gate",
+            "evidence-status",
+            "--scope",
+            "vs3",
+            "--record-dir",
+            "<redacted-dir>",
+            "--json",
+        ],
+        expected_exit_code=(
+            EXIT_SUCCESS
+            if evidence_status_report.get("status") == "success"
+            else EXIT_EVIDENCE_MISSING
+        ),
+        expected_json_schema="cs.vs3_human_gate_evidence_status.v0",
+        expected_source_tree=scenario_source_tree if scenario_source_tree else None,
+    )
+    review_kit_self_transcript_validation = _vs3_human_gate_self_transcript_validation(
+        review_kit_payload.get("self_command_transcript"),
+        payload=review_kit_payload,
+        expected_name="human_gate_review_kit_vs3",
+        expected_command=["cornerstone", "human-gate", "review-kit", "--scope", "vs3", "--json"],
+        expected_exit_code=(
+            EXIT_SUCCESS
+            if review_kit_payload.get("status") == "success"
+            else EXIT_EVIDENCE_MISSING
+        ),
+        expected_json_schema="cs.vs3_human_gate_review_kit.v0",
+        expected_source_tree=scenario_source_tree if scenario_source_tree else None,
+    )
+    vs3_p_gate_self_transcript_validation = _vs3_human_gate_self_transcript_validation(
+        vs3_p_gate_payload.get("self_command_transcript"),
+        payload=vs3_p_gate_payload,
+        expected_name="human_gate_vs3_p_gate",
+        expected_command=[
+            "cornerstone",
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "<redacted-path>",
+            "--json",
+        ],
+        expected_exit_code=EXIT_EVIDENCE_MISSING,
+        expected_json_schema="cs.vs3_p_human_gate.v0",
+        expected_source_tree=scenario_source_tree if scenario_source_tree else None,
+    )
+    overclaim_violations = {
+        key: value
+        for key, value in {
+            "vs3_p": claim_boundaries.get("vs3_p"),
+            "production": claim_boundaries.get("production"),
+            "production_onprem": claim_boundaries.get("production_onprem"),
+            "live_provider": claim_boundaries.get("live_provider"),
+            "real_idp": claim_boundaries.get("real_idp"),
+            "real_network": claim_boundaries.get("real_network"),
+            "migration_restore": claim_boundaries.get("migration_restore"),
+            "security_acceptance": claim_boundaries.get("security_acceptance"),
+            "human_acceptance": claim_boundaries.get("human_acceptance"),
+        }.items()
+        if value != "NOT_CLAIMED"
+    }
+    scenario_claim_boundary_overclaim_violations = {
+        key: value
+        for key, value in {
+            "vs3_p": scenario_claim_boundary.get("vs3_p"),
+            "production": scenario_claim_boundary.get("production"),
+            "production_onprem": scenario_claim_boundary.get("production_onprem"),
+            "live_provider": scenario_claim_boundary.get("live_provider"),
+            "real_idp": scenario_claim_boundary.get("real_idp"),
+            "real_network": scenario_claim_boundary.get("real_network"),
+            "migration_restore": scenario_claim_boundary.get("migration_restore"),
+            "security_acceptance": scenario_claim_boundary.get("security_acceptance"),
+            "human_acceptance": scenario_claim_boundary.get("human_acceptance"),
+        }.items()
+        if value != "NOT_CLAIMED"
+    }
+    component_proof_identity = _vs3_local_checkpoint_component_proof_identity(root, scenario_report)
+    component_proof_mismatches = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("matches_embedded_current_file")
+    ]
+    component_proof_semantic_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("semantics_success")
+    ]
+    component_proof_scenario_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("scenario_status_success")
+    ]
+    component_proof_scenario_coverage_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("scenario_status_coverage_success")
+    ]
+    component_proof_check_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("checks_success")
+    ]
+    component_proof_check_coverage_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("checks_coverage_success")
+    ]
+    component_proof_negative_evidence_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("negative_evidence_success")
+    ]
+    component_proof_secret_scan_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("report_secret_scan_success")
+    ]
+    component_proof_evidence_ref_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("evidence_refs_success")
+    ]
+    component_proof_audit_ref_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("audit_refs_success")
+    ]
+    component_proof_policy_decision_ref_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("policy_decision_refs_success")
+    ]
+    component_proof_reference_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("references_success")
+    ]
+    component_proof_source_tree_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("source_tree_identity_success")
+        or not proof.get("source_tree_key_success")
+    ]
+    component_proof_source_tree_current_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("source_tree_current_success")
+    ]
+    component_proof_boundary_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("proof_boundary_success")
+    ]
+    component_proof_traceability_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("traceability_success")
+    ]
+    component_proof_cli_command_evidence_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("cli_command_evidence_success")
+    ]
+    component_proof_cli_command_evidence_shape_failures = [
+        proof
+        for proof in component_proof_identity
+        if not proof.get("cli_command_evidence_shape_success")
+    ]
+    overclaim_lint_source_identity = _vs3_local_checkpoint_overclaim_lint_source_identity(root)
+    human_gate_package_semantics = _vs3_local_checkpoint_human_gate_package_semantics(
+        root,
+        package_dir=DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+        human_gate_ids=human_gate_ids,
+    )
+    checkpoint_conditions = {
+        "scenario_report_schema": scenario_report.get("schema_version") == "cs.vs3_onprem_trusted_extension.v0",
+        "scenario_report_status_success": scenario_report.get("status") == "success",
+        "scenario_report_traceability_valid": scenario_report_traceability["status"] == "passed",
+        "scenario_report_source_tree_current": not scenario_source_tree_current_mismatches,
+        "scenario_count_57": summary.get("scenario_count") == 57,
+        "pass_count_50": summary.get("pass") == 50,
+        "human_required_count_7": summary.get("human_required") == 7,
+        "blocking_count_0": summary.get("blocking") == 0,
+        "scenario_report_product_feature_claims_local_only": (
+            summary.get("product_feature_claims") == expected_product_feature_claims
+        ),
+        "all_ai_rows_pass": len(ai_blocking_rows) == 0,
+        "human_rows_are_vs3_h01_to_h07": sorted(human_ids) == human_gate_ids,
+        "human_rows_remain_human_required": len(human_rows_not_human_required) == 0,
+        "required_artifacts_present": len(missing_required_artifacts) == 0,
+        "scenario_report_claim_boundary_present": bool(scenario_claim_boundary),
+        "scenario_report_claim_boundaries_present": bool(claim_boundaries),
+        "scenario_report_claim_boundary_matches_claim_boundaries": (
+            scenario_claim_boundary == claim_boundaries
+        ),
+        "scenario_report_claim_boundary_vs3_l_local_only": (
+            scenario_claim_boundary.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+        ),
+        "scenario_report_claim_boundary_no_production_or_human_overclaims": (
+            len(scenario_claim_boundary_overclaim_violations) == 0
+        ),
+        "vs3_l_claim_is_local_only": claim_boundaries.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED",
+        "vs3_p_not_claimed": claim_boundaries.get("vs3_p") == "NOT_CLAIMED",
+        "no_production_or_human_overclaims": len(overclaim_violations) == 0,
+        "human_gate_package_body_expected_7_packages": human_gate_package_semantics.get("package_count") == 7,
+        "human_gate_package_body_expected_ids_match": sorted(
+            human_gate_package_semantics.get("actual_human_scenario_ids", [])
+        ) == human_gate_ids,
+        "human_gate_package_body_semantics_safe": human_gate_package_semantics.get("packages_ready") is True,
+        "human_gate_package_body_no_pass_or_unlock_claims": (
+            len(human_gate_package_semantics.get("marked_pass_package_ids", [])) == 0
+            and len(human_gate_package_semantics.get("unlock_or_acceptance_claim_ids", [])) == 0
+            and len(human_gate_package_semantics.get("claim_boundary_violation_ids", [])) == 0
+        ),
+        "human_gate_package_body_digests_match": (
+            len(human_gate_package_semantics.get("digest_mismatch_ids", [])) == 0
+        ),
+        "human_gate_package_body_blank_approval_records": (
+            len(human_gate_package_semantics.get("filled_blank_approval_record_ids", [])) == 0
+        ),
+        "human_gate_record_scaffold_schema": scaffold_report.get("vs3_human_gate_record_scaffold_schema_version") == "cs.vs3_human_gate_record_scaffold.v0",
+        "human_gate_record_scaffold_status_success": scaffold_report.get("status") == "success",
+        "human_gate_record_scaffold_final_verdict_human_required": scaffold_report.get("final_verdict") == "HUMAN_REQUIRED",
+        "human_gate_record_scaffold_no_vs3_p_unlock": scaffold_boundary.get("vs3_p_unlock_allowed") is False,
+        "human_gate_record_scaffold_no_human_acceptance": scaffold_boundary.get("human_acceptance_claim_allowed") is False,
+        "human_gate_record_scaffold_no_security_acceptance": (
+            scaffold_boundary.get("security_acceptance_claim_allowed") is False
+        ),
+        "human_gate_record_scaffold_no_filled_bodies": scaffold_negative.get("filled_record_bodies_persisted_by_scaffold") == 0,
+        "human_gate_evidence_status_schema": evidence_status_report.get("vs3_human_gate_evidence_status_schema_version") == "cs.vs3_human_gate_evidence_status.v0",
+        "human_gate_evidence_status_success": evidence_status_report.get("status") == "success",
+        "human_gate_evidence_status_scenario_report_hash_matches": (
+            status_scenario_report.get("sha256") == scenario_report_sha256
+        ),
+        "human_gate_evidence_status_scenario_report_path_hash_matches": (
+            status_scenario_report.get("path_sha256") == scenario_report_path_sha256
+        ),
+        "human_gate_evidence_status_final_verdict_human_required": evidence_status_report.get("final_verdict") == "HUMAN_REQUIRED",
+        "human_gate_evidence_status_expected_7_records": status_summary.get("expected_record_count") == 7,
+        "human_gate_evidence_status_record_ids_match": sorted(status_record_ids) == human_gate_ids
+        and len(status_record_ids) == 7,
+        "human_gate_evidence_status_no_missing_record_ids": len(missing_status_record_ids) == 0,
+        "human_gate_evidence_status_no_unexpected_record_ids": len(unexpected_status_record_ids) == 0,
+        "human_gate_evidence_status_no_duplicate_record_ids": len(duplicate_status_record_ids) == 0,
+        "human_gate_evidence_status_no_missing_summary_records": status_summary.get("missing_record_count") == 0,
+        "human_gate_evidence_status_no_duplicate_summary_records": status_summary.get("duplicate_record_scenario_count") == 0,
+        "human_gate_evidence_status_no_malformed_or_unsupported_records": (
+            status_summary.get("malformed_record_count") == 0
+            and status_summary.get("unsupported_record_count") == 0
+        ),
+        "human_gate_evidence_status_template_intake_summary_present": bool(status_template_intake),
+        "human_gate_evidence_status_template_readiness_awaiting_completion": (
+            status_template_intake.get("template_readiness_status") == "awaiting_human_completion"
+        ),
+        "human_gate_evidence_status_blank_template_pending_count": (
+            status_summary.get("blank_template_pending_count") == 7
+            and status_negative.get("blank_template_pending_count") == 7
+            and status_template_intake.get("blank_template_pending_count") == 7
+        ),
+        "human_gate_evidence_status_no_filled_records": (
+            status_summary.get("filled_record_count") == 0
+            and status_negative.get("filled_record_count") == 0
+            and status_template_intake.get("filled_record_count") == 0
+        ),
+        "human_gate_evidence_status_no_invalid_filled_records": (
+            status_summary.get("invalid_filled_record_count") == 0
+            and status_negative.get("invalid_filled_record_count") == 0
+            and status_template_intake.get("invalid_filled_record_count") == 0
+        ),
+        "human_gate_evidence_status_no_evidence_acceptance_candidates": (
+            status_summary.get("evidence_acceptance_candidate_count") == 0
+            and status_negative.get("evidence_acceptance_candidate_count") == 0
+            and status_template_intake.get("evidence_acceptance_candidate_count") == 0
+        ),
+        "human_gate_evidence_status_template_acceptance_boundary_explicit": (
+            "does not approve evidence" in status_template_acceptance_boundary
+            and "unlock dependencies" in status_template_acceptance_boundary
+            and "HUMAN_REQUIRED" in status_template_acceptance_boundary
+        ),
+        "human_gate_evidence_status_no_vs3_p_unlock": status_boundary.get("vs3_p_unlock_allowed") is False,
+        "human_gate_evidence_status_no_structural_acceptance": status_boundary.get("structural_validation_is_not_acceptance") is True,
+        "human_gate_evidence_status_no_security_acceptance": (
+            status_boundary.get("security_acceptance_claim_allowed") is False
+        ),
+        "human_gate_evidence_status_no_record_bodies": status_negative.get("record_bodies_persisted_by_evidence_status") == 0,
+        "human_gate_evidence_status_no_record_paths": status_negative.get("record_paths_persisted_by_evidence_status") == 0,
+        "human_gate_evidence_status_redacted_values": status_negative.get("raw_record_values_in_output") == 0,
+        "human_gate_evidence_status_rows_remain_human_required": all(
+            isinstance(row, dict)
+            and row.get("matrix_status_after_status") == "HUMAN_REQUIRED"
+            and row.get("dependency_unlock_allowed_by_structural_validation") is False
+            for row in status_record_rows
+        )
+        and len(status_record_rows) == 7,
+        "human_gate_evidence_status_dependency_order_guard": (
+            status_summary.get("dependency_blocked_count") == 6
+            and status_summary.get("dependency_blocked_structurally_valid_count") == 0
+            and status_summary.get("dependency_prerequisites_structurally_valid_count") == 0
+            and status_template_intake.get("dependency_blocked_structurally_valid_count") == 0
+            and status_template_intake.get("dependency_prerequisites_structurally_valid_count") == 0
+            and status_negative.get("dependency_unlock_allowed_by_structural_validation") == 0
+            and all(
+                isinstance(row, dict)
+                and (
+                    (
+                        not row.get("depends_on_human_gates")
+                        and row.get("dependency_status") == "no_prior_human_gate_dependency"
+                        and row.get("dependency_promotion_required") is False
+                    )
+                    or (
+                        bool(row.get("depends_on_human_gates"))
+                        and row.get("dependency_status") == "blocked_pending_human_promotion"
+                        and row.get("dependency_promotion_required") is True
+                    )
+                )
+                and row.get("dependency_unlock_allowed_by_structural_validation") is False
+                and isinstance(row.get("dependency_prerequisite_statuses"), list)
+                for row in status_record_rows
+            )
+        ),
+        "human_gate_evidence_status_self_command_transcript_valid": (
+            evidence_status_self_transcript_validation["status"] == "passed"
+            and evidence_status_report.get("self_command_transcript_validation", {}).get("status") == "passed"
+        ),
+        "human_gate_review_kit_schema": review_kit_payload.get("vs3_human_gate_review_kit_schema_version") == "cs.vs3_human_gate_review_kit.v0",
+        "human_gate_review_kit_status_success": review_kit_payload.get("status") == "success",
+        "human_gate_review_kit_ready_for_human_review": review_kit_body.get("status") == "ready_for_human_review",
+        "human_gate_review_kit_final_verdict_human_required": review_kit_payload.get("final_verdict") == "HUMAN_REQUIRED",
+        "human_gate_review_kit_expected_7_queue_rows": review_kit_summary.get("review_queue_count") == 7
+        and len(review_kit_queue) == 7,
+        "human_gate_review_kit_expected_7_templates": review_kit_summary.get("template_count") == 7
+        and len(review_kit_templates) == 7,
+        "human_gate_review_kit_expected_7_packages": review_kit_summary.get("package_count") == 7,
+        "human_gate_review_kit_expected_human_ids_match": review_kit_expected_human_ids == human_gate_ids,
+        "human_gate_review_kit_actual_human_ids_match": review_kit_actual_human_ids == human_gate_ids,
+        "human_gate_review_kit_scenario_report_hash_matches": (
+            review_kit_scenario_report.get("sha256") == scenario_report_sha256
+        ),
+        "human_gate_review_kit_scenario_report_path_hash_matches": (
+            review_kit_scenario_report.get("path_sha256") == scenario_report_path_sha256
+        ),
+        "human_gate_review_kit_condition_seven_human_rows_present": (
+            review_kit_conditions_payload.get("seven_human_rows_present_in_scenario_report") is True
+        ),
+        "human_gate_review_kit_condition_h_rows_human_required": (
+            review_kit_conditions_payload.get("h_rows_remain_human_required") is True
+        ),
+        "human_gate_review_kit_no_missing_human_rows": (
+            review_kit_negative.get("missing_human_rows_in_scenario_report") == 0
+        ),
+        "human_gate_review_kit_no_unexpected_human_rows": (
+            review_kit_negative.get("unexpected_human_rows_in_scenario_report") == 0
+        ),
+        "human_gate_review_kit_no_vs3_p_unlock": review_kit_boundary.get("vs3_p_unlock_allowed") is False
+        and review_kit_negative.get("vs3_p_unlocked_by_review_kit") == 0,
+        "human_gate_review_kit_no_human_acceptance": review_kit_boundary.get("human_acceptance_claim_allowed") is False
+        and review_kit_negative.get("human_acceptance_claimed_by_review_kit") == 0,
+        "human_gate_review_kit_no_security_acceptance": (
+            review_kit_boundary.get("security_acceptance_claim_allowed") is False
+            and review_kit_negative.get("security_acceptance_claimed_by_review_kit") == 0
+        ),
+        "human_gate_review_kit_no_production_claim": review_kit_boundary.get("production_readiness_claim_allowed") is False
+        and review_kit_negative.get("production_readiness_claimed_by_review_kit") == 0,
+        "human_gate_review_kit_no_record_bodies_or_paths": review_kit_negative.get("record_bodies_persisted_by_review_kit") == 0
+        and review_kit_negative.get("record_paths_persisted_by_review_kit") == 0,
+        "human_gate_review_kit_rows_remain_human_required": review_kit_boundary.get("h_rows_remain_human_required") is True
+        and review_kit_negative.get("human_rows_marked_pass_by_review_kit") == 0
+        and review_kit_negative.get("human_rows_not_human_required") == 0,
+        "human_gate_review_kit_self_command_transcript_valid": (
+            review_kit_self_transcript_validation["status"] == "passed"
+            and review_kit_payload.get("self_command_transcript_validation", {}).get("status") == "passed"
+        ),
+        "vs3_p_gate_schema": vs3_p_gate_payload.get("vs3_p_gate_schema_version") == "cs.vs3_p_human_gate.v0",
+        "vs3_p_gate_payload_blocked": vs3_p_gate_payload.get("status") == "blocked",
+        "vs3_p_gate_body_blocks_on_human_evidence": vs3_p_gate_body.get("status") == "blocked_on_human_required_evidence",
+        "vs3_p_gate_final_verdict_human_required": vs3_p_gate_payload.get("final_verdict") == "HUMAN_REQUIRED",
+        "vs3_p_gate_summary_status_blocks_on_human_evidence": (
+            vs3_p_gate_summary.get("status") == "blocked_on_human_required_evidence"
+        ),
+        "vs3_p_gate_summary_final_verdict_human_required": (
+            vs3_p_gate_summary.get("final_verdict") == "HUMAN_REQUIRED"
+        ),
+        "vs3_p_gate_summary_vs3_p_not_ready": vs3_p_gate_summary.get("vs3_p_ready") is False,
+        "vs3_p_gate_summary_vs3_p_not_claimed": vs3_p_gate_summary.get("vs3_p_claim") == "NOT_CLAIMED",
+        "vs3_p_gate_summary_product_claim_not_allowed": (
+            vs3_p_gate_summary.get("product_claim_allowed") is False
+        ),
+        "vs3_p_gate_summary_production_readiness_not_allowed": (
+            vs3_p_gate_summary.get("production_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_summary_security_acceptance_not_allowed": (
+            vs3_p_gate_summary.get("security_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_summary_human_acceptance_not_allowed": (
+            vs3_p_gate_summary.get("human_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_no_vs3_p_unlock": vs3_p_gate_boundary.get("vs3_p_unlock_allowed") is False
+        and vs3_p_gate_negative.get("vs3_p_unlocked_by_gate") == 0,
+        "vs3_p_gate_boundary_local_claim_only": (
+            vs3_p_gate_boundary.get("vs3_l_local_dev_claim_may_exist") is True
+        ),
+        "vs3_p_gate_boundary_production_readiness_not_allowed": (
+            vs3_p_gate_boundary.get("production_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_live_provider_readiness_not_allowed": (
+            vs3_p_gate_boundary.get("live_provider_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_real_idp_readiness_not_allowed": (
+            vs3_p_gate_boundary.get("real_idp_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_real_network_readiness_not_allowed": (
+            vs3_p_gate_boundary.get("real_network_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_migration_restore_readiness_not_allowed": (
+            vs3_p_gate_boundary.get("migration_restore_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_security_acceptance_not_allowed": (
+            vs3_p_gate_boundary.get("security_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_human_acceptance_not_allowed": (
+            vs3_p_gate_boundary.get("human_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_boundary_structural_validation_not_acceptance": (
+            vs3_p_gate_boundary.get("structural_validation_is_not_acceptance") is True
+        ),
+        "vs3_p_gate_body_boundary_no_vs3_p_unlock": vs3_p_gate_body_boundary.get("vs3_p_unlock_allowed") is False,
+        "vs3_p_gate_body_boundary_local_claim_only": (
+            vs3_p_gate_body_boundary.get("vs3_l_local_dev_claim_may_exist") is True
+        ),
+        "vs3_p_gate_body_boundary_production_readiness_not_allowed": (
+            vs3_p_gate_body_boundary.get("production_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_live_provider_readiness_not_allowed": (
+            vs3_p_gate_body_boundary.get("live_provider_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_real_idp_readiness_not_allowed": (
+            vs3_p_gate_body_boundary.get("real_idp_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_real_network_readiness_not_allowed": (
+            vs3_p_gate_body_boundary.get("real_network_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_migration_restore_readiness_not_allowed": (
+            vs3_p_gate_body_boundary.get("migration_restore_readiness_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_security_acceptance_not_allowed": (
+            vs3_p_gate_body_boundary.get("security_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_human_acceptance_not_allowed": (
+            vs3_p_gate_body_boundary.get("human_acceptance_claim_allowed") is False
+        ),
+        "vs3_p_gate_body_boundary_structural_validation_not_acceptance": (
+            vs3_p_gate_body_boundary.get("structural_validation_is_not_acceptance") is True
+        ),
+        "vs3_p_gate_expected_7_unresolved_human_rows": vs3_p_gate_summary.get("unresolved_human_required_rows") == 7,
+        "vs3_p_gate_no_human_pass_claims": vs3_p_gate_summary.get("human_required_rows_marked_pass") == 0
+        and vs3_p_gate_negative.get("human_required_rows_marked_pass_in_scenario_report") == 0,
+        "vs3_p_gate_no_production_or_acceptance_claims": vs3_p_gate_negative.get("production_readiness_claimed_by_gate") == 0
+        and vs3_p_gate_negative.get("security_acceptance_claimed_by_gate") == 0
+        and vs3_p_gate_negative.get("human_acceptance_claimed_by_gate") == 0,
+        "vs3_p_gate_error_code_human_evidence_required": any(
+            isinstance(error, dict) and error.get("code") == "CS_VS3_P_GATE_HUMAN_EVIDENCE_REQUIRED"
+            for error in vs3_p_gate_errors
+        ),
+        "vs3_p_gate_scenario_report_hash_matches": (
+            vs3_p_gate_scenario_report.get("sha256") == scenario_report_sha256
+        ),
+        "vs3_p_gate_scenario_report_path_hash_matches": (
+            vs3_p_gate_scenario_report.get("path_sha256") == scenario_report_path_sha256
+        ),
+        "vs3_p_gate_self_command_transcript_valid": (
+            vs3_p_gate_self_transcript_validation["status"] == "passed"
+            and vs3_p_gate_payload.get("self_command_transcript_validation", {}).get("status") == "passed"
+        ),
+    }
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_matches_current_file": proof[
+                "matches_embedded_current_file"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_semantics_success": proof[
+                "semantics_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_scenario_status_pass": proof[
+                "scenario_status_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_scenario_status_coverage": proof[
+                "scenario_status_coverage_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_checks_pass": proof[
+                "checks_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_checks_coverage": proof[
+                "checks_coverage_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_negative_evidence_zero": proof[
+                "negative_evidence_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_report_secret_scan_clean": proof[
+                "report_secret_scan_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_evidence_refs_present": proof[
+                "evidence_refs_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_audit_refs_present": proof[
+                "audit_refs_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_policy_decision_refs_present": proof[
+                "policy_decision_refs_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_source_tree_identity": proof[
+                "source_tree_identity_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_source_tree_keys_safe": proof[
+                "source_tree_key_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_source_tree_current": proof[
+                "source_tree_current_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_proof_boundary_safe": proof[
+                "proof_boundary_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_traceability_success": proof[
+                "traceability_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_cli_command_evidence_present": proof[
+                "cli_command_evidence_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions.update(
+        {
+            f"component_proof_{proof['scenario_report_key']}_cli_command_evidence_shape_valid": proof[
+                "cli_command_evidence_shape_success"
+            ]
+            for proof in component_proof_identity
+        }
+    )
+    checkpoint_conditions["overclaim_lint_source_reconciliation_matches_current_file"] = overclaim_lint_source_identity[
+        "matches_current_source_file"
+    ]
+    checkpoint_conditions["overclaim_lint_report_passed_without_overclaims"] = overclaim_lint_source_identity[
+        "report_semantics_passed"
+    ]
+    vs3_p_gate_summary_condition_names = [
+        "vs3_p_gate_summary_status_blocks_on_human_evidence",
+        "vs3_p_gate_summary_final_verdict_human_required",
+        "vs3_p_gate_summary_vs3_p_not_ready",
+        "vs3_p_gate_summary_vs3_p_not_claimed",
+        "vs3_p_gate_summary_product_claim_not_allowed",
+        "vs3_p_gate_summary_production_readiness_not_allowed",
+        "vs3_p_gate_summary_security_acceptance_not_allowed",
+        "vs3_p_gate_summary_human_acceptance_not_allowed",
+    ]
+    vs3_p_gate_claim_boundary_condition_names = [
+        "vs3_p_gate_no_vs3_p_unlock",
+        "vs3_p_gate_boundary_local_claim_only",
+        "vs3_p_gate_boundary_production_readiness_not_allowed",
+        "vs3_p_gate_boundary_live_provider_readiness_not_allowed",
+        "vs3_p_gate_boundary_real_idp_readiness_not_allowed",
+        "vs3_p_gate_boundary_real_network_readiness_not_allowed",
+        "vs3_p_gate_boundary_migration_restore_readiness_not_allowed",
+        "vs3_p_gate_boundary_security_acceptance_not_allowed",
+        "vs3_p_gate_boundary_human_acceptance_not_allowed",
+        "vs3_p_gate_boundary_structural_validation_not_acceptance",
+    ]
+    vs3_p_gate_body_claim_boundary_condition_names = [
+        "vs3_p_gate_body_boundary_no_vs3_p_unlock",
+        "vs3_p_gate_body_boundary_local_claim_only",
+        "vs3_p_gate_body_boundary_production_readiness_not_allowed",
+        "vs3_p_gate_body_boundary_live_provider_readiness_not_allowed",
+        "vs3_p_gate_body_boundary_real_idp_readiness_not_allowed",
+        "vs3_p_gate_body_boundary_real_network_readiness_not_allowed",
+        "vs3_p_gate_body_boundary_migration_restore_readiness_not_allowed",
+        "vs3_p_gate_body_boundary_security_acceptance_not_allowed",
+        "vs3_p_gate_body_boundary_human_acceptance_not_allowed",
+        "vs3_p_gate_body_boundary_structural_validation_not_acceptance",
+    ]
+    checkpoint_passed = all(checkpoint_conditions.values())
+    negative_evidence = {
+        "missing_required_artifacts": len(missing_required_artifacts),
+        "ai_blocking_rows": len(ai_blocking_rows),
+        "human_required_rows_marked_pass": len(human_rows_marked_pass),
+        "human_required_rows_not_human_required": len(human_rows_not_human_required),
+        "unexpected_human_row_count": 0 if len(human_rows) == 7 else abs(len(human_rows) - 7),
+        "scenario_summary_mismatches": len([name for name, ok in checkpoint_conditions.items() if name.endswith(("_57", "_50", "_7", "_0")) and not ok]),
+        "scenario_product_feature_claim_overclaims": 0
+        if checkpoint_conditions["scenario_report_product_feature_claims_local_only"]
+        else 1,
+        "scenario_report_traceability_failures": 0
+        if checkpoint_conditions["scenario_report_traceability_valid"]
+        else 1,
+        "scenario_report_traceability_missing_fields": len(
+            scenario_report_traceability["missing_fields"]
+        ),
+        "scenario_report_traceability_invalid_fields": len(
+            scenario_report_traceability["invalid_fields"]
+        ),
+        "scenario_report_traceability_row_missing_fields": len(
+            scenario_report_traceability["row_missing_fields"]
+        ),
+        "scenario_report_traceability_row_invalid_fields": len(
+            scenario_report_traceability["row_invalid_fields"]
+        ),
+        "scenario_report_source_tree_current_failures": 0
+        if checkpoint_conditions["scenario_report_source_tree_current"]
+        else 1,
+        "scenario_report_missing_claim_boundary": 0
+        if checkpoint_conditions["scenario_report_claim_boundary_present"]
+        else 1,
+        "scenario_report_missing_claim_boundaries": 0
+        if checkpoint_conditions["scenario_report_claim_boundaries_present"]
+        else 1,
+        "scenario_report_claim_boundary_mismatches": 0
+        if checkpoint_conditions["scenario_report_claim_boundary_matches_claim_boundaries"]
+        else 1,
+        "scenario_report_claim_boundary_overclaim_fields": len(
+            scenario_claim_boundary_overclaim_violations
+        ),
+        "overclaim_boundary_violations": len(overclaim_violations),
+        "human_gate_package_semantic_violations": int(
+            human_gate_package_semantics.get("semantic_error_count") or 0
+        ),
+        "human_gate_package_missing_or_invalid": len(human_gate_package_semantics.get("missing_package_ids", []))
+        + len(human_gate_package_semantics.get("invalid_json_package_ids", [])),
+        "human_gate_package_status_overclaims": len(human_gate_package_semantics.get("marked_pass_package_ids", [])),
+        "human_gate_package_claim_boundary_violations": len(
+            human_gate_package_semantics.get("claim_boundary_violation_ids", [])
+        ),
+        "human_gate_package_unlock_or_acceptance_claims": len(
+            human_gate_package_semantics.get("unlock_or_acceptance_claim_ids", [])
+        ),
+        "human_gate_package_blank_approval_records_filled": len(
+            human_gate_package_semantics.get("filled_blank_approval_record_ids", [])
+        ),
+        "human_gate_package_review_contract_unsafe": len(
+            human_gate_package_semantics.get("unsafe_review_record_contract_ids", [])
+        ),
+        "human_gate_package_validation_command_mismatches": len(
+            human_gate_package_semantics.get("validation_command_mismatch_ids", [])
+        ),
+        "human_gate_package_digest_mismatches": len(
+            human_gate_package_semantics.get("digest_mismatch_ids", [])
+        ),
+        "vs3_p_claimed_by_checkpoint": 0,
+        "production_readiness_claimed_by_checkpoint": 0,
+        "live_provider_readiness_claimed_by_checkpoint": 0,
+        "real_idp_readiness_claimed_by_checkpoint": 0,
+        "real_network_readiness_claimed_by_checkpoint": 0,
+        "migration_restore_readiness_claimed_by_checkpoint": 0,
+        "security_acceptance_claimed_by_checkpoint": 0,
+        "human_acceptance_claimed_by_checkpoint": 0,
+        "structural_validation_treated_as_acceptance": 0,
+        "human_gate_scaffold_missing_or_invalid": 0 if checkpoint_conditions["human_gate_record_scaffold_schema"] and checkpoint_conditions["human_gate_record_scaffold_status_success"] else 1,
+        "human_gate_evidence_status_missing_or_invalid": 0 if checkpoint_conditions["human_gate_evidence_status_schema"] and checkpoint_conditions["human_gate_evidence_status_success"] else 1,
+        "human_gate_evidence_status_unlocked_vs3_p": 0 if checkpoint_conditions["human_gate_evidence_status_no_vs3_p_unlock"] else 1,
+        "human_gate_evidence_status_record_bodies_persisted": int(status_negative.get("record_bodies_persisted_by_evidence_status") or 0),
+        "human_gate_evidence_status_record_paths_persisted": int(status_negative.get("record_paths_persisted_by_evidence_status") or 0),
+        "human_gate_evidence_status_missing_expected_record_ids": len(missing_status_record_ids),
+        "human_gate_evidence_status_unexpected_record_ids": len(unexpected_status_record_ids),
+        "human_gate_evidence_status_duplicate_record_ids": len(duplicate_status_record_ids),
+        "human_gate_evidence_status_record_id_mismatches": 0
+        if sorted(status_record_ids) == human_gate_ids and len(status_record_ids) == 7
+        else 1,
+        "human_gate_evidence_status_missing_summary_records": int(status_summary.get("missing_record_count") or 0),
+        "human_gate_evidence_status_duplicate_summary_records": int(status_summary.get("duplicate_record_scenario_count") or 0),
+        "human_gate_evidence_status_malformed_records": int(status_summary.get("malformed_record_count") or 0),
+        "human_gate_evidence_status_unsupported_records": int(status_summary.get("unsupported_record_count") or 0),
+        "human_gate_evidence_status_template_intake_missing_or_invalid": 0
+        if checkpoint_conditions["human_gate_evidence_status_template_intake_summary_present"]
+        else 1,
+        "human_gate_evidence_status_template_intake_count_mismatches": len(
+            [
+                condition_name
+                for condition_name in [
+                    "human_gate_evidence_status_template_readiness_awaiting_completion",
+                    "human_gate_evidence_status_blank_template_pending_count",
+                    "human_gate_evidence_status_no_filled_records",
+                    "human_gate_evidence_status_no_invalid_filled_records",
+                    "human_gate_evidence_status_no_evidence_acceptance_candidates",
+                    "human_gate_evidence_status_dependency_order_guard",
+                ]
+                if not checkpoint_conditions[condition_name]
+            ]
+        ),
+        "human_gate_evidence_status_template_acceptance_boundary_mismatches": 0
+        if checkpoint_conditions["human_gate_evidence_status_template_acceptance_boundary_explicit"]
+        else 1,
+        "human_gate_evidence_status_scenario_report_hash_mismatches": 0
+        if checkpoint_conditions["human_gate_evidence_status_scenario_report_hash_matches"]
+        else 1,
+        "human_gate_evidence_status_scenario_report_path_hash_mismatches": 0
+        if checkpoint_conditions["human_gate_evidence_status_scenario_report_path_hash_matches"]
+        else 1,
+        "human_gate_evidence_status_self_command_transcript_failures": 0
+        if checkpoint_conditions["human_gate_evidence_status_self_command_transcript_valid"]
+        else 1,
+        "human_gate_evidence_status_dependency_order_guard_failures": 0
+        if checkpoint_conditions["human_gate_evidence_status_dependency_order_guard"]
+        else 1,
+        "human_gate_review_kit_missing_or_invalid": 0 if checkpoint_conditions["human_gate_review_kit_schema"] and checkpoint_conditions["human_gate_review_kit_status_success"] else 1,
+        "human_gate_review_kit_not_ready": 0 if checkpoint_conditions["human_gate_review_kit_ready_for_human_review"] else 1,
+        "human_gate_review_kit_unlocked_vs3_p": int(review_kit_negative.get("vs3_p_unlocked_by_review_kit") or 0),
+        "human_gate_review_kit_human_pass_claims": int(review_kit_negative.get("human_rows_marked_pass_by_review_kit") or 0)
+        + int(review_kit_negative.get("human_rows_marked_pass_in_scenario_report") or 0),
+        "human_gate_review_kit_production_claims": int(review_kit_negative.get("production_readiness_claimed_by_review_kit") or 0),
+        "human_gate_review_kit_human_acceptance_claims": int(review_kit_negative.get("human_acceptance_claimed_by_review_kit") or 0),
+        "human_gate_review_kit_security_acceptance_claims": int(
+            review_kit_negative.get("security_acceptance_claimed_by_review_kit") or 0
+        ),
+        "human_gate_review_kit_record_bodies_persisted": int(review_kit_negative.get("record_bodies_persisted_by_review_kit") or 0),
+        "human_gate_review_kit_record_paths_persisted": int(review_kit_negative.get("record_paths_persisted_by_review_kit") or 0),
+        "human_gate_review_kit_missing_human_rows_in_scenario_report": int(
+            review_kit_negative.get("missing_human_rows_in_scenario_report") or 0
+        ),
+        "human_gate_review_kit_unexpected_human_rows_in_scenario_report": int(
+            review_kit_negative.get("unexpected_human_rows_in_scenario_report") or 0
+        ),
+        "human_gate_review_kit_expected_human_id_mismatches": 0
+        if review_kit_expected_human_ids == human_gate_ids
+        else 1,
+        "human_gate_review_kit_actual_human_id_mismatches": 0
+        if review_kit_actual_human_ids == human_gate_ids
+        else 1,
+        "human_gate_review_kit_scenario_report_hash_mismatches": 0
+        if checkpoint_conditions["human_gate_review_kit_scenario_report_hash_matches"]
+        else 1,
+        "human_gate_review_kit_scenario_report_path_hash_mismatches": 0
+        if checkpoint_conditions["human_gate_review_kit_scenario_report_path_hash_matches"]
+        else 1,
+        "human_gate_review_kit_self_command_transcript_failures": 0
+        if checkpoint_conditions["human_gate_review_kit_self_command_transcript_valid"]
+        else 1,
+        "vs3_p_gate_missing_or_invalid": 0 if checkpoint_conditions["vs3_p_gate_schema"] and checkpoint_conditions["vs3_p_gate_payload_blocked"] else 1,
+        "vs3_p_gate_unlocked_vs3_p": int(vs3_p_gate_negative.get("vs3_p_unlocked_by_gate") or 0),
+        "vs3_p_gate_human_pass_claims": int(vs3_p_gate_negative.get("human_required_rows_marked_pass_in_scenario_report") or 0),
+        "vs3_p_gate_production_claims": int(vs3_p_gate_negative.get("production_readiness_claimed_by_gate") or 0),
+        "vs3_p_gate_security_acceptance_claims": int(
+            vs3_p_gate_negative.get("security_acceptance_claimed_by_gate") or 0
+        ),
+        "vs3_p_gate_summary_claim_mismatches": len(
+            [
+                condition_name
+                for condition_name in vs3_p_gate_summary_condition_names
+                if not checkpoint_conditions[condition_name]
+            ]
+        ),
+        "vs3_p_gate_claim_boundary_mismatches": len(
+            [
+                condition_name
+                for condition_name in vs3_p_gate_claim_boundary_condition_names
+                if not checkpoint_conditions[condition_name]
+            ]
+        ),
+        "vs3_p_gate_body_claim_boundary_mismatches": len(
+            [
+                condition_name
+                for condition_name in vs3_p_gate_body_claim_boundary_condition_names
+                if not checkpoint_conditions[condition_name]
+            ]
+        ),
+        "vs3_p_gate_scenario_report_hash_mismatches": 0
+        if checkpoint_conditions["vs3_p_gate_scenario_report_hash_matches"]
+        else 1,
+        "vs3_p_gate_scenario_report_path_hash_mismatches": 0
+        if checkpoint_conditions["vs3_p_gate_scenario_report_path_hash_matches"]
+        else 1,
+        "vs3_p_gate_self_command_transcript_failures": 0
+        if checkpoint_conditions["vs3_p_gate_self_command_transcript_valid"]
+        else 1,
+        "component_proof_report_mismatches": len(component_proof_mismatches),
+        "component_proof_report_semantic_failures": len(component_proof_semantic_failures),
+        "component_proof_report_scenario_failures": len(component_proof_scenario_failures),
+        "component_proof_report_scenario_coverage_failures": len(component_proof_scenario_coverage_failures),
+        "component_proof_report_check_failures": len(component_proof_check_failures),
+        "component_proof_report_check_coverage_failures": len(component_proof_check_coverage_failures),
+        "component_proof_report_negative_evidence_failures": len(component_proof_negative_evidence_failures),
+        "component_proof_report_secret_scan_failures": len(component_proof_secret_scan_failures),
+        "component_proof_report_evidence_ref_failures": len(component_proof_evidence_ref_failures),
+        "component_proof_report_audit_ref_failures": len(component_proof_audit_ref_failures),
+        "component_proof_report_policy_decision_ref_failures": len(
+            component_proof_policy_decision_ref_failures
+        ),
+        "component_proof_report_reference_failures": len(component_proof_reference_failures),
+        "component_proof_report_source_tree_failures": len(component_proof_source_tree_failures),
+        "component_proof_report_source_tree_current_failures": len(
+            component_proof_source_tree_current_failures
+        ),
+        "component_proof_report_proof_boundary_failures": len(component_proof_boundary_failures),
+        "component_proof_report_traceability_failures": len(component_proof_traceability_failures),
+        "component_proof_report_cli_command_evidence_failures": len(
+            component_proof_cli_command_evidence_failures
+        ),
+        "component_proof_report_cli_command_evidence_shape_failures": len(
+            component_proof_cli_command_evidence_shape_failures
+        ),
+        "component_proof_report_missing_or_invalid": len(
+            [
+                proof
+                for proof in component_proof_identity
+                if not proof.get("embedded_present") or not proof.get("file_json_valid")
+            ]
+        ),
+        "overclaim_lint_source_reconciliation_mismatches": 0
+        if overclaim_lint_source_identity["matches_current_source_file"]
+        else 1,
+        "overclaim_lint_source_reconciliation_missing_or_invalid": 0
+        if (
+            overclaim_lint_source_identity["lint_report_present"]
+            and overclaim_lint_source_identity["lint_report_json_valid"]
+            and overclaim_lint_source_identity["source_report_present"]
+            and overclaim_lint_source_identity["source_report_json_valid"]
+            and overclaim_lint_source_identity["recorded_source_identity_present"]
+        )
+        else 1,
+        "overclaim_lint_report_failed_or_overclaiming": 0
+        if overclaim_lint_source_identity["report_semantics_passed"]
+        else 1,
+    }
+    artifact_manifest_id = "vs3l_manifest_" + hashlib.sha256(
+        json.dumps(
+            [
+                {
+                    "path": artifact.get("path"),
+                    "present": artifact.get("present"),
+                    "bytes": artifact.get("bytes"),
+                    "sha256": artifact.get("sha256"),
+                }
+                for artifact in artifact_manifest
+            ],
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()[:16]
+    human_required_blockers = [
+        {
+            "scenario_id": row.get("scenario_id") or row.get("id"),
+            "status": row.get("status"),
+            "required_human_action": row.get("verification_method"),
+            "expected_evidence": row.get("required_evidence"),
+            "release_impact": row.get("pass_fail_criteria"),
+        }
+        for row in human_rows
+    ]
+    payload["status"] = "success" if checkpoint_passed else "failed"
+    payload["final_verdict"] = (
+        "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED"
+        if checkpoint_passed
+        else "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED"
+    )
+    payload["claim_boundary"]["vs3_l"] = (
+        "LOCAL_DEV_ASSURANCE_VERIFIED" if checkpoint_passed else "NOT_CLAIMED"
+    )
+    payload["summary"] = {
+        "checkpoint_id": artifact_manifest_id,
+        "scenario_count": summary.get("scenario_count"),
+        "pass": summary.get("pass"),
+        "human_required": summary.get("human_required"),
+        "blocking": summary.get("blocking"),
+        "missing_required_artifacts": len(missing_required_artifacts),
+        "ai_blocking_rows": len(ai_blocking_rows),
+        "unresolved_human_required_rows": len(human_rows),
+        "vs3_l_claim": payload["claim_boundary"]["vs3_l"],
+        "source_scenario_vs3_l_claim": claim_boundaries.get("vs3_l", "NOT_CLAIMED"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "product_feature_claims": summary.get("product_feature_claims"),
+        "scenario_report_traceability_status": scenario_report_traceability["status"],
+        "scenario_report_source_tree_current_status": scenario_source_tree_current_validation[
+            "status"
+        ],
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+    }
+    payload["summary"]["component_proof_report_count"] = len(component_proof_identity)
+    payload["summary"]["component_proof_report_mismatches"] = len(component_proof_mismatches)
+    payload["summary"]["component_proof_report_semantic_failures"] = len(component_proof_semantic_failures)
+    payload["summary"]["component_proof_report_scenario_failures"] = len(component_proof_scenario_failures)
+    payload["summary"]["component_proof_report_scenario_coverage_failures"] = len(
+        component_proof_scenario_coverage_failures
+    )
+    payload["summary"]["component_proof_report_check_failures"] = len(component_proof_check_failures)
+    payload["summary"]["component_proof_report_check_coverage_failures"] = len(
+        component_proof_check_coverage_failures
+    )
+    payload["summary"]["component_proof_report_negative_evidence_failures"] = len(
+        component_proof_negative_evidence_failures
+    )
+    payload["summary"]["component_proof_report_secret_scan_failures"] = len(
+        component_proof_secret_scan_failures
+    )
+    payload["summary"]["component_proof_report_evidence_ref_failures"] = len(
+        component_proof_evidence_ref_failures
+    )
+    payload["summary"]["component_proof_report_audit_ref_failures"] = len(
+        component_proof_audit_ref_failures
+    )
+    payload["summary"]["component_proof_report_policy_decision_ref_failures"] = len(
+        component_proof_policy_decision_ref_failures
+    )
+    payload["summary"]["component_proof_report_reference_failures"] = len(
+        component_proof_reference_failures
+    )
+    payload["summary"]["component_proof_report_source_tree_failures"] = len(
+        component_proof_source_tree_failures
+    )
+    payload["summary"]["component_proof_report_source_tree_current_failures"] = len(
+        component_proof_source_tree_current_failures
+    )
+    payload["summary"]["component_proof_report_proof_boundary_failures"] = len(
+        component_proof_boundary_failures
+    )
+    payload["summary"]["component_proof_report_traceability_failures"] = len(
+        component_proof_traceability_failures
+    )
+    payload["summary"]["component_proof_report_cli_command_evidence_failures"] = len(
+        component_proof_cli_command_evidence_failures
+    )
+    payload["summary"]["component_proof_report_cli_command_evidence_shape_failures"] = len(
+        component_proof_cli_command_evidence_shape_failures
+    )
+    payload["summary"]["human_gate_package_semantic_violations"] = human_gate_package_semantics[
+        "semantic_error_count"
+    ]
+    human_gate_preparation_claim_boundary = vs3_human_gate_no_claim_boundary(
+        surface="human_gate_preparation_checkpoint_summary"
+    ) | {
+        "human_gate_preparation_is_not_acceptance": True,
+    }
+    vs3_p_gate_checkpoint_claim_boundary = vs3_human_gate_no_claim_boundary(
+        surface="human_gate_vs3_p_gate_checkpoint_summary"
+    ) | {
+        "vs3_l_local_dev_claim_may_exist": True,
+    }
+    payload["human_gate_preparation"] = {
+        "record_scaffold_report": {
+            "path": human_gate_record_scaffold_report,
+            "schema_version": scaffold_report.get("vs3_human_gate_record_scaffold_schema_version"),
+            "status": scaffold_report.get("status"),
+            "final_verdict": scaffold_report.get("final_verdict"),
+            "summary": scaffold_summary,
+        },
+        "evidence_status_report": {
+            "path": human_gate_evidence_status_report,
+            "schema_version": evidence_status_report.get("vs3_human_gate_evidence_status_schema_version"),
+            "status": evidence_status_report.get("status"),
+            "final_verdict": evidence_status_report.get("final_verdict"),
+            "summary": status_summary,
+            "claim_boundary": status_boundary,
+            "expected_human_scenario_ids": human_gate_ids,
+            "actual_human_scenario_ids": status_record_ids,
+            "missing_human_scenario_ids": missing_status_record_ids,
+            "unexpected_human_scenario_ids": unexpected_status_record_ids,
+            "duplicate_human_scenario_ids": duplicate_status_record_ids,
+            "scenario_report": {
+                "path": status_scenario_report.get("path"),
+                "path_recorded": status_scenario_report.get("path_recorded"),
+                "path_sha256": status_scenario_report.get("path_sha256"),
+                "sha256": status_scenario_report.get("sha256"),
+                "schema_version": status_scenario_report.get("schema_version"),
+                "status": status_scenario_report.get("status"),
+                "claim_boundary": status_scenario_report.get("claim_boundary"),
+                "claim_boundaries": status_scenario_report.get("claim_boundaries"),
+                "claim_boundary_validation": status_scenario_report.get("claim_boundary_validation"),
+                "traceability_validation": status_scenario_report.get("traceability_validation"),
+                "matches_checkpoint_scenario_report_sha256": (
+                    status_scenario_report.get("sha256") == scenario_report_sha256
+                ),
+                "matches_checkpoint_scenario_report_path_sha256": (
+                    status_scenario_report.get("path_sha256") == scenario_report_path_sha256
+                ),
+            },
+            "template_intake_summary": status_template_intake,
+            "record_statuses": [
+                {
+                    "scenario_id": row.get("scenario_id"),
+                    "status": row.get("status"),
+                    "validation_status": row.get("validation_status"),
+                    "matrix_status_after_status": row.get("matrix_status_after_status"),
+                    "dependency_unlock_allowed_by_structural_validation": row.get("dependency_unlock_allowed_by_structural_validation"),
+                }
+                for row in status_record_rows
+                if isinstance(row, dict)
+            ],
+            "self_command_transcript_validation": evidence_status_self_transcript_validation,
+        },
+        "review_kit_report": {
+            "path": human_gate_review_kit_report,
+            "schema_version": review_kit_payload.get("vs3_human_gate_review_kit_schema_version"),
+            "status": review_kit_payload.get("status"),
+            "final_verdict": review_kit_payload.get("final_verdict"),
+            "summary": review_kit_summary,
+            "expected_human_scenario_ids": review_kit_expected_human_ids,
+            "actual_human_scenario_ids": review_kit_actual_human_ids,
+            "review_kit_conditions": review_kit_conditions_payload,
+            "scenario_report": {
+                "path": review_kit_scenario_report.get("path"),
+                "path_recorded": review_kit_scenario_report.get("path_recorded"),
+                "path_sha256": review_kit_scenario_report.get("path_sha256"),
+                "sha256": review_kit_scenario_report.get("sha256"),
+                "schema_version": review_kit_scenario_report.get("schema_version"),
+                "status": review_kit_scenario_report.get("status"),
+                "claim_boundary": review_kit_scenario_report.get("claim_boundary"),
+                "claim_boundaries": review_kit_scenario_report.get("claim_boundaries"),
+                "claim_boundary_validation": review_kit_scenario_report.get("claim_boundary_validation"),
+                "traceability_validation": review_kit_scenario_report.get("traceability_validation"),
+                "matches_checkpoint_scenario_report_sha256": (
+                    review_kit_scenario_report.get("sha256") == scenario_report_sha256
+                ),
+                "matches_checkpoint_scenario_report_path_sha256": (
+                    review_kit_scenario_report.get("path_sha256") == scenario_report_path_sha256
+                ),
+            },
+            "review_queue": [
+                {
+                    "scenario_id": row.get("scenario_id"),
+                    "status": row.get("status"),
+                    "review_order": row.get("review_order"),
+                    "depends_on_human_gates": row.get("depends_on_human_gates"),
+                    "dependency_unlock_allowed_by_structural_validation": row.get("dependency_unlock_allowed_by_structural_validation"),
+                    "package_path": row.get("package_path"),
+                    "validation_command": row.get("validation_command"),
+                }
+                for row in review_kit_queue
+                if isinstance(row, dict)
+            ],
+            "template_count": len(review_kit_templates),
+            "claim_boundary": review_kit_boundary,
+            "self_command_transcript_validation": review_kit_self_transcript_validation,
+        },
+        "package_semantics": human_gate_package_semantics,
+        "claim_boundary": human_gate_preparation_claim_boundary,
+    }
+    payload["vs3_p_gate"] = {
+        "path": vs3_p_gate_report,
+        "schema_version": vs3_p_gate_payload.get("vs3_p_gate_schema_version"),
+        "status": vs3_p_gate_payload.get("status"),
+        "gate_status": vs3_p_gate_body.get("status"),
+        "final_verdict": vs3_p_gate_payload.get("final_verdict"),
+        "summary": vs3_p_gate_summary,
+        "claim_boundary": vs3_p_gate_checkpoint_claim_boundary,
+        "negative_evidence": {
+            "vs3_p_unlocked_by_gate": int(vs3_p_gate_negative.get("vs3_p_unlocked_by_gate") or 0),
+            "human_required_rows_marked_pass_in_scenario_report": int(
+                vs3_p_gate_negative.get("human_required_rows_marked_pass_in_scenario_report") or 0
+            ),
+            "production_readiness_claimed_by_gate": int(
+                vs3_p_gate_negative.get("production_readiness_claimed_by_gate") or 0
+            ),
+            "security_acceptance_claimed_by_gate": int(
+                vs3_p_gate_negative.get("security_acceptance_claimed_by_gate") or 0
+            ),
+            "human_acceptance_claimed_by_gate": int(
+                vs3_p_gate_negative.get("human_acceptance_claimed_by_gate") or 0
+            ),
+            "summary_claim_mismatches": len(
+                [
+                    condition_name
+                    for condition_name in vs3_p_gate_summary_condition_names
+                    if not checkpoint_conditions[condition_name]
+                ]
+            ),
+            "claim_boundary_mismatches": len(
+                [
+                    condition_name
+                    for condition_name in vs3_p_gate_claim_boundary_condition_names
+                    if not checkpoint_conditions[condition_name]
+                ]
+            ),
+            "body_claim_boundary_mismatches": len(
+                [
+                    condition_name
+                    for condition_name in vs3_p_gate_body_claim_boundary_condition_names
+                    if not checkpoint_conditions[condition_name]
+                ]
+            ),
+            "scenario_report_hash_mismatches": 0
+            if checkpoint_conditions["vs3_p_gate_scenario_report_hash_matches"]
+            else 1,
+            "scenario_report_path_hash_mismatches": 0
+            if checkpoint_conditions["vs3_p_gate_scenario_report_path_hash_matches"]
+            else 1,
+            "self_command_transcript_failures": 0
+            if checkpoint_conditions["vs3_p_gate_self_command_transcript_valid"]
+            else 1,
+        },
+        "scenario_report": {
+            "path": vs3_p_gate_scenario_report.get("path"),
+            "path_recorded": vs3_p_gate_scenario_report.get("path_recorded"),
+            "sha256": vs3_p_gate_scenario_report.get("sha256"),
+            "path_sha256": vs3_p_gate_scenario_report.get("path_sha256"),
+            "schema_version": vs3_p_gate_scenario_report.get("schema_version"),
+            "status": vs3_p_gate_scenario_report.get("status"),
+            "claim_boundary": vs3_p_gate_scenario_report.get("claim_boundary"),
+            "claim_boundaries": vs3_p_gate_scenario_report.get("claim_boundaries"),
+            "claim_boundary_validation": vs3_p_gate_scenario_report.get("claim_boundary_validation"),
+            "traceability_validation": vs3_p_gate_scenario_report.get("traceability_validation"),
+            "matches_checkpoint_scenario_report_sha256": checkpoint_conditions[
+                "vs3_p_gate_scenario_report_hash_matches"
+            ],
+            "matches_checkpoint_scenario_report_path_sha256": checkpoint_conditions[
+                "vs3_p_gate_scenario_report_path_hash_matches"
+            ],
+        },
+        "source_claim_boundary": vs3_p_gate_boundary,
+        "source_body_claim_boundary": vs3_p_gate_body_boundary,
+        "self_command_transcript_validation": vs3_p_gate_self_transcript_validation,
+    }
+    payload["scenario_report"] = {
+        "path": scenario_report_rel,
+        "path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+        "path_sha256": scenario_report_path_sha256,
+        "sha256": scenario_report_sha256,
+        "schema_version": scenario_report.get("schema_version"),
+        "status": scenario_report.get("status"),
+        "summary": summary,
+        "claim_boundary": scenario_claim_boundary,
+        "claim_boundaries": claim_boundaries,
+        "claim_boundary_validation": {
+            "schema_version": "cs.vs3_local_checkpoint_scenario_report_claim_boundary.v0",
+            "status": "passed"
+            if (
+                checkpoint_conditions["scenario_report_claim_boundary_present"]
+                and checkpoint_conditions["scenario_report_claim_boundaries_present"]
+                and checkpoint_conditions["scenario_report_claim_boundary_matches_claim_boundaries"]
+                and checkpoint_conditions["scenario_report_claim_boundary_vs3_l_local_only"]
+                and checkpoint_conditions[
+                    "scenario_report_claim_boundary_no_production_or_human_overclaims"
+                ]
+            )
+            else "failed",
+            "claim_boundary_present": checkpoint_conditions[
+                "scenario_report_claim_boundary_present"
+            ],
+            "claim_boundaries_present": checkpoint_conditions[
+                "scenario_report_claim_boundaries_present"
+            ],
+            "claim_boundary_matches_claim_boundaries": checkpoint_conditions[
+                "scenario_report_claim_boundary_matches_claim_boundaries"
+            ],
+            "claim_boundary_vs3_l_local_only": checkpoint_conditions[
+                "scenario_report_claim_boundary_vs3_l_local_only"
+            ],
+            "claim_boundary_overclaim_fields": scenario_claim_boundary_overclaim_violations,
+            "claim_boundaries_overclaim_fields": overclaim_violations,
+        },
+        "traceability_validation": scenario_report_traceability,
+        "source_tree_current_validation": scenario_source_tree_current_validation,
+    }
+    payload["checkpoint_conditions"] = checkpoint_conditions
+    payload["component_proof_identity"] = component_proof_identity
+    payload["overclaim_lint_source_identity"] = overclaim_lint_source_identity
+    payload["scenario_report_traceability"] = scenario_report_traceability
+    payload["scenario_report_source_tree_current_validation"] = (
+        scenario_source_tree_current_validation
+    )
+    payload["claim_boundaries_from_scenario_report"] = claim_boundaries
+    payload["claim_boundary_from_scenario_report"] = scenario_claim_boundary
+    payload["human_required_blockers"] = human_required_blockers
+    payload["missing_required_artifacts"] = missing_required_artifacts
+    payload["negative_evidence"] = negative_evidence
+    payload["ids"].update({"vs3_local_checkpoint_id": artifact_manifest_id})
+    payload["source_tree"] = scenario_source_tree
+    for proof_key in [
+        "request_context_proof",
+        "postgres_rls_proof",
+        "opa_policy_proof",
+        "egress_sandbox_proof",
+        "connectorhub_source_proof",
+        "tool_registry_proof",
+        "observability_proof",
+        "final_regression_proof",
+    ]:
+        proof = scenario_report.get(proof_key, {})
+        if isinstance(proof, dict):
+            payload["audit_refs"].extend(str(ref) for ref in proof.get("audit_refs", []) if ref)
+            payload["policy_decision_refs"].extend(str(ref) for ref in proof.get("policy_decision_refs", []) if ref)
+    payload["audit_refs"] = sorted(set(payload["audit_refs"]))
+    payload["policy_decision_refs"] = sorted(set(payload["policy_decision_refs"]))
+    transcript_command = ["cornerstone", "security", "vs3-local-checkpoint", "--json"]
+    transcript_exit_code = EXIT_SUCCESS if checkpoint_passed else EXIT_EVIDENCE_MISSING
+    transcript_scope = {
+        **requested_scope,
+        "scope_source": "local_vs3_fixture",
+    }
+    transcript_evidence_refs = list(payload.get("evidence_refs", []))
+    transcript_audit_refs = list(payload.get("audit_refs", []))
+    transcript_policy_decision_refs = list(payload.get("policy_decision_refs", []))
+    transcript_elapsed_seconds = round(perf_counter() - started, 3)
+    transcript_stdout_json = {
+        "schema_version": payload.get("schema_version"),
+        "json_schema": payload.get("vs3_local_checkpoint_schema_version"),
+        "status": payload.get("status"),
+        "command": transcript_command,
+        "arguments": transcript_command[1:],
+        "exit_code": transcript_exit_code,
+        "elapsed_seconds": transcript_elapsed_seconds,
+        "final_verdict": payload.get("final_verdict"),
+        "evidence_refs": transcript_evidence_refs,
+        "audit_refs": transcript_audit_refs,
+        "policy_decision_refs": transcript_policy_decision_refs,
+        "scope": transcript_scope,
+        "source_tree": scenario_source_tree,
+        "claim_boundary": payload.get("claim_boundary"),
+        "claim_boundaries": payload.get("claim_boundaries"),
+        "claim_boundary_from_scenario_report": payload.get("claim_boundary_from_scenario_report"),
+        "claim_boundaries_from_scenario_report": payload.get("claim_boundaries_from_scenario_report"),
+        "scenario_report": {
+            "path": payload["scenario_report"].get("path"),
+            "path_recorded": payload["scenario_report"].get("path_recorded"),
+            "path_sha256": payload["scenario_report"].get("path_sha256"),
+            "sha256": payload["scenario_report"].get("sha256"),
+            "schema_version": payload["scenario_report"].get("schema_version"),
+            "status": payload["scenario_report"].get("status"),
+            "claim_boundary": payload["scenario_report"].get("claim_boundary"),
+            "claim_boundaries": payload["scenario_report"].get("claim_boundaries"),
+            "claim_boundary_validation": payload["scenario_report"].get("claim_boundary_validation"),
+        },
+        "proof_boundary": {
+            "vs3_l": VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L,
+            "vs3_p": "NOT_CLAIMED",
+            "production": "NOT_CLAIMED",
+            "production_onprem": "NOT_CLAIMED",
+            "live_provider": "NOT_CLAIMED",
+            "real_idp": "NOT_CLAIMED",
+            "real_network": "NOT_CLAIMED",
+            "migration_restore": "NOT_CLAIMED",
+            "security_acceptance": "NOT_CLAIMED",
+            "human_acceptance": "NOT_CLAIMED",
+        },
+    }
+    transcript = command_transcript_entry(
+        name="security_vs3_local_checkpoint",
+        command=transcript_command,
+        exit_code=transcript_exit_code,
+        timed_out=False,
+        elapsed_seconds=transcript_elapsed_seconds,
+        stdout_tail=[
+            json.dumps(
+                {
+                    "schema_version": transcript_stdout_json.get("schema_version"),
+                    "json_schema": transcript_stdout_json.get("json_schema"),
+                    "status": payload.get("status"),
+                    "final_verdict": payload.get("final_verdict"),
+                    "summary": payload.get("summary"),
+                },
+                sort_keys=True,
+            )
+        ],
+        stderr_tail=[],
+    )
+    transcript.update(
+        {
+            "arguments": transcript_command[1:],
+            "started_at": started_at,
+            "ended_at": utc_now(),
+            "output_mode": "json",
+            "json_schema": payload.get("vs3_local_checkpoint_schema_version"),
+            "cli_schema_version": payload.get("cli_schema_version"),
+            "scope": transcript_scope,
+            "evidence_refs": transcript_evidence_refs,
+            "audit_refs": transcript_audit_refs,
+            "policy_decision_refs": transcript_policy_decision_refs,
+            "source_tree": scenario_source_tree,
+            "ref_summary": {
+                "evidence_refs_count": len(transcript_evidence_refs),
+                "audit_refs_count": len(transcript_audit_refs),
+                "policy_decision_refs_count": len(transcript_policy_decision_refs),
+            },
+            "stdout_json": transcript_stdout_json,
+        }
+    )
+    payload["command_transcripts"] = [transcript]
+    self_transcript_validation = _vs3_local_checkpoint_self_transcript_validation(
+        transcript,
+        checkpoint_payload=payload,
+        expected_source_tree=scenario_source_tree,
+    )
+    payload["self_command_transcript_validation"] = self_transcript_validation
+    checkpoint_conditions["self_command_transcript_shape_valid"] = self_transcript_validation["status"] == "passed"
+    payload["summary"]["self_command_transcript_shape_failures"] = (
+        0 if self_transcript_validation["status"] == "passed" else 1
+    )
+    payload["negative_evidence"]["self_command_transcript_shape_failures"] = (
+        0 if self_transcript_validation["status"] == "passed" else 1
+    )
+    if checkpoint_passed and self_transcript_validation["status"] != "passed":
+        checkpoint_passed = False
+        payload["status"] = "failed"
+        payload["final_verdict"] = "VS3_L_LOCAL_DEV_ASSURANCE_NOT_VERIFIED"
+        payload["claim_boundary"]["vs3_l"] = "NOT_CLAIMED"
+        payload["summary"]["status"] = "failed"
+        payload["summary"]["final_verdict"] = payload["final_verdict"]
+        payload["summary"]["vs3_l_claim"] = "NOT_CLAIMED"
+        transcript["exit_code"] = EXIT_EVIDENCE_MISSING
+        transcript["stdout_json"]["exit_code"] = EXIT_EVIDENCE_MISSING
+        transcript["stdout_json"]["status"] = "failed"
+        transcript["stdout_json"]["final_verdict"] = payload["final_verdict"]
+    if not checkpoint_passed:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_LOCAL_CHECKPOINT_INCOMPLETE",
+                "message": "VS3 local checkpoint failed because the aggregate report, claim boundary, human rows, or required artifacts are incomplete.",
+                "failed_conditions": [
+                    name for name, ok in checkpoint_conditions.items() if not ok
+                ],
+                "missing_required_artifacts": missing_required_artifacts,
+                "overclaim_boundary_violations": overclaim_violations,
+            }
+        )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if checkpoint_passed else EXIT_EVIDENCE_MISSING
+
+
+def command_observe_status(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if args.scope == "vs3":
+        report, report_path = _get_vs3_observability_report(args)
+        payload = _vs3_observability_base_payload("cornerstone observe status", report, report_path, root)
+        payload["observe_status_schema_version"] = "cs.vs3_observe_status.v0"
+        payload["operator_status_snapshot"] = report.get("operator_status_snapshot", {})
+        payload["status_surface_comparison"] = report.get("status_surface_comparison", {})
+        payload["ui_dom_snapshot_path"] = report.get("status_surface_comparison", {}).get(
+            "ui_dom_snapshot",
+            {},
+        ).get("path", DEFAULT_VS3_OPERATOR_STATUS_DOM_SNAPSHOT)
+        payload["component_count"] = len(report.get("operator_status_snapshot", {}).get("components", {}))
+        payload["fault_injection_results"] = report.get("operator_status_snapshot", {}).get("fault_injection_results", [])
+        payload["command_transcripts"] = [
+            row
+            for row in report.get("command_transcripts", [])
+            if row.get("command") == ["cornerstone", "observe", "status", "--scope", "vs3", "--json"]
+        ]
+        print_payload(payload, args.json)
+        return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.operator_status_report(requested_scope)
+    record = result["operator_status"]
+    audit_event = result["audit_event"]
+    payload = base_response("cornerstone observe status", "success", root)
+    payload.update(requested_scope)
+    payload["observe_status_schema_version"] = "cs.operator_status_report.v0"
+    payload["operator_status"] = record
+    payload["ids"].update({"status_id": record["status_id"]})
+    payload["evidence_refs"].append(f"operator_status:{record['status_id']}")
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_human_gate_package(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if args.scope != "vs3":
+        payload = base_response("cornerstone human-gate package", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
+                "message": "Only --scope vs3 is supported for the local human-gate package command.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    report, report_path = _get_vs3_observability_report(args)
+    payload = _vs3_observability_base_payload("cornerstone human-gate package", report, report_path, root)
+    package_set = report.get("human_gate_packages", {})
+    payload["human_gate_package_schema_version"] = "cs.vs3_human_gate_package_set.v0"
+    payload["human_gate_packages"] = package_set
+    payload["package_dir"] = package_set.get("package_dir", DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR)
+    payload["package_count"] = package_set.get("package_count", 0)
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["command_transcripts"] = [
+        row
+        for row in report.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "human-gate", "package", "--scope", "vs3", "--json"]
+    ]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _human_gate_vs3_scope_payload(command: str, args: argparse.Namespace) -> tuple[dict[str, Any], Path, dict[str, Any], dict[str, Any]] | tuple[None, None, None, dict[str, Any]]:
+    root = repo_root()
+    if args.scope != "vs3":
+        payload = base_response(command, "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
+                "message": "Only --scope vs3 is supported for this local human-gate command.",
+            }
+        )
+        return None, None, None, payload
+    report, report_path = _get_vs3_observability_report(args)
+    readiness = vs3_human_gate_readiness_report(root, report)
+    payload = _vs3_observability_base_payload(command, report, report_path, root)
+    return report, report_path, readiness, payload
+
+
+def command_human_gate_report(args: argparse.Namespace) -> int:
+    result = _human_gate_vs3_scope_payload("cornerstone human-gate report", args)
+    _report, _report_path, readiness, payload = result
+    if readiness is None:
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    payload["human_gate_readiness_report_schema_version"] = "cs.vs3_human_gate_readiness_report.v0"
+    payload["human_gate_readiness_report"] = readiness
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["summary"] = readiness.get("summary", {})
+    payload["human_required_count"] = readiness.get("human_required_count", 0)
+    payload["next_scenario_id"] = readiness.get("next_scenario_id")
+    payload["execution_queue_scenario_order"] = readiness.get("execution_queue_scenario_order", [])
+    payload["negative_evidence"] = readiness.get("negative_evidence", {})
+    payload["evidence_refs"].extend(str(ref) for ref in readiness.get("evidence_refs", []) if ref)
+    payload["command_transcripts"] = [
+        row
+        for row in readiness.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "human-gate", "report", "--scope", "vs3", "--json"]
+    ]
+    if readiness.get("status") != "success":
+        payload["status"] = "blocked"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_READINESS_INCOMPLETE",
+                "message": "VS3 human-gate readiness report is incomplete.",
+                "negative_evidence": readiness.get("negative_evidence", {}),
+            }
+        )
+    write_payload_output(repo_root(), args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if readiness.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_human_gate_next(args: argparse.Namespace) -> int:
+    result = _human_gate_vs3_scope_payload("cornerstone human-gate next", args)
+    _report, _report_path, readiness, payload = result
+    if readiness is None:
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    payload["human_gate_readiness_report_schema_version"] = "cs.vs3_human_gate_readiness_report.v0"
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["next_scenario_id"] = readiness.get("next_scenario_id")
+    payload["next_row"] = readiness.get("next_row")
+    payload["execution_queue_scenario_order"] = readiness.get("execution_queue_scenario_order", [])
+    payload["operator_rule"] = readiness.get("operator_rule")
+    payload["claim_boundary"] = readiness.get("claim_boundary", {})
+    payload["negative_evidence"] = readiness.get("negative_evidence", {})
+    payload["summary"] = {
+        "status": readiness.get("status"),
+        "final_verdict": "HUMAN_REQUIRED",
+        "next_scenario_id": readiness.get("next_scenario_id"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "product_claim_allowed": False,
+    }
+    payload["evidence_refs"].extend(str(ref) for ref in readiness.get("evidence_refs", []) if ref)
+    payload["command_transcripts"] = [
+        row
+        for row in readiness.get("command_transcripts", [])
+        if row.get("command") == ["cornerstone", "human-gate", "next", "--scope", "vs3", "--json"]
+    ]
+    if readiness.get("status") != "success":
+        payload["status"] = "blocked"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_NEXT_INCOMPLETE",
+                "message": "VS3 human-gate next selector is incomplete because readiness evidence is missing.",
+                "negative_evidence": readiness.get("negative_evidence", {}),
+            }
+        )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if readiness.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_human_gate_review_template(package: dict[str, Any]) -> dict[str, Any]:
+    record_contract = package.get("review_record_contract", {})
+    required_fields = (
+        list(record_contract.get("required_fields", []))
+        if isinstance(record_contract, dict)
+        else []
+    )
+    scenario_id = str(package.get("scenario_id") or "")
+    template: dict[str, Any] = {
+        "schema_version": "cs.vs3_human_gate_review_record.v0",
+        "scenario_id": scenario_id,
+        "redaction_note": "",
+    }
+    for field in required_fields:
+        if field == "scope":
+            template[field] = dict(
+                package.get(
+                    "scope",
+                    {
+                        "tenant_id": "local-dev",
+                        "owner_id": "local-user",
+                        "namespace_id": "personal",
+                        "workspace_id": "default",
+                    },
+                )
+            )
+        elif field == "reviewed_at":
+            template[field] = "YYYY-MM-DDTHH:MM:SSZ"
+        elif field == "decision":
+            allowed_decisions = record_contract.get("allowed_decisions", []) if isinstance(record_contract, dict) else []
+            template[field] = "|".join(str(decision) for decision in allowed_decisions)
+        elif field.endswith("_refs") or field in {
+            "audit_refs",
+            "connectorhub_audit_refs",
+            "cornerstone_audit_refs",
+            "evidence_refs",
+            "findings",
+            "issue_list",
+            "policy_decision_refs",
+            "remediation_refs",
+            "retest_refs",
+            "screenshots_or_recording_refs",
+            "task_outcomes",
+            "tested_bypass_paths",
+        }:
+            template[field] = []
+        else:
+            template[field] = ""
+    return template
+
+
+def command_human_gate_review_kit(args: argparse.Namespace) -> int:
+    started = perf_counter()
+    started_at = utc_now()
+    result = _human_gate_vs3_scope_payload("cornerstone human-gate review-kit", args)
+    report, report_path, readiness, payload = result
+    root = repo_root()
+    if readiness is None:
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_report_path, scenario_report_rel = _vs3_local_checkpoint_report_path(root, args.scenario_report)
+    scenario_report: dict[str, Any] = {}
+    scenario_report_error: dict[str, Any] | None = None
+    if not scenario_report_path.exists() or not scenario_report_path.is_file():
+        scenario_report_error = {
+            "code": "CS_VS3_REVIEW_KIT_SCENARIO_REPORT_MISSING",
+            "message": "VS3 human-gate review kit requires the aggregate VS3 scenario report.",
+            "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "scenario_report_path": scenario_report_rel,
+            "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+        }
+    else:
+        try:
+            scenario_report = json.loads(scenario_report_path.read_text())
+        except json.JSONDecodeError as error:
+            scenario_report_error = {
+                "code": "CS_VS3_REVIEW_KIT_SCENARIO_REPORT_INVALID_JSON",
+                "message": "VS3 human-gate review kit scenario report must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+                "scenario_report_path": scenario_report_rel,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+
+    queue_rows = list(readiness.get("queue_rows", [])) if isinstance(readiness.get("queue_rows"), list) else []
+    expected_ids = list(readiness.get("execution_queue_scenario_order", []))
+    package_artifacts = [
+        _vs3_local_checkpoint_artifact(
+            root,
+            f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/{scenario_id}.json",
+            kind="human_gate_package",
+        )
+        for scenario_id in expected_ids
+    ]
+    package_set = report.get("human_gate_packages", {}) if isinstance(report, dict) else {}
+    packages = package_set.get("packages", []) if isinstance(package_set, dict) else []
+    packages_by_id = {
+        str(package.get("scenario_id")): package
+        for package in packages
+        if isinstance(package, dict) and package.get("scenario_id")
+    }
+    record_templates = [
+        {
+            "scenario_id": scenario_id,
+            "package_path": packages_by_id.get(scenario_id, {}).get("package_path"),
+            "template_is_blank": True,
+            "template_is_not_human_evidence": True,
+            "validation_command": (
+                "cornerstone human-gate validate-record --scope vs3 "
+                f"--scenario {scenario_id} --record-file <filled-review-record.json> --json"
+            ),
+            "template": _vs3_human_gate_review_template(packages_by_id.get(scenario_id, {})),
+        }
+        for scenario_id in expected_ids
+    ]
+    scenario_summary = scenario_report.get("summary", {}) if isinstance(scenario_report, dict) else {}
+    claim_boundaries = scenario_report.get("claim_boundaries", {}) if isinstance(scenario_report, dict) else {}
+    scenario_results = scenario_report.get("scenario_results", []) if isinstance(scenario_report, dict) else []
+    scenario_report_traceability = _vs3_scenario_report_traceability_validation(
+        scenario_report,
+        scenario_results if isinstance(scenario_results, list) else [],
+        expected_report_path=scenario_report_rel,
+    )
+    scenario_report_claim_boundary_validation = _vs3_scenario_report_claim_boundary_validation(
+        scenario_report
+    )
+    human_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and (row.get("owner") == "Human" or str(row.get("scenario_id") or row.get("id") or "").startswith("VS3-H"))
+    ]
+    expected_human_ids = [f"VS3-H{index:02d}" for index in range(1, 8)]
+    actual_human_ids = [
+        str(row.get("scenario_id") or row.get("id") or "")
+        for row in human_rows
+    ]
+    missing_human_ids = [scenario_id for scenario_id in expected_human_ids if scenario_id not in actual_human_ids]
+    unexpected_human_ids = [
+        scenario_id
+        for scenario_id in actual_human_ids
+        if scenario_id not in expected_human_ids
+    ]
+    human_rows_marked_pass = [row for row in human_rows if row.get("status") == "PASS"]
+    human_rows_not_human_required = [row for row in human_rows if row.get("status") != "HUMAN_REQUIRED"]
+    missing_package_artifacts = [
+        artifact["path"]
+        for artifact in package_artifacts
+        if not artifact.get("present")
+    ]
+    package_ids_missing_from_report = [
+        scenario_id
+        for scenario_id in expected_ids
+        if scenario_id not in packages_by_id
+    ]
+    review_kit_conditions = {
+        "scenario_report_present_and_valid": scenario_report_error is None,
+        "scenario_report_status_success": scenario_report.get("status") == "success",
+        "scenario_report_traceability_valid": scenario_report_traceability["status"] == "passed",
+        "scenario_count_57": scenario_summary.get("scenario_count") == 57,
+        "pass_count_50": scenario_summary.get("pass") == 50,
+        "human_required_count_7": scenario_summary.get("human_required") == 7,
+        "blocking_count_0": scenario_summary.get("blocking") == 0,
+        "vs3_l_local_only": claim_boundaries.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED",
+        "vs3_p_not_claimed": claim_boundaries.get("vs3_p") == "NOT_CLAIMED",
+        "readiness_report_success": readiness.get("status") == "success",
+        "seven_package_files_present": len(missing_package_artifacts) == 0,
+        "seven_packages_in_observability_report": len(package_ids_missing_from_report) == 0,
+        "seven_blank_templates": len(record_templates) == 7,
+        "seven_human_rows_present_in_scenario_report": not missing_human_ids and not unexpected_human_ids,
+        "h_rows_remain_human_required": (
+            not missing_human_ids
+            and not unexpected_human_ids
+            and len(human_rows_not_human_required) == 0
+        ),
+    }
+    review_kit_ready = all(review_kit_conditions.values())
+    negative_evidence = {
+        "missing_package_artifacts": len(missing_package_artifacts),
+        "package_ids_missing_from_report": len(package_ids_missing_from_report),
+        "missing_human_rows_in_scenario_report": len(missing_human_ids),
+        "unexpected_human_rows_in_scenario_report": len(unexpected_human_ids),
+        "scenario_report_traceability_failures": 0
+        if review_kit_conditions["scenario_report_traceability_valid"]
+        else 1,
+        "scenario_report_traceability_missing_fields": len(
+            scenario_report_traceability["missing_fields"]
+        ),
+        "scenario_report_traceability_invalid_fields": len(
+            scenario_report_traceability["invalid_fields"]
+        ),
+        "scenario_report_traceability_row_missing_fields": len(
+            scenario_report_traceability["row_missing_fields"]
+        ),
+        "scenario_report_traceability_row_invalid_fields": len(
+            scenario_report_traceability["row_invalid_fields"]
+        ),
+        "human_rows_marked_pass_by_review_kit": 0,
+        "human_rows_marked_pass_in_scenario_report": len(human_rows_marked_pass),
+        "human_rows_not_human_required": len(human_rows_not_human_required),
+        "approval_collected_by_review_kit": 0,
+        "human_decision_recorded_by_review_kit": 0,
+        "record_bodies_persisted_by_review_kit": 0,
+        "record_paths_persisted_by_review_kit": 0,
+        "structural_validation_treated_as_acceptance": 0,
+        "vs3_p_unlocked_by_review_kit": 0,
+        "production_readiness_claimed_by_review_kit": 0,
+        "live_provider_readiness_claimed_by_review_kit": 0,
+        "real_idp_readiness_claimed_by_review_kit": 0,
+        "real_network_readiness_claimed_by_review_kit": 0,
+        "migration_restore_readiness_claimed_by_review_kit": 0,
+        "security_acceptance_claimed_by_review_kit": 0,
+        "human_acceptance_claimed_by_review_kit": 0,
+    }
+    review_kit_id = "vs3hkit_" + hashlib.sha256(
+        json.dumps(
+            {
+                "expected_ids": expected_ids,
+                "package_artifacts": [
+                    {
+                        "path": artifact.get("path"),
+                        "bytes": artifact.get("bytes"),
+                        "sha256": artifact.get("sha256"),
+                    }
+                    for artifact in package_artifacts
+                ],
+                "scenario_report_sha256": (
+                    hashlib.sha256(scenario_report_path.read_bytes()).hexdigest()
+                    if scenario_report_path.exists() and scenario_report_path.is_file()
+                    else None
+                ),
+                "negative_evidence": negative_evidence,
+            },
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()[:16]
+    review_kit_claim_boundary = vs3_human_gate_no_claim_boundary(surface="human_gate_review_kit_preparation_only") | {
+        "review_kit_is_human_evidence_preparation_only": True,
+        "blank_templates_are_not_human_evidence": True,
+        "vs3_l_local_dev_claim_may_exist": True,
+    }
+    review_kit = {
+        "schema_version": "cs.vs3_human_gate_review_kit.v0",
+        "review_kit_id": review_kit_id,
+        "status": "ready_for_human_review" if review_kit_ready else "incomplete",
+        "scope": readiness.get("scope", {}),
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "scenario_report": {
+            "path": scenario_report_rel,
+            "path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            "sha256": (
+                hashlib.sha256(scenario_report_path.read_bytes()).hexdigest()
+                if scenario_report_path.exists() and scenario_report_path.is_file()
+                else None
+            ),
+            "schema_version": scenario_report.get("schema_version"),
+            "status": scenario_report.get("status"),
+            "summary": scenario_summary,
+            "claim_boundary": scenario_report.get("claim_boundary"),
+            "claim_boundaries": scenario_report.get("claim_boundaries"),
+            "claim_boundary_validation": scenario_report_claim_boundary_validation,
+            "traceability_validation": scenario_report_traceability,
+        },
+        "claim_boundary": review_kit_claim_boundary,
+        "review_queue": queue_rows,
+        "package_artifacts": package_artifacts,
+        "record_templates": record_templates,
+        "expected_human_scenario_ids": expected_human_ids,
+        "actual_human_scenario_ids": actual_human_ids,
+        "review_kit_conditions": review_kit_conditions,
+        "negative_evidence": negative_evidence,
+        "non_mutation_evidence": {
+            "approval_collected_by_review_kit": False,
+            "human_decision_recorded_by_review_kit": False,
+            "record_bodies_persisted_by_review_kit": False,
+            "record_paths_persisted_by_review_kit": False,
+            "live_provider_calls_executed_by_review_kit": 0,
+            "external_mutations_executed_by_review_kit": 0,
+            "production_or_onprem_checks_executed_by_review_kit": 0,
+        },
+        "operator_rule": readiness.get("operator_rule"),
+        "required_before_vs3_p": [
+            "Run each human review in dependency order.",
+            "Attach dated, signed, redacted evidence refs to a filled review record.",
+            "Validate each filled record with cornerstone human-gate validate-record.",
+            "Validate the complete record directory with cornerstone human-gate validate-records.",
+            "Keep VS3-H rows HUMAN_REQUIRED until a separate owner-approved promotion record exists.",
+        ],
+        "evidence_refs": [
+            DEFAULT_VS3_SCENARIO_REPORT,
+            DEFAULT_VS3_OBSERVABILITY_REPORT,
+            DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+            "cornerstone security vs3-local-checkpoint --json",
+        ],
+        "audit_refs": [f"audit:vs3_human_gate_review_kit:{review_kit_id}"],
+    }
+    payload["status"] = "success" if review_kit_ready else "failed"
+    payload["vs3_human_gate_review_kit_schema_version"] = "cs.vs3_human_gate_review_kit.v0"
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["vs3_human_gate_review_kit"] = review_kit
+    payload["summary"] = {
+        "review_kit_id": review_kit_id,
+        "status": review_kit["status"],
+        "final_verdict": "HUMAN_REQUIRED",
+        "scenario_count": scenario_summary.get("scenario_count"),
+        "pass": scenario_summary.get("pass"),
+        "human_required": scenario_summary.get("human_required"),
+        "blocking": scenario_summary.get("blocking"),
+        "scenario_report_traceability_status": scenario_report_traceability["status"],
+        "review_queue_count": len(queue_rows),
+        "package_count": len(package_artifacts) - len(missing_package_artifacts),
+        "template_count": len(record_templates),
+        "next_scenario_id": readiness.get("next_scenario_id"),
+        "vs3_l_claim": claim_boundaries.get("vs3_l", "NOT_CLAIMED"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+    }
+    payload["claim_boundary"] = review_kit["claim_boundary"]
+    payload["claim_boundaries"] = payload["claim_boundary"]
+    payload["scenario_report"] = review_kit["scenario_report"]
+    payload["claim_boundary_from_scenario_report"] = review_kit["scenario_report"].get("claim_boundary")
+    payload["claim_boundaries_from_scenario_report"] = review_kit["scenario_report"].get("claim_boundaries")
+    payload["negative_evidence"] = negative_evidence
+    payload["ids"].update({"vs3_human_gate_review_kit_id": review_kit_id})
+    payload["audit_refs"].extend(review_kit["audit_refs"])
+    payload["evidence_refs"].extend(review_kit["evidence_refs"])
+    payload["evidence_refs"].extend(
+        f"report:{artifact['path']}"
+        for artifact in package_artifacts
+        if artifact.get("present")
+    )
+    if scenario_report_error is not None:
+        payload["errors"].append(scenario_report_error)
+    if scenario_report_error is None and scenario_report_traceability["status"] != "passed":
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_REVIEW_KIT_SCENARIO_TRACEABILITY_INVALID",
+                "message": "VS3 human-gate review kit requires scenario-run traceability from the aggregate VS3 scenario report.",
+                "missing_fields": scenario_report_traceability["missing_fields"],
+                "invalid_fields": scenario_report_traceability["invalid_fields"],
+                "row_missing_fields": scenario_report_traceability["row_missing_fields"],
+                "row_invalid_fields": scenario_report_traceability["row_invalid_fields"],
+            }
+        )
+    if not review_kit_ready:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_REVIEW_KIT_INCOMPLETE",
+                "message": "VS3 human-gate review kit is incomplete or cannot be tied to current VS3-L evidence.",
+                "failed_conditions": [
+                    name for name, ok in review_kit_conditions.items() if not ok
+                ],
+                "missing_package_artifacts": missing_package_artifacts,
+                "package_ids_missing_from_report": package_ids_missing_from_report,
+                "missing_human_rows_in_scenario_report": missing_human_ids,
+                "unexpected_human_rows_in_scenario_report": unexpected_human_ids,
+            }
+        )
+    _vs3_attach_human_gate_self_command_transcript(
+        payload,
+        name="human_gate_review_kit_vs3",
+        command=["cornerstone", "human-gate", "review-kit", "--scope", "vs3", "--json"],
+        exit_code=EXIT_SUCCESS if review_kit_ready else EXIT_EVIDENCE_MISSING,
+        json_schema="cs.vs3_human_gate_review_kit.v0",
+        started=started,
+        started_at=started_at,
+        source_tree=_vs3_source_tree_from_report_or_current(root, scenario_report),
+    )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if review_kit_ready else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_human_gate_record_scaffold_template(package: dict[str, Any]) -> dict[str, Any]:
+    template = _vs3_human_gate_review_template(package)
+    record_contract = package.get("review_record_contract", {})
+    allowed_decisions = (
+        list(record_contract.get("allowed_decisions", []))
+        if isinstance(record_contract, dict)
+        else []
+    )
+    if "decision" in template:
+        template["decision"] = ""
+    template["_template_metadata"] = {
+        "template_only": True,
+        "package_alone_is_not_human_evidence": True,
+        "blank_template_is_not_approval": True,
+        "allowed_decisions": allowed_decisions,
+        "package_path": package.get("package_path"),
+        "validation_command": (
+            "cornerstone human-gate validate-record --scope vs3 "
+            f"--scenario {package.get('scenario_id')} --record-file <filled-review-record.json> --json"
+        ),
+        "redaction_required": True,
+    }
+    return template
+
+
+def command_human_gate_record_scaffold(args: argparse.Namespace) -> int:
+    result = _human_gate_vs3_scope_payload("cornerstone human-gate record-scaffold", args)
+    report, _report_path, readiness, payload = result
+    root = repo_root()
+    if readiness is None:
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_report_path, scenario_report_rel = _vs3_local_checkpoint_report_path(root, args.scenario_report)
+    scenario_report: dict[str, Any] = {}
+    scenario_report_error: dict[str, Any] | None = None
+    if not scenario_report_path.exists() or not scenario_report_path.is_file():
+        scenario_report_error = {
+            "code": "CS_VS3_RECORD_SCAFFOLD_SCENARIO_REPORT_MISSING",
+            "message": "VS3 human-gate record scaffold requires the aggregate VS3 scenario report.",
+            "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "scenario_report_path": scenario_report_rel,
+            "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+        }
+    else:
+        try:
+            scenario_report = json.loads(scenario_report_path.read_text())
+        except json.JSONDecodeError as error:
+            scenario_report_error = {
+                "code": "CS_VS3_RECORD_SCAFFOLD_SCENARIO_REPORT_INVALID_JSON",
+                "message": "VS3 human-gate record scaffold scenario report must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+                "scenario_report_path": scenario_report_rel,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+
+    output_dir = resolve_output_path(root, args.output_dir)
+    expected_ids = list(readiness.get("execution_queue_scenario_order", []))
+    package_set = report.get("human_gate_packages", {}) if isinstance(report, dict) else {}
+    packages = package_set.get("packages", []) if isinstance(package_set, dict) else []
+    packages_by_id = {
+        str(package.get("scenario_id")): package
+        for package in packages
+        if isinstance(package, dict) and package.get("scenario_id")
+    }
+    template_paths = {
+        scenario_id: output_dir / f"{scenario_id}.review-record.template.json"
+        for scenario_id in expected_ids
+    }
+    manifest_path = output_dir / "manifest.json"
+    conflicts = [
+        str(path.relative_to(root)) if path.is_relative_to(root) else str(path)
+        for path in [*template_paths.values(), manifest_path]
+        if path.exists() and not args.force
+    ]
+    scenario_summary = scenario_report.get("summary", {}) if isinstance(scenario_report, dict) else {}
+    claim_boundaries = scenario_report.get("claim_boundaries", {}) if isinstance(scenario_report, dict) else {}
+    scenario_results = scenario_report.get("scenario_results", []) if isinstance(scenario_report, dict) else []
+    human_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and (row.get("owner") == "Human" or str(row.get("scenario_id") or row.get("id") or "").startswith("VS3-H"))
+    ]
+    human_rows_marked_pass = [row for row in human_rows if row.get("status") == "PASS"]
+    human_rows_not_human_required = [row for row in human_rows if row.get("status") != "HUMAN_REQUIRED"]
+    scaffold_conditions = {
+        "scenario_report_present_and_valid": scenario_report_error is None,
+        "scenario_report_status_success": scenario_report.get("status") == "success",
+        "scenario_count_57": scenario_summary.get("scenario_count") == 57,
+        "pass_count_50": scenario_summary.get("pass") == 50,
+        "human_required_count_7": scenario_summary.get("human_required") == 7,
+        "blocking_count_0": scenario_summary.get("blocking") == 0,
+        "vs3_l_local_only": claim_boundaries.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED",
+        "vs3_p_not_claimed": claim_boundaries.get("vs3_p") == "NOT_CLAIMED",
+        "readiness_report_success": readiness.get("status") == "success",
+        "seven_expected_human_gate_ids": expected_ids == ["VS3-H01", "VS3-H04", "VS3-H03", "VS3-H05", "VS3-H07", "VS3-H02", "VS3-H06"],
+        "seven_packages_in_observability_report": all(scenario_id in packages_by_id for scenario_id in expected_ids),
+        "h_rows_remain_human_required": len(human_rows_not_human_required) == 0,
+        "no_existing_template_conflicts": len(conflicts) == 0,
+    }
+    ready_to_write = all(scaffold_conditions.values())
+    negative_evidence = {
+        "existing_template_conflicts": len(conflicts),
+        "missing_package_records": len([scenario_id for scenario_id in expected_ids if scenario_id not in packages_by_id]),
+        "human_rows_marked_pass_by_scaffold": 0,
+        "human_rows_marked_pass_in_scenario_report": len(human_rows_marked_pass),
+        "human_rows_not_human_required": len(human_rows_not_human_required),
+        "approval_collected_by_scaffold": 0,
+        "human_decision_recorded_by_scaffold": 0,
+        "filled_record_bodies_persisted_by_scaffold": 0,
+        "vs3_p_unlocked_by_scaffold": 0,
+        "production_readiness_claimed_by_scaffold": 0,
+        "live_provider_readiness_claimed_by_scaffold": 0,
+        "real_idp_readiness_claimed_by_scaffold": 0,
+        "real_network_readiness_claimed_by_scaffold": 0,
+        "migration_restore_readiness_claimed_by_scaffold": 0,
+        "security_acceptance_claimed_by_scaffold": 0,
+        "human_acceptance_claimed_by_scaffold": 0,
+    }
+    template_artifacts: list[dict[str, Any]] = []
+    manifest_artifact: dict[str, Any] = {
+        "path": str(manifest_path.relative_to(root)) if manifest_path.is_relative_to(root) else str(manifest_path),
+        "present": False,
+        "kind": "human_gate_record_scaffold_manifest",
+    }
+    if ready_to_write:
+        output_dir.mkdir(parents=True, exist_ok=True)
+        for scenario_id in expected_ids:
+            package = packages_by_id[scenario_id]
+            template = _vs3_human_gate_record_scaffold_template(package)
+            path = template_paths[scenario_id]
+            path.write_text(json.dumps(template, indent=2, sort_keys=True) + "\n")
+            data = path.read_bytes()
+            template_artifacts.append(
+                {
+                    "scenario_id": scenario_id,
+                    "path": str(path.relative_to(root)) if path.is_relative_to(root) else str(path),
+                    "kind": "human_gate_record_template",
+                    "present": True,
+                    "bytes": len(data),
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                    "validation_command": template["_template_metadata"]["validation_command"],
+                    "template_only": True,
+                    "blank_template_is_not_approval": True,
+                }
+            )
+        manifest_claim_boundary = vs3_human_gate_no_claim_boundary(
+            surface="human_gate_record_scaffold_manifest_template_only"
+        ) | {
+            "scaffold_is_template_only": True,
+            "templates_are_not_human_evidence": True,
+        }
+        manifest_base = {
+            "schema_version": "cs.vs3_human_gate_record_scaffold_manifest.v0",
+            "scope": readiness.get("scope", {}),
+            "final_verdict": "HUMAN_REQUIRED",
+            "review_order": expected_ids,
+            "scenario_report": {
+                "path": scenario_report_rel,
+                "sha256": hashlib.sha256(scenario_report_path.read_bytes()).hexdigest(),
+                "summary": scenario_summary,
+            },
+            "template_artifacts": template_artifacts,
+            "claim_boundary": manifest_claim_boundary,
+            "negative_evidence": negative_evidence,
+        }
+        manifest_id = "vs3hscaffold_" + hashlib.sha256(
+            json.dumps(manifest_base, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:16]
+        manifest = dict(manifest_base)
+        manifest["manifest_id"] = manifest_id
+        manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+        manifest_data = manifest_path.read_bytes()
+        manifest_artifact = {
+            "path": str(manifest_path.relative_to(root)) if manifest_path.is_relative_to(root) else str(manifest_path),
+            "present": True,
+            "kind": "human_gate_record_scaffold_manifest",
+            "bytes": len(manifest_data),
+            "sha256": hashlib.sha256(manifest_data).hexdigest(),
+            "manifest_id": manifest_id,
+        }
+    else:
+        manifest_id = "vs3hscaffold_blocked_" + hashlib.sha256(
+            json.dumps(
+                {
+                    "conditions": scaffold_conditions,
+                    "conflicts": conflicts,
+                    "scenario_report_error": scenario_report_error,
+                    "negative_evidence": negative_evidence,
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+
+    record_scaffold_claim_boundary = vs3_human_gate_no_claim_boundary(
+        surface="human_gate_record_scaffold_template_only"
+    ) | {
+        "scaffold_is_template_only": True,
+        "templates_are_not_human_evidence": True,
+    }
+    record_scaffold = {
+        "schema_version": "cs.vs3_human_gate_record_scaffold.v0",
+        "scaffold_id": manifest_id,
+        "status": "created" if ready_to_write else "blocked",
+        "scope": readiness.get("scope", {}),
+        "output_dir": str(output_dir.relative_to(root)) if output_dir.is_relative_to(root) else str(output_dir),
+        "force": bool(args.force),
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "review_order": expected_ids,
+        "next_scenario_id": readiness.get("next_scenario_id"),
+        "template_artifacts": template_artifacts,
+        "manifest_artifact": manifest_artifact,
+        "claim_boundary": record_scaffold_claim_boundary,
+        "non_mutation_evidence": {
+            "approval_collected_by_scaffold": False,
+            "human_decision_recorded_by_scaffold": False,
+            "filled_record_bodies_persisted_by_scaffold": False,
+            "live_provider_calls_executed_by_scaffold": 0,
+            "external_mutations_executed_by_scaffold": 0,
+            "production_or_onprem_checks_executed_by_scaffold": 0,
+        },
+        "scaffold_conditions": scaffold_conditions,
+        "negative_evidence": negative_evidence,
+        "existing_template_conflicts": conflicts,
+        "operator_rule": (
+            "Fill copies of these templates with dated, signed, redacted evidence; validate filled "
+            "records with cornerstone human-gate validate-record; do not treat template creation as approval."
+        ),
+    }
+    payload["status"] = "success" if ready_to_write else "blocked"
+    payload["vs3_human_gate_record_scaffold_schema_version"] = "cs.vs3_human_gate_record_scaffold.v0"
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["vs3_human_gate_record_scaffold"] = record_scaffold
+    payload["summary"] = {
+        "scaffold_id": manifest_id,
+        "status": record_scaffold["status"],
+        "final_verdict": "HUMAN_REQUIRED",
+        "scenario_count": scenario_summary.get("scenario_count"),
+        "pass": scenario_summary.get("pass"),
+        "human_required": scenario_summary.get("human_required"),
+        "blocking": scenario_summary.get("blocking"),
+        "template_count": len(template_artifacts),
+        "manifest_present": manifest_artifact.get("present") is True,
+        "next_scenario_id": readiness.get("next_scenario_id"),
+        "vs3_l_claim": claim_boundaries.get("vs3_l", "NOT_CLAIMED"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+    }
+    payload["claim_boundary"] = record_scaffold["claim_boundary"]
+    payload["negative_evidence"] = negative_evidence
+    payload["ids"].update({"vs3_human_gate_record_scaffold_id": manifest_id})
+    payload["evidence_refs"].extend(
+        [
+            DEFAULT_VS3_SCENARIO_REPORT,
+            DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+            "cornerstone human-gate review-kit --scope vs3 --json",
+        ]
+    )
+    for artifact in template_artifacts:
+        payload["evidence_refs"].append(f"template:{artifact['path']}")
+    if manifest_artifact.get("present"):
+        payload["evidence_refs"].append(f"manifest:{manifest_artifact['path']}")
+    payload["command_transcripts"] = [
+        {
+            "command": [
+                "cornerstone",
+                "human-gate",
+                "record-scaffold",
+                "--scope",
+                "vs3",
+                "--output-dir",
+                str(output_dir.relative_to(root)) if output_dir.is_relative_to(root) else "<external-output-dir>",
+                "--json",
+            ],
+            "exit_code": 0 if ready_to_write else 4,
+            "json_schema": "cs.cli.v0 + cs.vs3_human_gate_record_scaffold.v0",
+        }
+    ]
+    if scenario_report_error is not None:
+        payload["errors"].append(scenario_report_error)
+    if not ready_to_write:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_SCAFFOLD_BLOCKED",
+                "message": "VS3 human-gate record scaffold cannot be created until required evidence inputs are present and output files can be written without overwrite.",
+                "failed_conditions": [
+                    name for name, ok in scaffold_conditions.items() if not ok
+                ],
+                "existing_template_conflicts": conflicts,
+            }
+        )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if ready_to_write else EXIT_EVIDENCE_MISSING
+
+
+def command_human_gate_validate_record(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if args.scope != "vs3":
+        payload = base_response("cornerstone human-gate validate-record", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
+                "message": "Only --scope vs3 is supported for the local human-gate validate-record command.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    def attach_failure_boundary(payload: dict[str, Any]) -> None:
+        payload["vs3_human_gate_record_validation_schema_version"] = (
+            "cs.vs3_human_gate_record_validation.v0"
+        )
+        payload["final_verdict"] = "HUMAN_REQUIRED"
+        payload["weakest_applicable_scenario_result"] = "HUMAN_REQUIRED"
+        payload["claim_boundary"] = vs3_human_gate_no_claim_boundary(
+            surface="single_record_load_failure_redacted_evidence_only"
+        ) | {
+            "load_failure_is_not_human_evidence": True,
+            "record_file_path_recorded": False,
+        }
+        payload["non_mutation_evidence"] = {
+            "approval_collected_by_validator": False,
+            "human_decision_recorded_by_validator": False,
+            "record_body_persisted_by_validator": False,
+            "record_path_persisted_by_validator": False,
+            "live_provider_calls_executed_by_validator": 0,
+            "external_mutations_executed_by_validator": 0,
+        }
+        payload["negative_evidence"] = {
+            "human_rows_marked_pass_by_validator": 0,
+            "product_claims_allowed_by_validator": 0,
+            "pass_without_owner_promotion_allowed_by_validator": 0,
+            "vs3_p_unlocked_by_validator": 0,
+            "production_readiness_claimed_by_validator": 0,
+            "live_provider_readiness_claimed_by_validator": 0,
+            "real_idp_readiness_claimed_by_validator": 0,
+            "real_network_readiness_claimed_by_validator": 0,
+            "migration_restore_readiness_claimed_by_validator": 0,
+            "security_acceptance_claimed_by_validator": 0,
+            "human_acceptance_claimed_by_validator": 0,
+            "record_body_persisted_by_validator": 0,
+            "record_path_persisted_by_validator": 0,
+            "raw_record_values_in_output": 0,
+        }
+
+    record_file = Path(args.record_file)
+    if not record_file.is_absolute():
+        record_file = root / record_file
+    payload = base_response("cornerstone human-gate validate-record", "success", root)
+    payload.update(
+        {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        }
+    )
+    if not record_file.exists():
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_NOT_FOUND",
+                "message": "VS3 human-gate review record file was not found.",
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    try:
+        record = json.loads(record_file.read_text())
+    except json.JSONDecodeError as error:
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_INVALID_JSON",
+                "message": "VS3 human-gate review record file must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    if not isinstance(record, dict):
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_INVALID_SHAPE",
+                "message": "VS3 human-gate review record file must contain a JSON object.",
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    report, report_path = _get_vs3_observability_report(args)
+    validation = validate_vs3_human_gate_review_record(root, args.scenario, record, record_file, report)
+    payload["vs3_human_gate_record_validation_schema_version"] = "cs.vs3_human_gate_record_validation.v0"
+    payload["vs3_human_gate_record_validation"] = validation
+    payload["observability_report"] = str(report_path.relative_to(root))
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["claim_boundary"] = validation.get(
+        "claim_boundary",
+        vs3_human_gate_no_claim_boundary(surface="single_record_structure_and_safety_only"),
+    )
+    payload["negative_evidence"] = validation.get("negative_evidence", {})
+    payload["summary"] = {
+        "validation_id": validation.get("validation_id"),
+        "scenario_id": validation.get("scenario_id"),
+        "status": validation.get("status"),
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": validation.get("weakest_applicable_scenario_result", "HUMAN_REQUIRED"),
+        "structurally_valid": validation.get("status") == "record_structurally_valid",
+        "matrix_status_after_validation": "HUMAN_REQUIRED",
+        "product_claim_allowed": validation.get("product_claim_allowed") is True,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+        "pass_claim_allowed_by_validator": validation.get("pass_claim_allowed_by_validator") is True,
+        "dependency_unlock_allowed_by_validator": validation.get("dependency_unlock_allowed_by_validator") is True,
+        "record_body_persisted_by_validator": validation.get("non_mutation_evidence", {}).get("record_body_persisted_by_validator") is True,
+        "record_path_persisted_by_validator": validation.get("non_mutation_evidence", {}).get("record_path_persisted_by_validator") is True,
+        "sensitive_marker_findings": validation.get("negative_evidence", {}).get("sensitive_marker_findings", 0),
+        "overclaim_marker_findings": validation.get("negative_evidence", {}).get("overclaim_marker_findings", 0),
+        "promotion_rule": validation.get("promotion_rule"),
+    }
+    if validation.get("validation_id"):
+        payload["ids"].update({"vs3_human_gate_record_validation_id": validation["validation_id"]})
+        payload["evidence_refs"].append(f"vs3_human_gate_record_validation:{validation['validation_id']}")
+    for evidence_ref in validation.get("evidence_refs", []):
+        if evidence_ref:
+            payload["evidence_refs"].append(str(evidence_ref))
+    payload["command_transcripts"] = [
+        {
+            "command": [
+                "cornerstone",
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs3",
+                "--scenario",
+                args.scenario,
+                "--record-file",
+                "<redacted-path>",
+                "--json",
+            ],
+            "exit_code": 0 if validation.get("status") == "record_structurally_valid" else 1,
+            "json_schema": "cs.cli.v0 + cs.vs3_human_gate_record_validation.v0",
+            "record_file_path_recorded": False,
+        }
+    ]
+    if validation.get("status") == "unsupported":
+        payload["status"] = "failed"
+        payload["errors"].extend(validation.get("errors", []))
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    if validation.get("status") != "record_structurally_valid":
+        payload["status"] = "blocked"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_INVALID",
+                "message": "VS3 human-gate review record is not structurally valid or contains unsafe markers.",
+                "structural_errors": validation.get("structural_errors", []),
+                "negative_evidence": validation.get("negative_evidence", {}),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def _vs3_redacted_record_file_ref(record_file: Path) -> dict[str, Any]:
+    exists = record_file.exists() and record_file.is_file()
+    return {
+        "path_recorded_by_status": False,
+        "path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+        "present": exists,
+        "bytes": record_file.stat().st_size if exists else 0,
+        "sha256": hashlib.sha256(record_file.read_bytes()).hexdigest() if exists else None,
+    }
+
+
+def _vs3_human_gate_record_is_blank_template(record: dict[str, Any], validation: dict[str, Any]) -> bool:
+    metadata = record.get("_template_metadata")
+    if isinstance(metadata, dict) and metadata.get("template_only") is True:
+        return True
+    empty_required = validation.get("empty_required_fields", [])
+    return bool(empty_required) and not validation.get("decision_present")
+
+
+def command_human_gate_evidence_status(args: argparse.Namespace) -> int:
+    started = perf_counter()
+    started_at = utc_now()
+    result = _human_gate_vs3_scope_payload("cornerstone human-gate evidence-status", args)
+    report, report_path, readiness, payload = result
+    root = repo_root()
+    if readiness is None:
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_report_path, scenario_report_rel = _vs3_local_checkpoint_report_path(root, args.scenario_report)
+    scenario_report: dict[str, Any] = {}
+    scenario_report_error: dict[str, Any] | None = None
+    if not scenario_report_path.exists() or not scenario_report_path.is_file():
+        scenario_report_error = {
+            "code": "CS_VS3_HUMAN_GATE_EVIDENCE_STATUS_SCENARIO_REPORT_MISSING",
+            "message": "VS3 human-gate evidence status requires the aggregate VS3 scenario report.",
+            "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "scenario_report_path": scenario_report_rel,
+            "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+        }
+    else:
+        try:
+            scenario_report = json.loads(scenario_report_path.read_text())
+        except json.JSONDecodeError as error:
+            scenario_report_error = {
+                "code": "CS_VS3_HUMAN_GATE_EVIDENCE_STATUS_SCENARIO_REPORT_INVALID_JSON",
+                "message": "VS3 human-gate evidence status scenario report must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "scenario_report_path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+                "scenario_report_path": scenario_report_rel,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+
+    record_dir = Path(args.record_dir)
+    if not record_dir.is_absolute():
+        record_dir = root / record_dir
+
+    payload["vs3_human_gate_evidence_status_schema_version"] = "cs.vs3_human_gate_evidence_status.v0"
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["claim_boundary"] = vs3_human_gate_no_claim_boundary(
+        surface="human_gate_evidence_status_report_only"
+    ) | {
+        "evidence_status_is_report_only": True,
+        "blank_templates_are_not_human_evidence": True,
+        "dependency_unlock_allowed_by_structural_validation": False,
+    }
+    payload["non_mutation_evidence"] = {
+        "approval_collected_by_evidence_status": False,
+        "human_decision_recorded_by_evidence_status": False,
+        "record_bodies_persisted_by_evidence_status": False,
+        "record_paths_persisted_by_evidence_status": False,
+        "live_provider_calls_executed_by_evidence_status": 0,
+        "external_mutations_executed_by_evidence_status": 0,
+        "production_or_onprem_checks_executed_by_evidence_status": 0,
+    }
+
+    if not record_dir.exists() or not record_dir.is_dir():
+        payload["status"] = "failed"
+        payload["record_dir"] = {
+            "path_recorded_by_status": False,
+            "path_sha256": hashlib.sha256(str(record_dir).encode("utf-8")).hexdigest(),
+            "present": False,
+        }
+        payload["negative_evidence"] = {
+            "human_rows_marked_pass_by_evidence_status": 0,
+            "vs3_p_unlocked_by_evidence_status": 0,
+            "record_bodies_persisted_by_evidence_status": 0,
+            "record_paths_persisted_by_evidence_status": 0,
+            "raw_record_values_in_output": 0,
+        }
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_EVIDENCE_STATUS_RECORD_DIR_NOT_FOUND",
+                "message": "VS3 human-gate evidence status record directory was not found.",
+                "record_dir_path_recorded": False,
+                "record_dir_path_sha256": payload["record_dir"]["path_sha256"],
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+
+    expected_ids = list(readiness.get("execution_queue_scenario_order", [])) or list(VS3_HUMAN_GATE_REVIEW_ORDER)
+    queue_by_id = {
+        str(row.get("scenario_id")): row
+        for row in readiness.get("queue_rows", [])
+        if isinstance(row, dict) and row.get("scenario_id")
+    }
+    records_by_scenario: dict[str, list[tuple[Path, dict[str, Any]]]] = {}
+    malformed_records: list[dict[str, Any]] = []
+    unsupported_records: list[dict[str, Any]] = []
+    ignored_records: list[dict[str, Any]] = []
+    manifest_present = False
+
+    for record_file in sorted(record_dir.glob("*.json")):
+        file_ref = _vs3_redacted_record_file_ref(record_file)
+        try:
+            record = json.loads(record_file.read_text())
+        except json.JSONDecodeError as error:
+            malformed_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_EVIDENCE_RECORD_INVALID_JSON",
+                    "line": error.lineno,
+                    "column": error.colno,
+                    "record_file": file_ref,
+                }
+            )
+            continue
+        if not isinstance(record, dict):
+            malformed_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_EVIDENCE_RECORD_INVALID_SHAPE",
+                    "record_file": file_ref,
+                }
+            )
+            continue
+        if record.get("schema_version") == "cs.vs3_human_gate_record_scaffold_manifest.v0":
+            manifest_present = True
+            ignored_records.append(
+                {
+                    "kind": "record_scaffold_manifest",
+                    "record_file": file_ref,
+                    "reason": "manifest_is_not_a_review_record",
+                }
+            )
+            continue
+        scenario_id = str(record.get("scenario_id") or "")
+        if scenario_id not in expected_ids:
+            unsupported_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_EVIDENCE_RECORD_UNSUPPORTED_SCENARIO",
+                    "scenario_id_recorded": False,
+                    "scenario_id_sha256": hashlib.sha256(scenario_id.encode("utf-8")).hexdigest(),
+                    "record_file": file_ref,
+                }
+            )
+            continue
+        records_by_scenario.setdefault(scenario_id, []).append((record_file, record))
+
+    scenario_summary = scenario_report.get("summary", {}) if isinstance(scenario_report, dict) else {}
+    claim_boundaries = scenario_report.get("claim_boundaries", {}) if isinstance(scenario_report, dict) else {}
+    scenario_results = scenario_report.get("scenario_results", []) if isinstance(scenario_report, dict) else []
+    scenario_report_traceability = _vs3_scenario_report_traceability_validation(
+        scenario_report,
+        scenario_results if isinstance(scenario_results, list) else [],
+        expected_report_path=scenario_report_rel,
+    )
+    scenario_report_claim_boundary_validation = _vs3_scenario_report_claim_boundary_validation(
+        scenario_report
+    )
+    record_statuses: list[dict[str, Any]] = []
+    structurally_valid_count = 0
+    structurally_invalid_count = 0
+    blank_template_count = 0
+    missing_count = 0
+    duplicate_count = 0
+    sensitive_marker_findings = 0
+    overclaim_marker_findings = 0
+
+    for order, scenario_id in enumerate(expected_ids, start=1):
+        dependencies = list(VS3_HUMAN_GATE_DEPENDENCIES.get(scenario_id, []))
+        files = records_by_scenario.get(scenario_id, [])
+        queue_row = queue_by_id.get(scenario_id, {})
+        base_row: dict[str, Any] = {
+            "review_order": order,
+            "scenario_id": scenario_id,
+            "matrix_status_after_status": "HUMAN_REQUIRED",
+            "depends_on_human_gates": dependencies,
+            "dependency_status": "human_evidence_required" if dependencies else "no_prior_human_gate_dependency",
+            "dependency_unlock_allowed_by_structural_validation": False,
+            "package_path": queue_row.get("package_path"),
+            "required_human_action": queue_row.get("required_human_action"),
+            "expected_evidence": queue_row.get("expected_evidence"),
+            "release_impact": queue_row.get("release_impact"),
+        }
+        if not files:
+            missing_count += 1
+            record_statuses.append(
+                {
+                    **base_row,
+                    "status": "missing",
+                    "validation_status": "not_run_missing_record",
+                    "record_file": {
+                        "present": False,
+                        "path_recorded_by_status": False,
+                    },
+                }
+            )
+            continue
+        if len(files) > 1:
+            duplicate_count += 1
+            record_statuses.append(
+                {
+                    **base_row,
+                    "status": "duplicate",
+                    "validation_status": "not_run_duplicate_records",
+                    "record_file_count": len(files),
+                    "record_files": [_vs3_redacted_record_file_ref(path) for path, _record in files],
+                }
+            )
+            continue
+
+        record_file, record = files[0]
+        validation = validate_vs3_human_gate_review_record(root, scenario_id, record, record_file, report)
+        validation_status = str(validation.get("status") or "")
+        validation_negative = validation.get("negative_evidence", {})
+        if not isinstance(validation_negative, dict):
+            validation_negative = {}
+        sensitive_marker_findings += int(validation_negative.get("sensitive_marker_findings", 0))
+        overclaim_marker_findings += int(validation_negative.get("overclaim_marker_findings", 0))
+        is_blank_template = _vs3_human_gate_record_is_blank_template(record, validation)
+        if validation_status == "record_structurally_valid":
+            status = "structurally_valid"
+            structurally_valid_count += 1
+        elif is_blank_template:
+            status = "blank_template"
+            blank_template_count += 1
+            structurally_invalid_count += 1
+        else:
+            status = "structurally_invalid"
+            structurally_invalid_count += 1
+        record_statuses.append(
+            {
+                **base_row,
+                "status": status,
+                "validation_status": validation_status,
+                "record_file": _vs3_redacted_record_file_ref(record_file),
+                "provided_fields": validation.get("provided_fields", []),
+                "structural_errors": validation.get("structural_errors", []),
+                "missing_required_fields": validation.get("missing_required_fields", []),
+                "empty_required_fields": validation.get("empty_required_fields", []),
+                "invalid_field_formats": validation.get("invalid_field_formats", []),
+                "invalid_field_types": validation.get("invalid_field_types", []),
+                "decision_present": validation.get("decision_present") is True,
+                "decision_allowed": validation.get("decision_allowed") is True,
+                "required_redaction_note_present": validation.get("required_redaction_note_present") is True,
+                "sensitive_marker_findings": validation_negative.get("sensitive_marker_findings", 0),
+                "overclaim_marker_findings": validation_negative.get("overclaim_marker_findings", 0),
+                "matrix_status_after_validation": validation.get("matrix_status_after_validation", "HUMAN_REQUIRED"),
+                "pass_claim_allowed_by_validator": validation.get("pass_claim_allowed_by_validator") is True,
+                "product_claim_allowed": validation.get("product_claim_allowed") is True,
+            }
+        )
+
+    unsupported_count = len(unsupported_records)
+    malformed_count = len(malformed_records)
+    record_status_by_id = {row["scenario_id"]: row for row in record_statuses}
+    for row in record_statuses:
+        dependencies = list(row.get("depends_on_human_gates", []))
+        prerequisite_statuses = [
+            {
+                "scenario_id": dependency_id,
+                "status": record_status_by_id.get(dependency_id, {}).get("status", "missing"),
+                "matrix_status_after_status": record_status_by_id.get(dependency_id, {}).get(
+                    "matrix_status_after_status",
+                    "HUMAN_REQUIRED",
+                ),
+            }
+            for dependency_id in dependencies
+        ]
+        row["dependency_prerequisite_statuses"] = prerequisite_statuses
+        row["dependency_prerequisites_structurally_valid"] = bool(dependencies) and all(
+            prerequisite["status"] == "structurally_valid"
+            for prerequisite in prerequisite_statuses
+        )
+        row["dependency_promotion_required"] = bool(dependencies)
+        if dependencies:
+            row["dependency_status"] = "blocked_pending_human_promotion"
+        else:
+            row["dependency_status"] = "no_prior_human_gate_dependency"
+        row["dependency_unlock_allowed_by_structural_validation"] = False
+
+    filled_record_count = len(record_statuses) - blank_template_count - missing_count - duplicate_count
+    invalid_filled_record_count = structurally_invalid_count - blank_template_count
+    evidence_acceptance_candidate_count = structurally_valid_count
+    dependency_blocked_count = len([row for row in record_statuses if row["depends_on_human_gates"]])
+    dependency_blocked_structurally_valid_count = len(
+        [
+            row
+            for row in record_statuses
+            if row["depends_on_human_gates"] and row["status"] == "structurally_valid"
+        ]
+    )
+    dependency_prerequisites_structurally_valid_count = len(
+        [
+            row
+            for row in record_statuses
+            if row["depends_on_human_gates"]
+            and row.get("dependency_prerequisites_structurally_valid") is True
+        ]
+    )
+    next_record_to_fill = next(
+        (row["scenario_id"] for row in record_statuses if row["status"] != "structurally_valid"),
+        None,
+    )
+    negative_evidence = {
+        "human_rows_marked_pass_by_evidence_status": 0,
+        "product_claims_allowed_by_evidence_status": 0,
+        "pass_without_owner_promotion_allowed_by_evidence_status": 0,
+        "vs3_p_unlocked_by_evidence_status": 0,
+        "production_readiness_claimed_by_evidence_status": 0,
+        "live_provider_readiness_claimed_by_evidence_status": 0,
+        "real_idp_readiness_claimed_by_evidence_status": 0,
+        "real_network_readiness_claimed_by_evidence_status": 0,
+        "migration_restore_readiness_claimed_by_evidence_status": 0,
+        "security_acceptance_claimed_by_evidence_status": 0,
+        "human_acceptance_claimed_by_evidence_status": 0,
+        "record_bodies_persisted_by_evidence_status": 0,
+        "record_paths_persisted_by_evidence_status": 0,
+        "raw_record_values_in_output": 0,
+        "structural_validation_treated_as_acceptance": 0,
+        "dependency_unlock_allowed_by_structural_validation": 0,
+        "missing_record_count": missing_count,
+        "blank_template_count": blank_template_count,
+        "malformed_record_count": malformed_count,
+        "unsupported_record_count": unsupported_count,
+        "duplicate_record_scenario_count": duplicate_count,
+        "blank_template_pending_count": blank_template_count,
+        "filled_record_count": filled_record_count,
+        "invalid_filled_record_count": invalid_filled_record_count,
+        "evidence_acceptance_candidate_count": evidence_acceptance_candidate_count,
+        "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+        "dependency_prerequisites_structurally_valid_count": dependency_prerequisites_structurally_valid_count,
+        "sensitive_marker_findings": sensitive_marker_findings,
+        "overclaim_marker_findings": overclaim_marker_findings,
+        "scenario_report_traceability_failures": 0
+        if scenario_report_traceability["status"] == "passed"
+        else 1,
+        "scenario_report_traceability_missing_fields": len(
+            scenario_report_traceability["missing_fields"]
+        ),
+        "scenario_report_traceability_invalid_fields": len(
+            scenario_report_traceability["invalid_fields"]
+        ),
+        "scenario_report_traceability_row_missing_fields": len(
+            scenario_report_traceability["row_missing_fields"]
+        ),
+        "scenario_report_traceability_row_invalid_fields": len(
+            scenario_report_traceability["row_invalid_fields"]
+        ),
+    }
+    status_report = {
+        "schema_version": "cs.vs3_human_gate_evidence_status.v0",
+        "status": (
+            "success"
+            if scenario_report_error is None and scenario_report_traceability["status"] == "passed"
+            else "blocked_on_scenario_report_traceability"
+        ),
+        "scope": readiness.get("scope", {}),
+        "status_scope": "record_directory_status_only",
+        "observability_report": str(report_path.relative_to(root)) if report_path.is_relative_to(root) else str(report_path),
+        "scenario_report": {
+            "path": scenario_report_rel,
+            "path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            "schema_version": scenario_report.get("schema_version"),
+            "sha256": (
+                hashlib.sha256(scenario_report_path.read_bytes()).hexdigest()
+                if scenario_report_path.exists() and scenario_report_path.is_file()
+                else None
+            ),
+            "status": scenario_report.get("status"),
+            "summary": scenario_summary,
+            "claim_boundary": scenario_report.get("claim_boundary"),
+            "claim_boundaries": scenario_report.get("claim_boundaries"),
+            "claim_boundary_validation": scenario_report_claim_boundary_validation,
+            "traceability_validation": scenario_report_traceability,
+        },
+        "record_dir": {
+            "path_recorded_by_status": False,
+            "path_sha256": hashlib.sha256(str(record_dir).encode("utf-8")).hexdigest(),
+            "present": True,
+            "manifest_present": manifest_present,
+        },
+        "expected_scenario_ids": expected_ids,
+        "record_statuses": record_statuses,
+        "malformed_records": malformed_records,
+        "unsupported_records": unsupported_records,
+        "ignored_records": ignored_records,
+        "claim_boundary": payload["claim_boundary"],
+        "non_mutation_evidence": payload["non_mutation_evidence"],
+        "negative_evidence": negative_evidence,
+        "template_intake_summary": {
+            "template_readiness_status": (
+                "awaiting_human_completion"
+                if blank_template_count
+                else "all_records_submitted_for_structural_review"
+            ),
+            "blank_template_pending_count": blank_template_count,
+            "filled_record_count": filled_record_count,
+            "invalid_filled_record_count": invalid_filled_record_count,
+            "evidence_acceptance_candidate_count": evidence_acceptance_candidate_count,
+            "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+            "dependency_prerequisites_structurally_valid_count": dependency_prerequisites_structurally_valid_count,
+            "next_record_to_fill_scenario_id": next_record_to_fill,
+            "acceptance_boundary": (
+                "Structural validity only identifies a review record as complete enough for human review; "
+                "it does not approve evidence, unlock dependencies, or change any VS3-H row from HUMAN_REQUIRED."
+            ),
+        },
+        "matrix_status_after_status": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "final_verdict": "HUMAN_REQUIRED",
+        "operator_rule": (
+            "This command reports redacted record-directory status only. Blank templates, valid "
+            "structure, and dependency ordering do not record approval, do not unlock dependencies, "
+            "and do not move VS3-H rows out of HUMAN_REQUIRED."
+        ),
+    }
+    status_report["status_report_id"] = (
+        "vs3hstatus_"
+        + hashlib.sha256(
+            json.dumps(
+                {
+                    "expected_scenario_ids": expected_ids,
+                    "record_statuses": [
+                        {
+                            "scenario_id": row["scenario_id"],
+                            "status": row["status"],
+                            "validation_status": row["validation_status"],
+                        }
+                        for row in record_statuses
+                    ],
+                    "negative_evidence": negative_evidence,
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+    )
+    status_report["audit_refs"] = [
+        f"audit:vs3_human_gate_evidence_status:{status_report['status_report_id']}"
+    ]
+    status_report_blocked = scenario_report_error is not None or scenario_report_traceability["status"] != "passed"
+    payload["status"] = "blocked" if status_report_blocked else "success"
+    payload["vs3_human_gate_evidence_status"] = status_report
+    payload["claim_boundaries"] = payload["claim_boundary"]
+    payload["scenario_report"] = status_report["scenario_report"]
+    payload["claim_boundary_from_scenario_report"] = status_report["scenario_report"].get("claim_boundary")
+    payload["claim_boundaries_from_scenario_report"] = status_report["scenario_report"].get("claim_boundaries")
+    payload["summary"] = {
+        "status_report_id": status_report["status_report_id"],
+        "status": status_report["status"],
+        "final_verdict": "HUMAN_REQUIRED",
+        "scenario_count": scenario_summary.get("scenario_count"),
+        "pass": scenario_summary.get("pass"),
+        "human_required": scenario_summary.get("human_required"),
+        "blocking": scenario_summary.get("blocking"),
+        "scenario_report_traceability_status": scenario_report_traceability["status"],
+        "expected_record_count": len(expected_ids),
+        "record_status_count": len(record_statuses),
+        "structurally_valid_count": structurally_valid_count,
+        "structurally_invalid_count": structurally_invalid_count,
+        "missing_record_count": missing_count,
+        "blank_template_count": blank_template_count,
+        "blank_template_pending_count": blank_template_count,
+        "filled_record_count": filled_record_count,
+        "invalid_filled_record_count": invalid_filled_record_count,
+        "evidence_acceptance_candidate_count": evidence_acceptance_candidate_count,
+        "malformed_record_count": malformed_count,
+        "unsupported_record_count": unsupported_count,
+        "duplicate_record_scenario_count": duplicate_count,
+        "dependency_blocked_count": dependency_blocked_count,
+        "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+        "dependency_prerequisites_structurally_valid_count": dependency_prerequisites_structurally_valid_count,
+        "next_scenario_id": readiness.get("next_scenario_id"),
+        "next_record_to_fill_scenario_id": next_record_to_fill,
+        "vs3_l_claim": claim_boundaries.get("vs3_l", "NOT_CLAIMED"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+        "overclaim_marker_findings": overclaim_marker_findings,
+    }
+    payload["negative_evidence"] = negative_evidence
+    payload["ids"].update({"vs3_human_gate_evidence_status_id": status_report["status_report_id"]})
+    payload["audit_refs"].extend(status_report["audit_refs"])
+    payload["evidence_refs"].extend(
+        [
+            DEFAULT_VS3_SCENARIO_REPORT,
+            DEFAULT_VS3_OBSERVABILITY_REPORT,
+            DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+            f"vs3_human_gate_evidence_status:{status_report['status_report_id']}",
+        ]
+    )
+    if scenario_report_error is not None:
+        payload["errors"].append(scenario_report_error)
+    if scenario_report_error is None and scenario_report_traceability["status"] != "passed":
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_EVIDENCE_STATUS_SCENARIO_TRACEABILITY_INVALID",
+                "message": "VS3 human-gate evidence status requires scenario-run traceability from the aggregate VS3 scenario report.",
+                "missing_fields": scenario_report_traceability["missing_fields"],
+                "invalid_fields": scenario_report_traceability["invalid_fields"],
+                "row_missing_fields": scenario_report_traceability["row_missing_fields"],
+                "row_invalid_fields": scenario_report_traceability["row_invalid_fields"],
+            }
+        )
+    _vs3_attach_human_gate_self_command_transcript(
+        payload,
+        name="human_gate_evidence_status_vs3",
+        command=[
+            "cornerstone",
+            "human-gate",
+            "evidence-status",
+            "--scope",
+            "vs3",
+            "--record-dir",
+            "<redacted-dir>",
+            "--json",
+        ],
+        exit_code=EXIT_EVIDENCE_MISSING if status_report_blocked else EXIT_SUCCESS,
+        json_schema="cs.vs3_human_gate_evidence_status.v0",
+        started=started,
+        started_at=started_at,
+        source_tree=_vs3_source_tree_from_report_or_current(root, scenario_report),
+    )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_EVIDENCE_MISSING if status_report_blocked else EXIT_SUCCESS
+
+
+def command_human_gate_validate_records(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if args.scope != "vs3":
+        payload = base_response("cornerstone human-gate validate-records", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
+                "message": "Only --scope vs3 is supported for the local human-gate validate-records command.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    record_dir = Path(args.record_dir)
+    if not record_dir.is_absolute():
+        record_dir = root / record_dir
+    payload = base_response("cornerstone human-gate validate-records", "success", root)
+    payload.update(
+        {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        }
+    )
+    payload["vs3_human_gate_record_validation_set_schema_version"] = "cs.vs3_human_gate_record_validation_set.v0"
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["claim_boundary"] = vs3_human_gate_no_claim_boundary(surface="batch_structure_and_safety_only") | {
+        "batch_validation_is_structure_and_safety_only": True,
+    }
+    payload["non_mutation_evidence"] = {
+        "approval_collected_by_batch_validator": False,
+        "human_decision_recorded_by_batch_validator": False,
+        "record_bodies_persisted_by_batch_validator": False,
+        "record_paths_persisted_by_batch_validator": False,
+        "live_provider_calls_executed_by_batch_validator": 0,
+        "external_mutations_executed_by_batch_validator": 0,
+    }
+
+    if not record_dir.exists() or not record_dir.is_dir():
+        payload["status"] = "failed"
+        payload["record_dir_path_recorded"] = False
+        payload["record_dir_path_sha256"] = hashlib.sha256(str(record_dir).encode("utf-8")).hexdigest()
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_DIR_NOT_FOUND",
+                "message": "VS3 human-gate review record directory was not found.",
+                "record_dir_path_recorded": False,
+                "record_dir_path_sha256": payload["record_dir_path_sha256"],
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    report, report_path = _get_vs3_observability_report(args)
+    readiness = vs3_human_gate_readiness_report(root, report)
+    expected_ids = list(readiness.get("execution_queue_scenario_order", []))
+    record_files_by_scenario: dict[str, list[Path]] = {}
+    malformed_records: list[dict[str, Any]] = []
+    unsupported_records: list[dict[str, Any]] = []
+    for record_file in sorted(record_dir.glob("*.json")):
+        try:
+            record = json.loads(record_file.read_text())
+        except json.JSONDecodeError as error:
+            malformed_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_RECORD_INVALID_JSON",
+                    "line": error.lineno,
+                    "column": error.colno,
+                    "record_file_path_recorded": False,
+                    "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+                }
+            )
+            continue
+        if not isinstance(record, dict):
+            malformed_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_RECORD_INVALID_SHAPE",
+                    "record_file_path_recorded": False,
+                    "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+                }
+            )
+            continue
+        scenario_id = str(record.get("scenario_id") or "")
+        if scenario_id not in expected_ids:
+            unsupported_records.append(
+                {
+                    "code": "CS_VS3_HUMAN_GATE_RECORD_UNSUPPORTED_SCENARIO",
+                    "scenario_id_recorded": False,
+                    "scenario_id_sha256": hashlib.sha256(scenario_id.encode("utf-8")).hexdigest(),
+                    "record_file_path_recorded": False,
+                    "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+                }
+            )
+            continue
+        record_files_by_scenario.setdefault(scenario_id, []).append(record_file)
+
+    duplicate_scenario_ids = sorted(
+        scenario_id for scenario_id, files in record_files_by_scenario.items() if len(files) > 1
+    )
+    missing_scenario_ids = [
+        scenario_id
+        for scenario_id in expected_ids
+        if scenario_id not in record_files_by_scenario
+    ]
+    validations: list[dict[str, Any]] = []
+    for scenario_id in expected_ids:
+        files = record_files_by_scenario.get(scenario_id, [])
+        if len(files) != 1:
+            continue
+        record_file = files[0]
+        record = json.loads(record_file.read_text())
+        validations.append(
+            validate_vs3_human_gate_review_record(root, scenario_id, record, record_file, report)
+        )
+
+    invalid_validations = [
+        validation
+        for validation in validations
+        if validation.get("status") != "record_structurally_valid"
+    ]
+    sensitive_marker_findings = sum(
+        int(validation.get("negative_evidence", {}).get("sensitive_marker_findings", 0))
+        for validation in validations
+    )
+    overclaim_marker_findings = sum(
+        int(validation.get("negative_evidence", {}).get("overclaim_marker_findings", 0))
+        for validation in validations
+    )
+    structurally_valid_count = len(validations) - len(invalid_validations)
+    dependency_blocked_structurally_valid_count = len(
+        [
+            validation
+            for validation in validations
+            if validation.get("status") == "record_structurally_valid"
+            and validation.get("depends_on_human_gates")
+        ]
+    )
+    validation_set_status = (
+        "record_set_structurally_valid"
+        if (
+            len(validations) == len(expected_ids)
+            and not invalid_validations
+            and not missing_scenario_ids
+            and not duplicate_scenario_ids
+            and not malformed_records
+            and not unsupported_records
+        )
+        else "record_set_structurally_invalid"
+    )
+    negative_evidence = {
+        "human_rows_marked_pass_by_batch_validator": 0,
+        "product_claims_allowed_by_batch_validator": 0,
+        "pass_without_owner_promotion_allowed_by_batch_validator": 0,
+        "vs3_p_unlocked_by_batch_validator": 0,
+        "production_readiness_claimed_by_batch_validator": 0,
+        "live_provider_readiness_claimed_by_batch_validator": 0,
+        "real_idp_readiness_claimed_by_batch_validator": 0,
+        "real_network_readiness_claimed_by_batch_validator": 0,
+        "migration_restore_readiness_claimed_by_batch_validator": 0,
+        "security_acceptance_claimed_by_batch_validator": 0,
+        "human_acceptance_claimed_by_batch_validator": 0,
+        "live_provider_calls_executed_by_batch_validator": 0,
+        "external_mutations_executed_by_batch_validator": 0,
+        "record_bodies_persisted_by_batch_validator": 0,
+        "record_paths_persisted_by_batch_validator": 0,
+        "raw_record_values_in_output": 0,
+        "dependency_unlock_allowed_by_batch_validator": 0,
+        "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+        "sensitive_marker_findings": sensitive_marker_findings,
+        "overclaim_marker_findings": overclaim_marker_findings,
+        "missing_record_count": len(missing_scenario_ids),
+        "duplicate_record_scenario_count": len(duplicate_scenario_ids),
+        "malformed_record_count": len(malformed_records),
+        "unsupported_record_count": len(unsupported_records),
+    }
+    validation_set = {
+        "schema_version": "cs.vs3_human_gate_record_validation_set.v0",
+        "status": validation_set_status,
+        "scope": readiness.get("scope", {}),
+        "validation_scope": "batch_structure_and_safety_only",
+        "observability_report": str(report_path.relative_to(root)),
+        "record_dir": {
+            "path_recorded_by_batch_validator": False,
+            "path_sha256": hashlib.sha256(str(record_dir).encode("utf-8")).hexdigest(),
+        },
+        "expected_scenario_ids": expected_ids,
+        "validation_count": len(validations),
+        "structurally_valid_count": structurally_valid_count,
+        "structurally_invalid_count": len(invalid_validations),
+        "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+        "missing_record_scenario_ids": missing_scenario_ids,
+        "duplicate_record_scenario_ids": duplicate_scenario_ids,
+        "malformed_records": malformed_records,
+        "unsupported_records": unsupported_records,
+        "record_validations": validations,
+        "claim_boundary": payload["claim_boundary"],
+        "non_mutation_evidence": payload["non_mutation_evidence"],
+        "negative_evidence": negative_evidence,
+        "matrix_status_after_validation": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "final_verdict": "HUMAN_REQUIRED",
+        "promotion_rule": (
+            "This batch validator checks reviewer-record structure and redaction safety only. "
+            "It never records approval, never persists raw reviewer content, and never moves "
+            "VS3-H rows out of HUMAN_REQUIRED."
+        ),
+        "dependency_order_guard": {
+            "status": "passed",
+            "structurally_valid_dependent_records": dependency_blocked_structurally_valid_count,
+            "dependency_unlock_allowed_by_batch_validator": False,
+            "promotion_required_before_dependency_unlock": True,
+        },
+        "evidence_refs": [
+            DEFAULT_VS3_OBSERVABILITY_REPORT,
+            DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+            "human_gate_record_validation_set:redacted_record_dir",
+        ],
+        "audit_refs": [],
+    }
+    validation_set["validation_set_id"] = (
+        "vs3hvalset_"
+        + hashlib.sha256(
+            json.dumps(
+                {
+                    "expected_scenario_ids": expected_ids,
+                    "validation_ids": [validation.get("validation_id") for validation in validations],
+                    "negative_evidence": negative_evidence,
+                    "status": validation_set_status,
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest()[:16]
+    )
+    payload["vs3_human_gate_record_validation_set"] = validation_set
+    payload["summary"] = {
+        "validation_set_id": validation_set["validation_set_id"],
+        "status": validation_set_status,
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "validation_count": len(validations),
+        "structurally_valid_count": structurally_valid_count,
+        "structurally_invalid_count": len(invalid_validations),
+        "dependency_blocked_structurally_valid_count": dependency_blocked_structurally_valid_count,
+        "missing_record_count": len(missing_scenario_ids),
+        "duplicate_record_scenario_count": len(duplicate_scenario_ids),
+        "malformed_record_count": len(malformed_records),
+        "unsupported_record_count": len(unsupported_records),
+        "sensitive_marker_findings": sensitive_marker_findings,
+        "overclaim_marker_findings": overclaim_marker_findings,
+        "matrix_status_after_validation": "HUMAN_REQUIRED",
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+        "pass_claim_allowed_by_batch_validator": False,
+        "vs3_p_unlock_allowed": False,
+    }
+    payload["ids"].update({"vs3_human_gate_record_validation_set_id": validation_set["validation_set_id"]})
+    payload["evidence_refs"].append(
+        f"vs3_human_gate_record_validation_set:{validation_set['validation_set_id']}"
+    )
+    for evidence_ref in validation_set["evidence_refs"]:
+        payload["evidence_refs"].append(str(evidence_ref))
+    payload["negative_evidence"] = negative_evidence
+    payload["command_transcripts"] = [
+        {
+            "command": [
+                "cornerstone",
+                "human-gate",
+                "validate-records",
+                "--scope",
+                "vs3",
+                "--record-dir",
+                "<redacted-dir>",
+                "--json",
+            ],
+            "exit_code": 0 if validation_set_status == "record_set_structurally_valid" else 1,
+            "json_schema": "cs.cli.v0 + cs.vs3_human_gate_record_validation_set.v0",
+            "record_dir_path_recorded": False,
+        }
+    ]
+    if validation_set_status != "record_set_structurally_valid":
+        payload["status"] = "blocked"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_HUMAN_GATE_RECORD_SET_INVALID",
+                "message": "VS3 human-gate review record set is incomplete, duplicated, malformed, unsupported, or structurally unsafe.",
+                "negative_evidence": negative_evidence,
+                "missing_record_scenario_ids": missing_scenario_ids,
+                "duplicate_record_scenario_ids": duplicate_scenario_ids,
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_human_gate_vs3_p_gate(args: argparse.Namespace) -> int:
+    started = perf_counter()
+    started_at = utc_now()
+    root = repo_root()
+    if args.scope != "vs3":
+        payload = base_response("cornerstone human-gate vs3-p-gate", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
+                "message": "Only --scope vs3 is supported for the local VS3-P human-gate command.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_report_path, scenario_report_rel = _vs3_local_checkpoint_report_path(
+        root,
+        args.scenario_report,
+    )
+    payload = base_response("cornerstone human-gate vs3-p-gate", "blocked", root)
+    payload.update(
+        {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+            "vs3_p_gate_schema_version": "cs.vs3_p_human_gate.v0",
+            "final_verdict": "HUMAN_REQUIRED",
+            "claim_boundary": vs3_human_gate_no_claim_boundary(
+                surface="human_gate_vs3_p_gate_block_only"
+            ) | {
+                "vs3_l_local_dev_claim_may_exist": True,
+            },
+            "non_mutation_evidence": {
+                "approval_collected_by_vs3_p_gate": False,
+                "human_decision_recorded_by_vs3_p_gate": False,
+                "record_bodies_persisted_by_vs3_p_gate": False,
+                "live_provider_calls_executed_by_vs3_p_gate": 0,
+                "external_mutations_executed_by_vs3_p_gate": 0,
+                "production_or_onprem_checks_executed_by_vs3_p_gate": 0,
+            },
+        }
+    )
+    if not scenario_report_path.exists() or not scenario_report_path.is_file():
+        path_digest = hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest()
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_SCENARIO_REPORT_MISSING",
+                "message": "VS3 scenario report is required before evaluating the VS3-P human gate.",
+                "scenario_report_path_recorded": False,
+                "scenario_report_path_sha256": path_digest,
+            }
+        )
+        payload["summary"] = {
+            "status": "blocked",
+            "final_verdict": "HUMAN_REQUIRED",
+            "vs3_p_ready": False,
+            "scenario_report_present": False,
+        }
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    try:
+        scenario_report = json.loads(scenario_report_path.read_text())
+    except json.JSONDecodeError as error:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_SCENARIO_REPORT_INVALID_JSON",
+                "message": "VS3 scenario report must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "scenario_report_path_recorded": False,
+                "scenario_report_path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            }
+        )
+        payload["summary"] = {
+            "status": "blocked",
+            "final_verdict": "HUMAN_REQUIRED",
+            "vs3_p_ready": False,
+            "scenario_report_present": True,
+        }
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    scenario_results = scenario_report.get("scenario_results", [])
+    if not isinstance(scenario_results, list):
+        scenario_results = []
+    scenario_report_traceability = _vs3_scenario_report_traceability_validation(
+        scenario_report,
+        scenario_results,
+        expected_report_path=scenario_report_rel,
+    )
+    scenario_report_claim_boundary_validation = _vs3_scenario_report_claim_boundary_validation(
+        scenario_report
+    )
+    ai_blocking_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and row.get("owner") != "Human"
+        and row.get("status") != "PASS"
+    ]
+    human_rows = [
+        row
+        for row in scenario_results
+        if isinstance(row, dict)
+        and (row.get("owner") == "Human" or str(row.get("scenario_id", "")).startswith("VS3-H"))
+    ]
+    expected_human_ids = [f"VS3-H{index:02d}" for index in range(1, 8)]
+    actual_human_ids = [
+        str(row.get("scenario_id") or row.get("id") or "")
+        for row in human_rows
+    ]
+    missing_human_ids = [
+        scenario_id for scenario_id in expected_human_ids if scenario_id not in actual_human_ids
+    ]
+    unexpected_human_ids = [
+        scenario_id for scenario_id in actual_human_ids if scenario_id not in expected_human_ids
+    ]
+    duplicate_human_ids = sorted(
+        {scenario_id for scenario_id in actual_human_ids if actual_human_ids.count(scenario_id) > 1}
+    )
+    human_row_identity_invalid = bool(
+        missing_human_ids
+        or unexpected_human_ids
+        or duplicate_human_ids
+        or len(actual_human_ids) != 7
+    )
+    unresolved_human_rows = [
+        row
+        for row in human_rows
+        if row.get("status") != "PASS"
+    ]
+    human_rows_marked_pass = [
+        row
+        for row in human_rows
+        if row.get("status") == "PASS"
+    ]
+    claim_boundaries = scenario_report.get("claim_boundaries", {})
+    if not isinstance(claim_boundaries, dict):
+        claim_boundaries = {}
+    summary = scenario_report.get("summary", {})
+    if not isinstance(summary, dict):
+        summary = {}
+    overclaim_violations = {
+        key: value
+        for key, value in {
+            "vs3_p": claim_boundaries.get("vs3_p"),
+            "production": claim_boundaries.get("production"),
+            "production_onprem": claim_boundaries.get("production_onprem"),
+            "live_provider": claim_boundaries.get("live_provider"),
+            "real_idp": claim_boundaries.get("real_idp"),
+            "real_network": claim_boundaries.get("real_network"),
+            "migration_restore": claim_boundaries.get("migration_restore"),
+            "security_acceptance": claim_boundaries.get("security_acceptance"),
+            "human_acceptance": claim_boundaries.get("human_acceptance"),
+        }.items()
+        if value not in {None, "NOT_CLAIMED"}
+    }
+    gate_status = (
+        "blocked_on_scenario_report_traceability"
+        if scenario_report_traceability["status"] != "passed"
+        else (
+            "blocked_on_ai_rows"
+            if ai_blocking_rows
+            else (
+                "blocked_on_human_row_identity_mismatch"
+                if human_row_identity_invalid
+                else (
+                    "blocked_on_human_pass_claim_without_promotion_evidence"
+                    if human_rows_marked_pass
+                    else (
+                        "blocked_on_human_required_evidence"
+                        if unresolved_human_rows
+                        else "blocked_until_owner_promotion_record"
+                    )
+                )
+            )
+        )
+    )
+    blockers = [
+        {
+            "scenario_id": row.get("scenario_id"),
+            "status": row.get("status"),
+            "required_human_action": row.get("verification_method"),
+            "expected_evidence": row.get("required_evidence"),
+            "release_impact": row.get("pass_fail_criteria"),
+        }
+        for row in unresolved_human_rows
+    ]
+    negative_evidence = {
+        "vs3_p_unlocked_by_gate": 0,
+        "production_readiness_claimed_by_gate": 0,
+        "live_provider_readiness_claimed_by_gate": 0,
+        "real_idp_readiness_claimed_by_gate": 0,
+        "real_network_readiness_claimed_by_gate": 0,
+        "migration_restore_readiness_claimed_by_gate": 0,
+        "security_acceptance_claimed_by_gate": 0,
+        "human_acceptance_claimed_by_gate": 0,
+        "approvals_collected_by_vs3_p_gate": 0,
+        "human_required_rows_marked_pass_in_scenario_report": len(human_rows_marked_pass),
+        "human_pass_claims_rejected_by_gate": len(human_rows_marked_pass),
+        "unresolved_human_required_rows": len(unresolved_human_rows),
+        "missing_human_required_rows_in_scenario_report": len(missing_human_ids),
+        "unexpected_human_required_rows_in_scenario_report": len(unexpected_human_ids),
+        "duplicate_human_required_rows_in_scenario_report": len(duplicate_human_ids),
+        "human_required_row_identity_mismatches": 1 if human_row_identity_invalid else 0,
+        "scenario_report_traceability_failures": 0
+        if scenario_report_traceability["status"] == "passed"
+        else 1,
+        "scenario_report_traceability_missing_fields": len(
+            scenario_report_traceability["missing_fields"]
+        ),
+        "scenario_report_traceability_invalid_fields": len(
+            scenario_report_traceability["invalid_fields"]
+        ),
+        "scenario_report_traceability_row_missing_fields": len(
+            scenario_report_traceability["row_missing_fields"]
+        ),
+        "scenario_report_traceability_row_invalid_fields": len(
+            scenario_report_traceability["row_invalid_fields"]
+        ),
+        "ai_blocking_rows": len(ai_blocking_rows),
+        "overclaim_boundary_violations": len(overclaim_violations),
+        "structural_validation_treated_as_acceptance": 0,
+    }
+    gate = {
+        "schema_version": "cs.vs3_p_human_gate.v0",
+        "status": gate_status,
+        "scenario_report": {
+            "path": scenario_report_rel,
+            "path_recorded": scenario_report_rel != "<external-scenario-report-path>",
+            "path_recorded_by_gate": False,
+            "path_sha256": hashlib.sha256(str(scenario_report_path).encode("utf-8")).hexdigest(),
+            "sha256": hashlib.sha256(scenario_report_path.read_bytes()).hexdigest(),
+            "schema_version": scenario_report.get("schema_version"),
+            "status": scenario_report.get("status"),
+            "claim_boundary": scenario_report.get("claim_boundary"),
+            "claim_boundaries": scenario_report.get("claim_boundaries"),
+            "claim_boundary_validation": scenario_report_claim_boundary_validation,
+            "traceability_validation": scenario_report_traceability,
+        },
+        "scenario_summary": summary,
+        "claim_boundaries": claim_boundaries,
+        "ai_blocking_rows": [
+            {"scenario_id": row.get("scenario_id"), "status": row.get("status")}
+            for row in ai_blocking_rows
+        ],
+        "human_required_blockers": blockers,
+        "human_pass_claim_rows": [
+            {"scenario_id": row.get("scenario_id"), "status": row.get("status")}
+            for row in human_rows_marked_pass
+        ],
+        "human_required_ids": [row.get("scenario_id") for row in human_rows],
+        "expected_human_required_ids": expected_human_ids,
+        "actual_human_required_ids": actual_human_ids,
+        "missing_human_required_ids": missing_human_ids,
+        "unexpected_human_required_ids": unexpected_human_ids,
+        "duplicate_human_required_ids": duplicate_human_ids,
+        "required_before_vs3_p": [
+            "VS3-H01 signed owner architecture/security/dependency/migration approval.",
+            "VS3-H02 independent security review and retest evidence.",
+            "VS3-H03 real IdP mapping and revocation evidence.",
+            "VS3-H04 real on-prem network/firewall/proxy/service-mesh evidence.",
+            "VS3-H05 approved live-provider rehearsal with redacted evidence.",
+            "VS3-H06 human operator UX/trust acceptance or rejection record.",
+            "VS3-H07 supervised migration/backup/restore drill evidence.",
+            "Separate owner-approved promotion record that explicitly scopes VS3-P.",
+        ],
+        "claim_boundary": payload["claim_boundary"],
+        "non_mutation_evidence": payload["non_mutation_evidence"],
+        "negative_evidence": negative_evidence,
+        "final_verdict": "HUMAN_REQUIRED",
+        "vs3_p_ready": False,
+        "promotion_rule": (
+            "This gate can only block or explain VS3-P readiness. It does not collect approval, "
+            "does not persist reviewer content, does not treat structural validation as acceptance, "
+            "and does not unlock VS3-P."
+        ),
+        "evidence_refs": [
+            DEFAULT_VS3_SCENARIO_REPORT,
+            DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR,
+            "cornerstone human-gate report --scope vs3 --json",
+        ],
+        "audit_refs": [],
+    }
+    gate["gate_id"] = "vs3pgate_" + hashlib.sha256(
+        json.dumps(
+            {
+                "status": gate_status,
+                "scenario_report_sha256": gate["scenario_report"]["sha256"],
+                "ai_blocking": gate["ai_blocking_rows"],
+                "human_required_ids": gate["human_required_ids"],
+                "negative_evidence": negative_evidence,
+            },
+            sort_keys=True,
+        ).encode("utf-8")
+    ).hexdigest()[:16]
+    gate["audit_refs"] = [f"audit:vs3_p_human_gate:{gate['gate_id']}"]
+    payload["vs3_p_human_gate"] = gate
+    payload["summary"] = {
+        "gate_id": gate["gate_id"],
+        "status": gate_status,
+        "final_verdict": "HUMAN_REQUIRED",
+        "vs3_p_ready": False,
+        "vs3_l_claim": claim_boundaries.get("vs3_l", "NOT_CLAIMED"),
+        "vs3_p_claim": "NOT_CLAIMED",
+        "scenario_count": summary.get("scenario_count"),
+        "pass": summary.get("pass"),
+        "scenario_report_traceability_status": scenario_report_traceability["status"],
+        "human_required": len(human_rows),
+        "expected_human_required_rows": len(expected_human_ids),
+        "missing_human_required_rows": len(missing_human_ids),
+        "unexpected_human_required_rows": len(unexpected_human_ids),
+        "duplicate_human_required_rows": len(duplicate_human_ids),
+        "unresolved_human_required_rows": len(unresolved_human_rows),
+        "human_required_rows_marked_pass": len(human_rows_marked_pass),
+        "ai_blocking_rows": len(ai_blocking_rows),
+        "product_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "real_idp_readiness_claim_allowed": False,
+        "real_network_readiness_claim_allowed": False,
+        "migration_restore_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+    }
+    payload["negative_evidence"] = negative_evidence
+    payload["claim_boundaries"] = payload["claim_boundary"]
+    payload["scenario_report"] = gate["scenario_report"]
+    payload["claim_boundary_from_scenario_report"] = gate["scenario_report"].get("claim_boundary")
+    payload["claim_boundaries_from_scenario_report"] = gate["scenario_report"].get("claim_boundaries")
+    payload["evidence_refs"].extend(gate["evidence_refs"])
+    payload["audit_refs"].extend(gate["audit_refs"])
+    payload["ids"].update({"vs3_p_human_gate_id": gate["gate_id"]})
+    _vs3_attach_human_gate_self_command_transcript(
+        payload,
+        name="human_gate_vs3_p_gate",
+        command=[
+            "cornerstone",
+            "human-gate",
+            "vs3-p-gate",
+            "--scope",
+            "vs3",
+            "--scenario-report",
+            "<redacted-path>",
+            "--json",
+        ],
+        exit_code=EXIT_EVIDENCE_MISSING,
+        json_schema="cs.vs3_p_human_gate.v0",
+        started=started,
+        started_at=started_at,
+        source_tree=_vs3_source_tree_from_report_or_current(root, scenario_report),
+    )
+    if scenario_report_traceability["status"] != "passed":
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_SCENARIO_TRACEABILITY_INVALID",
+                "message": "VS3-P gate requires scenario-run traceability from the aggregate VS3 scenario report before evaluating promotion readiness.",
+                "missing_fields": scenario_report_traceability["missing_fields"],
+                "invalid_fields": scenario_report_traceability["invalid_fields"],
+                "row_missing_fields": scenario_report_traceability["row_missing_fields"],
+                "row_invalid_fields": scenario_report_traceability["row_invalid_fields"],
+            }
+        )
+    if ai_blocking_rows:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_AI_ROWS_INCOMPLETE",
+                "message": "VS3-P is blocked because AI-verifiable VS3 rows are not all PASS.",
+                "ai_blocking_count": len(ai_blocking_rows),
+            }
+        )
+    if unresolved_human_rows:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_HUMAN_EVIDENCE_REQUIRED",
+                "message": "VS3-P is blocked until VS3-H01 through VS3-H07 have dated signed human/on-prem evidence and a separate owner promotion decision.",
+                "unresolved_human_required_rows": [row.get("scenario_id") for row in unresolved_human_rows],
+            }
+        )
+    if human_row_identity_invalid:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_HUMAN_ROWS_MISMATCH",
+                "message": "VS3-P is blocked because the scenario report must contain exactly VS3-H01 through VS3-H07 before human evidence or owner promotion can be evaluated.",
+                "expected_human_required_rows": expected_human_ids,
+                "actual_human_required_rows": actual_human_ids,
+                "missing_human_required_rows": missing_human_ids,
+                "unexpected_human_required_rows": unexpected_human_ids,
+                "duplicate_human_required_rows": duplicate_human_ids,
+            }
+        )
+    if human_rows_marked_pass:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_HUMAN_PASS_CLAIM_REJECTED",
+                "message": "VS3-P rejects scenario reports that mark human-required rows PASS without the separate human/external evidence and owner promotion record.",
+                "human_rows_marked_pass": [row.get("scenario_id") for row in human_rows_marked_pass],
+            }
+        )
+    if overclaim_violations:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_OVERCLAIM_BOUNDARY",
+                "message": "VS3 scenario report contains claim boundaries stronger than current evidence allows.",
+                "overclaim_boundary_violations": overclaim_violations,
+            }
+        )
+    if not payload["errors"]:
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_P_GATE_OWNER_PROMOTION_REQUIRED",
+                "message": "VS3-P remains blocked until a separate owner-approved promotion record is attached.",
+            }
+        )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_EVIDENCE_MISSING
 
 
 def command_search_query(args: argparse.Namespace) -> int:
@@ -2390,6 +10584,421 @@ def command_access_evaluate(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if decision["decision"] == "allow" else EXIT_POLICY_DENIED
 
 
+def _write_vs3_request_context_report(root: Path, report: dict[str, Any]) -> Path:
+    report_path = root / "reports/security/vs3-request-context-proof.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    return report_path
+
+
+def command_principal_context_resolve(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = run_vs3_request_context_proof(root)
+    report_path = _write_vs3_request_context_report(root, report)
+    request_context = report["trusted_request_context"]
+    payload = base_response("cornerstone principal context resolve", report["status"], root)
+    payload.update(request_context["scope"])
+    payload["schema_version"] = "cs.cli.v0"
+    payload["request_context_schema_version"] = request_context["schema_version"]
+    payload["request_context"] = request_context
+    payload["request_context_digest"] = report["request_context_digest"]
+    payload["proof_boundary"] = report["proof_boundary"]
+    payload["policy_decisions"] = [report["policy_decision"]]
+    payload["ids"].update(
+        {
+            "principal_id": request_context["trusted_principal"]["principal_id"],
+            "membership_snapshot_id": request_context["membership_snapshot"]["membership_snapshot_id"],
+            "request_context_digest": report["request_context_digest"],
+        }
+    )
+    payload["evidence_refs"].append("report:reports/security/vs3-request-context-proof.json")
+    payload["audit_refs"].append(report["policy_decision"]["audit_ref"])
+    payload["policy_decision_refs"].append(f"policy:{report['policy_decision']['decision_id']}")
+    payload["output_path"] = str(report_path)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_access_check(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = run_vs3_request_context_proof(root)
+    report_path = _write_vs3_request_context_report(root, report)
+    request_context = report["trusted_request_context"]
+    operation_rows = [
+        row for row in report["mission_policy_matrix"] if row.get("operation") == args.operation
+    ]
+    if not operation_rows:
+        payload = base_response("cornerstone access check", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_ACCESS_OPERATION_UNSUPPORTED",
+                "message": "The requested VS3 access-check operation is not part of the local RequestContext proof.",
+                "operation": args.operation,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    access_check = operation_rows[0]
+    status = "allowed" if access_check["decision"] == "allow" else "denied"
+    policy_decision = {
+        "decision_id": access_check["policy_decision_id"],
+        "decision": access_check["decision"],
+        "reason_code": (
+            "VS3_MISSION_WORKSPACE_AUTHORITY_ALLOW"
+            if access_check["decision"] == "allow"
+            else "VS3_TENANT_MEMBERSHIP_ONLY_INSUFFICIENT"
+        ),
+        "input_digest": report["request_context_digest"],
+        "audit_ref": access_check["audit_ref"],
+        "resolution_path": "Activate an explicit workspace or mission grant when the operation is allowed by policy.",
+    }
+    payload = base_response("cornerstone access check", status, root)
+    payload.update(request_context["scope"])
+    payload["access_check_schema_version"] = "cs.vs3_access_check.v0"
+    payload["request_context_digest"] = report["request_context_digest"]
+    payload["proof_boundary"] = report["proof_boundary"]
+    payload["access_check"] = access_check
+    payload["policy_decisions"] = [policy_decision]
+    payload["ids"].update(
+        {
+            "policy_decision_id": policy_decision["decision_id"],
+            "request_context_digest": report["request_context_digest"],
+            "operation": args.operation,
+        }
+    )
+    payload["evidence_refs"].append("report:reports/security/vs3-request-context-proof.json")
+    payload["audit_refs"].append(access_check["audit_ref"])
+    payload["policy_decision_refs"].append(f"policy:{policy_decision['decision_id']}")
+    payload["output_path"] = str(report_path)
+    if access_check["decision"] != "allow":
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_ACCESS_POLICY_DENIED",
+                "message": "Tenant membership alone does not authorize this operation.",
+                "resolution_path": policy_decision["resolution_path"],
+            }
+        )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if access_check["decision"] == "allow" else EXIT_PERMISSION_DENIED
+
+
+def command_security_vs3_request_context(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = run_vs3_request_context_proof(root)
+    report_path = _write_vs3_request_context_report(root, report)
+    payload = base_response("cornerstone security vs3-request-context", report["status"], root)
+    payload.update(report["trusted_request_context"]["scope"])
+    payload.update(report)
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"] = ["report:reports/security/vs3-request-context-proof.json"]
+    payload["audit_refs"] = report["audit_refs"]
+    payload["policy_decision_refs"] = [f"policy:{decision_id}" for decision_id in report["policy_decision_refs"]]
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_postgres_rls_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_POSTGRES_RLS_REPORT
+
+
+def _load_vs3_postgres_rls_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_postgres_rls_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_postgres_rls_report(args: argparse.Namespace, *, refresh_default: bool = False) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_postgres_rls_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    reuse_report = getattr(args, "reuse_vs2_local_range_report", None)
+    should_refresh = refresh_default and not use_existing
+    if should_refresh or reuse_report or not report_path.exists():
+        report = run_vs3_postgres_rls_proof(
+            root,
+            reuse_local_range_report=Path(reuse_report) if reuse_report else None,
+        )
+        return report, report_path
+    existing = _load_vs3_postgres_rls_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_postgres_rls_proof(root)
+    return report, report_path
+
+
+def _vs3_rls_base_payload(command: str, report: dict[str, Any], report_path: Path, root: Path) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_postgres_rls_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["source_report"] = report.get("source_report", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].extend(
+        [
+            f"report:{DEFAULT_VS3_POSTGRES_RLS_REPORT}",
+            f"report:{report.get('source_report', {}).get('path', 'reports/security/vs2-local-range.json')}",
+        ]
+    )
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    return payload
+
+
+def command_security_vs3_postgres_rls(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args, refresh_default=True)
+    payload = _vs3_rls_base_payload("cornerstone security vs3-postgres-rls", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_tenant_rls_inventory(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args)
+    payload = _vs3_rls_base_payload("cornerstone tenant rls-inventory", report, report_path, root)
+    payload["tenant_rls_inventory_schema_version"] = "cs.vs3_tenant_rls_inventory.v0"
+    payload["tenant_rls_inventory"] = {
+        "durable_object_families": report.get("durable_object_families", []),
+        "schema_inventory": report.get("schema_inventory", {}),
+        "pg_policies_inventory": report.get("pg_policies_inventory", {}),
+    }
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_tenant_rls_isolation(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args)
+    payload = _vs3_rls_base_payload("cornerstone tenant rls-isolation", report, report_path, root)
+    payload["tenant_rls_isolation_schema_version"] = "cs.vs3_tenant_rls_isolation.v0"
+    payload["tenant_rls_isolation"] = {
+        "read_isolation_matrix": report.get("read_isolation_matrix", {}),
+        "mutation_matrix": report.get("mutation_matrix", {}),
+        "negative_evidence": report.get("negative_evidence", {}),
+    }
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_tenant_migration_rehearsal(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args)
+    payload = _vs3_rls_base_payload("cornerstone tenant migration-rehearsal", report, report_path, root)
+    payload["tenant_migration_rehearsal_schema_version"] = "cs.vs3_tenant_migration_rehearsal.v0"
+    payload["tenant_migration_rehearsal"] = report.get("migration_quarantine_rollback", {})
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_backup_create(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args)
+    payload = _vs3_rls_base_payload("cornerstone backup create", report, report_path, root)
+    backup_restore = report.get("backup_restore", {})
+    payload["backup_schema_version"] = "cs.vs3_backup_manifest.v0"
+    payload["backup"] = {
+        "status": backup_restore.get("status"),
+        "dump": backup_restore.get("dump"),
+        "primary_counts_before": backup_restore.get("primary_counts_before"),
+        "primary_tenant_export": backup_restore.get("primary_tenant_export"),
+        "checks": backup_restore.get("checks", {}),
+    }
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_restore_verify(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_postgres_rls_report(args)
+    payload = _vs3_rls_base_payload("cornerstone restore verify", report, report_path, root)
+    backup_restore = report.get("backup_restore", {})
+    payload["restore_schema_version"] = "cs.vs3_restore_verification.v0"
+    payload["restore_verification"] = {
+        "status": backup_restore.get("status"),
+        "restore_counts": backup_restore.get("restore_counts"),
+        "restore_rls": backup_restore.get("restore_rls"),
+        "restore_audit": backup_restore.get("restore_audit"),
+        "restore_tenant_export": backup_restore.get("restore_tenant_export"),
+        "checks": backup_restore.get("checks", {}),
+    }
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def _vs3_opa_policy_report_path(root: Path) -> Path:
+    return root / DEFAULT_VS3_OPA_POLICY_REPORT
+
+
+def _load_vs3_opa_policy_report(root: Path) -> dict[str, Any] | None:
+    report_path = _vs3_opa_policy_report_path(root)
+    if not report_path.exists():
+        return None
+    try:
+        return json.loads(report_path.read_text())
+    except ValueError:
+        return None
+
+
+def _get_vs3_opa_policy_report(args: argparse.Namespace, *, refresh_default: bool = False) -> tuple[dict[str, Any], Path]:
+    root = repo_root()
+    report_path = _vs3_opa_policy_report_path(root)
+    use_existing = bool(getattr(args, "use_existing", False))
+    reuse_report = getattr(args, "reuse_vs2_local_range_report", None)
+    should_refresh = refresh_default and not use_existing
+    if should_refresh or reuse_report or not report_path.exists():
+        report = run_vs3_opa_policy_proof(
+            root,
+            reuse_local_range_report=Path(reuse_report) if reuse_report else None,
+        )
+        return report, report_path
+    existing = _load_vs3_opa_policy_report(root)
+    if existing is not None:
+        return existing, report_path
+    report = run_vs3_opa_policy_proof(root)
+    return report, report_path
+
+
+def _vs3_opa_base_payload(command: str, report: dict[str, Any], report_path: Path, root: Path) -> dict[str, Any]:
+    payload = base_response(command, report.get("status", "failed"), root)
+    payload["schema_version"] = "cs.cli.v0"
+    payload["vs3_opa_policy_schema_version"] = report.get("schema_version")
+    payload["proof_boundary"] = report.get("proof_boundary", {})
+    payload["scenario_status"] = report.get("scenario_status", {})
+    payload["checks"] = report.get("checks", {})
+    payload["negative_evidence"] = report.get("negative_evidence", {})
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].append(f"report:{DEFAULT_VS3_OPA_POLICY_REPORT}")
+    payload["audit_refs"].extend(report.get("audit_refs", []))
+    payload["policy_decision_refs"].extend([f"policy:{decision_id}" for decision_id in report.get("policy_decision_refs", [])])
+    return payload
+
+
+def command_security_vs3_opa_policy(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_opa_policy_report(args, refresh_default=True)
+    payload = _vs3_opa_base_payload("cornerstone security vs3-opa-policy", report, report_path, root)
+    payload.update(report)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_policy_evaluate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report, report_path = _get_vs3_opa_policy_report(args)
+    input_path = Path(args.input)
+    if not input_path.is_absolute():
+        input_path = root / input_path
+    payload = _vs3_opa_base_payload("cornerstone policy evaluate", report, report_path, root)
+    payload["policy_evaluate_schema_version"] = "cs.vs3_policy_evaluate.v0"
+    payload["input_path"] = str(input_path)
+    if not input_path.exists():
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_POLICY_INPUT_NOT_FOUND",
+                "message": "The requested VS3 policy input file was not found.",
+                "path": str(input_path),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    try:
+        policy_input = json.loads(input_path.read_text())
+    except ValueError as error:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_POLICY_INPUT_INVALID_JSON",
+                "message": str(error),
+                "path": str(input_path),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    decision = evaluate_vs3_policy_input(root, policy_input)
+    payload["status"] = "allowed" if decision["decision"] == "allow" else decision["decision"]
+    payload["policy_input_digest"] = decision["input_digest"]
+    payload["policy_decision"] = decision
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['decision_id']}")
+    payload["audit_refs"].extend(decision.get("audit_refs", []))
+    payload["evidence_refs"].extend(decision.get("evidence_refs", []))
+    payload["ids"].update(
+        {
+            "policy_decision_id": decision["decision_id"],
+            "policy_input_digest": decision["input_digest"],
+        }
+    )
+    if decision["decision"] != "allow":
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_POLICY_DENIED",
+                "message": ",".join(decision.get("reason_codes", [])) or "policy_denied",
+                "resolution_path": decision.get("safe_resolution"),
+            }
+        )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if decision["decision"] == "allow" else EXIT_POLICY_DENIED
+
+
+def command_policy_bundle_activate(args: argparse.Namespace) -> int:
+    root = repo_root()
+    if not args.dry_run:
+        report, report_path = _get_vs3_opa_policy_report(args)
+        payload = _vs3_opa_base_payload("cornerstone policy bundle activate", report, report_path, root)
+        lifecycle = report.get("bundle_lifecycle", {})
+        payload["status"] = "failed"
+        payload["policy_bundle_activate_schema_version"] = "cs.vs3_policy_bundle_activate.v0"
+        payload["dry_run"] = False
+        payload["bundle_activation"] = {
+            "status": "blocked_non_dry_run",
+            "active_revision_before": lifecycle.get("active_revision_before"),
+            "bundle_hash": lifecycle.get("bundle_hash"),
+            "invalid_bundle_activated": lifecycle.get("invalid_bundle_activated"),
+            "production_activation": "NOT_CLAIMED",
+            "human_security_acceptance": "HUMAN_REQUIRED",
+            "owner_approval_required": True,
+        }
+        payload["errors"].append(
+            {
+                "code": "CS_VS3_POLICY_BUNDLE_DRY_RUN_REQUIRED",
+                "message": "VS3 policy bundle activation requires --dry-run in this local proof slice.",
+                "resolution_path": "Run cornerstone policy bundle activate --dry-run --json and collect owner approval before any non-local activation.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    report, report_path = _get_vs3_opa_policy_report(args)
+    payload = _vs3_opa_base_payload("cornerstone policy bundle activate", report, report_path, root)
+    lifecycle = report.get("bundle_lifecycle", {})
+    payload["policy_bundle_activate_schema_version"] = "cs.vs3_policy_bundle_activate.v0"
+    payload["dry_run"] = True
+    payload["bundle_activation"] = {
+        "status": "dry_run_passed" if lifecycle.get("status") == "passed" else "dry_run_failed",
+        "active_revision_before": lifecycle.get("active_revision_before"),
+        "active_revision_after_invalid_bundle": lifecycle.get("active_revision_after_invalid_bundle"),
+        "bundle_hash": lifecycle.get("bundle_hash"),
+        "invalid_bundle_activated": lifecycle.get("invalid_bundle_activated"),
+        "first_start_failure_decision": lifecycle.get("first_start_failure_decision"),
+        "cache_invalidation_support": lifecycle.get("cache_invalidation_support"),
+        "production_activation": "NOT_CLAIMED",
+        "human_security_acceptance": "HUMAN_REQUIRED",
+    }
+    first_start_decision = lifecycle.get("first_start_failure_decision", {})
+    if first_start_decision.get("decision_id"):
+        payload["policy_decision_refs"].append(f"policy:{first_start_decision['decision_id']}")
+        payload["audit_refs"].extend(first_start_decision.get("audit_refs", []))
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report.get("status") == "success" and lifecycle.get("status") == "passed" else EXIT_EVIDENCE_MISSING
+
+
 def command_source_readonly_test(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
@@ -2974,6 +11583,7 @@ def command_pack_activate(args: argparse.Namespace) -> int:
         mission_id=args.mission_id,
         org_admin_shortcut=args.org_admin_shortcut,
         policy_id=args.policy_id,
+        dry_run=args.dry_run,
         scope=requested_scope,
     )
     error_exit = handle_pack_error(payload, result, args.json)
@@ -2983,6 +11593,24 @@ def command_pack_activate(args: argparse.Namespace) -> int:
     decision = result["policy_decision"]
     payload["activation"] = activation
     payload["ids"].update({"pack_id": args.pack_id, "activation_id": activation["activation_id"]})
+    payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
+    payload["policy_decisions"] = [decision]
+    payload["policy_decision_refs"].append(f"policy:{decision['policy_decision_id']}")
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_pack_revoke(args: argparse.Namespace) -> int:
+    _, store, requested_scope, payload = pack_payload(args, "cornerstone pack revoke")
+    result = store.revoke_agent_pack(args.pack_id, reason=args.reason, scope=requested_scope)
+    error_exit = handle_pack_error(payload, result, args.json)
+    if error_exit is not None:
+        return error_exit
+    revocation = result["revocation"]
+    decision = result["policy_decision"]
+    payload["revocation"] = revocation
+    payload["ids"].update({"pack_id": args.pack_id, "revocation_id": revocation["revocation_id"]})
     payload["evidence_refs"].append(f"agent_pack:{args.pack_id}")
     payload["policy_decisions"] = [decision]
     payload["policy_decision_refs"].append(f"policy:{decision['policy_decision_id']}")
@@ -5687,6 +14315,94 @@ def command_security_vs2_local_proof(args: argparse.Namespace) -> int:
     )
     print_payload(payload, args.json)
     return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_security_vs3_evidence_reconcile(args: argparse.Namespace) -> int:
+    root = repo_root()
+    report = reconcile_vs3_evidence(root)
+    report_path = root / "reports/security/vs3-evidence-reconciliation.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+    payload = base_response("cornerstone security vs3-evidence-reconcile", report["status"], root)
+    payload.update(report)
+    payload["output_path"] = str(report_path)
+    payload["evidence_refs"].extend(
+        [
+            "report:reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json",
+            "report:reports/scenario/vs2-policy-tenancy-egress-final.json",
+            "report:docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_FINAL_REPORT_2026-06-20.md",
+            "report:reports/security/vs3-evidence-reconciliation.json",
+        ]
+    )
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
+
+
+def command_security_vs3_overclaim_lint(args: argparse.Namespace) -> int:
+    root = repo_root()
+    reconciliation_path_arg = getattr(args, "reconciliation_report", None)
+    reconciliation_path = Path(reconciliation_path_arg) if reconciliation_path_arg else None
+    if reconciliation_path is not None and not reconciliation_path.is_absolute():
+        reconciliation_path = root / reconciliation_path
+    source_reconciliation_report_path = reconciliation_path or (root / DEFAULT_VS3_RECONCILIATION_REPORT)
+
+    errors: list[dict[str, Any]] = []
+    if reconciliation_path is not None:
+        try:
+            reconciliation = json.loads(reconciliation_path.read_text())
+        except FileNotFoundError:
+            reconciliation = {}
+            errors.append(
+                {
+                    "code": "CS_VS3_RECONCILIATION_REPORT_MISSING",
+                    "message": f"VS3 reconciliation report not found: {reconciliation_path}",
+                }
+            )
+        except ValueError as error:
+            reconciliation = {}
+            errors.append(
+                {
+                    "code": "CS_VS3_RECONCILIATION_REPORT_INVALID_JSON",
+                    "message": str(error),
+                }
+            )
+    else:
+        reconciliation = reconcile_vs3_evidence(root)
+        source_reconciliation_report_path.parent.mkdir(parents=True, exist_ok=True)
+        source_reconciliation_report_path.write_text(json.dumps(reconciliation, indent=2, sort_keys=True) + "\n")
+
+    lint = _vs3_overclaim_lint(root, reconciliation)
+    source_reconciliation_identity = _vs3_report_file_identity(root, source_reconciliation_report_path)
+    if lint.get("status") != "passed" and not errors:
+        errors.append(
+            {
+                "code": "CS_VS3_OVERCLAIM_LINT_FAILED",
+                "message": "VS3 overclaim lint found unallowlisted readiness claims or claim-boundary overclaims.",
+                "claim_boundary_overclaim_fields": lint.get("claim_boundary_overclaim_fields", []),
+                "finding_count": len(lint.get("findings", [])),
+            }
+        )
+    status = "failed" if errors or lint.get("status") != "passed" else "success"
+    output_path = Path(getattr(args, "output", None) or "reports/security/vs3-overclaim-lint.json")
+    if not output_path.is_absolute():
+        output_path = root / output_path
+    report = {
+        **lint,
+        "source_reconciliation_report": source_reconciliation_identity["path"],
+        "source_reconciliation_report_identity": source_reconciliation_identity,
+        "errors": errors,
+        "status": "failed" if errors or lint.get("status") != "passed" else "passed",
+    }
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+
+    payload = base_response("cornerstone security vs3-overclaim-lint", status, root)
+    payload.update(report)
+    payload["output_path"] = str(output_path)
+    payload["evidence_refs"].append(f"report:{output_path.relative_to(root)}" if output_path.is_relative_to(root) else f"report:{output_path}")
+    payload["evidence_refs"].append(f"report:{source_reconciliation_identity['path']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if status == "success" else EXIT_EVIDENCE_MISSING
 
 
 def command_security_vs2_local_range(args: argparse.Namespace) -> int:
@@ -9823,12 +18539,128 @@ def command_watch_result_approve_memory(args: argparse.Namespace) -> int:
 
 def command_scenario_list(args: argparse.Namespace) -> int:
     root = repo_root()
+    started_at = utc_now()
+    started = perf_counter()
     scenarios = list_scenarios(root, args.set)
     payload = base_response("cornerstone scenario list", "success", root)
     payload["scenario_set"] = args.set
     payload["count"] = len(scenarios)
     payload["scenarios"] = scenarios
+    type_counts: dict[str, int] = {}
+    phase_counts: dict[str, int] = {}
+    execution_classification_counts: dict[str, int] = {}
+    for scenario in scenarios:
+        scenario_type = scenario.get("type")
+        if scenario_type:
+            type_counts[scenario_type] = type_counts.get(scenario_type, 0) + 1
+        phase = scenario.get("phase")
+        if phase:
+            phase_counts[phase] = phase_counts.get(phase, 0) + 1
+        execution_classification = scenario.get("execution_classification")
+        if execution_classification:
+            execution_classification_counts[execution_classification] = (
+                execution_classification_counts.get(execution_classification, 0) + 1
+            )
+    if type_counts:
+        payload["counts"] = type_counts
+    if phase_counts:
+        payload["phase_counts"] = phase_counts
+    if args.set in {"vs3", "vs3-onprem-trusted-extension"}:
+        required_mapping_fields = [
+            "id",
+            "type",
+            "phase",
+            "given",
+            "when",
+            "expected_result",
+            "verification_method",
+            "required_evidence",
+            "pass_fail_criteria",
+            "initial_status",
+            "owner",
+            "execution_classification",
+        ]
+        missing_required_fields = [
+            {
+                "id": scenario.get("id"),
+                "missing": [field for field in required_mapping_fields if not scenario.get(field)],
+            }
+            for scenario in scenarios
+            if any(not scenario.get(field) for field in required_mapping_fields)
+        ]
+        duplicate_id_count = len(scenarios) - len({scenario.get("id") for scenario in scenarios})
+        payload["matrix_source"] = DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX
+        payload["contract_source"] = DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT
+        payload["full_mapping"] = {
+            "status": "mapped" if not missing_required_fields and duplicate_id_count == 0 else "failed",
+            "scenario_count": len(scenarios),
+            "counts": type_counts,
+            "phase_counts": phase_counts,
+            "execution_classification_counts": execution_classification_counts,
+            "required_mapping_fields": required_mapping_fields,
+            "missing_required_field_count": len(missing_required_fields),
+            "missing_required_fields": missing_required_fields,
+            "duplicate_id_count": duplicate_id_count,
+            "current_slice": "VS3-0",
+            "current_slice_ids": [
+                scenario["id"]
+                for scenario in scenarios
+                if scenario.get("execution_classification") == "in_this_slice"
+            ],
+            "proof_boundary": {
+                "vs3_l": "NOT_CLAIMED_BY_LIST",
+                "vs3_p": "NOT_CLAIMED",
+                "production_onprem": "NOT_CLAIMED",
+                "security_acceptance": "NOT_CLAIMED",
+                "human_acceptance": "NOT_CLAIMED",
+            },
+        }
     payload["evidence_refs"].append(f"doc:{args.set}:scenario-registry")
+    if args.set in {"vs3", "vs3-onprem-trusted-extension"}:
+        payload["evidence_refs"].extend(
+            [
+                f"doc:{DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT}",
+                f"doc:{DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX}",
+            ]
+        )
+        transcript_command = ["cornerstone", "scenario", "list", "--set", args.set]
+        if args.json:
+            transcript_command.append("--json")
+        list_transcript = command_transcript_entry(
+            name="scenario_list_vs3_onprem_trusted_extension",
+            command=transcript_command,
+            exit_code=EXIT_SUCCESS,
+            timed_out=False,
+            elapsed_seconds=perf_counter() - started,
+            stdout_tail=[],
+            stderr_tail=[],
+        )
+        list_transcript.update(
+            {
+                "arguments": transcript_command[1:],
+                "started_at": started_at,
+                "ended_at": utc_now(),
+                "output_mode": "json" if args.json else "text",
+                "json_schema": payload["schema_version"],
+                "source_json_schema": "cs.vs3_onprem_trusted_extension_matrix.v0",
+                "cli_schema_version": payload["cli_schema_version"],
+                "scope": {
+                    "tenant_id": payload["tenant_id"],
+                    "owner_id": payload["owner_id"],
+                    "namespace_id": payload["namespace_id"],
+                    "workspace_id": payload["workspace_id"],
+                },
+                "evidence_refs": payload["evidence_refs"],
+                "audit_refs": payload["audit_refs"],
+                "policy_decision_refs": payload["policy_decision_refs"],
+                "ref_summary": {
+                    "evidence_refs_count": len(payload["evidence_refs"]),
+                    "audit_refs_count": len(payload["audit_refs"]),
+                    "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+                },
+            }
+        )
+        payload["command_transcripts"] = [list_transcript]
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -9860,9 +18692,253 @@ def command_scenario_coverage(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if report["ok"] else EXIT_EVIDENCE_MISSING
 
 
+def _vs3_status_neutral_scenario_verify_payload(
+    root: Path,
+    args: argparse.Namespace,
+    *,
+    mode: str,
+    started_at: str,
+    started: float,
+) -> dict[str, Any]:
+    scenarios = list_scenarios(root, "vs3-onprem-trusted-extension")
+    type_counts: dict[str, int] = {}
+    phase_counts: dict[str, int] = {}
+    execution_classification_counts: dict[str, int] = {}
+    for scenario in scenarios:
+        scenario_type = scenario.get("type")
+        if scenario_type:
+            type_counts[scenario_type] = type_counts.get(scenario_type, 0) + 1
+        phase = scenario.get("phase")
+        if phase:
+            phase_counts[phase] = phase_counts.get(phase, 0) + 1
+        execution_classification = scenario.get("execution_classification")
+        if execution_classification:
+            execution_classification_counts[execution_classification] = (
+                execution_classification_counts.get(execution_classification, 0) + 1
+            )
+
+    scenario_results: list[dict[str, Any]] = []
+    human_required: list[dict[str, Any]] = []
+    doc_evidence_refs = [
+        f"doc:{DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT}",
+        f"doc:{DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX}",
+    ]
+    for scenario in scenarios:
+        status = "HUMAN_REQUIRED" if scenario.get("type") == "HUMAN_REQUIRED" else "NOT_RUN"
+        row = {
+            "id": scenario["id"],
+            "scenario_id": scenario["id"],
+            "type": scenario.get("type"),
+            "phase": scenario.get("phase"),
+            "related_requirements": scenario.get("related_requirements"),
+            "given": scenario.get("given"),
+            "when": scenario.get("when"),
+            "then": scenario.get("expected_result"),
+            "implementation_area": scenario.get("implementation_area"),
+            "verification_method": scenario.get("verification_method"),
+            "required_evidence": scenario.get("required_evidence"),
+            "pass_fail_criteria": scenario.get("pass_fail_criteria"),
+            "initial_status": scenario.get("initial_status"),
+            "owner": scenario.get("owner"),
+            "execution_classification": scenario.get("execution_classification"),
+            "classification_reason": scenario.get("classification_reason"),
+            "status": status,
+            "evidence_refs": doc_evidence_refs,
+            "audit_refs": [],
+            "policy_decision_refs": [],
+            "notes": "Status-neutral dry-run/list row; no scenario behavior executed and no PASS claimed.",
+        }
+        scenario_results.append(row)
+        if status == "HUMAN_REQUIRED":
+            human_required.append(
+                {
+                    "id": scenario["id"],
+                    "scenario_id": scenario["id"],
+                    "type": "HUMAN_REQUIRED",
+                    "status": "HUMAN_REQUIRED",
+                    "required_human_action": scenario.get("verification_method"),
+                    "expected_evidence": scenario.get("required_evidence"),
+                    "release_impact": scenario.get("pass_fail_criteria"),
+                }
+            )
+
+    command = ["cornerstone", "scenario", "verify", "vs3-onprem-trusted-extension"]
+    if mode == "dry_run":
+        command.append("--dry-run")
+    if mode == "list":
+        command.append("--list")
+    if args.json:
+        command.append("--json")
+    if args.output:
+        command.extend(["--output", args.output])
+
+    elapsed_seconds = round(perf_counter() - started, 3)
+    payload = base_response("cornerstone scenario verify vs3-onprem-trusted-extension", "success", root)
+    payload.update(
+        {
+            "schema_version": "cs.vs3_onprem_trusted_extension.dry_run.v0",
+            "scenario_set": "vs3-onprem-trusted-extension",
+            "mode": mode,
+            "scenario_count": len(scenario_results),
+            "summary": {
+                "scenario_count": len(scenario_results),
+                "pass": 0,
+                "fail": 0,
+                "not_verified": 0,
+                "not_run": len([row for row in scenario_results if row["status"] == "NOT_RUN"]),
+                "human_required": len(human_required),
+                "blocking": len([row for row in scenario_results if row["status"] == "NOT_RUN"]),
+                "product_feature_claims": "STATUS_NEUTRAL_VS3_VERIFY_DRY_RUN_ONLY",
+            },
+            "counts": type_counts,
+            "phase_counts": phase_counts,
+            "execution_classification_counts": execution_classification_counts,
+            "scenario_results": scenario_results,
+            "scenarios": scenario_results,
+            "human_required": human_required,
+            "human_required_blockers": human_required,
+            "matrix_source": DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX,
+            "contract_source": DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT,
+            "cli_coverage": {
+                "status": "status_neutral",
+                "native_command": "cornerstone scenario verify vs3-onprem-trusted-extension --dry-run --json",
+                "emits_status": True,
+                "emits_counts": True,
+                "emits_per_row_evidence": True,
+                "emits_human_rows": True,
+                "emits_gate_metadata": True,
+                "json_schema": "cs.vs3_onprem_trusted_extension.dry_run.v0",
+                "status_neutral_before_implementation": True,
+                "current_output_status_neutral": True,
+                "current_output_claim": "STATUS_NEUTRAL_VS3_VERIFY_DRY_RUN_ONLY",
+                "emits_command_transcripts": True,
+                "command_transcript_count": 1,
+            },
+            "gate_metadata": {
+                "current_slice": [
+                    scenario["id"]
+                    for scenario in scenarios
+                    if scenario.get("execution_classification") == "in_this_slice"
+                ],
+                "remaining_ai_rows": [
+                    scenario["id"]
+                    for scenario in scenarios
+                    if scenario.get("owner") != "Human"
+                    and scenario.get("execution_classification") != "in_this_slice"
+                ],
+                "human_rows": [row["id"] for row in human_required],
+                "vs3_l": "NOT_CLAIMED_BY_DRY_RUN",
+                "vs3_p": "NOT_CLAIMED",
+            },
+            "proof_boundary": {
+                "surface": "local_status_neutral_dry_run",
+                "vs3_l": "NOT_CLAIMED_BY_DRY_RUN",
+                "vs3_p": "NOT_CLAIMED",
+                "production": "NOT_CLAIMED",
+                "production_onprem": "NOT_CLAIMED",
+                "live_provider": "NOT_CLAIMED",
+                "real_idp": "NOT_CLAIMED",
+                "real_network": "NOT_CLAIMED",
+                "migration_restore": "NOT_CLAIMED",
+                "security_acceptance": "NOT_CLAIMED",
+                "human_acceptance": "NOT_CLAIMED",
+                "human_required_rows": [row["id"] for row in human_required],
+            },
+            "claim_boundaries": {
+                "vs3_l": "NOT_CLAIMED_BY_DRY_RUN",
+                "vs3_p": "NOT_CLAIMED",
+                "production": "NOT_CLAIMED",
+                "production_onprem": "NOT_CLAIMED",
+                "live_provider": "NOT_CLAIMED",
+                "real_idp": "NOT_CLAIMED",
+                "real_network": "NOT_CLAIMED",
+                "migration_restore": "NOT_CLAIMED",
+                "security_acceptance": "NOT_CLAIMED",
+                "human_acceptance": "NOT_CLAIMED",
+            },
+        }
+    )
+    payload["evidence_refs"].extend(doc_evidence_refs)
+    transcript = command_transcript_entry(
+        name="scenario_verify_vs3_onprem_trusted_extension_status_neutral",
+        command=command,
+        exit_code=EXIT_SUCCESS,
+        timed_out=False,
+        elapsed_seconds=elapsed_seconds,
+        stdout_tail=[
+            json.dumps(
+                {
+                    "schema_version": payload.get("cli_schema_version"),
+                    "json_schema": payload.get("schema_version"),
+                    "status": payload.get("status"),
+                    "scenario_set": payload.get("scenario_set"),
+                    "mode": mode,
+                    "summary": payload.get("summary"),
+                },
+                sort_keys=True,
+            )
+        ],
+        stderr_tail=[],
+    )
+    transcript.update(
+        {
+            "arguments": command[1:],
+            "started_at": started_at,
+            "ended_at": utc_now(),
+            "output_mode": "json" if args.json else "text",
+            "json_schema": payload["schema_version"],
+            "cli_schema_version": payload["cli_schema_version"],
+            "scope": {
+                "tenant_id": payload["tenant_id"],
+                "owner_id": payload["owner_id"],
+                "namespace_id": payload["namespace_id"],
+                "workspace_id": payload["workspace_id"],
+                "scope_source": "local_vs3_fixture",
+            },
+            "evidence_refs": payload["evidence_refs"],
+            "audit_refs": payload["audit_refs"],
+            "policy_decision_refs": payload["policy_decision_refs"],
+            "ref_summary": {
+                "evidence_refs_count": len(payload["evidence_refs"]),
+                "audit_refs_count": len(payload["audit_refs"]),
+                "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+            },
+            "stdout_json": {
+                "schema_version": payload.get("cli_schema_version"),
+                "json_schema": payload.get("schema_version"),
+                "status": payload.get("status"),
+                "scenario_set": payload.get("scenario_set"),
+                "mode": mode,
+                "summary": payload.get("summary"),
+                "proof_boundary": payload.get("proof_boundary"),
+            },
+        }
+    )
+    payload["self_command_transcript"] = transcript
+    payload["command_transcripts"] = [transcript]
+    return payload
+
+
 def command_scenario_verify(args: argparse.Namespace) -> int:
     root = repo_root()
+    started_at = utc_now()
     started = perf_counter()
+    if args.contract == "vs3-onprem-trusted-extension" and (args.dry_run or args.list):
+        mode = "dry_run" if args.dry_run else "list"
+        payload = _vs3_status_neutral_scenario_verify_payload(
+            root,
+            args,
+            mode=mode,
+            started_at=started_at,
+            started=started,
+        )
+        if args.output:
+            output_path = (root / args.output).resolve()
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            payload["output_path"] = str(output_path)
+            output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        print_payload(payload, args.json)
+        return EXIT_SUCCESS
     if args.contract == "vs0-scaffold":
         report = verify_vs0_scaffold(root)
     elif args.contract == "vs0-fixtures":
@@ -9936,6 +19012,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             root,
             local_proof_report=Path(args.reuse_vs2_local_proof_report) if args.reuse_vs2_local_proof_report else None,
         )
+    elif args.contract == "vs3-onprem-trusted-extension":
+        report = verify_vs3_onprem_trusted_extension(root)
     elif args.contract == "full-claim-collaboration":
         report = verify_full_claim_collaboration(root)
     elif args.contract == "full-agent-orchestration":
@@ -10023,6 +19101,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs1-ontology-suggest-promote",
                     "connector-contract-adapter",
                     "vs2-policy-tenancy-egress",
+                    "vs3-onprem-trusted-extension",
                     "full-claim-collaboration",
                     "full-agent-orchestration",
                     "full-brain-routing",
@@ -10083,6 +19162,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT
     if args.contract == "vs2-policy-tenancy-egress" and not output_arg:
         output_arg = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
+    if args.contract == "vs3-onprem-trusted-extension" and not output_arg:
+        output_arg = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
     if args.contract == "connector-contract-adapter" and not output_arg and not args.scenario:
         output_arg = "reports/scenario/connector-contract-adapter-2026-06-23.json"
     exit_code = EXIT_SUCCESS if report["status"] == "success" else EXIT_EVIDENCE_MISSING
@@ -10099,20 +19180,99 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         transcript_command.extend(["--reuse-vs2-local-proof-report", args.reuse_vs2_local_proof_report])
     if output_arg:
         transcript_command.extend(["--output", output_arg])
+    transcript_elapsed_seconds = round(perf_counter() - started, 3)
     payload["self_command_transcript"] = command_transcript_entry(
         name=f"scenario_verify_{args.contract}",
         command=transcript_command,
         exit_code=exit_code,
         timed_out=False,
-        elapsed_seconds=perf_counter() - started,
+        elapsed_seconds=transcript_elapsed_seconds,
         stdout_tail=[
             json.dumps(
-                {"status": report.get("status"), "scenario_set": report.get("scenario_set"), "summary": report.get("summary")},
+                {
+                    "schema_version": payload.get("cli_schema_version"),
+                    "json_schema": payload.get("schema_version"),
+                    "status": report.get("status"),
+                    "scenario_set": report.get("scenario_set"),
+                    "final_verdict": payload.get("final_verdict"),
+                    "summary": report.get("summary"),
+                },
                 sort_keys=True,
             )
         ],
         stderr_tail=[],
     )
+    payload["self_command_transcript"]["started_at"] = started_at
+    payload["self_command_transcript"]["ended_at"] = utc_now()
+    if args.contract == "vs3-onprem-trusted-extension":
+        transcript_scope = {
+            "tenant_id": payload.get("tenant_id"),
+            "owner_id": payload.get("owner_id"),
+            "namespace_id": payload.get("namespace_id"),
+            "workspace_id": payload.get("workspace_id"),
+            "scope_source": "local_vs3_fixture",
+        }
+        transcript_evidence_refs = list(payload.get("evidence_refs", []))
+        transcript_audit_refs = list(payload.get("audit_refs", []))
+        transcript_policy_decision_refs = list(payload.get("policy_decision_refs", []))
+        transcript_source_tree = payload.get("source_tree")
+        transcript_stdout_json = {
+            "schema_version": payload.get("cli_schema_version"),
+            "json_schema": payload.get("schema_version"),
+            "status": payload.get("status"),
+            "command": transcript_command,
+            "arguments": transcript_command[1:],
+            "exit_code": exit_code,
+            "elapsed_seconds": transcript_elapsed_seconds,
+            "scenario_set": payload.get("scenario_set"),
+            "final_verdict": payload.get("final_verdict"),
+            "evidence_refs": transcript_evidence_refs,
+            "audit_refs": transcript_audit_refs,
+            "policy_decision_refs": transcript_policy_decision_refs,
+            "scope": transcript_scope,
+            "source_tree": transcript_source_tree,
+            "proof_boundary": {
+                "vs3_l": VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L,
+                "vs3_p": "NOT_CLAIMED",
+                "production": "NOT_CLAIMED",
+                "production_onprem": "NOT_CLAIMED",
+                "live_provider": "NOT_CLAIMED",
+                "real_idp": "NOT_CLAIMED",
+                "real_network": "NOT_CLAIMED",
+                "migration_restore": "NOT_CLAIMED",
+                "security_acceptance": "NOT_CLAIMED",
+                "human_acceptance": "NOT_CLAIMED",
+            },
+        }
+        payload["self_command_transcript"]["arguments"] = transcript_command[1:]
+        payload["self_command_transcript"]["output_mode"] = "json" if args.json else "text"
+        payload["self_command_transcript"]["json_schema"] = payload.get("schema_version")
+        payload["self_command_transcript"]["cli_schema_version"] = payload.get("cli_schema_version")
+        payload["self_command_transcript"]["scope"] = transcript_scope
+        payload["self_command_transcript"]["evidence_refs"] = transcript_evidence_refs
+        payload["self_command_transcript"]["audit_refs"] = transcript_audit_refs
+        payload["self_command_transcript"]["policy_decision_refs"] = transcript_policy_decision_refs
+        payload["self_command_transcript"]["source_tree"] = transcript_source_tree
+        payload["self_command_transcript"]["ref_summary"] = {
+            "evidence_refs_count": len(payload["self_command_transcript"]["evidence_refs"]),
+            "audit_refs_count": len(payload["self_command_transcript"]["audit_refs"]),
+            "policy_decision_refs_count": len(payload["self_command_transcript"]["policy_decision_refs"]),
+        }
+        payload["self_command_transcript"]["stdout_json"] = transcript_stdout_json
+        payload["command_transcripts"] = [payload["self_command_transcript"]]
+        if output_arg:
+            traceability = payload.get("traceability")
+            if isinstance(traceability, dict):
+                traceability["transcript_paths"] = [output_arg]
+            scenario_results = payload.get("scenario_results")
+            if isinstance(scenario_results, list):
+                for row in scenario_results:
+                    if isinstance(row, dict):
+                        row["transcript_paths"] = [output_arg]
+        cli_coverage = payload.get("cli_coverage")
+        if isinstance(cli_coverage, dict):
+            cli_coverage["emits_command_transcripts"] = True
+            cli_coverage["command_transcript_count"] = len(payload["command_transcripts"])
     full_report_path_for_stdout: str | None = None
     full_report_sha256_for_stdout: str | None = None
     if output_arg:
@@ -10175,6 +19335,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
 
 def command_scenario_gate(args: argparse.Namespace) -> int:
     root = repo_root()
+    started_at = utc_now()
+    started = perf_counter()
     report_path = (root / args.report).resolve()
     payload = base_response("cornerstone scenario gate", "success", root)
     if not report_path.exists():
@@ -10190,18 +19352,2632 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
         return EXIT_EVIDENCE_MISSING
 
     data = json.loads(report_path.read_text())
-    rows = data.get("scenario_results", [])
+    rows_raw = data.get("scenario_results", [])
+    rows = rows_raw if isinstance(rows_raw, list) else []
+    scenario_results_not_list = [] if isinstance(rows_raw, list) else ["scenario_results"]
     report_errors = data.get("errors", [])
     blocking = [
         row
         for row in rows
-        if row.get("owner", "AI") != "Human"
+        if isinstance(row, dict)
+        and row.get("owner", "AI") != "Human"
         and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
     ]
     payload["checked_report"] = str(report_path)
     payload["scenario_count"] = len(rows)
+    payload["scenario_results_not_list"] = scenario_results_not_list
     payload["blocking_count"] = len(blocking)
     payload["blocking"] = blocking
+    proof_boundary_markers = (
+        data.get("proof_boundary") if isinstance(data.get("proof_boundary"), dict) else {}
+    )
+    claim_boundary_marker = (
+        data.get("claim_boundary") if isinstance(data.get("claim_boundary"), dict) else {}
+    )
+    claim_boundary_markers = (
+        data.get("claim_boundaries") if isinstance(data.get("claim_boundaries"), dict) else {}
+    )
+    is_vs3_onprem_report = (
+        data.get("schema_version") == "cs.vs3_onprem_trusted_extension.v0"
+        or data.get("scenario_set") == "vs3-onprem-trusted-extension"
+        or data.get("final_verdict")
+        == "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED"
+        or proof_boundary_markers.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+        or claim_boundary_marker.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+        or claim_boundary_markers.get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+    )
+    if is_vs3_onprem_report:
+        human_required_blockers_raw = data.get("human_required_blockers")
+        human_required_blockers = (
+            human_required_blockers_raw if isinstance(human_required_blockers_raw, list) else []
+        )
+        human_required_entries_raw = data.get("human_required")
+        human_required_entries = (
+            human_required_entries_raw if isinstance(human_required_entries_raw, list) else []
+        )
+        source_tree = data.get("source_tree") if isinstance(data.get("source_tree"), dict) else None
+        current_source_tree = _vs3_current_source_tree(root)
+        try:
+            generated_evidence_ignored_paths = {
+                str(report_path.relative_to(root)),
+                *VS3_SCENARIO_GATE_DOWNSTREAM_GENERATED_EVIDENCE_PATHS,
+            }
+        except ValueError:
+            generated_evidence_ignored_paths = set(
+                VS3_SCENARIO_GATE_DOWNSTREAM_GENERATED_EVIDENCE_PATHS
+            )
+        source_tree_current_mismatches = _vs3_source_tree_current_mismatches(
+            source_tree,
+            current_source_tree,
+        )
+        source_tree_current_validation = {
+            "schema_version": "cs.vs3_source_tree_current_validation.v0",
+            "status": "failed" if source_tree_current_mismatches else "passed",
+            "mismatches": source_tree_current_mismatches,
+            "scenario_source_tree_fingerprint": _vs3_source_tree_fingerprint(source_tree),
+            "current_source_tree_fingerprint": _vs3_source_tree_fingerprint(current_source_tree),
+        }
+        source_tree_snapshot_path_validation = _vs3_source_tree_snapshot_path_validation(
+            source_tree,
+            root,
+        )
+        dirty_path_validation = _vs3_source_tree_dirty_path_validation(
+            source_tree,
+            current_source_tree,
+        )
+        generated_dirty_path_validation = _vs3_source_tree_generated_dirty_path_validation(
+            source_tree,
+            current_source_tree,
+            ignored_paths=generated_evidence_ignored_paths,
+        )
+        generated_dirty_snapshot_validation = _vs3_generated_dirty_snapshot_validation(
+            source_tree,
+            current_source_tree,
+            ignored_paths=generated_evidence_ignored_paths,
+        )
+        source_tree_snapshot_coverage_validation = (
+            _vs3_source_tree_snapshot_coverage_validation(
+                source_tree,
+                current_source_tree,
+            )
+        )
+        source_tree_snapshot_entry_validation = (
+            _vs3_source_tree_snapshot_entry_validation(
+                source_tree,
+                current_source_tree,
+            )
+        )
+        try:
+            report_ref_path = report_path.relative_to(root)
+        except ValueError:
+            report_ref_path = report_path
+        report_evidence_ref = f"report:{report_ref_path}"
+        source_summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
+        gate_summary = dict(source_summary)
+        gate_summary.update(
+            {
+                "vs3_l_claim": claim_boundary_markers.get(
+                    "vs3_l",
+                    claim_boundary_marker.get(
+                        "vs3_l",
+                        proof_boundary_markers.get("vs3_l", "NOT_CLAIMED"),
+                    ),
+                ),
+                "vs3_p_claim": claim_boundary_markers.get(
+                    "vs3_p",
+                    claim_boundary_marker.get(
+                        "vs3_p",
+                        proof_boundary_markers.get("vs3_p", "NOT_CLAIMED"),
+                    ),
+                ),
+                "production_readiness_claim_allowed": False,
+                "live_provider_readiness_claim_allowed": False,
+                "real_idp_readiness_claim_allowed": False,
+                "real_network_readiness_claim_allowed": False,
+                "migration_restore_readiness_claim_allowed": False,
+                "security_acceptance_claim_allowed": False,
+                "human_acceptance_claim_allowed": False,
+            }
+        )
+        payload["summary"] = gate_summary
+        payload["final_verdict"] = data.get("final_verdict")
+        payload["proof_boundary"] = data.get("proof_boundary")
+        payload["claim_boundary"] = data.get("claim_boundary")
+        payload["claim_boundaries"] = data.get("claim_boundaries")
+        payload["source_tree"] = source_tree
+        payload["source_tree_current_validation"] = source_tree_current_validation
+        payload["source_tree_snapshot_path_validation"] = source_tree_snapshot_path_validation
+        payload["source_tree_snapshot_coverage_validation"] = (
+            source_tree_snapshot_coverage_validation
+        )
+        payload["source_tree_snapshot_entry_validation"] = (
+            source_tree_snapshot_entry_validation
+        )
+        payload["dirty_path_validation"] = dirty_path_validation
+        payload["generated_dirty_path_validation"] = generated_dirty_path_validation
+        payload["generated_dirty_snapshot_validation"] = generated_dirty_snapshot_validation
+        payload["source_report"] = {
+            "path": str(report_path),
+            "schema_version": data.get("schema_version"),
+            "scenario_set": data.get("scenario_set"),
+            "status": data.get("status"),
+            "final_verdict": data.get("final_verdict"),
+            "summary": data.get("summary"),
+            "proof_boundary": data.get("proof_boundary"),
+            "claim_boundary": data.get("claim_boundary"),
+            "claim_boundaries": data.get("claim_boundaries"),
+            "gate_metadata": data.get("gate_metadata"),
+            "traceability": data.get("traceability"),
+            "source_tree": source_tree,
+            "source_tree_current_validation": source_tree_current_validation,
+            "source_tree_snapshot_path_validation": source_tree_snapshot_path_validation,
+            "source_tree_snapshot_coverage_validation": source_tree_snapshot_coverage_validation,
+            "source_tree_snapshot_entry_validation": source_tree_snapshot_entry_validation,
+            "dirty_path_validation": dirty_path_validation,
+            "generated_dirty_path_validation": generated_dirty_path_validation,
+            "generated_dirty_snapshot_validation": generated_dirty_snapshot_validation,
+            "human_required_blocker_count": len(human_required_blockers)
+            if isinstance(human_required_blockers_raw, list)
+            else None,
+            "human_required_rows": [
+                row.get("scenario_id") or row.get("id")
+                for row in human_required_blockers
+                if isinstance(row, dict)
+            ],
+            "human_required_entry_count": len(human_required_entries)
+            if isinstance(human_required_entries_raw, list)
+            else None,
+        }
+        claims_local_dev_assurance = (
+            data.get("final_verdict") == "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED"
+            or (data.get("proof_boundary") or {}).get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+            or (data.get("claim_boundary") or {}).get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+            or (data.get("claim_boundaries") or {}).get("vs3_l") == "LOCAL_DEV_ASSURANCE_VERIFIED"
+        )
+        expected_report_identity = {
+            "schema_version": "cs.vs3_onprem_trusted_extension.v0",
+            "scenario_set": "vs3-onprem-trusted-extension",
+            "cli_schema_version": SCHEMA_VERSION,
+            "command": "cornerstone scenario verify vs3-onprem-trusted-extension",
+            "version": __version__,
+        }
+        actual_report_identity = {
+            field: data.get(field) for field in expected_report_identity
+        }
+        invalid_report_identity_fields = [
+            field
+            for field, expected_value in expected_report_identity.items()
+            if data.get(field) != expected_value
+        ]
+        report_identity_validation = {
+            "status": "failed" if invalid_report_identity_fields else "passed",
+            "expected": expected_report_identity,
+            "actual": actual_report_identity,
+            "invalid_fields": invalid_report_identity_fields,
+        }
+        payload["report_identity_validation"] = report_identity_validation
+        payload["source_report"]["report_identity_validation"] = report_identity_validation
+        if claims_local_dev_assurance and report_identity_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_REPORT_IDENTITY_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve exact top-level report identity before scenario gate can pass.",
+                    "invalid_fields": invalid_report_identity_fields,
+                    "expected": expected_report_identity,
+                    "actual": actual_report_identity,
+                }
+            )
+        expected_report_runtime_metadata = {
+            "product": "CornerStone",
+            "mode": "local_scaffold",
+            "ids.git_commit": git_commit(root),
+            "output_path": str(report_path),
+        }
+        data_ids = data.get("ids") if isinstance(data.get("ids"), dict) else {}
+        actual_report_runtime_metadata = {
+            "product": data.get("product"),
+            "mode": data.get("mode"),
+            "ids.git_commit": data_ids.get("git_commit"),
+            "output_path": data.get("output_path"),
+        }
+        invalid_report_runtime_metadata_fields = [
+            field
+            for field, expected_value in expected_report_runtime_metadata.items()
+            if actual_report_runtime_metadata.get(field) != expected_value
+        ]
+        report_runtime_metadata_validation = {
+            "status": "failed" if invalid_report_runtime_metadata_fields else "passed",
+            "expected": expected_report_runtime_metadata,
+            "actual": actual_report_runtime_metadata,
+            "invalid_fields": invalid_report_runtime_metadata_fields,
+        }
+        payload["report_runtime_metadata_validation"] = report_runtime_metadata_validation
+        payload["source_report"]["report_runtime_metadata_validation"] = (
+            report_runtime_metadata_validation
+        )
+        if (
+            claims_local_dev_assurance
+            and report_runtime_metadata_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_REPORT_RUNTIME_METADATA_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve exact CornerStone local runtime metadata before scenario gate can pass.",
+                    "invalid_fields": invalid_report_runtime_metadata_fields,
+                    "expected": expected_report_runtime_metadata,
+                    "actual": actual_report_runtime_metadata,
+                }
+            )
+        expected_human_required_rows = [
+            "VS3-H01",
+            "VS3-H02",
+            "VS3-H03",
+            "VS3-H04",
+            "VS3-H05",
+            "VS3-H06",
+            "VS3-H07",
+        ]
+        scenario_rows_by_id = {
+            str(row.get("scenario_id") or row.get("id")): row
+            for row in rows
+            if isinstance(row, dict) and (row.get("scenario_id") or row.get("id"))
+        }
+        reported_scenario_ids = [
+            str(row.get("scenario_id") or row.get("id"))
+            for row in rows
+            if isinstance(row, dict) and (row.get("scenario_id") or row.get("id"))
+        ]
+        expected_scenarios = [
+            scenario
+            for scenario in list_scenarios(root, "vs3-onprem-trusted-extension")
+            if scenario.get("id")
+        ]
+        expected_scenario_ids = [scenario["id"] for scenario in expected_scenarios]
+        expected_scenarios_by_id = {scenario["id"]: scenario for scenario in expected_scenarios}
+        expected_ai_scenario_ids = [
+            scenario_id
+            for scenario_id in expected_scenario_ids
+            if not scenario_id.startswith("VS3-H")
+        ]
+        row_identity_issues: list[dict[str, Any]] = []
+        row_classification_issues: list[dict[str, Any]] = []
+        row_contract_issues: list[dict[str, Any]] = []
+        row_contract_field_map = [
+            ("given", "given"),
+            ("when", "when"),
+            ("then", "expected_result"),
+            ("implementation_area", "implementation_area"),
+            ("verification_method", "verification_method"),
+            ("required_evidence", "required_evidence"),
+            ("pass_fail_criteria", "pass_fail_criteria"),
+        ]
+        for row_index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                row_identity_issues.append(
+                    {
+                        "row_index": row_index,
+                        "id": None,
+                        "scenario_id": None,
+                        "issue": "row_not_object",
+                    }
+                )
+                continue
+            row_id = row.get("id")
+            row_scenario_id = row.get("scenario_id")
+            normalized_row_id = row_id.strip() if isinstance(row_id, str) else ""
+            normalized_row_scenario_id = (
+                row_scenario_id.strip() if isinstance(row_scenario_id, str) else ""
+            )
+            if not normalized_row_id:
+                row_identity_issues.append(
+                    {
+                        "row_index": row_index,
+                        "id": row_id,
+                        "scenario_id": row_scenario_id,
+                        "issue": "missing_id",
+                    }
+                )
+            if not normalized_row_scenario_id:
+                row_identity_issues.append(
+                    {
+                        "row_index": row_index,
+                        "id": row_id,
+                        "scenario_id": row_scenario_id,
+                        "issue": "missing_scenario_id",
+                    }
+                )
+            if (
+                normalized_row_id
+                and normalized_row_scenario_id
+                and normalized_row_id != normalized_row_scenario_id
+            ):
+                row_identity_issues.append(
+                    {
+                        "row_index": row_index,
+                        "id": normalized_row_id,
+                        "scenario_id": normalized_row_scenario_id,
+                        "issue": "id_scenario_id_mismatch",
+                    }
+                )
+            canonical_row_key = normalized_row_scenario_id or normalized_row_id
+            expected_scenario = expected_scenarios_by_id.get(canonical_row_key)
+            if expected_scenario:
+                for field_name in ["type", "phase", "owner", "initial_status"]:
+                    actual_value = row.get(field_name)
+                    expected_value = expected_scenario.get(field_name)
+                    if actual_value != expected_value:
+                        row_classification_issues.append(
+                            {
+                                "row_index": row_index,
+                                "scenario_id": canonical_row_key,
+                                "field": field_name,
+                                "expected": expected_value,
+                                "actual": actual_value,
+                                "issue": "row_classification_mismatch",
+                            }
+                        )
+                for row_field_name, expected_field_name in row_contract_field_map:
+                    actual_value = row.get(row_field_name)
+                    expected_value = expected_scenario.get(expected_field_name)
+                    if actual_value != expected_value:
+                        row_contract_issues.append(
+                            {
+                                "row_index": row_index,
+                                "scenario_id": canonical_row_key,
+                                "field": row_field_name,
+                                "expected": expected_value,
+                                "actual": actual_value,
+                                "issue": "row_contract_mismatch",
+                            }
+                        )
+        duplicate_scenario_ids = sorted(
+            {scenario_id for scenario_id in reported_scenario_ids if reported_scenario_ids.count(scenario_id) > 1}
+        )
+        missing_scenario_ids = [
+            scenario_id
+            for scenario_id in expected_scenario_ids
+            if scenario_id not in reported_scenario_ids
+        ]
+        unexpected_scenario_ids = sorted(
+            scenario_id
+            for scenario_id in reported_scenario_ids
+            if scenario_id not in expected_scenario_ids
+        )
+        human_blocker_ids = [
+            str(row.get("scenario_id") or row.get("id"))
+            for row in human_required_blockers
+            if isinstance(row, dict) and (row.get("scenario_id") or row.get("id"))
+        ]
+        human_required_entry_ids = [
+            str(row.get("scenario_id") or row.get("id"))
+            for row in human_required_entries
+            if isinstance(row, dict) and (row.get("scenario_id") or row.get("id"))
+        ]
+        proof_boundary = data.get("proof_boundary") if isinstance(data.get("proof_boundary"), dict) else {}
+        summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
+        actual_summary_counts = {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if isinstance(row, dict) and row.get("status") == "PASS"]),
+            "fail": len([row for row in rows if isinstance(row, dict) and row.get("status") == "FAIL"]),
+            "not_verified": len(
+                [row for row in rows if isinstance(row, dict) and row.get("status") == "NOT_VERIFIED"]
+            ),
+            "not_run": len([row for row in rows if isinstance(row, dict) and row.get("status") == "NOT_RUN"]),
+            "human_required": len(
+                [row for row in rows if isinstance(row, dict) and row.get("status") == "HUMAN_REQUIRED"]
+            ),
+            "blocking": len(blocking),
+        }
+        expected_summary_counts = {
+            "scenario_count": len(expected_scenario_ids),
+            "pass": len(expected_scenario_ids) - len(expected_human_required_rows),
+            "fail": 0,
+            "not_verified": 0,
+            "not_run": 0,
+            "human_required": len(expected_human_required_rows),
+            "blocking": 0,
+        }
+        mismatched_summary_fields = [
+            field
+            for field, expected in expected_summary_counts.items()
+            if summary.get(field) != expected or actual_summary_counts.get(field) != expected
+        ]
+        coverage_validation = {
+            "status": "passed",
+            "scenario_results_not_list": scenario_results_not_list,
+            "expected_scenario_count": len(expected_scenario_ids),
+            "reported_scenario_count": len(rows),
+            "expected_scenario_ids": expected_scenario_ids,
+            "missing_scenario_ids": missing_scenario_ids,
+            "unexpected_scenario_ids": unexpected_scenario_ids,
+            "duplicate_scenario_ids": duplicate_scenario_ids,
+            "row_identity_issues": row_identity_issues,
+            "row_classification_issues": row_classification_issues,
+            "row_contract_issues": row_contract_issues,
+            "expected_summary_counts": expected_summary_counts,
+            "actual_summary_counts": actual_summary_counts,
+            "reported_summary_counts": {
+                field: summary.get(field)
+                for field in expected_summary_counts
+            },
+            "mismatched_summary_fields": mismatched_summary_fields,
+        }
+        if (
+                scenario_results_not_list
+                or missing_scenario_ids
+                or unexpected_scenario_ids
+                or duplicate_scenario_ids
+                or row_identity_issues
+                or row_classification_issues
+                or row_contract_issues
+                or mismatched_summary_fields
+        ):
+            coverage_validation["status"] = "failed"
+        payload["coverage_validation"] = coverage_validation
+        payload["source_report"]["coverage_validation"] = coverage_validation
+        if claims_local_dev_assurance and coverage_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SCENARIO_COVERAGE_INVALID",
+                    "message": "VS3 local-dev assurance reports must include every frozen VS3 scenario row exactly once and matching summary counts before scenario gate can pass.",
+                    "scenario_results_not_list": scenario_results_not_list,
+                    "missing_scenario_ids": missing_scenario_ids,
+                    "unexpected_scenario_ids": unexpected_scenario_ids,
+                    "duplicate_scenario_ids": duplicate_scenario_ids,
+                    "row_identity_issues": row_identity_issues,
+                    "row_classification_issues": row_classification_issues,
+                    "row_contract_issues": row_contract_issues,
+                    "mismatched_summary_fields": mismatched_summary_fields,
+                }
+            )
+        expected_priority_counts = {
+            "MUST_PASS": len(
+                [scenario for scenario in expected_scenarios if scenario.get("type") == "MUST_PASS"]
+            ),
+            "REGRESSION": len(
+                [scenario for scenario in expected_scenarios if scenario.get("type") == "REGRESSION"]
+            ),
+            "HUMAN_REQUIRED": len(
+                [scenario for scenario in expected_scenarios if scenario.get("type") == "HUMAN_REQUIRED"]
+            ),
+        }
+        expected_matrix_check = {
+            "status": "passed",
+            "row_count": len(expected_scenario_ids),
+            "priority_counts": expected_priority_counts,
+            "initial_status_counts": {
+                "NOT_RUN": len(expected_ai_scenario_ids),
+                "HUMAN_REQUIRED": len(expected_human_required_rows),
+            },
+            "duplicates": [],
+            "missing_cells": [],
+            "missing_from_contract": [],
+            "invalid_initial_status": [],
+            "matrix_error": None,
+            "contract_path": DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT,
+            "matrix_path": DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX,
+            "checks": {
+                "contract_contains_all_ids": True,
+                "contract_present": True,
+                "duplicate_ids_absent": True,
+                "initial_status_counts_expected": True,
+                "initial_status_policy_ok": True,
+                "matrix_present": True,
+                "matrix_readable": True,
+                "priority_counts_expected": True,
+                "required_cells_present": True,
+                "row_count_57": True,
+            },
+        }
+        expected_cli_coverage = {
+            "status": "passed",
+            "native_command": "cornerstone scenario verify vs3-onprem-trusted-extension --json",
+            "json_schema": f"{SCHEMA_VERSION} + cs.vs3_onprem_trusted_extension.v0",
+            "emits_status": True,
+            "emits_counts": True,
+            "emits_per_row_evidence": True,
+            "emits_human_rows": True,
+            "emits_gate_metadata": True,
+            "emits_command_transcripts": True,
+            "command_transcript_count": 1,
+            "initial_coverage_status_neutral_before_implementation": True,
+            "status_neutral_before_implementation": False,
+            "current_output_status_neutral": False,
+            "current_output_claim": summary.get("product_feature_claims"),
+        }
+        matrix_check = data.get("matrix_check") if isinstance(data.get("matrix_check"), dict) else {}
+        cli_coverage = data.get("cli_coverage") if isinstance(data.get("cli_coverage"), dict) else {}
+        matrix_check_invalid_fields = [
+            f"matrix_check.{field}"
+            for field, expected_value in expected_matrix_check.items()
+            if matrix_check.get(field) != expected_value
+        ]
+        cli_coverage_invalid_fields = [
+            f"cli_coverage.{field}"
+            for field, expected_value in expected_cli_coverage.items()
+            if cli_coverage.get(field) != expected_value
+        ]
+        matrix_cli_coverage_validation = {
+            "status": "failed"
+            if matrix_check_invalid_fields or cli_coverage_invalid_fields
+            else "passed",
+            "expected_matrix_check": expected_matrix_check,
+            "actual_matrix_check": matrix_check,
+            "expected_cli_coverage": expected_cli_coverage,
+            "actual_cli_coverage": cli_coverage,
+            "invalid_fields": matrix_check_invalid_fields + cli_coverage_invalid_fields,
+        }
+        payload["matrix_cli_coverage_validation"] = matrix_cli_coverage_validation
+        payload["source_report"]["matrix_cli_coverage_validation"] = (
+            matrix_cli_coverage_validation
+        )
+        if (
+            claims_local_dev_assurance
+            and matrix_cli_coverage_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_MATRIX_CLI_COVERAGE_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve exact matrix structural proof and native CLI coverage before scenario gate can pass.",
+                    "invalid_fields": matrix_cli_coverage_validation["invalid_fields"],
+                    "expected_matrix_check": expected_matrix_check,
+                    "actual_matrix_check": matrix_check,
+                    "expected_cli_coverage": expected_cli_coverage,
+                    "actual_cli_coverage": cli_coverage,
+                }
+            )
+        expected_evidence_reconciliation = reconcile_vs3_evidence(root)
+        evidence_reconciliation_raw = data.get("evidence_reconciliation")
+        evidence_reconciliation = (
+            evidence_reconciliation_raw
+            if isinstance(evidence_reconciliation_raw, dict)
+            else {}
+        )
+        evidence_reconciliation_invalid_fields = (
+            ["evidence_reconciliation"]
+            if not isinstance(evidence_reconciliation_raw, dict)
+            else [
+                f"evidence_reconciliation.{field}"
+                for field, expected_value in expected_evidence_reconciliation.items()
+                if evidence_reconciliation.get(field) != expected_value
+            ]
+        )
+        evidence_reconciliation_validation = {
+            "status": "failed" if evidence_reconciliation_invalid_fields else "passed",
+            "expected": expected_evidence_reconciliation,
+            "actual": evidence_reconciliation_raw,
+            "invalid_fields": evidence_reconciliation_invalid_fields,
+        }
+        payload["evidence_reconciliation_validation"] = (
+            evidence_reconciliation_validation
+        )
+        payload["source_report"]["evidence_reconciliation"] = (
+            evidence_reconciliation_raw
+        )
+        payload["source_report"]["evidence_reconciliation_validation"] = (
+            evidence_reconciliation_validation
+        )
+        if (
+            claims_local_dev_assurance
+            and evidence_reconciliation_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_EVIDENCE_RECONCILIATION_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve exact current VS2/VS3 evidence reconciliation semantics before scenario gate can pass.",
+                    "invalid_fields": evidence_reconciliation_validation[
+                        "invalid_fields"
+                    ],
+                    "expected": expected_evidence_reconciliation,
+                    "actual": evidence_reconciliation_raw,
+                }
+            )
+        expected_overclaim_lint_claim_boundary = {
+            "vs2_current": "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED",
+            "vs3_l": "NOT_CLAIMED",
+            "vs3_p": "NOT_CLAIMED",
+            "production": "NOT_CLAIMED",
+            "production_onprem": "NOT_CLAIMED",
+            "live_provider": "NOT_CLAIMED",
+            "real_idp": "NOT_CLAIMED",
+            "real_network": "NOT_CLAIMED",
+            "migration_restore": "NOT_CLAIMED",
+            "security_acceptance": "NOT_CLAIMED",
+            "human_acceptance": "NOT_CLAIMED",
+        }
+        expected_overclaim_lint = {
+            "schema_version": "cs.vs3_overclaim_lint.v0",
+            "status": "passed",
+            "checked_paths": [
+                "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md",
+                "docs/agent/VS3_FULL_GOAL_PROMPT.md",
+                "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+                "reports/security/vs3-final-regression-proof.json",
+                "reports/human-gates/vs3/record-scaffold.json",
+                "reports/human-gates/vs3/evidence-status.json",
+                "reports/human-gates/vs3/review-kit.json",
+                "reports/human-gates/vs3/vs3-p-gate.json",
+                "reports/human-gates/vs3/VS3-H01.json",
+                "reports/human-gates/vs3/VS3-H02.json",
+                "reports/human-gates/vs3/VS3-H03.json",
+                "reports/human-gates/vs3/VS3-H04.json",
+                "reports/human-gates/vs3/VS3-H05.json",
+                "reports/human-gates/vs3/VS3-H06.json",
+                "reports/human-gates/vs3/VS3-H07.json",
+            ],
+            "claim_boundary": expected_overclaim_lint_claim_boundary,
+            "claim_boundaries": dict(expected_overclaim_lint_claim_boundary),
+            "claim_boundary_overclaim_fields": [],
+            "claim_boundaries_overclaim_fields": [],
+            "claim_boundary_matches_claim_boundaries": True,
+            "findings": [],
+            "reviewed_allowlist": [],
+            "negative_evidence": {
+                "claim_boundaries_overclaim_count": 0,
+                "claim_boundary_alias_mismatch_count": 0,
+                "claim_boundary_overclaim_count": 0,
+                "human_acceptance_claimed": 0,
+                "live_provider_readiness_claimed": 0,
+                "migration_restore_readiness_claimed": 0,
+                "production_claimed": 0,
+                "production_onprem_readiness_claimed": 0,
+                "real_idp_readiness_claimed": 0,
+                "real_network_readiness_claimed": 0,
+                "security_acceptance_claimed": 0,
+                "unallowlisted_overclaim_findings": 0,
+                "vs3_l_claimed": 0,
+                "vs3_p_claimed": 0,
+            },
+        }
+        overclaim_lint_raw = data.get("overclaim_lint")
+        overclaim_lint = overclaim_lint_raw if isinstance(overclaim_lint_raw, dict) else {}
+        overclaim_lint_invalid_fields = (
+            ["overclaim_lint"]
+            if not isinstance(overclaim_lint_raw, dict)
+            else [
+                f"overclaim_lint.{field}"
+                for field, expected_value in expected_overclaim_lint.items()
+                if overclaim_lint.get(field) != expected_value
+            ]
+        )
+        overclaim_lint_validation = {
+            "status": "failed" if overclaim_lint_invalid_fields else "passed",
+            "expected": expected_overclaim_lint,
+            "actual": overclaim_lint_raw,
+            "invalid_fields": overclaim_lint_invalid_fields,
+        }
+        payload["overclaim_lint_validation"] = overclaim_lint_validation
+        payload["source_report"]["overclaim_lint"] = overclaim_lint_raw
+        payload["source_report"]["overclaim_lint_validation"] = (
+            overclaim_lint_validation
+        )
+        if (
+            claims_local_dev_assurance
+            and overclaim_lint_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_OVERCLAIM_LINT_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve a passing overclaim-lint proof with exact no-claim boundaries before scenario gate can pass.",
+                    "invalid_fields": overclaim_lint_validation["invalid_fields"],
+                    "expected": expected_overclaim_lint,
+                    "actual": overclaim_lint_raw,
+                }
+            )
+        row_error_entries: list[dict[str, Any]] = []
+        for row_index, row in enumerate(rows):
+            if not isinstance(row, dict):
+                continue
+            row_errors = row.get("errors")
+            if row_errors:
+                row_error_entries.append(
+                    {
+                        "row_index": row_index,
+                        "scenario_id": row.get("scenario_id") or row.get("id"),
+                        "errors": row_errors,
+                    }
+                )
+        embedded_source_report = data.get("source_report")
+        source_report_issues: list[dict[str, Any]] = []
+        if embedded_source_report is not None:
+            if not isinstance(embedded_source_report, dict):
+                source_report_issues.append(
+                    {
+                        "field": "source_report",
+                        "issue": "source_report_not_object",
+                        "actual_type": type(embedded_source_report).__name__,
+                    }
+                )
+            else:
+                embedded_source_report_status = embedded_source_report.get("status")
+                if embedded_source_report_status not in (None, "success"):
+                    source_report_issues.append(
+                        {
+                            "field": "source_report.status",
+                            "issue": "source_report_status_not_success",
+                            "actual": embedded_source_report_status,
+                        }
+                    )
+                embedded_source_report_errors = embedded_source_report.get("errors")
+                if embedded_source_report_errors:
+                    source_report_issues.append(
+                        {
+                            "field": "source_report.errors",
+                            "issue": "source_report_errors_present",
+                            "errors": embedded_source_report_errors,
+                        }
+                    )
+        report_integrity_validation = {
+            "status": "passed",
+            "row_error_entries": row_error_entries,
+            "source_report_issues": source_report_issues,
+        }
+        if row_error_entries or source_report_issues:
+            report_integrity_validation["status"] = "failed"
+        payload["report_integrity_validation"] = report_integrity_validation
+        payload["source_report"]["report_integrity_validation"] = report_integrity_validation
+        if claims_local_dev_assurance and report_integrity_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_REPORT_INTEGRITY_INVALID",
+                    "message": "VS3 local-dev assurance reports must not contain row-level errors or failed nested source-report state before scenario gate can pass.",
+                    "row_error_entries": row_error_entries,
+                    "source_report_issues": source_report_issues,
+                }
+            )
+        missing_human_required_rows = [
+            row_id
+            for row_id in expected_human_required_rows
+            if row_id not in scenario_rows_by_id
+        ]
+        human_rows_not_required = [
+            row_id
+            for row_id in expected_human_required_rows
+            if row_id in scenario_rows_by_id
+            and (
+                scenario_rows_by_id[row_id].get("owner") != "Human"
+                or scenario_rows_by_id[row_id].get("status") != "HUMAN_REQUIRED"
+            )
+        ]
+        missing_human_required_blockers = [
+            row_id
+            for row_id in expected_human_required_rows
+            if row_id not in human_blocker_ids
+        ]
+        human_required_blockers_not_list = (
+            [] if isinstance(human_required_blockers_raw, list) else ["human_required_blockers"]
+        )
+        unexpected_human_required_blockers = [
+            row_id
+            for row_id in human_blocker_ids
+            if row_id not in expected_human_required_rows
+        ]
+        duplicate_human_required_blockers = sorted(
+            {
+                row_id
+                for row_id in human_blocker_ids
+                if human_blocker_ids.count(row_id) > 1
+            }
+        )
+        expected_human_required_blockers = {
+            row_id: {
+                "scenario_id": row_id,
+                "status": "HUMAN_REQUIRED",
+                "required_human_action": expected_scenarios_by_id[row_id].get("verification_method"),
+                "expected_evidence": expected_scenarios_by_id[row_id].get("required_evidence"),
+                "release_impact": expected_scenarios_by_id[row_id].get("pass_fail_criteria"),
+            }
+            for row_id in expected_human_required_rows
+            if row_id in expected_scenarios_by_id
+        }
+        human_required_entries_not_list = (
+            [] if isinstance(human_required_entries_raw, list) else ["human_required"]
+        )
+        missing_human_required_entries = [
+            row_id
+            for row_id in expected_human_required_rows
+            if row_id not in human_required_entry_ids
+        ]
+        unexpected_human_required_entries = [
+            row_id
+            for row_id in human_required_entry_ids
+            if row_id not in expected_human_required_rows
+        ]
+        duplicate_human_required_entries = sorted(
+            {
+                row_id
+                for row_id in human_required_entry_ids
+                if human_required_entry_ids.count(row_id) > 1
+            }
+        )
+        expected_human_required_entries = {
+            row_id: {
+                "id": row_id,
+                "scenario_id": row_id,
+                "type": "HUMAN_REQUIRED",
+                "status": "HUMAN_REQUIRED",
+                "why_ai_cannot_verify": expected_scenarios_by_id[row_id].get("expected_result"),
+                "required_human_action": expected_scenarios_by_id[row_id].get("verification_method"),
+                "expected_evidence": expected_scenarios_by_id[row_id].get("required_evidence"),
+                "release_impact": expected_scenarios_by_id[row_id].get("pass_fail_criteria"),
+            }
+            for row_id in expected_human_required_rows
+            if row_id in expected_scenarios_by_id
+        }
+        human_required_entry_content_issues: list[dict[str, Any]] = []
+        for entry_index, entry in enumerate(human_required_entries):
+            if not isinstance(entry, dict):
+                human_required_entry_content_issues.append(
+                    {
+                        "entry_index": entry_index,
+                        "scenario_id": None,
+                        "field": None,
+                        "expected": "object",
+                        "actual": type(entry).__name__,
+                        "issue": "entry_not_object",
+                    }
+                )
+                continue
+            entry_id = str(entry.get("scenario_id") or entry.get("id") or "")
+            expected_entry = expected_human_required_entries.get(entry_id)
+            if not expected_entry:
+                continue
+            for field_name, expected_value in expected_entry.items():
+                actual_value = entry.get(field_name)
+                if actual_value != expected_value:
+                    human_required_entry_content_issues.append(
+                        {
+                            "entry_index": entry_index,
+                            "scenario_id": entry_id,
+                            "field": field_name,
+                            "expected": expected_value,
+                            "actual": actual_value,
+                            "issue": "entry_field_mismatch",
+                        }
+                    )
+        human_required_blocker_content_issues: list[dict[str, Any]] = []
+        for blocker_index, blocker in enumerate(human_required_blockers):
+            if not isinstance(blocker, dict):
+                human_required_blocker_content_issues.append(
+                    {
+                        "blocker_index": blocker_index,
+                        "scenario_id": None,
+                        "field": None,
+                        "expected": "object",
+                        "actual": type(blocker).__name__,
+                        "issue": "blocker_not_object",
+                    }
+                )
+                continue
+            blocker_id = str(blocker.get("scenario_id") or blocker.get("id") or "")
+            expected_blocker = expected_human_required_blockers.get(blocker_id)
+            if not expected_blocker:
+                continue
+            for field_name, expected_value in expected_blocker.items():
+                actual_value = blocker.get(field_name)
+                if actual_value != expected_value:
+                    human_required_blocker_content_issues.append(
+                        {
+                            "blocker_index": blocker_index,
+                            "scenario_id": blocker_id,
+                            "field": field_name,
+                            "expected": expected_value,
+                            "actual": actual_value,
+                            "issue": "blocker_field_mismatch",
+                        }
+                    )
+        proof_boundary_human_rows = proof_boundary.get("human_required_rows")
+        proof_boundary_missing_human_rows = (
+            [
+                row_id
+                for row_id in expected_human_required_rows
+                if row_id not in proof_boundary_human_rows
+            ]
+            if isinstance(proof_boundary_human_rows, list)
+            else expected_human_required_rows
+        )
+        invalid_human_gate_fields: list[str] = []
+        if summary.get("human_required") != len(expected_human_required_rows):
+            invalid_human_gate_fields.append("summary.human_required")
+        if proof_boundary.get("human_acceptance_gate") != "HUMAN_REQUIRED":
+            invalid_human_gate_fields.append("proof_boundary.human_acceptance_gate")
+        if proof_boundary.get("security_acceptance_gate") != "HUMAN_REQUIRED":
+            invalid_human_gate_fields.append("proof_boundary.security_acceptance_gate")
+        if proof_boundary.get("human_acceptance") != "NOT_CLAIMED":
+            invalid_human_gate_fields.append("proof_boundary.human_acceptance")
+        if proof_boundary.get("human_gate_templates_are_not_acceptance") is not True:
+            invalid_human_gate_fields.append("proof_boundary.human_gate_templates_are_not_acceptance")
+        human_required_validation = {
+            "status": "passed",
+            "expected_human_required_rows": expected_human_required_rows,
+            "missing_human_required_rows": missing_human_required_rows,
+            "human_rows_not_required": human_rows_not_required,
+            "missing_human_required_blockers": missing_human_required_blockers,
+            "human_required_blockers_not_list": human_required_blockers_not_list,
+            "unexpected_human_required_blockers": unexpected_human_required_blockers,
+            "duplicate_human_required_blockers": duplicate_human_required_blockers,
+            "expected_human_required_blockers": expected_human_required_blockers,
+            "human_required_blocker_content_issues": human_required_blocker_content_issues,
+            "human_required_entries_not_list": human_required_entries_not_list,
+            "missing_human_required_entries": missing_human_required_entries,
+            "unexpected_human_required_entries": unexpected_human_required_entries,
+            "duplicate_human_required_entries": duplicate_human_required_entries,
+            "expected_human_required_entries": expected_human_required_entries,
+            "human_required_entry_content_issues": human_required_entry_content_issues,
+            "proof_boundary_missing_human_rows": proof_boundary_missing_human_rows,
+            "invalid_fields": invalid_human_gate_fields,
+        }
+        if (
+            missing_human_required_rows
+            or human_rows_not_required
+            or missing_human_required_blockers
+            or human_required_blockers_not_list
+            or unexpected_human_required_blockers
+            or duplicate_human_required_blockers
+            or human_required_blocker_content_issues
+            or human_required_entries_not_list
+            or missing_human_required_entries
+            or unexpected_human_required_entries
+            or duplicate_human_required_entries
+            or human_required_entry_content_issues
+            or proof_boundary_missing_human_rows
+            or invalid_human_gate_fields
+        ):
+            human_required_validation["status"] = "failed"
+        payload["human_required_validation"] = human_required_validation
+        payload["source_report"]["human_required_validation"] = human_required_validation
+        payload["source_report"]["expected_human_required_rows"] = expected_human_required_rows
+        if claims_local_dev_assurance and human_required_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_HUMAN_REQUIRED_BOUNDARY_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve VS3-H01 through VS3-H07 as HUMAN_REQUIRED before scenario gate can pass.",
+                    "missing_human_required_rows": missing_human_required_rows,
+                    "human_rows_not_required": human_rows_not_required,
+                    "missing_human_required_blockers": missing_human_required_blockers,
+                    "human_required_blockers_not_list": human_required_blockers_not_list,
+                    "unexpected_human_required_blockers": unexpected_human_required_blockers,
+                    "duplicate_human_required_blockers": duplicate_human_required_blockers,
+                    "human_required_blocker_content_issues": human_required_blocker_content_issues,
+                    "human_required_entries_not_list": human_required_entries_not_list,
+                    "missing_human_required_entries": missing_human_required_entries,
+                    "unexpected_human_required_entries": unexpected_human_required_entries,
+                    "duplicate_human_required_entries": duplicate_human_required_entries,
+                    "human_required_entry_content_issues": human_required_entry_content_issues,
+                    "proof_boundary_missing_human_rows": proof_boundary_missing_human_rows,
+                    "invalid_fields": invalid_human_gate_fields,
+                }
+            )
+        if (
+            claims_local_dev_assurance
+            and (
+                human_required_entries_not_list
+                or missing_human_required_entries
+                or unexpected_human_required_entries
+                or duplicate_human_required_entries
+                or human_required_entry_content_issues
+            )
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_HUMAN_REQUIRED_ENTRIES_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve top-level VS3-H01 through VS3-H07 human_required metadata as HUMAN_REQUIRED review requirements before scenario gate can pass.",
+                    "human_required_entries_not_list": human_required_entries_not_list,
+                    "missing_human_required_entries": missing_human_required_entries,
+                    "unexpected_human_required_entries": unexpected_human_required_entries,
+                    "duplicate_human_required_entries": duplicate_human_required_entries,
+                    "human_required_entry_content_issues": human_required_entry_content_issues,
+                }
+            )
+        if claims_local_dev_assurance and human_required_blocker_content_issues:
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_HUMAN_REQUIRED_BLOCKERS_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve VS3-H01 through VS3-H07 blocker metadata as HUMAN_REQUIRED review requirements before scenario gate can pass.",
+                    "human_required_blocker_content_issues": human_required_blocker_content_issues,
+                }
+            )
+        if (
+            claims_local_dev_assurance
+            and (
+                human_required_blockers_not_list
+                or missing_human_required_blockers
+                or unexpected_human_required_blockers
+                or duplicate_human_required_blockers
+            )
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_HUMAN_REQUIRED_BLOCKERS_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve VS3-H01 through VS3-H07 blocker metadata as a list of HUMAN_REQUIRED review requirements before scenario gate can pass.",
+                    "human_required_blockers_not_list": human_required_blockers_not_list,
+                    "missing_human_required_blockers": missing_human_required_blockers,
+                    "unexpected_human_required_blockers": unexpected_human_required_blockers,
+                    "duplicate_human_required_blockers": duplicate_human_required_blockers,
+                }
+            )
+        claim_boundary = data.get("claim_boundary") if isinstance(data.get("claim_boundary"), dict) else {}
+        claim_boundaries = data.get("claim_boundaries") if isinstance(data.get("claim_boundaries"), dict) else {}
+        ai_pass_row_ids = [
+            row_id
+            for row_id in expected_ai_scenario_ids
+            if row_id in scenario_rows_by_id
+            and scenario_rows_by_id[row_id].get("status") == "PASS"
+        ]
+        missing_ai_pass_rows = [
+            row_id
+            for row_id in expected_ai_scenario_ids
+            if row_id not in ai_pass_row_ids
+        ]
+        ai_rows_complete = not missing_ai_pass_rows and len(ai_pass_row_ids) == len(expected_ai_scenario_ids)
+        human_rows_preserved = human_required_validation["status"] == "passed"
+        success_report_claims_ai_scope_complete = (
+            data.get("status") == "success"
+            and ai_rows_complete
+        )
+        completion_claim_validation = {
+            "status": "passed",
+            "success_report_claims_ai_scope_complete": success_report_claims_ai_scope_complete,
+            "claims_local_dev_assurance": claims_local_dev_assurance,
+            "human_rows_preserved": human_rows_preserved,
+            "expected_ai_pass_count": len(expected_ai_scenario_ids),
+            "actual_ai_pass_count": len(ai_pass_row_ids),
+            "missing_ai_pass_rows": missing_ai_pass_rows,
+            "final_verdict": data.get("final_verdict"),
+            "product_feature_claims": summary.get("product_feature_claims"),
+            "proof_boundary_vs3_l": proof_boundary.get("vs3_l"),
+            "singular_claim_boundary_vs3_l": claim_boundary.get("vs3_l"),
+            "claim_boundaries_vs3_l": claim_boundaries.get("vs3_l"),
+        }
+        if success_report_claims_ai_scope_complete and not claims_local_dev_assurance:
+            completion_claim_validation["status"] = "failed"
+        payload["completion_claim_validation"] = completion_claim_validation
+        payload["source_report"]["completion_claim_validation"] = completion_claim_validation
+        if completion_claim_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_UNRECOGNIZED_LOCAL_DEV_CLAIM_BOUNDARY",
+                    "message": "VS3 reports with all AI-verifiable rows passing must use the allowed local-dev assurance claim boundary; unsupported success claims cannot pass the scenario gate.",
+                    "final_verdict": data.get("final_verdict"),
+                    "product_feature_claims": summary.get("product_feature_claims"),
+                    "proof_boundary_vs3_l": proof_boundary.get("vs3_l"),
+                    "claim_boundary_vs3_l": claim_boundaries.get("vs3_l"),
+                }
+            )
+        gate_metadata = data.get("gate_metadata")
+        gate_metadata_missing_fields: list[str] = []
+        gate_metadata_invalid_fields: list[str] = []
+        if not isinstance(gate_metadata, dict) or not gate_metadata:
+            gate_metadata_missing_fields.append("gate_metadata")
+            gate_metadata = {}
+        expected_completed_slices = [
+            "VS3-0",
+            "VS3-1",
+            "VS3-2",
+            "VS3-3",
+            "VS3-4",
+            "VS3-5",
+            "VS3-6",
+            "VS3-7",
+            "VS3-FINAL-REGRESSION",
+        ]
+        expected_gate_metadata_values = {
+            "vs3_l": "LOCAL_DEV_ASSURANCE_VERIFIED",
+            "vs3_p": "NOT_CLAIMED",
+            "completed_slices": expected_completed_slices,
+            "current_slice": expected_human_required_rows,
+            "first_slice": [
+                "VS3-GATE-001",
+                "VS3-GATE-002",
+                "VS3-GATE-003",
+                "VS3-GATE-004",
+            ],
+            "remaining_ai_rows": 0,
+            "human_rows": len(expected_human_required_rows),
+            "next_slice": (
+                "VS3-L local/dev checkpoint is complete. VS3-P remains blocked on "
+                "VS3-H01 through VS3-H07 human/on-prem evidence."
+            ),
+        }
+        for field_name, expected_value in expected_gate_metadata_values.items():
+            if field_name not in gate_metadata:
+                gate_metadata_missing_fields.append(f"gate_metadata.{field_name}")
+            elif gate_metadata.get(field_name) != expected_value:
+                gate_metadata_invalid_fields.append(f"gate_metadata.{field_name}")
+        unexpected_completed_slices = [
+            str(value)
+            for value in gate_metadata.get("completed_slices", [])
+            if isinstance(gate_metadata.get("completed_slices"), list)
+            and value not in expected_completed_slices
+        ]
+        if unexpected_completed_slices and "gate_metadata.completed_slices" not in gate_metadata_invalid_fields:
+            gate_metadata_invalid_fields.append("gate_metadata.completed_slices")
+        gate_metadata_validation = {
+            "status": "passed"
+            if not gate_metadata_missing_fields and not gate_metadata_invalid_fields
+            else "failed",
+            "expected": expected_gate_metadata_values,
+            "actual": gate_metadata,
+            "missing_fields": sorted(set(gate_metadata_missing_fields)),
+            "invalid_fields": sorted(set(gate_metadata_invalid_fields)),
+            "unexpected_completed_slices": unexpected_completed_slices,
+        }
+        payload["gate_metadata_validation"] = gate_metadata_validation
+        payload["source_report"]["gate_metadata_validation"] = gate_metadata_validation
+        if claims_local_dev_assurance and gate_metadata_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_GATE_METADATA_BOUNDARY_INVALID",
+                    "message": "VS3 local-dev assurance gate metadata must preserve the VS3-L-only claim boundary and keep VS3-P blocked on human/on-prem evidence.",
+                    "missing_fields": gate_metadata_validation["missing_fields"],
+                    "invalid_fields": gate_metadata_validation["invalid_fields"],
+                    "unexpected_completed_slices": unexpected_completed_slices,
+                }
+            )
+        component_proof_required = (
+            claims_local_dev_assurance
+            or success_report_claims_ai_scope_complete
+        )
+        component_proof_identity = _vs3_local_checkpoint_component_proof_identity(root, data)
+
+        def _component_proof_failure_keys(field_name: str) -> list[str]:
+            return [
+                str(proof.get("scenario_report_key"))
+                for proof in component_proof_identity
+                if not proof.get(field_name)
+            ]
+
+        component_proof_validation = {
+            "status": "passed",
+            "required": component_proof_required,
+            "expected_component_count": 9,
+            "component_count": len(component_proof_identity),
+            "mismatch_keys": _component_proof_failure_keys("matches_embedded_current_file"),
+            "semantic_failure_keys": _component_proof_failure_keys("semantics_success"),
+            "scenario_failure_keys": _component_proof_failure_keys("scenario_status_success"),
+            "scenario_coverage_failure_keys": _component_proof_failure_keys("scenario_status_coverage_success"),
+            "check_failure_keys": _component_proof_failure_keys("checks_success"),
+            "check_coverage_failure_keys": _component_proof_failure_keys("checks_coverage_success"),
+            "negative_evidence_failure_keys": _component_proof_failure_keys("negative_evidence_success"),
+            "secret_scan_failure_keys": _component_proof_failure_keys("report_secret_scan_success"),
+            "evidence_ref_failure_keys": _component_proof_failure_keys("evidence_refs_success"),
+            "audit_ref_failure_keys": _component_proof_failure_keys("audit_refs_success"),
+            "policy_decision_ref_failure_keys": _component_proof_failure_keys("policy_decision_refs_success"),
+            "reference_failure_keys": _component_proof_failure_keys("references_success"),
+            "source_tree_failure_keys": _component_proof_failure_keys("source_tree_identity_success"),
+            "source_tree_current_failure_keys": _component_proof_failure_keys("source_tree_current_success"),
+            "proof_boundary_failure_keys": _component_proof_failure_keys("proof_boundary_success"),
+            "traceability_failure_keys": _component_proof_failure_keys("traceability_success"),
+            "cli_command_evidence_failure_keys": _component_proof_failure_keys("cli_command_evidence_success"),
+            "cli_command_evidence_shape_failure_keys": _component_proof_failure_keys("cli_command_evidence_shape_success"),
+            "missing_or_invalid_keys": [
+                str(proof.get("scenario_report_key"))
+                for proof in component_proof_identity
+                if not proof.get("embedded_present") or not proof.get("file_json_valid")
+            ],
+            "semantic_error_codes_by_key": {
+                str(proof.get("scenario_report_key")): proof.get("semantic_error_codes")
+                for proof in component_proof_identity
+                if proof.get("semantic_error_codes")
+            },
+        }
+        component_proof_failure_fields = [
+            "mismatch_keys",
+            "semantic_failure_keys",
+            "scenario_failure_keys",
+            "scenario_coverage_failure_keys",
+            "check_failure_keys",
+            "check_coverage_failure_keys",
+            "negative_evidence_failure_keys",
+            "secret_scan_failure_keys",
+            "evidence_ref_failure_keys",
+            "audit_ref_failure_keys",
+            "policy_decision_ref_failure_keys",
+            "reference_failure_keys",
+            "source_tree_failure_keys",
+            "source_tree_current_failure_keys",
+            "proof_boundary_failure_keys",
+            "traceability_failure_keys",
+            "cli_command_evidence_failure_keys",
+            "cli_command_evidence_shape_failure_keys",
+            "missing_or_invalid_keys",
+        ]
+        if component_proof_required and (
+            len(component_proof_identity) != component_proof_validation["expected_component_count"]
+            or any(component_proof_validation[field] for field in component_proof_failure_fields)
+        ):
+            component_proof_validation["status"] = "failed"
+        payload["component_proof_validation"] = component_proof_validation
+        payload["source_report"]["component_proof_validation"] = component_proof_validation
+        if component_proof_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_COMPONENT_PROOF_INVALID",
+                    "message": "VS3 local-dev assurance reports must preserve successful embedded component proofs matching their current source proof files before scenario gate can pass.",
+                    "component_count": component_proof_validation["component_count"],
+                    "expected_component_count": component_proof_validation["expected_component_count"],
+                    "mismatch_keys": component_proof_validation["mismatch_keys"],
+                    "semantic_failure_keys": component_proof_validation["semantic_failure_keys"],
+                    "scenario_failure_keys": component_proof_validation["scenario_failure_keys"],
+                    "scenario_coverage_failure_keys": component_proof_validation[
+                        "scenario_coverage_failure_keys"
+                    ],
+                    "check_failure_keys": component_proof_validation["check_failure_keys"],
+                    "check_coverage_failure_keys": component_proof_validation[
+                        "check_coverage_failure_keys"
+                    ],
+                    "negative_evidence_failure_keys": component_proof_validation[
+                        "negative_evidence_failure_keys"
+                    ],
+                    "source_tree_current_failure_keys": component_proof_validation[
+                        "source_tree_current_failure_keys"
+                    ],
+                    "proof_boundary_failure_keys": component_proof_validation[
+                        "proof_boundary_failure_keys"
+                    ],
+                    "traceability_failure_keys": component_proof_validation[
+                        "traceability_failure_keys"
+                    ],
+                    "cli_command_evidence_failure_keys": component_proof_validation[
+                        "cli_command_evidence_failure_keys"
+                    ],
+                    "cli_command_evidence_shape_failure_keys": component_proof_validation[
+                        "cli_command_evidence_shape_failure_keys"
+                    ],
+                    "missing_or_invalid_keys": component_proof_validation["missing_or_invalid_keys"],
+                    "semantic_error_codes_by_key": component_proof_validation[
+                        "semantic_error_codes_by_key"
+                    ],
+                }
+            )
+        negative_evidence = data.get("negative_evidence")
+        negative_evidence_required = (
+            claims_local_dev_assurance
+            or success_report_claims_ai_scope_complete
+        )
+        negative_evidence_present = isinstance(negative_evidence, dict) and bool(negative_evidence)
+        negative_evidence_nonzero: dict[str, Any] = {}
+        negative_evidence_malformed: dict[str, Any] = {}
+        observed_negative_evidence_keys: list[str] = []
+        if isinstance(negative_evidence, dict):
+            for key, value in negative_evidence.items():
+                normalized_key = key.strip() if isinstance(key, str) else ""
+                if not normalized_key:
+                    negative_evidence_malformed[str(key)] = {
+                        "issue": "key_not_nonempty_string",
+                        "value": value,
+                    }
+                    continue
+                observed_negative_evidence_keys.append(normalized_key)
+                if isinstance(value, bool):
+                    negative_evidence_malformed[normalized_key] = {
+                        "issue": "value_bool_not_counter",
+                        "value": value,
+                    }
+                elif isinstance(value, (int, float)):
+                    if value != 0:
+                        negative_evidence_nonzero[normalized_key] = value
+                else:
+                    negative_evidence_malformed[normalized_key] = {
+                        "issue": "value_not_numeric_zero",
+                        "value": value,
+                    }
+        elif negative_evidence is not None:
+            negative_evidence_malformed["negative_evidence"] = {
+                "issue": "not_object",
+                "value_type": type(negative_evidence).__name__,
+            }
+        observed_negative_evidence_key_set = set(observed_negative_evidence_keys)
+        required_negative_evidence_key_set = set(VS3_REQUIRED_NEGATIVE_EVIDENCE_KEYS)
+        missing_required_negative_evidence_keys = [
+            key
+            for key in VS3_REQUIRED_NEGATIVE_EVIDENCE_KEYS
+            if key not in observed_negative_evidence_key_set
+        ]
+        unexpected_negative_evidence_keys = sorted(
+            key
+            for key in observed_negative_evidence_key_set
+            if key not in required_negative_evidence_key_set
+        )
+        negative_evidence_validation = {
+            "status": "passed",
+            "required": negative_evidence_required,
+            "present": negative_evidence_present,
+            "count": len(negative_evidence) if isinstance(negative_evidence, dict) else 0,
+            "observed_key_count": len(observed_negative_evidence_key_set),
+            "required_key_count": len(VS3_REQUIRED_NEGATIVE_EVIDENCE_KEYS),
+            "missing_required_keys": missing_required_negative_evidence_keys,
+            "unexpected_keys": unexpected_negative_evidence_keys,
+            "nonzero_entries": negative_evidence_nonzero,
+            "malformed_entries": negative_evidence_malformed,
+        }
+        if negative_evidence_required and (
+            not negative_evidence_present
+            or negative_evidence_nonzero
+            or negative_evidence_malformed
+            or missing_required_negative_evidence_keys
+            or unexpected_negative_evidence_keys
+        ):
+            negative_evidence_validation["status"] = "failed"
+        payload["negative_evidence_validation"] = negative_evidence_validation
+        payload["source_report"]["negative_evidence_validation"] = negative_evidence_validation
+        if negative_evidence_validation["status"] != "passed":
+            payload["status"] = "failed"
+            if negative_evidence_required and (
+                missing_required_negative_evidence_keys
+                or unexpected_negative_evidence_keys
+            ):
+                payload["errors"].append(
+                    {
+                        "code": "CS_VS3_NEGATIVE_EVIDENCE_COVERAGE_INVALID",
+                        "message": "VS3 local-dev assurance reports must preserve the exact required top-level negative-evidence counter set before scenario gate can pass.",
+                        "required_key_count": len(VS3_REQUIRED_NEGATIVE_EVIDENCE_KEYS),
+                        "observed_key_count": len(observed_negative_evidence_key_set),
+                        "missing_required_keys": missing_required_negative_evidence_keys,
+                        "unexpected_keys": unexpected_negative_evidence_keys,
+                    }
+                )
+            if (
+                not negative_evidence_present
+                or negative_evidence_nonzero
+                or negative_evidence_malformed
+            ):
+                payload["errors"].append(
+                    {
+                        "code": "CS_VS3_NEGATIVE_EVIDENCE_INVALID",
+                        "message": "VS3 local-dev assurance reports must include non-empty top-level negative evidence with zero-valued safety counters before scenario gate can pass.",
+                        "required": negative_evidence_required,
+                        "present": negative_evidence_present,
+                        "nonzero_entries": negative_evidence_nonzero,
+                        "malformed_entries": negative_evidence_malformed,
+                    }
+                )
+        expected_not_claimed_boundary_fields = [
+            ("proof_boundary", "vs3_p"),
+            ("proof_boundary", "production"),
+            ("proof_boundary", "production_onprem"),
+            ("proof_boundary", "live_provider"),
+            ("proof_boundary", "real_idp"),
+            ("proof_boundary", "real_network"),
+            ("proof_boundary", "migration_restore"),
+            ("proof_boundary", "security_acceptance"),
+            ("proof_boundary", "human_acceptance"),
+            ("claim_boundary", "vs3_p"),
+            ("claim_boundary", "production"),
+            ("claim_boundary", "production_onprem"),
+            ("claim_boundary", "live_provider"),
+            ("claim_boundary", "real_idp"),
+            ("claim_boundary", "real_network"),
+            ("claim_boundary", "migration_restore"),
+            ("claim_boundary", "security_acceptance"),
+            ("claim_boundary", "human_acceptance"),
+            ("claim_boundaries", "vs3_p"),
+            ("claim_boundaries", "production"),
+            ("claim_boundaries", "production_onprem"),
+            ("claim_boundaries", "live_provider"),
+            ("claim_boundaries", "real_idp"),
+            ("claim_boundaries", "real_network"),
+            ("claim_boundaries", "migration_restore"),
+            ("claim_boundaries", "security_acceptance"),
+            ("claim_boundaries", "human_acceptance"),
+        ]
+        invalid_claim_boundary_fields: list[str] = []
+        for boundary_name, field_name in expected_not_claimed_boundary_fields:
+            if boundary_name == "proof_boundary":
+                boundary = proof_boundary
+            elif boundary_name == "claim_boundary":
+                boundary = claim_boundary
+            else:
+                boundary = claim_boundaries
+            if boundary.get(field_name) != "NOT_CLAIMED":
+                invalid_claim_boundary_fields.append(f"{boundary_name}.{field_name}")
+        if proof_boundary.get("surface") != "local_dev_scenario_verification":
+            invalid_claim_boundary_fields.append("proof_boundary.surface")
+        if claim_boundary.get("vs2_current") != "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED":
+            invalid_claim_boundary_fields.append("claim_boundary.vs2_current")
+        if claim_boundaries.get("vs2_current") != "LOCAL_VS2_READINESS_REJECTED_REMEDIATION_REQUIRED":
+            invalid_claim_boundary_fields.append("claim_boundaries.vs2_current")
+        if data.get("final_verdict") != "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_REQUIRED":
+            invalid_claim_boundary_fields.append("final_verdict")
+        if summary.get("product_feature_claims") != "VS3_L_LOCAL_DEV_ASSURANCE_VERIFIED_VS3_P_HUMAN_GATES_REQUIRED":
+            invalid_claim_boundary_fields.append("summary.product_feature_claims")
+        expected_proof_boundary_keys = {
+            "surface",
+            "vs3_l",
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "security_acceptance_gate",
+            "human_acceptance",
+            "human_acceptance_gate",
+            "human_gate_templates_are_not_acceptance",
+            "human_required_rows",
+        }
+        expected_claim_boundary_keys = {
+            "vs2_current",
+            "vs3_l",
+            "vs3_p",
+            "production",
+            "production_onprem",
+            "live_provider",
+            "real_idp",
+            "real_network",
+            "migration_restore",
+            "security_acceptance",
+            "human_acceptance",
+        }
+        unexpected_claim_boundary_fields = [
+            f"proof_boundary.{field}"
+            for field in sorted(set(proof_boundary) - expected_proof_boundary_keys)
+        ] + [
+            f"claim_boundary.{field}"
+            for field in sorted(set(claim_boundary) - expected_claim_boundary_keys)
+        ] + [
+            f"claim_boundaries.{field}"
+            for field in sorted(set(claim_boundaries) - expected_claim_boundary_keys)
+        ]
+        invalid_claim_boundary_fields.extend(unexpected_claim_boundary_fields)
+        claim_boundary_validation = {
+            "status": "passed" if not invalid_claim_boundary_fields else "failed",
+            "required_not_claimed_fields": [
+                f"{boundary_name}.{field_name}"
+                for boundary_name, field_name in expected_not_claimed_boundary_fields
+            ],
+            "allowed_proof_boundary_keys": sorted(expected_proof_boundary_keys),
+            "allowed_claim_boundary_keys": sorted(expected_claim_boundary_keys),
+            "unexpected_fields": unexpected_claim_boundary_fields,
+            "invalid_fields": invalid_claim_boundary_fields,
+        }
+        payload["claim_boundary_validation"] = claim_boundary_validation
+        payload["source_report"]["claim_boundary_validation"] = claim_boundary_validation
+        if claims_local_dev_assurance and claim_boundary_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_PROOF_BOUNDARY_OVERCLAIM_INVALID",
+                    "message": "VS3 local-dev assurance reports cannot claim VS3-P, production/on-prem, live-provider, real-identity, migration/restore, security-acceptance, or human-acceptance readiness.",
+                    "invalid_fields": invalid_claim_boundary_fields,
+                }
+            )
+        if claims_local_dev_assurance and not source_tree:
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_METADATA_MISSING",
+                    "message": "VS3 local-dev assurance reports must include source_tree metadata before scenario gate can pass.",
+                }
+            )
+        elif claims_local_dev_assurance and source_tree_current_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_METADATA_STALE",
+                    "message": "VS3 local-dev assurance reports must match the current source-tree fingerprint before scenario gate can pass.",
+                    "mismatches": source_tree_current_validation["mismatches"],
+                    "scenario_source_tree_fingerprint": source_tree_current_validation[
+                        "scenario_source_tree_fingerprint"
+                    ],
+                    "current_source_tree_fingerprint": source_tree_current_validation[
+                        "current_source_tree_fingerprint"
+                    ],
+                }
+            )
+        if (
+            claims_local_dev_assurance
+            and source_tree_snapshot_path_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_SNAPSHOT_PATHS_INVALID",
+                    "message": "VS3 local-dev assurance reports must keep generated evidence paths out of verified_source_snapshot_paths while preserving source-bearing paths.",
+                    "path_count": source_tree_snapshot_path_validation["path_count"],
+                    "generated_evidence_paths": source_tree_snapshot_path_validation[
+                        "generated_evidence_paths"
+                    ],
+                    "duplicate_paths": source_tree_snapshot_path_validation[
+                        "duplicate_paths"
+                    ],
+                    "metadata_mismatches": source_tree_snapshot_path_validation[
+                        "metadata_mismatches"
+                    ],
+                    "invalid_entries": source_tree_snapshot_path_validation[
+                        "invalid_entries"
+                    ],
+                }
+            )
+        if (
+            claims_local_dev_assurance
+            and source_tree_snapshot_coverage_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_SNAPSHOT_COVERAGE_INVALID",
+                    "message": "VS3 local-dev assurance reports must cover the current source-bearing verified_source_snapshot_paths without omissions or stale entries.",
+                    "recorded_path_count": source_tree_snapshot_coverage_validation[
+                        "recorded_path_count"
+                    ],
+                    "current_path_count": source_tree_snapshot_coverage_validation[
+                        "current_path_count"
+                    ],
+                    "missing_current_snapshot_paths": source_tree_snapshot_coverage_validation[
+                        "missing_current_snapshot_paths"
+                    ],
+                    "stale_snapshot_paths": source_tree_snapshot_coverage_validation[
+                        "stale_snapshot_paths"
+                    ],
+                    "duplicate_paths": source_tree_snapshot_coverage_validation[
+                        "duplicate_paths"
+                    ],
+                    "current_duplicate_paths": source_tree_snapshot_coverage_validation[
+                        "current_duplicate_paths"
+                    ],
+                    "invalid_entries": source_tree_snapshot_coverage_validation[
+                        "invalid_entries"
+                    ],
+                    "current_invalid_entries": source_tree_snapshot_coverage_validation[
+                        "current_invalid_entries"
+                    ],
+                }
+            )
+        if (
+            claims_local_dev_assurance
+            and source_tree_snapshot_entry_validation["status"] != "passed"
+        ):
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_SNAPSHOT_ENTRIES_INVALID",
+                    "message": "VS3 local-dev assurance reports must keep verified_source_snapshot_paths entries consistent with the current source snapshot status, state, hash, and byte metadata.",
+                    "checked_path_count": source_tree_snapshot_entry_validation[
+                        "checked_path_count"
+                    ],
+                    "entry_mismatches": source_tree_snapshot_entry_validation[
+                        "entry_mismatches"
+                    ],
+                    "duplicate_paths": source_tree_snapshot_entry_validation[
+                        "duplicate_paths"
+                    ],
+                    "current_duplicate_paths": source_tree_snapshot_entry_validation[
+                        "current_duplicate_paths"
+                    ],
+                    "invalid_entries": source_tree_snapshot_entry_validation[
+                        "invalid_entries"
+                    ],
+                    "current_invalid_entries": source_tree_snapshot_entry_validation[
+                        "current_invalid_entries"
+                    ],
+                }
+            )
+        if claims_local_dev_assurance and dirty_path_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_DIRTY_PATHS_INVALID",
+                    "message": "VS3 local-dev assurance reports must keep source_tree.dirty_paths safe, unique, and consistent with current source-bearing dirty paths.",
+                    "path_count": dirty_path_validation["path_count"],
+                    "source_path_count": dirty_path_validation["source_path_count"],
+                    "duplicate_paths": dirty_path_validation["duplicate_paths"],
+                    "stale_source_dirty_paths": dirty_path_validation[
+                        "stale_source_dirty_paths"
+                    ],
+                    "missing_current_source_dirty_paths": dirty_path_validation[
+                        "missing_current_source_dirty_paths"
+                    ],
+                    "invalid_entries": dirty_path_validation["invalid_entries"],
+                }
+            )
+        if claims_local_dev_assurance and generated_dirty_path_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_GENERATED_DIRTY_PATHS_INVALID",
+                    "message": "VS3 local-dev assurance reports must classify generated_dirty_paths as generated evidence paths that are still dirty without mixing source-bearing paths.",
+                    "path_count": generated_dirty_path_validation["path_count"],
+                    "non_generated_paths": generated_dirty_path_validation[
+                        "non_generated_paths"
+                    ],
+                    "duplicate_paths": generated_dirty_path_validation[
+                        "duplicate_paths"
+                    ],
+                    "stale_paths": generated_dirty_path_validation["stale_paths"],
+                    "dirty_path_missing_paths": generated_dirty_path_validation[
+                        "dirty_path_missing_paths"
+                    ],
+                    "missing_current_generated_dirty_paths": generated_dirty_path_validation[
+                        "missing_current_generated_dirty_paths"
+                    ],
+                    "invalid_entries": generated_dirty_path_validation[
+                        "invalid_entries"
+                    ],
+                }
+            )
+        if claims_local_dev_assurance and generated_dirty_snapshot_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TREE_GENERATED_DIRTY_SNAPSHOT_INVALID",
+                    "message": "VS3 local-dev assurance reports must keep generated evidence dirty-path byte metadata consistent with the current generated evidence snapshot.",
+                    "recorded_path_count": generated_dirty_snapshot_validation[
+                        "recorded_path_count"
+                    ],
+                    "current_path_count": generated_dirty_snapshot_validation[
+                        "current_path_count"
+                    ],
+                    "recorded_hash": generated_dirty_snapshot_validation["recorded_hash"],
+                    "current_hash": generated_dirty_snapshot_validation["current_hash"],
+                    "effective_recorded_hash": generated_dirty_snapshot_validation[
+                        "effective_recorded_hash"
+                    ],
+                    "effective_current_hash": generated_dirty_snapshot_validation[
+                        "effective_current_hash"
+                    ],
+                    "hash_mismatch": generated_dirty_snapshot_validation["hash_mismatch"],
+                    "ignored_paths": generated_dirty_snapshot_validation["ignored_paths"],
+                    "missing_current_snapshot_paths": generated_dirty_snapshot_validation[
+                        "missing_current_snapshot_paths"
+                    ],
+                    "stale_snapshot_paths": generated_dirty_snapshot_validation[
+                        "stale_snapshot_paths"
+                    ],
+                    "entry_mismatches": generated_dirty_snapshot_validation[
+                        "entry_mismatches"
+                    ],
+                    "duplicate_paths": generated_dirty_snapshot_validation[
+                        "duplicate_paths"
+                    ],
+                    "current_duplicate_paths": generated_dirty_snapshot_validation[
+                        "current_duplicate_paths"
+                    ],
+                    "invalid_entries": generated_dirty_snapshot_validation[
+                        "invalid_entries"
+                    ],
+                    "current_invalid_entries": generated_dirty_snapshot_validation[
+                        "current_invalid_entries"
+                    ],
+                }
+            )
+        traceability = data.get("traceability") if isinstance(data.get("traceability"), dict) else {}
+        traceability_missing_fields: list[str] = []
+        traceability_invalid_fields: list[str] = []
+        traceability_row_missing_fields: list[str] = []
+        traceability_row_invalid_fields: list[str] = []
+
+        def _vs3_trace_string(value: Any) -> bool:
+            return isinstance(value, str) and bool(value.strip())
+
+        def _vs3_trace_string_list(value: Any) -> bool:
+            return (
+                isinstance(value, list)
+                and bool(value)
+                and all(isinstance(item, str) and item.strip() for item in value)
+            )
+
+        def _vs3_trace_scope(value: Any) -> bool:
+            return value == VS3_SCENARIO_VERIFY_SCOPE
+
+        if not traceability:
+            traceability_missing_fields.append("traceability")
+        if traceability.get("schema_version") != "cs.scenario_traceability.v0":
+            traceability_invalid_fields.append("traceability.schema_version")
+        if traceability.get("scenario_set") != "vs3-onprem-trusted-extension":
+            traceability_invalid_fields.append("traceability.scenario_set")
+        local_verification_identity_fields = {
+            "corpus_pack_id": VS3_SCENARIO_CORPUS_PACK_ID,
+            "model_provider": VS3_SCENARIO_MODEL_PROVIDER,
+            "model_name": VS3_SCENARIO_MODEL_NAME,
+        }
+        for field in ["scenario_run_id", "trace_id", "corpus_pack_id", "model_provider", "model_name"]:
+            if not _vs3_trace_string(traceability.get(field)):
+                traceability_missing_fields.append(f"traceability.{field}")
+            if data.get(field) != traceability.get(field):
+                traceability_invalid_fields.append(field)
+        for field, expected_value in local_verification_identity_fields.items():
+            if _vs3_trace_string(data.get(field)) and data.get(field) != expected_value:
+                traceability_invalid_fields.append(field)
+            if (
+                _vs3_trace_string(traceability.get(field))
+                and traceability.get(field) != expected_value
+            ):
+                traceability_invalid_fields.append(f"traceability.{field}")
+        if not _vs3_trace_scope(traceability.get("scope")):
+            traceability_invalid_fields.append("traceability.scope")
+        top_level_scope_fields = ["tenant_id", "owner_id", "namespace_id", "workspace_id"]
+        for field in top_level_scope_fields:
+            expected_value = VS3_SCENARIO_VERIFY_SCOPE[field]
+            actual_value = data.get(field)
+            if not _vs3_trace_string(actual_value):
+                traceability_missing_fields.append(field)
+            elif actual_value != expected_value:
+                traceability_invalid_fields.append(field)
+        expected_traceability_transcript_paths = [str(report_ref_path)]
+        traceability_transcript_paths = traceability.get("transcript_paths")
+        if not _vs3_trace_string_list(traceability_transcript_paths):
+            traceability_missing_fields.append("traceability.transcript_paths")
+        elif traceability_transcript_paths != expected_traceability_transcript_paths:
+            traceability_invalid_fields.append("traceability.transcript_paths")
+        if traceability.get("scenario_ids") != expected_scenario_ids:
+            traceability_invalid_fields.append("traceability.scenario_ids")
+        if traceability.get("human_required_rows") != expected_human_required_rows:
+            traceability_invalid_fields.append("traceability.human_required_rows")
+        expected_ai_verifiable_rows = len(expected_ai_scenario_ids)
+        if "ai_verifiable_rows" not in traceability:
+            traceability_missing_fields.append("traceability.ai_verifiable_rows")
+        elif traceability.get("ai_verifiable_rows") != expected_ai_verifiable_rows:
+            traceability_invalid_fields.append("traceability.ai_verifiable_rows")
+        expected_source_tree_ref = (
+            source_tree.get("verified_source_worktree_hash")
+            if isinstance(source_tree, dict)
+            else None
+        )
+        source_hash_for_trace = str(expected_source_tree_ref or "unknown-source")
+        trace_hash = source_hash_for_trace[:16] if source_hash_for_trace else "unknown-source"
+        expected_trace_identity_fields = {
+            "scenario_run_id": f"scenario-run:vs3-onprem-trusted-extension:{trace_hash}",
+            "trace_id": f"trace:vs3-onprem-trusted-extension:{trace_hash}",
+        }
+        if not _vs3_trace_string(traceability.get("source_tree_ref")):
+            traceability_missing_fields.append("traceability.source_tree_ref")
+        elif (
+            _vs3_trace_string(expected_source_tree_ref)
+            and traceability.get("source_tree_ref") != expected_source_tree_ref
+        ):
+            traceability_invalid_fields.append("traceability.source_tree_ref")
+        for field, expected_value in expected_trace_identity_fields.items():
+            if _vs3_trace_string(data.get(field)) and data.get(field) != expected_value:
+                traceability_invalid_fields.append(field)
+            if (
+                _vs3_trace_string(traceability.get(field))
+                and traceability.get(field) != expected_value
+            ):
+                traceability_invalid_fields.append(f"traceability.{field}")
+        for row in rows:
+            row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>") if isinstance(row, dict) else "<unknown>"
+            if not isinstance(row, dict):
+                traceability_row_invalid_fields.append(f"{row_id}.row")
+                continue
+            for field in ["scenario_run_id", "trace_id", "corpus_pack_id", "model_provider", "model_name"]:
+                if not _vs3_trace_string(row.get(field)):
+                    traceability_row_missing_fields.append(f"{row_id}.{field}")
+                elif row.get(field) != traceability.get(field):
+                    traceability_row_invalid_fields.append(f"{row_id}.{field}")
+                elif (
+                    field in local_verification_identity_fields
+                    and row.get(field) != local_verification_identity_fields[field]
+                ):
+                    traceability_row_invalid_fields.append(f"{row_id}.{field}")
+                elif (
+                    field in expected_trace_identity_fields
+                    and row.get(field) != expected_trace_identity_fields[field]
+                ):
+                    traceability_row_invalid_fields.append(f"{row_id}.{field}")
+            if not _vs3_trace_scope(row.get("scope")):
+                traceability_row_invalid_fields.append(f"{row_id}.scope")
+            row_transcript_paths = row.get("transcript_paths")
+            if not _vs3_trace_string_list(row_transcript_paths):
+                traceability_row_missing_fields.append(f"{row_id}.transcript_paths")
+            elif row_transcript_paths != expected_traceability_transcript_paths:
+                traceability_row_invalid_fields.append(f"{row_id}.transcript_paths")
+        traceability_validation = {
+            "status": "passed",
+            "expected_transcript_paths": expected_traceability_transcript_paths,
+            "actual_transcript_paths": traceability_transcript_paths
+            if isinstance(traceability_transcript_paths, list)
+            else [],
+            "expected_ai_verifiable_rows": expected_ai_verifiable_rows,
+            "actual_ai_verifiable_rows": traceability.get("ai_verifiable_rows"),
+            "expected_source_tree_ref": expected_source_tree_ref,
+            "actual_source_tree_ref": traceability.get("source_tree_ref"),
+            "expected_trace_identity": expected_trace_identity_fields,
+            "actual_trace_identity": {
+                field: data.get(field)
+                for field in expected_trace_identity_fields
+            },
+            "actual_traceability_trace_identity": {
+                field: traceability.get(field)
+                for field in expected_trace_identity_fields
+            },
+            "expected_local_verification_identity": local_verification_identity_fields,
+            "actual_local_verification_identity": {
+                field: data.get(field)
+                for field in local_verification_identity_fields
+            },
+            "actual_traceability_local_verification_identity": {
+                field: traceability.get(field)
+                for field in local_verification_identity_fields
+            },
+            "expected_scope": VS3_SCENARIO_VERIFY_SCOPE,
+            "actual_scope": traceability.get("scope"),
+            "actual_top_level_scope": {
+                field: data.get(field)
+                for field in top_level_scope_fields
+            },
+            "missing_fields": sorted(set(traceability_missing_fields)),
+            "invalid_fields": sorted(set(traceability_invalid_fields)),
+            "row_missing_fields": sorted(set(traceability_row_missing_fields)),
+            "row_invalid_fields": sorted(set(traceability_row_invalid_fields)),
+        }
+        if (
+            traceability_validation["missing_fields"]
+            or traceability_validation["invalid_fields"]
+            or traceability_validation["row_missing_fields"]
+            or traceability_validation["row_invalid_fields"]
+        ):
+            traceability_validation["status"] = "failed"
+        payload["traceability_validation"] = traceability_validation
+        payload["source_report"]["traceability_validation"] = traceability_validation
+        if claims_local_dev_assurance and traceability_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_TRACEABILITY_METADATA_MISSING",
+                    "message": "VS3 local-dev assurance reports must include scenario-run traceability metadata before scenario gate can pass.",
+                    "missing_fields": traceability_validation["missing_fields"],
+                    "invalid_fields": traceability_validation["invalid_fields"],
+                    "row_missing_fields": traceability_validation["row_missing_fields"],
+                    "row_invalid_fields": traceability_validation["row_invalid_fields"],
+                }
+            )
+        missing_evidence_ref_rows: list[str] = []
+        malformed_evidence_ref_rows: list[dict[str, Any]] = []
+        duplicate_evidence_ref_rows: list[dict[str, Any]] = []
+        missing_evidence_path_rows: list[dict[str, str]] = []
+        malformed_evidence_path_rows: list[dict[str, Any]] = []
+        duplicate_evidence_path_rows: list[dict[str, Any]] = []
+        missing_source_report_ref_rows: list[str] = []
+        unresolved_source_report_ref_rows: list[dict[str, Any]] = []
+        duplicate_source_report_ref_rows: list[dict[str, Any]] = []
+        unexpected_source_report_ref_rows: list[dict[str, Any]] = []
+        missing_expected_source_report_ref_rows: list[dict[str, Any]] = []
+        source_report_ref_not_in_evidence_rows: list[dict[str, Any]] = []
+        missing_audit_ref_rows: list[str] = []
+        malformed_audit_ref_rows: list[dict[str, Any]] = []
+        duplicate_audit_ref_rows: list[dict[str, Any]] = []
+        missing_policy_decision_ref_rows: list[str] = []
+        malformed_policy_decision_ref_rows: list[dict[str, Any]] = []
+        duplicate_policy_decision_ref_rows: list[dict[str, Any]] = []
+
+        def _vs3_expected_source_report_refs(row_id: str) -> set[str]:
+            if row_id == "VS3-GATE-001":
+                return {"reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"}
+            if row_id == "VS3-GATE-002":
+                return {"docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"}
+            if row_id in {"VS3-GATE-003", "VS3-GATE-004"} or row_id.startswith("VS3-REG-"):
+                return {"reports/security/vs3-final-regression-proof.json"}
+            if row_id.startswith("VS3-CTX-"):
+                return {"reports/security/vs3-request-context-proof.json"}
+            if row_id.startswith("VS3-RLS-"):
+                return {"reports/db/vs3-postgres-rls-proof.json"}
+            if row_id.startswith("VS3-OPA-"):
+                return {"reports/policy/vs3-opa-policy-proof.json"}
+            if row_id.startswith("VS3-EGR-"):
+                return {"reports/security/vs3-egress-sandbox-proof.json"}
+            if row_id.startswith("VS3-CON-"):
+                return {"reports/security/vs3-connectorhub-source-proof.json"}
+            if row_id.startswith("VS3-TOOL-"):
+                return {"reports/security/vs3-tool-registry-proof.json"}
+            if row_id.startswith("VS3-OBS-"):
+                return {"reports/observability/vs3-observability-proof.json"}
+            return set()
+
+        def _vs3_row_source_report_ref_issue(ref: str) -> str | None:
+            ref_path = Path(ref)
+            if ref_path.is_absolute():
+                return "absolute_path_not_allowed"
+            resolved = (root / ref_path).resolve()
+            try:
+                resolved.relative_to(root)
+            except ValueError:
+                return "path_outside_repo"
+            if not resolved.exists():
+                return "missing"
+            if not resolved.is_file():
+                return "not_file"
+            return None
+
+        def _vs3_audit_ref_valid(ref: str) -> bool:
+            return ref.startswith("audit:") or ref.startswith("audit_")
+
+        def _vs3_policy_decision_ref_valid(ref: str) -> bool:
+            return ref.startswith("policy:") or ref.startswith("policy_")
+
+        def _vs3_evidence_ref_issue(ref: str) -> str | None:
+            if "\n" in ref or "\r" in ref:
+                return "unsupported_ref_format"
+            if ref.startswith("/") or ".." in ref.split("/"):
+                return "path_outside_repo"
+            path_prefixes = (
+                "docs/",
+                "reports/",
+                "scripts/",
+                "config/",
+                "policies/",
+                "fixtures/",
+            )
+            if ref.startswith(path_prefixes):
+                resolved = (root / ref).resolve()
+                try:
+                    resolved.relative_to(root)
+                except ValueError:
+                    return "path_outside_repo"
+                if not resolved.exists():
+                    return "missing"
+                return None
+            command_prefixes = (
+                "cornerstone ",
+                "git status ",
+            )
+            if ref.startswith(command_prefixes):
+                return None
+            symbolic_prefixes = (
+                "human_gate_validation_rehearsal:",
+                "audit_state:",
+                "audit_tamper_state:",
+                "controlled_sink:",
+                "connector_ack_outbox:",
+                "connector_delivery_quarantine:",
+                "sandbox_suite:",
+            )
+            if ref.startswith(symbolic_prefixes):
+                return None
+            symbolic_exact_refs = {
+                "vs3_overclaim_lint",
+                "local policy-gateway HTTP fixture",
+                "decision_log_masking",
+                "url_normalization_matrix",
+                "sandbox_matrix",
+                "outage_matrix",
+                "untrusted_content_matrix",
+                "trusted_registry_negative_tests",
+                "status_surface_comparison",
+                "operator_status_snapshot",
+            }
+            if ref in symbolic_exact_refs:
+                return None
+            return "unsupported_ref_format"
+
+        def _vs3_evidence_ref_valid(ref: str) -> bool:
+            return _vs3_evidence_ref_issue(ref) is None
+
+        def _vs3_duplicate_string_refs(refs: Any) -> list[str]:
+            if not isinstance(refs, list):
+                return []
+            normalized_refs = [
+                ref.strip()
+                for ref in refs
+                if isinstance(ref, str) and ref.strip()
+            ]
+            return sorted(
+                {
+                    ref
+                    for ref in normalized_refs
+                    if normalized_refs.count(ref) > 1
+                }
+            )
+
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>")
+            row_evidence_paths_by_field = {
+                "evidence": row.get("evidence"),
+                "evidence_paths": row.get("evidence_paths"),
+            }
+            evidence_row_refs = row.get("evidence_refs")
+            source_report_row_refs = row.get("source_report_refs")
+            audit_row_refs = row.get("audit_refs")
+            policy_decision_row_refs = row.get("policy_decision_refs")
+            row_is_ai_pass = row.get("owner", "AI") != "Human" and row.get("status") == "PASS"
+            for field_name, evidence_paths in row_evidence_paths_by_field.items():
+                if not (
+                    isinstance(evidence_paths, list)
+                    and evidence_paths
+                    and all(isinstance(ref, str) and ref.strip() for ref in evidence_paths)
+                ):
+                    missing_evidence_path_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "field": field_name,
+                            "issue": "missing_or_invalid_list",
+                        }
+                    )
+                    continue
+                for ref in evidence_paths:
+                    issue = _vs3_evidence_ref_issue(ref)
+                    if issue:
+                        malformed_evidence_path_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "field": field_name,
+                                "evidence_path": ref,
+                                "issue": issue,
+                            }
+                        )
+                duplicate_refs = _vs3_duplicate_string_refs(evidence_paths)
+                if duplicate_refs:
+                    duplicate_evidence_path_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "field": field_name,
+                            "duplicate_refs": duplicate_refs,
+                        }
+                    )
+            if not (
+                isinstance(evidence_row_refs, list)
+                and evidence_row_refs
+                and all(isinstance(ref, str) and ref.strip() for ref in evidence_row_refs)
+            ):
+                missing_evidence_ref_rows.append(row_id)
+            else:
+                for ref in evidence_row_refs:
+                    issue = _vs3_evidence_ref_issue(ref)
+                    if issue:
+                        malformed_evidence_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "evidence_ref": ref,
+                                "issue": issue,
+                            }
+                        )
+                duplicate_refs = _vs3_duplicate_string_refs(evidence_row_refs)
+                if duplicate_refs:
+                    duplicate_evidence_ref_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "duplicate_refs": duplicate_refs,
+                        }
+                    )
+            if not (
+                isinstance(source_report_row_refs, list)
+                and source_report_row_refs
+                and all(isinstance(ref, str) and ref.strip() for ref in source_report_row_refs)
+            ):
+                missing_source_report_ref_rows.append(row_id)
+            else:
+                duplicate_refs = _vs3_duplicate_string_refs(source_report_row_refs)
+                if duplicate_refs:
+                    duplicate_source_report_ref_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "duplicate_refs": duplicate_refs,
+                        }
+                    )
+            if (
+                isinstance(source_report_row_refs, list)
+                and source_report_row_refs
+                and all(isinstance(ref, str) and ref.strip() for ref in source_report_row_refs)
+                and row_is_ai_pass
+            ):
+                for ref in source_report_row_refs:
+                    issue = _vs3_row_source_report_ref_issue(ref)
+                    if issue:
+                        unresolved_source_report_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "source_report_ref": ref,
+                                "issue": issue,
+                            }
+                        )
+                expected_source_report_refs = _vs3_expected_source_report_refs(row_id)
+                if expected_source_report_refs:
+                    actual_source_report_refs = {
+                        ref for ref in source_report_row_refs if isinstance(ref, str) and ref.strip()
+                    }
+                    for ref in sorted(actual_source_report_refs - expected_source_report_refs):
+                        unexpected_source_report_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "source_report_ref": ref,
+                                "expected_source_report_refs": sorted(expected_source_report_refs),
+                                "issue": "unexpected_source_report_ref",
+                            }
+                        )
+                    missing_expected_refs = sorted(expected_source_report_refs - actual_source_report_refs)
+                    if missing_expected_refs:
+                        missing_expected_source_report_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "missing_source_report_refs": missing_expected_refs,
+                                "issue": "missing_expected_source_report_ref",
+                            }
+                        )
+                if isinstance(evidence_row_refs, list):
+                    evidence_row_ref_set = {
+                        ref for ref in evidence_row_refs if isinstance(ref, str) and ref.strip()
+                    }
+                    for ref in source_report_row_refs:
+                        if isinstance(ref, str) and ref.strip() and ref not in evidence_row_ref_set:
+                            source_report_ref_not_in_evidence_rows.append(
+                                {
+                                    "scenario_id": row_id,
+                                    "source_report_ref": ref,
+                                    "issue": "source_report_ref_not_in_evidence_refs",
+                                }
+                            )
+            if (
+                row_is_ai_pass
+                and not (
+                    isinstance(audit_row_refs, list)
+                    and audit_row_refs
+                    and all(isinstance(ref, str) and ref.strip() for ref in audit_row_refs)
+                )
+            ):
+                missing_audit_ref_rows.append(row_id)
+            elif row_is_ai_pass:
+                for ref in audit_row_refs:
+                    if not _vs3_audit_ref_valid(ref):
+                        malformed_audit_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "audit_ref": ref,
+                                "issue": "unsupported_ref_format",
+                            }
+                        )
+                duplicate_refs = _vs3_duplicate_string_refs(audit_row_refs)
+                if duplicate_refs:
+                    duplicate_audit_ref_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "duplicate_refs": duplicate_refs,
+                        }
+                    )
+            if (
+                row_is_ai_pass
+                and not (
+                    isinstance(policy_decision_row_refs, list)
+                    and policy_decision_row_refs
+                    and all(isinstance(ref, str) and ref.strip() for ref in policy_decision_row_refs)
+                )
+            ):
+                missing_policy_decision_ref_rows.append(row_id)
+            elif row_is_ai_pass:
+                for ref in policy_decision_row_refs:
+                    if not _vs3_policy_decision_ref_valid(ref):
+                        malformed_policy_decision_ref_rows.append(
+                            {
+                                "scenario_id": row_id,
+                                "policy_decision_ref": ref,
+                                "issue": "unsupported_ref_format",
+                            }
+                        )
+                duplicate_refs = _vs3_duplicate_string_refs(policy_decision_row_refs)
+                if duplicate_refs:
+                    duplicate_policy_decision_ref_rows.append(
+                        {
+                            "scenario_id": row_id,
+                            "duplicate_refs": duplicate_refs,
+                        }
+                    )
+        row_ref_validation = {
+            "status": "passed",
+            "missing_evidence_ref_rows": missing_evidence_ref_rows,
+            "malformed_evidence_ref_rows": malformed_evidence_ref_rows,
+            "duplicate_evidence_ref_rows": duplicate_evidence_ref_rows,
+            "missing_evidence_path_rows": missing_evidence_path_rows,
+            "malformed_evidence_path_rows": malformed_evidence_path_rows,
+            "duplicate_evidence_path_rows": duplicate_evidence_path_rows,
+            "missing_source_report_ref_rows": missing_source_report_ref_rows,
+            "unresolved_source_report_ref_rows": unresolved_source_report_ref_rows,
+            "duplicate_source_report_ref_rows": duplicate_source_report_ref_rows,
+            "unexpected_source_report_ref_rows": unexpected_source_report_ref_rows,
+            "missing_expected_source_report_ref_rows": missing_expected_source_report_ref_rows,
+            "source_report_ref_not_in_evidence_rows": source_report_ref_not_in_evidence_rows,
+            "missing_audit_ref_rows": missing_audit_ref_rows,
+            "malformed_audit_ref_rows": malformed_audit_ref_rows,
+            "duplicate_audit_ref_rows": duplicate_audit_ref_rows,
+            "missing_policy_decision_ref_rows": missing_policy_decision_ref_rows,
+            "malformed_policy_decision_ref_rows": malformed_policy_decision_ref_rows,
+            "duplicate_policy_decision_ref_rows": duplicate_policy_decision_ref_rows,
+        }
+        if (
+            missing_evidence_ref_rows
+            or malformed_evidence_ref_rows
+            or duplicate_evidence_ref_rows
+            or missing_evidence_path_rows
+            or malformed_evidence_path_rows
+            or duplicate_evidence_path_rows
+            or missing_source_report_ref_rows
+            or unresolved_source_report_ref_rows
+            or duplicate_source_report_ref_rows
+            or unexpected_source_report_ref_rows
+            or missing_expected_source_report_ref_rows
+            or source_report_ref_not_in_evidence_rows
+            or missing_audit_ref_rows
+            or malformed_audit_ref_rows
+            or duplicate_audit_ref_rows
+            or missing_policy_decision_ref_rows
+            or malformed_policy_decision_ref_rows
+            or duplicate_policy_decision_ref_rows
+        ):
+            row_ref_validation["status"] = "failed"
+        payload["row_ref_validation"] = row_ref_validation
+        payload["source_report"]["row_ref_validation"] = row_ref_validation
+        if claims_local_dev_assurance and row_ref_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_ROW_EVIDENCE_METADATA_MISSING",
+                    "message": "VS3 local-dev assurance reports must include valid row-level evidence, evidence_paths, evidence_refs, source_report_refs, and AI PASS audit_refs before scenario gate can pass.",
+                    "missing_evidence_ref_rows": missing_evidence_ref_rows,
+                    "malformed_evidence_ref_rows": malformed_evidence_ref_rows,
+                    "duplicate_evidence_ref_rows": duplicate_evidence_ref_rows,
+                    "missing_evidence_path_rows": missing_evidence_path_rows,
+                    "malformed_evidence_path_rows": malformed_evidence_path_rows,
+                    "duplicate_evidence_path_rows": duplicate_evidence_path_rows,
+                    "missing_source_report_ref_rows": missing_source_report_ref_rows,
+                    "unresolved_source_report_ref_rows": unresolved_source_report_ref_rows,
+                    "duplicate_source_report_ref_rows": duplicate_source_report_ref_rows,
+                    "unexpected_source_report_ref_rows": unexpected_source_report_ref_rows,
+                    "missing_expected_source_report_ref_rows": missing_expected_source_report_ref_rows,
+                    "source_report_ref_not_in_evidence_rows": source_report_ref_not_in_evidence_rows,
+                    "missing_audit_ref_rows": missing_audit_ref_rows,
+                    "malformed_audit_ref_rows": malformed_audit_ref_rows,
+                    "duplicate_audit_ref_rows": duplicate_audit_ref_rows,
+                    "missing_policy_decision_ref_rows": missing_policy_decision_ref_rows,
+                    "malformed_policy_decision_ref_rows": malformed_policy_decision_ref_rows,
+                    "duplicate_policy_decision_ref_rows": duplicate_policy_decision_ref_rows,
+                }
+            )
+        row_ref_exactness_ready = row_ref_validation["status"] == "passed"
+        missing_aggregate_ref_fields: list[str] = []
+        malformed_aggregate_evidence_refs: list[str] = []
+        malformed_aggregate_audit_refs: list[str] = []
+        malformed_aggregate_policy_decision_refs: list[str] = []
+        duplicate_aggregate_evidence_refs: list[str] = []
+        duplicate_aggregate_audit_refs: list[str] = []
+        duplicate_aggregate_policy_decision_refs: list[str] = []
+        unexpected_aggregate_evidence_refs: list[str] = []
+        unexpected_aggregate_audit_refs: list[str] = []
+        unexpected_aggregate_policy_decision_refs: list[str] = []
+        aggregate_row_evidence_ref_missing_from_evidence_refs: list[dict[str, Any]] = []
+        aggregate_source_report_ref_missing_from_evidence_refs: list[dict[str, Any]] = []
+        aggregate_row_audit_ref_missing_from_audit_refs: list[dict[str, Any]] = []
+        aggregate_row_policy_decision_ref_missing_from_policy_decision_refs: list[dict[str, Any]] = []
+        for field in ["evidence_refs", "audit_refs", "policy_decision_refs"]:
+            refs = data.get(field)
+            if not (
+                isinstance(refs, list)
+                and refs
+                and all(isinstance(ref, str) and ref.strip() for ref in refs)
+            ):
+                missing_aggregate_ref_fields.append(field)
+        aggregate_evidence_refs = data.get("evidence_refs")
+        if isinstance(aggregate_evidence_refs, list):
+            duplicate_aggregate_evidence_refs = _vs3_duplicate_string_refs(
+                aggregate_evidence_refs
+            )
+            malformed_aggregate_evidence_refs = [
+                ref
+                for ref in aggregate_evidence_refs
+                if isinstance(ref, str) and ref.strip() and not _vs3_evidence_ref_valid(ref)
+            ]
+            aggregate_evidence_ref_set = {
+                ref for ref in aggregate_evidence_refs if isinstance(ref, str) and ref.strip()
+            }
+            expected_aggregate_evidence_ref_set = set()
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>")
+                row_evidence_refs = row.get("evidence_refs")
+                if isinstance(row_evidence_refs, list):
+                    for ref in row_evidence_refs:
+                        if isinstance(ref, str) and ref.strip():
+                            expected_aggregate_evidence_ref_set.add(ref)
+                        if (
+                            row_ref_exactness_ready
+                            and
+                            isinstance(ref, str)
+                            and ref.strip()
+                            and ref not in aggregate_evidence_ref_set
+                        ):
+                            aggregate_row_evidence_ref_missing_from_evidence_refs.append(
+                                {
+                                    "scenario_id": row_id,
+                                    "evidence_ref": ref,
+                                    "issue": "row_evidence_ref_missing_from_aggregate_evidence_refs",
+                                }
+                            )
+                source_report_row_refs = row.get("source_report_refs")
+                if not isinstance(source_report_row_refs, list):
+                    continue
+                for ref in source_report_row_refs:
+                    if isinstance(ref, str) and ref.strip():
+                        expected_aggregate_evidence_ref_set.add(ref)
+                    if (
+                        row_ref_exactness_ready
+                        and isinstance(ref, str)
+                        and ref.strip()
+                        and ref not in aggregate_evidence_ref_set
+                    ):
+                        aggregate_source_report_ref_missing_from_evidence_refs.append(
+                            {
+                                "scenario_id": row_id,
+                                "source_report_ref": ref,
+                                "issue": "source_report_ref_missing_from_aggregate_evidence_refs",
+                            }
+                        )
+            if row_ref_exactness_ready:
+                unexpected_aggregate_evidence_refs = sorted(
+                    aggregate_evidence_ref_set - expected_aggregate_evidence_ref_set
+                )
+        aggregate_audit_refs = data.get("audit_refs")
+        if isinstance(aggregate_audit_refs, list):
+            duplicate_aggregate_audit_refs = _vs3_duplicate_string_refs(
+                aggregate_audit_refs
+            )
+            malformed_aggregate_audit_refs = [
+                ref
+                for ref in aggregate_audit_refs
+                if isinstance(ref, str) and ref.strip() and not _vs3_audit_ref_valid(ref)
+            ]
+            aggregate_audit_ref_set = {
+                ref for ref in aggregate_audit_refs if isinstance(ref, str) and ref.strip()
+            }
+            expected_aggregate_audit_ref_set = set()
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>")
+                row_audit_refs = row.get("audit_refs")
+                if not isinstance(row_audit_refs, list):
+                    continue
+                for ref in row_audit_refs:
+                    if isinstance(ref, str) and ref.strip():
+                        expected_aggregate_audit_ref_set.add(ref)
+                    if (
+                        row_ref_exactness_ready
+                        and isinstance(ref, str)
+                        and ref.strip()
+                        and ref not in aggregate_audit_ref_set
+                    ):
+                        aggregate_row_audit_ref_missing_from_audit_refs.append(
+                            {
+                                "scenario_id": row_id,
+                                "audit_ref": ref,
+                                "issue": "row_audit_ref_missing_from_aggregate_audit_refs",
+                            }
+                        )
+            if row_ref_exactness_ready:
+                unexpected_aggregate_audit_refs = sorted(
+                    aggregate_audit_ref_set - expected_aggregate_audit_ref_set
+                )
+        aggregate_policy_decision_refs = data.get("policy_decision_refs")
+        if isinstance(aggregate_policy_decision_refs, list):
+            duplicate_aggregate_policy_decision_refs = _vs3_duplicate_string_refs(
+                aggregate_policy_decision_refs
+            )
+            malformed_aggregate_policy_decision_refs = [
+                ref
+                for ref in aggregate_policy_decision_refs
+                if isinstance(ref, str) and ref.strip() and not _vs3_policy_decision_ref_valid(ref)
+            ]
+            aggregate_policy_decision_ref_set = {
+                ref
+                for ref in aggregate_policy_decision_refs
+                if isinstance(ref, str) and ref.strip()
+            }
+            expected_aggregate_policy_decision_ref_set = set()
+            for row in rows:
+                if not isinstance(row, dict):
+                    continue
+                row_id = str(row.get("scenario_id") or row.get("id") or "<unknown>")
+                row_policy_decision_refs = row.get("policy_decision_refs")
+                if not isinstance(row_policy_decision_refs, list):
+                    continue
+                for ref in row_policy_decision_refs:
+                    if isinstance(ref, str) and ref.strip():
+                        expected_aggregate_policy_decision_ref_set.add(ref)
+                    if (
+                        row_ref_exactness_ready
+                        and
+                        isinstance(ref, str)
+                        and ref.strip()
+                        and ref not in aggregate_policy_decision_ref_set
+                    ):
+                        aggregate_row_policy_decision_ref_missing_from_policy_decision_refs.append(
+                            {
+                                "scenario_id": row_id,
+                                "policy_decision_ref": ref,
+                                "issue": (
+                                    "row_policy_decision_ref_missing_from_aggregate_policy_decision_refs"
+                                ),
+                            }
+                        )
+            if row_ref_exactness_ready:
+                unexpected_aggregate_policy_decision_refs = sorted(
+                    aggregate_policy_decision_ref_set
+                    - expected_aggregate_policy_decision_ref_set
+                )
+        aggregate_ref_validation = {
+            "status": "failed"
+            if (
+                missing_aggregate_ref_fields
+                or malformed_aggregate_evidence_refs
+                or malformed_aggregate_audit_refs
+                or malformed_aggregate_policy_decision_refs
+                or duplicate_aggregate_evidence_refs
+                or duplicate_aggregate_audit_refs
+                or duplicate_aggregate_policy_decision_refs
+                or unexpected_aggregate_evidence_refs
+                or unexpected_aggregate_audit_refs
+                or unexpected_aggregate_policy_decision_refs
+                or aggregate_row_evidence_ref_missing_from_evidence_refs
+                or aggregate_source_report_ref_missing_from_evidence_refs
+                or aggregate_row_audit_ref_missing_from_audit_refs
+                or aggregate_row_policy_decision_ref_missing_from_policy_decision_refs
+            )
+            else "passed",
+            "missing_ref_fields": missing_aggregate_ref_fields,
+            "malformed_evidence_refs": malformed_aggregate_evidence_refs,
+            "malformed_audit_refs": malformed_aggregate_audit_refs,
+            "malformed_policy_decision_refs": malformed_aggregate_policy_decision_refs,
+            "duplicate_evidence_refs": duplicate_aggregate_evidence_refs,
+            "duplicate_audit_refs": duplicate_aggregate_audit_refs,
+            "duplicate_policy_decision_refs": duplicate_aggregate_policy_decision_refs,
+            "unexpected_evidence_refs": unexpected_aggregate_evidence_refs,
+            "unexpected_audit_refs": unexpected_aggregate_audit_refs,
+            "unexpected_policy_decision_refs": unexpected_aggregate_policy_decision_refs,
+            "row_evidence_ref_missing_from_evidence_refs": (
+                aggregate_row_evidence_ref_missing_from_evidence_refs
+            ),
+            "source_report_ref_missing_from_evidence_refs": aggregate_source_report_ref_missing_from_evidence_refs,
+            "row_audit_ref_missing_from_audit_refs": aggregate_row_audit_ref_missing_from_audit_refs,
+            "row_policy_decision_ref_missing_from_policy_decision_refs": (
+                aggregate_row_policy_decision_ref_missing_from_policy_decision_refs
+            ),
+            "source_evidence_ref_count": len(data.get("evidence_refs") or [])
+            if isinstance(data.get("evidence_refs"), list)
+            else 0,
+            "source_audit_ref_count": len(data.get("audit_refs") or [])
+            if isinstance(data.get("audit_refs"), list)
+            else 0,
+            "source_policy_decision_ref_count": len(data.get("policy_decision_refs") or [])
+            if isinstance(data.get("policy_decision_refs"), list)
+            else 0,
+        }
+        payload["aggregate_ref_validation"] = aggregate_ref_validation
+        payload["source_report"]["aggregate_ref_validation"] = aggregate_ref_validation
+        if claims_local_dev_assurance and aggregate_ref_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_AGGREGATE_EVIDENCE_METADATA_MISSING",
+                    "message": "VS3 local-dev assurance reports must include valid aggregate evidence_refs, audit_refs, and policy_decision_refs before scenario gate can pass.",
+                    "missing_ref_fields": missing_aggregate_ref_fields,
+                    "malformed_evidence_refs": malformed_aggregate_evidence_refs,
+                    "malformed_audit_refs": malformed_aggregate_audit_refs,
+                    "malformed_policy_decision_refs": malformed_aggregate_policy_decision_refs,
+                    "duplicate_evidence_refs": duplicate_aggregate_evidence_refs,
+                    "duplicate_audit_refs": duplicate_aggregate_audit_refs,
+                    "duplicate_policy_decision_refs": duplicate_aggregate_policy_decision_refs,
+                    "unexpected_evidence_refs": unexpected_aggregate_evidence_refs,
+                    "unexpected_audit_refs": unexpected_aggregate_audit_refs,
+                    "unexpected_policy_decision_refs": unexpected_aggregate_policy_decision_refs,
+                    "row_evidence_ref_missing_from_evidence_refs": (
+                        aggregate_row_evidence_ref_missing_from_evidence_refs
+                    ),
+                    "source_report_ref_missing_from_evidence_refs": aggregate_source_report_ref_missing_from_evidence_refs,
+                    "row_audit_ref_missing_from_audit_refs": (
+                        aggregate_row_audit_ref_missing_from_audit_refs
+                    ),
+                    "row_policy_decision_ref_missing_from_policy_decision_refs": (
+                        aggregate_row_policy_decision_ref_missing_from_policy_decision_refs
+                    ),
+                }
+            )
+        source_transcripts = data.get("command_transcripts")
+        self_transcript = data.get("self_command_transcript")
+        source_verify_transcript = None
+        if isinstance(source_transcripts, list):
+            for transcript in source_transcripts:
+                if not isinstance(transcript, dict):
+                    continue
+                command = transcript.get("command")
+                if (
+                    transcript.get("name") == "scenario_verify_vs3-onprem-trusted-extension"
+                    and isinstance(command, list)
+                    and command[:4]
+                    == ["cornerstone", "scenario", "verify", "vs3-onprem-trusted-extension"]
+                ):
+                    source_verify_transcript = transcript
+                    break
+        missing_source_transcript_fields: list[str] = []
+        invalid_source_transcript_fields: list[str] = []
+        mismatched_source_transcript_ref_fields: list[str] = []
+        if not isinstance(source_transcripts, list) or not source_transcripts:
+            missing_source_transcript_fields.append("command_transcripts")
+        if source_verify_transcript is None:
+            missing_source_transcript_fields.append("command_transcripts.scenario_verify_vs3")
+        if not isinstance(self_transcript, dict):
+            missing_source_transcript_fields.append("self_command_transcript")
+
+        def _valid_ref_list(value: Any) -> bool:
+            return (
+                isinstance(value, list)
+                and bool(value)
+                and all(isinstance(ref, str) and ref.strip() for ref in value)
+            )
+
+        def _validate_source_transcript(label: str, transcript: dict[str, Any]) -> None:
+            for error_code in _vs3_cli_command_transcript_errors(
+                transcript,
+                expected_source_tree=source_tree,
+                require_stdout_tail=True,
+            ):
+                invalid_source_transcript_fields.append(f"{label}.{error_code}")
+            if transcript.get("schema_version") != "cs.command_transcript.v0":
+                invalid_source_transcript_fields.append(f"{label}.schema_version")
+            if transcript.get("exit_code") != 0:
+                invalid_source_transcript_fields.append(f"{label}.exit_code")
+            if transcript.get("timed_out") is not False:
+                invalid_source_transcript_fields.append(f"{label}.timed_out")
+            if transcript.get("output_mode") != "json":
+                invalid_source_transcript_fields.append(f"{label}.output_mode")
+            if transcript.get("json_schema") != data.get("schema_version"):
+                invalid_source_transcript_fields.append(f"{label}.json_schema")
+            if not isinstance(transcript.get("source_tree"), dict):
+                invalid_source_transcript_fields.append(f"{label}.source_tree")
+            for ref_field in ["evidence_refs", "audit_refs", "policy_decision_refs"]:
+                if not _valid_ref_list(transcript.get(ref_field)):
+                    invalid_source_transcript_fields.append(f"{label}.{ref_field}")
+                elif transcript.get(ref_field) != data.get(ref_field):
+                    mismatched_source_transcript_ref_fields.append(f"{label}.{ref_field}")
+
+        if isinstance(source_verify_transcript, dict):
+            _validate_source_transcript("command_transcripts.scenario_verify_vs3", source_verify_transcript)
+        if isinstance(self_transcript, dict):
+            _validate_source_transcript("self_command_transcript", self_transcript)
+        source_transcript_validation = {
+            "status": "failed"
+            if (
+                missing_source_transcript_fields
+                or invalid_source_transcript_fields
+                or mismatched_source_transcript_ref_fields
+            )
+            else "passed",
+            "missing_fields": missing_source_transcript_fields,
+            "invalid_fields": invalid_source_transcript_fields,
+            "mismatched_ref_fields": mismatched_source_transcript_ref_fields,
+        }
+        payload["source_transcript_validation"] = source_transcript_validation
+        payload["source_report"]["source_transcript_validation"] = source_transcript_validation
+        if claims_local_dev_assurance and source_transcript_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SOURCE_TRANSCRIPT_METADATA_MISSING",
+                    "message": "VS3 local-dev assurance reports must include a valid source scenario-verify command transcript before scenario gate can pass.",
+                    "missing_fields": missing_source_transcript_fields,
+                    "invalid_fields": invalid_source_transcript_fields,
+                    "mismatched_ref_fields": mismatched_source_transcript_ref_fields,
+                }
+            )
+        payload["evidence_refs"] = list(data.get("evidence_refs") or [])
+        if report_evidence_ref not in payload["evidence_refs"]:
+            payload["evidence_refs"].append(report_evidence_ref)
+        payload["audit_refs"] = list(data.get("audit_refs") or [])
+        payload["policy_decision_refs"] = list(data.get("policy_decision_refs") or [])
     if data.get("status") != "success" or report_errors:
         payload["status"] = "failed"
         payload["errors"].append(
@@ -10220,8 +21996,177 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
                 "message": "AI-verifiable scenarios remain non-PASS.",
             }
         )
+    exit_code = EXIT_SUCCESS if payload["status"] == "success" else EXIT_EVIDENCE_MISSING
+    if is_vs3_onprem_report:
+        transcript_elapsed_seconds = round(perf_counter() - started, 3)
+        ended_at = utc_now()
+        transcript_command = [
+            "cornerstone",
+            "scenario",
+            "gate",
+            str(report_path.relative_to(root) if report_path.is_relative_to(root) else report_path),
+            "--json",
+        ]
+        transcript_scope = {
+            "tenant_id": payload["tenant_id"],
+            "owner_id": payload["owner_id"],
+            "namespace_id": payload["namespace_id"],
+            "workspace_id": payload["workspace_id"],
+            "scope_source": "local_vs3_fixture",
+        }
+        transcript_stdout_json = {
+            "schema_version": payload["schema_version"],
+            "json_schema": payload["schema_version"],
+            "status": payload["status"],
+            "command": transcript_command,
+            "arguments": transcript_command[1:],
+            "exit_code": exit_code,
+            "elapsed_seconds": transcript_elapsed_seconds,
+            "checked_report": payload.get("checked_report"),
+            "final_verdict": payload.get("final_verdict"),
+            "evidence_refs": payload["evidence_refs"],
+            "audit_refs": payload["audit_refs"],
+            "policy_decision_refs": payload["policy_decision_refs"],
+            "scope": transcript_scope,
+            "source_tree": payload.get("source_tree"),
+            "proof_boundary": {
+                "vs3_l": VS3_CLI_STDOUT_PROOF_BOUNDARY_VS3_L,
+                "vs3_p": "NOT_CLAIMED",
+                "production": "NOT_CLAIMED",
+                "production_onprem": "NOT_CLAIMED",
+                "live_provider": "NOT_CLAIMED",
+                "real_idp": "NOT_CLAIMED",
+                "real_network": "NOT_CLAIMED",
+                "migration_restore": "NOT_CLAIMED",
+                "security_acceptance": "NOT_CLAIMED",
+                "human_acceptance": "NOT_CLAIMED",
+            },
+            "source_report": {
+                "schema_version": data.get("schema_version"),
+                "scenario_set": data.get("scenario_set"),
+                "status": data.get("status"),
+                "final_verdict": data.get("final_verdict"),
+            },
+        }
+        gate_transcript = command_transcript_entry(
+            name="scenario_gate_vs3_onprem_trusted_extension",
+            command=transcript_command,
+            exit_code=exit_code,
+            timed_out=False,
+            elapsed_seconds=transcript_elapsed_seconds,
+            stdout_tail=[
+                json.dumps(
+                    {
+                        "schema_version": transcript_stdout_json.get("schema_version"),
+                        "json_schema": transcript_stdout_json.get("json_schema"),
+                        "status": payload.get("status"),
+                        "checked_report": payload.get("checked_report"),
+                        "final_verdict": payload.get("final_verdict"),
+                        "summary": payload.get("summary"),
+                    },
+                    sort_keys=True,
+                )
+            ],
+            stderr_tail=[],
+        )
+        gate_transcript.update(
+            {
+                "arguments": transcript_command[1:],
+                "started_at": started_at,
+                "ended_at": ended_at,
+                "output_mode": "json",
+                "json_schema": payload["schema_version"],
+                "source_json_schema": data.get("schema_version"),
+                "cli_schema_version": payload["cli_schema_version"],
+                "scope": transcript_scope,
+                "evidence_refs": payload["evidence_refs"],
+                "audit_refs": payload["audit_refs"],
+                "policy_decision_refs": payload["policy_decision_refs"],
+                "source_tree": payload.get("source_tree"),
+                "ref_summary": {
+                    "evidence_refs_count": len(payload["evidence_refs"]),
+                    "audit_refs_count": len(payload["audit_refs"]),
+                    "policy_decision_refs_count": len(payload["policy_decision_refs"]),
+                },
+                "stdout_json": transcript_stdout_json,
+            }
+        )
+        gate_transcript_validation = _vs3_scenario_gate_self_transcript_validation(
+            gate_transcript,
+            gate_payload=payload,
+            expected_command=transcript_command,
+            expected_source_tree=payload.get("source_tree") if isinstance(payload.get("source_tree"), dict) else None,
+        )
+        payload["self_command_transcript_validation"] = gate_transcript_validation
+        source_tree_current_gate_passed = (
+            not claims_local_dev_assurance
+            or source_tree_current_validation["status"] == "passed"
+        )
+        source_tree_snapshot_coverage_gate_passed = (
+            not claims_local_dev_assurance
+            or source_tree_snapshot_coverage_validation["status"] == "passed"
+        )
+        source_tree_snapshot_entries_gate_passed = (
+            not claims_local_dev_assurance
+            or source_tree_snapshot_entry_validation["status"] == "passed"
+        )
+        generated_dirty_snapshot_gate_passed = (
+            not claims_local_dev_assurance
+            or generated_dirty_snapshot_validation["status"] == "passed"
+        )
+        payload["scenario_gate_conditions"] = {
+            "source_tree_current": source_tree_current_gate_passed,
+            "source_tree_snapshot_coverage": source_tree_snapshot_coverage_gate_passed,
+            "source_tree_snapshot_entries": source_tree_snapshot_entries_gate_passed,
+            "generated_dirty_snapshot": generated_dirty_snapshot_gate_passed,
+            "self_command_transcript_shape_valid": gate_transcript_validation["status"] == "passed",
+        }
+        payload["scenario_gate_summary"] = {
+            "source_tree_current_failures": 0 if source_tree_current_gate_passed else 1,
+            "source_tree_snapshot_coverage_failures": 0
+            if source_tree_snapshot_coverage_gate_passed
+            else 1,
+            "source_tree_snapshot_entry_failures": 0
+            if source_tree_snapshot_entries_gate_passed
+            else 1,
+            "generated_dirty_snapshot_failures": 0
+            if generated_dirty_snapshot_gate_passed
+            else 1,
+            "self_command_transcript_shape_failures": 0
+            if gate_transcript_validation["status"] == "passed"
+            else 1,
+        }
+        payload["scenario_gate_negative_evidence"] = {
+            "source_tree_current_failures": 0 if source_tree_current_gate_passed else 1,
+            "source_tree_snapshot_coverage_failures": 0
+            if source_tree_snapshot_coverage_gate_passed
+            else 1,
+            "source_tree_snapshot_entry_failures": 0
+            if source_tree_snapshot_entries_gate_passed
+            else 1,
+            "generated_dirty_snapshot_failures": 0
+            if generated_dirty_snapshot_gate_passed
+            else 1,
+            "self_command_transcript_shape_failures": 0
+            if gate_transcript_validation["status"] == "passed"
+            else 1,
+        }
+        if payload["status"] == "success" and gate_transcript_validation["status"] != "passed":
+            payload["status"] = "failed"
+            exit_code = EXIT_EVIDENCE_MISSING
+            gate_transcript["exit_code"] = exit_code
+            gate_transcript["stdout_json"]["status"] = "failed"
+            gate_transcript["stdout_json"]["exit_code"] = exit_code
+            payload["errors"].append(
+                {
+                    "code": "CS_VS3_SCENARIO_GATE_SELF_TRANSCRIPT_INVALID",
+                    "message": "VS3 scenario gate command transcript must be replayable, scoped, and structured before the gate can pass.",
+                    "error_codes": gate_transcript_validation["error_codes"],
+                }
+            )
+        payload["command_transcripts"] = [gate_transcript]
     print_payload(payload, args.json)
-    return EXIT_SUCCESS if payload["status"] == "success" else EXIT_EVIDENCE_MISSING
+    return exit_code
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -10300,6 +22245,94 @@ def build_parser() -> argparse.ArgumentParser:
     repo_split.add_argument("--json", action="store_true", help="Emit JSON output")
     repo_split.set_defaults(func=command_product_repo_split_review)
 
+    principal = subcommands.add_parser("principal", help="Trusted principal and request-context commands")
+    principal_sub = principal.add_subparsers(dest="principal_command")
+    principal_context = principal_sub.add_parser("context", help="RequestContext commands")
+    principal_context_sub = principal_context.add_subparsers(dest="principal_context_command")
+    principal_context_resolve = principal_context_sub.add_parser(
+        "resolve",
+        help="Resolve a VS3 local RequestContext from trusted identity and membership",
+    )
+    principal_context_resolve.add_argument("--json", action="store_true", help="Emit JSON output")
+    principal_context_resolve.set_defaults(func=command_principal_context_resolve)
+
+    tenant = subcommands.add_parser("tenant", help="Tenant, RLS, and migration verification commands")
+    tenant_sub = tenant.add_subparsers(dest="tenant_command")
+    tenant_rls_inventory = tenant_sub.add_parser(
+        "rls-inventory",
+        help="Read the VS3 local Postgres/RLS schema and policy inventory proof",
+    )
+    tenant_rls_inventory.add_argument("--json", action="store_true", help="Emit JSON output")
+    tenant_rls_inventory.set_defaults(func=command_tenant_rls_inventory)
+    tenant_rls_isolation = tenant_sub.add_parser(
+        "rls-isolation",
+        help="Read the VS3 local Postgres/RLS tenant isolation and mutation-denial proof",
+    )
+    tenant_rls_isolation.add_argument("--json", action="store_true", help="Emit JSON output")
+    tenant_rls_isolation.set_defaults(func=command_tenant_rls_isolation)
+    tenant_migration_rehearsal = tenant_sub.add_parser(
+        "migration-rehearsal",
+        help="Read the VS3 local migration quarantine and rollback rehearsal proof",
+    )
+    tenant_migration_rehearsal.add_argument("--json", action="store_true", help="Emit JSON output")
+    tenant_migration_rehearsal.set_defaults(func=command_tenant_migration_rehearsal)
+
+    backup = subcommands.add_parser("backup", help="Backup evidence commands")
+    backup_sub = backup.add_subparsers(dest="backup_command")
+    backup_create = backup_sub.add_parser(
+        "create",
+        help="Read the VS3 local backup manifest proof without claiming production backup readiness",
+    )
+    backup_create.add_argument("--json", action="store_true", help="Emit JSON output")
+    backup_create.set_defaults(func=command_backup_create)
+
+    restore = subcommands.add_parser("restore", help="Restore verification commands")
+    restore_sub = restore.add_subparsers(dest="restore_command")
+    restore_verify = restore_sub.add_parser(
+        "verify",
+        help="Read the VS3 local restore verification proof without claiming migration readiness",
+    )
+    restore_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    restore_verify.set_defaults(func=command_restore_verify)
+
+    policy = subcommands.add_parser("policy", help="OPA/Rego policy evaluation and bundle commands")
+    policy_sub = policy.add_subparsers(dest="policy_command")
+    policy_evaluate = policy_sub.add_parser(
+        "evaluate",
+        help="Evaluate a VS3 PolicyInput through the local policy proof boundary",
+    )
+    policy_evaluate.add_argument("--input", required=True, help="VS3 PolicyInput JSON file")
+    policy_evaluate.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Use the existing VS3 OPA proof report instead of refreshing it",
+    )
+    policy_evaluate.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting OPA/cache evidence",
+    )
+    policy_evaluate.add_argument("--json", action="store_true", help="Emit JSON output")
+    policy_evaluate.set_defaults(func=command_policy_evaluate)
+
+    policy_bundle = policy_sub.add_parser("bundle", help="Policy bundle lifecycle commands")
+    policy_bundle_sub = policy_bundle.add_subparsers(dest="policy_bundle_command")
+    policy_bundle_activate = policy_bundle_sub.add_parser(
+        "activate",
+        help="Dry-run VS3 policy bundle activation and rollback/fail-closed checks",
+    )
+    policy_bundle_activate.add_argument("--dry-run", action="store_true", help="Required for VS3 local bundle activation proof")
+    policy_bundle_activate.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Use the existing VS3 OPA proof report instead of refreshing it",
+    )
+    policy_bundle_activate.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting OPA/cache evidence",
+    )
+    policy_bundle_activate.add_argument("--json", action="store_true", help="Emit JSON output")
+    policy_bundle_activate.set_defaults(func=command_policy_bundle_activate)
+
     wiki = subcommands.add_parser("wiki", help="Permanent wiki view commands")
     wiki_sub = wiki.add_subparsers(dest="wiki_command")
 
@@ -10365,11 +22398,196 @@ def build_parser() -> argparse.ArgumentParser:
     audit_export.add_argument("--json", action="store_true", help="Emit JSON output")
     audit_export.set_defaults(func=command_audit_list)
 
+    observe = subcommands.add_parser("observe", help="Operator observability commands")
+    observe_sub = observe.add_subparsers(dest="observe_command", required=True)
+
+    observe_status = observe_sub.add_parser("status", help="Show operator status signals")
+    observe_status.add_argument("--scope", choices=["default", "vs3"], default="default", help="Status profile scope")
+    observe_status.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report when --scope vs3 is selected")
+    add_state_argument(observe_status)
+    add_scope_arguments(observe_status)
+    observe_status.add_argument("--json", action="store_true", help="Emit JSON output")
+    observe_status.set_defaults(func=command_observe_status)
+
+    human_gate = subcommands.add_parser("human-gate", help="Human-required evidence package commands")
+    human_gate_sub = human_gate.add_subparsers(dest="human_gate_command", required=True)
+
+    human_gate_package = human_gate_sub.add_parser("package", help="Generate or show human-required evidence packages")
+    human_gate_package.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate package scope")
+    human_gate_package.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    add_state_argument(human_gate_package)
+    add_scope_arguments(human_gate_package)
+    human_gate_package.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_package.set_defaults(func=command_human_gate_package)
+
+    human_gate_report = human_gate_sub.add_parser(
+        "report",
+        help="Show VS3 human-gate readiness queue without promoting human-required rows",
+    )
+    human_gate_report.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate readiness scope")
+    human_gate_report.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_report.add_argument(
+        "--output",
+        help="Optional path to write the redacted JSON readiness report envelope",
+    )
+    add_state_argument(human_gate_report)
+    add_scope_arguments(human_gate_report)
+    human_gate_report.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_report.set_defaults(func=command_human_gate_report)
+
+    human_gate_next = human_gate_sub.add_parser(
+        "next",
+        help="Select the next VS3 human gate to review without accepting it",
+    )
+    human_gate_next.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate readiness scope")
+    human_gate_next.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    add_state_argument(human_gate_next)
+    add_scope_arguments(human_gate_next)
+    human_gate_next.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_next.set_defaults(func=command_human_gate_next)
+
+    human_gate_review_kit = human_gate_sub.add_parser(
+        "review-kit",
+        help="Build a VS3 human-review kit manifest without collecting approval or unlocking VS3-P",
+    )
+    human_gate_review_kit.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate readiness scope")
+    human_gate_review_kit.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS3_SCENARIO_REPORT,
+        help="VS3 aggregate scenario report to bind into the review kit",
+    )
+    human_gate_review_kit.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_review_kit.add_argument(
+        "--output",
+        help="Optional path to write the redacted VS3 human-gate review kit envelope",
+    )
+    add_state_argument(human_gate_review_kit)
+    add_scope_arguments(human_gate_review_kit)
+    human_gate_review_kit.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_review_kit.set_defaults(func=command_human_gate_review_kit)
+
+    human_gate_record_scaffold = human_gate_sub.add_parser(
+        "record-scaffold",
+        help="Write blank VS3 human-gate review record templates without recording approval",
+    )
+    human_gate_record_scaffold.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate scaffold scope")
+    human_gate_record_scaffold.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS3_SCENARIO_REPORT,
+        help="VS3 aggregate scenario report to bind into the scaffold manifest",
+    )
+    human_gate_record_scaffold.add_argument(
+        "--output-dir",
+        default=f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/record-templates",
+        help="Directory where blank review-record templates and manifest should be written",
+    )
+    human_gate_record_scaffold.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_record_scaffold.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite existing scaffold template files and manifest",
+    )
+    human_gate_record_scaffold.add_argument(
+        "--output",
+        help="Optional path to write the redacted scaffold command envelope",
+    )
+    add_state_argument(human_gate_record_scaffold)
+    add_scope_arguments(human_gate_record_scaffold)
+    human_gate_record_scaffold.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_record_scaffold.set_defaults(func=command_human_gate_record_scaffold)
+
+    human_gate_evidence_status = human_gate_sub.add_parser(
+        "evidence-status",
+        help="Report redacted VS3 human-gate record-directory status without accepting records",
+    )
+    human_gate_evidence_status.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate status scope")
+    human_gate_evidence_status.add_argument(
+        "--record-dir",
+        default=f"{DEFAULT_VS3_HUMAN_GATE_PACKAGE_DIR}/record-templates",
+        help="Directory containing VS3 human-gate review records or blank templates",
+    )
+    human_gate_evidence_status.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS3_SCENARIO_REPORT,
+        help="VS3 aggregate scenario report to bind into the evidence-status report",
+    )
+    human_gate_evidence_status.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_evidence_status.add_argument(
+        "--output",
+        help="Optional path to write the redacted JSON evidence-status envelope",
+    )
+    add_state_argument(human_gate_evidence_status)
+    add_scope_arguments(human_gate_evidence_status)
+    human_gate_evidence_status.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_evidence_status.set_defaults(func=command_human_gate_evidence_status)
+
+    human_gate_validate_record = human_gate_sub.add_parser(
+        "validate-record",
+        help="Validate a proposed VS3 human-gate review record without promoting the scenario",
+    )
+    human_gate_validate_record.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate validation scope")
+    human_gate_validate_record.add_argument("--scenario", required=True, help="VS3 human-required scenario ID")
+    human_gate_validate_record.add_argument("--record-file", required=True, help="Path to proposed VS3 human-gate review record JSON")
+    human_gate_validate_record.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_validate_record.add_argument(
+        "--output",
+        help="Optional path to write the redacted JSON validation envelope",
+    )
+    add_state_argument(human_gate_validate_record)
+    add_scope_arguments(human_gate_validate_record)
+    human_gate_validate_record.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_validate_record.set_defaults(func=command_human_gate_validate_record)
+
+    human_gate_validate_records = human_gate_sub.add_parser(
+        "validate-records",
+        help="Validate a directory of proposed VS3 human-gate review records without promoting scenarios",
+    )
+    human_gate_validate_records.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate validation scope")
+    human_gate_validate_records.add_argument("--record-dir", required=True, help="Directory containing proposed VS3 human-gate review record JSON files")
+    human_gate_validate_records.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
+    human_gate_validate_records.add_argument(
+        "--output",
+        help="Optional path to write the redacted JSON validation-set envelope",
+    )
+    add_state_argument(human_gate_validate_records)
+    add_scope_arguments(human_gate_validate_records)
+    human_gate_validate_records.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_validate_records.set_defaults(func=command_human_gate_validate_records)
+
+    human_gate_vs3_p_gate = human_gate_sub.add_parser(
+        "vs3-p-gate",
+        help="Explain why VS3-P remains blocked until human/on-prem evidence exists",
+    )
+    human_gate_vs3_p_gate.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate readiness scope")
+    human_gate_vs3_p_gate.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS3_SCENARIO_REPORT,
+        help="VS3 aggregate scenario report to evaluate",
+    )
+    human_gate_vs3_p_gate.add_argument(
+        "--output",
+        help="Optional path to write the redacted VS3-P gate envelope",
+    )
+    add_state_argument(human_gate_vs3_p_gate)
+    add_scope_arguments(human_gate_vs3_p_gate)
+    human_gate_vs3_p_gate.add_argument("--json", action="store_true", help="Emit JSON output")
+    human_gate_vs3_p_gate.set_defaults(func=command_human_gate_vs3_p_gate)
+
     egress = subcommands.add_parser("egress", help="Egress policy commands")
     egress_sub = egress.add_subparsers(dest="egress_command")
 
-    egress_test = egress_sub.add_parser("test", help="Verify default egress denial without making a network call")
+    egress_test = egress_sub.add_parser("test", help="Verify default egress denial or VS3 egress/sandbox profile evidence")
     egress_test.add_argument("--url", default="https://example.invalid/blocked", help="External URL to evaluate")
+    egress_test.add_argument("--profile", choices=["default", "vs3"], default="default", help="Verification profile")
+    egress_test.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Use the existing VS3 egress/sandbox proof report when --profile vs3 is selected",
+    )
+    egress_test.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting VS3 egress evidence",
+    )
     add_state_argument(egress_test)
     add_scope_arguments(egress_test)
     egress_test.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -10385,6 +22603,19 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(sandbox_test)
     sandbox_test.add_argument("--json", action="store_true", help="Emit JSON output")
     sandbox_test.set_defaults(func=command_sandbox_test)
+
+    sandbox_verify = sandbox_sub.add_parser("verify", help="Verify VS3 sandbox and fail-closed runtime proof")
+    sandbox_verify.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Use the existing VS3 egress/sandbox proof report instead of refreshing it",
+    )
+    sandbox_verify.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting VS3 egress evidence",
+    )
+    sandbox_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    sandbox_verify.set_defaults(func=command_sandbox_verify)
 
     search = subcommands.add_parser("search", help="Search artifact-derived content")
     search_sub = search.add_subparsers(dest="search_command")
@@ -10873,6 +23104,24 @@ def build_parser() -> argparse.ArgumentParser:
     access_evaluate.add_argument("--json", action="store_true", help="Emit JSON output")
     access_evaluate.set_defaults(func=command_access_evaluate)
 
+    access_check = access_sub.add_parser("check", help="Check VS3 RequestContext mission/workspace authority")
+    access_check.add_argument(
+        "--operation",
+        choices=[
+            "memory_read",
+            "model_route",
+            "promotion_with_provenance",
+            "connector_call",
+            "tool_execute",
+            "action_execute",
+            "cross_namespace_memory",
+        ],
+        default="memory_read",
+        help="Operation to check through the VS3 local RequestContext proof",
+    )
+    access_check.add_argument("--json", action="store_true", help="Emit JSON output")
+    access_check.set_defaults(func=command_access_check)
+
     learning = subcommands.add_parser("learning", help="Action outcome learning commands")
     learning_sub = learning.add_subparsers(dest="learning_command")
 
@@ -11230,6 +23479,16 @@ def build_parser() -> argparse.ArgumentParser:
     role_show.add_argument("--json", action="store_true", help="Emit JSON output")
     role_show.set_defaults(func=command_role_show)
 
+    tool = subcommands.add_parser("tool", help="Tool package verification commands")
+    tool_sub = tool.add_subparsers(dest="tool_command", required=True)
+
+    tool_verify = tool_sub.add_parser("verify", help="Verify the VS3 local tool package and registry proof")
+    tool_verify.add_argument("--use-existing", action="store_true", help="Read the existing VS3 tool registry proof report if present")
+    add_state_argument(tool_verify)
+    add_scope_arguments(tool_verify)
+    tool_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    tool_verify.set_defaults(func=command_tool_verify)
+
     pack = subcommands.add_parser("pack", help="Agent Pack registry, install, activation, and rollout commands")
     pack_sub = pack.add_subparsers(dest="pack_command")
 
@@ -11268,10 +23527,19 @@ def build_parser() -> argparse.ArgumentParser:
     pack_activate.add_argument("--mission-id", help="Optional mission activation boundary")
     pack_activate.add_argument("--org-admin-shortcut", action="store_true", help="Use an organization policy shortcut when allowed")
     pack_activate.add_argument("--policy-id", help="Organization policy record for shortcut activation")
+    pack_activate.add_argument("--dry-run", action="store_true", help="Preview activation grants without applying authority")
     add_state_argument(pack_activate)
     add_scope_arguments(pack_activate)
     pack_activate.add_argument("--json", action="store_true", help="Emit JSON output")
     pack_activate.set_defaults(func=command_pack_activate)
+
+    pack_revoke = pack_sub.add_parser("revoke", help="Revoke an active Agent Pack activation grant")
+    pack_revoke.add_argument("pack_id", help="Agent Pack ID")
+    pack_revoke.add_argument("--reason", required=True, help="Revocation reason")
+    add_state_argument(pack_revoke)
+    add_scope_arguments(pack_revoke)
+    pack_revoke.add_argument("--json", action="store_true", help="Emit JSON output")
+    pack_revoke.set_defaults(func=command_pack_revoke)
 
     pack_certify = pack_sub.add_parser("certify", help="Generate an evidence-backed Agent Pack certification card")
     pack_certify.add_argument("pack_id", help="Agent Pack ID")
@@ -11799,6 +24067,13 @@ def build_parser() -> argparse.ArgumentParser:
     connector_policy = connector_sub.add_parser("source-policy", help="Connector Source Policy commands")
     connector_policy_sub = connector_policy.add_subparsers(dest="connector_source_policy_command")
 
+    connector_policy_show = connector_policy_sub.add_parser("show", help="Show the VS3 ConnectorHub SourcePolicySnapshot proof")
+    connector_policy_show.add_argument("--use-existing", action="store_true", help="Read the existing VS3 ConnectorHub source proof report if present")
+    add_state_argument(connector_policy_show)
+    add_scope_arguments(connector_policy_show)
+    connector_policy_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    connector_policy_show.set_defaults(func=command_connector_source_policy_show)
+
     connector_policy_confirm = connector_policy_sub.add_parser("confirm", help="Confirm or narrow a Connector Source Policy snapshot")
     connector_policy_confirm.add_argument("--contract-id", required=True, help="Connector capability contract ID")
     connector_policy_confirm.add_argument("--contract-version-id", help="Optional contract version ID")
@@ -11823,6 +24098,24 @@ def build_parser() -> argparse.ArgumentParser:
     connector_upgrade_plan.add_argument("--json", action="store_true", help="Emit JSON output")
     connector_upgrade_plan.set_defaults(func=command_connector_upgrade_plan)
 
+    connector_projection = connector_sub.add_parser("projection", help="Connector projection verification commands")
+    connector_projection_sub = connector_projection.add_subparsers(dest="connector_projection_command")
+    connector_projection_verify = connector_projection_sub.add_parser("verify", help="Verify VS3 projection commit-before-ack and quarantine proof")
+    connector_projection_verify.add_argument("--use-existing", action="store_true", help="Read the existing VS3 ConnectorHub source proof report if present")
+    add_state_argument(connector_projection_verify)
+    add_scope_arguments(connector_projection_verify)
+    connector_projection_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    connector_projection_verify.set_defaults(func=command_connector_projection_verify)
+
+    connector_action = connector_sub.add_parser("action", help="Connector action dry-run verification commands")
+    connector_action_sub = connector_action.add_subparsers(dest="connector_action_command")
+    connector_action_dry_run = connector_action_sub.add_parser("dry-run", help="Verify ConnectorHub action dry-run has no provider side effects")
+    connector_action_dry_run.add_argument("--use-existing", action="store_true", help="Read the existing VS3 ConnectorHub source proof report if present")
+    add_state_argument(connector_action_dry_run)
+    add_scope_arguments(connector_action_dry_run)
+    connector_action_dry_run.add_argument("--json", action="store_true", help="Emit JSON output")
+    connector_action_dry_run.set_defaults(func=command_connector_action_dry_run)
+
     connector_product_surface = connector_sub.add_parser("product-surface", help="Connector-backed product surface audit commands")
     connector_product_surface_sub = connector_product_surface.add_subparsers(dest="connector_product_surface_command")
 
@@ -11837,6 +24130,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     connector_capture = connector_sub.add_parser("capture", help="Connector WatchAgent capture boundary commands")
     connector_capture_sub = connector_capture.add_subparsers(dest="connector_capture_command", required=True)
+
+    connector_capture_verify = connector_capture_sub.add_parser("verify", help="Verify VS3 bounded capture fixture controls")
+    connector_capture_verify.add_argument("--profile", choices=["vs3"], default="vs3")
+    connector_capture_verify.add_argument("--use-existing", action="store_true", help="Read the existing VS3 ConnectorHub source proof report if present")
+    add_state_argument(connector_capture_verify)
+    add_scope_arguments(connector_capture_verify)
+    connector_capture_verify.add_argument("--json", action="store_true", help="Emit JSON output")
+    connector_capture_verify.set_defaults(func=command_connector_capture_verify)
 
     connector_capture_permission = connector_capture_sub.add_parser("permission", help="Capture platform permission diagnostics")
     connector_capture_permission_sub = connector_capture_permission.add_subparsers(
@@ -12436,6 +24737,149 @@ def build_parser() -> argparse.ArgumentParser:
     vs2_h01_package.add_argument("--json", action="store_true", help="Emit JSON output")
     vs2_h01_package.set_defaults(func=command_security_vs2_h01_approval_package)
 
+    vs3_evidence_reconcile = security_sub.add_parser(
+        "vs3-evidence-reconcile",
+        help="Reconcile VS2 carry-over evidence boundaries before VS3 work continues",
+    )
+    vs3_evidence_reconcile.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_evidence_reconcile.set_defaults(func=command_security_vs3_evidence_reconcile)
+
+    vs3_overclaim_lint = security_sub.add_parser(
+        "vs3-overclaim-lint",
+        help="Run VS3 static overclaim and claim-boundary lint without claiming VS3-P",
+    )
+    vs3_overclaim_lint.add_argument(
+        "--reconciliation-report",
+        help="Optional VS3 evidence reconciliation JSON to lint instead of regenerating the default reconciliation",
+    )
+    vs3_overclaim_lint.add_argument(
+        "--output",
+        help="Optional path to write the VS3 overclaim lint report",
+    )
+    vs3_overclaim_lint.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_overclaim_lint.set_defaults(func=command_security_vs3_overclaim_lint)
+
+    vs3_request_context = security_sub.add_parser(
+        "vs3-request-context",
+        help="Run local deterministic VS3 trusted RequestContext proof",
+    )
+    vs3_request_context.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_request_context.set_defaults(func=command_security_vs3_request_context)
+
+    vs3_postgres_rls = security_sub.add_parser(
+        "vs3-postgres-rls",
+        help="Run the VS3 local Postgres/RLS, migration, backup, and restore proof",
+    )
+    vs3_postgres_rls.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as the raw Postgres evidence source",
+    )
+    vs3_postgres_rls.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 Postgres/RLS proof report instead of refreshing it",
+    )
+    vs3_postgres_rls.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_postgres_rls.set_defaults(func=command_security_vs3_postgres_rls)
+
+    vs3_opa_policy = security_sub.add_parser(
+        "vs3-opa-policy",
+        help="Run the VS3 local OPA/Rego policy-control proof",
+    )
+    vs3_opa_policy.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting OPA/cache evidence",
+    )
+    vs3_opa_policy.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 OPA policy proof report instead of refreshing it",
+    )
+    vs3_opa_policy.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_opa_policy.set_defaults(func=command_security_vs3_opa_policy)
+
+    vs3_egress_sandbox = security_sub.add_parser(
+        "vs3-egress-sandbox",
+        help="Run the VS3 local egress boundary and sandbox proof",
+    )
+    vs3_egress_sandbox.add_argument(
+        "--reuse-vs2-local-range-report",
+        help="Reuse an existing VS2 local-range report as supporting egress evidence",
+    )
+    vs3_egress_sandbox.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 egress/sandbox proof report instead of refreshing it",
+    )
+    vs3_egress_sandbox.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_egress_sandbox.set_defaults(func=command_security_vs3_egress_sandbox)
+
+    vs3_connectorhub_source = security_sub.add_parser(
+        "vs3-connectorhub-source",
+        help="Run the VS3 local ConnectorHub source boundary proof",
+    )
+    vs3_connectorhub_source.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 ConnectorHub source proof report instead of refreshing it",
+    )
+    vs3_connectorhub_source.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_connectorhub_source.set_defaults(func=command_security_vs3_connectorhub_source)
+
+    vs3_tool_registry = security_sub.add_parser(
+        "vs3-tool-registry",
+        help="Run the VS3 local Tool SDK and signed registry proof",
+    )
+    vs3_tool_registry.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 tool registry proof report instead of refreshing it",
+    )
+    vs3_tool_registry.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_tool_registry.set_defaults(func=command_security_vs3_tool_registry)
+
+    vs3_observability = security_sub.add_parser(
+        "vs3-observability",
+        help="Run the VS3 local operator status, audit, and human-gate proof",
+    )
+    vs3_observability.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 observability proof report instead of refreshing it",
+    )
+    vs3_observability.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_observability.set_defaults(func=command_security_vs3_observability)
+
+    vs3_regression_gate = security_sub.add_parser(
+        "vs3-regression-gate",
+        help="Run the VS3 final local regression gate without claiming VS3-P or human acceptance",
+    )
+    vs3_regression_gate.add_argument(
+        "--use-existing",
+        action="store_true",
+        help="Read the existing VS3 final regression proof report instead of refreshing it",
+    )
+    vs3_regression_gate.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_regression_gate.set_defaults(func=command_security_vs3_regression_gate)
+
+    vs3_local_checkpoint = security_sub.add_parser(
+        "vs3-local-checkpoint",
+        help="Create a hash-backed VS3-L local checkpoint manifest without claiming VS3-P",
+    )
+    vs3_local_checkpoint.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS3_SCENARIO_REPORT,
+        help="VS3 aggregate scenario report to checkpoint",
+    )
+    add_state_argument(vs3_local_checkpoint)
+    add_scope_arguments(vs3_local_checkpoint)
+    vs3_local_checkpoint.add_argument(
+        "--output",
+        help="Optional path to write the VS3-L checkpoint JSON envelope",
+    )
+    vs3_local_checkpoint.add_argument("--json", action="store_true", help="Emit JSON output")
+    vs3_local_checkpoint.set_defaults(func=command_security_vs3_local_checkpoint)
+
     vs2_local_proof = security_sub.add_parser(
         "vs2-local-proof",
         help="Run local deterministic VS2 policy, tenant-isolation, and egress proof",
@@ -12668,7 +25112,16 @@ def build_parser() -> argparse.ArgumentParser:
     scenario_list = scenario_sub.add_parser("list", help="List frozen scenarios")
     scenario_list.add_argument(
         "--set",
-        choices=["full", "vs0", "vs2", "vs2-policy-tenancy-egress", "connectorhub", "connector-contract-adapter"],
+        choices=[
+            "full",
+            "vs0",
+            "vs2",
+            "vs2-policy-tenancy-egress",
+            "vs3",
+            "vs3-onprem-trusted-extension",
+            "connectorhub",
+            "connector-contract-adapter",
+        ],
         default="full",
     )
     scenario_list.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -12686,6 +25139,17 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument(
         "--reuse-vs2-local-proof-report",
         help="Reuse a current-source VS2 local proof report for vs2-policy-tenancy-egress instead of rerunning it.",
+    )
+    verify_mode = verify.add_mutually_exclusive_group()
+    verify_mode.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Emit status-neutral scenario coverage for supported contracts without claiming PASS.",
+    )
+    verify_mode.add_argument(
+        "--list",
+        action="store_true",
+        help="List status-neutral scenario coverage for supported contracts without executing proof checks.",
     )
     verify.add_argument("--json", action="store_true", help="Emit JSON output")
     verify.add_argument("--output", help="Optional path to write the JSON report")

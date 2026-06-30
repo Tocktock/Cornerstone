@@ -10,7 +10,7 @@
         "--output",
         "reports/scenario/vs0-runtime-acceptance-2026-06-11.json"
       ],
-      "elapsed_seconds": 4.885,
+      "elapsed_seconds": 5.357,
       "exit_code": 0,
       "name": "scenario_verify_vs0_evux",
       "required": true,
@@ -30,7 +30,7 @@
         "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
         "--json"
       ],
-      "elapsed_seconds": 0.073,
+      "elapsed_seconds": 0.087,
       "exit_code": 0,
       "name": "scenario_gate",
       "required": true,
@@ -48,7 +48,7 @@
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"8a13998\"",
+        "    \"git_commit\": \"d145c8d\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -75,7 +75,7 @@
         "vs0-runtime-acceptance",
         "--json"
       ],
-      "elapsed_seconds": 0.077,
+      "elapsed_seconds": 0.09,
       "exit_code": 0,
       "name": "release_evidence_collect",
       "required": true,
@@ -88,7 +88,7 @@
       "timed_out": false
     }
   ],
-  "created_at": "2026-06-19T05:37:36.104496Z",
+  "created_at": "2026-06-28T18:02:56.347043Z",
   "schema_version": "cs.release_command_transcript.v0",
   "scope_name": "vs0-runtime-acceptance",
   "summary": {

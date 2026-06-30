@@ -1,0 +1,69 @@
+{
+  "contract_hash": "9a285d1d7a31ef2e2b1ccd723e152a40c99ab6d7185d7bac645f8bd8494a248d",
+  "created_at": "2026-06-30T11:19:46.613513Z",
+  "daily_user_card_visible": true,
+  "operator_contract_visible": true,
+  "role_card": {
+    "display_name": "Evidence Agent",
+    "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+    "risk_boundary": "cannot directly mutate truth or source systems",
+    "schema_version": "cs.agent_role_card.v0",
+    "summary": "Evidence Agent helps the Orchestrator with bounded, evidence-labeled work.",
+    "visible_to_daily_user": true
+  },
+  "role_contract": {
+    "allowed_tools": [
+      "artifact.read",
+      "search.read",
+      "evidence.read"
+    ],
+    "audit_expectations": [
+      "agent.output.created"
+    ],
+    "escalation_rules": [
+      "escalate missing source",
+      "escalate contradiction"
+    ],
+    "evidence_requirements": [
+      "source refs",
+      "uncertainty label"
+    ],
+    "forbidden_actions": [
+      "claim.approve",
+      "memory.write",
+      "source.write"
+    ],
+    "judge_rubric": {
+      "checks": [
+        "source coverage",
+        "uncertainty"
+      ],
+      "llm_signal_is_supporting_only": true
+    },
+    "memory_scope": "none",
+    "model_policy": {
+      "contract_controls_authority": true,
+      "provider": "local_test",
+      "replaceable_brain": true
+    },
+    "purpose": "Review artifacts, search snapshots, and evidence bundles without mutating truth.",
+    "responsibilities": [
+      "inspect_artifacts",
+      "check_evidence_refs",
+      "label_evidence_gaps"
+    ],
+    "role_key": "evidence",
+    "schema_version": "cs.agent_role_contract.v0"
+  },
+  "role_id": "role_evidence_3e548f87d142e49b",
+  "role_key": "evidence",
+  "schema_version": "cs.agent_role_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "active",
+  "version": 1
+}

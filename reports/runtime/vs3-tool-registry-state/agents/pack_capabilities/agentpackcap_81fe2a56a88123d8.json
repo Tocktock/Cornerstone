@@ -1,0 +1,40 @@
+{
+  "activation_id": null,
+  "capability": "connector.mock.read",
+  "capability_attempt_id": "agentpackcap_81fe2a56a88123d8",
+  "capability_used": false,
+  "connectorhub_mediated": false,
+  "created_at": "2026-06-30T11:19:46.618006Z",
+  "granted_capabilities": [],
+  "pack_id": "pack_vs3_tool_registry_sample",
+  "policy_decision": {
+    "created_at": "2026-06-30T11:19:46.617999Z",
+    "decision": "deny",
+    "policy": "agent_pack_workspace_grant_required",
+    "policy_decision_id": "policy_78125ac99d829772",
+    "reason": "Agent Pack supplied agents can use only capabilities explicitly activated for this workspace or mission.",
+    "resolution_path": [
+      "Activate the pack with the minimum required grant and ConnectorHub policy review."
+    ],
+    "schema_version": "cs.policy_decision.v0",
+    "scope": {
+      "namespace_id": "personal",
+      "owner_id": "local-user",
+      "tenant_id": "local-dev",
+      "workspace_id": "default"
+    },
+    "subject": {
+      "id": "role_connector_3e548f87d142e49b",
+      "type": "agent"
+    }
+  },
+  "role_id": "role_connector_3e548f87d142e49b",
+  "schema_version": "cs.agent_pack_capability_attempt.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "status": "denied"
+}
