@@ -1,0 +1,40 @@
+{
+  "audit_refs": [
+    "audit:vs3_ctx_bcd16e59568c",
+    "audit:vs3_ctx_surface_api_bcd16e5956",
+    "audit:vs3_ctx_surface_cli_bcd16e5956",
+    "audit:vs3_ctx_surface_tool_runtime_bcd16e5956",
+    "audit:vs3_ctx_surface_ui_bcd16e5956",
+    "audit:vs3_ctx_surface_worker_bcd16e5956",
+    "audit:vs3_revoke_before_api",
+    "audit:vs3_revoke_after_api",
+    "audit:user-chat-approval:2026-07-01:h03-local-synthetic-identity-only"
+  ],
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h03-approve-with-exceptions-local-synthetic-identity-only",
+    "reports/security/vs3-request-context-proof.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H03.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "idp_name_or_ref": "local-synthetic-identity-verification-only; no real IdP/OIDC/SSO provider selected or accepted by this record",
+  "mapping_transcript_ref": "reports/security/vs3-request-context-proof.json; final product release requires real IdP/OIDC/SSO login, group mapping, and role mapping re-verification",
+  "policy_decision_refs": [
+    "policy_vs3_ctx_bcd16e59568cb13a",
+    "policy_vs3_forgery_api_role",
+    "policy_vs3_forgery_cli_role",
+    "policy_vs3_forgery_tool_runtime_role",
+    "policy_vs3_forgery_ui_role",
+    "policy_vs3_forgery_worker_role",
+    "policy_vs3_revoke_before_api",
+    "policy_vs3_revoke_after_api"
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, IdP tokens, live directory attributes, or unredacted production identity data are included. This record allows local/synthetic identity verification for VS3 continuation only; real IdP/OIDC/SSO login, group mapping, role mapping, and revocation must be reverified before final product release or any real on-prem readiness claim.",
+  "reviewed_at": "2026-07-01T05:43:40Z",
+  "reviewer": "JiYong / Tars",
+  "revocation_transcript_ref": "reports/security/vs3-request-context-proof.json; final product release requires real IdP/OIDC/SSO revocation re-verification",
+  "scenario_id": "VS3-H03",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "signature_ref": "user-chat-approval:2026-07-01T05:43:40Z:h03-approve-with-exceptions-local-synthetic-identity-only"
+}

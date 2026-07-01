@@ -1,0 +1,48 @@
+{
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h02-approve-with-exceptions-local-security-evidence-for-continuation",
+    "reports/security/vs3-request-context-proof.json",
+    "reports/db/vs3-postgres-rls-proof.json",
+    "reports/policy/vs3-opa-policy-proof.json",
+    "reports/security/vs3-egress-sandbox-proof.json",
+    "reports/security/vs3-connectorhub-source-proof.json",
+    "reports/security/vs3-tool-registry-proof.json",
+    "reports/observability/vs3-observability-proof.json",
+    "reports/security/vs3-final-regression-proof.json",
+    "reports/security/vs3-overclaim-lint.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H02.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "findings": [
+    "Existing local security evidence is acceptable for VS3 continuation only.",
+    "Before final product release, VS3-P, real on-prem readiness, or any security acceptance claim, an independent security review and retest must verify tenant isolation, policy enforcement, egress boundaries, connector permissions, tool authority, prompt-injection resistance, audit coverage, findings remediation, and retest evidence.",
+    "This record does not claim independent security acceptance, production/on-prem readiness, VS3-P readiness, real network readiness, live provider readiness, or final release readiness."
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, exploit payload secrets, live provider payloads, production network data, or unredacted production/customer data are included. This record references local security evidence only and requires independent review and retest before final product release, VS3-P, real on-prem readiness, or security acceptance claim.",
+  "remediation_refs": [
+    "local-continuation-only:no-independent-findings-or-remediation-accepted-by-this-record",
+    "future-required:independent-security-review-findings-and-remediation-evidence-before-final-release"
+  ],
+  "retest_refs": [
+    "reports/security/vs3-final-regression-proof.json",
+    "future-required:independent-security-retest-evidence-before-final-release-vs3-p-real-onprem-readiness-or-security-acceptance"
+  ],
+  "reviewed_at": "2026-07-01T06:07:27Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS3-H02",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "signature_ref": "user-chat-approval:2026-07-01T06:07:27Z:h02-approve-with-exceptions-local-security-evidence-continuation-only",
+  "tested_bypass_paths": [
+    "tenant isolation and RLS local proof",
+    "policy enforcement and OPA local proof",
+    "egress boundary local proof",
+    "connector permission local proof",
+    "tool authority and registry local proof",
+    "prompt-injection resistance local proof",
+    "audit coverage and overclaim local proof",
+    "future-required: independent findings remediation and retest before final release"
+  ],
+  "topology_scope": "Local VS3 security evidence and local/on-prem development continuation only. Representative production-like or real on-prem topology remains outside this approval and must be independently reviewed and retested before final product release, VS3-P, real on-prem readiness, or security acceptance claim."
+}

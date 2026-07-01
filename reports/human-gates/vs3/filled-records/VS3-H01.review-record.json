@@ -1,0 +1,26 @@
+{
+  "architecture_decision": "APPROVE_WITH_EXCEPTIONS for current VS3-L local/on-prem architecture direction only. This record allows continued local/on-prem VS3 development and the next human reviews. It does not approve VS3-P, production/on-prem readiness, independent security acceptance, real IdP readiness, live provider readiness, real network readiness, migration/restore readiness, or human UX acceptance.",
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "dependency_decision": "No additional production dependency approval is granted by this record. Existing committed VS3-L local/dev dependency scope may remain for now. Any new production or security-sensitive dependency requires separate review.",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:only-for-now",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/review-kit.json",
+    "reports/human-gates/vs3/VS3-H01.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "migration_rollback_owner": "JiYong / Tars owns the current follow-up decision for this limited approval. Production-like migration, restore, and rollback ownership remains subject to VS3-H07 evidence.",
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, or unredacted production data are included. This record captures only the owner chat decision and repo-local evidence references.",
+  "reviewed_at": "2026-07-01T02:16:28Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS3-H01",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "security_owner": "JiYong / Tars owns this limited current-scope approval. Independent security review remains required under VS3-H02 before any security acceptance or VS3-P claim.",
+  "signature_ref": "user-chat-approval:2026-07-01T02:16:28Z:approve-with-exceptions-only-for-now"
+}

@@ -1,0 +1,33 @@
+{
+  "approved_exception_transcript_ref": "user-chat-approval:2026-07-01T05:33:21Z:h04-local-verification-allowed-final-release-reverify-required",
+  "audit_refs": [
+    "audit:vs3_egr_allowed_connectorhub",
+    "audit:vs3_egr_no_grant",
+    "audit:vs3_egr_redirect_hop_denied",
+    "audit:vs3_sandbox_direct_socket",
+    "audit:vs3_sandbox_proxy_env",
+    "audit:vs3_sandbox_shell",
+    "audit:vs3_sandbox_subprocess",
+    "audit:user-chat-approval:2026-07-01:h04-local-verification-only"
+  ],
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "deny_default_transcript_ref": "reports/security/vs3-egress-sandbox-proof.json",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h04-approve-with-exceptions-local-verification-only",
+    "reports/security/vs3-egress-sandbox-proof.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H04.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "network_log_refs": [
+    "reports/security/vs3-egress-sandbox-proof.json",
+    "reports/security/vs2-local-range.json"
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, packet payloads, live network captures, or unredacted production data are included. This record approves local verification only and requires real target topology re-verification before final product release.",
+  "reviewed_at": "2026-07-01T05:33:21Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS3-H04",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "signature_ref": "user-chat-approval:2026-07-01T05:33:21Z:h04-approve-with-exceptions-local-verification-only",
+  "topology_diagram_ref": "local-verification-exception:no-real-target-topology-diagram-yet; final-product-release-requires-real-topology-review"
+}

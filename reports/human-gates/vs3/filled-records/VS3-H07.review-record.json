@@ -1,0 +1,34 @@
+{
+  "after_counts_hashes": "local-rehearsal-reference:reports/db/vs3-postgres-rls-proof.json and reports/security/vs3-final-regression-proof.json; final product release requires production-like non-destructive drill after-counts and hashes for migration, backup, restore, rollback, quarantine, tenant isolation/RLS, policy inventory, audit integrity, evidence/action/search reproducibility",
+  "audit_refs": [
+    "audit_07480738aec69e16",
+    "audit_1849f74ec57dea18",
+    "audit_19d10e594183fbd1",
+    "audit_24a0961d2272eb7a",
+    "audit_2f298801f693d7a6",
+    "audit:vs3_evidence_reconciliation:canonical_boundary_selected",
+    "audit:user-chat-approval:2026-07-01:h07-local-rehearsal-final-release-drill-required"
+  ],
+  "before_counts_hashes": "local-rehearsal-reference:reports/db/vs3-postgres-rls-proof.json and reports/security/vs3-final-regression-proof.json; final product release requires production-like non-destructive drill before-counts and hashes for migration, backup, restore, rollback, quarantine, tenant isolation/RLS, policy inventory, audit integrity, evidence/action/search reproducibility",
+  "data_scope": "APPROVE_WITH_EXCEPTIONS for VS3 continuation only: local migration/backup/restore rehearsal is acceptable. This record does not approve production-like data, real on-prem data, destructive migration, production migration readiness, restore readiness, or rollback readiness.",
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h07-approve-with-exceptions-local-migration-backup-restore-rehearsal",
+    "reports/db/vs3-postgres-rls-proof.json",
+    "reports/security/vs3-final-regression-proof.json",
+    "reports/security/vs3-evidence-reconciliation.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H07.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live database exports, production payloads, customer data, or unredacted backup contents are included. This record allows local migration/backup/restore rehearsal for VS3 continuation only. Before final product release or any real on-prem readiness claim, a production-like non-destructive drill must verify migration, backup, restore, rollback, quarantine behavior, tenant isolation/RLS, policy inventory, audit integrity, and evidence/action/search reproducibility.",
+  "restore_result_ref": "reports/db/vs3-postgres-rls-proof.json; local restore rehearsal reference only, production-like non-destructive restore drill required before final product release or real on-prem readiness claim",
+  "retention_policy_ref": "local-dev-retention-policy-reference:docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md; final release requires target retention-rule review in production-like drill",
+  "reviewed_at": "2026-07-01T06:04:23Z",
+  "reviewer": "JiYong / Tars",
+  "rls_policy_inventory_ref": "reports/db/vs3-postgres-rls-proof.json; includes local tenant isolation/RLS checks and migration quarantine/backup restore scope checks, not production-like RLS acceptance",
+  "rollback_result_ref": "reports/db/vs3-postgres-rls-proof.json; local rollback/quarantine rehearsal reference only, production-like non-destructive rollback drill required before final product release or real on-prem readiness claim",
+  "scenario_id": "VS3-H07",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "signature_ref": "user-chat-approval:2026-07-01T06:04:23Z:h07-approve-with-exceptions-local-rehearsal-final-release-drill-required"
+}

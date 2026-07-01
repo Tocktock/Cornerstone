@@ -1,0 +1,39 @@
+{
+  "approval_ref": "user-chat-approval:2026-07-01T06:00:38Z:h05-connector-action-mode-policy",
+  "connectorhub_audit_refs": [
+    "audit:vs3_con_github_readonly_guard",
+    "audit:vs3_con_credential_boundary",
+    "audit:vs3_con_source_policy_created",
+    "audit:vs3_con_source_policy_revoked",
+    "audit:vs3_con_delivery_before_revoke",
+    "audit:vs3_con_delivery_after_revoke_denied",
+    "audit:vs3_con_delivery_cross_scope_denied",
+    "audit:vs3_con_fault_prompt_injection_quarantined",
+    "audit:vs3_con_fault_stale_quarantined",
+    "audit:vs3_con_fault_duplicate_deduped"
+  ],
+  "cornerstone_audit_refs": [
+    "audit:vs3_mission_action_denied",
+    "audit:vs3_mission_connector_denied",
+    "audit:vs3_mission_tool_denied",
+    "audit:user-chat-approval:2026-07-01:h05-write-mode-policy"
+  ],
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h05-write-behavior-controlled-by-user-selected-connector-action-mode",
+    "reports/security/vs3-connectorhub-source-proof.json",
+    "reports/security/vs3-tool-registry-proof.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H05.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "permission_scope": "Write behavior is governed by the user-selected Connector/Action mode: Auto, Ask Permission, Full Access, Read Only, or Disabled. Approval is required only when the selected mode or risk policy requires it. This record allows local/mock ConnectorHub continuation under that policy only; live provider permission scope must be reverified before final product release or live readiness claim.",
+  "provider_ref": "local/mock ConnectorHub provider proof only; no live provider credential or external account is accepted by this record",
+  "provider_transcript_ref": "reports/security/vs3-connectorhub-source-proof.json; final release requires a redacted live-provider transcript for the selected provider and permission mode",
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, or unredacted external account data are included. This record captures the Connector/Action mode policy and local/mock proof only; live provider rehearsal remains required before final product release or live readiness claim.",
+  "reviewed_at": "2026-07-01T06:00:38Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS3-H05",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "signature_ref": "user-chat-approval:2026-07-01T06:00:38Z:h05-approve-with-exceptions-mode-policy-local-continuation-only"
+}

@@ -1,0 +1,40 @@
+{
+  "acceptance_note": "APPROVE_WITH_EXCEPTIONS for VS3 continuation only. Current local CLI/report/operator UX evidence is acceptable for continued VS3 work. Before final product release, VS3-P, real on-prem readiness, or any human operator acceptance claim, a final operator UX/trust review must verify that users can understand action status, connector mode, approval requirement, policy decisions, denial reasons, evidence/audit links, risks, and next steps without misleading guidance.",
+  "decision": "APPROVE_WITH_EXCEPTIONS",
+  "evidence_refs": [
+    "user-chat-approval:2026-07-01:h06-approve-with-exceptions-local-cli-report-operator-ux-evidence",
+    "reports/security/vs3-local-checkpoint.json",
+    "reports/human-gates/vs3/review-kit.json",
+    "reports/human-gates/vs3/evidence-status.json",
+    "reports/human-gates/vs3/vs3-p-gate.json",
+    "reports/observability/vs3-observability-proof.json",
+    "reports/security/vs3-overclaim-lint.json",
+    "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json",
+    "reports/human-gates/vs3/VS3-H06.json",
+    "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
+  ],
+  "issue_list": [
+    "No final human operator acceptance claim is made by this record.",
+    "Final product release requires operator UX/trust review with user-visible evidence that action status, connector mode, approval requirement, policy decisions, denial reasons, evidence/audit links, risks, and next steps are understandable and not misleading.",
+    "Final review should include screenshots or recording from the release-candidate operator surfaces."
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, production data, user recordings, or screenshots containing sensitive data are included. This record references local CLI/report/operator UX evidence only and requires final operator UX/trust review before final product release, VS3-P, real on-prem readiness, or human operator acceptance claim.",
+  "reviewed_at": "2026-07-01T06:27:30Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS3-H06",
+  "schema_version": "cs.vs3_human_gate_review_record.v0",
+  "screenshots_or_recording_refs": [
+    "local-cli-report-evidence:reports/security/vs3-local-checkpoint.json",
+    "local-cli-report-evidence:reports/human-gates/vs3/review-kit.json",
+    "future-required:release-candidate-screenshots-or-recording-before-final-product-release-vs3-p-real-onprem-readiness-or-human-operator-acceptance"
+  ],
+  "signature_ref": "user-chat-approval:2026-07-01T06:27:30Z:h06-approve-with-exceptions-local-operator-ux-continuation-only",
+  "task_outcomes": [
+    "Continuation accepted using current local CLI/report/operator UX evidence.",
+    "Final product release still requires users to understand action status.",
+    "Final product release still requires users to understand Connector/Action mode.",
+    "Final product release still requires users to understand approval requirement and risk policy.",
+    "Final product release still requires users to understand policy decisions and denial reasons.",
+    "Final product release still requires users to understand evidence/audit links, risks, and next steps without misleading guidance."
+  ]
+}
