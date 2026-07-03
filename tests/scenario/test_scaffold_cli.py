@@ -14,11 +14,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-VS4_ACTIVE_SLICE = "slice-020-runtime-backed-ops-inbox"
+VS4_ACTIVE_SLICE = "slice-021-runtime-loop-coherence"
 VS4_ACTIVE_SLICE_CONTRACT = (
-    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
 )
-VS4_ACTIVE_SLICE_SCENARIO_COUNT = 14
+VS4_ACTIVE_SLICE_SCENARIO_COUNT = 16
 
 from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
 from cornerstone_cli.scenarios import (
@@ -11412,7 +11412,10 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("slice_contracts", {})["slice_019"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
         )
-        report.setdefault("slice_contracts", {})["slice_020"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_020"] = (
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
+        )
+        report.setdefault("slice_contracts", {})["slice_021"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11428,6 +11431,21 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("proof_boundary", {})["vs4_slice_020_runtime_backed_ops_inbox"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
+        report.setdefault("proof_boundary", {})["vs4_slice_021_runtime_loop_coherence"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
+        report["active_proof"] = {
+            "schema_version": "cs.vs4_active_proof.v0",
+            "status": "bound",
+            "slice": VS4_ACTIVE_SLICE,
+            "slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
+            "desktop_browser_proof_dir": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence",
+            "mobile_browser_proof_dir": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile",
+            "desktop_browser_proof_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+            "mobile_browser_proof_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+            "active_paths_match_slice_021": True,
+            "reference_images_are_not_pass_evidence": True,
+        }
         unsafe_markers = {
             "http_text_intake_forces_user_paste_untrusted": True,
             "unsafe_http_conversation_untrusted": True,
@@ -11442,7 +11460,21 @@ class ScaffoldCliTests(unittest.TestCase):
         report["browser_proof"].setdefault("unsafe_http_boundary", {})["markers"] = dict(unsafe_markers)
         report.setdefault("mobile_browser_proof", {})["unsafe_http_boundary_markers"] = dict(unsafe_markers)
         report["mobile_browser_proof"].setdefault("unsafe_http_boundary", {})["markers"] = dict(unsafe_markers)
+        loop_markers = {
+            "runtime_learn_candidate_backed": True,
+            "runtime_learn_candidate_has_product_ref": True,
+            "runtime_learn_candidate_has_native_refs": True,
+            "runtime_learn_candidate_has_evidence_refs": True,
+            "runtime_learn_candidate_has_audit_refs": True,
+            "runtime_learn_candidate_review_only": True,
+            "action_approval_copy_coherent": True,
+        }
+        report["browser_proof"].setdefault("ops_inbox_triage_markers", {}).update(loop_markers)
+        report["browser_proof"].setdefault("ops_inbox_triage", {}).setdefault("markers", {}).update(loop_markers)
+        report["mobile_browser_proof"].setdefault("ops_inbox_triage_markers", {}).update(loop_markers)
+        report["mobile_browser_proof"].setdefault("ops_inbox_triage", {}).setdefault("markers", {}).update(loop_markers)
         report.setdefault("cli_workflow", {}).setdefault("checks", {})["text_trust_downgrade"] = True
+        report["cli_workflow"]["checks"]["runtime_learn_cli_parity"] = True
         report.setdefault("negative_evidence", {})["same_checksum_user_paste_kept_trusted"] = 0
         report["negative_evidence"]["user_paste_probe_external_http_calls"] = 0
         report["negative_evidence"]["user_paste_probe_authority_expanded"] = 0
@@ -11460,6 +11492,14 @@ class ScaffoldCliTests(unittest.TestCase):
         report["negative_evidence"]["runtime_ops_inbox_approved_memory_before_review"] = 0
         report["negative_evidence"]["runtime_ops_inbox_action_executed"] = 0
         report["negative_evidence"]["runtime_ops_inbox_authority_expanded"] = 0
+        report["negative_evidence"]["vs4_active_proof_stale_without_alias"] = 0
+        report["negative_evidence"]["vs4_active_proof_missing_slice_021_path"] = 0
+        report["negative_evidence"]["vs4_action_approval_copy_contradiction"] = 0
+        report["negative_evidence"]["vs4_runtime_learn_static_fallback_used"] = 0
+        report["negative_evidence"]["vs4_runtime_learn_missing_record_refs"] = 0
+        report["negative_evidence"]["vs4_runtime_learn_missing_evidence_refs"] = 0
+        report["negative_evidence"]["vs4_runtime_learn_missing_audit_refs"] = 0
+        report["negative_evidence"]["vs4_runtime_learn_hidden_durable_change"] = 0
         report["source_tree"] = git_verification_metadata(ROOT)
         report.setdefault("self_command_transcript", {})["command"] = [
             "cornerstone",
@@ -12062,27 +12102,29 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
-    def test_vs4_product_alpha_runtime_backed_ops_inbox_slice_verify(self) -> None:
+    def test_vs4_product_alpha_runtime_loop_coherence_slice_verify(self) -> None:
         selected = [
             "VS4-GATE-001",
             "VS4-UI-001",
             "VS4-UI-008",
             "VS4-UI-009",
+            "VS4-UI-010",
+            "VS4-UI-011",
             "VS4-UI-012",
             "VS4-UI-013",
-            "VS4-UI-015",
             "VS4-UI-016",
             "VS4-STATE-001",
-            "VS4-REF-001",
+            "VS4-REF-002",
             "VS4-REG-003",
             "VS4-REG-004",
+            "VS4-REG-005",
             "VS4-REG-006",
             "VS4-REG-007",
         ]
         args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
         for scenario_id in selected:
             args.extend(["--scenario", scenario_id])
-        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-runtime-backed-ops-inbox.json"])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-runtime-loop-coherence.json"])
         result = run_cli(*args)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
@@ -12109,12 +12151,22 @@ class ScaffoldCliTests(unittest.TestCase):
                 "runtime_mission_control_api_parity",
                 "runtime_loop_view_visible",
                 "runtime_refresh_no_authority_side_effects",
+                "runtime_learn_candidate_backed",
+                "runtime_learn_candidate_has_product_ref",
+                "runtime_learn_candidate_has_native_refs",
+                "runtime_learn_candidate_has_evidence_refs",
+                "runtime_learn_candidate_has_audit_refs",
+                "runtime_learn_candidate_review_only",
+                "action_approval_copy_coherent",
             ]:
                 self.assertTrue(markers[marker], f"{proof_key}:{marker}")
             runtime_projection = payload[proof_key]["ops_inbox_triage"]["runtime_projection"]
             self.assertTrue(runtime_projection["runtime_backed"])
             self.assertTrue(runtime_projection["memory_candidate_draft"])
-            for prefix in ["brief:", "claim:", "memory:", "action:"]:
+            self.assertTrue(runtime_projection["learn_candidate_backed"])
+            self.assertTrue(runtime_projection["learn_candidate_review_only"])
+            self.assertTrue(runtime_projection["action_approval_copy_coherent"])
+            for prefix in ["brief:", "claim:", "memory:", "action:", "learn:", "lesson:", "trajectory:"]:
                 self.assertTrue(
                     any(ref.startswith(prefix) for ref in runtime_projection["record_refs"]),
                     f"{proof_key}:{prefix}",
@@ -12123,17 +12175,23 @@ class ScaffoldCliTests(unittest.TestCase):
         checks = payload["cli_workflow"]["checks"]
         self.assertTrue(checks["runtime_backed_ops_inbox_cli_parity"])
         self.assertTrue(checks["runtime_draft_memory_cli_boundary"])
+        self.assertTrue(checks["runtime_learn_cli_parity"])
         self.assertTrue(checks["ops_inbox_selection_cli_parity"])
         self.assertTrue(checks["ops_inbox_loop_view_cli_parity"])
 
         transcripts = payload["cli_workflow"]["transcripts"]
         self.assertIn("product_mission_control_memory_selected", transcripts)
+        self.assertIn("product_mission_control_learn_selected", transcripts)
+        self.assertIn("experience_trajectory_record", transcripts)
+        self.assertIn("experience_lesson_propose", transcripts)
         ids = payload["cli_workflow"]["ids"]
         memory_selected = transcripts["product_mission_control_memory_selected"]["stdout_json"]["mission_control"]
         action_selected = transcripts["product_mission_control_action_selected"]["stdout_json"]["mission_control"]
+        learn_selected = transcripts["product_mission_control_learn_selected"]["stdout_json"]["mission_control"]
         loop_view = transcripts["product_loop_view_selected_action"]["stdout_json"]["product_loop"]
         memory_detail = memory_selected["selected_item_detail"]
         action_detail = action_selected["selected_item_detail"]
+        learn_detail = learn_selected["selected_item_detail"]
         self.assertEqual(memory_detail["selected_item_id"], "memory-candidate")
         self.assertIn(f"memory:{ids['memory_id']}", memory_detail["record_refs"])
         self.assertEqual(memory_detail["status"], "draft")
@@ -12141,17 +12199,31 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(memory_detail["human_ux_acceptance_claimed"])
         self.assertEqual(action_detail["selected_item_id"], "action-card-draft")
         self.assertIn(f"action:{ids['action_id']}", action_detail["record_refs"])
+        self.assertEqual(learn_detail["selected_item_id"], "learning-recovery-candidate")
+        self.assertEqual(learn_detail["status"], "needs_review")
+        self.assertIn(f"learn:{ids['lesson_id']}", learn_detail["record_refs"])
+        self.assertIn(f"lesson:{ids['lesson_id']}", learn_detail["record_refs"])
+        self.assertIn(f"trajectory:{ids['trajectory_id']}", learn_detail["record_refs"])
+        self.assertTrue(learn_detail["evidence_refs"])
+        self.assertTrue(learn_detail["activity_refs"])
         for expected_ref in [
             f"brief:{ids['brief_id']}",
             f"claim:{ids['claim_id']}",
             f"memory:{ids['memory_id']}",
             f"action:{ids['action_id']}",
+            f"learn:{ids['lesson_id']}",
         ]:
             self.assertIn(expected_ref, [stage.get("ref") for stage in loop_view["stages"]])
+        self.assertIn(f"lesson:{ids['lesson_id']}", [stage.get("native_ref") for stage in loop_view["stages"]])
         self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
 
+        self.assertEqual(payload["active_proof"]["status"], "bound")
+        self.assertTrue(payload["active_proof"]["active_paths_match_slice_021"])
+        self.assertIn("slice-021-runtime-loop-coherence", payload["active_proof"]["desktop_browser_proof_dir"])
+        self.assertIn("slice-021-runtime-loop-coherence", payload["active_proof"]["mobile_browser_proof_dir"])
+
         self.assertEqual(
-            payload["proof_boundary"]["vs4_slice_020_runtime_backed_ops_inbox"],
+            payload["proof_boundary"]["vs4_slice_021_runtime_loop_coherence"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
         )
         for key in [
@@ -12164,6 +12236,14 @@ class ScaffoldCliTests(unittest.TestCase):
             "runtime_ops_inbox_approved_memory_before_review",
             "runtime_ops_inbox_action_executed",
             "runtime_ops_inbox_authority_expanded",
+            "vs4_active_proof_stale_without_alias",
+            "vs4_active_proof_missing_slice_021_path",
+            "vs4_action_approval_copy_contradiction",
+            "vs4_runtime_learn_static_fallback_used",
+            "vs4_runtime_learn_missing_record_refs",
+            "vs4_runtime_learn_missing_evidence_refs",
+            "vs4_runtime_learn_missing_audit_refs",
+            "vs4_runtime_learn_hidden_durable_change",
         ]:
             self.assertIn(key, payload["negative_evidence"])
             self.assertEqual(payload["negative_evidence"][key], 0, key)

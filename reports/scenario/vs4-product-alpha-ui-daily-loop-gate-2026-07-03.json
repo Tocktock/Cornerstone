@@ -10,7 +10,7 @@
     "report:reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
   ],
   "ids": {
-    "git_commit": "865cd99a4"
+    "git_commit": "547958496"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -43,9 +43,10 @@
     "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+    "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
   },
-  "scenario_count": 14,
+  "scenario_count": 16,
   "scenario_gate_conditions": {
     "cli_parity": true,
     "negative_evidence": true,
@@ -55,6 +56,7 @@
     "row_coverage": true,
     "row_identity": true,
     "row_status": true,
+    "runtime_loop_coherence": true,
     "self_command_transcript": true,
     "source_tree_metadata": true,
     "summary_counts": true,
@@ -69,14 +71,15 @@
     "row_coverage_failures": 0,
     "row_identity_failures": 0,
     "row_status_failures": 0,
+    "runtime_loop_coherence_failures": 0,
     "self_command_transcript_failures": 0,
     "source_tree_metadata_failures": 0,
     "summary_counts_failures": 0,
     "unsafe_http_boundary_failures": 0
   },
   "scenario_gate_summary": {
-    "actual_scenario_count": 14,
-    "expected_scenario_count": 14,
+    "actual_scenario_count": 16,
+    "expected_scenario_count": 16,
     "failure_count": 0,
     "full_report": false,
     "human_ux_acceptance_claim_allowed": false,
@@ -113,14 +116,19 @@
       "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.cli.v0",
-    "slice": "slice-020-runtime-backed-ops-inbox",
+    "slice": "slice-021-runtime-loop-coherence",
     "source_tree": {
       "dirty_paths": [
+        "Makefile",
+        "README.md",
+        "docs/sot/README.md",
         "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md",
+        "packages/cornerstone_cli/acceptance.py",
         "packages/cornerstone_cli/main.py",
         "packages/cornerstone_cli/product_runtime.py",
         "packages/cornerstone_cli/runtime.py",
@@ -140,18 +148,6 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -207,7 +203,10 @@
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "tests/scenario/test_scaffold_cli.py",
+        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -240,18 +239,6 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -307,6 +294,8 @@
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -320,7 +309,7 @@
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "d84ed3db28888528f3728018fcef576445253330b1d1aeea4fb567b9b5dfacb9",
+      "generated_dirty_snapshot_hash": "c010f703dd5d6f2b170f88d7b99c59184c84a4237ab222f47cdaff303455961f",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -360,21 +349,21 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "3280a1b2cd99a927419c60fd58b25b647215bef9d122293844e607c66161fd8b",
+          "sha256": "e5ff9e8678582f08459da37c1701c8ce285b221015c95eb46ee571847aa00fb1",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "9e6c228c46a453e79d149f23c590ab09d8e6bc955d52e24eadb40d32529a7cc2",
+          "sha256": "5aad0f2846b82db57dffe7d1d001299e434a04a57370f0d222a83cc0e82dca7a",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 328109,
+          "bytes": 333936,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "6a9457ece02d009f0433793e07b29ca44a5a2a48fe2819ceb0340d4da1c8e9c1",
+          "sha256": "0a22ae372003693a62837625ac9f1a88771f9e446d3ae10af243c665be43b0b8",
           "state": "present",
           "status": "M"
         },
@@ -442,88 +431,18 @@
           "status": "??"
         },
         {
-          "bytes": 389055,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-          "sha256": "19a9f2590921cc1728f85d4a9407fe15a38567966200ff0839dee9c83c58a8d9",
-          "state": "present",
-          "status": "M"
+          "bytes": 0,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
+          "sha256": null,
+          "state": "non_file",
+          "status": "??"
         },
         {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-          "sha256": "61677186903bd5f54c4829472b4c5ce5aebd766c73edbcf31e8bd258e5419152",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 202758,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
-          "sha256": "f791e3003bd2a3e681a407e17c1063dd7e06dee9dcd85cf01f3ea2e9f745af0b",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 832618,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-          "sha256": "1a593f6a97eb24a63d2929fac94885dd0ef16c1bf6a3dd1ed1c79246b268f2fa",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-          "sha256": "61677186903bd5f54c4829472b4c5ce5aebd766c73edbcf31e8bd258e5419152",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 202758,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-          "sha256": "f791e3003bd2a3e681a407e17c1063dd7e06dee9dcd85cf01f3ea2e9f745af0b",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 389059,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-          "sha256": "2a9dbfa8b732b9b3ad9a03c58f426f063616a1e0fa600257a0833204c8390b28",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-          "sha256": "61ea5376a782725e59ec4fc7adef37f4f71052902d55a02249bd44932306d359",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 72202,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
-          "sha256": "fc8d998cfc39d1b6271a5b9f01a023f5fd948f6cedd71a97dad421cbbe32f7cd",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 832614,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-          "sha256": "fa6a37b4eb982ee78584e7f9df5690f72377dca923685b546c541d4b31a856f1",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-          "sha256": "61ea5376a782725e59ec4fc7adef37f4f71052902d55a02249bd44932306d359",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 72202,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
-          "sha256": "fc8d998cfc39d1b6271a5b9f01a023f5fd948f6cedd71a97dad421cbbe32f7cd",
-          "state": "present",
-          "status": "M"
+          "bytes": 0,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
+          "sha256": null,
+          "state": "non_file",
+          "status": "??"
         },
         {
           "bytes": 198922,
@@ -989,47 +908,82 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "865cd99a4",
-      "verified_base_commit_full": "865cd99a434a1d5ca777d3d7fda0a89f6e6ad5c4",
-      "verified_base_tree_hash": "eff3b790bf8b0adf107df8d6399fa3da59f50690",
+      "verified_base_commit": "547958496",
+      "verified_base_commit_full": "5479584963a36458fa7c021db718d926e2ef2f8d",
+      "verified_base_tree_hash": "0e7519e87ddd0f4fe96ba4e170d4ec07a10f0ceb",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 1282091,
+          "bytes": 33919,
+          "path": "Makefile",
+          "sha256": "343ff25772faedd8c8600f39e4aee3b373470740ee1c4ca362e73418deebcb21",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 71114,
+          "path": "README.md",
+          "sha256": "f822d8a00789f7c3cf54b98b3d684be06a69e622d72852c9676031e5040d4c33",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 8781,
+          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
+          "sha256": "bcfe8a2321e83a28371c1843e3562f3df68de1c413654acd32d859c42c1e849c",
+          "state": "present",
+          "status": "??"
+        },
+        {
+          "bytes": 34852,
+          "path": "docs/sot/README.md",
+          "sha256": "511de051cc54e09c369758aeb7d809e3b1197ee5fead86900a3f7a00e6e99ed4",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 107267,
+          "path": "packages/cornerstone_cli/acceptance.py",
+          "sha256": "5daa99e25242e77b23399a28ca1fa9f224b0e12817555bf1d83cda865f838ab6",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1285462,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "579d4ad86a2084a424f4bc3d4beae04fe15ebb70b6c5f89f75468689c99a44ba",
+          "sha256": "29ff88bdb2f957b4be61ed23694faf15da490928c5d846e712d58aaeff4d5811",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 302143,
+          "bytes": 311859,
           "path": "packages/cornerstone_cli/product_runtime.py",
-          "sha256": "672cc56e6cfc6878db6b4889d0d5e652b2ab158a10b36f76ee181bfbd48817df",
+          "sha256": "c225912aadd962ebf6460ada63b803088cf8f28add1b160e91cb311c55584321",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 565005,
+          "bytes": 566828,
           "path": "packages/cornerstone_cli/runtime.py",
-          "sha256": "ae3d10dc89f7bebe46a7970a13d298959a6696e000e7415d8775776c60664a85",
+          "sha256": "8e0cd13dffbaa2fecba0b3a9fa0909180dc49a43ac418d4a01baec6e005bd77b",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1925079,
+          "bytes": 1934893,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "53980652499a3fba720653ee1ec16964743ba215b3aeae96455ae551d29c1346",
+          "sha256": "d404e1b087ac09f28c354ae5c62c3ad4c780dee5001233c4de700c27a8ee0fc1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1168416,
+          "bytes": 1173889,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "471a9e3fbb6953c56fd248df5cf19ef6752a7d2efa2cabd25c89a8510bc7fa0b",
+          "sha256": "9fc498cdea49ac6c7caf8e32b6c426eb6075acfa3e2bf6735a8bd80671433755",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "5cdddcc3a1c7b98f85b34b10b8f2577a628833908692055f6668a1432afa5438",
+      "verified_source_worktree_hash": "6b53d113396d127af6002e2be908390427bfac539e4e17d82c1ae00814d6ce99",
       "worktree_dirty_at_verification": true
     },
     "status": "success",
@@ -1037,13 +991,13 @@
       "blocking": 0,
       "fail": 0,
       "human_required": 0,
-      "in_this_slice": 14,
+      "in_this_slice": 16,
       "not_run": 0,
       "not_verified": 0,
-      "pass": 14,
-      "previous_slice": 13,
+      "pass": 16,
+      "previous_slice": 11,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 14
+      "scenario_count": 16
     }
   },
   "status": "success",
@@ -1053,16 +1007,16 @@
     "final_security_acceptance_claim_allowed": false,
     "human_required": 0,
     "human_ux_acceptance_claim_allowed": false,
-    "in_this_slice": 14,
+    "in_this_slice": 16,
     "live_provider_readiness_claim_allowed": false,
     "not_run": 0,
     "not_verified": 0,
-    "pass": 14,
-    "previous_slice": 13,
+    "pass": 16,
+    "previous_slice": 11,
     "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
     "production_onprem_readiness_claim_allowed": false,
     "production_readiness_claim_allowed": false,
-    "scenario_count": 14
+    "scenario_count": 16
   },
   "tenant_id": "local-dev",
   "version": "0.0.0-scaffold",
@@ -1072,18 +1026,20 @@
       "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
+      "VS4-UI-010",
+      "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-015",
       "VS4-UI-016",
       "VS4-STATE-001",
-      "VS4-REF-001",
+      "VS4-REF-002",
       "VS4-REG-003",
       "VS4-REG-004",
+      "VS4-REG-005",
       "VS4-REG-006",
       "VS4-REG-007"
     ],
-    "actual_scenario_count": 14,
+    "actual_scenario_count": 16,
     "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "conditions": {
       "cli_parity": true,
@@ -1094,6 +1050,7 @@
       "row_coverage": true,
       "row_identity": true,
       "row_status": true,
+      "runtime_loop_coherence": true,
       "self_command_transcript": true,
       "source_tree_metadata": true,
       "summary_counts": true,
@@ -1102,21 +1059,23 @@
     "expected_full_scenario_count": 28,
     "expected_ids": [
       "VS4-GATE-001",
-      "VS4-REF-001",
+      "VS4-REF-002",
       "VS4-REG-003",
       "VS4-REG-004",
+      "VS4-REG-005",
       "VS4-REG-006",
       "VS4-REG-007",
       "VS4-STATE-001",
       "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
+      "VS4-UI-010",
+      "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-015",
       "VS4-UI-016"
     ],
-    "expected_scenario_count": 14,
+    "expected_scenario_count": 16,
     "failure_count": 0,
     "failures": [],
     "full_report": false,
@@ -1129,6 +1088,7 @@
       "row_coverage_failures": 0,
       "row_identity_failures": 0,
       "row_status_failures": 0,
+      "runtime_loop_coherence_failures": 0,
       "self_command_transcript_failures": 0,
       "source_tree_metadata_failures": 0,
       "summary_counts_failures": 0,
@@ -1159,22 +1119,25 @@
       "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
     "scenario_filter": [
       "VS4-GATE-001",
-      "VS4-REF-001",
+      "VS4-REF-002",
       "VS4-REG-003",
       "VS4-REG-004",
+      "VS4-REG-005",
       "VS4-REG-006",
       "VS4-REG-007",
       "VS4-STATE-001",
       "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
+      "VS4-UI-010",
+      "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-015",
       "VS4-UI-016"
     ],
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
@@ -1197,18 +1160,6 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -1264,6 +1215,8 @@
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -1277,7 +1230,7 @@
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "d84ed3db28888528f3728018fcef576445253330b1d1aeea4fb567b9b5dfacb9",
+      "generated_dirty_snapshot_hash": "c010f703dd5d6f2b170f88d7b99c59184c84a4237ab222f47cdaff303455961f",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -1317,21 +1270,21 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "3280a1b2cd99a927419c60fd58b25b647215bef9d122293844e607c66161fd8b",
+          "sha256": "e5ff9e8678582f08459da37c1701c8ce285b221015c95eb46ee571847aa00fb1",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "9e6c228c46a453e79d149f23c590ab09d8e6bc955d52e24eadb40d32529a7cc2",
+          "sha256": "5aad0f2846b82db57dffe7d1d001299e434a04a57370f0d222a83cc0e82dca7a",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 328109,
+          "bytes": 333936,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "6a9457ece02d009f0433793e07b29ca44a5a2a48fe2819ceb0340d4da1c8e9c1",
+          "sha256": "0a22ae372003693a62837625ac9f1a88771f9e446d3ae10af243c665be43b0b8",
           "state": "present",
           "status": "M"
         },
@@ -1399,88 +1352,18 @@
           "status": "??"
         },
         {
-          "bytes": 389055,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-          "sha256": "19a9f2590921cc1728f85d4a9407fe15a38567966200ff0839dee9c83c58a8d9",
-          "state": "present",
-          "status": "M"
+          "bytes": 0,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
+          "sha256": null,
+          "state": "non_file",
+          "status": "??"
         },
         {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-          "sha256": "61677186903bd5f54c4829472b4c5ce5aebd766c73edbcf31e8bd258e5419152",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 202758,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
-          "sha256": "f791e3003bd2a3e681a407e17c1063dd7e06dee9dcd85cf01f3ea2e9f745af0b",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 832618,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-          "sha256": "1a593f6a97eb24a63d2929fac94885dd0ef16c1bf6a3dd1ed1c79246b268f2fa",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-          "sha256": "61677186903bd5f54c4829472b4c5ce5aebd766c73edbcf31e8bd258e5419152",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 202758,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-          "sha256": "f791e3003bd2a3e681a407e17c1063dd7e06dee9dcd85cf01f3ea2e9f745af0b",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 389059,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-          "sha256": "2a9dbfa8b732b9b3ad9a03c58f426f063616a1e0fa600257a0833204c8390b28",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-          "sha256": "61ea5376a782725e59ec4fc7adef37f4f71052902d55a02249bd44932306d359",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 72202,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
-          "sha256": "fc8d998cfc39d1b6271a5b9f01a023f5fd948f6cedd71a97dad421cbbe32f7cd",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 832614,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-          "sha256": "fa6a37b4eb982ee78584e7f9df5690f72377dca923685b546c541d4b31a856f1",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 257675,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-          "sha256": "61ea5376a782725e59ec4fc7adef37f4f71052902d55a02249bd44932306d359",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 72202,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
-          "sha256": "fc8d998cfc39d1b6271a5b9f01a023f5fd948f6cedd71a97dad421cbbe32f7cd",
-          "state": "present",
-          "status": "M"
+          "bytes": 0,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
+          "sha256": null,
+          "state": "non_file",
+          "status": "??"
         },
         {
           "bytes": 198922,
@@ -1946,47 +1829,82 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "865cd99a4",
-      "verified_base_commit_full": "865cd99a434a1d5ca777d3d7fda0a89f6e6ad5c4",
-      "verified_base_tree_hash": "eff3b790bf8b0adf107df8d6399fa3da59f50690",
+      "verified_base_commit": "547958496",
+      "verified_base_commit_full": "5479584963a36458fa7c021db718d926e2ef2f8d",
+      "verified_base_tree_hash": "0e7519e87ddd0f4fe96ba4e170d4ec07a10f0ceb",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 1282091,
+          "bytes": 33919,
+          "path": "Makefile",
+          "sha256": "343ff25772faedd8c8600f39e4aee3b373470740ee1c4ca362e73418deebcb21",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 71114,
+          "path": "README.md",
+          "sha256": "f822d8a00789f7c3cf54b98b3d684be06a69e622d72852c9676031e5040d4c33",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 8781,
+          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
+          "sha256": "bcfe8a2321e83a28371c1843e3562f3df68de1c413654acd32d859c42c1e849c",
+          "state": "present",
+          "status": "??"
+        },
+        {
+          "bytes": 34852,
+          "path": "docs/sot/README.md",
+          "sha256": "511de051cc54e09c369758aeb7d809e3b1197ee5fead86900a3f7a00e6e99ed4",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 107267,
+          "path": "packages/cornerstone_cli/acceptance.py",
+          "sha256": "5daa99e25242e77b23399a28ca1fa9f224b0e12817555bf1d83cda865f838ab6",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1285462,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "579d4ad86a2084a424f4bc3d4beae04fe15ebb70b6c5f89f75468689c99a44ba",
+          "sha256": "29ff88bdb2f957b4be61ed23694faf15da490928c5d846e712d58aaeff4d5811",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 302143,
+          "bytes": 311859,
           "path": "packages/cornerstone_cli/product_runtime.py",
-          "sha256": "672cc56e6cfc6878db6b4889d0d5e652b2ab158a10b36f76ee181bfbd48817df",
+          "sha256": "c225912aadd962ebf6460ada63b803088cf8f28add1b160e91cb311c55584321",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 565005,
+          "bytes": 566828,
           "path": "packages/cornerstone_cli/runtime.py",
-          "sha256": "ae3d10dc89f7bebe46a7970a13d298959a6696e000e7415d8775776c60664a85",
+          "sha256": "8e0cd13dffbaa2fecba0b3a9fa0909180dc49a43ac418d4a01baec6e005bd77b",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1925079,
+          "bytes": 1934893,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "53980652499a3fba720653ee1ec16964743ba215b3aeae96455ae551d29c1346",
+          "sha256": "d404e1b087ac09f28c354ae5c62c3ad4c780dee5001233c4de700c27a8ee0fc1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1168416,
+          "bytes": 1173889,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "471a9e3fbb6953c56fd248df5cf19ef6752a7d2efa2cabd25c89a8510bc7fa0b",
+          "sha256": "9fc498cdea49ac6c7caf8e32b6c426eb6075acfa3e2bf6735a8bd80671433755",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "5cdddcc3a1c7b98f85b34b10b8f2577a628833908692055f6668a1432afa5438",
+      "verified_source_worktree_hash": "6b53d113396d127af6002e2be908390427bfac539e4e17d82c1ae00814d6ce99",
       "worktree_dirty_at_verification": true
     },
     "status": "passed",
@@ -1994,13 +1912,13 @@
       "blocking": 0,
       "fail": 0,
       "human_required": 0,
-      "in_this_slice": 14,
+      "in_this_slice": 16,
       "not_run": 0,
       "not_verified": 0,
-      "pass": 14,
-      "previous_slice": 13,
+      "pass": 16,
+      "previous_slice": 11,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 14
+      "scenario_count": 16
     }
   },
   "workspace_id": "default"

@@ -42,8 +42,8 @@ DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT = "reports/scenario/vs1-ontology-suggest-pr
 DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR = "reports/browser/vs1-ontology-suggest-promote-2026-06-15"
 DEFAULT_VS1_ONTOLOGY_REPORT = "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md"
 DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
-DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001"
-DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile"
+DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence"
+DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile"
 
 
 def utc_now() -> str:

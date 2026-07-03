@@ -3705,6 +3705,7 @@ class LocalRuntimeStore:
         actions = self._action_records(scope)
         memories = self._memory_records(scope)
         learning = self._learning_records(scope)
+        lessons = self._lesson_candidate_records(scope)
         evidence_free_claims = [
             claim
             for claim in claims
@@ -3749,6 +3750,9 @@ class LocalRuntimeStore:
 
         def _evidence_refs(record: dict[str, Any], fallback: list[str]) -> list[str]:
             refs: list[str] = []
+            direct_refs = record.get("evidence_refs")
+            if isinstance(direct_refs, list):
+                refs.extend(str(ref) for ref in direct_refs if ref)
             evidence_bundle = record.get("evidence_bundle", {}) if isinstance(record.get("evidence_bundle"), dict) else {}
             evidence = record.get("evidence", {}) if isinstance(record.get("evidence"), dict) else {}
             bundle_id = evidence_bundle.get("evidence_bundle_id") or evidence.get("evidence_bundle_id")
@@ -3772,7 +3776,18 @@ class LocalRuntimeStore:
         ]
         memory = draft_memories[0] if draft_memories else (memories[0] if memories else {})
         action = actions[0] if actions else {}
+        lesson_row = lessons[0] if lessons else {}
         learning_row = learning[0] if learning else {}
+        learn_record = lesson_row or learning_row
+        learn_record_refs = (
+            [
+                f"learn:{lesson_row.get('lesson_id')}",
+                f"lesson:{lesson_row.get('lesson_id')}",
+                f"trajectory:{lesson_row.get('trajectory_id')}",
+            ]
+            if lesson_row.get("lesson_id")
+            else ([f"learning:{learning_row.get('learning_id')}"] if learning_row.get("learning_id") else [])
+        )
         ops_inbox_items = [
             {
                 "item_id": "brief-review",
@@ -3849,14 +3864,14 @@ class LocalRuntimeStore:
                 "lane": "failed-recovery",
                 "kind": "learn",
                 "title": "Learning recovery candidate",
-                "status": learning_row.get("status", "failed_with_recovery"),
+                "status": lesson_row.get("review_state") or learning_row.get("status", "failed_with_recovery"),
                 "owner_workspace_label": owner_workspace_label,
-                "evidence_refs": ["learning:local_vs4_recovery"],
-                "activity_refs": _audit_refs(learning_row),
+                "evidence_refs": _evidence_refs(learn_record, ["learning:local_vs4_recovery"]),
+                "activity_refs": _audit_refs(learn_record),
                 "risk": "review_before_learning",
                 "next_action": "Open Learn review before changing future behavior.",
                 "continue_target": "#vs4-learn-review",
-                "record_refs": [f"learning:{learning_row.get('learning_id')}"] if learning_row.get("learning_id") else [],
+                "record_refs": [ref for ref in learn_record_refs if ref and not ref.endswith("None")],
             },
         ]
         lane_counts = {
@@ -3981,6 +3996,17 @@ class LocalRuntimeStore:
                 ],
                 "learning_opportunities": [
                     {
+                        "lesson_id": row.get("lesson_id"),
+                        "trajectory_id": row.get("trajectory_id"),
+                        "label": "Learn",
+                        "status": row.get("review_state"),
+                        "lesson": row.get("lesson"),
+                        "evidence_refs": row.get("evidence_refs", []),
+                    }
+                    for row in lessons
+                ]
+                + [
+                    {
                         "learning_id": row.get("learning_id"),
                         "label": "Learn",
                         "status": row.get("status"),
@@ -4034,19 +4060,22 @@ class LocalRuntimeStore:
         mission_id: str = "",
         action_id: str = "",
         outcome_id: str = "",
+        lesson_id: str = "",
     ) -> dict[str, Any]:
+        learn_ref = f"learn:{lesson_id}" if lesson_id else (f"mission_outcome:{outcome_id}" if outcome_id else None)
+        learn_native_ref = f"lesson:{lesson_id}" if lesson_id else None
         loop_base = {
             "schema_version": "cs.product_loop_view.v0",
             "status": "visible",
             "scope": scope,
-            "item_id": mission_id or action_id or memory_id or claim_id or brief_id or conversation_id,
+            "item_id": lesson_id or mission_id or action_id or memory_id or claim_id or brief_id or conversation_id,
             "stages": [
                 {"stage": "Inbox", "visible": True, "ref": f"conversation:{conversation_id}" if conversation_id else None},
                 {"stage": "Brief", "visible": True, "ref": f"brief:{brief_id}" if brief_id else None},
                 {"stage": "Claim", "visible": True, "ref": f"claim:{claim_id}" if claim_id else None},
                 {"stage": "Memory/Wiki", "visible": True, "ref": f"memory:{memory_id}" if memory_id else None},
                 {"stage": "Action", "visible": True, "ref": f"action:{action_id}" if action_id else None},
-                {"stage": "Learn", "visible": True, "ref": f"mission_outcome:{outcome_id}" if outcome_id else None},
+                {"stage": "Learn", "visible": True, "ref": learn_ref, "native_ref": learn_native_ref},
             ],
             "journey": "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn",
             "single_item_progression_visible": True,
@@ -5912,8 +5941,17 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": connected_outcome.get("scope")}
 
         actions = [action for action in self._action_records(scope) if action.get("mission_id") == mission_id]
+        def _action_dry_run(action: dict[str, Any]) -> dict[str, Any]:
+            return action.get("dry_run") or {}
+
+        def _action_execution(action: dict[str, Any]) -> dict[str, Any]:
+            return action.get("execution") or {}
+
+        def _action_execution_result(action: dict[str, Any]) -> dict[str, Any]:
+            return _action_execution(action).get("result") or {}
+
         action_ids = {action.get("action_id") for action in actions}
-        executed_actions = [action for action in actions if action.get("execution", {}).get("status") == "executed"]
+        executed_actions = [action for action in actions if _action_execution(action).get("status") == "executed"]
         learnings = [
             learning
             for learning in self._learning_records(scope)
@@ -5944,10 +5982,10 @@ class LocalRuntimeStore:
                 "goal": action.get("goal"),
                 "risk": action.get("risk"),
                 "policy_decision": action.get("policy_decision"),
-                "dry_run": action.get("dry_run"),
+                "dry_run": _action_dry_run(action),
                 "approval": action.get("approval"),
-                "execution": action.get("execution"),
-                "tool_results": action.get("execution", {}).get("result"),
+                "execution": _action_execution(action),
+                "tool_results": _action_execution_result(action),
             }
             for action in actions
         ]
@@ -6007,9 +6045,9 @@ class LocalRuntimeStore:
             else [],
             "rollback_events": [],
             "cost_time": {
-                "duration_ms": sum(float(action.get("dry_run", {}).get("duration_ms", 0) or 0) for action in actions),
+                "duration_ms": sum(float(_action_dry_run(action).get("duration_ms", 0) or 0) for action in actions),
                 "estimated_cost_usd": 0,
-                "real_external_http_calls": sum(int(action.get("execution", {}).get("result", {}).get("external_http_calls", 0) or 0) for action in actions),
+                "real_external_http_calls": sum(int(_action_execution_result(action).get("external_http_calls", 0) or 0) for action in actions),
             },
             "extracted_lessons": [f"learning:{learning['learning_id']}" for learning in learnings],
             "reference_corpus": {

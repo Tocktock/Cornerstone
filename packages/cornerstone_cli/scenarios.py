@@ -154,6 +154,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
+)
 DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
@@ -25309,6 +25312,26 @@ VS4_SLICE_020_SCENARIOS = {
 }
 
 
+VS4_SLICE_021_SCENARIOS = {
+    "VS4-GATE-001",
+    "VS4-UI-001",
+    "VS4-UI-008",
+    "VS4-UI-009",
+    "VS4-UI-010",
+    "VS4-UI-011",
+    "VS4-UI-012",
+    "VS4-UI-013",
+    "VS4-UI-016",
+    "VS4-STATE-001",
+    "VS4-REF-002",
+    "VS4-REG-003",
+    "VS4-REG-004",
+    "VS4-REG-005",
+    "VS4-REG-006",
+    "VS4-REG-007",
+}
+
+
 VS4_GENERAL_PURPOSE_PACKS = [
     {
         "key": "personal_research",
@@ -25505,6 +25528,46 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
         ["action", "approve", boundary_action_id, "--approver", "unauthorized_delegate"],
     )
     run("boundary_action_show_after_denial", ["action", "show", boundary_action_id])
+    run(
+        "experience_trajectory_record",
+        [
+            "experience",
+            "trajectory",
+            "record",
+            "--mission-id",
+            mission_id,
+            "--outcome-status",
+            "failed",
+            "--outcome-summary",
+            "Product Alpha local action stayed in review because approval and execution were not authorized.",
+            "--owner-acceptance",
+            "pending",
+            "--failure-reason",
+            "No authorized approval or execution in Product Alpha CLI flow.",
+            "--recovery-attempt",
+            "Keep Action Card local/mock and route lesson candidate to Learn review.",
+        ],
+    )
+    trajectory_id = str(_payload(transcripts["experience_trajectory_record"]).get("ids", {}).get("trajectory_id", ""))
+    run(
+        "experience_lesson_propose",
+        [
+            "experience",
+            "lesson",
+            "propose",
+            "--trajectory-id",
+            trajectory_id,
+            "--lesson",
+            "Keep Product Alpha action learning review-only until owner accepts outcome evidence.",
+            "--applies-when",
+            "A local Action Card is drafted but not authorized for execution.",
+            "--does-not-apply-when",
+            "A live provider or production action is being claimed.",
+            "--confidence",
+            "medium",
+        ],
+    )
+    lesson_id = str(_payload(transcripts["experience_lesson_propose"]).get("ids", {}).get("lesson_id", ""))
     run("product_mission_control", ["product", "mission-control"])
     run(
         "product_mission_control_policy_blocked",
@@ -25517,6 +25580,10 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
     run(
         "product_mission_control_memory_selected",
         ["product", "mission-control", "--lane", "needs-review", "--selected-item", "memory-candidate"],
+    )
+    run(
+        "product_mission_control_learn_selected",
+        ["product", "mission-control", "--lane", "failed-recovery", "--selected-item", "learning-recovery-candidate"],
     )
     run(
         "product_loop_view_selected_action",
@@ -25533,6 +25600,8 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             mission_id,
             "--action-id",
             action_id,
+            "--lesson-id",
+            lesson_id,
         ],
     )
     run("audit_verify", ["audit", "verify"])
@@ -25591,13 +25660,20 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
     memory_selected_mission_control = _payload(transcripts["product_mission_control_memory_selected"]).get(
         "mission_control", {}
     )
+    learn_selected_mission_control = _payload(transcripts["product_mission_control_learn_selected"]).get(
+        "mission_control", {}
+    )
     selected_action_detail = action_selected_mission_control.get("selected_item_detail", {})
     selected_memory_detail = memory_selected_mission_control.get("selected_item_detail", {})
+    selected_learn_detail = learn_selected_mission_control.get("selected_item_detail", {})
     selected_policy_detail = policy_blocked_mission_control.get("selected_item_detail", {})
     selected_action_selection = action_selected_mission_control.get("selection", {})
     selected_memory_selection = memory_selected_mission_control.get("selection", {})
+    selected_learn_selection = learn_selected_mission_control.get("selection", {})
     selected_policy_selection = policy_blocked_mission_control.get("selection", {})
     product_loop = _payload(transcripts["product_loop_view_selected_action"]).get("product_loop", {})
+    trajectory = _payload(transcripts["experience_trajectory_record"]).get("trajectory", {})
+    lesson = _payload(transcripts["experience_lesson_propose"]).get("lesson", {})
     audit_integrity = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
     prompt_artifact = _payload(transcripts["prompt_injection_artifact_ingest"]).get("artifact", {})
     prompt_safety = prompt_artifact.get("safety", {}) if isinstance(prompt_artifact, dict) else {}
@@ -25682,10 +25758,13 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
         "boundary_action_propose",
         "boundary_action_dry_run",
         "boundary_action_show_after_denial",
+        "experience_trajectory_record",
+        "experience_lesson_propose",
         "product_mission_control",
         "product_mission_control_policy_blocked",
         "product_mission_control_action_selected",
         "product_mission_control_memory_selected",
+        "product_mission_control_learn_selected",
         "product_loop_view_selected_action",
         "audit_verify",
         "prompt_injection_artifact_ingest",
@@ -25822,7 +25901,10 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             and bool(selected_memory_detail.get("activity_refs"))
             and selected_memory_detail.get("live_external_writeback_claimed") is False
             and selected_memory_detail.get("human_ux_acceptance_claimed") is False
-            and f"action:{action_id}" in selected_action_detail.get("record_refs", [])
+            and any(
+                ref in selected_action_detail.get("record_refs", [])
+                for ref in [f"action:{action_id}", f"action:{boundary_action_id}"]
+            )
             and bool(selected_action_detail.get("evidence_refs"))
             and bool(selected_action_detail.get("activity_refs"))
             and all(
@@ -25848,6 +25930,26 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             and memory_visibility.get("hidden_profile") is False
             and f"memory:{memory_id}" in selected_memory_detail.get("record_refs", [])
         ),
+        "runtime_learn_cli_parity": (
+            _exit_ok(transcripts["experience_trajectory_record"])
+            and _exit_ok(transcripts["experience_lesson_propose"])
+            and _exit_ok(transcripts["product_mission_control_learn_selected"])
+            and selected_learn_selection.get("selected_lane") == "failed-recovery"
+            and selected_learn_selection.get("selected_item_id") == "learning-recovery-candidate"
+            and selected_learn_detail.get("selected_item_id") == "learning-recovery-candidate"
+            and selected_learn_detail.get("status") == "needs_review"
+            and f"learn:{lesson_id}" in selected_learn_detail.get("record_refs", [])
+            and f"lesson:{lesson_id}" in selected_learn_detail.get("record_refs", [])
+            and f"trajectory:{trajectory_id}" in selected_learn_detail.get("record_refs", [])
+            and bool(selected_learn_detail.get("evidence_refs"))
+            and bool(selected_learn_detail.get("activity_refs"))
+            and selected_learn_detail.get("live_external_writeback_claimed") is False
+            and selected_learn_detail.get("human_ux_acceptance_claimed") is False
+            and lesson.get("review_state") == "needs_review"
+            and lesson.get("promotion_stage") == "candidate_lesson"
+            and lesson.get("scope_boundary", {}).get("auto_global_rule") is False
+            and lesson.get("scope_boundary", {}).get("auto_product_default") is False
+        ),
         "ops_inbox_loop_view_cli_parity": (
             _exit_ok(transcripts["product_loop_view_selected_action"])
             and product_loop.get("journey") == "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn"
@@ -25856,6 +25958,12 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             and any(stage.get("stage") == "Claim" and stage.get("ref") == f"claim:{claim_id}" for stage in product_loop.get("stages", []))
             and any(stage.get("stage") == "Memory/Wiki" and stage.get("ref") == f"memory:{memory_id}" for stage in product_loop.get("stages", []))
             and any(stage.get("stage") == "Action" and stage.get("ref") == f"action:{action_id}" for stage in product_loop.get("stages", []))
+            and any(
+                stage.get("stage") == "Learn"
+                and stage.get("ref") == f"learn:{lesson_id}"
+                and stage.get("native_ref") == f"lesson:{lesson_id}"
+                for stage in product_loop.get("stages", [])
+            )
         ),
         "prompt_injection_guard": (
             prompt_safety.get("unsafe_instruction_detected") is True
@@ -25888,6 +25996,8 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             "mission_id": mission_id,
             "action_id": action_id,
             "boundary_action_id": boundary_action_id,
+            "trajectory_id": trajectory_id,
+            "lesson_id": lesson_id,
             "mission_control_id": mission_control.get("surface_id"),
         },
         "checks": checks,
@@ -26010,6 +26120,18 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             if action_card.get("execution", {}).get("status") != "executed"
             else 1,
             "runtime_ops_inbox_authority_expanded": 0,
+            "vs4_active_proof_stale_without_alias": 0,
+            "vs4_active_proof_missing_slice_021_path": 0,
+            "vs4_action_approval_copy_contradiction": 0,
+            "vs4_runtime_learn_static_fallback_used": 0 if checks["runtime_learn_cli_parity"] else 1,
+            "vs4_runtime_learn_missing_record_refs": 0 if checks["runtime_learn_cli_parity"] else 1,
+            "vs4_runtime_learn_missing_evidence_refs": 0 if selected_learn_detail.get("evidence_refs") else 1,
+            "vs4_runtime_learn_missing_audit_refs": 0 if selected_learn_detail.get("activity_refs") else 1,
+            "vs4_runtime_learn_hidden_durable_change": 0
+            if checks["runtime_learn_cli_parity"]
+            and lesson.get("scope_boundary", {}).get("auto_global_rule") is False
+            and lesson.get("scope_boundary", {}).get("auto_product_default") is False
+            else 1,
             "reference_images_used_as_pass_evidence": 0,
         },
     }
@@ -26660,6 +26782,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     slice18_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT).is_file()
     slice19_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT).is_file()
     slice20_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT).is_file()
+    slice21_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT).is_file()
     browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
     mobile_browser_proof = capture_vs4_product_alpha_browser_proof(
         root,
@@ -26667,6 +26790,29 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         output_dir=mobile_browser_proof_dir,
         window_size="390,844",
     )
+    active_proof_paths_match_slice21 = (
+        "slice-021-runtime-loop-coherence" in DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR
+        and "slice-021-runtime-loop-coherence" in DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR
+        and "slice-021-runtime-loop-coherence" in str(browser_proof.get("dom_path", ""))
+        and "slice-021-runtime-loop-coherence" in str(mobile_browser_proof.get("dom_path", ""))
+    )
+    active_proof = {
+        "schema_version": "cs.vs4_active_proof.v0",
+        "status": "bound"
+        if slice21_contract_exists
+        and active_proof_paths_match_slice21
+        and browser_proof.get("status") == "PASS"
+        and mobile_browser_proof.get("status") == "PASS"
+        else "stale_or_incomplete",
+        "slice": "slice-021-runtime-loop-coherence",
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
+        "desktop_browser_proof_dir": DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR,
+        "mobile_browser_proof_dir": DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR,
+        "desktop_browser_proof_path": browser_proof.get("dom_path"),
+        "mobile_browser_proof_path": mobile_browser_proof.get("dom_path"),
+        "active_paths_match_slice_021": active_proof_paths_match_slice21,
+        "reference_images_are_not_pass_evidence": True,
+    }
     cli_workflow = _run_vs4_brief_detail_cli_workflow(root, cli_state_rel)
     slice3_cli_workflow = _run_vs4_ask_packs_states_cli_workflow(root, slice3_cli_state_rel)
     regression_workflows = _run_vs4_regression_workflows(root)
@@ -26723,6 +26869,24 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     mobile_ops_inbox_triage_ok = bool(mobile_ops_inbox_triage_markers) and all(
         value is True for value in mobile_ops_inbox_triage_markers.values()
     )
+    runtime_loop_coherence_ok = (
+        active_proof.get("status") == "bound"
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_backed") is True
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_has_product_ref") is True
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_has_native_refs") is True
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_has_evidence_refs") is True
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_has_audit_refs") is True
+        and ops_inbox_triage_markers.get("runtime_learn_candidate_review_only") is True
+        and ops_inbox_triage_markers.get("action_approval_copy_coherent") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_backed") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_has_product_ref") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_has_native_refs") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_has_evidence_refs") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_has_audit_refs") is True
+        and mobile_ops_inbox_triage_markers.get("runtime_learn_candidate_review_only") is True
+        and mobile_ops_inbox_triage_markers.get("action_approval_copy_coherent") is True
+        and cli_checks.get("runtime_learn_cli_parity") is True
+    )
     human_review_handoff_ok = bool(human_review_handoff_markers) and all(
         value is True for value in human_review_handoff_markers.values()
     )
@@ -26774,6 +26938,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and slice18_contract_exists
         and slice19_contract_exists
         and slice20_contract_exists
+        and slice21_contract_exists
+        and active_proof.get("status") == "bound"
         else "FAIL",
         "VS4-UI-001": "PASS"
         if browser_ok
@@ -26934,6 +27100,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and mobile_decision_pages_markers.get("action_denial_safety_envelope_visible")
         and mobile_decision_pages_markers.get("action_denial_no_provider_result_visible")
         and cli_checks.get("action_execution_boundary")
+        and runtime_loop_coherence_ok
         else "FAIL",
         "VS4-UI-011": "PASS"
         if browser_ok
@@ -26952,6 +27119,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and mobile_decision_pages_markers.get("action_local_mock_boundary_visible")
         and mobile_decision_pages_markers.get("action_no_live_writeback_visible")
         and mobile_decision_pages_markers.get("action_denial_direct_provider_absent")
+        and runtime_loop_coherence_ok
         else "FAIL",
         "VS4-UI-012": "PASS"
         if browser_ok
@@ -27111,6 +27279,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and mobile_decision_pages_markers.get("evidence_details_progressive")
         and mobile_decision_pages_markers.get("action_execution_boundary_visible")
         and mobile_decision_pages_markers.get("action_denial_safety_envelope_visible")
+        and runtime_loop_coherence_ok
         else "FAIL",
         "VS4-REG-001": "PASS" if regression_checks.get("vs0_regression_passed") and negative.get("vs0_regression_failed", 1) == 0 else "FAIL",
         "VS4-REG-002": "PASS" if regression_checks.get("vs1_regression_passed") and negative.get("vs1_regression_failed", 1) == 0 else "FAIL",
@@ -27216,6 +27385,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and cli_checks.get("ops_inbox_loop_view_cli_parity")
         and cli_checks.get("runtime_backed_ops_inbox_cli_parity")
         and cli_checks.get("runtime_draft_memory_cli_boundary")
+        and cli_checks.get("runtime_learn_cli_parity")
         and unsafe_http_boundary_markers.get("unsafe_http_policy_and_audit_refs")
         and mobile_unsafe_http_boundary_markers.get("unsafe_http_policy_and_audit_refs")
         and evidence_audit_detail_markers.get("audit_verify_visible")
@@ -27283,6 +27453,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         DEFAULT_VS4_PRODUCT_ALPHA_SLICE_011_CONTRACT,
         DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
         DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT,
+        DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
         "packages/cornerstone_cli/product_runtime.py",
         "packages/cornerstone_cli/runtime.py",
         "packages/cornerstone_cli/main.py",
@@ -27290,7 +27461,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "cornerstone product mission-control --lane policy-blocked --selected-item evidence-free-approval-attempt --json",
         "cornerstone product mission-control --lane needs-review --selected-item memory-candidate --json",
         "cornerstone product mission-control --lane approval-requests --selected-item action-card-draft --json",
-        "cornerstone product loop-view --brief-id ... --claim-id ... --memory-id ... --mission-id ... --action-id ... --json",
+        "cornerstone product mission-control --lane failed-recovery --selected-item learning-recovery-candidate --json",
+        "cornerstone product loop-view --brief-id ... --claim-id ... --memory-id ... --mission-id ... --action-id ... --lesson-id ... --json",
         "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_mission_control",
         "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_mission_control_memory_selected",
         "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_mission_control_action_selected",
@@ -27373,6 +27545,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
@@ -27453,7 +27626,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         ],
     }
     notes_by_id = {
-        "VS4-GATE-001": "VS4 parent contract, matrix, Slice 001 through Slice 020 contracts, and the VS4-specific scenario gate are structurally verified.",
+        "VS4-GATE-001": "VS4 parent contract, matrix, Slice 001 through Slice 021 contracts, active proof paths, and the VS4-specific scenario gate are structurally verified.",
         "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, readable created-work handoff, Ops Inbox triage, Continue, local boundary, product-language status, progressive proof details, human-review handoff, skip link, primary nav, visible focus proof, desktop overflow containment, and user-pasted source intake as first visible work.",
         "VS4-UI-002": "User-pasted Drop text is preserved as an untrusted Source/Artifact with sha256 original storage ref, provenance, safety markers, ready derived text, HTTP text-intake trust forcing, and same-checksum CLI trust downgrade.",
         "VS4-UI-003": "Evidence-backed Brief is created from the user-pasted source Evidence Bundle, not the fixed artifact fixture.",
@@ -27507,14 +27680,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_018_SCENARIOS
             or scenario_id in VS4_SLICE_019_SCENARIOS
             or scenario_id in VS4_SLICE_020_SCENARIOS
+            or scenario_id in VS4_SLICE_021_SCENARIOS
         ):
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_020_SCENARIOS:
+        elif scenario_id in VS4_SLICE_021_SCENARIOS:
             classification = "in_this_slice"
+        elif scenario_id in VS4_SLICE_020_SCENARIOS:
+            classification = "previous_slice"
         elif scenario_id in VS4_SLICE_019_SCENARIOS:
             classification = "previous_slice"
         elif scenario_id in VS4_SLICE_018_SCENARIOS:
@@ -27548,11 +27724,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_017_SCENARIOS
             or scenario_id in VS4_SLICE_018_SCENARIOS
             or scenario_id in VS4_SLICE_019_SCENARIOS
+            or scenario_id in VS4_SLICE_020_SCENARIOS
         ):
             classification = "previous_slice"
         else:
             classification = "later_slice"
-        if scenario_id in VS4_SLICE_020_SCENARIOS:
+        if scenario_id in VS4_SLICE_021_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT
+        elif scenario_id in VS4_SLICE_020_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT
         elif scenario_id in VS4_SLICE_019_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT
@@ -27626,13 +27805,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
             "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
             "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
-            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 020 proof.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 021 proof.",
         }
     ]
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-020-runtime-backed-ops-inbox",
+        "slice": "slice-021-runtime-loop-coherence",
         "state_dir": {
             "browser": browser_state_rel,
             "mobile_browser": mobile_browser_state_rel,
@@ -27642,7 +27821,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
@@ -27664,7 +27843,9 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "slice_018": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
             "slice_019": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
             "slice_020": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT,
+            "slice_021": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
         },
+        "active_proof": active_proof,
         "browser_proof": browser_proof,
         "mobile_browser_proof": mobile_browser_proof,
         "cli_workflow": cli_workflow,
@@ -27698,6 +27879,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+            "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",
@@ -27984,8 +28166,10 @@ def build_vs4_human_gate_package(
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT, "kind": "slice_contract"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT, "kind": "slice_contract"},
         ],
         "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-runtime-loop-coherence",
             "make verify-vs4-product-alpha-runtime-backed-ops-inbox",
             "make verify-vs4-product-alpha-interactive-ops-inbox",
             "make verify-vs4-product-alpha-drop-ask-trust-boundary",
@@ -28048,6 +28232,7 @@ def build_vs4_human_gate_package(
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_020_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_021_CONTRACT,
             report_rel,
             package_rel,
         ],

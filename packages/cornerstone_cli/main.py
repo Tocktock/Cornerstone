@@ -536,6 +536,7 @@ def command_product_loop_view(args: argparse.Namespace) -> int:
         mission_id=args.mission_id or "",
         action_id=args.action_id or "",
         outcome_id=args.outcome_id or "",
+        lesson_id=args.lesson_id or "",
     )
     loop = result["product_loop"]
     payload["product_loop"] = loop
@@ -19710,6 +19711,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19746,6 +19748,14 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "runtime_ops_inbox_approved_memory_before_review",
     "runtime_ops_inbox_action_executed",
     "runtime_ops_inbox_authority_expanded",
+    "vs4_active_proof_stale_without_alias",
+    "vs4_active_proof_missing_slice_021_path",
+    "vs4_action_approval_copy_contradiction",
+    "vs4_runtime_learn_static_fallback_used",
+    "vs4_runtime_learn_missing_record_refs",
+    "vs4_runtime_learn_missing_evidence_refs",
+    "vs4_runtime_learn_missing_audit_refs",
+    "vs4_runtime_learn_hidden_durable_change",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
@@ -19824,6 +19834,7 @@ def _vs4_product_alpha_gate_validation(
         if isinstance(data.get("mobile_browser_proof"), dict)
         else {}
     )
+    active_proof = data.get("active_proof") if isinstance(data.get("active_proof"), dict) else {}
     cli_workflow = data.get("cli_workflow") if isinstance(data.get("cli_workflow"), dict) else {}
     slice_003_cli_workflow = (
         data.get("slice_003_cli_workflow")
@@ -19983,6 +19994,16 @@ def _vs4_product_alpha_gate_validation(
         if isinstance(mobile_browser_proof.get("unsafe_http_boundary_markers"), dict)
         else {}
     )
+    ops_markers = (
+        browser_proof.get("ops_inbox_triage_markers")
+        if isinstance(browser_proof.get("ops_inbox_triage_markers"), dict)
+        else {}
+    )
+    mobile_ops_markers = (
+        mobile_browser_proof.get("ops_inbox_triage_markers")
+        if isinstance(mobile_browser_proof.get("ops_inbox_triage_markers"), dict)
+        else {}
+    )
     record(
         "reference_image_boundary",
         detail_markers.get("reference_images_not_pass_evidence") is True
@@ -20001,6 +20022,38 @@ def _vs4_product_alpha_gate_validation(
         "VS4 unsafe HTTP/API Drop/Ask boundary markers must pass on desktop and mobile browser proof.",
         desktop_markers=unsafe_http_markers,
         mobile_markers=mobile_unsafe_http_markers,
+    )
+    record(
+        "runtime_loop_coherence",
+        active_proof.get("status") == "bound"
+        and active_proof.get("slice") == "slice-021-runtime-loop-coherence"
+        and active_proof.get("active_paths_match_slice_021") is True
+        and "slice-021-runtime-loop-coherence" in str(active_proof.get("desktop_browser_proof_dir", ""))
+        and "slice-021-runtime-loop-coherence" in str(active_proof.get("mobile_browser_proof_dir", ""))
+        and ops_markers.get("runtime_learn_candidate_backed") is True
+        and ops_markers.get("runtime_learn_candidate_has_product_ref") is True
+        and ops_markers.get("runtime_learn_candidate_has_native_refs") is True
+        and ops_markers.get("runtime_learn_candidate_has_evidence_refs") is True
+        and ops_markers.get("runtime_learn_candidate_has_audit_refs") is True
+        and ops_markers.get("runtime_learn_candidate_review_only") is True
+        and ops_markers.get("action_approval_copy_coherent") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_backed") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_has_product_ref") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_has_native_refs") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_has_evidence_refs") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_has_audit_refs") is True
+        and mobile_ops_markers.get("runtime_learn_candidate_review_only") is True
+        and mobile_ops_markers.get("action_approval_copy_coherent") is True
+        and negative_evidence.get("vs4_action_approval_copy_contradiction") == 0
+        and negative_evidence.get("vs4_runtime_learn_static_fallback_used") == 0
+        and negative_evidence.get("vs4_runtime_learn_missing_record_refs") == 0
+        and negative_evidence.get("vs4_runtime_learn_missing_evidence_refs") == 0
+        and negative_evidence.get("vs4_runtime_learn_missing_audit_refs") == 0
+        and negative_evidence.get("vs4_runtime_learn_hidden_durable_change") == 0,
+        "VS4 active proof must bind to Slice 021 and prove runtime-backed Learn plus coherent Action approval copy.",
+        active_proof=active_proof,
+        desktop_markers=ops_markers,
+        mobile_markers=mobile_ops_markers,
     )
     self_command = self_transcript.get("command")
     record(
@@ -20031,6 +20084,7 @@ def _vs4_product_alpha_gate_validation(
         cli_checks.get("cli_parity") is True
         and cli_checks.get("action_boundary_cli_parity") is True
         and cli_checks.get("text_trust_downgrade") is True
+        and cli_checks.get("runtime_learn_cli_parity") is True
         and slice3_checks.get("cli_parity") is True
         and regression_checks.get("fresh_command_outputs") is True
         and isinstance(cli_workflow.get("transcripts"), dict)
@@ -23024,6 +23078,7 @@ def build_parser() -> argparse.ArgumentParser:
     loop_view.add_argument("--mission-id")
     loop_view.add_argument("--action-id")
     loop_view.add_argument("--outcome-id")
+    loop_view.add_argument("--lesson-id")
     add_state_argument(loop_view)
     add_scope_arguments(loop_view)
     loop_view.add_argument("--json", action="store_true", help="Emit JSON output")
