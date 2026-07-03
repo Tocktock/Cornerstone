@@ -15141,6 +15141,41 @@ def command_conversation_promote(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "unsafe_source_denied":
+        policy_decision = result.get("policy_decision", {})
+        conversation = result.get("conversation", {})
+        payload["status"] = "failed"
+        payload["conversation"] = conversation
+        payload["policy_decision"] = policy_decision
+        payload["ids"].update(
+            {
+                "conversation_id": args.conversation_id,
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        source_artifact_id = conversation.get("source_artifact_id") if isinstance(conversation, dict) else None
+        if policy_decision.get("policy_decision_id"):
+            payload["ids"]["policy_decision_id"] = policy_decision["policy_decision_id"]
+            payload["policy_decision_refs"].append(f"policy:{policy_decision['policy_decision_id']}")
+        payload["evidence_refs"].append(f"conversation:{args.conversation_id}")
+        payload["evidence_refs"].append(f"evidence_bundle:{args.evidence_bundle_id}")
+        if source_artifact_id:
+            payload["evidence_refs"].append(f"artifact:{source_artifact_id}")
+        payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result.get("audit_events", []))
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_UNSAFE_SOURCE",
+                "message": "Conversation promotion is blocked because the source Ask text contains unsafe instructions.",
+                "resolution_path": [
+                    "Treat the Ask text as untrusted evidence.",
+                    "Create a new clean conversation or attach independently reviewed source evidence.",
+                    "Promote only after unsafe instructions are excluded from the authority source.",
+                ],
+                "source_safety": result.get("source_safety", {}),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_POLICY_DENIED
 
     claim = result["claim"]
     evidence = claim["evidence_bundle"]

@@ -884,6 +884,15 @@ class LocalRuntimeStore:
             return None
         return _read_json(path)
 
+    def conversation_source_safety(self, conversation: dict[str, Any], scope: dict[str, str]) -> dict[str, Any]:
+        safety = conversation.get("safety")
+        if isinstance(safety, dict) and "unsafe_instruction_detected" in safety:
+            return safety
+        source_artifact_id = str(conversation.get("source_artifact_id") or "")
+        artifact = self.get_artifact(source_artifact_id, scope) if source_artifact_id else None
+        artifact_safety = artifact.get("safety", {}) if isinstance(artifact, dict) else {}
+        return artifact_safety if isinstance(artifact_safety, dict) else {}
+
     def get_mission(self, mission_id: str) -> dict[str, Any] | None:
         path = self.mission_path(mission_id)
         if not path.exists():
@@ -11237,11 +11246,49 @@ class LocalRuntimeStore:
             trust="untrusted",
         )
         artifact = artifact_result["artifact"]
+        artifact_safety = artifact.get("safety", {}) if isinstance(artifact, dict) else {}
+        unsafe_instruction_detected = artifact_safety.get("unsafe_instruction_detected") is True
+        conversation_safety = {
+            "untrusted_message": True,
+            "source_artifact_id": artifact["artifact_id"],
+            "unsafe_instruction_detected": unsafe_instruction_detected,
+            "blocked_attempt_count": int(artifact_safety.get("blocked_attempt_count", 0) or 0),
+            "blocked_attempts": list(artifact_safety.get("blocked_attempts", [])),
+            "promotion_allowed": not unsafe_instruction_detected,
+            "promotion_blocked_reason": "prompt_injection_blocked" if unsafe_instruction_detected else None,
+            "tool_calls_created_from_unsafe_prompt": int(artifact_safety.get("tool_calls_created", 0) or 0),
+            "action_cards_created_from_unsafe_prompt": int(artifact_safety.get("action_cards_created_from_untrusted_artifact", 0) or 0),
+            "claim_promotions_created_from_unsafe_prompt": 0,
+            "claim_approvals_created_from_unsafe_prompt": 0,
+            "memory_approvals_created_from_unsafe_prompt": 0,
+            "hidden_memory_writes_created_from_unsafe_prompt": 0,
+            "action_executions_created_from_unsafe_prompt": 0,
+            "policy_changes_created_from_unsafe_prompt": 0,
+            "cross_workspace_reads_created_from_unsafe_prompt": 0,
+            "unredacted_secret_leaks_created_from_unsafe_prompt": 0,
+            "external_http_calls": int(artifact_safety.get("external_http_calls", 0) or 0),
+            "direct_provider_access": False,
+            "authority_expanded": False,
+        }
+        suggested_outputs = [
+            {"type": "Mission Card", "mode": "optional_promotion", "forced": False},
+            {"type": "Knowledge Capsule", "mode": "optional_promotion", "forced": False},
+            {"type": "Claim", "mode": "optional_promotion", "forced": False},
+            {"type": "Action Card", "mode": "optional_promotion", "forced": False},
+            {"type": "Memory", "mode": "optional_promotion", "forced": False},
+            {"type": "Playbook Candidate", "mode": "optional_promotion", "forced": False},
+        ]
+        if unsafe_instruction_detected:
+            suggested_outputs = [
+                {**item, "mode": "blocked_prompt_injection", "blocked_reason": "prompt_injection_blocked"}
+                for item in suggested_outputs
+            ]
         turn = {
             "turn_id": f"turn_{_json_hash({'conversation_id': conversation_id, 'role': 'user', 'message': message})[:16]}",
             "role": "user",
             "content": redact_text(message),
             "artifact_ref": f"artifact:{artifact['artifact_id']}",
+            "safety": conversation_safety,
             "created_at": utc_now(),
         }
         conversation = dict(conversation_base)
@@ -11250,14 +11297,8 @@ class LocalRuntimeStore:
                 "conversation_id": conversation_id,
                 "turns": [turn],
                 "source_artifact_id": artifact["artifact_id"],
-                "suggested_outputs": [
-                    {"type": "Mission Card", "mode": "optional_promotion", "forced": False},
-                    {"type": "Knowledge Capsule", "mode": "optional_promotion", "forced": False},
-                    {"type": "Claim", "mode": "optional_promotion", "forced": False},
-                    {"type": "Action Card", "mode": "optional_promotion", "forced": False},
-                    {"type": "Memory", "mode": "optional_promotion", "forced": False},
-                    {"type": "Playbook Candidate", "mode": "optional_promotion", "forced": False},
-                ],
+                "safety": conversation_safety,
+                "suggested_outputs": suggested_outputs,
                 "user_can_continue_without_conversion": True,
             }
         )
@@ -11269,6 +11310,8 @@ class LocalRuntimeStore:
             {
                 "source_artifact_id": artifact["artifact_id"],
                 "suggested_output_types": [item["type"] for item in conversation["suggested_outputs"]],
+                "unsafe_instruction_detected": unsafe_instruction_detected,
+                "promotion_allowed": conversation_safety["promotion_allowed"],
             },
         )
         return {
@@ -11289,6 +11332,51 @@ class LocalRuntimeStore:
             return {"status": "not_found", "resource": "conversation"}
         if conversation.get("scope") != scope:
             return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
+
+        source_safety = self.conversation_source_safety(conversation, scope)
+        if source_safety.get("unsafe_instruction_detected") is True:
+            policy_decision = {
+                "policy_decision_id": f"policy_{_json_hash({'conversation_id': conversation_id, 'evidence_bundle_id': evidence_bundle_id, 'reason': 'prompt_injection_blocked'})[:16]}",
+                "decision": "deny",
+                "reason": "prompt_injection_blocked",
+                "applies_to": "conversation.promote",
+                "tool_calls_created": 0,
+                "action_cards_created": 0,
+                "claim_promotions_created": 0,
+                "memory_approvals_created": 0,
+                "action_executions_created": 0,
+                "policy_changes_created": 0,
+                "external_http_calls": 0,
+                "direct_provider_access": False,
+                "cross_workspace_reads": 0,
+                "unredacted_secret_leaks": 0,
+                "authority_expanded": False,
+            }
+            event = self.append_audit(
+                "conversation.promotion.denied",
+                scope,
+                {"type": "conversation", "id": conversation_id},
+                {
+                    "reason": "prompt_injection_blocked",
+                    "policy_decision_id": policy_decision["policy_decision_id"],
+                    "promoted_kind": "claim",
+                    "evidence_bundle_id": evidence_bundle_id,
+                    "source_artifact_id": conversation.get("source_artifact_id"),
+                    "blocked_attempt_count": int(source_safety.get("blocked_attempt_count", 0) or 0),
+                    **{
+                        key: value
+                        for key, value in policy_decision.items()
+                        if key != "policy_decision_id" and key not in {"decision", "reason", "applies_to"}
+                    },
+                },
+            )
+            return {
+                "status": "unsafe_source_denied",
+                "conversation": conversation,
+                "source_safety": source_safety,
+                "policy_decision": policy_decision,
+                "audit_events": [event],
+            }
 
         result = self.create_claim_from_evidence_bundle(evidence_bundle_id, statement, scope)
         if result.get("status"):
