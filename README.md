@@ -69,6 +69,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 46. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md`
 47. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md`
 48. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md`
+49. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md`
 
 ## Active Authority
 
@@ -123,6 +124,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md` | Frozen VS4 Slice 002 Evidence-backed Brief detail implementation contract |
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md` | Frozen VS4 Slice 003 Ask, general-purpose packs, page states, reference alignment, and regression implementation contract |
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md` | Frozen VS4 Slice 004 human acceptance package and validation contract; keeps `VS4-H01` HUMAN_REQUIRED |
+| `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md` | Frozen VS4 Slice 005 UX polish and Learn review contract; no new canonical matrix rows |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -139,7 +141,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; local verifier path `cornerstone scenario verify vs0-operator-acceptance-ui`, 12 AI-verifiable PASS, 1 human-only row accepted by JiYong/Tars, full VS-1 main implementation unblocked.
 - VS2 policy/tenancy/egress overlay: 93 task-scoped scenarios; verifier path `cornerstone scenario verify vs2-policy-tenancy-egress`; current generated status is recorded in `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`.
 - ConnectorHub adoption overlay: 47 task-scoped scenarios; verifier path `cornerstone scenario verify connector-contract-adapter`; current generated status is recorded in `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` and `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md`.
-- VS4 Product Alpha UI Daily Loop overlay: 28 task-scoped scenarios; verifier path `cornerstone scenario verify vs4-product-alpha-ui-daily-loop`. Slice 001 selects 7 AI-verifiable rows for the local Product Alpha Home/Ops Inbox shell. Slice 002 adds 14 AI-verifiable rows for the Evidence-backed Brief detail, claim/memory/action review boundaries, prompt-injection guard, reference-boundary guard, and CLI parity. Slice 003 adds the remaining 6 AI-verifiable rows for Ask, packs, page states, reference alignment, and VS0/VS1 regression. Slice 004 prepares the `VS4-H01` human acceptance package and validator without marking human UX accepted. Full VS4 remains incomplete until `VS4-H01` has human acceptance evidence.
+- VS4 Product Alpha UI Daily Loop overlay: 28 task-scoped scenarios; verifier path `cornerstone scenario verify vs4-product-alpha-ui-daily-loop`. Slice 001 selects 7 AI-verifiable rows for the local Product Alpha Home/Ops Inbox shell. Slice 002 adds 14 AI-verifiable rows for the Evidence-backed Brief detail, claim/memory/action review boundaries, prompt-injection guard, reference-boundary guard, and CLI parity. Slice 003 adds the remaining 6 AI-verifiable rows for Ask, packs, page states, reference alignment, and VS0/VS1 regression. Slice 004 prepares the `VS4-H01` human acceptance package and validator without marking human UX accepted. Slice 005 strengthens product-language, Learn-review, and progressive proof-detail readiness without adding canonical matrix rows. Full VS4 remains incomplete until `VS4-H01` has human acceptance evidence.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 

@@ -105,6 +105,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md"
+)
 DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
@@ -25055,6 +25058,16 @@ VS4_SLICE_003_SCENARIOS = {
 }
 
 
+VS4_SLICE_005_SCENARIOS = {
+    "VS4-UI-001",
+    "VS4-UI-004",
+    "VS4-UI-012",
+    "VS4-UI-016",
+    "VS4-REG-003",
+    "VS4-REG-006",
+}
+
+
 VS4_GENERAL_PURPOSE_PACKS = [
     {
         "key": "personal_research",
@@ -25938,16 +25951,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
             "python3 scripts/verify_scenario_matrix.py docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md",
             "git diff --check",
         ],
-        "VS4-UI-001": browser_evidence,
+        "VS4-UI-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-002": [*browser_evidence, *cli_evidence],
         "VS4-UI-003": [*browser_evidence, *cli_evidence],
-        "VS4-UI-004": [*browser_evidence, *cli_evidence],
+        "VS4-UI-004": [*browser_evidence, *cli_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-005": [*browser_evidence, *cli_evidence],
         "VS4-UI-006": [*browser_evidence, *cli_evidence],
         "VS4-UI-007": cli_evidence,
@@ -25955,28 +25969,28 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-009": cli_evidence,
         "VS4-UI-010": [*browser_evidence, *cli_evidence],
         "VS4-UI-011": [*browser_evidence, *cli_evidence],
-        "VS4-UI-012": browser_evidence,
+        "VS4-UI-012": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-013": [*browser_evidence, *slice3_evidence],
         "VS4-UI-014": [*browser_evidence, *slice3_evidence],
         "VS4-UI-015": browser_evidence,
-        "VS4-UI-016": browser_evidence,
+        "VS4-UI-016": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-STATE-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT],
         "VS4-REF-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT, "docs/design/reference-images/README.md"],
         "VS4-REF-002": [*browser_evidence, *cli_evidence],
         "VS4-REG-001": regression_evidence,
         "VS4-REG-002": regression_evidence,
-        "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json"],
+        "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-REG-004": cli_evidence,
         "VS4-REG-005": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT],
-        "VS4-REG-006": browser_evidence,
+        "VS4-REG-006": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-REG-007": cli_evidence,
     }
     notes_by_id = {
         "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001/002 contracts are structurally verified.",
-        "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, Continue, and local boundary as first visible work.",
+        "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, Continue, local boundary, product-language status, and progressive proof details as first visible work.",
         "VS4-UI-002": "Source artifact remains preserved with sha256 original storage ref and ready derived text.",
         "VS4-UI-003": "Evidence-backed Brief is created from a concrete Evidence Bundle.",
-        "VS4-UI-004": "Brief contains supported key points, evidence links, uncertainty, and next-step guidance.",
+        "VS4-UI-004": "Brief contains supported key points, evidence links, uncertainty, next-step guidance, and Learn review candidate state.",
         "VS4-UI-005": "Shared Evidence Drawer exposes source, snippet, provenance, and audit linkage.",
         "VS4-UI-006": "Claim candidate remains evidence-backed and tied to the Evidence Bundle.",
         "VS4-UI-007": "Zero-evidence claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED.",
@@ -25984,20 +25998,20 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-009": "Draft memory cannot influence answers or actions and is not hidden durable memory.",
         "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, and local activity.",
         "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0.",
-        "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, and activity follow-up rows.",
+        "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, Learn, and activity follow-up rows.",
         "VS4-UI-013": "Ask creates a conversation-backed answer and reviewable Brief, Claim, Memory/Wiki candidate, Action Card, evidence, and audit refs.",
         "VS4-UI-014": "Personal Research, Company Policy Review, and Operations Issue packs each produce Brief, Claim, Memory/Wiki candidate, Action Card, and Ops Inbox follow-up refs.",
         "VS4-UI-015": "Workspace and owner context are visible in the shell.",
-        "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, and Activity record language.",
+        "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, Learn review, and Activity record language before proof jargon.",
         "VS4-STATE-001": "Major Product Alpha surfaces expose empty, loading, ready, partial/degraded, needs-review, permission denied, policy blocked, failed-with-recovery, and audit/log states.",
         "VS4-REF-001": "Home, Search, and Artifact surfaces align with reference direction using DOM/browser/source evidence; reference images are not PASS evidence.",
         "VS4-REF-002": "Claim and Action references align to the runtime Brief detail design without using reference images as PASS evidence.",
         "VS4-REG-001": "Fresh VS0 operator acceptance UI regression passes on the current tree.",
         "VS4-REG-002": "Fresh VS1 ontology suggest/review/promote regression passes with zero auto-promotion.",
-        "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness.",
+        "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness; proof flags are progressively disclosed.",
         "VS4-REG-004": "Prompt-injection fixture is detected and creates no tool calls, actions, external calls, or authority expansion.",
         "VS4-REG-005": "Reference images remain design guidance only; PASS evidence is runtime/docs/CLI output.",
-        "VS4-REG-006": "The first screen remains product-first and the primary nav omits admin, connector, and ontology entries.",
+        "VS4-REG-006": "The first screen remains product-first and the primary nav omits admin, connector, ontology, and verifier-first entries.",
         "VS4-REG-007": "Brief detail feature paths have native CLI transcripts with JSON output and expected negative exit code.",
     }
     scenario_results: list[dict[str, Any]] = []
@@ -26006,19 +26020,26 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         owner = "Human" if matrix_row.get("owner") == "Human" else "AI"
         if owner == "Human":
             status = "HUMAN_REQUIRED"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS or scenario_id in VS4_SLICE_003_SCENARIOS:
+        elif (
+            scenario_id in VS4_SLICE_001_SCENARIOS
+            or scenario_id in VS4_SLICE_002_SCENARIOS
+            or scenario_id in VS4_SLICE_003_SCENARIOS
+            or scenario_id in VS4_SLICE_005_SCENARIOS
+        ):
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS:
-            classification = "previous_slice"
-        elif scenario_id in VS4_SLICE_003_SCENARIOS:
+        elif scenario_id in VS4_SLICE_005_SCENARIOS:
             classification = "in_this_slice"
+        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS or scenario_id in VS4_SLICE_003_SCENARIOS:
+            classification = "previous_slice"
         else:
             classification = "later_slice"
-        if scenario_id in VS4_SLICE_003_SCENARIOS:
+        if scenario_id in VS4_SLICE_005_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT
+        elif scenario_id in VS4_SLICE_003_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT
         elif scenario_id in VS4_SLICE_002_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT
@@ -26066,7 +26087,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-003-ask-packs-states-regression",
+        "slice": "slice-005-ux-polish-learn",
         "state_dir": {
             "browser": browser_state_rel,
             "cli": cli_state_rel,
@@ -26075,11 +26096,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
             "slice_003": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
+            "slice_004": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
+            "slice_005": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
         },
         "browser_proof": browser_proof,
         "cli_workflow": cli_workflow,
@@ -26319,7 +26342,8 @@ def build_vs4_human_gate_package(
             "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
             "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
             "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
-            "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use.",
+            "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
+            "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
             "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
             "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note.",
         ],
@@ -26355,8 +26379,10 @@ def build_vs4_human_gate_package(
             {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html", "kind": "dom_snapshot"},
             {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png", "kind": "screenshot"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT, "kind": "slice_contract"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT, "kind": "slice_contract"},
         ],
         "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-ux-polish-learn",
             "make verify-vs4-product-alpha-human-package",
             "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
             "cornerstone human-gate package --scope vs4 --json",
@@ -26387,6 +26413,7 @@ def build_vs4_human_gate_package(
         "evidence_refs": [
             DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
             report_rel,
             package_rel,
         ],

@@ -40,6 +40,7 @@
   "evidence_refs": [
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md",
     "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json",
     "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
@@ -117,6 +118,7 @@
           "vs4_h01_remains_human_required": true
         },
         "commands_to_run_before_review": [
+          "make verify-vs4-product-alpha-ux-polish-learn",
           "make verify-vs4-product-alpha-human-package",
           "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
           "cornerstone human-gate package --scope vs4 --json",
@@ -125,6 +127,7 @@
         "evidence_refs": [
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md",
           "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "reports/human-gates/vs4/VS4-H01.json"
         ],
@@ -143,7 +146,7 @@
           "production_readiness_claimed_by_package": 0,
           "security_acceptance_claimed_by_package": 0
         },
-        "package_digest_sha256": "d8de3d068f7b82086276abc33a9b7adf84ecac7afb7e669303780a50a82ebaaa",
+        "package_digest_sha256": "3cc823da55503fa59cf0707a875d98cf6c859ab6771001cf84ac56ffbd799fe2",
         "package_id": "vs4_human_gate_vs4_h01",
         "package_path": "reports/human-gates/vs4/VS4-H01.json",
         "pass_claim_allowed": false,
@@ -180,7 +183,8 @@
           "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
           "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
           "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
-          "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use.",
+          "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
+          "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
           "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
           "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
         ],
@@ -188,7 +192,7 @@
           {
             "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
             "present": true,
-            "sha256": "50694ac7b68439b1bd37d1d1b8435b8db708ec2003e37cd128addc355aa32f7d",
+            "sha256": "1f07a39c5d93c7c0977f8566f14fc01686b19c2ff7c9bc4859d913143793ca63",
             "summary": {
               "blocking": 0,
               "fail": 0,
@@ -216,6 +220,10 @@
           {
             "kind": "slice_contract",
             "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md"
           }
         ],
         "review_record_contract": {
@@ -251,7 +259,7 @@
         "scenario_report": {
           "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "present": true,
-          "sha256": "50694ac7b68439b1bd37d1d1b8435b8db708ec2003e37cd128addc355aa32f7d",
+          "sha256": "1f07a39c5d93c7c0977f8566f14fc01686b19c2ff7c9bc4859d913143793ca63",
           "summary": {
             "blocking": 0,
             "fail": 0,
@@ -352,7 +360,7 @@
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "ids": {
-    "git_commit": "9079982",
+    "git_commit": "f5f1edf",
     "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
   },
   "mode": "local_scaffold",

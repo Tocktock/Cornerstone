@@ -61,8 +61,9 @@ This bundle resolves authority:
 36. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md` - frozen VS4 Evidence-backed Brief detail implementation-slice contract.
 37. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md` - frozen VS4 Ask, packs, states, reference alignment, and regression implementation-slice contract.
 38. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md` - frozen VS4 human acceptance package and validation contract.
-39. Frozen scenario contract for the specific implementation task.
-40. Repository code/docs/tests/logs as implementation evidence.
+39. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md` - frozen VS4 UX polish and Learn review implementation-slice contract.
+40. Frozen scenario contract for the specific implementation task.
+41. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -125,6 +126,7 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md` | Frozen VS4 Evidence-backed Brief detail implementation-slice contract |
 | `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md` | Frozen VS4 Ask, general-purpose packs, page states, reference alignment, and regression implementation-slice contract |
 | `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md` | Frozen VS4 human acceptance package and validation contract; keeps `VS4-H01` HUMAN_REQUIRED |
+| `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md` | Frozen VS4 UX polish and Learn review contract; keeps the canonical VS4 matrix unchanged |
 | `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` | Final VS0 implementation closure report for VS1 transition |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |

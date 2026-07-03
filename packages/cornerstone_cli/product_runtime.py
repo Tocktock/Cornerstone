@@ -99,6 +99,13 @@ VS4_CONTINUE_WORK = [
         "body": "A follow-up action is prepared with expected impact, risk, evidence, and no live writeback.",
         "href": "#action-card",
     },
+    {
+        "kind": "Learn",
+        "title": "Learn review candidate",
+        "status": "Needs review",
+        "body": "Outcome, correction, rejection, or failure notes wait for review before changing future behavior.",
+        "href": "#vs4-learn-review",
+    },
 ]
 
 VS4_KNOWLEDGE_STATES = [
@@ -152,6 +159,14 @@ VS4_STATE_SURFACES = [
     "Memory/Wiki",
     "Action Card",
     "Evidence/Audit",
+    "Learn Review",
+]
+
+VS4_LEARN_REVIEW_ITEMS = [
+    ("Outcome", "Capture what happened after the local action preview."),
+    ("Correction", "Record what the Brief, Claim, or Memory candidate got wrong."),
+    ("Rejection", "Keep rejected recommendations as evidence, not durable truth."),
+    ("Failure", "Turn failed or blocked work into a reviewed lesson candidate."),
 ]
 
 VS4_REFERENCE_ALIGNMENT = [
@@ -361,6 +376,14 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         f"<span>{html.escape(rule)}</span>"
         "</article>"
         for surface, rule in VS4_REFERENCE_ALIGNMENT
+    )
+    learn_rows = "\n".join(
+        "<div class='activity-row' "
+        f"data-vs4-learn-input='{html.escape(kind.lower())}'>"
+        f"<strong>{html.escape(kind)}</strong>"
+        f"<span>{html.escape(description)}</span>"
+        "</div>"
+        for kind, description in VS4_LEARN_REVIEW_ITEMS
     )
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
@@ -736,6 +759,19 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     h1 {{ margin: 0; font-size: 24px; letter-spacing: 0; }}
     h2 {{ margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }}
     .status-row {{ display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }}
+    .proof-details {{
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 10px 12px;
+    }}
+    .proof-details summary {{
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+    }}
     .badge {{
       border: 1px solid var(--line);
       border-radius: 6px;
@@ -906,14 +942,22 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         <span class="badge safe" data-vs4-owner="local-user">Owner: local-user</span>
       </div>
     </div>
-    <div class="status-row">
-      <span class="badge safe">Local mode: no live writeback</span>
-      <span class="badge safe">local_scenario_ready={str(readiness["local_scenario_ready"]).lower()}</span>
-      <span class="badge safe">vs0_runtime_ready={runtime_ready}</span>
-      <span class="badge warn">production_release_ready={production_ready}</span>
-      <span class="badge safe">real_external_http_calls=0</span>
-      <span class="badge warn">VS4-H01 human UX acceptance required</span>
+    <div class="status-row" data-vs4-normal-status="product-language">
+      <span class="badge safe">Local mode</span>
+      <span class="badge safe">No live external writeback</span>
+      <span class="badge safe">Workspace-scoped review</span>
+      <span class="badge warn">Human UX review required</span>
     </div>
+    <details class="proof-details" data-vs4-proof-details="collapsed">
+      <summary>Verification details</summary>
+      <div class="detail-grid" data-vs4-proof-flags="local">
+        <div><span class="label">Local gate</span><span>local_scenario_ready={str(readiness["local_scenario_ready"]).lower()}</span></div>
+        <div><span class="label">Runtime</span><span>vs0_runtime_ready={runtime_ready}</span></div>
+        <div><span class="label">Release boundary</span><span>production_release_ready={production_ready}</span></div>
+        <div><span class="label">Network boundary</span><span>real_external_http_calls=0</span></div>
+        <div><span class="label">Human gate</span><span>VS4-H01 human UX acceptance required</span></div>
+      </div>
+    </details>
   </header>
   <main>
     <nav aria-label="Primary">
@@ -978,6 +1022,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
               <div class="activity-row"><strong>Memory review</strong><span>Candidate knowledge remains draft until reviewed.</span></div>
               <div class="activity-row"><strong>Action preview</strong><span>Execution mode is local/mock by default.</span></div>
               <div class="activity-row"><strong>Activity record</strong><span>Audit detail is available from evidence, claims, and actions.</span></div>
+              <div class="activity-row"><strong>Learn review</strong><span>Outcomes and corrections stay as review candidates before changing future behavior.</span></div>
             </div>
           </aside>
         </div>
@@ -987,6 +1032,14 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
             <h2>Daily loop preview</h2>
             <p>Supported findings, gaps, claim candidates, memory candidates, suggested actions, and activity stay together as the central work item.</p>
           </div>
+          <div class="product-panel" id="vs4-learn-review" data-vs4-learn-review="visible" data-vs4-learning-durable-write="false">
+            <div class="label">Learn review</div>
+            <h2>Learning candidate</h2>
+            <p>Outcomes, corrections, approvals, rejections, and failures can become future evidence only after owner-scoped review.</p>
+            <div class="activity-list">{learn_rows}</div>
+          </div>
+        </div>
+        <div class="ops-grid">
           <div class="product-panel" id="vs4-memory-candidates" data-vs4-memory-shell="visible">
             <div class="label">General-purpose packs</div>
             <h2>Same loop, different work</h2>
@@ -994,6 +1047,11 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
             <button id="run-vs4-packs-flow" class="subtle-button" type="button">Run pack loop</button>
             <div class="pack-list">{pack_rows}</div>
           </div>
+          <aside class="product-panel" data-vs4-learn-boundary="review-required">
+            <div class="label">Learning boundary</div>
+            <h3>No hidden adaptation</h3>
+            <p>Learn candidates cannot update durable memory, approved claims, answers, or actions until reviewed.</p>
+          </aside>
         </div>
         <details class="evidence-drawer" id="shared-evidence-drawer" data-vs4-evidence-drawer="reachable">
           <summary>Supporting evidence and activity</summary>
@@ -1086,6 +1144,17 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <div><span class="label">Activity</span><span id="vs4-action-activity">Audit available after preparation.</span></div>
               </div>
               <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
+            </div>
+            <div class="brief-block" id="vs4-learn-candidate-detail" data-vs4-learn-candidate-detail="visible" data-vs4-learning-can-change-durable-behavior="false">
+              <div class="label">Learn review</div>
+              <h3 id="vs4-learn-title">Learning candidate waits for outcome evidence.</h3>
+              <p id="vs4-learn-rationale">Outcomes, corrections, rejections, and failures remain review candidates before future behavior changes.</p>
+              <div class="detail-grid">
+                <div><span class="label">Evidence</span><span id="vs4-learn-evidence">Evidence not attached.</span></div>
+                <div><span class="label">Owner scope</span><span id="vs4-learn-scope">local-user / default</span></div>
+                <div><span class="label">Review state</span><span id="vs4-learn-state">needs review</span></div>
+                <div><span class="label">Durable change</span><span id="vs4-learn-durable-change">blocked until reviewed</span></div>
+              </div>
             </div>
           </aside>
         </div>
@@ -1553,9 +1622,18 @@ Search phrase: alpha-evidence-anchor.</code>
       }},
       action: {{}},
       audit: {{}},
+      learn: {{
+        status: "needs_review",
+        review_required: true,
+        can_change_durable_behavior: false,
+        can_change_answers: false,
+        can_change_actions: false,
+        hidden_adaptation: false
+      }},
       negative_evidence: {{
         zero_evidence_approval_created_approved_claim: 0,
         approved_memory_before_review: 0,
+        hidden_learning_before_review: 0,
         real_external_http_calls: 0,
         live_external_writeback_claimed: 0,
         chatbot_only_ask_output: 0,
@@ -1608,6 +1686,13 @@ Search phrase: alpha-evidence-anchor.</code>
         vs4State.action.direct_provider_access === false &&
         vs4State.action.real_external_http_calls === 0 &&
         vs4State.audit.verification_status === "success" &&
+        vs4State.learn.learning_candidate_id &&
+        vs4State.learn.status === "needs_review" &&
+        vs4State.learn.review_required === true &&
+        vs4State.learn.can_change_durable_behavior === false &&
+        vs4State.learn.can_change_answers === false &&
+        vs4State.learn.can_change_actions === false &&
+        vs4State.learn.hidden_adaptation === false &&
         Object.values(vs4State.negative_evidence).every((value) => value === 0)
       );
     }}
@@ -1850,6 +1935,27 @@ Search phrase: alpha-evidence-anchor.</code>
         }};
         setText("vs4-evidence-audit", document.getElementById("vs4-evidence-audit").textContent + "; audit=" + audit.status);
 
+        vs4State.learn = {{
+          learning_candidate_id: "learn:" + brief.brief_id,
+          status: "needs_review",
+          review_required: true,
+          inputs: ["outcome", "correction", "rejection", "failure"],
+          evidence_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "brief:" + brief.brief_id, "action:" + action.action_id],
+          audit_refs: auditResponse.payload.audit_refs || [],
+          owner_scope: evuxScope.owner_id + " / " + evuxScope.workspace_id,
+          can_change_durable_behavior: false,
+          can_change_answers: false,
+          can_change_actions: false,
+          hidden_adaptation: false
+        }};
+        vs4State.negative_evidence.hidden_learning_before_review = 0;
+        setText("vs4-learn-title", "Learning candidate: " + brief.brief_id);
+        setText("vs4-learn-rationale", "Outcome, correction, rejection, or failure notes can become future evidence only after owner-scoped review.");
+        setText("vs4-learn-evidence", vs4State.learn.evidence_refs.join(" | "));
+        setText("vs4-learn-scope", vs4State.learn.owner_scope);
+        setText("vs4-learn-state", "needs review; review_required=true");
+        setText("vs4-learn-durable-change", "cannot change durable memory, answers, claims, or actions before review");
+
         vs4State.completed = vs4Passes();
         document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
       }} catch (error) {{
@@ -2021,6 +2127,10 @@ Search phrase: alpha-evidence-anchor.</code>
           claim_candidate_visible: Boolean(document.querySelector("[data-vs4-claim-candidate='visible']")),
           memory_candidate_visible: Boolean(document.querySelector("[data-vs4-memory-candidate-detail='visible']")),
           action_card_visible: Boolean(document.querySelector("[data-vs4-action-card-detail='visible']")),
+          learn_review_visible: Boolean(document.querySelector("[data-vs4-learn-review='visible']")),
+          learn_candidate_detail_visible: Boolean(document.querySelector("[data-vs4-learn-candidate-detail='visible']")) &&
+            vs4State.learn.status === "needs_review" &&
+            vs4State.learn.can_change_durable_behavior === false,
           ask_flow_complete: vs4AskPasses(),
           general_packs_complete: vs4PacksPass(),
           state_coverage_complete: vs4State.state_coverage.complete === true,

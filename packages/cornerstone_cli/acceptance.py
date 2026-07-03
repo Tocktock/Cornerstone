@@ -1219,6 +1219,13 @@ def capture_vs4_product_alpha_browser_proof(
     shell_index = dom.find('data-vs4-surface="home-ops-inbox"')
     vs1_index = dom.find('id="vs1-ontology-loop"')
     vs0_index = dom.find('id="vs0-evux-loop"')
+    normal_status_start = dom.find('data-vs4-normal-status="product-language"')
+    normal_status_end = dom.find("</div>", normal_status_start) if normal_status_start >= 0 else -1
+    normal_status_html = dom[normal_status_start:normal_status_end] if normal_status_start >= 0 and normal_status_end >= 0 else ""
+    raw_proof_terms = ["local_scenario_ready=", "vs0_runtime_ready=", "production_release_ready=", "real_external_http_calls="]
+    proof_details_start = dom.find('data-vs4-proof-details="collapsed"')
+    proof_details_end = dom.find("</details>", proof_details_start) if proof_details_start >= 0 else -1
+    proof_details_html = dom[proof_details_start:proof_details_end] if proof_details_start >= 0 and proof_details_end >= 0 else ""
     brief_evidence = base.get("runtime_evidence") if isinstance(base.get("runtime_evidence"), dict) else {}
     brief_state = brief_evidence.get("state", {}) if isinstance(brief_evidence.get("state"), dict) else {}
     brief_markers = brief_evidence.get("markers", {}) if isinstance(brief_evidence.get("markers"), dict) else {}
@@ -1234,6 +1241,9 @@ def capture_vs4_product_alpha_browser_proof(
         "pending_evidence_gap_visible": "Evidence gap" in dom and "Claim approval waits for supporting evidence" in dom,
         "memory_candidate_visible": "Memory/Wiki candidate" in dom and "durable knowledge proposal" in dom,
         "action_card_visible": "Action Card draft" in dom and "no live writeback" in dom,
+        "learn_review_visible": 'data-vs4-learn-review="visible"' in dom
+        and "Learning candidate" in dom
+        and ('data-vs4-work-kind="learn"' in dom or "data-vs4-work-kind='learn'" in dom),
         "recent_activity_visible": "Activity record" in dom and "Audit detail is available" in dom,
         "workspace_context_visible": "Workspace: Personal / Project / default" in dom and "Owner: local-user" in dom,
         "local_mode_boundary_visible": "Local Product Alpha" in dom and "No live external writeback" in dom,
@@ -1243,7 +1253,12 @@ def capture_vs4_product_alpha_browser_proof(
         "artifact_reference_visible": 'data-vs4-artifact-reference="original-source-primary"' in dom and 'data-vs4-original-source-preview="visible"' in dom,
         "state_coverage_visible": 'data-vs4-state-coverage="visible"' in dom,
         "reference_alignment_visible": 'data-vs4-reference-alignment="home-search-artifact"' in dom,
-        "product_language_first": all(marker in dom for marker in ["Source intake", "Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft"]),
+        "normal_user_status_product_language": all(marker in normal_status_html for marker in ["Local mode", "No live external writeback", "Workspace-scoped review", "Human UX review required"])
+        and all(term not in normal_status_html for term in raw_proof_terms),
+        "proof_details_progressively_disclosed": proof_details_start >= 0
+        and all(term in proof_details_html for term in raw_proof_terms)
+        and "VS4-H01 human UX acceptance required" in proof_details_html,
+        "product_language_first": all(marker in dom for marker in ["Source intake", "Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft", "Learning candidate"]),
         "legacy_vs0_vs1_reachable": "id=\"vs0-evux-loop\"" in dom and "id=\"vs1-ontology-loop\"" in dom,
         "forbidden_readiness_overclaim_absent": all(claim not in dom for claim in forbidden_readiness_claims),
         "human_required_visible": "VS4-H01 human UX acceptance required" in dom,
@@ -1256,6 +1271,9 @@ def capture_vs4_product_alpha_browser_proof(
         "claim_candidate_detail_visible": brief_markers.get("claim_candidate_visible") is True and bool(brief_state.get("claim", {}).get("claim_id")),
         "memory_candidate_detail_visible": brief_markers.get("memory_candidate_visible") is True and brief_state.get("memory", {}).get("status") == "draft",
         "action_card_detail_visible": brief_markers.get("action_card_visible") is True and bool(brief_state.get("action", {}).get("action_id")),
+        "learn_candidate_detail_visible": brief_markers.get("learn_candidate_detail_visible") is True
+        and bool(brief_state.get("learn", {}).get("learning_candidate_id"))
+        and brief_state.get("learn", {}).get("can_change_durable_behavior") is False,
         "brief_evidence_drawer_reachable": brief_markers.get("shared_evidence_drawer_visible") is True,
         "ask_flow_complete": brief_markers.get("ask_flow_complete") is True and bool(brief_state.get("ask", {}).get("created_work_item_refs")),
         "general_packs_complete": brief_markers.get("general_packs_complete") is True and len(brief_state.get("packs", [])) == 3,

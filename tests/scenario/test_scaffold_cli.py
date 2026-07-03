@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
+        self.assertEqual(payload["slice"], "slice-005-ux-polish-learn")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11417,6 +11417,9 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
         self.assertEqual(payload["browser_proof"]["status"], "PASS")
         self.assertTrue(all(payload["browser_proof"]["shell_markers"].values()))
+        self.assertTrue(payload["browser_proof"]["shell_markers"]["normal_user_status_product_language"])
+        self.assertTrue(payload["browser_proof"]["shell_markers"]["proof_details_progressively_disclosed"])
+        self.assertTrue(payload["browser_proof"]["shell_markers"]["learn_review_visible"])
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
         self.assertEqual(payload["proof_boundary"]["full_vs4"], "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED")
@@ -11447,7 +11450,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
+        self.assertEqual(payload["slice"], "slice-005-ux-polish-learn")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11457,6 +11460,7 @@ class ScaffoldCliTests(unittest.TestCase):
 
         self.assertEqual(payload["browser_proof"]["status"], "PASS")
         self.assertTrue(all(payload["browser_proof"]["brief_detail_markers"].values()))
+        self.assertTrue(payload["browser_proof"]["brief_detail_markers"]["learn_candidate_detail_visible"])
         self.assertTrue(payload["browser_proof"]["brief_evidence"]["completed"])
         self.assertTrue(payload["browser_proof"]["brief_evidence"]["passes"])
 
@@ -11501,7 +11505,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
+        self.assertEqual(payload["slice"], "slice-005-ux-polish-learn")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11533,6 +11537,42 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+
+    def test_vs4_product_alpha_ux_polish_learn_slice_verify(self) -> None:
+        selected = [
+            "VS4-UI-001",
+            "VS4-UI-004",
+            "VS4-UI-012",
+            "VS4-UI-016",
+            "VS4-REG-003",
+            "VS4-REG-006",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-ux-polish-learn.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-005-ux-polish-learn")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        shell = payload["browser_proof"]["shell_markers"]
+        detail = payload["browser_proof"]["brief_detail_markers"]
+        self.assertTrue(shell["normal_user_status_product_language"])
+        self.assertTrue(shell["proof_details_progressively_disclosed"])
+        self.assertTrue(shell["learn_review_visible"])
+        self.assertTrue(shell["product_language_first"])
+        self.assertTrue(detail["learn_candidate_detail_visible"])
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
 
     def test_vs4_human_gate_package_prepares_review_without_acceptance(self) -> None:
         scenario_report = "tmp/test-vs4-product-alpha-full-for-human-package.json"
@@ -11592,6 +11632,8 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(package_row["status"], "HUMAN_REQUIRED")
         self.assertFalse(package_row["approval_collected"])
         self.assertFalse(package_row["claim_boundary"]["human_acceptance_claim_allowed"])
+        self.assertTrue(any("Learn review" in item for item in package_row["review_checklist"]))
+        self.assertTrue(any("proof details" in item for item in package_row["review_checklist"]))
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())
 
