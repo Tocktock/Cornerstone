@@ -76,8 +76,9 @@ This bundle resolves authority:
 51. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md` - frozen VS4 user Drop/Ask source implementation-slice contract.
 52. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md` - frozen VS4 Drop/Ask trust-boundary implementation-slice contract.
 53. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md` - frozen VS4 interactive Ops Inbox implementation-slice contract.
-54. Frozen scenario contract for the specific implementation task.
-55. Repository code/docs/tests/logs as implementation evidence.
+54. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md` - frozen VS4 runtime-backed Ops Inbox implementation-slice contract.
+55. Frozen scenario contract for the specific implementation task.
+56. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 

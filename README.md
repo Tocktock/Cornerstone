@@ -84,6 +84,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 61. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md`
 62. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md`
 63. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md`
+64. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md`
 
 ## Active Authority
 
