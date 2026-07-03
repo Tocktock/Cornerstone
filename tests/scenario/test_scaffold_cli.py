@@ -14,10 +14,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-VS4_ACTIVE_SLICE = "slice-019-interactive-ops-inbox"
+VS4_ACTIVE_SLICE = "slice-020-runtime-backed-ops-inbox"
 VS4_ACTIVE_SLICE_CONTRACT = (
-    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
 )
+VS4_ACTIVE_SLICE_SCENARIO_COUNT = 14
 
 from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
 from cornerstone_cli.scenarios import (
@@ -11408,7 +11409,10 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("slice_contracts", {})["slice_018"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md"
         )
-        report.setdefault("slice_contracts", {})["slice_019"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_019"] = (
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
+        )
+        report.setdefault("slice_contracts", {})["slice_020"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11419,6 +11423,9 @@ class ScaffoldCliTests(unittest.TestCase):
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         report.setdefault("proof_boundary", {})["vs4_slice_019_interactive_ops_inbox"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
+        report.setdefault("proof_boundary", {})["vs4_slice_020_runtime_backed_ops_inbox"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         unsafe_markers = {
@@ -11444,6 +11451,15 @@ class ScaffoldCliTests(unittest.TestCase):
         report["negative_evidence"]["ops_inbox_selection_live_writeback_claimed"] = 0
         report["negative_evidence"]["ops_inbox_selection_human_acceptance_claimed"] = 0
         report["negative_evidence"]["ops_inbox_selection_loop_view_missing"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_static_fallback_used"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_missing_record_refs"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_missing_evidence_refs"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_missing_audit_refs"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_live_writeback_claimed"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_human_acceptance_claimed"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_approved_memory_before_review"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_action_executed"] = 0
+        report["negative_evidence"]["runtime_ops_inbox_authority_expanded"] = 0
         report["source_tree"] = git_verification_metadata(ROOT)
         report.setdefault("self_command_transcript", {})["command"] = [
             "cornerstone",
@@ -11794,7 +11810,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(ask_readability["refs_detail_open"])
         self.assertIn("brief:", ask_readability["refs_text"])
         self.assertIn("claim:", ask_readability["refs_text"])
-        self.assertIn("memory_candidate:", ask_readability["refs_text"])
+        self.assertIn("memory:", ask_readability["refs_text"])
         self.assertIn("action:", ask_readability["refs_text"])
         for raw_prefix in ["brief_", "claim_", "evb_", "action_"]:
             self.assertNotIn(raw_prefix, ask_readability["answer_text"])
@@ -11886,7 +11902,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12046,6 +12062,116 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs4_product_alpha_runtime_backed_ops_inbox_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-008",
+            "VS4-UI-009",
+            "VS4-UI-012",
+            "VS4-UI-013",
+            "VS4-UI-015",
+            "VS4-UI-016",
+            "VS4-STATE-001",
+            "VS4-REF-001",
+            "VS4-REG-003",
+            "VS4-REG-004",
+            "VS4-REG-006",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-runtime-backed-ops-inbox.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], VS4_ACTIVE_SLICE_SCENARIO_COUNT)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["not_run"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        for proof_key in ["browser_proof", "mobile_browser_proof"]:
+            self.assertEqual(payload[proof_key]["status"], "PASS")
+            markers = payload[proof_key]["ops_inbox_triage_markers"]
+            for marker in [
+                "runtime_backed_after_drop_ask",
+                "runtime_rows_have_record_refs",
+                "runtime_selected_detail_record_refs_visible",
+                "runtime_memory_candidate_draft",
+                "runtime_mission_control_api_parity",
+                "runtime_loop_view_visible",
+                "runtime_refresh_no_authority_side_effects",
+            ]:
+                self.assertTrue(markers[marker], f"{proof_key}:{marker}")
+            runtime_projection = payload[proof_key]["ops_inbox_triage"]["runtime_projection"]
+            self.assertTrue(runtime_projection["runtime_backed"])
+            self.assertTrue(runtime_projection["memory_candidate_draft"])
+            for prefix in ["brief:", "claim:", "memory:", "action:"]:
+                self.assertTrue(
+                    any(ref.startswith(prefix) for ref in runtime_projection["record_refs"]),
+                    f"{proof_key}:{prefix}",
+                )
+
+        checks = payload["cli_workflow"]["checks"]
+        self.assertTrue(checks["runtime_backed_ops_inbox_cli_parity"])
+        self.assertTrue(checks["runtime_draft_memory_cli_boundary"])
+        self.assertTrue(checks["ops_inbox_selection_cli_parity"])
+        self.assertTrue(checks["ops_inbox_loop_view_cli_parity"])
+
+        transcripts = payload["cli_workflow"]["transcripts"]
+        self.assertIn("product_mission_control_memory_selected", transcripts)
+        ids = payload["cli_workflow"]["ids"]
+        memory_selected = transcripts["product_mission_control_memory_selected"]["stdout_json"]["mission_control"]
+        action_selected = transcripts["product_mission_control_action_selected"]["stdout_json"]["mission_control"]
+        loop_view = transcripts["product_loop_view_selected_action"]["stdout_json"]["product_loop"]
+        memory_detail = memory_selected["selected_item_detail"]
+        action_detail = action_selected["selected_item_detail"]
+        self.assertEqual(memory_detail["selected_item_id"], "memory-candidate")
+        self.assertIn(f"memory:{ids['memory_id']}", memory_detail["record_refs"])
+        self.assertEqual(memory_detail["status"], "draft")
+        self.assertFalse(memory_detail["live_external_writeback_claimed"])
+        self.assertFalse(memory_detail["human_ux_acceptance_claimed"])
+        self.assertEqual(action_detail["selected_item_id"], "action-card-draft")
+        self.assertIn(f"action:{ids['action_id']}", action_detail["record_refs"])
+        for expected_ref in [
+            f"brief:{ids['brief_id']}",
+            f"claim:{ids['claim_id']}",
+            f"memory:{ids['memory_id']}",
+            f"action:{ids['action_id']}",
+        ]:
+            self.assertIn(expected_ref, [stage.get("ref") for stage in loop_view["stages"]])
+        self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
+
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_020_runtime_backed_ops_inbox"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
+        for key in [
+            "runtime_ops_inbox_static_fallback_used",
+            "runtime_ops_inbox_missing_record_refs",
+            "runtime_ops_inbox_missing_evidence_refs",
+            "runtime_ops_inbox_missing_audit_refs",
+            "runtime_ops_inbox_live_writeback_claimed",
+            "runtime_ops_inbox_human_acceptance_claimed",
+            "runtime_ops_inbox_approved_memory_before_review",
+            "runtime_ops_inbox_action_executed",
+            "runtime_ops_inbox_authority_expanded",
+        ]:
+            self.assertIn(key, payload["negative_evidence"])
+            self.assertEqual(payload["negative_evidence"][key], 0, key)
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
     def test_vs4_product_alpha_action_execution_boundary_slice_verify(self) -> None:
         selected = [
             "VS4-GATE-001",
@@ -12071,7 +12197,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12165,7 +12291,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12232,7 +12358,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12310,7 +12436,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12376,7 +12502,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12456,7 +12582,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 11)
+        self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 

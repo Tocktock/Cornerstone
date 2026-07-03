@@ -43,11 +43,15 @@ API_ROUTES = [
     "POST /claims",
     "GET /claims/{claim_id}",
     "POST /claims/{claim_id}/approve",
+    "POST /memories",
+    "GET /memories/{memory_id}",
     "POST /actions",
     "GET /actions/{action_id}",
     "POST /actions/{action_id}/dry-run",
     "POST /actions/{action_id}/approve",
     "POST /actions/{action_id}/execute",
+    "POST /product/mission-control",
+    "POST /product/loop-view",
     "GET /audit-events",
     "POST /audit/verify",
 ]
@@ -319,6 +323,7 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-runtime-backed-ops-inbox",
     "make verify-vs4-product-alpha-interactive-ops-inbox",
     "make verify-vs4-product-alpha-drop-ask-trust-boundary",
     "make verify-vs4-product-alpha-user-drop-ask-source",
@@ -531,7 +536,8 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         f"data-vs4-inbox-next-action='{html.escape(item['next_action'])}' "
         f"data-vs4-inbox-href='{html.escape(item['href'])}' "
         f"data-vs4-inbox-evidence-ref='{html.escape(item['evidence'])}' "
-        f"data-vs4-inbox-audit-ref='{html.escape(item['audit'])}'>"
+        f"data-vs4-inbox-audit-ref='{html.escape(item['audit'])}' "
+        "data-vs4-inbox-runtime-record-refs=''>"
         "<div>"
         f"<span class='label'>{html.escape(item['kind'])}</span>"
         f"<h3>{html.escape(item['title'])}</h3>"
@@ -561,6 +567,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         f"<div><span class='label'>Status</span><span data-vs4-inbox-selected-status>{html.escape(selected_item['status'])}</span></div>"
         f"<div><span class='label'>Owner / workspace</span><span data-vs4-inbox-selected-scope>{html.escape(selected_item['owner'])} / Personal / Project / default</span></div>"
         f"<div><span class='label'>Evidence</span><span data-vs4-inbox-selected-evidence>{html.escape(selected_item['evidence'])}</span></div>"
+        "<div><span class='label'>Records</span><span data-vs4-inbox-selected-records>waiting for runtime records</span></div>"
         f"<div><span class='label'>Risk</span><span data-vs4-inbox-selected-risk>{html.escape(selected_item['risk'])}</span></div>"
         f"<div><span class='label'>Next action</span><span data-vs4-inbox-selected-next-action>{html.escape(selected_item['next_action'])}</span></div>"
         f"<div><span class='label'>Activity</span><span data-vs4-inbox-selected-audit>{html.escape(selected_item['audit'])}</span></div>"
@@ -575,6 +582,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         "<div class='activity-row'><strong>Learn review</strong><span>Outcomes and corrections stay as review candidates before changing future behavior.</span></div>"
         "</div>"
         "<div class='review-note'>Review source, evidence, and audit detail before approving a claim, memory, or action.</div>"
+        "<p class='section-kicker' data-vs4-runtime-ops-inbox-status='waiting'>Create local work to refresh this Inbox from runtime records.</p>"
         "</aside>"
     )
     knowledge_chips = "\n".join(
@@ -2355,6 +2363,7 @@ Search phrase: alpha-evidence-anchor.</code>
       }},
       action: {{}},
       audit: {{}},
+      runtime_ops_inbox: {{}},
       learn: {{
         status: "needs_review",
         review_required: true,
@@ -2372,7 +2381,16 @@ Search phrase: alpha-evidence-anchor.</code>
         chatbot_only_ask_output: 0,
         general_pack_missing_output: 0,
         required_page_state_missing: 0,
-        home_search_artifact_reference_gap: 0
+        home_search_artifact_reference_gap: 0,
+        runtime_ops_inbox_static_fallback_used: 0,
+        runtime_ops_inbox_missing_record_refs: 0,
+        runtime_ops_inbox_missing_evidence_refs: 0,
+        runtime_ops_inbox_missing_audit_refs: 0,
+        runtime_ops_inbox_live_writeback_claimed: 0,
+        runtime_ops_inbox_human_acceptance_claimed: 0,
+        runtime_ops_inbox_approved_memory_before_review: 0,
+        runtime_ops_inbox_action_executed: 0,
+        runtime_ops_inbox_authority_expanded: 0
       }}
     }};
     function traceVs4(name, payload) {{
@@ -2442,6 +2460,8 @@ Search phrase: alpha-evidence-anchor.</code>
         vs4State.learn.can_change_answers === false &&
         vs4State.learn.can_change_actions === false &&
         vs4State.learn.hidden_adaptation === false &&
+        vs4State.runtime_ops_inbox.runtime_backed === true &&
+        vs4State.runtime_ops_inbox.memory_candidate_draft === true &&
         Object.values(vs4State.negative_evidence).every((value) => value === 0)
       );
     }}
@@ -2470,6 +2490,127 @@ Search phrase: alpha-evidence-anchor.</code>
           pack.ops_followup_id &&
           pack.real_external_http_calls === 0
         );
+    }}
+    function vs4TitleCase(value) {{
+      const text = String(value || "");
+      return text ? text.charAt(0).toUpperCase() + text.slice(1).replace(/_/g, " ") : "";
+    }}
+    function vs4RefList(value) {{
+      return Array.isArray(value) ? value.filter(Boolean).map(String) : [];
+    }}
+    function vs4JoinedRefs(value) {{
+      return vs4RefList(value).join(" | ");
+    }}
+    function applyVs4RuntimeOpsInbox(missionControl, productLoop) {{
+      const control = missionControl || {{}};
+      const items = Array.isArray(control.ops_inbox_items) ? control.ops_inbox_items : [];
+      const rowsById = {{}};
+      Array.from(document.querySelectorAll("[data-vs4-inbox-item-id]")).forEach((row) => {{
+        rowsById[row.dataset.vs4InboxItemId || ""] = row;
+      }});
+      (control.triage_lanes || []).forEach((lane) => {{
+        const laneButton = document.querySelector("[data-vs4-inbox-lane='" + String(lane.key || "") + "']");
+        if (!laneButton) return;
+        laneButton.dataset.vs4InboxLaneCount = String(lane.count || 0);
+        const countNode = laneButton.querySelector("strong");
+        if (countNode) countNode.textContent = String(lane.count || 0);
+        const descriptionNode = laneButton.querySelector("small");
+        if (descriptionNode) descriptionNode.textContent = lane.description || "";
+      }});
+      items.forEach((item) => {{
+        const row = rowsById[item.item_id || ""];
+        if (!row) return;
+        const evidenceRefs = vs4RefList(item.evidence_refs);
+        const activityRefs = vs4RefList(item.activity_refs);
+        const recordRefs = vs4RefList(item.record_refs);
+        const title = item.title || row.dataset.vs4InboxTitle || "";
+        const kind = vs4TitleCase(item.kind || row.dataset.vs4InboxKind || "");
+        const status = String(item.status || "").replace(/_/g, "-");
+        row.dataset.vs4InboxItem = String(item.kind || "").replace(/_/g, "-");
+        row.dataset.vs4InboxLaneRef = item.lane || "";
+        row.dataset.vs4InboxStatus = status;
+        row.dataset.vs4InboxTitle = title;
+        row.dataset.vs4InboxKind = kind;
+        row.dataset.vs4InboxBody = item.next_action || "Open selected work and review source evidence.";
+        row.dataset.vs4InboxRisk = item.risk || "";
+        row.dataset.vs4InboxOwner = item.owner_workspace_label || "";
+        row.dataset.vs4InboxNextAction = item.next_action || "";
+        row.dataset.vs4InboxHref = item.continue_target || "#";
+        row.dataset.vs4InboxEvidenceRef = vs4JoinedRefs(evidenceRefs);
+        row.dataset.vs4InboxAuditRef = vs4JoinedRefs(activityRefs);
+        row.dataset.vs4InboxRuntimeRecordRefs = vs4JoinedRefs(recordRefs);
+        row.dataset.vs4RuntimeBacked = recordRefs.length > 0 ? "true" : "false";
+        const label = row.querySelector(".label");
+        const heading = row.querySelector("h3");
+        const body = row.querySelector("p");
+        const meta = Array.from(row.querySelectorAll(".inbox-meta span"));
+        if (label) label.textContent = kind;
+        if (heading) heading.textContent = title;
+        if (body) body.textContent = item.next_action || body.textContent;
+        if (meta[0]) meta[0].textContent = item.owner_workspace_label || "local-user / personal / default";
+        if (meta[1]) meta[1].textContent = "runtime";
+        if (meta[2]) meta[2].textContent = recordRefs.length > 0 ? "Runtime" : "Waiting";
+        if (meta[3]) meta[3].textContent = item.risk || "";
+        const link = row.querySelector("a.text-link");
+        if (link) link.setAttribute("href", item.continue_target || "#");
+      }});
+      const selectedDetail = control.selected_item_detail || {{}};
+      const runtimeRows = items.filter((item) => vs4RefList(item.record_refs).length > 0);
+      const allRecordRefs = runtimeRows.flatMap((item) => vs4RefList(item.record_refs));
+      const requiredPrefixes = ["brief:", "claim:", "memory:", "action:"];
+      const missingRecordPrefixes = requiredPrefixes.filter((prefix) => !allRecordRefs.some((ref) => ref.startsWith(prefix)));
+      const memoryRows = items.filter((item) => item.item_id === "memory-candidate");
+      const actionRows = items.filter((item) => item.item_id === "action-card-draft");
+      const missingEvidenceRows = items.filter((item) => vs4RefList(item.evidence_refs).length === 0);
+      const missingActivityRows = items.filter((item) => vs4RefList(item.activity_refs).length === 0);
+      const loopStages = Array.isArray((productLoop || {{}}).stages) ? productLoop.stages : [];
+      const statusNode = document.querySelector("[data-vs4-runtime-ops-inbox-status]");
+      if (statusNode) {{
+        statusNode.dataset.vs4RuntimeOpsInboxStatus = missingRecordPrefixes.length === 0 ? "runtime-backed" : "partial-runtime";
+        statusNode.textContent = missingRecordPrefixes.length === 0
+          ? "Ops Inbox refreshed from runtime Brief, Claim, Memory, and Action records."
+          : "Ops Inbox refreshed from runtime records with gaps: " + missingRecordPrefixes.join(", ");
+      }}
+      selectVs4InboxLane("needs-review", {{restore: true}});
+      const selectedRowsText = document.querySelector("[data-vs4-inbox-selected-records]")?.textContent || "";
+      const memoryDraft = vs4State.memory.status === "draft" &&
+        vs4State.memory.trust_state === "draft" &&
+        vs4State.memory.owner_approved === false &&
+        vs4State.memory.can_influence_answers === false &&
+        vs4State.memory.can_influence_actions === false &&
+        memoryRows.some((item) => vs4RefList(item.record_refs).some((ref) => ref.startsWith("memory:")));
+      const actionExecuted = actionRows.some((item) => String(item.status || "").includes("executed")) ||
+        vs4State.action.execution_status === "executed";
+      const runtimeBacked = missingRecordPrefixes.length === 0 && runtimeRows.length >= 4;
+      vs4State.runtime_ops_inbox = {{
+        runtime_backed: runtimeBacked,
+        memory_candidate_draft: memoryDraft,
+        row_count: items.length,
+        runtime_row_count: runtimeRows.length,
+        record_refs: allRecordRefs,
+        missing_record_prefixes: missingRecordPrefixes,
+        selected_detail_record_refs: vs4RefList(selectedDetail.record_refs),
+        selected_detail_evidence_refs: vs4RefList(selectedDetail.evidence_refs),
+        selected_detail_activity_refs: vs4RefList(selectedDetail.activity_refs),
+        selected_detail_records_visible: requiredPrefixes.some((prefix) => selectedRowsText.includes(prefix)),
+        loop_view_journey: (productLoop || {{}}).journey || "",
+        loop_view_stage_refs: loopStages.map((stage) => stage.ref).filter(Boolean),
+        mission_control_surface_id: control.surface_id || "",
+        selected_item_id: selectedDetail.selected_item_id || "",
+        live_external_writeback_claimed: selectedDetail.live_external_writeback_claimed === true,
+        human_ux_acceptance_claimed: selectedDetail.human_ux_acceptance_claimed === true,
+        action_executed: actionExecuted
+      }};
+      vs4State.negative_evidence.runtime_ops_inbox_static_fallback_used = runtimeBacked ? 0 : 1;
+      vs4State.negative_evidence.runtime_ops_inbox_missing_record_refs = missingRecordPrefixes.length;
+      vs4State.negative_evidence.runtime_ops_inbox_missing_evidence_refs = missingEvidenceRows.length;
+      vs4State.negative_evidence.runtime_ops_inbox_missing_audit_refs = missingActivityRows.length;
+      vs4State.negative_evidence.runtime_ops_inbox_live_writeback_claimed = selectedDetail.live_external_writeback_claimed === true ? 1 : 0;
+      vs4State.negative_evidence.runtime_ops_inbox_human_acceptance_claimed = selectedDetail.human_ux_acceptance_claimed === true ? 1 : 0;
+      vs4State.negative_evidence.runtime_ops_inbox_approved_memory_before_review = memoryDraft ? 0 : 1;
+      vs4State.negative_evidence.runtime_ops_inbox_action_executed = actionExecuted ? 1 : 0;
+      vs4State.negative_evidence.runtime_ops_inbox_authority_expanded = 0;
+      return vs4State.runtime_ops_inbox;
     }}
     function collectVs4StateCoverage() {{
       const rows = Array.from(document.querySelectorAll("[data-vs4-state-surface]"));
@@ -2723,19 +2864,34 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-claim-page-zero-denial", "CS_CLAIM_EVIDENCE_REQUIRED: evidence-free approval stayed blocked.");
         setText("vs4-claim-page-status", "Evidence-backed / approval pending");
 
-        vs4State.memory = {{
+        const memoryResponse = await vs4Api("/memories", {{
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          statement: "Draft VS4 Memory/Wiki candidate from the Evidence-backed Brief source.",
           status: "draft",
           trust_state: "draft",
-          owner_approved: false,
+          memory_type: "knowledge_candidate",
+          synthesis_mode: "auto"
+        }});
+        const memory = memoryResponse.payload.memory || {{}};
+        const memoryPermissions = memory.usage_permissions || {{}};
+        const memoryCanonicality = memory.canonicality || {{}};
+        const memoryVisibility = memory.identity_visibility || {{}};
+        vs4State.memory = {{
+          memory_id: memory.memory_id,
+          status: memory.status,
+          trust_state: memory.trust_state,
+          owner_approved: memoryCanonicality.owner_approved === true,
           evidence_bundle_id: bundle.evidence_bundle_id,
-          source_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "artifact:" + firstEvidence.artifact_id],
-          freshness: "current, review required",
-          can_influence_answers: false,
-          can_influence_actions: false,
-          hidden_profile: false
+          source_refs: memory.evidence_refs || ["evidence_bundle:" + bundle.evidence_bundle_id, "artifact:" + firstEvidence.artifact_id],
+          evidence_refs: memory.evidence_refs || [],
+          audit_refs: memoryResponse.payload.audit_refs || [],
+          freshness: memory.freshness && memory.freshness.status ? memory.freshness.status + ", review required" : "current, review required",
+          can_influence_answers: memoryPermissions.can_influence_answers === true,
+          can_influence_actions: memoryPermissions.can_influence_actions === true,
+          hidden_profile: memoryVisibility.hidden_profile === true
         }};
         setText("vs4-memory-state", "Memory: Draft / Needs review");
-        setText("vs4-memory-rationale", "Draft candidate from evidence_bundle:" + bundle.evidence_bundle_id + "; not approved durable memory.");
+        setText("vs4-memory-rationale", "Draft candidate memory:" + memory.memory_id + " from evidence_bundle:" + bundle.evidence_bundle_id + "; not approved durable memory.");
         setText("vs4-memory-trust", "draft; owner_approved=false");
         setText("vs4-memory-freshness", "current; review required before durable use");
 
@@ -2762,7 +2918,9 @@ Search phrase: alpha-evidence-anchor.</code>
           direct_provider_access: action.connector_boundary ? action.connector_boundary.direct_provider_access : null,
           real_external_http_calls: impact.real_external_http_calls || 0,
           expected_connector_calls: impact.expected_connector_calls || 0,
-          dry_run_id: dryRun.dry_run_id
+          dry_run_id: dryRun.dry_run_id,
+          mission_id: action.mission_id || (actionResponse.payload.mission && actionResponse.payload.mission.mission_id),
+          execution_status: action.execution && action.execution.status
         }};
         setText("vs4-action-goal", action.goal || "Local follow-up action");
         setText("vs4-action-why", "Why: preserve the review next step without external writeback.");
@@ -2808,6 +2966,7 @@ Search phrase: alpha-evidence-anchor.</code>
             "evidence_bundle:" + bundle.evidence_bundle_id,
             "brief:" + brief.brief_id,
             "claim:" + claim.claim_id,
+            "memory:" + memory.memory_id,
             "action:" + action.action_id
           ],
           policy_decision: vs4State.action.policy_decision || "allow",
@@ -2820,6 +2979,7 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-audit-provenance-ref", "storage=" + firstEvidence.original_storage_ref + "; derived=" + firstEvidence.derived_text_ref);
         setText("vs4-audit-evidence-ref", "evidence_bundle:" + bundle.evidence_bundle_id);
         setText("vs4-audit-claim-ref", "claim:" + claim.claim_id + "; trust=" + (claim.trust_state || "evidence_backed"));
+        setText("vs4-audit-memory-ref", "memory:" + memory.memory_id + "; trust=draft");
         setText("vs4-audit-action-ref", "action:" + action.action_id + "; mode=Draft / Local / Mock");
         setText("vs4-audit-policy-ref", "policy_decision:" + vs4State.audit.policy_decision + "; real_external_http_calls=0");
         setText("vs4-audit-source-activity", "Saved source artifact:" + firstEvidence.artifact_id + "; original preserved.");
@@ -2836,7 +2996,7 @@ Search phrase: alpha-evidence-anchor.</code>
           status: "needs_review",
           review_required: true,
           inputs: ["outcome", "correction", "rejection", "failure"],
-          evidence_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "brief:" + brief.brief_id, "action:" + action.action_id],
+          evidence_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "brief:" + brief.brief_id, "memory:" + memory.memory_id, "action:" + action.action_id],
           audit_refs: auditResponse.payload.audit_refs || [],
           owner_scope: evuxScope.owner_id + " / " + evuxScope.workspace_id,
           can_change_durable_behavior: false,
@@ -2853,6 +3013,29 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-learn-durable-change", "cannot change durable memory, answers, claims, or actions before review");
         setText("vs4-audit-learn-activity", "Learn candidate " + vs4State.learn.learning_candidate_id + " stays needs review before durable behavior changes.");
         setText("vs4-audit-learn-ref", vs4State.learn.learning_candidate_id + "; review_required=true");
+
+        const missionControlResponse = await vs4Api("/product/mission-control", {{}});
+        const actionSelectionResponse = await vs4Api("/product/mission-control", {{
+          lane: "approval-requests",
+          selected_item: "action-card-draft"
+        }});
+        const memorySelectionResponse = await vs4Api("/product/mission-control", {{
+          lane: "needs-review",
+          selected_item: "memory-candidate"
+        }});
+        const loopViewResponse = await vs4Api("/product/loop-view", {{
+          brief_id: brief.brief_id,
+          claim_id: claim.claim_id,
+          memory_id: memory.memory_id,
+          mission_id: vs4State.action.mission_id,
+          action_id: action.action_id
+        }});
+        applyVs4RuntimeOpsInbox(
+          missionControlResponse.payload.mission_control || {{}},
+          loopViewResponse.payload.product_loop || {{}}
+        );
+        vs4State.runtime_ops_inbox.action_selected_record_refs = ((actionSelectionResponse.payload.mission_control || {{}}).selected_item_detail || {{}}).record_refs || [];
+        vs4State.runtime_ops_inbox.memory_selected_record_refs = ((memorySelectionResponse.payload.mission_control || {{}}).selected_item_detail || {{}}).record_refs || [];
 
         vs4State.completed = vs4Passes();
         document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
@@ -2899,7 +3082,7 @@ Search phrase: alpha-evidence-anchor.</code>
         const createdRefs = [
           "brief:" + vs4State.brief.brief_id,
           "claim:" + (promotedClaim.claim_id || vs4State.claim.claim_id),
-          "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          "memory:" + vs4State.memory.memory_id,
           "action:" + vs4State.action.action_id
         ];
         vs4State.ask = {{
@@ -2911,10 +3094,10 @@ Search phrase: alpha-evidence-anchor.</code>
           primary_source_artifact_id: vs4State.source.artifact_id,
           answer_label: answer.label,
           evidence_refs: [...(answer.evidence_refs || []), "evidence_bundle:" + vs4State.evidence.evidence_bundle_id],
-          memory_refs: ["memory_candidate:" + vs4State.memory.evidence_bundle_id],
+          memory_refs: ["memory:" + vs4State.memory.memory_id],
           brief_id: vs4State.brief.brief_id,
           claim_id: promotedClaim.claim_id || vs4State.claim.claim_id,
-          memory_candidate_id: "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          memory_candidate_id: "memory:" + vs4State.memory.memory_id,
           action_id: vs4State.action.action_id,
           created_work_item_refs: createdRefs,
           audit_refs: auditRefs,
@@ -2925,7 +3108,7 @@ Search phrase: alpha-evidence-anchor.</code>
         const createdWork = [
           ["Evidence-backed Brief", "ready for support check", "brief", vs4State.brief.brief_id],
           ["Claim candidate", "evidence-backed, not approved", "claim", promotedClaim.claim_id || vs4State.claim.claim_id],
-          ["Memory/Wiki candidate", "draft, needs review", "memory-candidate", vs4State.memory.evidence_bundle_id],
+          ["Memory/Wiki candidate", "draft, needs review", "memory-candidate", vs4State.memory.memory_id],
           ["Action Card draft", "local/mock preview", "action-card", vs4State.action.action_id]
         ];
         setText("vs4-ask-answer", "Answer prepared reviewable work with evidence. Open each item before approving a claim, memory, or action.");
@@ -3204,7 +3387,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const labels = chips.map((chip) => chip.childNodes[0] ? chip.childNodes[0].textContent.trim() : chip.textContent.trim());
       const answerText = answer ? answer.textContent || "" : "";
       const refsText = refsNode ? refsNode.textContent || "" : "";
-      const rawIdPattern = /(brief_|claim_|evb_|action_)/;
+      const rawIdPattern = /(brief_|claim_|memory_|evb_|action_)/;
       const requiredLabels = ["Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft"];
       const requiredKinds = ["brief", "claim", "memory-candidate", "action-card"];
       const markerSet = {{
@@ -3213,7 +3396,7 @@ Search phrase: alpha-evidence-anchor.</code>
         created_work_labels_visible: requiredLabels.every((label) => labels.includes(label)),
         created_work_kinds_complete: requiredKinds.every((kind) => Boolean(document.querySelector("[data-vs4-created-work-chip='" + kind + "']"))),
         raw_refs_progressively_disclosed: Boolean(refDetail) && refDetail.tagName.toLowerCase() === "details" && refDetail.open === false,
-        raw_refs_preserved: ["brief:", "claim:", "memory_candidate:", "action:"].every((prefix) => refsText.includes(prefix)) && rawIdPattern.test(refsText),
+        raw_refs_preserved: ["brief:", "claim:", "memory:", "action:"].every((prefix) => refsText.includes(prefix)) && rawIdPattern.test(refsText),
         raw_refs_not_primary_answer: !rawIdPattern.test(answerText),
         ask_not_chatbot_only: vs4State.ask.chatbot_only === false,
         human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']"),
@@ -3341,8 +3524,13 @@ Search phrase: alpha-evidence-anchor.</code>
       setSelectedText("[data-vs4-inbox-selected-kind]", row.dataset.vs4InboxKind || "");
       setSelectedText("[data-vs4-inbox-selected-lane-label]", laneKey);
       setSelectedText("[data-vs4-inbox-selected-status]", (row.dataset.vs4InboxStatus || "").replace(/-/g, " "));
-      setSelectedText("[data-vs4-inbox-selected-scope]", `${{row.dataset.vs4InboxOwner || "local-user"}} / Personal / Project / default`);
+      const ownerLabel = row.dataset.vs4InboxOwner || "local-user";
+      const scopeLabel = ownerLabel.includes("Personal / Project / default")
+        ? ownerLabel
+        : `${{ownerLabel.split("/")[0].trim() || "local-user"}} / Personal / Project / default`;
+      setSelectedText("[data-vs4-inbox-selected-scope]", scopeLabel);
       setSelectedText("[data-vs4-inbox-selected-evidence]", row.dataset.vs4InboxEvidenceRef || "");
+      setSelectedText("[data-vs4-inbox-selected-records]", row.dataset.vs4InboxRuntimeRecordRefs || "");
       setSelectedText("[data-vs4-inbox-selected-risk]", row.dataset.vs4InboxRisk || "");
       setSelectedText("[data-vs4-inbox-selected-next-action]", row.dataset.vs4InboxNextAction || "");
       setSelectedText("[data-vs4-inbox-selected-audit]", row.dataset.vs4InboxAuditRef || "");
@@ -3356,7 +3544,8 @@ Search phrase: alpha-evidence-anchor.</code>
         title: row.dataset.vs4InboxTitle || "",
         continue_target: row.dataset.vs4InboxHref || "",
         evidence_ref: row.dataset.vs4InboxEvidenceRef || "",
-        audit_ref: row.dataset.vs4InboxAuditRef || ""
+        audit_ref: row.dataset.vs4InboxAuditRef || "",
+        record_refs: row.dataset.vs4InboxRuntimeRecordRefs || ""
       }});
       return true;
     }}
@@ -3432,6 +3621,11 @@ Search phrase: alpha-evidence-anchor.</code>
       const laneKeys = lanes.map((lane) => lane.dataset.vs4InboxLane || "");
       const rowLaneKeys = rows.map((row) => row.dataset.vs4InboxLaneRef || "");
       const selectedContinue = document.querySelector("[data-vs4-inbox-selected-continue]");
+      const runtimeProjection = vs4State.runtime_ops_inbox || {{}};
+      const selectedRecordsText = document.querySelector("[data-vs4-inbox-selected-records]")?.textContent || "";
+      const runtimeRows = rows.filter((row) => row.dataset.vs4RuntimeBacked === "true");
+      const runtimeRecordRefs = runtimeRows.flatMap((row) => (row.dataset.vs4InboxRuntimeRecordRefs || "").split(" | ").filter(Boolean));
+      const requiredRuntimePrefixes = ["brief:", "claim:", "memory:", "action:"];
       const markerSet = {{
         lanes_visible: lanes.length >= 4,
         lane_counts_visible: lanes.every((lane) => Number(lane.dataset.vs4InboxLaneCount || "0") > 0),
@@ -3442,6 +3636,7 @@ Search phrase: alpha-evidence-anchor.</code>
         selected_detail_visible: Boolean(selected),
         selected_detail_has_scope: selectedText.includes("Personal / Project / default"),
         selected_detail_has_evidence: selectedText.includes("evidence_bundle:"),
+        selected_detail_has_records: selectedText.includes("Records") && requiredRuntimePrefixes.some((prefix) => selectedRecordsText.includes(prefix)),
         selected_detail_has_audit: selectedText.includes("audit:"),
         selected_detail_has_next_action: selectedText.includes("Next action"),
         selected_detail_has_risk: selectedText.includes("Risk"),
@@ -3465,7 +3660,19 @@ Search phrase: alpha-evidence-anchor.</code>
         no_live_writeback_after_selection: interactionProof.no_live_writeback_after_selection,
         product_language_before_internal_ids: selectedText.indexOf("Selected work") >= 0 &&
           selectedText.indexOf("Selected work") < selectedText.indexOf("evidence_bundle:"),
-        no_admin_first_inbox: !selectedText.includes("Connectors") && !selectedText.includes("Ontology") && !selectedText.includes("Scenario verifier")
+        no_admin_first_inbox: !selectedText.includes("Connectors") && !selectedText.includes("Ontology") && !selectedText.includes("Scenario verifier"),
+        runtime_backed_after_drop_ask: runtimeProjection.runtime_backed === true,
+        runtime_rows_have_record_refs: runtimeRows.length >= 4 &&
+          requiredRuntimePrefixes.every((prefix) => runtimeRecordRefs.some((ref) => ref.startsWith(prefix))),
+        runtime_selected_detail_record_refs_visible: requiredRuntimePrefixes.some((prefix) => selectedRecordsText.includes(prefix)),
+        runtime_memory_candidate_draft: runtimeProjection.memory_candidate_draft === true,
+        runtime_mission_control_api_parity: Boolean(runtimeProjection.mission_control_surface_id),
+        runtime_loop_view_visible: runtimeProjection.loop_view_journey === "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn",
+        runtime_refresh_no_authority_side_effects: vs4State.negative_evidence.runtime_ops_inbox_live_writeback_claimed === 0 &&
+          vs4State.negative_evidence.runtime_ops_inbox_human_acceptance_claimed === 0 &&
+          vs4State.negative_evidence.runtime_ops_inbox_approved_memory_before_review === 0 &&
+          vs4State.negative_evidence.runtime_ops_inbox_action_executed === 0 &&
+          vs4State.negative_evidence.runtime_ops_inbox_authority_expanded === 0
       }};
       return {{
         schema_version: "cs.vs4_ops_inbox_triage_proof.v0",
@@ -3474,6 +3681,8 @@ Search phrase: alpha-evidence-anchor.</code>
         selected_item_id: selected ? selected.dataset.vs4InboxSelectedItemId || "" : "",
         selected_lane: selected ? selected.dataset.vs4InboxSelectedLane || "" : "",
         selected_text: selectedText.replace(/\\s+/g, " ").trim().slice(0, 1200),
+        runtime_projection: runtimeProjection,
+        runtime_record_refs: runtimeRecordRefs,
         interaction_proof: interactionProof,
         trace: (window.__cornerstoneVs4InboxTrace || []).slice(-8),
         markers: markerSet
@@ -4575,6 +4784,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "claims":
             self._show_claim(parts[1])
             return
+        if len(parts) == 2 and parts[0] == "memories":
+            self._show_memory(parts[1])
+            return
         if len(parts) == 2 and parts[0] == "actions":
             self._show_action(parts[1])
             return
@@ -4635,6 +4847,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 3 and parts[0] == "claims" and parts[2] == "approve":
             self._approve_claim(parts[1], body)
             return
+        if parts == ["memories"]:
+            self._create_memory(body)
+            return
         if parts == ["actions"]:
             self._create_action(body)
             return
@@ -4649,6 +4864,12 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["audit", "verify"]:
             self._audit_verify()
+            return
+        if parts == ["product", "mission-control"]:
+            self._product_mission_control(body)
+            return
+        if parts == ["product", "loop-view"]:
+            self._product_loop_view(body)
             return
         self._send_json(_json_response("not_found", errors=[{"code": "CS_API_NOT_FOUND", "message": "Route not found."}]), 404)
 
@@ -4886,6 +5107,25 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         event = self.store.append_audit("claim.read", scope, {"type": "claim", "id": claim_id}, {"reason": "api_claim_show"})
         self._send_json(_json_response("success", claim=claim, evidence_refs=[f"claim:{claim_id}"], audit_refs=[f"audit:{event['event_id']}"]))
+
+    def _show_memory(self, memory_id: str) -> None:
+        scope = self._query_scope()
+        memory = self.store.get_memory(memory_id)
+        if memory is None:
+            self._send_json(_json_response("failed", errors=[{"code": "CS_MEMORY_NOT_FOUND", "message": "Memory/Wiki candidate not found."}]), 404)
+            return
+        if memory.get("scope") != scope:
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Memory/Wiki candidate is outside the requested scope."}]), 403)
+            return
+        event = self.store.append_audit("memory.read", scope, {"type": "memory", "id": memory_id}, {"reason": "api_memory_show"})
+        self._send_json(
+            _json_response(
+                "success",
+                memory=memory,
+                evidence_refs=[f"memory:{memory_id}", *memory.get("evidence_refs", [])],
+                audit_refs=[f"audit:{event['event_id']}"],
+            )
+        )
 
     def _show_action(self, action_id: str) -> None:
         scope = self._query_scope()
@@ -5174,6 +5414,42 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
         self._send_json(_json_response("success", claim=claim, evidence_refs=refs, audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
+    def _create_memory(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.create_memory_from_evidence_bundle(
+            str(body.get("evidence_bundle_id", "")),
+            str(body.get("statement", "")),
+            scope,
+            trust_state=str(body.get("trust_state", "draft")),
+            status=str(body.get("status", "draft")),
+            memory_type=str(body.get("memory_type", "knowledge_candidate")),
+            synthesis_mode=str(body.get("synthesis_mode", "auto")),
+        )
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_EVIDENCE_BUNDLE_NOT_FOUND", "message": "Evidence Bundle not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Evidence Bundle is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "evidence_required":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_MEMORY_EVIDENCE_REQUIRED", "message": "Memory/Wiki candidate creation requires source evidence."}],
+                ),
+                400,
+            )
+            return
+        memory = result["memory"]
+        self._send_json(
+            _json_response(
+                "success",
+                memory=memory,
+                evidence_refs=[f"memory:{memory['memory_id']}", *memory.get("evidence_refs", [])],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
     def _approve_claim(self, claim_id: str, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
         result = self.store.approve_claim(claim_id, scope)
@@ -5309,6 +5585,45 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
             return
         self._send_json(_json_response("success", action_card=result["action_card"], evidence_refs=[f"action:{action_id}"], audit_refs=refs))
+
+    def _product_mission_control(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.mission_control_view(
+            scope,
+            lane=str(body.get("lane", "")),
+            selected_item_id=str(body.get("selected_item") or body.get("selected_item_id") or ""),
+        )
+        surface = result["mission_control"]
+        self._send_json(
+            _json_response(
+                "success",
+                mission_control=surface,
+                evidence_refs=[f"mission_control:{surface['surface_id']}"],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
+    def _product_loop_view(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.product_loop_view(
+            scope,
+            conversation_id=str(body.get("conversation_id", "")),
+            brief_id=str(body.get("brief_id", "")),
+            claim_id=str(body.get("claim_id", "")),
+            memory_id=str(body.get("memory_id", "")),
+            mission_id=str(body.get("mission_id", "")),
+            action_id=str(body.get("action_id", "")),
+            outcome_id=str(body.get("outcome_id", "")),
+        )
+        product_loop = result["product_loop"]
+        self._send_json(
+            _json_response(
+                "success",
+                product_loop=product_loop,
+                evidence_refs=[f"product_loop:{product_loop['loop_id']}"],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
 
     def _execute_action(self, action_id: str, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)

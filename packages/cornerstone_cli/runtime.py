@@ -3763,7 +3763,14 @@ class LocalRuntimeStore:
         supported_claims = [claim for claim in claims if claim not in evidence_free_claims]
         claim = supported_claims[0] if supported_claims else (claims[0] if claims else {})
         blocked_claim = evidence_free_claims[0] if evidence_free_claims else {}
-        memory = memories[0] if memories else {}
+        draft_memories = [
+            row
+            for row in memories
+            if row.get("status") == "draft"
+            and row.get("trust_state") == "draft"
+            and row.get("canonicality", {}).get("owner_approved") is False
+        ]
+        memory = draft_memories[0] if draft_memories else (memories[0] if memories else {})
         action = actions[0] if actions else {}
         learning_row = learning[0] if learning else {}
         ops_inbox_items = [
@@ -4005,10 +4012,14 @@ class LocalRuntimeStore:
                 "one_operational_surface": True,
             },
         )
+        projection_audit_ref = f"audit:{event['event_id']}"
+        for item in surface.get("ops_inbox_items", []):
+            if isinstance(item, dict) and not item.get("activity_refs"):
+                item["activity_refs"] = [projection_audit_ref]
         surface["selected_item_detail"]["activity_refs"] = list(
-            dict.fromkeys([*surface["selected_item_detail"].get("activity_refs", []), f"audit:{event['event_id']}"])
+            dict.fromkeys([*surface["selected_item_detail"].get("activity_refs", []), projection_audit_ref])
         )
-        surface["audit_refs"] = [f"audit:{event['event_id']}"]
+        surface["audit_refs"] = [projection_audit_ref]
         _write_json(self.mission_control_path(surface_id), surface)
         return {"mission_control": surface, "audit_event": event}
 

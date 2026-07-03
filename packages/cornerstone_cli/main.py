@@ -19709,6 +19709,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19736,6 +19737,15 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "ops_inbox_selection_live_writeback_claimed",
     "ops_inbox_selection_human_acceptance_claimed",
     "ops_inbox_selection_loop_view_missing",
+    "runtime_ops_inbox_static_fallback_used",
+    "runtime_ops_inbox_missing_record_refs",
+    "runtime_ops_inbox_missing_evidence_refs",
+    "runtime_ops_inbox_missing_audit_refs",
+    "runtime_ops_inbox_live_writeback_claimed",
+    "runtime_ops_inbox_human_acceptance_claimed",
+    "runtime_ops_inbox_approved_memory_before_review",
+    "runtime_ops_inbox_action_executed",
+    "runtime_ops_inbox_authority_expanded",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
