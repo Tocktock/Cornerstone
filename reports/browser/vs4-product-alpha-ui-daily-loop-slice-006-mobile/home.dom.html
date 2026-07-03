@@ -808,8 +808,10 @@
               <div class="product-panel" data-vs4-drop-zone="visible">
                 <div class="label">Drop</div>
                 <h3>Source intake</h3>
-                <textarea aria-label="Paste source text">Paste notes, meeting text, policy excerpts, issue reports, or research here.</textarea>
-                <button class="subtle-button" type="button">Prepare source</button>
+                <textarea id="vs4-drop-input" aria-label="Paste source text" data-vs4-user-drop-source="editable">alpha-evidence-anchor user pasted source.
+Quarterly review note says the local Product Alpha user source needs evidence-backed review before action.
+Follow-up should stay local until an owner reviews the claim, memory, and action.</textarea>
+                <button id="prepare-vs4-source" class="subtle-button" type="button" aria-controls="vs4-brief-summary-text vs4-brief-evidence-drawer">Prepare source</button>
               </div>
               <div class="product-panel" data-vs4-ask-box="visible">
                 <div class="label">Ask</div>
@@ -819,10 +821,10 @@
                 <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="ready" aria-live="polite">
                   <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="evidence_backed">Ask: Evidence-backed work item ready</span>
                   <p id="vs4-ask-answer">Answer prepared reviewable work with evidence. Open each item before approving a claim, memory, or action.</p>
-                  <div id="vs4-ask-work-list" class="ask-work-list" data-vs4-ask-work-list="ready"><div class="ask-work-chip" data-vs4-created-work-chip="brief" data-vs4-created-work-ref="brief_fa7884d69f31c12f">Evidence-backed Brief<span>ready for support check</span></div><div class="ask-work-chip" data-vs4-created-work-chip="claim" data-vs4-created-work-ref="claim_b28db366cfd06269">Claim candidate<span>evidence-backed, not approved</span></div><div class="ask-work-chip" data-vs4-created-work-chip="memory-candidate" data-vs4-created-work-ref="evb_33841076f7eab0c6">Memory/Wiki candidate<span>draft, needs review</span></div><div class="ask-work-chip" data-vs4-created-work-chip="action-card" data-vs4-created-work-ref="action_6ef8e9eaf320f8f8">Action Card draft<span>local/mock preview</span></div></div>
+                  <div id="vs4-ask-work-list" class="ask-work-list" data-vs4-ask-work-list="ready"><div class="ask-work-chip" data-vs4-created-work-chip="brief" data-vs4-created-work-ref="brief_14eb2c3c5924bd88">Evidence-backed Brief<span>ready for support check</span></div><div class="ask-work-chip" data-vs4-created-work-chip="claim" data-vs4-created-work-ref="claim_4e46265118c5480b">Claim candidate<span>evidence-backed, not approved</span></div><div class="ask-work-chip" data-vs4-created-work-chip="memory-candidate" data-vs4-created-work-ref="evb_c26986867ce4f9e2">Memory/Wiki candidate<span>draft, needs review</span></div><div class="ask-work-chip" data-vs4-created-work-chip="action-card" data-vs4-created-work-ref="action_5f11b7215f1c7f61">Action Card draft<span>local/mock preview</span></div></div>
                   <details id="vs4-ask-ref-detail" class="ask-ref-detail" data-vs4-ask-refs="progressive">
                     <summary>Evidence refs</summary>
-                    <code id="vs4-ask-created-refs" data-vs4-created-work-kind="brief,claim,memory-candidate,action-card">brief:brief_fa7884d69f31c12f | claim:claim_b28db366cfd06269 | memory_candidate:evb_33841076f7eab0c6 | action:action_6ef8e9eaf320f8f8</code>
+                    <code id="vs4-ask-created-refs" data-vs4-created-work-kind="brief,claim,memory-candidate,action-card">brief:brief_14eb2c3c5924bd88 | claim:claim_4e46265118c5480b | memory_candidate:evb_c26986867ce4f9e2 | action:action_5f11b7215f1c7f61</code>
                   </details>
                 </div>
               </div>
@@ -919,7 +921,8 @@
 <div><span class="label">Scenario report</span><code data-vs4-human-review-artifact="scenario-report">reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json</code></div>
 <div><span class="label">Desktop browser proof</span><code data-vs4-human-review-artifact="desktop-browser-proof">reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json</code></div>
 <div><span class="label">Mobile browser proof</span><code data-vs4-human-review-artifact="mobile-browser-proof">reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json</code></div></div>
-              <ol class="command-list"><li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-evidence-audit-detail</code></li>
+              <ol class="command-list"><li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-user-drop-ask-source</code></li>
+<li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-evidence-audit-detail</code></li>
 <li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-human-review-handoff</code></li>
 <li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-human-package</code></li>
 <li><code data-vs4-human-review-command="">cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json</code></li>
@@ -934,9 +937,9 @@
             <h2>Same loop, different work</h2>
             <p>Personal research, company policy, and operations issue packs use the same Source, Brief, Claim, Memory/Wiki, Action, and Ops Inbox loop.</p>
             <button id="run-vs4-packs-flow" class="subtle-button" type="button" aria-controls="vs4-memory-candidates">Run pack loop</button>
-            <div class="pack-list"><div class="pack-row" data-vs4-pack-row="Personal Research" data-vs4-pack-fixture="fixtures/vs1/ontology/personal_research.txt" data-vs4-pack-query="Walking Desk"><strong>Personal Research</strong><span>Reading notes, source highlights, evidence-backed brief</span><code id="vs4-pack-personal-research-status">ready: brief_597254bf7b1f0a82 / action_c1c266c93ef44598</code></div>
-<div class="pack-row" data-vs4-pack-row="Company Policy Review" data-vs4-pack-fixture="fixtures/vs1/ontology/internal_policy.txt" data-vs4-pack-query="Local Action Approval Policy"><strong>Company Policy Review</strong><span>Policy excerpt, claim candidate, safety check</span><code id="vs4-pack-company-policy-review-status">ready: brief_7378985bebfd280d / action_8e5b64d570ddd835</code></div>
-<div class="pack-row" data-vs4-pack-row="Operations Issue" data-vs4-pack-fixture="fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt" data-vs4-pack-query="learning-failure-anchor"><strong>Operations Issue</strong><span>Incident note, follow-up action, audit-ready activity</span><code id="vs4-pack-operations-issue-status">ready: brief_6c27069187b1461c / action_09b2c37ced255779</code></div></div>
+            <div class="pack-list"><div class="pack-row" data-vs4-pack-row="Personal Research" data-vs4-pack-fixture="fixtures/vs1/ontology/personal_research.txt" data-vs4-pack-query="Walking Desk"><strong>Personal Research</strong><span>Reading notes, source highlights, evidence-backed brief</span><code id="vs4-pack-personal-research-status">ready: brief_f9c4fb565f4c7bc2 / action_56ab0ac5d0162074</code></div>
+<div class="pack-row" data-vs4-pack-row="Company Policy Review" data-vs4-pack-fixture="fixtures/vs1/ontology/internal_policy.txt" data-vs4-pack-query="Local Action Approval Policy"><strong>Company Policy Review</strong><span>Policy excerpt, claim candidate, safety check</span><code id="vs4-pack-company-policy-review-status">ready: brief_e3c4aaa0e0b5f5d1 / action_16b94ccd4ff55f2e</code></div>
+<div class="pack-row" data-vs4-pack-row="Operations Issue" data-vs4-pack-fixture="fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt" data-vs4-pack-query="learning-failure-anchor"><strong>Operations Issue</strong><span>Incident note, follow-up action, audit-ready activity</span><code id="vs4-pack-operations-issue-status">ready: brief_8b65ae80a163f0d3 / action_adc58dc690dc1209</code></div></div>
           </div>
           <aside class="product-panel" data-vs4-learn-boundary="review-required">
             <div class="label">Learning boundary</div>
@@ -962,7 +965,7 @@
               <h2>Brief Detail</h2>
               <p>The Brief keeps the saved source, support, gaps, claim candidate, memory candidate, action draft, and activity together as one reviewable work item.</p>
               <div class="status-row">
-                <span class="badge safe" id="vs4-source-state" data-vs4-source-state="saved-searchable">Saved source / Searchable</span>
+                <span class="badge safe" id="vs4-source-state" data-vs4-source-state="saved-searchable">Saved pasted source / Searchable</span>
                 <span class="badge safe" id="vs4-brief-state" data-vs4-brief-state="evidence-backed">Evidence-backed Brief ready</span>
                 <span class="badge warn" id="vs4-claim-approval-state" data-vs4-claim-approval-state="draft">Claim: Draft / Evidence-backed</span>
                 <span class="badge warn" id="vs4-memory-state" data-vs4-memory-approved="false">Memory: Draft / Needs review</span>
@@ -974,20 +977,20 @@
               <h3>Summary</h3>
               <p id="vs4-brief-summary-text">Brief for alpha-evidence-anchor</p>
               <ul>
-                <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">alpha-evidence-anchor.</span></li>
+                <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">alpha-evidence-anchor user pasted source. Quarterly review note says the local Product Alpha user source needs evidence-backed review before action. Follow-up should stay local unt</span></li>
                 <li><strong>Gap / uncertainty:</strong> <span id="vs4-brief-gap">This brief is grounded only in the attached Evidence Bundle.</span></li>
-                <li><strong>Activity:</strong> <span id="vs4-brief-activity">brief:brief_fa7884d69f31c12f created; audit refs audit:audit_749081eadd8d2622</span></li>
+                <li><strong>Activity:</strong> <span id="vs4-brief-activity">brief:brief_14eb2c3c5924bd88 created; audit refs audit:audit_ba623ff2348238e4</span></li>
               </ul>
             </div>
             <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
               <summary data-vs4-keyboard-disclosure="evidence-drawer">Shared Evidence Drawer</summary>
               <div class="detail-grid">
-                <div><span class="label">Source</span><span id="vs4-evidence-source">artifact:art_2735313e0cb92563</span></div>
-                <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">alpha-evidence-anchor.</span></div>
+                <div><span class="label">Source</span><span id="vs4-evidence-source">artifact:art_cf88e66b259c5e47</span></div>
+                <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">alpha-evidence-anchor user pasted source. Quarterly review note says the local Product Alpha user source needs evidence-backed review before action. Follow-up should stay local unt</span></div>
                 <div><span class="label">Why it supports</span><span id="vs4-evidence-rationale">Finding is supported because it comes from the saved source and Evidence Bundle.</span></div>
-                <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">storage=sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be; derived=derived/art_2735313e0cb92563.txt</span></div>
+                <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">storage=sha256:cf88e66b259c5e47b0e46cae12b3b67bc61302020cc020abf7ac81a761eb0120; derived=derived/art_cf88e66b259c5e47.txt</span></div>
                 <div><span class="label">Related objects</span><span id="vs4-evidence-related">Brief, Claim candidate, Memory candidate, and Action Card.</span></div>
-                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">audit:audit_4efe25e1c54862f9, audit:audit_749081eadd8d2622; audit=success</span></div>
+                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">audit:audit_ef15a7c04aed38e0, audit:audit_ba623ff2348238e4; audit=success</span></div>
               </div>
             </details>
           </div>
@@ -1000,13 +1003,13 @@
                 <span class="trust-step" id="vs4-trust-evidence-backed" data-state="active">Evidence-backed</span>
                 <span class="trust-step" id="vs4-trust-approved" data-state="pending">Approved</span>
               </div>
-              <p id="vs4-claim-rationale">Rationale: supported by evidence_bundle:evb_33841076f7eab0c6 and still scoped to default.</p>
+              <p id="vs4-claim-rationale">Rationale: supported by evidence_bundle:evb_c26986867ce4f9e2 and still scoped to default.</p>
               <div class="danger-note" id="vs4-zero-evidence-denial">CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.</div>
             </div>
             <div class="brief-block" id="vs4-memory-candidate-detail" data-vs4-memory-candidate-detail="visible">
               <div class="label">Memory/Wiki candidate</div>
               <h3>Draft / Needs review</h3>
-              <p id="vs4-memory-rationale">Draft candidate from evidence_bundle:evb_33841076f7eab0c6; not approved durable memory.</p>
+              <p id="vs4-memory-rationale">Draft candidate from evidence_bundle:evb_c26986867ce4f9e2; not approved durable memory.</p>
               <div class="detail-grid">
                 <div><span class="label">Trust</span><span id="vs4-memory-trust">draft; owner_approved=false</span></div>
                 <div><span class="label">Freshness</span><span id="vs4-memory-freshness">current; review required before durable use</span></div>
@@ -1019,8 +1022,8 @@
               <h3 id="vs4-action-goal">Create local follow-up from the Evidence-backed Brief</h3>
               <p id="vs4-action-why">Why: preserve the review next step without external writeback.</p>
               <div class="detail-grid">
-                <div><span class="label">Evidence</span><span id="vs4-action-evidence">evidence_bundle:evb_33841076f7eab0c6</span></div>
-                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">brief:brief_fa7884d69f31c12f; claim:claim_895847b21fadf36f</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-action-evidence">evidence_bundle:evb_c26986867ce4f9e2</span></div>
+                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">brief:brief_14eb2c3c5924bd88; claim:claim_e15c7b06354fdd48</span></div>
                 <div><span class="label">Proposed change</span><span id="vs4-action-change">would perform draft_task against mock://vs4-brief-detail/browser</span></div>
                 <div><span class="label">Expected impact</span><span id="vs4-action-impact">expected_connector_calls=0; real_external_http_calls=0</span></div>
                 <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
@@ -1029,16 +1032,16 @@
                 <div><span class="label">Execution boundary</span><span id="vs4-action-boundary-state">Denied until authorized approval; CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED.</span></div>
                 <div><span class="label">Denied result</span><span id="vs4-action-denied-result">No action result, workflow run, provider receipt, external HTTP call, provider mutation, real provider call, direct provider access, or live writeback is created on denial.</span></div>
                 <div><span class="label">Safety envelope</span><span id="vs4-action-safety-envelope">policy_decision: required; audit: required; action_safety_envelope: denied; external_http_calls=0; provider_mutations=0.</span></div>
-                <div><span class="label">Activity</span><span id="vs4-action-activity">action:action_6ef8e9eaf320f8f8; dry_run:dryrun_e1c61c3668aa5d5c</span></div>
+                <div><span class="label">Activity</span><span id="vs4-action-activity">action:action_5f11b7215f1c7f61; dry_run:dryrun_2075a4c07b139af0</span></div>
               </div>
               <div class="review-note">No live external writeback. Unauthorized execution returns CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED, unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED, and the denied path records external_http_calls=0.</div>
             </div>
             <div class="brief-block" id="vs4-learn-candidate-detail" data-vs4-learn-candidate-detail="visible" data-vs4-learning-can-change-durable-behavior="false">
               <div class="label">Learn review</div>
-              <h3 id="vs4-learn-title">Learning candidate: brief_fa7884d69f31c12f</h3>
+              <h3 id="vs4-learn-title">Learning candidate: brief_14eb2c3c5924bd88</h3>
               <p id="vs4-learn-rationale">Outcome, correction, rejection, or failure notes can become future evidence only after owner-scoped review.</p>
               <div class="detail-grid">
-                <div><span class="label">Evidence</span><span id="vs4-learn-evidence">evidence_bundle:evb_33841076f7eab0c6 | brief:brief_fa7884d69f31c12f | action:action_6ef8e9eaf320f8f8</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-learn-evidence">evidence_bundle:evb_c26986867ce4f9e2 | brief:brief_14eb2c3c5924bd88 | action:action_5f11b7215f1c7f61</span></div>
                 <div><span class="label">Owner scope</span><span id="vs4-learn-scope">local-user / default</span></div>
                 <div><span class="label">Review state</span><span id="vs4-learn-state">needs review; review_required=true</span></div>
                 <div><span class="label">Durable change</span><span id="vs4-learn-durable-change">cannot change durable memory, answers, claims, or actions before review</span></div>
@@ -1225,12 +1228,12 @@ Search phrase: alpha-evidence-anchor.</code>
             <details class="evidence-drawer" id="vs4-claim-page-evidence-detail" data-vs4-claim-evidence-detail="reachable">
               <summary>Claim evidence and activity</summary>
               <div class="detail-grid">
-                <div><span class="label">Claim</span><span id="vs4-claim-page-id">claim:claim_895847b21fadf36f</span></div>
-                <div><span class="label">Evidence</span><span id="vs4-claim-page-evidence">evidence_bundle:evb_33841076f7eab0c6</span></div>
-                <div><span class="label">Source</span><span id="vs4-claim-page-source">artifact:art_2735313e0cb92563</span></div>
+                <div><span class="label">Claim</span><span id="vs4-claim-page-id">claim:claim_e15c7b06354fdd48</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-claim-page-evidence">evidence_bundle:evb_c26986867ce4f9e2</span></div>
+                <div><span class="label">Source</span><span id="vs4-claim-page-source">artifact:art_cf88e66b259c5e47</span></div>
                 <div><span class="label">Trust</span><span id="vs4-claim-page-trust">Draft -&gt; Evidence-backed -&gt; Approved; current=evidence_backed</span></div>
                 <div><span class="label">Owner scope</span><span>local-user / default</span></div>
-                <div><span class="label">Activity</span><span id="vs4-claim-page-activity">unsupported_claim:claim_539440a0adb3588b; denial=CS_CLAIM_EVIDENCE_REQUIRED</span></div>
+                <div><span class="label">Activity</span><span id="vs4-claim-page-activity">unsupported_claim:claim_26fb5c5bc66d5230; denial=CS_CLAIM_EVIDENCE_REQUIRED</span></div>
               </div>
             </details>
           </div>
@@ -1238,7 +1241,7 @@ Search phrase: alpha-evidence-anchor.</code>
             <div class="product-panel">
               <div class="label">Review state</div>
               <h3 id="vs4-claim-page-title">The saved source is ready for a local evidence-backed Brief review.</h3>
-              <p id="vs4-claim-page-rationale">Supported by evidence_bundle:evb_33841076f7eab0c6; approval still needs explicit review.</p>
+              <p id="vs4-claim-page-rationale">Supported by evidence_bundle:evb_c26986867ce4f9e2; approval still needs explicit review.</p>
               <div class="status-row">
                 <span class="badge warn" id="vs4-claim-page-status">Evidence-backed / approval pending</span>
                 <span class="badge safe">Evidence required</span>
@@ -1266,14 +1269,14 @@ Search phrase: alpha-evidence-anchor.</code>
               <div class="decision-step"><strong>Mode</strong><span id="vs4-action-page-mode">Draft / Local / Mock; connector=mock_connector</span></div>
             </div>
             <div class="detail-grid">
-              <div><span class="label">Evidence</span><span id="vs4-action-page-evidence">evidence_bundle:evb_33841076f7eab0c6</span></div>
+              <div><span class="label">Evidence</span><span id="vs4-action-page-evidence">evidence_bundle:evb_c26986867ce4f9e2</span></div>
               <div><span class="label">Proposed change</span><span id="vs4-action-page-change">would perform draft_task against mock://vs4-brief-detail/browser</span></div>
               <div><span class="label">Expected impact</span><span id="vs4-action-page-impact">expected_connector_calls=0; real_external_http_calls=0</span></div>
               <div><span class="label">Approval</span><span id="vs4-action-page-approval">not_required</span></div>
               <div><span class="label">Execution boundary</span><span id="vs4-action-page-execution-boundary">Denied until authorized approval; CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED; direct_provider_access=false; policy_decision: required; action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false.</span></div>
-              <div><span class="label">Dry-run</span><span id="vs4-action-page-dry-run">dry_run:dryrun_e1c61c3668aa5d5c</span></div>
+              <div><span class="label">Dry-run</span><span id="vs4-action-page-dry-run">dry_run:dryrun_2075a4c07b139af0</span></div>
               <div><span class="label">Denied result</span><span id="vs4-action-page-denied-result">No action result, workflow run, provider receipt, external HTTP call, provider mutation, real provider call, direct provider access, or live writeback is created on denial.</span></div>
-              <div><span class="label">Activity</span><span id="vs4-action-page-activity">action:action_6ef8e9eaf320f8f8; audit pending until verify; denial audit required</span></div>
+              <div><span class="label">Activity</span><span id="vs4-action-page-activity">action:action_5f11b7215f1c7f61; audit pending until verify; denial audit required</span></div>
             </div>
           </div>
           <aside class="decision-stack">
@@ -1291,8 +1294,8 @@ Search phrase: alpha-evidence-anchor.</code>
             <details class="evidence-drawer" id="vs4-action-page-evidence-detail" data-vs4-action-evidence-detail="reachable">
               <summary>Action evidence and audit</summary>
               <div class="detail-grid">
-                <div><span class="label">Action Card</span><span id="vs4-action-page-id">action:action_6ef8e9eaf320f8f8</span></div>
-                <div><span class="label">Claim</span><span id="vs4-action-page-claim">claim:claim_895847b21fadf36f</span></div>
+                <div><span class="label">Action Card</span><span id="vs4-action-page-id">action:action_5f11b7215f1c7f61</span></div>
+                <div><span class="label">Claim</span><span id="vs4-action-page-claim">claim:claim_e15c7b06354fdd48</span></div>
                 <div><span class="label">Policy</span><span id="vs4-action-page-policy">policy_decision:allow</span></div>
                 <div><span class="label">External calls</span><span id="vs4-action-page-calls">expected_connector_calls=0; real_external_http_calls=0</span></div>
                 <div><span class="label">Denial codes</span><span id="vs4-action-page-denial-codes">CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; CS_ACTION_APPROVER_UNAUTHORIZED</span></div>
@@ -1310,19 +1313,19 @@ Search phrase: alpha-evidence-anchor.</code>
             <h2>Inspect the source, safety check, activity, and learning path.</h2>
             <p id="vs4-audit-summary">Activity records connect Source, Brief, Claim, Memory/Wiki, Action Card, and Learn review without changing durable authority.</p>
             <div class="detail-grid">
-              <div><span class="label">Source</span><span id="vs4-audit-source-ref">artifact:art_2735313e0cb92563</span></div>
-              <div><span class="label">Provenance</span><span id="vs4-audit-provenance-ref">storage=sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be; derived=derived/art_2735313e0cb92563.txt</span></div>
-              <div><span class="label">Supporting evidence</span><span id="vs4-audit-evidence-ref">evidence_bundle:evb_33841076f7eab0c6</span></div>
-              <div><span class="label">Claim</span><span id="vs4-audit-claim-ref">claim:claim_895847b21fadf36f; trust=evidence_backed</span></div>
-              <div><span class="label">Action</span><span id="vs4-audit-action-ref">action:action_6ef8e9eaf320f8f8; mode=Draft / Local / Mock</span></div>
+              <div><span class="label">Source</span><span id="vs4-audit-source-ref">artifact:art_cf88e66b259c5e47</span></div>
+              <div><span class="label">Provenance</span><span id="vs4-audit-provenance-ref">storage=sha256:cf88e66b259c5e47b0e46cae12b3b67bc61302020cc020abf7ac81a761eb0120; derived=derived/art_cf88e66b259c5e47.txt</span></div>
+              <div><span class="label">Supporting evidence</span><span id="vs4-audit-evidence-ref">evidence_bundle:evb_c26986867ce4f9e2</span></div>
+              <div><span class="label">Claim</span><span id="vs4-audit-claim-ref">claim:claim_e15c7b06354fdd48; trust=evidence_backed</span></div>
+              <div><span class="label">Action</span><span id="vs4-audit-action-ref">action:action_5f11b7215f1c7f61; mode=Draft / Local / Mock</span></div>
               <div><span class="label">Safety check</span><span id="vs4-audit-policy-ref">policy_decision:allow; real_external_http_calls=0</span></div>
             </div>
             <div class="activity-list" data-vs4-audit-timeline="visible">
-              <div class="activity-row"><strong>Source saved</strong><span id="vs4-audit-source-activity">Saved source artifact:art_2735313e0cb92563; original preserved.</span></div>
-              <div class="activity-row"><strong>Evidence linked</strong><span id="vs4-audit-evidence-activity">Evidence Bundle evb_33841076f7eab0c6 supports the Brief and Claim candidate.</span></div>
+              <div class="activity-row"><strong>Source saved</strong><span id="vs4-audit-source-activity">Saved source artifact:art_cf88e66b259c5e47; original preserved.</span></div>
+              <div class="activity-row"><strong>Evidence linked</strong><span id="vs4-audit-evidence-activity">Evidence Bundle evb_c26986867ce4f9e2 supports the Brief and Claim candidate.</span></div>
               <div class="activity-row"><strong>Claim guarded</strong><span id="vs4-audit-claim-activity">CS_CLAIM_EVIDENCE_REQUIRED blocked evidence-free approval; supported claim remains reviewable.</span></div>
-              <div class="activity-row"><strong>Action previewed</strong><span id="vs4-audit-action-activity">Action action_6ef8e9eaf320f8f8 has dry-run dryrun_e1c61c3668aa5d5c and no live writeback.</span></div>
-              <div class="activity-row"><strong>Learn review</strong><span id="vs4-audit-learn-activity">Learn candidate learn:brief_fa7884d69f31c12f stays needs review before durable behavior changes.</span></div>
+              <div class="activity-row"><strong>Action previewed</strong><span id="vs4-audit-action-activity">Action action_5f11b7215f1c7f61 has dry-run dryrun_2075a4c07b139af0 and no live writeback.</span></div>
+              <div class="activity-row"><strong>Learn review</strong><span id="vs4-audit-learn-activity">Learn candidate learn:brief_14eb2c3c5924bd88 stays needs review before durable behavior changes.</span></div>
             </div>
           </div>
           <aside class="decision-stack">
@@ -1339,9 +1342,9 @@ Search phrase: alpha-evidence-anchor.</code>
             <details class="evidence-drawer" id="vs4-audit-evidence-drawer" data-vs4-audit-evidence-drawer="reachable">
               <summary>Evidence and activity refs</summary>
               <div class="detail-grid">
-                <div><span class="label">Brief</span><span id="vs4-audit-brief-ref">brief:brief_fa7884d69f31c12f</span></div>
+                <div><span class="label">Brief</span><span id="vs4-audit-brief-ref">brief:brief_14eb2c3c5924bd88</span></div>
                 <div><span class="label">Audit verification</span><span id="vs4-audit-verify-state">cornerstone audit verify --json =&gt; success; event_count=22</span></div>
-                <div><span class="label">Learn candidate</span><span id="vs4-audit-learn-ref">learn:brief_fa7884d69f31c12f; review_required=true</span></div>
+                <div><span class="label">Learn candidate</span><span id="vs4-audit-learn-ref">learn:brief_14eb2c3c5924bd88; review_required=true</span></div>
                 <div><span class="label">External calls</span><span id="vs4-audit-external-calls">real_external_http_calls=0; provider_mutations=0</span></div>
               </div>
             </details>
@@ -1693,6 +1696,22 @@ Search phrase: alpha-evidence-anchor.</code>
       traceVs4(path, { status: response.status, payload });
       return { response, payload };
     }
+    function currentVs4DropText() {
+      const node = document.getElementById("vs4-drop-input");
+      const text = node ? String(node.value || "").trim() : "";
+      return text || "alpha-evidence-anchor user pasted source. Local Product Alpha source needs evidence-backed review before action.";
+    }
+    function currentVs4AskQuestion() {
+      const node = document.getElementById("vs4-ask-input");
+      const text = node ? String(node.value || "").trim() : "";
+      return text || "What needs review before action?";
+    }
+    function vs4SourceSearchQuery(text) {
+      if (String(text).toLowerCase().includes("alpha-evidence-anchor")) return "alpha-evidence-anchor";
+      const terms = String(text).match(/[a-zA-Z0-9][a-zA-Z0-9_-]{4,}/g) || [];
+      const filtered = terms.filter((term) => !["source", "local", "review", "before", "action"].includes(term.toLowerCase()));
+      return (filtered.slice(0, 3).join(" ") || terms.slice(0, 3).join(" ") || "evidence review").trim();
+    }
     function vs4Passes() {
       return Boolean(
         vs4State.source.artifact_id &&
@@ -1889,10 +1908,15 @@ Search phrase: alpha-evidence-anchor.</code>
     async function runVs4BriefFlow() {
       const button = document.getElementById("run-vs4-brief-flow");
       if (button) button.disabled = true;
+      const prepareButton = document.getElementById("prepare-vs4-source");
+      if (prepareButton) prepareButton.disabled = true;
       try {
+        const sourceText = currentVs4DropText();
+        const sourceQuery = vs4SourceSearchQuery(sourceText);
         const artifactResponse = await vs4Api("/artifacts", {
-          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
-          source: "local_fixture",
+          text: sourceText,
+          source: "user_paste",
+          source_ref: "home.drop_text",
           media_type: "text/plain",
           trust: "untrusted"
         });
@@ -1903,16 +1927,23 @@ Search phrase: alpha-evidence-anchor.</code>
           original_storage_ref: artifact.original_storage_ref,
           derived_status: artifact.derived && artifact.derived.status,
           provenance: artifact.provenance || {},
+          source_type: artifact.source && artifact.source.type,
+          source_ref: artifact.source && artifact.source.ref,
+          text_ingest: artifactResponse.payload.text_ingest === true,
+          text_preview: sourceText.slice(0, 160),
+          search_query: sourceQuery,
+          safety: artifact.safety || {},
           audit_refs: artifactResponse.payload.audit_refs || []
         };
-        setText("vs4-source-state", "Saved source / Searchable");
+        setText("vs4-source-state", "Saved pasted source / Searchable");
         document.getElementById("vs4-source-state").dataset.vs4SourceState = "saved-searchable";
 
-        const searchResponse = await vs4Api("/search", { query: "alpha-evidence-anchor" });
+        const searchResponse = await vs4Api("/search", { query: sourceQuery });
         const snapshot = searchResponse.payload.search_snapshot || {};
         const firstResult = (snapshot.results || [])[0] || {};
         vs4State.search = {
           search_snapshot_id: snapshot.search_snapshot_id,
+          query: sourceQuery,
           result_count: snapshot.result_count,
           evidence_refs: firstResult.evidence_refs || []
         };
@@ -1939,6 +1970,7 @@ Search phrase: alpha-evidence-anchor.</code>
           key_point_count: (brief.key_points || []).length,
           evidence_link_count: (brief.evidence_links || []).length,
           gap_count: (brief.uncertainty || []).length,
+          evidence_artifact_refs: brief.evidence_bundle && brief.evidence_bundle.artifact_refs || [],
           suggested_outputs: brief.suggested_outputs || [],
           audit_refs: briefResponse.payload.audit_refs || []
         };
@@ -2132,6 +2164,7 @@ Search phrase: alpha-evidence-anchor.</code>
         document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = "false";
       } finally {
         if (button) button.disabled = false;
+        if (prepareButton) prepareButton.disabled = false;
       }
     }
     async function runVs4AskFlow() {
@@ -2141,14 +2174,16 @@ Search phrase: alpha-evidence-anchor.</code>
         if (!vs4State.completed) {
           await runVs4BriefFlow();
         }
-        const question = (document.getElementById("vs4-ask-input") || { value: "What needs review before action?" }).value;
+        const question = currentVs4AskQuestion();
+        const sourceText = currentVs4DropText();
+        const sourceQuery = vs4State.source.search_query || vs4SourceSearchQuery(sourceText);
         const conversationResponse = await vs4Api("/conversations", {
-          message: question + " Source anchor: alpha-evidence-anchor. Prepare reviewable work, not a chatbot-only answer."
+          message: question + " Source context: " + sourceText.slice(0, 280) + " Prepare reviewable work, not a chatbot-only answer."
         });
         const conversation = conversationResponse.payload.conversation || {};
         const sourceArtifact = conversationResponse.payload.artifact || {};
         const answerResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/answers", {
-          question: "What does alpha-evidence-anchor say about review before action?"
+          question: question + " Use evidence from " + sourceQuery + "."
         });
         const answer = answerResponse.payload.answer || {};
         const promoteResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/promote", {
@@ -2172,7 +2207,10 @@ Search phrase: alpha-evidence-anchor.</code>
         vs4State.ask = {
           conversation_id: conversation.conversation_id,
           answer_id: answer.answer_id,
+          question: question,
+          source_query: sourceQuery,
           source_artifact_id: sourceArtifact.artifact_id,
+          primary_source_artifact_id: vs4State.source.artifact_id,
           answer_label: answer.label,
           evidence_refs: [...(answer.evidence_refs || []), "evidence_bundle:" + vs4State.evidence.evidence_bundle_id],
           memory_refs: ["memory_candidate:" + vs4State.memory.evidence_bundle_id],
@@ -2603,6 +2641,69 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       };
     }
+    function collectVs4UserDropAskSource() {
+      const dropInput = document.getElementById("vs4-drop-input");
+      const source = vs4State.source || {};
+      const evidence = vs4State.evidence || {};
+      const brief = vs4State.brief || {};
+      const ask = vs4State.ask || {};
+      const dropText = dropInput ? String(dropInput.value || "") : "";
+      const normalizedDropText = dropText.replace(/\s+/g, " ").trim();
+      const previewNeedle = normalizedDropText.split(" ").slice(0, 4).join(" ");
+      const briefRefs = Array.isArray(brief.evidence_artifact_refs) ? brief.evidence_artifact_refs : [];
+      const markerSet = {
+        drop_input_visible: Boolean(dropInput && dropInput.dataset.vs4UserDropSource === "editable" && normalizedDropText.length > 40),
+        source_ingested_from_user_paste: source.source_type === "user_paste" && source.source_ref === "home.drop_text" && source.text_ingest === true,
+        fixture_path_not_used_for_primary_source: source.source_type !== "local_fixture" && !String(source.source_ref || "").includes("fixtures/"),
+        original_preserved: Boolean(source.checksum_sha256 && String(source.original_storage_ref || "").startsWith("sha256:")),
+        derived_text_ready: source.derived_status === "ready",
+        provenance_visible: Boolean(source.provenance && Array.isArray(source.provenance.transformations) && source.provenance.transformations.includes("original_preserved")),
+        safety_untrusted_visible: Boolean(source.safety && source.safety.untrusted_evidence === true && source.safety.external_http_calls === 0),
+        search_uses_user_source_query: Boolean(source.search_query && vs4State.search.query === source.search_query && vs4State.search.result_count >= 1),
+        evidence_matches_user_source: Boolean(evidence.artifact_id && evidence.artifact_id === source.artifact_id && String(evidence.snippet || "").includes(previewNeedle)),
+        brief_from_user_source: Boolean(brief.brief_id && briefRefs.includes("artifact:" + source.artifact_id)),
+        ask_uses_user_question: Boolean(ask.question === currentVs4AskQuestion() && ask.source_query === source.search_query),
+        ask_work_refs_tied_to_user_source: Boolean(ask.primary_source_artifact_id === source.artifact_id && ask.brief_id === brief.brief_id && ask.evidence_refs && ask.evidence_refs.length > 0),
+        product_copy_visible: document.body.textContent.includes("Drop a source") &&
+          document.body.textContent.includes("Saved pasted source") &&
+          document.body.textContent.includes("Evidence-backed Brief"),
+        local_boundary_preserved: vs4State.action.real_external_http_calls === 0 &&
+          vs4State.negative_evidence.live_external_writeback_claimed === 0 &&
+          !document.querySelector("[data-vs4-live-provider-claimed='true']"),
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']")
+      };
+      return {
+        schema_version: "cs.vs4_user_drop_ask_source_proof.v0",
+        drop_text_preview: normalizedDropText.slice(0, 220),
+        source: {
+          artifact_id: source.artifact_id,
+          checksum_sha256: source.checksum_sha256,
+          original_storage_ref: source.original_storage_ref,
+          source_type: source.source_type,
+          source_ref: source.source_ref,
+          search_query: source.search_query,
+          derived_status: source.derived_status
+        },
+        evidence: {
+          artifact_id: evidence.artifact_id,
+          evidence_bundle_id: evidence.evidence_bundle_id,
+          snippet: String(evidence.snippet || "").slice(0, 220)
+        },
+        brief: {
+          brief_id: brief.brief_id,
+          status: brief.status,
+          evidence_artifact_refs: briefRefs
+        },
+        ask: {
+          conversation_id: ask.conversation_id,
+          question: ask.question,
+          source_query: ask.source_query,
+          primary_source_artifact_id: ask.primary_source_artifact_id,
+          created_work_item_refs: ask.created_work_item_refs || []
+        },
+        markers: markerSet
+      };
+    }
     window.__cornerstoneVs4BriefEvidence = function() {
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
@@ -2613,6 +2714,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const opsInboxTriage = collectVs4OpsInboxTriage();
       const humanReviewHandoff = collectVs4HumanReviewHandoff();
       const evidenceAuditDetail = collectVs4EvidenceAuditDetail();
+      const userDropAskSource = collectVs4UserDropAskSource();
       return {
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2627,6 +2729,7 @@ Search phrase: alpha-evidence-anchor.</code>
         ops_inbox_triage: opsInboxTriage,
         human_review_handoff: humanReviewHandoff,
         evidence_audit_detail: evidenceAuditDetail,
+        user_drop_ask_source: userDropAskSource,
         markers: {
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -2645,6 +2748,7 @@ Search phrase: alpha-evidence-anchor.</code>
           ops_inbox_triage_complete: Object.values(opsInboxTriage.markers).every((value) => value === true),
           human_review_handoff_complete: Object.values(humanReviewHandoff.markers).every((value) => value === true),
           evidence_audit_detail_complete: Object.values(evidenceAuditDetail.markers).every((value) => value === true),
+          user_drop_ask_source_complete: Object.values(userDropAskSource.markers).every((value) => value === true),
           claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
@@ -3370,6 +3474,7 @@ Search phrase: alpha-evidence-anchor.</code>
     document.getElementById("step-approve-run").addEventListener("click", approveStep);
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
+    document.getElementById("prepare-vs4-source").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-vs4-ask-flow").addEventListener("click", runVs4AskFlow);
     document.getElementById("run-vs4-packs-flow").addEventListener("click", runVs4PackFlow);

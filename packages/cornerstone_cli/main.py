@@ -579,43 +579,87 @@ def command_product_repo_split_review(args: argparse.Namespace) -> int:
 
 def command_artifact_ingest(args: argparse.Namespace) -> int:
     root = repo_root()
-    input_path = (root / args.path).resolve()
     requested_scope = scope_args(args)
     payload = base_response("cornerstone artifact ingest", "success", root)
     payload.update(requested_scope)
-    if not input_path.exists() or not input_path.is_file():
+    text_value = getattr(args, "text", None)
+    path_value = getattr(args, "path", None)
+    if text_value and path_value:
         payload["status"] = "failed"
         payload["errors"].append(
             {
-                "code": "CS_ARTIFACT_INPUT_MISSING",
-                "message": "Artifact input file does not exist.",
-                "path": str(input_path),
+                "code": "CS_ARTIFACT_INPUT_AMBIGUOUS",
+                "message": "Use either a path or --text for artifact ingestion, not both.",
             }
         )
         print_payload(payload, args.json)
-        return EXIT_NOT_FOUND
+        return EXIT_INVALID
+    if not text_value and not path_value:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_INPUT_REQUIRED",
+                "message": "Artifact ingestion requires a path or --text.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
 
     store = LocalRuntimeStore(state_dir(root, args))
-    try:
-        result = store.ingest_artifact(
-            input_path,
-            **requested_scope,
-            source=args.source,
-            media_type=args.media_type,
-            derived_mode=args.derived_mode,
-            trust=args.trust,
-            lineage_from=args.lineage_from,
-        )
-    except OSError as error:
-        payload["status"] = "failed"
-        payload["errors"].append({"code": "CS_ARTIFACT_STORAGE_ERROR", "message": str(error)})
-        print_payload(payload, args.json)
-        return EXIT_RUNTIME_FAILURE
+    if text_value:
+        try:
+            result = store.ingest_text_artifact(
+                text_value,
+                requested_scope,
+                source_type=args.source,
+                source_ref=args.source_ref or "cli_text",
+                trust=args.trust,
+            )
+        except OSError as error:
+            payload["status"] = "failed"
+            payload["errors"].append({"code": "CS_ARTIFACT_STORAGE_ERROR", "message": str(error)})
+            print_payload(payload, args.json)
+            return EXIT_RUNTIME_FAILURE
+        artifact = result["artifact"]
+        audit_event = result["audit_event"]
+        audit_events = result.get("audit_events", [audit_event])
+        policy_decisions: list[dict[str, Any]] = []
+        payload["text_ingest"] = True
+        payload["source_ref"] = args.source_ref or "cli_text"
+    else:
+        input_path = (root / str(path_value)).resolve()
+        if not input_path.exists() or not input_path.is_file():
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_ARTIFACT_INPUT_MISSING",
+                    "message": "Artifact input file does not exist.",
+                    "path": str(input_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_NOT_FOUND
 
-    artifact = result["artifact"]
-    audit_event = result["audit_event"]
-    audit_events = result.get("audit_events", [audit_event])
-    policy_decisions = result.get("policy_decisions", [])
+        try:
+            result = store.ingest_artifact(
+                input_path,
+                **requested_scope,
+                source=args.source,
+                media_type=args.media_type,
+                derived_mode=args.derived_mode,
+                trust=args.trust,
+                lineage_from=args.lineage_from,
+            )
+        except OSError as error:
+            payload["status"] = "failed"
+            payload["errors"].append({"code": "CS_ARTIFACT_STORAGE_ERROR", "message": str(error)})
+            print_payload(payload, args.json)
+            return EXIT_RUNTIME_FAILURE
+
+        artifact = result["artifact"]
+        audit_event = result["audit_event"]
+        audit_events = result.get("audit_events", [audit_event])
+        policy_decisions = result.get("policy_decisions", [])
     payload.update(artifact["scope"])
     payload["ids"].update(
         {
@@ -19655,6 +19699,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs3_h01_to_h07": "CONDITIONAL_DEFERRED_FOR_PRODUCTION_ONPREM_SECURITY_LIVE_PROVIDER_AND_HUMAN_ACCEPTANCE_CLAIMS",
     "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -23053,10 +23098,12 @@ def build_parser() -> argparse.ArgumentParser:
     artifact_sub = artifact.add_subparsers(dest="artifact_command")
 
     artifact_ingest = artifact_sub.add_parser("ingest", help="Ingest an immutable artifact")
-    artifact_ingest.add_argument("path", help="Path to the input artifact")
+    artifact_ingest.add_argument("path", nargs="?", help="Path to the input artifact")
     add_state_argument(artifact_ingest)
     add_scope_arguments(artifact_ingest)
     artifact_ingest.add_argument("--source", default="local_file", help="Artifact source type")
+    artifact_ingest.add_argument("--source-ref", help="Source reference for --text ingestion")
+    artifact_ingest.add_argument("--text", help="Inline text to preserve as an untrusted text artifact")
     artifact_ingest.add_argument("--media-type", default="text/plain", help="Input media type")
     artifact_ingest.add_argument("--derived-mode", choices=["auto", "fail", "unsupported"], default="auto")
     artifact_ingest.add_argument("--trust", choices=["trusted", "untrusted"], default="untrusted")

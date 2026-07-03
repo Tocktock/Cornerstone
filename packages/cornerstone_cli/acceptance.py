@@ -1272,6 +1272,14 @@ def capture_vs4_product_alpha_browser_proof(
     evidence_audit_detail_markers = (
         evidence_audit_detail.get("markers", {}) if isinstance(evidence_audit_detail.get("markers"), dict) else {}
     )
+    user_drop_ask_source = (
+        brief_evidence.get("user_drop_ask_source", {})
+        if isinstance(brief_evidence.get("user_drop_ask_source"), dict)
+        else {}
+    )
+    user_drop_ask_source_markers = (
+        user_drop_ask_source.get("markers", {}) if isinstance(user_drop_ask_source.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1369,6 +1377,9 @@ def capture_vs4_product_alpha_browser_proof(
     evidence_audit_detail_ok = bool(evidence_audit_detail_markers) and all(
         value is True for value in evidence_audit_detail_markers.values()
     )
+    user_drop_ask_source_ok = bool(user_drop_ask_source_markers) and all(
+        value is True for value in user_drop_ask_source_markers.values()
+    )
     status = (
         "PASS"
         if screenshot_exists
@@ -1380,6 +1391,7 @@ def capture_vs4_product_alpha_browser_proof(
         and ops_inbox_triage_ok
         and human_review_handoff_ok
         and evidence_audit_detail_ok
+        and user_drop_ask_source_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1419,6 +1431,9 @@ def capture_vs4_product_alpha_browser_proof(
         "evidence_audit_detail_required": True,
         "evidence_audit_detail": evidence_audit_detail,
         "evidence_audit_detail_markers": evidence_audit_detail_markers,
+        "user_drop_ask_source_required": True,
+        "user_drop_ask_source": user_drop_ask_source,
+        "user_drop_ask_source_markers": user_drop_ask_source_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1457,6 +1472,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **human_review_handoff_markers,
                 "evidence_audit_detail_markers_present": evidence_audit_detail_ok,
                 **evidence_audit_detail_markers,
+                "user_drop_ask_source_markers_present": user_drop_ask_source_ok,
+                **user_drop_ask_source_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value

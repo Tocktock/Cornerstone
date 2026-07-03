@@ -11392,12 +11392,18 @@ class ScaffoldCliTests(unittest.TestCase):
     def _vs4_gate_fixture_report(self, report_rel: str, mutator: Any | None = None) -> str:
         source_path = ROOT / "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
         report = json.loads(source_path.read_text())
-        report["slice"] = "slice-016-evidence-audit-detail"
-        report["slice_contract"] = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md"
+        report["slice"] = "slice-017-user-drop-ask-source"
+        report["slice_contract"] = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md"
         report.setdefault("slice_contracts", {})["slice_016"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md"
         )
+        report.setdefault("slice_contracts", {})["slice_017"] = (
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md"
+        )
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
+        report.setdefault("proof_boundary", {})["vs4_slice_017_user_drop_ask_source"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         report["source_tree"] = git_verification_metadata(ROOT)
@@ -11458,7 +11464,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11501,7 +11507,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11559,7 +11565,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11609,7 +11615,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11648,7 +11654,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11689,7 +11695,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11730,7 +11736,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11779,7 +11785,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11837,12 +11843,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 8)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11906,12 +11912,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 8)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11964,12 +11970,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 8)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12057,13 +12063,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
+        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 8)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12124,13 +12130,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
+        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 8)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12201,13 +12207,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-016-evidence-audit-detail")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
+        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12239,6 +12245,85 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("Learn candidate learn:", detail["audit_text"])
         self.assertEqual(
             payload["proof_boundary"]["vs4_slice_016_evidence_audit_detail"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_user_drop_ask_source_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-002",
+            "VS4-UI-003",
+            "VS4-UI-004",
+            "VS4-UI-013",
+            "VS4-UI-016",
+            "VS4-REG-003",
+            "VS4-REG-004",
+            "VS4-REG-006",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-user-drop-ask-source.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-017-user-drop-ask-source")
+        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        self.assertEqual(payload["mobile_browser_proof"]["status"], "PASS")
+        detail = payload["browser_proof"]["user_drop_ask_source"]
+        mobile_detail = payload["mobile_browser_proof"]["user_drop_ask_source"]
+        self.assertTrue(all(payload["browser_proof"]["user_drop_ask_source_markers"].values()))
+        self.assertTrue(all(payload["mobile_browser_proof"]["user_drop_ask_source_markers"].values()))
+        for marker in [
+            "drop_input_visible",
+            "source_ingested_from_user_paste",
+            "fixture_path_not_used_for_primary_source",
+            "original_preserved",
+            "derived_text_ready",
+            "provenance_visible",
+            "safety_untrusted_visible",
+            "search_uses_user_source_query",
+            "evidence_matches_user_source",
+            "brief_from_user_source",
+            "ask_uses_user_question",
+            "ask_work_refs_tied_to_user_source",
+            "product_copy_visible",
+            "local_boundary_preserved",
+            "human_acceptance_unclaimed",
+        ]:
+            self.assertTrue(detail["markers"][marker], marker)
+            self.assertTrue(mobile_detail["markers"][marker], marker)
+        self.assertEqual(detail["source"]["source_type"], "user_paste")
+        self.assertEqual(detail["source"]["source_ref"], "home.drop_text")
+        self.assertTrue(str(detail["source"]["original_storage_ref"]).startswith("sha256:"))
+        self.assertIn("user pasted source", detail["drop_text_preview"])
+        self.assertIn("artifact:" + detail["source"]["artifact_id"], detail["brief"]["evidence_artifact_refs"])
+
+        checks = payload["cli_workflow"]["checks"]
+        self.assertTrue(checks["source_preserved"])
+        self.assertTrue(checks["user_text_ingest"])
+        self.assertTrue(checks["brief_created"])
+        artifact_payload = payload["cli_workflow"]["transcripts"]["artifact_ingest"]["stdout_json"]
+        self.assertTrue(artifact_payload["text_ingest"])
+        self.assertEqual(artifact_payload["artifact"]["source"]["type"], "user_paste")
+        self.assertEqual(artifact_payload["artifact"]["source"]["ref"], "cli.vs4.drop_text")
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_017_user_drop_ask_source"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
         )
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
@@ -12387,6 +12472,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("Action execution boundary" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("desktop overflow proof" in item for item in package_row["review_checklist"]))
         self.assertIn("make verify-vs4-product-alpha-human-review-handoff", package_row["commands_to_run_before_review"])
+        self.assertIn("make verify-vs4-product-alpha-user-drop-ask-source", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-desktop-overflow", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
@@ -12416,6 +12502,10 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertIn(
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md",
+            package_row["evidence_refs"],
+        )
+        self.assertIn(
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md",
             package_row["evidence_refs"],
         )
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())

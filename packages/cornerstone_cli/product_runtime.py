@@ -313,6 +313,7 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-user-drop-ask-source",
     "make verify-vs4-product-alpha-evidence-audit-detail",
     "make verify-vs4-product-alpha-human-review-handoff",
     "make verify-vs4-product-alpha-human-package",
@@ -1439,8 +1440,10 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
               <div class="product-panel" data-vs4-drop-zone="visible">
                 <div class="label">Drop</div>
                 <h3>Source intake</h3>
-                <textarea aria-label="Paste source text">Paste notes, meeting text, policy excerpts, issue reports, or research here.</textarea>
-                <button class="subtle-button" type="button">Prepare source</button>
+                <textarea id="vs4-drop-input" aria-label="Paste source text" data-vs4-user-drop-source="editable">alpha-evidence-anchor user pasted source.
+Quarterly review note says the local Product Alpha user source needs evidence-backed review before action.
+Follow-up should stay local until an owner reviews the claim, memory, and action.</textarea>
+                <button id="prepare-vs4-source" class="subtle-button" type="button" aria-controls="vs4-brief-summary-text vs4-brief-evidence-drawer">Prepare source</button>
               </div>
               <div class="product-panel" data-vs4-ask-box="visible">
                 <div class="label">Ask</div>
@@ -2350,6 +2353,22 @@ Search phrase: alpha-evidence-anchor.</code>
       traceVs4(path, {{ status: response.status, payload }});
       return {{ response, payload }};
     }}
+    function currentVs4DropText() {{
+      const node = document.getElementById("vs4-drop-input");
+      const text = node ? String(node.value || "").trim() : "";
+      return text || "alpha-evidence-anchor user pasted source. Local Product Alpha source needs evidence-backed review before action.";
+    }}
+    function currentVs4AskQuestion() {{
+      const node = document.getElementById("vs4-ask-input");
+      const text = node ? String(node.value || "").trim() : "";
+      return text || "What needs review before action?";
+    }}
+    function vs4SourceSearchQuery(text) {{
+      if (String(text).toLowerCase().includes("alpha-evidence-anchor")) return "alpha-evidence-anchor";
+      const terms = String(text).match(/[a-zA-Z0-9][a-zA-Z0-9_-]{{4,}}/g) || [];
+      const filtered = terms.filter((term) => !["source", "local", "review", "before", "action"].includes(term.toLowerCase()));
+      return (filtered.slice(0, 3).join(" ") || terms.slice(0, 3).join(" ") || "evidence review").trim();
+    }}
     function vs4Passes() {{
       return Boolean(
         vs4State.source.artifact_id &&
@@ -2546,10 +2565,15 @@ Search phrase: alpha-evidence-anchor.</code>
     async function runVs4BriefFlow() {{
       const button = document.getElementById("run-vs4-brief-flow");
       if (button) button.disabled = true;
+      const prepareButton = document.getElementById("prepare-vs4-source");
+      if (prepareButton) prepareButton.disabled = true;
       try {{
+        const sourceText = currentVs4DropText();
+        const sourceQuery = vs4SourceSearchQuery(sourceText);
         const artifactResponse = await vs4Api("/artifacts", {{
-          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
-          source: "local_fixture",
+          text: sourceText,
+          source: "user_paste",
+          source_ref: "home.drop_text",
           media_type: "text/plain",
           trust: "untrusted"
         }});
@@ -2560,16 +2584,23 @@ Search phrase: alpha-evidence-anchor.</code>
           original_storage_ref: artifact.original_storage_ref,
           derived_status: artifact.derived && artifact.derived.status,
           provenance: artifact.provenance || {{}},
+          source_type: artifact.source && artifact.source.type,
+          source_ref: artifact.source && artifact.source.ref,
+          text_ingest: artifactResponse.payload.text_ingest === true,
+          text_preview: sourceText.slice(0, 160),
+          search_query: sourceQuery,
+          safety: artifact.safety || {{}},
           audit_refs: artifactResponse.payload.audit_refs || []
         }};
-        setText("vs4-source-state", "Saved source / Searchable");
+        setText("vs4-source-state", "Saved pasted source / Searchable");
         document.getElementById("vs4-source-state").dataset.vs4SourceState = "saved-searchable";
 
-        const searchResponse = await vs4Api("/search", {{ query: "alpha-evidence-anchor" }});
+        const searchResponse = await vs4Api("/search", {{ query: sourceQuery }});
         const snapshot = searchResponse.payload.search_snapshot || {{}};
         const firstResult = (snapshot.results || [])[0] || {{}};
         vs4State.search = {{
           search_snapshot_id: snapshot.search_snapshot_id,
+          query: sourceQuery,
           result_count: snapshot.result_count,
           evidence_refs: firstResult.evidence_refs || []
         }};
@@ -2596,6 +2627,7 @@ Search phrase: alpha-evidence-anchor.</code>
           key_point_count: (brief.key_points || []).length,
           evidence_link_count: (brief.evidence_links || []).length,
           gap_count: (brief.uncertainty || []).length,
+          evidence_artifact_refs: brief.evidence_bundle && brief.evidence_bundle.artifact_refs || [],
           suggested_outputs: brief.suggested_outputs || [],
           audit_refs: briefResponse.payload.audit_refs || []
         }};
@@ -2789,6 +2821,7 @@ Search phrase: alpha-evidence-anchor.</code>
         document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = "false";
       }} finally {{
         if (button) button.disabled = false;
+        if (prepareButton) prepareButton.disabled = false;
       }}
     }}
     async function runVs4AskFlow() {{
@@ -2798,14 +2831,16 @@ Search phrase: alpha-evidence-anchor.</code>
         if (!vs4State.completed) {{
           await runVs4BriefFlow();
         }}
-        const question = (document.getElementById("vs4-ask-input") || {{ value: "What needs review before action?" }}).value;
+        const question = currentVs4AskQuestion();
+        const sourceText = currentVs4DropText();
+        const sourceQuery = vs4State.source.search_query || vs4SourceSearchQuery(sourceText);
         const conversationResponse = await vs4Api("/conversations", {{
-          message: question + " Source anchor: alpha-evidence-anchor. Prepare reviewable work, not a chatbot-only answer."
+          message: question + " Source context: " + sourceText.slice(0, 280) + " Prepare reviewable work, not a chatbot-only answer."
         }});
         const conversation = conversationResponse.payload.conversation || {{}};
         const sourceArtifact = conversationResponse.payload.artifact || {{}};
         const answerResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/answers", {{
-          question: "What does alpha-evidence-anchor say about review before action?"
+          question: question + " Use evidence from " + sourceQuery + "."
         }});
         const answer = answerResponse.payload.answer || {{}};
         const promoteResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/promote", {{
@@ -2829,7 +2864,10 @@ Search phrase: alpha-evidence-anchor.</code>
         vs4State.ask = {{
           conversation_id: conversation.conversation_id,
           answer_id: answer.answer_id,
+          question: question,
+          source_query: sourceQuery,
           source_artifact_id: sourceArtifact.artifact_id,
+          primary_source_artifact_id: vs4State.source.artifact_id,
           answer_label: answer.label,
           evidence_refs: [...(answer.evidence_refs || []), "evidence_bundle:" + vs4State.evidence.evidence_bundle_id],
           memory_refs: ["memory_candidate:" + vs4State.memory.evidence_bundle_id],
@@ -3260,6 +3298,69 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function collectVs4UserDropAskSource() {{
+      const dropInput = document.getElementById("vs4-drop-input");
+      const source = vs4State.source || {{}};
+      const evidence = vs4State.evidence || {{}};
+      const brief = vs4State.brief || {{}};
+      const ask = vs4State.ask || {{}};
+      const dropText = dropInput ? String(dropInput.value || "") : "";
+      const normalizedDropText = dropText.replace(/\\s+/g, " ").trim();
+      const previewNeedle = normalizedDropText.split(" ").slice(0, 4).join(" ");
+      const briefRefs = Array.isArray(brief.evidence_artifact_refs) ? brief.evidence_artifact_refs : [];
+      const markerSet = {{
+        drop_input_visible: Boolean(dropInput && dropInput.dataset.vs4UserDropSource === "editable" && normalizedDropText.length > 40),
+        source_ingested_from_user_paste: source.source_type === "user_paste" && source.source_ref === "home.drop_text" && source.text_ingest === true,
+        fixture_path_not_used_for_primary_source: source.source_type !== "local_fixture" && !String(source.source_ref || "").includes("fixtures/"),
+        original_preserved: Boolean(source.checksum_sha256 && String(source.original_storage_ref || "").startsWith("sha256:")),
+        derived_text_ready: source.derived_status === "ready",
+        provenance_visible: Boolean(source.provenance && Array.isArray(source.provenance.transformations) && source.provenance.transformations.includes("original_preserved")),
+        safety_untrusted_visible: Boolean(source.safety && source.safety.untrusted_evidence === true && source.safety.external_http_calls === 0),
+        search_uses_user_source_query: Boolean(source.search_query && vs4State.search.query === source.search_query && vs4State.search.result_count >= 1),
+        evidence_matches_user_source: Boolean(evidence.artifact_id && evidence.artifact_id === source.artifact_id && String(evidence.snippet || "").includes(previewNeedle)),
+        brief_from_user_source: Boolean(brief.brief_id && briefRefs.includes("artifact:" + source.artifact_id)),
+        ask_uses_user_question: Boolean(ask.question === currentVs4AskQuestion() && ask.source_query === source.search_query),
+        ask_work_refs_tied_to_user_source: Boolean(ask.primary_source_artifact_id === source.artifact_id && ask.brief_id === brief.brief_id && ask.evidence_refs && ask.evidence_refs.length > 0),
+        product_copy_visible: document.body.textContent.includes("Drop a source") &&
+          document.body.textContent.includes("Saved pasted source") &&
+          document.body.textContent.includes("Evidence-backed Brief"),
+        local_boundary_preserved: vs4State.action.real_external_http_calls === 0 &&
+          vs4State.negative_evidence.live_external_writeback_claimed === 0 &&
+          !document.querySelector("[data-vs4-live-provider-claimed='true']"),
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']")
+      }};
+      return {{
+        schema_version: "cs.vs4_user_drop_ask_source_proof.v0",
+        drop_text_preview: normalizedDropText.slice(0, 220),
+        source: {{
+          artifact_id: source.artifact_id,
+          checksum_sha256: source.checksum_sha256,
+          original_storage_ref: source.original_storage_ref,
+          source_type: source.source_type,
+          source_ref: source.source_ref,
+          search_query: source.search_query,
+          derived_status: source.derived_status
+        }},
+        evidence: {{
+          artifact_id: evidence.artifact_id,
+          evidence_bundle_id: evidence.evidence_bundle_id,
+          snippet: String(evidence.snippet || "").slice(0, 220)
+        }},
+        brief: {{
+          brief_id: brief.brief_id,
+          status: brief.status,
+          evidence_artifact_refs: briefRefs
+        }},
+        ask: {{
+          conversation_id: ask.conversation_id,
+          question: ask.question,
+          source_query: ask.source_query,
+          primary_source_artifact_id: ask.primary_source_artifact_id,
+          created_work_item_refs: ask.created_work_item_refs || []
+        }},
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
@@ -3270,6 +3371,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const opsInboxTriage = collectVs4OpsInboxTriage();
       const humanReviewHandoff = collectVs4HumanReviewHandoff();
       const evidenceAuditDetail = collectVs4EvidenceAuditDetail();
+      const userDropAskSource = collectVs4UserDropAskSource();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -3284,6 +3386,7 @@ Search phrase: alpha-evidence-anchor.</code>
         ops_inbox_triage: opsInboxTriage,
         human_review_handoff: humanReviewHandoff,
         evidence_audit_detail: evidenceAuditDetail,
+        user_drop_ask_source: userDropAskSource,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -3302,6 +3405,7 @@ Search phrase: alpha-evidence-anchor.</code>
           ops_inbox_triage_complete: Object.values(opsInboxTriage.markers).every((value) => value === true),
           human_review_handoff_complete: Object.values(humanReviewHandoff.markers).every((value) => value === true),
           evidence_audit_detail_complete: Object.values(evidenceAuditDetail.markers).every((value) => value === true),
+          user_drop_ask_source_complete: Object.values(userDropAskSource.markers).every((value) => value === true),
           claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
@@ -4027,6 +4131,7 @@ Search phrase: alpha-evidence-anchor.</code>
     document.getElementById("step-approve-run").addEventListener("click", approveStep);
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
+    document.getElementById("prepare-vs4-source").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-vs4-ask-flow").addEventListener("click", runVs4AskFlow);
     document.getElementById("run-vs4-packs-flow").addEventListener("click", runVs4PackFlow);
@@ -4492,6 +4597,28 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _ingest_artifact(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
+        text_value = body.get("text")
+        if isinstance(text_value, str) and text_value.strip():
+            result = self.store.ingest_text_artifact(
+                text_value,
+                scope,
+                source_type=str(body.get("source", "user_paste")),
+                source_ref=str(body.get("source_ref", "home.drop_text")),
+                trust=str(body.get("trust", "untrusted")),
+            )
+            artifact = result["artifact"]
+            self._send_json(
+                _json_response(
+                    "success",
+                    artifact=artifact,
+                    deduplicated=result.get("deduplicated", False),
+                    text_ingest=True,
+                    evidence_refs=[f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"],
+                    audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                    policy_decision_refs=[],
+                )
+            )
+            return
         try:
             path = self._input_path(str(body.get("path", "")))
         except ValueError as error:
