@@ -1,0 +1,44 @@
+{
+  "browser": {
+    "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "headless": true,
+    "name": "Google Chrome",
+    "window_size": "1440,1100"
+  },
+  "chrome_exit_codes": {
+    "screenshot": 0
+  },
+  "chrome_timeout_after_screenshot": false,
+  "clean_browser_exit": true,
+  "created_at": "2026-07-03T07:27:43.876429Z",
+  "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
+  "dom_sha256": "6421c93d9e56f66bb824f9ab46cb9ec4324e360138ed7463467d8247ebaa71ab",
+  "errors": [],
+  "production_overclaim_absent": true,
+  "readiness_labels_present": {
+    "local_scenario_ready=true": true,
+    "production_release_ready=false": true,
+    "real_external_http_calls=0": true,
+    "vs0_runtime_ready=true": true
+  },
+  "route": "/",
+  "schema_version": "cs.browser_proof.v0",
+  "screenshot_bytes": 208737,
+  "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
+  "screenshot_sha256": "2c83a53694b2429ff3fd5df4428be013c3124f8ff2109f3849e0a21418aa5a82",
+  "status": "passed",
+  "stderr_tail": {
+    "screenshot": [
+      "DevTools listening on ws://127.0.0.1:53206/devtools/browser/0917b2ba-42a2-4c0c-9cd3-15503d57e6e1"
+    ]
+  },
+  "surface_presence": {
+    "Action Card": true,
+    "Artifact Viewer": true,
+    "Audit Detail": true,
+    "Claim Builder": true,
+    "Home/Ops Inbox": true,
+    "Search": true
+  },
+  "url": "http://127.0.0.1:53205/"
+}

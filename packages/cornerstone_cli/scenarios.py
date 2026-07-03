@@ -35,7 +35,10 @@ from cornerstone_cli.acceptance import (
     DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR,
     DEFAULT_VS1_ONTOLOGY_REPORT,
     DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
+    DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR,
+    DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
     capture_evux_browser_proof,
+    capture_vs4_product_alpha_browser_proof,
     capture_vs1_ontology_browser_proof,
     capture_browser_proof,
     collect_release_evidence,
@@ -88,6 +91,11 @@ DEFAULT_VS2_SCENARIO_REPORT = "reports/scenario/vs2-policy-tenancy-egress-2026-0
 DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_MATRIX = "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv"
 DEFAULT_VS3_ONPREM_TRUSTED_EXTENSION_CONTRACT = "docs/scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md"
 DEFAULT_VS3_GOAL_PROMPT = "docs/agent/VS3_FULL_GOAL_PROMPT.md"
+DEFAULT_VS4_PRODUCT_ALPHA_CONTRACT = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md"
+DEFAULT_VS4_PRODUCT_ALPHA_MATRIX = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv"
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md"
+)
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
 DEFAULT_VS3_REQUEST_CONTEXT_REPORT = "reports/security/vs3-request-context-proof.json"
@@ -24995,6 +25003,247 @@ def verify_vs1_ontology_suggest_promote(root: Path) -> dict[str, Any]:
     }
     _write_vs1_ontology_report(root, report)
     return report
+
+
+VS4_SLICE_001_SCENARIOS = {
+    "VS4-GATE-001",
+    "VS4-UI-001",
+    "VS4-UI-012",
+    "VS4-UI-015",
+    "VS4-UI-016",
+    "VS4-REG-003",
+    "VS4-REG-006",
+}
+
+
+def _vs4_matrix_rows(root: Path) -> list[dict[str, str]]:
+    matrix_path = root / DEFAULT_VS4_PRODUCT_ALPHA_MATRIX
+    with matrix_path.open(newline="") as file:
+        return list(csv.DictReader(file))
+
+
+def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dict[str, Any]:
+    required = [
+        "scenario_id",
+        "priority",
+        "phase",
+        "related_requirements",
+        "given",
+        "when",
+        "then",
+        "implementation_area",
+        "verification",
+        "evidence",
+        "pass_fail_criteria",
+        "owner",
+        "initial_status",
+    ]
+    ids = [row.get("scenario_id", "") for row in rows]
+    duplicate_ids = sorted({scenario_id for scenario_id in ids if ids.count(scenario_id) > 1})
+    missing_required = [
+        {"line": index + 2, "field": field}
+        for index, row in enumerate(rows)
+        for field in required
+        if not row.get(field)
+    ]
+    priority_counts: dict[str, int] = {}
+    initial_status_counts: dict[str, int] = {}
+    for row in rows:
+        priority = row.get("priority", "")
+        initial_status = row.get("initial_status", "")
+        priority_counts[priority] = priority_counts.get(priority, 0) + 1
+        initial_status_counts[initial_status] = initial_status_counts.get(initial_status, 0) + 1
+    return {
+        "row_count": len(rows),
+        "priority_counts": priority_counts,
+        "initial_status_counts": initial_status_counts,
+        "duplicate_ids": duplicate_ids,
+        "missing_required": missing_required,
+        "expected_counts_match": priority_counts == {"MUST_PASS": 20, "REGRESSION_GUARD": 7, "HUMAN_REQUIRED": 1},
+        "status_neutral": initial_status_counts == {"NOT_RUN": 27, "HUMAN_REQUIRED": 1},
+        "ok": len(rows) == 28 and not duplicate_ids and not missing_required and priority_counts == {"MUST_PASS": 20, "REGRESSION_GUARD": 7, "HUMAN_REQUIRED": 1},
+    }
+
+
+def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-slice-001")
+    state_path = root / state_rel
+    browser_proof_dir = root / DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR
+    for path in [state_path, browser_proof_dir]:
+        if path.exists():
+            shutil.rmtree(path)
+
+    rows_from_matrix = _vs4_matrix_rows(root)
+    matrix_checks = _vs4_matrix_structural_checks(root, rows_from_matrix)
+    docs_result = _run_script(root, "scripts/verify_sot_docs.sh")
+    cli_docs_result = _run_script(root, "scripts/verify_cli_native_first_docs.sh")
+    design_docs_result = _run_script(root, "scripts/verify_design_system_docs.sh")
+    full_matrix_result = _run_command(
+        root,
+        ["python3", "scripts/verify_scenario_matrix.py", "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv", "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"],
+    )
+    diff_check = _run_command(root, ["git", "diff", "--check"])
+    browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir)
+    markers = browser_proof.get("shell_markers", {})
+    negative = browser_proof.get("negative_evidence", {})
+    docs_ok = (
+        docs_result.get("exit_code") == 0
+        and cli_docs_result.get("exit_code") == 0
+        and design_docs_result.get("exit_code") == 0
+        and full_matrix_result.get("exit_code") == 0
+        and diff_check.get("exit_code") == 0
+    )
+    browser_ok = browser_proof.get("status") == "PASS"
+    status_by_id = {
+        "VS4-GATE-001": "PASS" if docs_ok and matrix_checks["ok"] else "FAIL",
+        "VS4-UI-001": "PASS"
+        if browser_ok
+        and markers.get("product_alpha_shell_present")
+        and markers.get("small_normal_nav")
+        and markers.get("drop_visible")
+        and markers.get("ask_visible")
+        and markers.get("product_shell_before_legacy_flows")
+        else "FAIL",
+        "VS4-UI-012": "PASS"
+        if browser_ok
+        and markers.get("ops_inbox_visible")
+        and markers.get("continue_work_rows")
+        and markers.get("pending_evidence_gap_visible")
+        and markers.get("memory_candidate_visible")
+        and markers.get("action_card_visible")
+        and markers.get("recent_activity_visible")
+        else "FAIL",
+        "VS4-UI-015": "PASS" if browser_ok and markers.get("workspace_context_visible") else "FAIL",
+        "VS4-UI-016": "PASS" if browser_ok and markers.get("product_language_first") else "FAIL",
+        "VS4-REG-003": "PASS"
+        if browser_ok
+        and markers.get("forbidden_readiness_overclaim_absent")
+        and all(value == 0 for value in negative.values())
+        else "FAIL",
+        "VS4-REG-006": "PASS"
+        if browser_ok
+        and markers.get("product_shell_before_legacy_flows")
+        and markers.get("small_normal_nav")
+        and markers.get("legacy_vs0_vs1_reachable")
+        else "FAIL",
+    }
+    evidence_by_id = {
+        "VS4-GATE-001": [
+            DEFAULT_VS4_PRODUCT_ALPHA_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
+            "scripts/verify_sot_docs.sh",
+            "scripts/verify_cli_native_first_docs.sh",
+            "scripts/verify_design_system_docs.sh",
+            "python3 scripts/verify_scenario_matrix.py docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md",
+            "git diff --check",
+        ],
+        "VS4-UI-001": [
+            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json",
+            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html",
+            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png",
+            "packages/cornerstone_cli/product_runtime.py",
+        ],
+        "VS4-UI-012": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+        "VS4-UI-015": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+        "VS4-UI-016": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+        "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json"],
+        "VS4-REG-006": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+    }
+    notes_by_id = {
+        "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001 contract are structurally verified.",
+        "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, Continue, and local boundary as first visible work.",
+        "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, and activity follow-up rows.",
+        "VS4-UI-015": "Workspace and owner context are visible in the shell.",
+        "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, and Activity record language.",
+        "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness.",
+        "VS4-REG-006": "The first screen remains product-first and the primary nav omits admin, connector, and ontology entries.",
+    }
+    scenario_results: list[dict[str, Any]] = []
+    for matrix_row in rows_from_matrix:
+        scenario_id = matrix_row["scenario_id"]
+        owner = "Human" if matrix_row.get("owner") == "Human" else "AI"
+        if owner == "Human":
+            status = "HUMAN_REQUIRED"
+        elif scenario_id in VS4_SLICE_001_SCENARIOS:
+            status = status_by_id.get(scenario_id, "FAIL")
+        else:
+            status = "NOT_RUN"
+        classification = (
+            "human_required"
+            if owner == "Human"
+            else "in_this_slice"
+            if scenario_id in VS4_SLICE_001_SCENARIOS
+            else "later_slice"
+        )
+        row = _row(
+            scenario_id,
+            matrix_row.get("priority", "MUST_PASS"),
+            status,
+            evidence_by_id.get(scenario_id, [DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT]),
+            notes_by_id.get(scenario_id, "Deferred by Slice 001 classification; no PASS is claimed."),
+            owner=owner,
+        )
+        row.update(
+            {
+                "scenario_id": scenario_id,
+                "phase": matrix_row.get("phase"),
+                "execution_classification": classification,
+                "initial_status": matrix_row.get("initial_status"),
+                "pass_fail_criteria": matrix_row.get("pass_fail_criteria"),
+            }
+        )
+        scenario_results.append(row)
+
+    summary = _governance_summary(scenario_results)
+    summary["product_feature_claims"] = "LOCAL_VS4_SLICE_001_PRODUCT_SHELL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED"
+    summary["not_run"] = len([row for row in scenario_results if row.get("status") == "NOT_RUN"])
+    summary["fail"] = len([row for row in scenario_results if row.get("status") == "FAIL"])
+    summary["in_this_slice"] = len([row for row in scenario_results if row.get("execution_classification") == "in_this_slice"])
+    blocking = [
+        row
+        for row in scenario_results
+        if row.get("owner") != "Human" and row.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    human_required = [
+        {
+            "id": "VS4-H01",
+            "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
+            "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
+            "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 proof.",
+        }
+    ]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs4-product-alpha-ui-daily-loop",
+        "slice": "slice-001-product-shell",
+        "state_dir": state_rel,
+        "summary": summary,
+        "scenario_results": scenario_results,
+        "matrix_checks": matrix_checks,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
+        "browser_proof": browser_proof,
+        "doc_verification": {
+            "verify_sot_docs": docs_result,
+            "verify_cli_native_first_docs": cli_docs_result,
+            "verify_design_system_docs": design_docs_result,
+            "verify_scenario_matrix": full_matrix_result,
+            "git_diff_check": diff_check,
+        },
+        "negative_evidence": negative,
+        "proof_boundary": {
+            "vs4_slice_001_product_shell": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+            "full_vs4": "NOT_COMPLETE",
+            "production": "NOT_CLAIMED",
+            "production_onprem": "NOT_CLAIMED",
+            "final_security_acceptance": "NOT_CLAIMED",
+            "live_provider": "NOT_CLAIMED",
+            "human_ux_acceptance": "HUMAN_REQUIRED",
+            "vs3_h01_to_h07": "CONDITIONAL_DEFERRED_FOR_PRODUCTION_ONPREM_SECURITY_LIVE_PROVIDER_AND_HUMAN_ACCEPTANCE_CLAIMS",
+        },
+        "human_required": human_required,
+    }
 
 
 def verify_vs0_evux(root: Path) -> dict[str, Any]:

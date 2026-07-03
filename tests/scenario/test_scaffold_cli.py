@@ -11389,6 +11389,39 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs4_product_alpha_shell_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-012",
+            "VS4-UI-015",
+            "VS4-UI-016",
+            "VS4-REG-003",
+            "VS4-REG-006",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-shell.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-001-product-shell")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["not_run"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        self.assertTrue(all(payload["browser_proof"]["shell_markers"].values()))
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+        self.assertEqual(payload["proof_boundary"]["full_vs4"], "NOT_COMPLETE")
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+
     def test_vs0_evux_quickstart_verify(self) -> None:
         output_path = ROOT / "tmp/test-vs0-evux-quickstart.json"
         if output_path.exists():

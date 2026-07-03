@@ -57,8 +57,9 @@ This bundle resolves authority:
 32. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
 33. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md` - Product Alpha UI daily-loop documentation contract.
 34. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv` - machine-readable VS4 row inventory.
-35. Frozen scenario contract for the specific implementation task.
-36. Repository code/docs/tests/logs as implementation evidence.
+35. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md` - frozen VS4 Product Alpha Home/Ops Inbox implementation-slice contract.
+36. Frozen scenario contract for the specific implementation task.
+37. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -117,6 +118,7 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv` | Machine-readable VS3 matrix: 42 MUST_PASS, 8 REGRESSION, 7 HUMAN_REQUIRED rows |
 | `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md` | Frozen VS4 Product Alpha UI Daily Loop documentation contract; status-neutral and not implementation evidence |
 | `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv` | Machine-readable VS4 matrix: 20 MUST_PASS, 7 REGRESSION_GUARD, 1 HUMAN_REQUIRED row |
+| `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md` | Frozen VS4 Product Alpha Home/Ops Inbox shell implementation-slice contract |
 | `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` | Final VS0 implementation closure report for VS1 transition |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
@@ -175,7 +177,7 @@ The VS2 policy, tenant isolation, and default egress-deny contract is `../scenar
 
 The VS3 on-prem security and trusted extension/connector substrate contract is `../scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md`. It contains 57 `VS3-*` rows: 42 MUST_PASS, 8 REGRESSION, and 7 HUMAN_REQUIRED. VS3 starts by reconciling the conflicting VS2 evidence boundary, then carries forward trusted RequestContext, Postgres/RLS, OPA/Rego, default-deny egress, ConnectorHub source safety, Tool SDK/signed registry, Agent Pack activation, operator status, audit, and human-gate evidence. The contract is status-neutral: all AI-verifiable rows start as NOT_RUN, and VS3 may not claim production/on-prem readiness until VS3-H01 through VS3-H07 have dated human/on-prem evidence.
 
-The VS4 Product Alpha UI Daily Loop contract is `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md`. It contains 28 `VS4-*` rows: 20 MUST_PASS, 7 REGRESSION_GUARD, and 1 HUMAN_REQUIRED. VS4 is the Product Alpha / Daily Loop documentation contract for turning the verified local evidence/action engine into a daily-use product shell around Drop / Ask, Evidence-backed Briefs, Claims, Memory/Wiki, Action Cards, Ops Inbox, Evidence/Audit, and Learn. The contract is status-neutral and does not update the canonical 206-scenario matrix or claim implementation evidence. VS3-H01 through VS3-H07 remain conditional deferred gates for production/on-prem/security/live-provider/human acceptance claims and do not block local VS4 documentation or implementation planning.
+The VS4 Product Alpha UI Daily Loop contract is `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md`. It contains 28 `VS4-*` rows: 20 MUST_PASS, 7 REGRESSION_GUARD, and 1 HUMAN_REQUIRED. VS4 is the Product Alpha / Daily Loop documentation contract for turning the verified local evidence/action engine into a daily-use product shell around Drop / Ask, Evidence-backed Briefs, Claims, Memory/Wiki, Action Cards, Ops Inbox, Evidence/Audit, and Learn. The parent contract is status-neutral and does not update the canonical 206-scenario matrix or claim implementation evidence. The first implementation slice is `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md`, which selects 7 AI-verifiable rows for local Product Alpha Home/Ops Inbox shell proof and leaves full VS4 completion unclaimed. VS3-H01 through VS3-H07 remain conditional deferred gates for production/on-prem/security/live-provider/human acceptance claims and do not block local VS4 documentation or implementation planning.
 
 ## Deprecated Product Framing
 

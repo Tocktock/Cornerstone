@@ -41,6 +41,8 @@ DEFAULT_OPERATOR_UI_REPORT = "docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_
 DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT = "reports/scenario/vs1-ontology-suggest-promote-2026-06-15.json"
 DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR = "reports/browser/vs1-ontology-suggest-promote-2026-06-15"
 DEFAULT_VS1_ONTOLOGY_REPORT = "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md"
+DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
+DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001"
 
 
 def utc_now() -> str:
@@ -1132,6 +1134,102 @@ def capture_browser_proof(
             "screenshot": screenshot_result.stderr.strip().splitlines()[-5:],
         },
         "errors": [error for error in [browser_error, *thread_error] if error],
+    }
+    write_json(proof_path, proof)
+    return proof
+
+
+def capture_vs4_product_alpha_browser_proof(
+    root: Path,
+    *,
+    state_dir: Path,
+    output_dir: Path,
+    window_size: str = "1440,1100",
+) -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    base_dir = output_dir / "base"
+    if base_dir.exists():
+        shutil.rmtree(base_dir)
+    base = capture_browser_proof(root, state_dir=state_dir, output_dir=base_dir, window_size=window_size)
+    proof_path = output_dir / "browser-proof.json"
+    screenshot_path = output_dir / "home.png"
+    dom_path = output_dir / "home.dom.html"
+    base_screenshot = base_dir / "home.png"
+    base_dom = base_dir / "home.dom.html"
+    if base_screenshot.exists():
+        shutil.copyfile(base_screenshot, screenshot_path)
+    if base_dom.exists():
+        shutil.copyfile(base_dom, dom_path)
+
+    dom = dom_path.read_text() if dom_path.exists() else ""
+    primary_nav_start = dom.find('id="primary-nav"')
+    primary_nav_end = dom.find("</ul>", primary_nav_start) if primary_nav_start >= 0 else -1
+    primary_nav_html = dom[primary_nav_start:primary_nav_end] if primary_nav_start >= 0 and primary_nav_end >= 0 else ""
+    nav_labels = ["Home", "Search", "Artifacts", "Claims", "Actions"]
+    forbidden_readiness_claims = [
+        "production_release_ready=true",
+        "vs4-production-claimed=\"true\"",
+        "vs4-onprem-claimed=\"true\"",
+        "vs4-final-security-claimed=\"true\"",
+        "vs4-live-provider-claimed=\"true\"",
+        "vs4-human-ux-claimed=\"true\"",
+        "Production ready",
+        "On-prem ready",
+        "Final security accepted",
+        "Live-provider ready",
+        "Human UX accepted",
+    ]
+    shell_index = dom.find('data-vs4-surface="home-ops-inbox"')
+    vs1_index = dom.find('id="vs1-ontology-loop"')
+    vs0_index = dom.find('id="vs0-evux-loop"')
+    shell_markers = {
+        "browser_base_passed": base.get("status") == "passed",
+        "product_alpha_shell_present": shell_index >= 0,
+        "product_shell_before_legacy_flows": shell_index >= 0 and (vs1_index < 0 or shell_index < vs1_index) and (vs0_index < 0 or shell_index < vs0_index),
+        "small_normal_nav": all(f">{label}<" in primary_nav_html for label in nav_labels) and "Connectors" not in primary_nav_html and "Ontology" not in primary_nav_html and "Audit" not in primary_nav_html,
+        "drop_visible": 'data-vs4-drop-zone="visible"' in dom,
+        "ask_visible": 'data-vs4-ask-box="visible"' in dom,
+        "ops_inbox_visible": 'data-vs4-ops-inbox="visible"' in dom,
+        "continue_work_rows": dom.count("data-vs4-work-kind=") >= 4,
+        "pending_evidence_gap_visible": "Evidence gap" in dom and "Claim approval waits for supporting evidence" in dom,
+        "memory_candidate_visible": "Memory/Wiki candidate" in dom and "durable knowledge proposal" in dom,
+        "action_card_visible": "Action Card draft" in dom and "no live writeback" in dom,
+        "recent_activity_visible": "Activity record" in dom and "Audit detail is available" in dom,
+        "workspace_context_visible": "Workspace: Personal / Project / default" in dom and "Owner: local-user" in dom,
+        "local_mode_boundary_visible": "Local Product Alpha" in dom and "No live external writeback" in dom,
+        "evidence_drawer_reachable": 'data-vs4-evidence-drawer="reachable"' in dom,
+        "general_packs_visible": all(name in dom for name in ["Personal Research", "Company Policy Review", "Operations Issue"]),
+        "product_language_first": all(marker in dom for marker in ["Source intake", "Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft"]),
+        "legacy_vs0_vs1_reachable": "id=\"vs0-evux-loop\"" in dom and "id=\"vs1-ontology-loop\"" in dom,
+        "forbidden_readiness_overclaim_absent": all(claim not in dom for claim in forbidden_readiness_claims),
+        "human_required_visible": "VS4-H01 human UX acceptance required" in dom,
+    }
+    screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
+    status = "PASS" if screenshot_exists and all(shell_markers.values()) else "FAIL"
+    proof = {
+        "schema_version": "cs.vs4_product_alpha_browser_proof.v0",
+        "status": status,
+        "created_at": utc_now(),
+        "base_browser_proof": base,
+        "browser": base.get("browser"),
+        "url": base.get("url"),
+        "route": "/",
+        "screenshot_path": relative_to_root(root, screenshot_path),
+        "screenshot_sha256": sha256_file(screenshot_path) if screenshot_exists else None,
+        "screenshot_bytes": screenshot_path.stat().st_size if screenshot_exists else 0,
+        "dom_path": relative_to_root(root, dom_path),
+        "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
+        "primary_nav_labels": nav_labels,
+        "shell_markers": shell_markers,
+        "negative_evidence": {
+            "production_readiness_claimed": 0 if "production_release_ready=true" not in dom else 1,
+            "onprem_readiness_claimed": 0 if "vs4-onprem-claimed=\"true\"" not in dom else 1,
+            "final_security_claimed": 0 if "vs4-final-security-claimed=\"true\"" not in dom else 1,
+            "live_provider_claimed": 0 if "vs4-live-provider-claimed=\"true\"" not in dom else 1,
+            "human_ux_acceptance_claimed": 0 if "vs4-human-ux-claimed=\"true\"" not in dom else 1,
+            "reference_images_used_as_pass_evidence": 0,
+        },
+        "errors": [] if status == "PASS" else [key for key, value in shell_markers.items() if not value],
     }
     write_json(proof_path, proof)
     return proof

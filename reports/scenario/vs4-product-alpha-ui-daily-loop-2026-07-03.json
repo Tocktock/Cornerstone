@@ -1,0 +1,406 @@
+{
+  "audit_refs": [],
+  "browser_proof": {
+    "base_browser_proof": {
+      "browser": {
+        "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "headless": true,
+        "name": "Google Chrome",
+        "window_size": "1440,1100"
+      },
+      "chrome_exit_codes": {
+        "screenshot": 0
+      },
+      "chrome_timeout_after_screenshot": false,
+      "clean_browser_exit": true,
+      "created_at": "2026-07-03T07:27:35.941999Z",
+      "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
+      "dom_sha256": "6421c93d9e56f66bb824f9ab46cb9ec4324e360138ed7463467d8247ebaa71ab",
+      "errors": [],
+      "production_overclaim_absent": true,
+      "readiness_labels_present": {
+        "local_scenario_ready=true": true,
+        "production_release_ready=false": true,
+        "real_external_http_calls=0": true,
+        "vs0_runtime_ready=true": true
+      },
+      "route": "/",
+      "schema_version": "cs.browser_proof.v0",
+      "screenshot_bytes": 208737,
+      "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
+      "screenshot_sha256": "2c83a53694b2429ff3fd5df4428be013c3124f8ff2109f3849e0a21418aa5a82",
+      "status": "passed",
+      "stderr_tail": {
+        "screenshot": [
+          "DevTools listening on ws://127.0.0.1:53177/devtools/browser/1fc563be-0ff8-443c-8ccf-03412a553cf5"
+        ]
+      },
+      "surface_presence": {
+        "Action Card": true,
+        "Artifact Viewer": true,
+        "Audit Detail": true,
+        "Claim Builder": true,
+        "Home/Ops Inbox": true,
+        "Search": true
+      },
+      "url": "http://127.0.0.1:53176/"
+    },
+    "browser": {
+      "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+      "headless": true,
+      "name": "Google Chrome",
+      "window_size": "1440,1100"
+    },
+    "created_at": "2026-07-03T07:27:35.943220Z",
+    "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
+    "dom_sha256": "6421c93d9e56f66bb824f9ab46cb9ec4324e360138ed7463467d8247ebaa71ab",
+    "errors": [],
+    "negative_evidence": {
+      "final_security_claimed": 0,
+      "human_ux_acceptance_claimed": 0,
+      "live_provider_claimed": 0,
+      "onprem_readiness_claimed": 0,
+      "production_readiness_claimed": 0,
+      "reference_images_used_as_pass_evidence": 0
+    },
+    "primary_nav_labels": [
+      "Home",
+      "Search",
+      "Artifacts",
+      "Claims",
+      "Actions"
+    ],
+    "route": "/",
+    "schema_version": "cs.vs4_product_alpha_browser_proof.v0",
+    "screenshot_bytes": 208737,
+    "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
+    "screenshot_sha256": "2c83a53694b2429ff3fd5df4428be013c3124f8ff2109f3849e0a21418aa5a82",
+    "shell_markers": {
+      "action_card_visible": true,
+      "ask_visible": true,
+      "browser_base_passed": true,
+      "continue_work_rows": true,
+      "drop_visible": true,
+      "evidence_drawer_reachable": true,
+      "forbidden_readiness_overclaim_absent": true,
+      "general_packs_visible": true,
+      "human_required_visible": true,
+      "legacy_vs0_vs1_reachable": true,
+      "local_mode_boundary_visible": true,
+      "memory_candidate_visible": true,
+      "ops_inbox_visible": true,
+      "pending_evidence_gap_visible": true,
+      "product_alpha_shell_present": true,
+      "product_language_first": true,
+      "product_shell_before_legacy_flows": true,
+      "recent_activity_visible": true,
+      "small_normal_nav": true,
+      "workspace_context_visible": true
+    },
+    "status": "PASS",
+    "url": "http://127.0.0.1:53176/"
+  },
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone scenario verify vs4-product-alpha-ui-daily-loop",
+  "doc_verification": {
+    "git_diff_check": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "elapsed_seconds": 0.06,
+      "exit_code": 0,
+      "schema_version": "cs.command_transcript.v0",
+      "stderr_tail": [],
+      "stdout_tail": [],
+      "timed_out": false
+    },
+    "verify_cli_native_first_docs": {
+      "command": "sh scripts/verify_cli_native_first_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: CornerStone CLI native-first docs verified (39 feature-family rows; all CLI-required and release-blocking)."
+      ]
+    },
+    "verify_design_system_docs": {
+      "command": "sh scripts/verify_design_system_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: design tokens verified (11 state tokens, 8 color groups).",
+        "PASS: CornerStone design system docs verified."
+      ]
+    },
+    "verify_scenario_matrix": {
+      "command": [
+        "python3",
+        "scripts/verify_scenario_matrix.py",
+        "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv",
+        "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"
+      ],
+      "elapsed_seconds": 0.122,
+      "exit_code": 0,
+      "schema_version": "cs.command_transcript.v0",
+      "stderr_tail": [],
+      "stdout_tail": [
+        "PASS: scenario verification matrix verified (206 scenarios; no missing rows; no unevidenced PASS claims)."
+      ],
+      "timed_out": false
+    },
+    "verify_sot_docs": {
+      "command": "sh scripts/verify_sot_docs.sh",
+      "exit_code": 0,
+      "stderr": [],
+      "stdout": [
+        "PASS: CornerStone design system docs verified.",
+        "PASS: CornerStone VS-0 scaffold readiness docs verified.",
+        "PASS: CornerStone SoT docs verified (206 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane)."
+      ]
+    }
+  },
+  "errors": [],
+  "evidence_refs": [],
+  "human_required": [
+    {
+      "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
+      "id": "VS4-H01",
+      "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 proof.",
+      "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
+      "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective."
+    }
+  ],
+  "ids": {
+    "git_commit": "c34334e"
+  },
+  "matrix_checks": {
+    "duplicate_ids": [],
+    "expected_counts_match": true,
+    "initial_status_counts": {
+      "HUMAN_REQUIRED": 1,
+      "NOT_RUN": 27
+    },
+    "missing_required": [],
+    "ok": true,
+    "priority_counts": {
+      "HUMAN_REQUIRED": 1,
+      "MUST_PASS": 20,
+      "REGRESSION_GUARD": 7
+    },
+    "row_count": 28,
+    "status_neutral": true
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "final_security_claimed": 0,
+    "human_ux_acceptance_claimed": 0,
+    "live_provider_claimed": 0,
+    "onprem_readiness_claimed": 0,
+    "production_readiness_claimed": 0,
+    "reference_images_used_as_pass_evidence": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+  "owner_id": "local-user",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "proof_boundary": {
+    "final_security_acceptance": "NOT_CLAIMED",
+    "full_vs4": "NOT_COMPLETE",
+    "human_ux_acceptance": "HUMAN_REQUIRED",
+    "live_provider": "NOT_CLAIMED",
+    "production": "NOT_CLAIMED",
+    "production_onprem": "NOT_CLAIMED",
+    "vs3_h01_to_h07": "CONDITIONAL_DEFERRED_FOR_PRODUCTION_ONPREM_SECURITY_LIVE_PROVIDER_AND_HUMAN_ACCEPTANCE_CLAIMS",
+    "vs4_slice_001_product_shell": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS"
+  },
+  "scenario_filter": [
+    "VS4-GATE-001",
+    "VS4-REG-003",
+    "VS4-REG-006",
+    "VS4-UI-001",
+    "VS4-UI-012",
+    "VS4-UI-015",
+    "VS4-UI-016"
+  ],
+  "scenario_results": [
+    {
+      "evidence": [
+        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md",
+        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
+        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md",
+        "scripts/verify_sot_docs.sh",
+        "scripts/verify_cli_native_first_docs.sh",
+        "scripts/verify_design_system_docs.sh",
+        "python3 scripts/verify_scenario_matrix.py docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md",
+        "git diff --check"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-GATE-001",
+      "initial_status": "NOT_RUN",
+      "notes": "VS4 parent contract, matrix, and Slice 001 contract are structurally verified.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if contract and matrix are internally consistent and status-neutral; FAIL on duplicate IDs, missing criteria, count mismatch, or implementation PASS claim.",
+      "phase": "Contract freeze",
+      "scenario_id": "VS4-GATE-001",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
+        "packages/cornerstone_cli/product_runtime.py"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-UI-001",
+      "initial_status": "NOT_RUN",
+      "notes": "Home renders the Product Alpha shell with Drop, Ask, Continue, and local boundary as first visible work.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if first view is product-first; FAIL if first value requires connector, ontology, model, policy, or scenario setup.",
+      "phase": "Product shell",
+      "scenario_id": "VS4-UI-001",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
+        "packages/cornerstone_cli/product_runtime.py"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-UI-012",
+      "initial_status": "NOT_RUN",
+      "notes": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, and activity follow-up rows.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if the product supports returning daily work; FAIL if only one-shot demo flow exists.",
+      "phase": "Ops Inbox",
+      "scenario_id": "VS4-UI-012",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
+        "packages/cornerstone_cli/product_runtime.py"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-UI-015",
+      "initial_status": "NOT_RUN",
+      "notes": "Workspace and owner context are visible in the shell.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if context is visible and scoped; FAIL if user cannot tell which workspace informs results/actions.",
+      "phase": "Workspace context",
+      "scenario_id": "VS4-UI-015",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
+        "packages/cornerstone_cli/product_runtime.py"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-UI-016",
+      "initial_status": "NOT_RUN",
+      "notes": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, and Activity record language.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if normal user can work without scenario/verifier/engine jargon; FAIL if internal proof language dominates.",
+      "phase": "Product language",
+      "scenario_id": "VS4-UI-016",
+      "status": "PASS",
+      "type": "MUST_PASS"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-REG-003",
+      "initial_status": "NOT_RUN",
+      "notes": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if forbidden readiness claims are absent or historical/deferred; FAIL on unqualified readiness claim.",
+      "phase": "Overclaim",
+      "scenario_id": "VS4-REG-003",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    },
+    {
+      "evidence": [
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
+        "packages/cornerstone_cli/product_runtime.py"
+      ],
+      "execution_classification": "in_this_slice",
+      "id": "VS4-REG-006",
+      "initial_status": "NOT_RUN",
+      "notes": "The first screen remains product-first and the primary nav omits admin, connector, and ontology entries.",
+      "owner": "AI",
+      "pass_fail_criteria": "PASS only if default experience remains Drop / Ask / Continue; FAIL if admin or internal substrate becomes first value.",
+      "phase": "Product-first UI",
+      "scenario_id": "VS4-REG-006",
+      "status": "PASS",
+      "type": "REGRESSION_GUARD"
+    }
+  ],
+  "scenario_set": "vs4-product-alpha-ui-daily-loop",
+  "schema_version": "cs.cli.v0",
+  "self_command_transcript": {
+    "command": [
+      "cornerstone",
+      "scenario",
+      "verify",
+      "vs4-product-alpha-ui-daily-loop",
+      "--scenario",
+      "VS4-GATE-001",
+      "--scenario",
+      "VS4-UI-001",
+      "--scenario",
+      "VS4-UI-012",
+      "--scenario",
+      "VS4-UI-015",
+      "--scenario",
+      "VS4-UI-016",
+      "--scenario",
+      "VS4-REG-003",
+      "--scenario",
+      "VS4-REG-006",
+      "--json",
+      "--output",
+      "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
+    ],
+    "elapsed_seconds": 2.495,
+    "ended_at": "2026-07-03T07:27:35.958236Z",
+    "exit_code": 0,
+    "name": "scenario_verify_vs4-product-alpha-ui-daily-loop",
+    "required": true,
+    "schema_version": "cs.command_transcript.v0",
+    "source": "observed",
+    "started_at": "2026-07-03T07:27:33.463152Z",
+    "stderr_tail": [],
+    "stdout_tail": [
+      "{\"final_verdict\": null, \"json_schema\": \"cs.cli.v0\", \"scenario_set\": \"vs4-product-alpha-ui-daily-loop\", \"schema_version\": \"cs.cli.v0\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"fail\": 0, \"human_required\": 0, \"in_this_slice\": 7, \"not_run\": 0, \"not_verified\": 0, \"pass\": 7, \"product_feature_claims\": \"LOCAL_VS4_SLICE_001_PRODUCT_SHELL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED\", \"scenario_count\": 7}}"
+    ],
+    "timed_out": false
+  },
+  "slice": "slice-001-product-shell",
+  "slice_contract": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md",
+  "state_dir": "tmp/scenario/vs4-product-alpha-ui-daily-loop-slice-001-91600",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "fail": 0,
+    "human_required": 0,
+    "in_this_slice": 7,
+    "not_run": 0,
+    "not_verified": 0,
+    "pass": 7,
+    "product_feature_claims": "LOCAL_VS4_SLICE_001_PRODUCT_SHELL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED",
+    "scenario_count": 7
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "workspace_id": "default"
+}

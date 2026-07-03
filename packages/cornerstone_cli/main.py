@@ -26,6 +26,7 @@ from cornerstone_cli.acceptance import (
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
     DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
+    DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
     command_transcript_entry,
     collect_release_evidence,
     finalize_release_evidence,
@@ -99,6 +100,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_evux_governance,
     verify_vs0_operator_acceptance_ui,
     verify_vs1_ontology_suggest_promote,
+    verify_vs4_product_alpha_ui_daily_loop,
     verify_vs2_policy_tenancy_egress,
     verify_vs3_onprem_trusted_extension,
     verify_vs0_runtime_acceptance,
@@ -19005,6 +19007,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs0_operator_acceptance_ui(root)
     elif args.contract == "vs1-ontology-suggest-promote":
         report = verify_vs1_ontology_suggest_promote(root)
+    elif args.contract == "vs4-product-alpha-ui-daily-loop":
+        report = verify_vs4_product_alpha_ui_daily_loop(root)
     elif args.contract == "connector-contract-adapter":
         report = verify_connector_contract_adapter(root)
     elif args.contract == "vs2-policy-tenancy-egress":
@@ -19099,6 +19103,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-evux-governance",
                     "vs0-operator-acceptance-ui",
                     "vs1-ontology-suggest-promote",
+                    "vs4-product-alpha-ui-daily-loop",
                     "connector-contract-adapter",
                     "vs2-policy-tenancy-egress",
                     "vs3-onprem-trusted-extension",
@@ -19143,6 +19148,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             report["summary"]["pass"] = len([row for row in filtered_rows if row.get("status") == "PASS"])
             report["summary"]["fail"] = len([row for row in filtered_rows if row.get("status") == "FAIL"])
             report["summary"]["not_verified"] = len([row for row in filtered_rows if row.get("status") == "NOT_VERIFIED"])
+            report["summary"]["not_run"] = len([row for row in filtered_rows if row.get("status") == "NOT_RUN"])
             report["summary"]["human_required"] = len([row for row in filtered_rows if row.get("owner") == "Human"])
             report["summary"]["blocking"] = len(blocking)
             report["status"] = "success" if not blocking else "failed"
@@ -19160,6 +19166,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_arg = DEFAULT_OPERATOR_UI_SCENARIO_REPORT
     if args.contract == "vs1-ontology-suggest-promote" and not output_arg:
         output_arg = DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT
+    if args.contract == "vs4-product-alpha-ui-daily-loop" and not output_arg:
+        output_arg = DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT
     if args.contract == "vs2-policy-tenancy-egress" and not output_arg:
         output_arg = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
     if args.contract == "vs3-onprem-trusted-extension" and not output_arg:
