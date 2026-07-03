@@ -11219,31 +11219,13 @@ class LocalRuntimeStore:
         checksum = sha256_bytes(data)
         artifact_id = f"art_{checksum[:16]}"
         original_storage_ref = f"sha256:{checksum}"
-        original_path = self.original_dir / checksum
-        self.original_dir.mkdir(parents=True, exist_ok=True)
-        if not original_path.exists():
-            original_path.write_bytes(data)
-
-        existing = self.get_artifact(artifact_id, scope)
-        if existing and existing.get("scope") == scope:
-            event = self.append_audit(
-                "artifact.deduplicated",
-                scope,
-                {"type": "artifact", "id": artifact_id},
-                {"checksum_sha256": checksum, "original_storage_ref": original_storage_ref},
-            )
-            return {"artifact": existing, "deduplicated": True, "audit_event": event}
-
-        now = utc_now()
         raw_text = data.decode("utf-8", errors="replace")
-        redacted_text = redact_text(raw_text)
-        derived_text_ref = f"derived/{artifact_id}.txt"
-        derived_path = self.artifact_dir / derived_text_ref
-        derived_path.parent.mkdir(parents=True, exist_ok=True)
-        derived_path.write_text(redacted_text)
-        blocked_attempts = detect_unsafe_instructions(raw_text) if trust == "untrusted" else []
+        untrusted_text_sources = {"user_paste", "conversation_turn"}
+        effective_trust = "untrusted" if source_type in untrusted_text_sources else trust
+        trust_forced_untrusted = effective_trust == "untrusted" and trust != "untrusted"
+        blocked_attempts = detect_unsafe_instructions(raw_text) if effective_trust == "untrusted" else []
         safety = {
-            "untrusted_evidence": trust == "untrusted",
+            "untrusted_evidence": effective_trust == "untrusted",
             "unsafe_instruction_detected": bool(blocked_attempts),
             "blocked_attempt_count": len(blocked_attempts),
             "blocked_attempts": blocked_attempts,
@@ -11252,6 +11234,73 @@ class LocalRuntimeStore:
             "external_http_calls": 0,
             "authority_expanded": False,
         }
+        original_path = self.original_dir / checksum
+        self.original_dir.mkdir(parents=True, exist_ok=True)
+        if not original_path.exists():
+            original_path.write_bytes(data)
+
+        existing = self.get_artifact(artifact_id, scope)
+        if existing and existing.get("scope") == scope:
+            trust_downgraded = False
+            if effective_trust == "untrusted" and (
+                existing.get("trust_state") != "untrusted"
+                or existing.get("safety", {}).get("untrusted_evidence") is not True
+                or existing.get("safety", {}).get("unsafe_instruction_detected") != safety["unsafe_instruction_detected"]
+                or existing.get("source", {}).get("type") != source_type
+                or existing.get("source", {}).get("ref") != source_ref
+            ):
+                updated = dict(existing)
+                source_history = list(updated.get("source_history", [])) if isinstance(updated.get("source_history"), list) else []
+                if isinstance(updated.get("source"), dict):
+                    source_history.append(updated["source"])
+                updated["trust_state"] = "untrusted"
+                updated["safety"] = safety
+                updated["source"] = {
+                    "type": source_type,
+                    "ref": source_ref,
+                    "ingested_at": utc_now(),
+                }
+                updated["source_history"] = source_history[-8:]
+                updated.setdefault("provenance", {}).setdefault("transformations", [])
+                transformations = updated["provenance"]["transformations"]
+                if "trust_forced_untrusted" not in transformations:
+                    transformations.append("trust_forced_untrusted")
+                if "source_rebound_to_untrusted_text" not in transformations:
+                    transformations.append("source_rebound_to_untrusted_text")
+                _write_json(self.artifact_path(artifact_id, scope), updated)
+                existing = updated
+                trust_downgraded = True
+            event = self.append_audit(
+                "artifact.deduplicated",
+                scope,
+                {"type": "artifact", "id": artifact_id},
+                {
+                    "checksum_sha256": checksum,
+                    "original_storage_ref": original_storage_ref,
+                    "source_type": source_type,
+                    "effective_trust": effective_trust,
+                    "trust_forced_untrusted": trust_forced_untrusted,
+                    "trust_downgraded": trust_downgraded,
+                    "unsafe_instruction_detected": safety["unsafe_instruction_detected"],
+                },
+            )
+            return {
+                "artifact": existing,
+                "deduplicated": True,
+                "audit_event": event,
+                "trust_forced_untrusted": trust_forced_untrusted,
+                "trust_downgraded": trust_downgraded,
+            }
+
+        now = utc_now()
+        redacted_text = redact_text(raw_text)
+        derived_text_ref = f"derived/{artifact_id}.txt"
+        derived_path = self.artifact_dir / derived_text_ref
+        derived_path.parent.mkdir(parents=True, exist_ok=True)
+        derived_path.write_text(redacted_text)
+        transformations = ["hash_calculated", "original_preserved", "derived_text_created"]
+        if trust_forced_untrusted:
+            transformations.append("trust_forced_untrusted")
         record = {
             "schema_version": "cs.artifact.v0",
             "artifact_id": artifact_id,
@@ -11261,7 +11310,7 @@ class LocalRuntimeStore:
             "raw_original_access": {"policy": "owner_scope_required", "display": "controlled"},
             "original_size_bytes": len(data),
             "media_type": "text/plain",
-            "trust_state": trust,
+            "trust_state": effective_trust,
             "safety": safety,
             "scope": scope,
             "source": {
@@ -11278,7 +11327,7 @@ class LocalRuntimeStore:
             "provenance": {
                 "created_at": now,
                 "lineage_from": None,
-                "transformations": ["hash_calculated", "original_preserved", "derived_text_created"],
+                "transformations": transformations,
             },
         }
         _write_json(self.artifact_path(artifact_id, scope), record)
@@ -11292,9 +11341,17 @@ class LocalRuntimeStore:
                 "source_type": source_type,
                 "derived_status": "ready",
                 "unsafe_instruction_detected": safety["unsafe_instruction_detected"],
+                "effective_trust": effective_trust,
+                "trust_forced_untrusted": trust_forced_untrusted,
             },
         )
-        return {"artifact": record, "deduplicated": False, "audit_event": event}
+        return {
+            "artifact": record,
+            "deduplicated": False,
+            "audit_event": event,
+            "trust_forced_untrusted": trust_forced_untrusted,
+            "trust_downgraded": False,
+        }
 
     def start_conversation(self, message: str, scope: dict[str, str]) -> dict[str, Any]:
         conversation_base = {

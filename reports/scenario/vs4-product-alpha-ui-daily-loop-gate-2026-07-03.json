@@ -10,7 +10,7 @@
     "report:reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
   ],
   "ids": {
-    "git_commit": "0519ec19d"
+    "git_commit": "860511c35"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -38,9 +38,12 @@
     "vs4_slice_012_action_execution_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
     "vs4_slice_013_desktop_overflow_containment": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
     "vs4_slice_014_human_review_handoff": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+    "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
   },
-  "scenario_count": 28,
+  "scenario_count": 9,
   "scenario_gate_conditions": {
     "cli_parity": true,
     "negative_evidence": true,
@@ -52,7 +55,8 @@
     "row_status": true,
     "self_command_transcript": true,
     "source_tree_metadata": true,
-    "summary_counts": true
+    "summary_counts": true,
+    "unsafe_http_boundary": true
   },
   "scenario_gate_negative_evidence": {
     "cli_parity_failures": 0,
@@ -65,13 +69,14 @@
     "row_status_failures": 0,
     "self_command_transcript_failures": 0,
     "source_tree_metadata_failures": 0,
-    "summary_counts_failures": 0
+    "summary_counts_failures": 0,
+    "unsafe_http_boundary_failures": 0
   },
   "scenario_gate_summary": {
-    "actual_scenario_count": 28,
-    "expected_scenario_count": 28,
+    "actual_scenario_count": 9,
+    "expected_scenario_count": 9,
     "failure_count": 0,
-    "full_report": true,
+    "full_report": false,
     "human_ux_acceptance_claim_allowed": false,
     "live_provider_readiness_claim_allowed": false,
     "production_readiness_claim_allowed": false
@@ -101,18 +106,24 @@
       "vs4_slice_012_action_execution_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
       "vs4_slice_013_desktop_overflow_containment": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
       "vs4_slice_014_human_review_handoff": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.cli.v0",
-    "slice": "slice-015-gate-integrity",
+    "slice": "slice-018-drop-ask-trust-boundary",
     "source_tree": {
       "dirty_paths": [
         "Makefile",
         "README.md",
         "docs/sot/README.md",
         "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md",
+        "packages/cornerstone_cli/acceptance.py",
         "packages/cornerstone_cli/main.py",
+        "packages/cornerstone_cli/product_runtime.py",
+        "packages/cornerstone_cli/runtime.py",
         "packages/cornerstone_cli/scenarios.py",
         "reports/browser/vs0-evux-2026-06-13/browser-proof.json",
         "reports/browser/vs0-evux-2026-06-13/workflow-trace.json",
@@ -131,12 +142,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -187,14 +202,13 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "tests/scenario/test_scaffold_cli.py",
-        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_015_GATE_INTEGRITY.md",
+        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
@@ -207,8 +221,7 @@
         "reports/runtime/vs3-tool-registry-state/packs/rollbacks/packroll_5a9d8b8a37b7ceb6.json",
         "reports/runtime/vs3-tool-registry-state/packs/security_patches/packpatch_034de306aa96873c.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
-        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
+        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
       "final_commit": null,
       "final_commit_pending_reason": "worktree_dirty_at_verification",
@@ -231,12 +244,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -287,7 +304,6 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
@@ -305,10 +321,9 @@
         "reports/runtime/vs3-tool-registry-state/packs/rollbacks/packroll_5a9d8b8a37b7ceb6.json",
         "reports/runtime/vs3-tool-registry-state/packs/security_patches/packpatch_034de306aa96873c.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
-        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
+        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "03720dc65358f34e6204c56b6e827df39a28393b00a60d678991a6565d693dbc",
+      "generated_dirty_snapshot_hash": "bc96a5ebc303cedea5ddde593859f987077104eef28ac677f054f6c3f1a00272",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -348,28 +363,28 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "affd9c8b62e36539eff7a1cd97fe8b57da883fe0d1b64fd01d72f591ce5a02d7",
+          "sha256": "7fc4b3bd1c7d689a237cbec3456ba1079121edec7ff58184b3992a45506004f2",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "78e9d95948cad3397f9f350970e5829859fe070e9d070b7f955a3f3d76ea8ae9",
+          "sha256": "f1faadf8dd58db4121da8caee3866a453dc16f57257959c9d2d7b0352733ea47",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 275561,
+          "bytes": 299535,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "84e02e1eeb5f695fc43443d7c7c44c525266129c78b207066910bb5c5b14480c",
+          "sha256": "3e9e6ac317826ab7b287bcdcede40a6fc1470fa28118df2253bd1dfb9ea6f0f7",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 230060,
+          "bytes": 235587,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.png",
-          "sha256": "c1e1c56d3f91b291a5ccb621d76e9a4b258d8730104682885d372f3be4b1f971",
+          "sha256": "ee05c7f3c0ea39239c437952db40bf6cd310663b893b2c25b2f947de11f38c3c",
           "state": "present",
           "status": "M"
         },
@@ -430,58 +445,86 @@
           "status": "??"
         },
         {
-          "bytes": 220349,
+          "bytes": 273063,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-          "sha256": "5aa9a402e24f86c87c368288f6ee52d41ae75dc16c151e842439f23995757160",
+          "sha256": "297db484f2ed96f80ea55b5170b77cd257c124a8a090830adf7e4110ed0d0555",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-          "sha256": "0f20ca4b3de5a2ceb54b9a599735c3fc2b5b7714ffc32106f2acdee5ef972c7d",
+          "sha256": "859ed4f47745df765c3f7b7cbc4bf1f20ae9018e93af66fe7b6c6b28089610b1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 470916,
+          "bytes": 167045,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
+          "sha256": "204ad829dc2e8366c4385c3491d4d687fce708187e8a0c17d884998fc48d165f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 586455,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-          "sha256": "92654a6aeaa3e7221c7ed77e7d308fc175fec147a5626b18863a0376bd47736f",
+          "sha256": "9b289a5f559ef13eba62d1a339a3eaa3d8ffdd991685ec82e074634c6cec224f",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-          "sha256": "0f20ca4b3de5a2ceb54b9a599735c3fc2b5b7714ffc32106f2acdee5ef972c7d",
+          "sha256": "859ed4f47745df765c3f7b7cbc4bf1f20ae9018e93af66fe7b6c6b28089610b1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 220354,
+          "bytes": 167045,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
+          "sha256": "204ad829dc2e8366c4385c3491d4d687fce708187e8a0c17d884998fc48d165f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 273066,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-          "sha256": "9238ed06dbb44b72dc485e9a353ca3a80d538d2827c2c1cbab37100c8aa04bf4",
+          "sha256": "50702dcb804d9855690a47ee3a8bfdd8c63971a613feb21b872c765f872942f8",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-          "sha256": "6066afbbd210ae11bebdd434074e506f0c324e808f0d04df21b412324eb2c71b",
+          "sha256": "0e82fb7d85574b6640b5732699bc3908cb1d29f8b52d2dd8ff23bb7290bf83f7",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 470914,
+          "bytes": 73378,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
+          "sha256": "7e105a46b52444ad88958c3787fdf16d26d04e43e987a65e2c5fa5b2049e6160",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 586449,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-          "sha256": "3630c23a2a22725618c1d0bf36e58e11311cf0e412c4d50d57e1579374084941",
+          "sha256": "d4faa1d64a715c79b87bce4c0ceaad59e3cbeb67fd7dff4fb52d23b5279141de",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-          "sha256": "6066afbbd210ae11bebdd434074e506f0c324e808f0d04df21b412324eb2c71b",
+          "sha256": "0e82fb7d85574b6640b5732699bc3908cb1d29f8b52d2dd8ff23bb7290bf83f7",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 73378,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
+          "sha256": "7e105a46b52444ad88958c3787fdf16d26d04e43e987a65e2c5fa5b2049e6160",
           "state": "present",
           "status": "M"
         },
@@ -542,9 +585,9 @@
           "status": "M"
         },
         {
-          "bytes": 13692,
+          "bytes": 14309,
           "path": "reports/human-gates/vs4/VS4-H01.json",
-          "sha256": "aaeea387c86f0d4bfc5ec73fcae39db1dd5e2c9a33662fdb6cd657db3f91bc7f",
+          "sha256": "394cb834b96917e7817789c06b895c2fd081e11696781a0e52802016a50129cf",
           "state": "present",
           "status": "M"
         },
@@ -920,20 +963,6 @@
           "status": "M"
         },
         {
-          "bytes": 1893816,
-          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
-          "sha256": "3f1f081700acd6194c66d24d75420ef3b1f140cd54a331d50ce36de7f2ba8ea9",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 88622,
-          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
-          "sha256": "b2a4509425df347313805da88e0dd649347f531f74a5ed0eeb285a60604b6485",
-          "state": "present",
-          "status": "??"
-        },
-        {
           "bytes": 143764,
           "path": "reports/security/vs3-connectorhub-source-proof.json",
           "sha256": "7dbcf461f63324804dc8ac4085cd9ec686cff8645f2b3988712f2d50388cbcfc",
@@ -970,74 +999,96 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "0519ec19d",
-      "verified_base_commit_full": "0519ec19d32c4b16bfea7adbb8b7e25bae2666be",
-      "verified_base_tree_hash": "4e85d0efc60442358157a3c56c6954064b3876cb",
+      "verified_base_commit": "860511c35",
+      "verified_base_commit_full": "860511c355e5e92bbe1c9f46c22f7b335a8fa4e9",
+      "verified_base_tree_hash": "a0d8056c038272c7bd200563a338a2f14b82e651",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 29752,
+          "bytes": 31605,
           "path": "Makefile",
-          "sha256": "f78179cb23a06ccec3d87421cb66d728faa3cdef4c6c759f602dae95454fcc86",
+          "sha256": "0530129ce2578b314d7f45732b6619db86a71984d63ccd38fcfc9e2b08cc6303",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 68180,
+          "bytes": 69803,
           "path": "README.md",
-          "sha256": "83ba0ddf20c66ffba982b1542edc1fcf024959b44f5f2a6d1c90ee24c6ca0648",
+          "sha256": "51048a4710195d880a7b5cf66502b64719a257cbece9e4160a63aec81388c32a",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 5734,
-          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_015_GATE_INTEGRITY.md",
-          "sha256": "85f7b56323172b0f393251f5de3743a590b9c08900c6806ed5a2d23498835ad7",
+          "bytes": 6514,
+          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
+          "sha256": "ec54aab5478a5f5cfbae760d11bd973155c086acd48f86d9cbbbaf5b9a0cd6e1",
           "state": "present",
           "status": "??"
         },
         {
-          "bytes": 30903,
+          "bytes": 32953,
           "path": "docs/sot/README.md",
-          "sha256": "4894498d8610f02bdd3e0e0f25d9ac51d84d8215502f1374f0a52a85bff622d5",
+          "sha256": "625d7f79377dc0f5f30190ef21a63dd988a24626c332f0fd969284a83e6b3820",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1277274,
+          "bytes": 107221,
+          "path": "packages/cornerstone_cli/acceptance.py",
+          "sha256": "6c09db31e13cc109b8657520b3c50160035cb447aef4903b3fecd29f07940ef7",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1280856,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "ec8015beb016095a8480aa992e5b7eb24e5020491b183d7c95d52c2b25cd37d1",
+          "sha256": "7b3a26c7d12dfcdedbeb8236e89c6e2214aa6a1dde515564f5017dbad3ae3d45",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1888704,
+          "bytes": 270738,
+          "path": "packages/cornerstone_cli/product_runtime.py",
+          "sha256": "1de0c916516236f4e6fe08a30e5f5df5a652db9fee4bdaf7ddb970cba639b536",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 557188,
+          "path": "packages/cornerstone_cli/runtime.py",
+          "sha256": "c477accc0551675e40fcdd0fdbcce694dd0501c04d17c0e04d4bbbad61d42158",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1909786,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "13fc589197a7d3fe8e46e703d78d39cc3680b296ede075d944862a5f25d321ce",
+          "sha256": "44f89dd8d83b28d50c39a7b6f169ae5ced1545e09d6cc9897b5c0c96bd3fa17d",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1142880,
+          "bytes": 1157372,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "9bb67af17aa231b9284d80bfa90f56081b689510745ff12088767410d851716d",
+          "sha256": "f6605899892bda783b169a4bb859d114c01287216cbaa3765c676d50f01635c0",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "bf43c4b4d2eeeee0be7b24ec25a9d01d9b2b9be4cdf0ce2d828202a6a07a7d68",
+      "verified_source_worktree_hash": "ba3d792185fdaee98658bbe7972f8ce516971cbbcdab29c475ab1530f42010a3",
       "worktree_dirty_at_verification": true
     },
     "status": "success",
     "summary": {
       "blocking": 0,
       "fail": 0,
-      "human_required": 1,
-      "in_this_slice": 5,
+      "human_required": 0,
+      "in_this_slice": 9,
       "not_run": 0,
-      "pass": 27,
-      "previous_slice": 22,
+      "not_verified": 0,
+      "pass": 9,
+      "previous_slice": 18,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 28
+      "scenario_count": 9
     }
   },
   "status": "success",
@@ -1045,52 +1096,34 @@
     "blocking": 0,
     "fail": 0,
     "final_security_acceptance_claim_allowed": false,
-    "human_required": 1,
+    "human_required": 0,
     "human_ux_acceptance_claim_allowed": false,
-    "in_this_slice": 5,
+    "in_this_slice": 9,
     "live_provider_readiness_claim_allowed": false,
     "not_run": 0,
-    "pass": 27,
-    "previous_slice": 22,
+    "not_verified": 0,
+    "pass": 9,
+    "previous_slice": 18,
     "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
     "production_onprem_readiness_claim_allowed": false,
     "production_readiness_claim_allowed": false,
-    "scenario_count": 28
+    "scenario_count": 9
   },
   "tenant_id": "local-dev",
   "version": "0.0.0-scaffold",
   "vs4_gate_validation": {
     "actual_ids": [
       "VS4-GATE-001",
-      "VS4-UI-001",
       "VS4-UI-002",
-      "VS4-UI-003",
-      "VS4-UI-004",
-      "VS4-UI-005",
-      "VS4-UI-006",
       "VS4-UI-007",
-      "VS4-UI-008",
       "VS4-UI-009",
-      "VS4-UI-010",
       "VS4-UI-011",
-      "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-014",
-      "VS4-UI-015",
-      "VS4-UI-016",
-      "VS4-STATE-001",
-      "VS4-REF-001",
-      "VS4-REF-002",
-      "VS4-REG-001",
-      "VS4-REG-002",
       "VS4-REG-003",
       "VS4-REG-004",
-      "VS4-REG-005",
-      "VS4-REG-006",
-      "VS4-REG-007",
-      "VS4-H01"
+      "VS4-REG-007"
     ],
-    "actual_scenario_count": 28,
+    "actual_scenario_count": 9,
     "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "conditions": {
       "cli_parity": true,
@@ -1103,43 +1136,25 @@
       "row_status": true,
       "self_command_transcript": true,
       "source_tree_metadata": true,
-      "summary_counts": true
+      "summary_counts": true,
+      "unsafe_http_boundary": true
     },
     "expected_full_scenario_count": 28,
     "expected_ids": [
       "VS4-GATE-001",
-      "VS4-UI-001",
-      "VS4-UI-002",
-      "VS4-UI-003",
-      "VS4-UI-004",
-      "VS4-UI-005",
-      "VS4-UI-006",
-      "VS4-UI-007",
-      "VS4-UI-008",
-      "VS4-UI-009",
-      "VS4-UI-010",
-      "VS4-UI-011",
-      "VS4-UI-012",
-      "VS4-UI-013",
-      "VS4-UI-014",
-      "VS4-UI-015",
-      "VS4-UI-016",
-      "VS4-STATE-001",
-      "VS4-REF-001",
-      "VS4-REF-002",
-      "VS4-REG-001",
-      "VS4-REG-002",
       "VS4-REG-003",
       "VS4-REG-004",
-      "VS4-REG-005",
-      "VS4-REG-006",
       "VS4-REG-007",
-      "VS4-H01"
+      "VS4-UI-002",
+      "VS4-UI-007",
+      "VS4-UI-009",
+      "VS4-UI-011",
+      "VS4-UI-013"
     ],
-    "expected_scenario_count": 28,
+    "expected_scenario_count": 9,
     "failure_count": 0,
     "failures": [],
-    "full_report": true,
+    "full_report": false,
     "negative_evidence": {
       "cli_parity_failures": 0,
       "negative_evidence_failures": 0,
@@ -1151,7 +1166,8 @@
       "row_status_failures": 0,
       "self_command_transcript_failures": 0,
       "source_tree_metadata_failures": 0,
-      "summary_counts_failures": 0
+      "summary_counts_failures": 0,
+      "unsafe_http_boundary_failures": 0
     },
     "proof_boundary": {
       "final_security_acceptance": "NOT_CLAIMED",
@@ -1173,9 +1189,22 @@
       "vs4_slice_012_action_execution_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
       "vs4_slice_013_desktop_overflow_containment": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
       "vs4_slice_014_human_review_handoff": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
-    "scenario_filter": [],
+    "scenario_filter": [
+      "VS4-GATE-001",
+      "VS4-REG-003",
+      "VS4-REG-004",
+      "VS4-REG-007",
+      "VS4-UI-002",
+      "VS4-UI-007",
+      "VS4-UI-009",
+      "VS4-UI-011",
+      "VS4-UI-013"
+    ],
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.vs4_product_alpha_scenario_gate_validation.v0",
     "source_tree": {
@@ -1198,12 +1227,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -1254,7 +1287,6 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
@@ -1272,10 +1304,9 @@
         "reports/runtime/vs3-tool-registry-state/packs/rollbacks/packroll_5a9d8b8a37b7ceb6.json",
         "reports/runtime/vs3-tool-registry-state/packs/security_patches/packpatch_034de306aa96873c.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
-        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json",
-        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
+        "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "03720dc65358f34e6204c56b6e827df39a28393b00a60d678991a6565d693dbc",
+      "generated_dirty_snapshot_hash": "bc96a5ebc303cedea5ddde593859f987077104eef28ac677f054f6c3f1a00272",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -1315,28 +1346,28 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "affd9c8b62e36539eff7a1cd97fe8b57da883fe0d1b64fd01d72f591ce5a02d7",
+          "sha256": "7fc4b3bd1c7d689a237cbec3456ba1079121edec7ff58184b3992a45506004f2",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "78e9d95948cad3397f9f350970e5829859fe070e9d070b7f955a3f3d76ea8ae9",
+          "sha256": "f1faadf8dd58db4121da8caee3866a453dc16f57257959c9d2d7b0352733ea47",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 275561,
+          "bytes": 299535,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "84e02e1eeb5f695fc43443d7c7c44c525266129c78b207066910bb5c5b14480c",
+          "sha256": "3e9e6ac317826ab7b287bcdcede40a6fc1470fa28118df2253bd1dfb9ea6f0f7",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 230060,
+          "bytes": 235587,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.png",
-          "sha256": "c1e1c56d3f91b291a5ccb621d76e9a4b258d8730104682885d372f3be4b1f971",
+          "sha256": "ee05c7f3c0ea39239c437952db40bf6cd310663b893b2c25b2f947de11f38c3c",
           "state": "present",
           "status": "M"
         },
@@ -1397,58 +1428,86 @@
           "status": "??"
         },
         {
-          "bytes": 220349,
+          "bytes": 273063,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/browser-proof.json",
-          "sha256": "5aa9a402e24f86c87c368288f6ee52d41ae75dc16c151e842439f23995757160",
+          "sha256": "297db484f2ed96f80ea55b5170b77cd257c124a8a090830adf7e4110ed0d0555",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.dom.html",
-          "sha256": "0f20ca4b3de5a2ceb54b9a599735c3fc2b5b7714ffc32106f2acdee5ef972c7d",
+          "sha256": "859ed4f47745df765c3f7b7cbc4bf1f20ae9018e93af66fe7b6c6b28089610b1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 470916,
+          "bytes": 167045,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/base/home.png",
+          "sha256": "204ad829dc2e8366c4385c3491d4d687fce708187e8a0c17d884998fc48d165f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 586455,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json",
-          "sha256": "92654a6aeaa3e7221c7ed77e7d308fc175fec147a5626b18863a0376bd47736f",
+          "sha256": "9b289a5f559ef13eba62d1a339a3eaa3d8ffdd991685ec82e074634c6cec224f",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html",
-          "sha256": "0f20ca4b3de5a2ceb54b9a599735c3fc2b5b7714ffc32106f2acdee5ef972c7d",
+          "sha256": "859ed4f47745df765c3f7b7cbc4bf1f20ae9018e93af66fe7b6c6b28089610b1",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 220354,
+          "bytes": 167045,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
+          "sha256": "204ad829dc2e8366c4385c3491d4d687fce708187e8a0c17d884998fc48d165f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 273066,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/browser-proof.json",
-          "sha256": "9238ed06dbb44b72dc485e9a353ca3a80d538d2827c2c1cbab37100c8aa04bf4",
+          "sha256": "50702dcb804d9855690a47ee3a8bfdd8c63971a613feb21b872c765f872942f8",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.dom.html",
-          "sha256": "6066afbbd210ae11bebdd434074e506f0c324e808f0d04df21b412324eb2c71b",
+          "sha256": "0e82fb7d85574b6640b5732699bc3908cb1d29f8b52d2dd8ff23bb7290bf83f7",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 470914,
+          "bytes": 73378,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/base/home.png",
+          "sha256": "7e105a46b52444ad88958c3787fdf16d26d04e43e987a65e2c5fa5b2049e6160",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 586449,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json",
-          "sha256": "3630c23a2a22725618c1d0bf36e58e11311cf0e412c4d50d57e1579374084941",
+          "sha256": "d4faa1d64a715c79b87bce4c0ceaad59e3cbeb67fd7dff4fb52d23b5279141de",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 203510,
+          "bytes": 228180,
           "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html",
-          "sha256": "6066afbbd210ae11bebdd434074e506f0c324e808f0d04df21b412324eb2c71b",
+          "sha256": "0e82fb7d85574b6640b5732699bc3908cb1d29f8b52d2dd8ff23bb7290bf83f7",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 73378,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png",
+          "sha256": "7e105a46b52444ad88958c3787fdf16d26d04e43e987a65e2c5fa5b2049e6160",
           "state": "present",
           "status": "M"
         },
@@ -1509,9 +1568,9 @@
           "status": "M"
         },
         {
-          "bytes": 13692,
+          "bytes": 14309,
           "path": "reports/human-gates/vs4/VS4-H01.json",
-          "sha256": "aaeea387c86f0d4bfc5ec73fcae39db1dd5e2c9a33662fdb6cd657db3f91bc7f",
+          "sha256": "394cb834b96917e7817789c06b895c2fd081e11696781a0e52802016a50129cf",
           "state": "present",
           "status": "M"
         },
@@ -1887,20 +1946,6 @@
           "status": "M"
         },
         {
-          "bytes": 1893816,
-          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
-          "sha256": "3f1f081700acd6194c66d24d75420ef3b1f140cd54a331d50ce36de7f2ba8ea9",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 88622,
-          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
-          "sha256": "b2a4509425df347313805da88e0dd649347f531f74a5ed0eeb285a60604b6485",
-          "state": "present",
-          "status": "??"
-        },
-        {
           "bytes": 143764,
           "path": "reports/security/vs3-connectorhub-source-proof.json",
           "sha256": "7dbcf461f63324804dc8ac4085cd9ec686cff8645f2b3988712f2d50388cbcfc",
@@ -1937,74 +1982,96 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "0519ec19d",
-      "verified_base_commit_full": "0519ec19d32c4b16bfea7adbb8b7e25bae2666be",
-      "verified_base_tree_hash": "4e85d0efc60442358157a3c56c6954064b3876cb",
+      "verified_base_commit": "860511c35",
+      "verified_base_commit_full": "860511c355e5e92bbe1c9f46c22f7b335a8fa4e9",
+      "verified_base_tree_hash": "a0d8056c038272c7bd200563a338a2f14b82e651",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 29752,
+          "bytes": 31605,
           "path": "Makefile",
-          "sha256": "f78179cb23a06ccec3d87421cb66d728faa3cdef4c6c759f602dae95454fcc86",
+          "sha256": "0530129ce2578b314d7f45732b6619db86a71984d63ccd38fcfc9e2b08cc6303",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 68180,
+          "bytes": 69803,
           "path": "README.md",
-          "sha256": "83ba0ddf20c66ffba982b1542edc1fcf024959b44f5f2a6d1c90ee24c6ca0648",
+          "sha256": "51048a4710195d880a7b5cf66502b64719a257cbece9e4160a63aec81388c32a",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 5734,
-          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_015_GATE_INTEGRITY.md",
-          "sha256": "85f7b56323172b0f393251f5de3743a590b9c08900c6806ed5a2d23498835ad7",
+          "bytes": 6514,
+          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
+          "sha256": "ec54aab5478a5f5cfbae760d11bd973155c086acd48f86d9cbbbaf5b9a0cd6e1",
           "state": "present",
           "status": "??"
         },
         {
-          "bytes": 30903,
+          "bytes": 32953,
           "path": "docs/sot/README.md",
-          "sha256": "4894498d8610f02bdd3e0e0f25d9ac51d84d8215502f1374f0a52a85bff622d5",
+          "sha256": "625d7f79377dc0f5f30190ef21a63dd988a24626c332f0fd969284a83e6b3820",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1277274,
+          "bytes": 107221,
+          "path": "packages/cornerstone_cli/acceptance.py",
+          "sha256": "6c09db31e13cc109b8657520b3c50160035cb447aef4903b3fecd29f07940ef7",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1280856,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "ec8015beb016095a8480aa992e5b7eb24e5020491b183d7c95d52c2b25cd37d1",
+          "sha256": "7b3a26c7d12dfcdedbeb8236e89c6e2214aa6a1dde515564f5017dbad3ae3d45",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1888704,
+          "bytes": 270738,
+          "path": "packages/cornerstone_cli/product_runtime.py",
+          "sha256": "1de0c916516236f4e6fe08a30e5f5df5a652db9fee4bdaf7ddb970cba639b536",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 557188,
+          "path": "packages/cornerstone_cli/runtime.py",
+          "sha256": "c477accc0551675e40fcdd0fdbcce694dd0501c04d17c0e04d4bbbad61d42158",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 1909786,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "13fc589197a7d3fe8e46e703d78d39cc3680b296ede075d944862a5f25d321ce",
+          "sha256": "44f89dd8d83b28d50c39a7b6f169ae5ced1545e09d6cc9897b5c0c96bd3fa17d",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1142880,
+          "bytes": 1157372,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "9bb67af17aa231b9284d80bfa90f56081b689510745ff12088767410d851716d",
+          "sha256": "f6605899892bda783b169a4bb859d114c01287216cbaa3765c676d50f01635c0",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "bf43c4b4d2eeeee0be7b24ec25a9d01d9b2b9be4cdf0ce2d828202a6a07a7d68",
+      "verified_source_worktree_hash": "ba3d792185fdaee98658bbe7972f8ce516971cbbcdab29c475ab1530f42010a3",
       "worktree_dirty_at_verification": true
     },
     "status": "passed",
     "summary": {
       "blocking": 0,
       "fail": 0,
-      "human_required": 1,
-      "in_this_slice": 5,
+      "human_required": 0,
+      "in_this_slice": 9,
       "not_run": 0,
-      "pass": 27,
-      "previous_slice": 22,
+      "not_verified": 0,
+      "pass": 9,
+      "previous_slice": 18,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 28
+      "scenario_count": 9
     }
   },
   "workspace_id": "default"

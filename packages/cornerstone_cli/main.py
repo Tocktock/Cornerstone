@@ -626,6 +626,8 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
         policy_decisions: list[dict[str, Any]] = []
         payload["text_ingest"] = True
         payload["source_ref"] = args.source_ref or "cli_text"
+        payload["trust_forced_untrusted"] = result.get("trust_forced_untrusted", False)
+        payload["trust_downgraded"] = result.get("trust_downgraded", False)
     else:
         input_path = (root / str(path_value)).resolve()
         if not input_path.exists() or not input_path.is_file():
@@ -19700,6 +19702,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19719,6 +19722,9 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "vs4_unauthorized_action_approval_accepted",
     "vs4_provider_mutations_on_denial",
     "vs4_external_http_calls_on_denial",
+    "same_checksum_user_paste_kept_trusted",
+    "user_paste_probe_external_http_calls",
+    "user_paste_probe_authority_expanded",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
@@ -19946,6 +19952,16 @@ def _vs4_product_alpha_gate_validation(
         if isinstance(mobile_browser_proof.get("human_review_handoff_markers"), dict)
         else {}
     )
+    unsafe_http_markers = (
+        browser_proof.get("unsafe_http_boundary_markers")
+        if isinstance(browser_proof.get("unsafe_http_boundary_markers"), dict)
+        else {}
+    )
+    mobile_unsafe_http_markers = (
+        mobile_browser_proof.get("unsafe_http_boundary_markers")
+        if isinstance(mobile_browser_proof.get("unsafe_http_boundary_markers"), dict)
+        else {}
+    )
     record(
         "reference_image_boundary",
         detail_markers.get("reference_images_not_pass_evidence") is True
@@ -19954,6 +19970,16 @@ def _vs4_product_alpha_gate_validation(
         and negative_evidence.get("reference_images_used_as_pass_evidence") == 0
         and negative_evidence.get("reference_images_used_as_human_acceptance_evidence") == 0,
         "VS4 reference images may guide design only; they cannot be PASS or human-acceptance evidence.",
+    )
+    record(
+        "unsafe_http_boundary",
+        bool(unsafe_http_markers)
+        and all(value is True for value in unsafe_http_markers.values())
+        and bool(mobile_unsafe_http_markers)
+        and all(value is True for value in mobile_unsafe_http_markers.values()),
+        "VS4 unsafe HTTP/API Drop/Ask boundary markers must pass on desktop and mobile browser proof.",
+        desktop_markers=unsafe_http_markers,
+        mobile_markers=mobile_unsafe_http_markers,
     )
     self_command = self_transcript.get("command")
     record(
@@ -19983,6 +20009,7 @@ def _vs4_product_alpha_gate_validation(
         "cli_parity",
         cli_checks.get("cli_parity") is True
         and cli_checks.get("action_boundary_cli_parity") is True
+        and cli_checks.get("text_trust_downgrade") is True
         and slice3_checks.get("cli_parity") is True
         and regression_checks.get("fresh_command_outputs") is True
         and isinstance(cli_workflow.get("transcripts"), dict)

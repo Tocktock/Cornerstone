@@ -1280,6 +1280,14 @@ def capture_vs4_product_alpha_browser_proof(
     user_drop_ask_source_markers = (
         user_drop_ask_source.get("markers", {}) if isinstance(user_drop_ask_source.get("markers"), dict) else {}
     )
+    unsafe_http_boundary = (
+        brief_evidence.get("unsafe_http_boundary", {})
+        if isinstance(brief_evidence.get("unsafe_http_boundary"), dict)
+        else {}
+    )
+    unsafe_http_boundary_markers = (
+        unsafe_http_boundary.get("markers", {}) if isinstance(unsafe_http_boundary.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1380,6 +1388,9 @@ def capture_vs4_product_alpha_browser_proof(
     user_drop_ask_source_ok = bool(user_drop_ask_source_markers) and all(
         value is True for value in user_drop_ask_source_markers.values()
     )
+    unsafe_http_boundary_ok = bool(unsafe_http_boundary_markers) and all(
+        value is True for value in unsafe_http_boundary_markers.values()
+    )
     status = (
         "PASS"
         if screenshot_exists
@@ -1392,6 +1403,7 @@ def capture_vs4_product_alpha_browser_proof(
         and human_review_handoff_ok
         and evidence_audit_detail_ok
         and user_drop_ask_source_ok
+        and unsafe_http_boundary_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1434,6 +1446,9 @@ def capture_vs4_product_alpha_browser_proof(
         "user_drop_ask_source_required": True,
         "user_drop_ask_source": user_drop_ask_source,
         "user_drop_ask_source_markers": user_drop_ask_source_markers,
+        "unsafe_http_boundary_required": True,
+        "unsafe_http_boundary": unsafe_http_boundary,
+        "unsafe_http_boundary_markers": unsafe_http_boundary_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1474,6 +1489,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **evidence_audit_detail_markers,
                 "user_drop_ask_source_markers_present": user_drop_ask_source_ok,
                 **user_drop_ask_source_markers,
+                "unsafe_http_boundary_markers_present": unsafe_http_boundary_ok,
+                **unsafe_http_boundary_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value
