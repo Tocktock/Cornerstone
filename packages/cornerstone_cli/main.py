@@ -538,6 +538,47 @@ def command_product_loop_view(args: argparse.Namespace) -> int:
         outcome_id=args.outcome_id or "",
         lesson_id=args.lesson_id or "",
     )
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["loop_validation"] = result.get("loop_validation")
+        payload["errors"].append(
+            {
+                "code": result.get("error_code") or "CS_LOOP_REF_NOT_FOUND",
+                "message": result.get("message") or "Loop View could not find one of the requested work items.",
+                "resource": result.get("resource"),
+                "resource_id": result.get("resource_id"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "denied"
+        payload["loop_validation"] = result.get("loop_validation")
+        payload["errors"].append(
+            {
+                "code": result.get("error_code") or "CS_SCOPE_DENIED",
+                "message": result.get("message") or "Loop View cannot show work from outside the requested workspace.",
+                "resource": result.get("resource"),
+                "resource_id": result.get("resource_id"),
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "lineage_mismatch":
+        payload["status"] = "failed"
+        payload["loop_validation"] = result.get("loop_validation")
+        payload["errors"].append(
+            {
+                "code": result.get("error_code") or "CS_LOOP_LINEAGE_MISMATCH",
+                "message": result.get("message")
+                or "Loop View could not show one journey because the selected work items do not belong to the same evidence-backed journey.",
+                "resource": result.get("resource"),
+                "mismatches": result.get("mismatches", []),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
     loop = result["product_loop"]
     payload["product_loop"] = loop
     payload["ids"].update({"loop_id": loop["loop_id"]})
@@ -19712,6 +19753,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19756,6 +19798,15 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "vs4_runtime_learn_missing_evidence_refs",
     "vs4_runtime_learn_missing_audit_refs",
     "vs4_runtime_learn_hidden_durable_change",
+    "vs4_loop_missing_ref_accepted",
+    "vs4_loop_cross_scope_ref_accepted",
+    "vs4_loop_lineage_mismatch_accepted",
+    "vs4_loop_invalid_ref_created_product_loop",
+    "vs4_loop_invalid_ref_created_audit",
+    "vs4_loop_invalid_ref_authority_expanded",
+    "vs4_loop_invalid_ref_live_writeback",
+    "vs4_loop_api_parity_failed",
+    "vs4_loop_product_language_error_missing",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
@@ -20004,6 +20055,17 @@ def _vs4_product_alpha_gate_validation(
         if isinstance(mobile_browser_proof.get("ops_inbox_triage_markers"), dict)
         else {}
     )
+    cli_checks = cli_workflow.get("checks") if isinstance(cli_workflow.get("checks"), dict) else {}
+    slice3_checks = (
+        slice_003_cli_workflow.get("checks")
+        if isinstance(slice_003_cli_workflow.get("checks"), dict)
+        else {}
+    )
+    regression_checks = (
+        regression_workflows.get("checks")
+        if isinstance(regression_workflows.get("checks"), dict)
+        else {}
+    )
     record(
         "reference_image_boundary",
         detail_markers.get("reference_images_not_pass_evidence") is True
@@ -20055,6 +20117,48 @@ def _vs4_product_alpha_gate_validation(
         desktop_markers=ops_markers,
         mobile_markers=mobile_ops_markers,
     )
+    record(
+        "return_to_work_lineage_guard",
+        proof_boundary.get("vs4_slice_022_return_to_work_lineage_guard")
+        == "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        and cli_checks.get("loop_lineage_guard_cli_parity") is True
+        and cli_checks.get("loop_missing_ref_denied") is True
+        and cli_checks.get("loop_cross_scope_denied") is True
+        and cli_checks.get("loop_lineage_mismatch_denied") is True
+        and cli_checks.get("loop_invalid_no_side_effects") is True
+        and cli_checks.get("loop_product_language_errors") is True
+        and ops_markers.get("loop_lineage_guard_valid_loop_visible") is True
+        and ops_markers.get("loop_lineage_guard_api_missing_ref_denied") is True
+        and ops_markers.get("loop_lineage_guard_api_cross_scope_denied") is True
+        and ops_markers.get("loop_lineage_guard_api_lineage_mismatch_denied") is True
+        and ops_markers.get("loop_lineage_guard_product_language_errors") is True
+        and ops_markers.get("loop_lineage_guard_no_invalid_product_loop") is True
+        and ops_markers.get("loop_lineage_guard_no_invalid_audit") is True
+        and ops_markers.get("loop_lineage_guard_no_authority_expansion") is True
+        and ops_markers.get("loop_lineage_guard_no_live_writeback") is True
+        and mobile_ops_markers.get("loop_lineage_guard_valid_loop_visible") is True
+        and mobile_ops_markers.get("loop_lineage_guard_api_missing_ref_denied") is True
+        and mobile_ops_markers.get("loop_lineage_guard_api_cross_scope_denied") is True
+        and mobile_ops_markers.get("loop_lineage_guard_api_lineage_mismatch_denied") is True
+        and mobile_ops_markers.get("loop_lineage_guard_product_language_errors") is True
+        and mobile_ops_markers.get("loop_lineage_guard_no_invalid_product_loop") is True
+        and mobile_ops_markers.get("loop_lineage_guard_no_invalid_audit") is True
+        and mobile_ops_markers.get("loop_lineage_guard_no_authority_expansion") is True
+        and mobile_ops_markers.get("loop_lineage_guard_no_live_writeback") is True
+        and negative_evidence.get("vs4_loop_missing_ref_accepted") == 0
+        and negative_evidence.get("vs4_loop_cross_scope_ref_accepted") == 0
+        and negative_evidence.get("vs4_loop_lineage_mismatch_accepted") == 0
+        and negative_evidence.get("vs4_loop_invalid_ref_created_product_loop") == 0
+        and negative_evidence.get("vs4_loop_invalid_ref_created_audit") == 0
+        and negative_evidence.get("vs4_loop_invalid_ref_authority_expanded") == 0
+        and negative_evidence.get("vs4_loop_invalid_ref_live_writeback") == 0
+        and negative_evidence.get("vs4_loop_api_parity_failed") == 0
+        and negative_evidence.get("vs4_loop_product_language_error_missing") == 0,
+        "VS4 Slice 022 must reject missing, cross-scope, and mismatched Loop View refs through CLI/API proof without creating product loops, audit refs, authority expansion, or live writeback.",
+        cli_checks=cli_checks,
+        desktop_markers=ops_markers,
+        mobile_markers=mobile_ops_markers,
+    )
     self_command = self_transcript.get("command")
     record(
         "self_command_transcript",
@@ -20068,23 +20172,13 @@ def _vs4_product_alpha_gate_validation(
         command=self_command,
         exit_code=self_transcript.get("exit_code"),
     )
-    cli_checks = cli_workflow.get("checks") if isinstance(cli_workflow.get("checks"), dict) else {}
-    slice3_checks = (
-        slice_003_cli_workflow.get("checks")
-        if isinstance(slice_003_cli_workflow.get("checks"), dict)
-        else {}
-    )
-    regression_checks = (
-        regression_workflows.get("checks")
-        if isinstance(regression_workflows.get("checks"), dict)
-        else {}
-    )
     record(
         "cli_parity",
         cli_checks.get("cli_parity") is True
         and cli_checks.get("action_boundary_cli_parity") is True
         and cli_checks.get("text_trust_downgrade") is True
         and cli_checks.get("runtime_learn_cli_parity") is True
+        and cli_checks.get("loop_lineage_guard_cli_parity") is True
         and slice3_checks.get("cli_parity") is True
         and regression_checks.get("fresh_command_outputs") is True
         and isinstance(cli_workflow.get("transcripts"), dict)

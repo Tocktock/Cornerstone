@@ -4062,12 +4062,309 @@ class LocalRuntimeStore:
         outcome_id: str = "",
         lesson_id: str = "",
     ) -> dict[str, Any]:
+        def _requested_refs() -> dict[str, str]:
+            return {
+                key: value
+                for key, value in {
+                    "conversation": conversation_id,
+                    "brief": brief_id,
+                    "claim": claim_id,
+                    "memory": memory_id,
+                    "mission": mission_id,
+                    "action": action_id,
+                    "outcome": outcome_id,
+                    "lesson": lesson_id,
+                }.items()
+                if value
+            }
+
+        def _validation_base() -> dict[str, Any]:
+            return {
+                "schema_version": "cs.product_loop_ref_validation.v0",
+                "status": "checking",
+                "scope": scope,
+                "requested_refs": _requested_refs(),
+                "validated_refs": [],
+                "same_scope": False,
+                "same_lineage": False,
+                "shared_evidence_bundle_id": None,
+                "shared_artifact_refs": [],
+                "mismatches": [],
+                "invalid_refs_created_product_loop": False,
+                "invalid_refs_created_audit": False,
+                "invalid_refs_changed_authority": False,
+                "invalid_refs_live_writeback": False,
+            }
+
+        def _fail(
+            status: str,
+            code: str,
+            message: str,
+            *,
+            resource: str,
+            resource_id: str | None = None,
+            resource_scope: dict[str, str] | None = None,
+            mismatches: list[dict[str, Any]] | None = None,
+        ) -> dict[str, Any]:
+            validation = _validation_base()
+            validation.update(
+                {
+                    "status": "blocked",
+                    "failure": status,
+                    "error_code": code,
+                    "message": message,
+                    "same_scope": status != "scope_denied",
+                    "same_lineage": status != "lineage_mismatch",
+                    "mismatches": mismatches or [],
+                }
+            )
+            result: dict[str, Any] = {
+                "status": status,
+                "error_code": code,
+                "message": message,
+                "resource": resource,
+                "loop_validation": validation,
+            }
+            if resource_id is not None:
+                result["resource_id"] = resource_id
+            if resource_scope is not None:
+                result["resource_scope"] = resource_scope
+            if mismatches:
+                result["mismatches"] = mismatches
+            return result
+
+        records: dict[str, dict[str, Any]] = {}
+        refs = _requested_refs()
+        getters = {
+            "conversation": self.get_conversation,
+            "brief": self.get_brief,
+            "claim": self.get_claim,
+            "memory": self.get_memory,
+            "mission": self.get_mission,
+            "action": self.get_action,
+            "outcome": self.get_connected_outcome,
+            "lesson": self.get_lesson_candidate,
+        }
+        missing_message = "Loop View could not find one of the requested work items."
+        for kind, record_id in refs.items():
+            record = getters[kind](record_id)
+            if record is None:
+                return _fail(
+                    "not_found",
+                    "CS_LOOP_REF_NOT_FOUND",
+                    missing_message,
+                    resource=kind,
+                    resource_id=record_id,
+                )
+            if record.get("scope") != scope:
+                return _fail(
+                    "scope_denied",
+                    "CS_SCOPE_DENIED",
+                    "Loop View cannot show work from outside the requested workspace.",
+                    resource=kind,
+                    resource_id=record_id,
+                    resource_scope=record.get("scope") if isinstance(record.get("scope"), dict) else None,
+                )
+            records[kind] = record
+
+        if "lesson" in records:
+            trajectory_id = str(records["lesson"].get("trajectory_id") or "")
+            if not trajectory_id:
+                return _fail(
+                    "lineage_mismatch",
+                    "CS_LOOP_LINEAGE_MISMATCH",
+                    "Loop View could not show one journey because the selected work items do not belong to the same evidence-backed journey.",
+                    resource="lesson",
+                    resource_id=lesson_id,
+                    mismatches=[
+                        {
+                            "resource": "lesson",
+                            "field": "trajectory_id",
+                            "expected": "trajectory reference",
+                            "actual": None,
+                        }
+                    ],
+                )
+            trajectory = self.get_trajectory(trajectory_id)
+            if trajectory is None:
+                return _fail(
+                    "not_found",
+                    "CS_LOOP_REF_NOT_FOUND",
+                    missing_message,
+                    resource="trajectory",
+                    resource_id=trajectory_id,
+                )
+            if trajectory.get("scope") != scope:
+                return _fail(
+                    "scope_denied",
+                    "CS_SCOPE_DENIED",
+                    "Loop View cannot show work from outside the requested workspace.",
+                    resource="trajectory",
+                    resource_id=trajectory_id,
+                    resource_scope=trajectory.get("scope") if isinstance(trajectory.get("scope"), dict) else None,
+                )
+            records["trajectory"] = trajectory
+
+        def _ref_values(record: dict[str, Any]) -> list[str]:
+            refs_value = record.get("evidence_refs", [])
+            return [str(ref) for ref in refs_value if isinstance(ref, str)]
+
+        def _bundle_id(kind: str, record: dict[str, Any]) -> str:
+            if kind in {"brief", "claim"}:
+                return str(record.get("evidence_bundle", {}).get("evidence_bundle_id") or "")
+            if kind == "memory":
+                return str(
+                    record.get("source", {}).get("evidence_bundle_id")
+                    or record.get("provenance", {}).get("source_evidence_bundle_id")
+                    or ""
+                )
+            if kind in {"mission", "action"}:
+                return str(record.get("evidence", {}).get("evidence_bundle_id") or "")
+            if kind in {"lesson", "trajectory"}:
+                for ref in _ref_values(record):
+                    if ref.startswith("evidence_bundle:"):
+                        return ref.split(":", 1)[1]
+            return ""
+
+        def _artifact_refs(kind: str, record: dict[str, Any]) -> list[str]:
+            if kind in {"brief", "claim"}:
+                refs_value = record.get("evidence_bundle", {}).get("artifact_refs", [])
+            elif kind == "memory":
+                refs_value = record.get("source", {}).get("artifact_refs") or record.get("provenance", {}).get("source_artifact_refs", [])
+            elif kind in {"mission", "action"}:
+                refs_value = record.get("evidence", {}).get("artifact_refs", [])
+            elif kind in {"lesson", "trajectory"}:
+                refs_value = [ref for ref in _ref_values(record) if ref.startswith("artifact:")]
+            elif kind == "conversation":
+                source_artifact_id = str(record.get("source_artifact_id") or "")
+                refs_value = [f"artifact:{source_artifact_id}"] if source_artifact_id else []
+            else:
+                refs_value = []
+            return [str(ref) for ref in refs_value if isinstance(ref, str)]
+
+        lineage_message = (
+            "Loop View could not show one journey because the selected work items do not belong to the same evidence-backed journey."
+        )
+        mismatches: list[dict[str, Any]] = []
+        bundle_values = [
+            {"resource": kind, "resource_id": refs.get(kind, records[kind].get(f"{kind}_id", "")), "evidence_bundle_id": _bundle_id(kind, record)}
+            for kind, record in records.items()
+            if kind in {"brief", "claim", "memory", "mission", "action", "lesson", "trajectory"}
+        ]
+        shared_bundle_id = next((entry["evidence_bundle_id"] for entry in bundle_values if entry["evidence_bundle_id"]), "")
+        if shared_bundle_id:
+            for entry in bundle_values:
+                if not entry["evidence_bundle_id"] or entry["evidence_bundle_id"] != shared_bundle_id:
+                    mismatches.append(
+                        {
+                            "resource": entry["resource"],
+                            "resource_id": entry["resource_id"],
+                            "field": "evidence_bundle_id",
+                            "expected": shared_bundle_id,
+                            "actual": entry["evidence_bundle_id"] or None,
+                        }
+                    )
+
+        if "mission" in records and claim_id:
+            mission_claim_id = str(records["mission"].get("source_claim", {}).get("claim_id") or "")
+            if mission_claim_id != claim_id:
+                mismatches.append(
+                    {
+                        "resource": "mission",
+                        "resource_id": mission_id,
+                        "field": "source_claim.claim_id",
+                        "expected": claim_id,
+                        "actual": mission_claim_id or None,
+                    }
+                )
+        if "action" in records and mission_id and str(records["action"].get("mission_id") or "") != mission_id:
+            mismatches.append(
+                {
+                    "resource": "action",
+                    "resource_id": action_id,
+                    "field": "mission_id",
+                    "expected": mission_id,
+                    "actual": records["action"].get("mission_id"),
+                }
+            )
+        if "action" in records and claim_id and str(records["action"].get("source_claim_id") or "") != claim_id:
+            mismatches.append(
+                {
+                    "resource": "action",
+                    "resource_id": action_id,
+                    "field": "source_claim_id",
+                    "expected": claim_id,
+                    "actual": records["action"].get("source_claim_id"),
+                }
+            )
+        if "trajectory" in records:
+            trajectory_refs = set(_ref_values(records["trajectory"]))
+            if mission_id and str(records["trajectory"].get("mission_id") or "") != mission_id:
+                mismatches.append(
+                    {
+                        "resource": "trajectory",
+                        "resource_id": records["trajectory"].get("trajectory_id"),
+                        "field": "mission_id",
+                        "expected": mission_id,
+                        "actual": records["trajectory"].get("mission_id"),
+                    }
+                )
+            if action_id and f"action:{action_id}" not in trajectory_refs:
+                mismatches.append(
+                    {
+                        "resource": "trajectory",
+                        "resource_id": records["trajectory"].get("trajectory_id"),
+                        "field": "evidence_refs",
+                        "expected": f"action:{action_id}",
+                        "actual": sorted(ref for ref in trajectory_refs if ref.startswith("action:")),
+                    }
+                )
+            if claim_id and f"claim:{claim_id}" not in trajectory_refs:
+                mismatches.append(
+                    {
+                        "resource": "trajectory",
+                        "resource_id": records["trajectory"].get("trajectory_id"),
+                        "field": "evidence_refs",
+                        "expected": f"claim:{claim_id}",
+                        "actual": sorted(ref for ref in trajectory_refs if ref.startswith("claim:")),
+                    }
+                )
+
+        if mismatches:
+            return _fail(
+                "lineage_mismatch",
+                "CS_LOOP_LINEAGE_MISMATCH",
+                lineage_message,
+                resource="product_loop",
+                mismatches=mismatches,
+            )
+
+        shared_artifact_refs = sorted(
+            {
+                artifact_ref
+                for kind, record in records.items()
+                for artifact_ref in _artifact_refs(kind, record)
+                if artifact_ref
+            }
+        )
+        validation = _validation_base()
+        validation.update(
+            {
+                "status": "validated",
+                "validated_refs": [f"{kind}:{record_id}" for kind, record_id in refs.items()],
+                "same_scope": True,
+                "same_lineage": True,
+                "shared_evidence_bundle_id": shared_bundle_id or None,
+                "shared_artifact_refs": shared_artifact_refs,
+            }
+        )
         learn_ref = f"learn:{lesson_id}" if lesson_id else (f"mission_outcome:{outcome_id}" if outcome_id else None)
         learn_native_ref = f"lesson:{lesson_id}" if lesson_id else None
         loop_base = {
             "schema_version": "cs.product_loop_view.v0",
             "status": "visible",
             "scope": scope,
+            "loop_validation": validation,
             "item_id": lesson_id or mission_id or action_id or memory_id or claim_id or brief_id or conversation_id,
             "stages": [
                 {"stage": "Inbox", "visible": True, "ref": f"conversation:{conversation_id}" if conversation_id else None},

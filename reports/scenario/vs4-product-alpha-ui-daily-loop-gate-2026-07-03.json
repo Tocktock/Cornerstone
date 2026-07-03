@@ -10,7 +10,7 @@
     "report:reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
   ],
   "ids": {
-    "git_commit": "547958496"
+    "git_commit": "332f6bdaa"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -44,7 +44,8 @@
     "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+    "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
   },
   "scenario_count": 16,
   "scenario_gate_conditions": {
@@ -53,6 +54,7 @@
     "proof_boundary": true,
     "reference_image_boundary": true,
     "report_identity": true,
+    "return_to_work_lineage_guard": true,
     "row_coverage": true,
     "row_identity": true,
     "row_status": true,
@@ -68,6 +70,7 @@
     "proof_boundary_failures": 0,
     "reference_image_boundary_failures": 0,
     "report_identity_failures": 0,
+    "return_to_work_lineage_guard_failures": 0,
     "row_coverage_failures": 0,
     "row_identity_failures": 0,
     "row_status_failures": 0,
@@ -117,18 +120,15 @@
       "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.cli.v0",
-    "slice": "slice-021-runtime-loop-coherence",
+    "slice": "slice-022-return-to-work-lineage-guard",
     "source_tree": {
       "dirty_paths": [
-        "Makefile",
-        "README.md",
-        "docs/sot/README.md",
         "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md",
-        "packages/cornerstone_cli/acceptance.py",
         "packages/cornerstone_cli/main.py",
         "packages/cornerstone_cli/product_runtime.py",
         "packages/cornerstone_cli/runtime.py",
@@ -148,6 +148,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -156,6 +166,7 @@
         "reports/human-gates/vs3/VS3-H05.json",
         "reports/human-gates/vs3/VS3-H06.json",
         "reports/human-gates/vs3/VS3-H07.json",
+        "reports/human-gates/vs4/VS4-H01.json",
         "reports/observability/vs3-observability-proof.json",
         "reports/observability/vs3-operator-status.dom.html",
         "reports/policy/vs3-opa-policy-proof.json",
@@ -197,16 +208,15 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "tests/scenario/test_scaffold_cli.py",
-        "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -239,6 +249,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -247,6 +267,7 @@
         "reports/human-gates/vs3/VS3-H05.json",
         "reports/human-gates/vs3/VS3-H06.json",
         "reports/human-gates/vs3/VS3-H07.json",
+        "reports/human-gates/vs4/VS4-H01.json",
         "reports/observability/vs3-observability-proof.json",
         "reports/observability/vs3-operator-status.dom.html",
         "reports/policy/vs3-opa-policy-proof.json",
@@ -288,14 +309,14 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -309,7 +330,7 @@
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "c010f703dd5d6f2b170f88d7b99c59184c84a4237ab222f47cdaff303455961f",
+      "generated_dirty_snapshot_hash": "1f3950d5b6b16db438164f6d88ad5dee793a7561fa94190c48c9f8b225e173c2",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -349,21 +370,21 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "e5ff9e8678582f08459da37c1701c8ce285b221015c95eb46ee571847aa00fb1",
+          "sha256": "8e78e8e342226c87326d80d51c16d82cb644d0645295690dce86c7cbb9f7b450",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "5aad0f2846b82db57dffe7d1d001299e434a04a57370f0d222a83cc0e82dca7a",
+          "sha256": "97625f0ba81a147c488e9fdcad78a7784e2ee897c6d5774c5f5e44e1483d9777",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 333936,
+          "bytes": 339657,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "0a22ae372003693a62837625ac9f1a88771f9e446d3ae10af243c665be43b0b8",
+          "sha256": "e2087dcac447c10f61917630046cdcca9c91e5468c2fd48288162c7ee9fef706",
           "state": "present",
           "status": "M"
         },
@@ -431,18 +452,74 @@
           "status": "??"
         },
         {
-          "bytes": 0,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
-          "sha256": null,
-          "state": "non_file",
-          "status": "??"
+          "bytes": 454469,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/browser-proof.json",
+          "sha256": "894cfad0a97b9f5bcc7c8805f8a1053c09f28387fde3d5b7b18de08e3f2598ee",
+          "state": "present",
+          "status": "M"
         },
         {
-          "bytes": 0,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
-          "sha256": null,
-          "state": "non_file",
-          "status": "??"
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
+          "sha256": "15b985224abab7438657dbc1187763a9305566116a16868a4d43753ca6c47b44",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 970730,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json",
+          "sha256": "5fd5dfc67534215a9432e0cd7580153d7427d8ec3a39ef2e58f3a09c930613bc",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+          "sha256": "15b985224abab7438657dbc1187763a9305566116a16868a4d43753ca6c47b44",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 454463,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/browser-proof.json",
+          "sha256": "1c72da44b4413102cc5e64e5bcdac09745235c0027319725c369833cfc3ccfe5",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
+          "sha256": "a3156d9f5f64cd62f25cfa4848ed31604a60da22761bc470801a0ed700e7f249",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 204001,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
+          "sha256": "4ba1bb1d3074aa0eeec99e17319c4073850e557d514826806a112a689d708d03",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 970730,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json",
+          "sha256": "f13d31fe5510d89205c3481bf783328d1b8ac419074841fd8685dae25a06070f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+          "sha256": "a3156d9f5f64cd62f25cfa4848ed31604a60da22761bc470801a0ed700e7f249",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 204001,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
+          "sha256": "4ba1bb1d3074aa0eeec99e17319c4073850e557d514826806a112a689d708d03",
+          "state": "present",
+          "status": "M"
         },
         {
           "bytes": 198922,
@@ -497,6 +574,13 @@
           "bytes": 5382,
           "path": "reports/human-gates/vs3/VS3-H07.json",
           "sha256": "f7aef135c9b7b1900e898498f0ce21271a2e1e2eabd5b66d5f99f15384eeda96",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 16177,
+          "path": "reports/human-gates/vs4/VS4-H01.json",
+          "sha256": "a57ebf182bb7725935a36478533cf82513235621a8609b29ea0c66a6b5a37441",
           "state": "present",
           "status": "M"
         },
@@ -872,6 +956,20 @@
           "status": "M"
         },
         {
+          "bytes": 3096149,
+          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+          "sha256": "a0d90cb4ffba6d639e3728cc63d9e2df5bfca3db28a3bb53bba4705fc870ab1b",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 92698,
+          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
+          "sha256": "306ee39be1c9f8939cea2516fd6e211f1132012f15cd46f86f0003270640b209",
+          "state": "present",
+          "status": "M"
+        },
+        {
           "bytes": 143764,
           "path": "reports/security/vs3-connectorhub-source-proof.json",
           "sha256": "7dbcf461f63324804dc8ac4085cd9ec686cff8645f2b3988712f2d50388cbcfc",
@@ -908,82 +1006,47 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "547958496",
-      "verified_base_commit_full": "5479584963a36458fa7c021db718d926e2ef2f8d",
-      "verified_base_tree_hash": "0e7519e87ddd0f4fe96ba4e170d4ec07a10f0ceb",
+      "verified_base_commit": "332f6bdaa",
+      "verified_base_commit_full": "332f6bdaac8d934a94918ff87911cccb6f0ffe67",
+      "verified_base_tree_hash": "08adb88f5990081841ab44cfaf523e11ccd06435",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 33919,
-          "path": "Makefile",
-          "sha256": "343ff25772faedd8c8600f39e4aee3b373470740ee1c4ca362e73418deebcb21",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 71114,
-          "path": "README.md",
-          "sha256": "f822d8a00789f7c3cf54b98b3d684be06a69e622d72852c9676031e5040d4c33",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 8781,
-          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
-          "sha256": "bcfe8a2321e83a28371c1843e3562f3df68de1c413654acd32d859c42c1e849c",
-          "state": "present",
-          "status": "??"
-        },
-        {
-          "bytes": 34852,
-          "path": "docs/sot/README.md",
-          "sha256": "511de051cc54e09c369758aeb7d809e3b1197ee5fead86900a3f7a00e6e99ed4",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 107267,
-          "path": "packages/cornerstone_cli/acceptance.py",
-          "sha256": "5daa99e25242e77b23399a28ca1fa9f224b0e12817555bf1d83cda865f838ab6",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 1285462,
+          "bytes": 1291095,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "29ff88bdb2f957b4be61ed23694faf15da490928c5d846e712d58aaeff4d5811",
+          "sha256": "de6cff53c0f61f953e4e507956d02bcda68820fc5c116091867bd24108ea7d35",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 311859,
+          "bytes": 319951,
           "path": "packages/cornerstone_cli/product_runtime.py",
-          "sha256": "c225912aadd962ebf6460ada63b803088cf8f28add1b160e91cb311c55584321",
+          "sha256": "cace4538a5f8f95c741310c8a8e34598caac9c326d770eb1ccfc1eac9438db86",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 566828,
+          "bytes": 579871,
           "path": "packages/cornerstone_cli/runtime.py",
-          "sha256": "8e0cd13dffbaa2fecba0b3a9fa0909180dc49a43ac418d4a01baec6e005bd77b",
+          "sha256": "6d18d679d487472beb91831bc30af6904adc188cb1aca323832961b5df8fde6d",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1934893,
+          "bytes": 1945742,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "d404e1b087ac09f28c354ae5c62c3ad4c780dee5001233c4de700c27a8ee0fc1",
+          "sha256": "47d70059adff2e749ae46606c120730378dfb122e29316458141c74c8890bb42",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1173889,
+          "bytes": 1182969,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "9fc498cdea49ac6c7caf8e32b6c426eb6075acfa3e2bf6735a8bd80671433755",
+          "sha256": "5c03861dfdfdc3b948681f4c01f018801ec68e3ae2eed963a3bc1191a7a28d0e",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "6b53d113396d127af6002e2be908390427bfac539e4e17d82c1ae00814d6ce99",
+      "verified_source_worktree_hash": "454bf92f7fdfb7508aab29ccf64a6ef698e6c25e2bf60c1b87fe0eaeefafe8a3",
       "worktree_dirty_at_verification": true
     },
     "status": "success",
@@ -1023,13 +1086,13 @@
   "vs4_gate_validation": {
     "actual_ids": [
       "VS4-GATE-001",
-      "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
       "VS4-UI-010",
       "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
+      "VS4-UI-015",
       "VS4-UI-016",
       "VS4-STATE-001",
       "VS4-REF-002",
@@ -1047,6 +1110,7 @@
       "proof_boundary": true,
       "reference_image_boundary": true,
       "report_identity": true,
+      "return_to_work_lineage_guard": true,
       "row_coverage": true,
       "row_identity": true,
       "row_status": true,
@@ -1066,13 +1130,13 @@
       "VS4-REG-006",
       "VS4-REG-007",
       "VS4-STATE-001",
-      "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
       "VS4-UI-010",
       "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
+      "VS4-UI-015",
       "VS4-UI-016"
     ],
     "expected_scenario_count": 16,
@@ -1085,6 +1149,7 @@
       "proof_boundary_failures": 0,
       "reference_image_boundary_failures": 0,
       "report_identity_failures": 0,
+      "return_to_work_lineage_guard_failures": 0,
       "row_coverage_failures": 0,
       "row_identity_failures": 0,
       "row_status_failures": 0,
@@ -1120,7 +1185,8 @@
       "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+      "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+      "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
     "scenario_filter": [
       "VS4-GATE-001",
@@ -1131,13 +1197,13 @@
       "VS4-REG-006",
       "VS4-REG-007",
       "VS4-STATE-001",
-      "VS4-UI-001",
       "VS4-UI-008",
       "VS4-UI-009",
       "VS4-UI-010",
       "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
+      "VS4-UI-015",
       "VS4-UI-016"
     ],
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
@@ -1160,6 +1226,16 @@
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.dom.html",
         "reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
         "reports/db/vs3-postgres-rls-proof.json",
         "reports/human-gates/vs3/VS3-H01.json",
         "reports/human-gates/vs3/VS3-H02.json",
@@ -1168,6 +1244,7 @@
         "reports/human-gates/vs3/VS3-H05.json",
         "reports/human-gates/vs3/VS3-H06.json",
         "reports/human-gates/vs3/VS3-H07.json",
+        "reports/human-gates/vs4/VS4-H01.json",
         "reports/observability/vs3-observability-proof.json",
         "reports/observability/vs3-operator-status.dom.html",
         "reports/policy/vs3-opa-policy-proof.json",
@@ -1209,14 +1286,14 @@
         "reports/scenario/vs3-regression-vs0-operator-acceptance-ui.json",
         "reports/scenario/vs3-regression-vs0-regression-guardrails.json",
         "reports/scenario/vs3-regression-vs1-ontology-suggest-promote.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
         "reports/security/vs3-connectorhub-source-proof.json",
         "reports/security/vs3-egress-sandbox-proof.json",
         "reports/security/vs3-final-regression-proof.json",
         "reports/security/vs3-request-context-proof.json",
         "reports/security/vs3-tool-registry-proof.json",
         "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
-        "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_0e157d80388528f5.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_78b1339ecaebe2e7.json",
         "reports/runtime/vs3-tool-registry-state/agents/pack_capabilities/agentpackcap_cfd5997de2bb0f63.json",
@@ -1230,7 +1307,7 @@
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_684681fd7d87aca9.json",
         "reports/runtime/vs3-tool-registry-state/packs/updates/packupd_741ad138af8e6e33.json"
       ],
-      "generated_dirty_snapshot_hash": "c010f703dd5d6f2b170f88d7b99c59184c84a4237ab222f47cdaff303455961f",
+      "generated_dirty_snapshot_hash": "1f3950d5b6b16db438164f6d88ad5dee793a7561fa94190c48c9f8b225e173c2",
       "generated_dirty_snapshot_paths": [
         {
           "bytes": 7929,
@@ -1270,21 +1347,21 @@
         {
           "bytes": 86801,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/browser-proof.json",
-          "sha256": "e5ff9e8678582f08459da37c1701c8ce285b221015c95eb46ee571847aa00fb1",
+          "sha256": "8e78e8e342226c87326d80d51c16d82cb644d0645295690dce86c7cbb9f7b450",
           "state": "present",
           "status": "M"
         },
         {
           "bytes": 73058,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow-trace.json",
-          "sha256": "5aad0f2846b82db57dffe7d1d001299e434a04a57370f0d222a83cc0e82dca7a",
+          "sha256": "97625f0ba81a147c488e9fdcad78a7784e2ee897c6d5774c5f5e44e1483d9777",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 333936,
+          "bytes": 339657,
           "path": "reports/browser/vs0-operator-acceptance-ui-2026-06-14/workflow.dom.html",
-          "sha256": "0a22ae372003693a62837625ac9f1a88771f9e446d3ae10af243c665be43b0b8",
+          "sha256": "e2087dcac447c10f61917630046cdcca9c91e5468c2fd48288162c7ee9fef706",
           "state": "present",
           "status": "M"
         },
@@ -1352,18 +1429,74 @@
           "status": "??"
         },
         {
-          "bytes": 0,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/",
-          "sha256": null,
-          "state": "non_file",
-          "status": "??"
+          "bytes": 454469,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/browser-proof.json",
+          "sha256": "894cfad0a97b9f5bcc7c8805f8a1053c09f28387fde3d5b7b18de08e3f2598ee",
+          "state": "present",
+          "status": "M"
         },
         {
-          "bytes": 0,
-          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/",
-          "sha256": null,
-          "state": "non_file",
-          "status": "??"
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
+          "sha256": "15b985224abab7438657dbc1187763a9305566116a16868a4d43753ca6c47b44",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 970730,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json",
+          "sha256": "5fd5dfc67534215a9432e0cd7580153d7427d8ec3a39ef2e58f3a09c930613bc",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
+          "sha256": "15b985224abab7438657dbc1187763a9305566116a16868a4d43753ca6c47b44",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 454463,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/browser-proof.json",
+          "sha256": "1c72da44b4413102cc5e64e5bcdac09745235c0027319725c369833cfc3ccfe5",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
+          "sha256": "a3156d9f5f64cd62f25cfa4848ed31604a60da22761bc470801a0ed700e7f249",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 204001,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
+          "sha256": "4ba1bb1d3074aa0eeec99e17319c4073850e557d514826806a112a689d708d03",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 970730,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json",
+          "sha256": "f13d31fe5510d89205c3481bf783328d1b8ac419074841fd8685dae25a06070f",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 270000,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
+          "sha256": "a3156d9f5f64cd62f25cfa4848ed31604a60da22761bc470801a0ed700e7f249",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 204001,
+          "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
+          "sha256": "4ba1bb1d3074aa0eeec99e17319c4073850e557d514826806a112a689d708d03",
+          "state": "present",
+          "status": "M"
         },
         {
           "bytes": 198922,
@@ -1418,6 +1551,13 @@
           "bytes": 5382,
           "path": "reports/human-gates/vs3/VS3-H07.json",
           "sha256": "f7aef135c9b7b1900e898498f0ce21271a2e1e2eabd5b66d5f99f15384eeda96",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 16177,
+          "path": "reports/human-gates/vs4/VS4-H01.json",
+          "sha256": "a57ebf182bb7725935a36478533cf82513235621a8609b29ea0c66a6b5a37441",
           "state": "present",
           "status": "M"
         },
@@ -1793,6 +1933,20 @@
           "status": "M"
         },
         {
+          "bytes": 3096149,
+          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+          "sha256": "a0d90cb4ffba6d639e3728cc63d9e2df5bfca3db28a3bb53bba4705fc870ab1b",
+          "state": "present",
+          "status": "M"
+        },
+        {
+          "bytes": 92698,
+          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
+          "sha256": "306ee39be1c9f8939cea2516fd6e211f1132012f15cd46f86f0003270640b209",
+          "state": "present",
+          "status": "M"
+        },
+        {
           "bytes": 143764,
           "path": "reports/security/vs3-connectorhub-source-proof.json",
           "sha256": "7dbcf461f63324804dc8ac4085cd9ec686cff8645f2b3988712f2d50388cbcfc",
@@ -1829,82 +1983,47 @@
         }
       ],
       "report_generated_before_commit": true,
-      "verified_base_commit": "547958496",
-      "verified_base_commit_full": "5479584963a36458fa7c021db718d926e2ef2f8d",
-      "verified_base_tree_hash": "0e7519e87ddd0f4fe96ba4e170d4ec07a10f0ceb",
+      "verified_base_commit": "332f6bdaa",
+      "verified_base_commit_full": "332f6bdaac8d934a94918ff87911cccb6f0ffe67",
+      "verified_base_tree_hash": "08adb88f5990081841ab44cfaf523e11ccd06435",
       "verified_source_snapshot_paths": [
         {
-          "bytes": 33919,
-          "path": "Makefile",
-          "sha256": "343ff25772faedd8c8600f39e4aee3b373470740ee1c4ca362e73418deebcb21",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 71114,
-          "path": "README.md",
-          "sha256": "f822d8a00789f7c3cf54b98b3d684be06a69e622d72852c9676031e5040d4c33",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 8781,
-          "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
-          "sha256": "bcfe8a2321e83a28371c1843e3562f3df68de1c413654acd32d859c42c1e849c",
-          "state": "present",
-          "status": "??"
-        },
-        {
-          "bytes": 34852,
-          "path": "docs/sot/README.md",
-          "sha256": "511de051cc54e09c369758aeb7d809e3b1197ee5fead86900a3f7a00e6e99ed4",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 107267,
-          "path": "packages/cornerstone_cli/acceptance.py",
-          "sha256": "5daa99e25242e77b23399a28ca1fa9f224b0e12817555bf1d83cda865f838ab6",
-          "state": "present",
-          "status": "M"
-        },
-        {
-          "bytes": 1285462,
+          "bytes": 1291095,
           "path": "packages/cornerstone_cli/main.py",
-          "sha256": "29ff88bdb2f957b4be61ed23694faf15da490928c5d846e712d58aaeff4d5811",
+          "sha256": "de6cff53c0f61f953e4e507956d02bcda68820fc5c116091867bd24108ea7d35",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 311859,
+          "bytes": 319951,
           "path": "packages/cornerstone_cli/product_runtime.py",
-          "sha256": "c225912aadd962ebf6460ada63b803088cf8f28add1b160e91cb311c55584321",
+          "sha256": "cace4538a5f8f95c741310c8a8e34598caac9c326d770eb1ccfc1eac9438db86",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 566828,
+          "bytes": 579871,
           "path": "packages/cornerstone_cli/runtime.py",
-          "sha256": "8e0cd13dffbaa2fecba0b3a9fa0909180dc49a43ac418d4a01baec6e005bd77b",
+          "sha256": "6d18d679d487472beb91831bc30af6904adc188cb1aca323832961b5df8fde6d",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1934893,
+          "bytes": 1945742,
           "path": "packages/cornerstone_cli/scenarios.py",
-          "sha256": "d404e1b087ac09f28c354ae5c62c3ad4c780dee5001233c4de700c27a8ee0fc1",
+          "sha256": "47d70059adff2e749ae46606c120730378dfb122e29316458141c74c8890bb42",
           "state": "present",
           "status": "M"
         },
         {
-          "bytes": 1173889,
+          "bytes": 1182969,
           "path": "tests/scenario/test_scaffold_cli.py",
-          "sha256": "9fc498cdea49ac6c7caf8e32b6c426eb6075acfa3e2bf6735a8bd80671433755",
+          "sha256": "5c03861dfdfdc3b948681f4c01f018801ec68e3ae2eed963a3bc1191a7a28d0e",
           "state": "present",
           "status": "M"
         }
       ],
-      "verified_source_worktree_hash": "6b53d113396d127af6002e2be908390427bfac539e4e17d82c1ae00814d6ce99",
+      "verified_source_worktree_hash": "454bf92f7fdfb7508aab29ccf64a6ef698e6c25e2bf60c1b87fe0eaeefafe8a3",
       "worktree_dirty_at_verification": true
     },
     "status": "passed",

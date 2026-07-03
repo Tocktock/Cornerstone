@@ -325,6 +325,7 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-return-to-work-lineage",
     "make verify-vs4-product-alpha-runtime-loop-coherence",
     "make verify-vs4-product-alpha-runtime-backed-ops-inbox",
     "make verify-vs4-product-alpha-interactive-ops-inbox",
@@ -2393,7 +2394,16 @@ Search phrase: alpha-evidence-anchor.</code>
         runtime_ops_inbox_human_acceptance_claimed: 0,
         runtime_ops_inbox_approved_memory_before_review: 0,
         runtime_ops_inbox_action_executed: 0,
-        runtime_ops_inbox_authority_expanded: 0
+        runtime_ops_inbox_authority_expanded: 0,
+        vs4_loop_missing_ref_accepted: 0,
+        vs4_loop_cross_scope_ref_accepted: 0,
+        vs4_loop_lineage_mismatch_accepted: 0,
+        vs4_loop_invalid_ref_created_product_loop: 0,
+        vs4_loop_invalid_ref_created_audit: 0,
+        vs4_loop_invalid_ref_authority_expanded: 0,
+        vs4_loop_invalid_ref_live_writeback: 0,
+        vs4_loop_api_parity_failed: 0,
+        vs4_loop_product_language_error_missing: 0
       }}
     }};
     function traceVs4(name, payload) {{
@@ -3105,6 +3115,68 @@ Search phrase: alpha-evidence-anchor.</code>
           action_id: action.action_id,
           lesson_id: lessonId
         }});
+        const missingLoopResponse = await vs4Api("/product/loop-view", {{
+          brief_id: brief.brief_id + "-missing"
+        }});
+        const crossScopeLoopResponse = await vs4Api("/product/loop-view", {{
+          brief_id: brief.brief_id,
+          workspace_id: "other-workspace"
+        }});
+        const mismatchLoopResponse = await vs4Api("/product/loop-view", {{
+          brief_id: brief.brief_id,
+          claim_id: unsupportedRecord.claim_id
+        }});
+        const loopErrorCodes = (payload) => (payload.errors || []).map((error) => error.code);
+        const missingCodes = loopErrorCodes(missingLoopResponse.payload);
+        const crossScopeCodes = loopErrorCodes(crossScopeLoopResponse.payload);
+        const mismatchCodes = loopErrorCodes(mismatchLoopResponse.payload);
+        const invalidLoopPayloads = [
+          missingLoopResponse.payload,
+          crossScopeLoopResponse.payload,
+          mismatchLoopResponse.payload
+        ];
+        const invalidPayloadCreatedLoop = invalidLoopPayloads.some((payload) => Boolean(payload.product_loop || payload.ids?.loop_id));
+        const invalidPayloadCreatedAudit = invalidLoopPayloads.some((payload) => (payload.audit_refs || []).length > 0);
+        const invalidPayloadExpandedAuthority = invalidLoopPayloads.some((payload) => {{
+          const validation = payload.loop_validation || {{}};
+          return validation.invalid_refs_changed_authority === true || validation.invalid_refs_live_writeback === true;
+        }});
+        const productLanguageVisible = invalidLoopPayloads.every((payload) =>
+          (payload.errors || []).some((error) => String(error.message || "").includes("Loop View"))
+        );
+        vs4State.loop_lineage_guard = {{
+          valid_loop_visible: loopViewResponse.response.status === 200 &&
+            (loopViewResponse.payload.product_loop || {{}}).loop_validation?.status === "validated",
+          api_missing_ref_denied: missingLoopResponse.response.status === 404 &&
+            missingCodes.includes("CS_LOOP_REF_NOT_FOUND"),
+          api_cross_scope_denied: crossScopeLoopResponse.response.status === 403 &&
+            crossScopeCodes.includes("CS_SCOPE_DENIED"),
+          api_lineage_mismatch_denied: mismatchLoopResponse.response.status === 409 &&
+            mismatchCodes.includes("CS_LOOP_LINEAGE_MISMATCH"),
+          product_language_errors: productLanguageVisible,
+          invalid_refs_created_product_loop: invalidPayloadCreatedLoop,
+          invalid_refs_created_audit: invalidPayloadCreatedAudit,
+          invalid_refs_changed_authority: invalidPayloadExpandedAuthority,
+          invalid_refs_live_writeback: invalidPayloadExpandedAuthority,
+          missing_status: missingLoopResponse.response.status,
+          cross_scope_status: crossScopeLoopResponse.response.status,
+          mismatch_status: mismatchLoopResponse.response.status,
+          missing_error_codes: missingCodes,
+          cross_scope_error_codes: crossScopeCodes,
+          mismatch_error_codes: mismatchCodes
+        }};
+        vs4State.negative_evidence.vs4_loop_missing_ref_accepted = vs4State.loop_lineage_guard.api_missing_ref_denied ? 0 : 1;
+        vs4State.negative_evidence.vs4_loop_cross_scope_ref_accepted = vs4State.loop_lineage_guard.api_cross_scope_denied ? 0 : 1;
+        vs4State.negative_evidence.vs4_loop_lineage_mismatch_accepted = vs4State.loop_lineage_guard.api_lineage_mismatch_denied ? 0 : 1;
+        vs4State.negative_evidence.vs4_loop_invalid_ref_created_product_loop = invalidPayloadCreatedLoop ? 1 : 0;
+        vs4State.negative_evidence.vs4_loop_invalid_ref_created_audit = invalidPayloadCreatedAudit ? 1 : 0;
+        vs4State.negative_evidence.vs4_loop_invalid_ref_authority_expanded = invalidPayloadExpandedAuthority ? 1 : 0;
+        vs4State.negative_evidence.vs4_loop_invalid_ref_live_writeback = invalidPayloadExpandedAuthority ? 1 : 0;
+        vs4State.negative_evidence.vs4_loop_api_parity_failed =
+          vs4State.loop_lineage_guard.api_missing_ref_denied &&
+          vs4State.loop_lineage_guard.api_cross_scope_denied &&
+          vs4State.loop_lineage_guard.api_lineage_mismatch_denied ? 0 : 1;
+        vs4State.negative_evidence.vs4_loop_product_language_error_missing = productLanguageVisible ? 0 : 1;
         applyVs4RuntimeOpsInbox(
           missionControlResponse.payload.mission_control || {{}},
           loopViewResponse.payload.product_loop || {{}}
@@ -3700,6 +3772,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const rowLaneKeys = rows.map((row) => row.dataset.vs4InboxLaneRef || "");
       const selectedContinue = document.querySelector("[data-vs4-inbox-selected-continue]");
       const runtimeProjection = vs4State.runtime_ops_inbox || {{}};
+      const loopGuard = vs4State.loop_lineage_guard || {{}};
       const selectedRecordsText = document.querySelector("[data-vs4-inbox-selected-records]")?.textContent || "";
       const runtimeRows = rows.filter((row) => row.dataset.vs4RuntimeBacked === "true");
       const runtimeRecordRefs = runtimeRows.flatMap((row) => (row.dataset.vs4InboxRuntimeRecordRefs || "").split(" | ").filter(Boolean));
@@ -3762,7 +3835,16 @@ Search phrase: alpha-evidence-anchor.</code>
           vs4State.negative_evidence.runtime_ops_inbox_approved_memory_before_review === 0 &&
           vs4State.negative_evidence.runtime_ops_inbox_action_executed === 0 &&
           vs4State.negative_evidence.runtime_ops_inbox_authority_expanded === 0 &&
-          vs4State.negative_evidence.vs4_runtime_learn_hidden_durable_change === 0
+          vs4State.negative_evidence.vs4_runtime_learn_hidden_durable_change === 0,
+        loop_lineage_guard_valid_loop_visible: loopGuard.valid_loop_visible === true,
+        loop_lineage_guard_api_missing_ref_denied: loopGuard.api_missing_ref_denied === true,
+        loop_lineage_guard_api_cross_scope_denied: loopGuard.api_cross_scope_denied === true,
+        loop_lineage_guard_api_lineage_mismatch_denied: loopGuard.api_lineage_mismatch_denied === true,
+        loop_lineage_guard_product_language_errors: loopGuard.product_language_errors === true,
+        loop_lineage_guard_no_invalid_product_loop: loopGuard.invalid_refs_created_product_loop === false,
+        loop_lineage_guard_no_invalid_audit: loopGuard.invalid_refs_created_audit === false,
+        loop_lineage_guard_no_authority_expansion: loopGuard.invalid_refs_changed_authority === false,
+        loop_lineage_guard_no_live_writeback: loopGuard.invalid_refs_live_writeback === false
       }};
       return {{
         schema_version: "cs.vs4_ops_inbox_triage_proof.v0",
@@ -5712,6 +5794,60 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             outcome_id=str(body.get("outcome_id", "")),
             lesson_id=str(body.get("lesson_id", "")),
         )
+        if result.get("status") == "not_found":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    loop_validation=result.get("loop_validation"),
+                    errors=[
+                        {
+                            "code": result.get("error_code") or "CS_LOOP_REF_NOT_FOUND",
+                            "message": result.get("message") or "Loop View could not find one of the requested work items.",
+                            "resource": result.get("resource"),
+                            "resource_id": result.get("resource_id"),
+                        }
+                    ],
+                ),
+                404,
+            )
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(
+                _json_response(
+                    "denied",
+                    loop_validation=result.get("loop_validation"),
+                    errors=[
+                        {
+                            "code": result.get("error_code") or "CS_SCOPE_DENIED",
+                            "message": result.get("message")
+                            or "Loop View cannot show work from outside the requested workspace.",
+                            "resource": result.get("resource"),
+                            "resource_id": result.get("resource_id"),
+                            "resource_scope": result.get("resource_scope"),
+                        }
+                    ],
+                ),
+                403,
+            )
+            return
+        if result.get("status") == "lineage_mismatch":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    loop_validation=result.get("loop_validation"),
+                    errors=[
+                        {
+                            "code": result.get("error_code") or "CS_LOOP_LINEAGE_MISMATCH",
+                            "message": result.get("message")
+                            or "Loop View could not show one journey because the selected work items do not belong to the same evidence-backed journey.",
+                            "resource": result.get("resource"),
+                            "mismatches": result.get("mismatches", []),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         product_loop = result["product_loop"]
         self._send_json(
             _json_response(

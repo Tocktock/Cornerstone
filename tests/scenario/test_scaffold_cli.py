@@ -14,11 +14,14 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-VS4_ACTIVE_SLICE = "slice-021-runtime-loop-coherence"
+VS4_ACTIVE_SLICE = "slice-022-return-to-work-lineage-guard"
 VS4_ACTIVE_SLICE_CONTRACT = (
-    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md"
 )
 VS4_ACTIVE_SLICE_SCENARIO_COUNT = 16
+VS4_RUNTIME_LOOP_COHERENCE_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
+)
 
 from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
 from cornerstone_cli.scenarios import (
@@ -11415,7 +11418,8 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("slice_contracts", {})["slice_020"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
         )
-        report.setdefault("slice_contracts", {})["slice_021"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_021"] = VS4_RUNTIME_LOOP_COHERENCE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_022"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11434,17 +11438,25 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("proof_boundary", {})["vs4_slice_021_runtime_loop_coherence"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
+        report.setdefault("proof_boundary", {})["vs4_slice_022_return_to_work_lineage_guard"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
         report["active_proof"] = {
             "schema_version": "cs.vs4_active_proof.v0",
             "status": "bound",
-            "slice": VS4_ACTIVE_SLICE,
-            "slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
+            "slice": "slice-021-runtime-loop-coherence",
+            "slice_contract": VS4_RUNTIME_LOOP_COHERENCE_CONTRACT,
             "desktop_browser_proof_dir": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence",
             "mobile_browser_proof_dir": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile",
             "desktop_browser_proof_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
             "mobile_browser_proof_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
             "active_paths_match_slice_021": True,
             "reference_images_are_not_pass_evidence": True,
+        }
+        report["lineage_guard_slice"] = {
+            "slice": VS4_ACTIVE_SLICE,
+            "slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
+            "proof_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
         }
         unsafe_markers = {
             "http_text_intake_forces_user_paste_untrusted": True,
@@ -11468,6 +11480,15 @@ class ScaffoldCliTests(unittest.TestCase):
             "runtime_learn_candidate_has_audit_refs": True,
             "runtime_learn_candidate_review_only": True,
             "action_approval_copy_coherent": True,
+            "loop_lineage_guard_valid_loop_visible": True,
+            "loop_lineage_guard_api_missing_ref_denied": True,
+            "loop_lineage_guard_api_cross_scope_denied": True,
+            "loop_lineage_guard_api_lineage_mismatch_denied": True,
+            "loop_lineage_guard_product_language_errors": True,
+            "loop_lineage_guard_no_invalid_product_loop": True,
+            "loop_lineage_guard_no_invalid_audit": True,
+            "loop_lineage_guard_no_authority_expansion": True,
+            "loop_lineage_guard_no_live_writeback": True,
         }
         report["browser_proof"].setdefault("ops_inbox_triage_markers", {}).update(loop_markers)
         report["browser_proof"].setdefault("ops_inbox_triage", {}).setdefault("markers", {}).update(loop_markers)
@@ -11475,6 +11496,45 @@ class ScaffoldCliTests(unittest.TestCase):
         report["mobile_browser_proof"].setdefault("ops_inbox_triage", {}).setdefault("markers", {}).update(loop_markers)
         report.setdefault("cli_workflow", {}).setdefault("checks", {})["text_trust_downgrade"] = True
         report["cli_workflow"]["checks"]["runtime_learn_cli_parity"] = True
+        report["cli_workflow"]["checks"]["loop_lineage_guard_cli_parity"] = True
+        report["cli_workflow"]["checks"]["loop_missing_ref_denied"] = True
+        report["cli_workflow"]["checks"]["loop_cross_scope_denied"] = True
+        report["cli_workflow"]["checks"]["loop_lineage_mismatch_denied"] = True
+        report["cli_workflow"]["checks"]["loop_invalid_no_side_effects"] = True
+        report["cli_workflow"]["checks"]["loop_product_language_errors"] = True
+        report.setdefault("cli_workflow", {}).setdefault("transcripts", {}).setdefault(
+            "product_loop_view_missing_brief",
+            {
+                "exit_code": 3,
+                "stdout_json": {
+                    "status": "failed",
+                    "errors": [{"code": "CS_LOOP_REF_NOT_FOUND", "message": "Loop View could not be shown."}],
+                    "loop_validation": {"failure": "not_found"},
+                },
+            },
+        )
+        report["cli_workflow"]["transcripts"].setdefault(
+            "product_loop_view_cross_scope_brief",
+            {
+                "exit_code": 6,
+                "stdout_json": {
+                    "status": "denied",
+                    "errors": [{"code": "CS_SCOPE_DENIED", "message": "Loop View could not be shown."}],
+                    "loop_validation": {"failure": "scope_denied"},
+                },
+            },
+        )
+        report["cli_workflow"]["transcripts"].setdefault(
+            "product_loop_view_mismatched_claim",
+            {
+                "exit_code": 4,
+                "stdout_json": {
+                    "status": "failed",
+                    "errors": [{"code": "CS_LOOP_LINEAGE_MISMATCH", "message": "Loop View could not be shown."}],
+                    "loop_validation": {"failure": "lineage_mismatch", "mismatches": [{"field": "claim"}]},
+                },
+            },
+        )
         report.setdefault("negative_evidence", {})["same_checksum_user_paste_kept_trusted"] = 0
         report["negative_evidence"]["user_paste_probe_external_http_calls"] = 0
         report["negative_evidence"]["user_paste_probe_authority_expanded"] = 0
@@ -11500,6 +11560,15 @@ class ScaffoldCliTests(unittest.TestCase):
         report["negative_evidence"]["vs4_runtime_learn_missing_evidence_refs"] = 0
         report["negative_evidence"]["vs4_runtime_learn_missing_audit_refs"] = 0
         report["negative_evidence"]["vs4_runtime_learn_hidden_durable_change"] = 0
+        report["negative_evidence"]["vs4_loop_missing_ref_accepted"] = 0
+        report["negative_evidence"]["vs4_loop_cross_scope_ref_accepted"] = 0
+        report["negative_evidence"]["vs4_loop_lineage_mismatch_accepted"] = 0
+        report["negative_evidence"]["vs4_loop_invalid_ref_created_product_loop"] = 0
+        report["negative_evidence"]["vs4_loop_invalid_ref_created_audit"] = 0
+        report["negative_evidence"]["vs4_loop_invalid_ref_authority_expanded"] = 0
+        report["negative_evidence"]["vs4_loop_invalid_ref_live_writeback"] = 0
+        report["negative_evidence"]["vs4_loop_api_parity_failed"] = 0
+        report["negative_evidence"]["vs4_loop_product_language_error_missing"] = 0
         report["source_tree"] = git_verification_metadata(ROOT)
         report.setdefault("self_command_transcript", {})["command"] = [
             "cornerstone",
@@ -12105,13 +12174,13 @@ class ScaffoldCliTests(unittest.TestCase):
     def test_vs4_product_alpha_runtime_loop_coherence_slice_verify(self) -> None:
         selected = [
             "VS4-GATE-001",
-            "VS4-UI-001",
             "VS4-UI-008",
             "VS4-UI-009",
             "VS4-UI-010",
             "VS4-UI-011",
             "VS4-UI-012",
             "VS4-UI-013",
+            "VS4-UI-015",
             "VS4-UI-016",
             "VS4-STATE-001",
             "VS4-REF-002",
@@ -12178,12 +12247,21 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(checks["runtime_learn_cli_parity"])
         self.assertTrue(checks["ops_inbox_selection_cli_parity"])
         self.assertTrue(checks["ops_inbox_loop_view_cli_parity"])
+        self.assertTrue(checks["loop_lineage_guard_cli_parity"])
+        self.assertTrue(checks["loop_missing_ref_denied"])
+        self.assertTrue(checks["loop_cross_scope_denied"])
+        self.assertTrue(checks["loop_lineage_mismatch_denied"])
+        self.assertTrue(checks["loop_invalid_no_side_effects"])
+        self.assertTrue(checks["loop_product_language_errors"])
 
         transcripts = payload["cli_workflow"]["transcripts"]
         self.assertIn("product_mission_control_memory_selected", transcripts)
         self.assertIn("product_mission_control_learn_selected", transcripts)
         self.assertIn("experience_trajectory_record", transcripts)
         self.assertIn("experience_lesson_propose", transcripts)
+        self.assertIn("product_loop_view_missing_brief", transcripts)
+        self.assertIn("product_loop_view_cross_scope_brief", transcripts)
+        self.assertIn("product_loop_view_mismatched_claim", transcripts)
         ids = payload["cli_workflow"]["ids"]
         memory_selected = transcripts["product_mission_control_memory_selected"]["stdout_json"]["mission_control"]
         action_selected = transcripts["product_mission_control_action_selected"]["stdout_json"]["mission_control"]
@@ -12198,7 +12276,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(memory_detail["live_external_writeback_claimed"])
         self.assertFalse(memory_detail["human_ux_acceptance_claimed"])
         self.assertEqual(action_detail["selected_item_id"], "action-card-draft")
-        self.assertIn(f"action:{ids['action_id']}", action_detail["record_refs"])
+        self.assertTrue(
+            any(
+                ref in action_detail["record_refs"]
+                for ref in [f"action:{ids['action_id']}", f"action:{ids.get('boundary_action_id')}"]
+            )
+        )
         self.assertEqual(learn_detail["selected_item_id"], "learning-recovery-candidate")
         self.assertEqual(learn_detail["status"], "needs_review")
         self.assertIn(f"learn:{ids['lesson_id']}", learn_detail["record_refs"])
@@ -12216,6 +12299,27 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertIn(expected_ref, [stage.get("ref") for stage in loop_view["stages"]])
         self.assertIn(f"lesson:{ids['lesson_id']}", [stage.get("native_ref") for stage in loop_view["stages"]])
         self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
+        self.assertEqual(loop_view["loop_validation"]["status"], "validated")
+        self.assertTrue(loop_view["loop_validation"]["same_scope"])
+        self.assertTrue(loop_view["loop_validation"]["same_lineage"])
+        self.assertTrue(loop_view["loop_validation"]["shared_evidence_bundle_id"])
+
+        missing_ref = transcripts["product_loop_view_missing_brief"]["stdout_json"]
+        cross_scope = transcripts["product_loop_view_cross_scope_brief"]["stdout_json"]
+        lineage_mismatch = transcripts["product_loop_view_mismatched_claim"]["stdout_json"]
+        self.assertEqual(transcripts["product_loop_view_missing_brief"]["exit_code"], 3)
+        self.assertEqual(missing_ref["status"], "failed")
+        self.assertEqual(missing_ref["loop_validation"]["failure"], "not_found")
+        self.assertIn("CS_LOOP_REF_NOT_FOUND", [error["code"] for error in missing_ref["errors"]])
+        self.assertEqual(transcripts["product_loop_view_cross_scope_brief"]["exit_code"], 6)
+        self.assertEqual(cross_scope["status"], "denied")
+        self.assertEqual(cross_scope["loop_validation"]["failure"], "scope_denied")
+        self.assertIn("CS_SCOPE_DENIED", [error["code"] for error in cross_scope["errors"]])
+        self.assertEqual(transcripts["product_loop_view_mismatched_claim"]["exit_code"], 4)
+        self.assertEqual(lineage_mismatch["status"], "failed")
+        self.assertEqual(lineage_mismatch["loop_validation"]["failure"], "lineage_mismatch")
+        self.assertTrue(lineage_mismatch["loop_validation"]["mismatches"])
+        self.assertIn("CS_LOOP_LINEAGE_MISMATCH", [error["code"] for error in lineage_mismatch["errors"]])
 
         self.assertEqual(payload["active_proof"]["status"], "bound")
         self.assertTrue(payload["active_proof"]["active_paths_match_slice_021"])
@@ -12226,6 +12330,24 @@ class ScaffoldCliTests(unittest.TestCase):
             payload["proof_boundary"]["vs4_slice_021_runtime_loop_coherence"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
         )
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_022_return_to_work_lineage_guard"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
+        for proof_key in ["browser_proof", "mobile_browser_proof"]:
+            markers = payload[proof_key]["ops_inbox_triage_markers"]
+            for marker in [
+                "loop_lineage_guard_valid_loop_visible",
+                "loop_lineage_guard_api_missing_ref_denied",
+                "loop_lineage_guard_api_cross_scope_denied",
+                "loop_lineage_guard_api_lineage_mismatch_denied",
+                "loop_lineage_guard_product_language_errors",
+                "loop_lineage_guard_no_invalid_product_loop",
+                "loop_lineage_guard_no_invalid_audit",
+                "loop_lineage_guard_no_authority_expansion",
+                "loop_lineage_guard_no_live_writeback",
+            ]:
+                self.assertTrue(markers[marker], f"{proof_key}:{marker}")
         for key in [
             "runtime_ops_inbox_static_fallback_used",
             "runtime_ops_inbox_missing_record_refs",
@@ -12244,6 +12366,15 @@ class ScaffoldCliTests(unittest.TestCase):
             "vs4_runtime_learn_missing_evidence_refs",
             "vs4_runtime_learn_missing_audit_refs",
             "vs4_runtime_learn_hidden_durable_change",
+            "vs4_loop_missing_ref_accepted",
+            "vs4_loop_cross_scope_ref_accepted",
+            "vs4_loop_lineage_mismatch_accepted",
+            "vs4_loop_invalid_ref_created_product_loop",
+            "vs4_loop_invalid_ref_created_audit",
+            "vs4_loop_invalid_ref_authority_expanded",
+            "vs4_loop_invalid_ref_live_writeback",
+            "vs4_loop_api_parity_failed",
+            "vs4_loop_product_language_error_missing",
         ]:
             self.assertIn(key, payload["negative_evidence"])
             self.assertEqual(payload["negative_evidence"][key], 0, key)
@@ -12766,6 +12897,25 @@ class ScaffoldCliTests(unittest.TestCase):
         payload = self._run_vs4_gate_fixture(report_rel)
         self._assert_vs4_gate_fails_for_condition(payload, "negative_evidence")
 
+    def test_vs4_scenario_gate_rejects_missing_loop_lineage_guard(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            report["cli_workflow"]["checks"]["loop_lineage_guard_cli_parity"] = False
+            report["browser_proof"]["ops_inbox_triage_markers"]["loop_lineage_guard_api_missing_ref_denied"] = False
+
+        report_rel = self._vs4_gate_fixture_report("tmp/test-vs4-gate-missing-loop-lineage-guard.json", tamper)
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "return_to_work_lineage_guard")
+        self.assertFalse(payload["vs4_gate_validation"]["conditions"]["cli_parity"])
+
+    def test_vs4_scenario_gate_rejects_loop_lineage_side_effect_counter(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            report["negative_evidence"]["vs4_loop_lineage_mismatch_accepted"] = 1
+
+        report_rel = self._vs4_gate_fixture_report("tmp/test-vs4-gate-loop-lineage-counter.json", tamper)
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "negative_evidence")
+        self.assertFalse(payload["vs4_gate_validation"]["conditions"]["return_to_work_lineage_guard"])
+
     def test_vs4_scenario_gate_rejects_missing_freshness_metadata(self) -> None:
         def tamper(report: dict[str, Any]) -> None:
             report.pop("source_tree", None)
@@ -12849,6 +12999,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("make verify-vs4-product-alpha-user-drop-ask-source", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-desktop-overflow", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
+        self.assertIn("make verify-vs4-product-alpha-return-to-work-lineage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-decision-pages", package_row["commands_to_run_before_review"])
