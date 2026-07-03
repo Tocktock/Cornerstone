@@ -425,12 +425,19 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       background: var(--surface);
       padding: 20px 28px;
     }}
+    section, .product-panel {{
+      min-width: 0;
+    }}
     main {{
       display: grid;
       grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
       min-height: calc(100vh - 81px);
     }}
+    main > *, main > div {{
+      min-width: 0;
+    }}
     nav {{
+      min-width: 0;
       border-right: 1px solid var(--line);
       background: #fbfcfd;
       padding: 20px;
@@ -650,9 +657,18 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     }}
     .state-matrix {{
       width: 100%;
+      min-width: 720px;
       border-collapse: collapse;
       margin-top: 12px;
       font-size: 13px;
+    }}
+    .table-scroll {{
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }}
     .state-matrix th, .state-matrix td {{
       border-top: 1px solid var(--line);
@@ -920,12 +936,13 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     }}
     pre {{ white-space: pre-wrap; word-break: break-word; background: #eef3f7; border: 1px solid var(--line); border-radius: 6px; padding: 10px; max-height: 320px; overflow: auto; }}
     @media (max-width: 760px) {{
-      main {{ grid-template-columns: 1fr; }}
+      main {{ grid-template-columns: minmax(0, 1fr); }}
       nav {{ border-right: 0; border-bottom: 1px solid var(--line); }}
       header, section {{ padding-left: 18px; padding-right: 18px; }}
       .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid {{ grid-template-columns: 1fr; }}
       .workspace-strip {{ justify-content: flex-start; }}
       .work-row {{ grid-template-columns: 1fr; }}
+      .state-matrix {{ min-width: 720px; }}
     }}
   </style>
 </head>
@@ -1243,15 +1260,17 @@ Search phrase: alpha-evidence-anchor.</code>
         <div class="product-panel">
           <div class="label">Page states</div>
           <h2>Major surfaces expose recovery and review states.</h2>
-          <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
-            <thead>
-              <tr>
-                <th scope="col">Surface</th>
-                {''.join(f'<th scope="col">{html.escape(state.replace("-", " "))}</th>' for state in VS4_REQUIRED_PAGE_STATES)}
-              </tr>
-            </thead>
-            <tbody>{state_coverage_rows}</tbody>
-          </table>
+          <div class="table-scroll" data-vs4-state-matrix-scroll="contained">
+            <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
+              <thead>
+                <tr>
+                  <th scope="col">Surface</th>
+                  {''.join(f'<th scope="col">{html.escape(state.replace("-", " "))}</th>' for state in VS4_REQUIRED_PAGE_STATES)}
+                </tr>
+              </thead>
+              <tbody>{state_coverage_rows}</tbody>
+            </table>
+          </div>
         </div>
       </section>
       <section
@@ -1769,6 +1788,70 @@ Search phrase: alpha-evidence-anchor.</code>
       vs4State.negative_evidence.home_search_artifact_reference_gap = alignment.complete ? 0 : 1;
       return alignment;
     }}
+    function gridColumnCount(selector) {{
+      const node = document.querySelector(selector);
+      if (!node) return 0;
+      const style = window.getComputedStyle(node);
+      if (!style || !style.gridTemplateColumns || style.gridTemplateColumns === "none") return 0;
+      return style.gridTemplateColumns.split(" ").filter(Boolean).length;
+    }}
+    function isVisible(selector) {{
+      const node = document.querySelector(selector);
+      if (!node) return false;
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    }}
+    function collectVs4ResponsiveLayout() {{
+      const doc = document.documentElement;
+      const body = document.body;
+      const innerWidth = window.innerWidth || doc.clientWidth || 0;
+      const documentScrollWidth = Math.max(doc.scrollWidth || 0, body.scrollWidth || 0);
+      const stateScroll = document.querySelector("[data-vs4-state-matrix-scroll='contained']");
+      const stateTable = document.querySelector(".state-matrix");
+      const stateScrollRect = stateScroll ? stateScroll.getBoundingClientRect() : null;
+      const stateTableRect = stateTable ? stateTable.getBoundingClientRect() : null;
+      const layout = {{
+        inner_width: innerWidth,
+        inner_height: window.innerHeight || doc.clientHeight || 0,
+        document_scroll_width: documentScrollWidth,
+        viewport_meta_present: Boolean(document.querySelector("meta[name='viewport'][content*='width=device-width']")),
+        horizontal_overflow: documentScrollWidth > innerWidth + 1,
+        main_grid_columns: gridColumnCount("main"),
+        topbar_grid_columns: gridColumnCount(".topbar"),
+        drop_ask_grid_columns: gridColumnCount(".drop-ask-grid"),
+        ops_grid_columns: gridColumnCount(".ops-grid"),
+        work_row_grid_columns: gridColumnCount(".work-row"),
+        brief_workbench_grid_columns: gridColumnCount(".brief-workbench"),
+        state_matrix_scroll_contained: Boolean(
+          stateScroll &&
+          stateTable &&
+          stateScrollRect &&
+          stateTableRect &&
+          stateScrollRect.width <= innerWidth + 1 &&
+          stateScroll.scrollWidth >= stateScroll.clientWidth &&
+          stateTableRect.width >= stateScrollRect.width
+        ),
+        visible: {{
+          primary_nav: isVisible("#primary-nav"),
+          global_search: isVisible(".global-search"),
+          product_shell: isVisible("[data-vs4-surface='home-ops-inbox']"),
+          drop: isVisible("[data-vs4-drop-zone='visible']"),
+          ask: isVisible("[data-vs4-ask-box='visible']"),
+          ops_inbox: isVisible("[data-vs4-ops-inbox='visible']"),
+          workspace_context: isVisible(".workspace-strip"),
+          learn_review: isVisible("[data-vs4-learn-review='visible']"),
+          brief_detail: isVisible("[data-vs4-brief-detail='visible']")
+        }}
+      }};
+      layout.mobile_breakpoint_applied = innerWidth <= 760 &&
+        layout.main_grid_columns === 1 &&
+        layout.topbar_grid_columns === 1 &&
+        layout.drop_ask_grid_columns === 1 &&
+        layout.ops_grid_columns === 1 &&
+        layout.work_row_grid_columns === 1;
+      return layout;
+    }}
     function vs4Slice003Passes() {{
       const coverage = collectVs4StateCoverage();
       const reference = collectVs4ReferenceAlignment();
@@ -2113,6 +2196,7 @@ Search phrase: alpha-evidence-anchor.</code>
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
+      const responsiveLayout = collectVs4ResponsiveLayout();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2120,6 +2204,7 @@ Search phrase: alpha-evidence-anchor.</code>
         slice_003_passes: vs4Slice003Passes(),
         state: vs4State,
         trace: vs4Trace,
+        responsive_layout: responsiveLayout,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),

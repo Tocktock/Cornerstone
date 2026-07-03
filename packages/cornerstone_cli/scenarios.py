@@ -36,6 +36,7 @@ from cornerstone_cli.acceptance import (
     DEFAULT_VS1_ONTOLOGY_REPORT,
     DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
     DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR,
+    DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR,
     DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
     capture_evux_browser_proof,
     capture_vs4_product_alpha_browser_proof,
@@ -107,6 +108,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT = (
 )
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md"
+)
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md"
 )
 DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
@@ -25068,6 +25072,19 @@ VS4_SLICE_005_SCENARIOS = {
 }
 
 
+VS4_SLICE_006_SCENARIOS = {
+    "VS4-GATE-001",
+    "VS4-UI-001",
+    "VS4-UI-004",
+    "VS4-UI-012",
+    "VS4-UI-015",
+    "VS4-UI-016",
+    "VS4-STATE-001",
+    "VS4-REG-003",
+    "VS4-REG-006",
+}
+
+
 VS4_GENERAL_PURPOSE_PACKS = [
     {
         "key": "personal_research",
@@ -25794,13 +25811,23 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
 
 def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-browser")
+    mobile_browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-mobile-browser")
     cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-cli")
     slice3_cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-slice-003-cli")
     browser_state_path = root / browser_state_rel
+    mobile_browser_state_path = root / mobile_browser_state_rel
     cli_state_path = root / cli_state_rel
     slice3_cli_state_path = root / slice3_cli_state_rel
     browser_proof_dir = root / DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR
-    for path in [browser_state_path, cli_state_path, slice3_cli_state_path, browser_proof_dir]:
+    mobile_browser_proof_dir = root / DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR
+    for path in [
+        browser_state_path,
+        mobile_browser_state_path,
+        cli_state_path,
+        slice3_cli_state_path,
+        browser_proof_dir,
+        mobile_browser_proof_dir,
+    ]:
         if path.exists():
             shutil.rmtree(path)
 
@@ -25814,20 +25841,31 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         ["python3", "scripts/verify_scenario_matrix.py", "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv", "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"],
     )
     diff_check = _run_command(root, ["git", "diff", "--check"])
+    slice6_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT).is_file()
     browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
+    mobile_browser_proof = capture_vs4_product_alpha_browser_proof(
+        root,
+        state_dir=mobile_browser_state_path,
+        output_dir=mobile_browser_proof_dir,
+        window_size="390,844",
+    )
     cli_workflow = _run_vs4_brief_detail_cli_workflow(root, cli_state_rel)
     slice3_cli_workflow = _run_vs4_ask_packs_states_cli_workflow(root, slice3_cli_state_rel)
     regression_workflows = _run_vs4_regression_workflows(root)
     shell_markers = browser_proof.get("shell_markers", {})
     detail_markers = browser_proof.get("brief_detail_markers", {})
     browser_negative = browser_proof.get("negative_evidence", {})
+    mobile_shell_markers = mobile_browser_proof.get("shell_markers", {})
+    mobile_detail_markers = mobile_browser_proof.get("brief_detail_markers", {})
+    mobile_responsive_markers = mobile_browser_proof.get("responsive_markers", {})
+    mobile_browser_negative = mobile_browser_proof.get("negative_evidence", {})
     cli_checks = cli_workflow.get("checks", {})
     slice3_checks = slice3_cli_workflow.get("checks", {})
     regression_checks = regression_workflows.get("checks", {})
     cli_negative = cli_workflow.get("negative_evidence", {})
     slice3_negative = slice3_cli_workflow.get("negative_evidence", {})
     regression_negative = regression_workflows.get("negative_evidence", {})
-    negative = {**browser_negative, **cli_negative, **slice3_negative, **regression_negative}
+    negative = {**browser_negative, **mobile_browser_negative, **cli_negative, **slice3_negative, **regression_negative}
     docs_ok = (
         docs_result.get("exit_code") == 0
         and cli_docs_result.get("exit_code") == 0
@@ -25836,20 +25874,36 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and diff_check.get("exit_code") == 0
     )
     browser_ok = browser_proof.get("status") == "PASS"
+    mobile_browser_ok = mobile_browser_proof.get("status") == "PASS"
     all_negative_zero = all(value == 0 for value in negative.values())
     status_by_id = {
-        "VS4-GATE-001": "PASS" if docs_ok and matrix_checks["ok"] else "FAIL",
+        "VS4-GATE-001": "PASS" if docs_ok and matrix_checks["ok"] and slice6_contract_exists else "FAIL",
         "VS4-UI-001": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and shell_markers.get("product_alpha_shell_present")
+        and mobile_shell_markers.get("product_alpha_shell_present")
         and shell_markers.get("small_normal_nav")
+        and mobile_shell_markers.get("small_normal_nav")
         and shell_markers.get("drop_visible")
+        and mobile_shell_markers.get("drop_visible")
         and shell_markers.get("ask_visible")
+        and mobile_shell_markers.get("ask_visible")
         and shell_markers.get("product_shell_before_legacy_flows")
+        and mobile_responsive_markers.get("product_shell_visible")
+        and mobile_responsive_markers.get("drop_ask_visible")
         else "FAIL",
         "VS4-UI-002": "PASS" if browser_ok and cli_checks.get("source_preserved") and detail_markers.get("source_preservation_visible") else "FAIL",
         "VS4-UI-003": "PASS" if browser_ok and cli_checks.get("brief_created") and detail_markers.get("brief_created") else "FAIL",
-        "VS4-UI-004": "PASS" if browser_ok and cli_checks.get("brief_contents") and detail_markers.get("brief_flow_completed") else "FAIL",
+        "VS4-UI-004": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and cli_checks.get("brief_contents")
+        and detail_markers.get("brief_flow_completed")
+        and mobile_detail_markers.get("brief_flow_completed")
+        and mobile_responsive_markers.get("brief_detail_visible")
+        and mobile_responsive_markers.get("learn_review_visible")
+        else "FAIL",
         "VS4-UI-005": "PASS" if browser_ok and cli_checks.get("evidence_drawer") and detail_markers.get("brief_evidence_drawer_reachable") else "FAIL",
         "VS4-UI-006": "PASS" if browser_ok and cli_checks.get("claim_candidate") and detail_markers.get("claim_candidate_detail_visible") else "FAIL",
         "VS4-UI-007": "PASS" if browser_ok and cli_checks.get("zero_evidence_denied") else "FAIL",
@@ -25859,12 +25913,18 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-011": "PASS" if browser_ok and cli_checks.get("local_mock_execution_mode") else "FAIL",
         "VS4-UI-012": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and shell_markers.get("ops_inbox_visible")
+        and mobile_shell_markers.get("ops_inbox_visible")
         and shell_markers.get("continue_work_rows")
+        and mobile_shell_markers.get("continue_work_rows")
         and shell_markers.get("pending_evidence_gap_visible")
         and shell_markers.get("memory_candidate_visible")
         and shell_markers.get("action_card_visible")
         and shell_markers.get("recent_activity_visible")
+        and mobile_responsive_markers.get("ops_inbox_visible")
+        and mobile_responsive_markers.get("one_column_ops_grid")
+        and mobile_responsive_markers.get("one_column_work_rows")
         else "FAIL",
         "VS4-UI-013": "PASS"
         if browser_ok
@@ -25881,12 +25941,27 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and slice3_checks.get("pack_outputs_complete")
         and slice3_checks.get("pack_domains_not_logistics_only")
         else "FAIL",
-        "VS4-UI-015": "PASS" if browser_ok and shell_markers.get("workspace_context_visible") else "FAIL",
-        "VS4-UI-016": "PASS" if browser_ok and shell_markers.get("product_language_first") else "FAIL",
+        "VS4-UI-015": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and shell_markers.get("workspace_context_visible")
+        and mobile_shell_markers.get("workspace_context_visible")
+        and mobile_responsive_markers.get("workspace_context_visible")
+        else "FAIL",
+        "VS4-UI-016": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and shell_markers.get("product_language_first")
+        and mobile_shell_markers.get("product_language_first")
+        and mobile_responsive_markers.get("global_search_visible")
+        else "FAIL",
         "VS4-STATE-001": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and shell_markers.get("state_coverage_visible")
         and detail_markers.get("state_coverage_complete")
+        and mobile_responsive_markers.get("document_scroll_width_lte_viewport_width")
+        and mobile_responsive_markers.get("state_matrix_scroll_contained")
         and negative.get("required_page_state_missing", 0) == 0
         else "FAIL",
         "VS4-REF-001": "PASS"
@@ -25908,16 +25983,23 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-REG-002": "PASS" if regression_checks.get("vs1_regression_passed") and negative.get("vs1_regression_failed", 1) == 0 else "FAIL",
         "VS4-REG-003": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and shell_markers.get("forbidden_readiness_overclaim_absent")
+        and mobile_shell_markers.get("forbidden_readiness_overclaim_absent")
         and all_negative_zero
         else "FAIL",
         "VS4-REG-004": "PASS" if cli_checks.get("prompt_injection_guard") and all_negative_zero else "FAIL",
         "VS4-REG-005": "PASS" if detail_markers.get("reference_images_not_pass_evidence") and negative.get("reference_images_used_as_pass_evidence") == 0 else "FAIL",
         "VS4-REG-006": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and shell_markers.get("product_shell_before_legacy_flows")
+        and mobile_shell_markers.get("product_shell_before_legacy_flows")
         and shell_markers.get("small_normal_nav")
+        and mobile_shell_markers.get("small_normal_nav")
         and shell_markers.get("legacy_vs0_vs1_reachable")
+        and mobile_responsive_markers.get("mobile_breakpoint_applied")
+        and mobile_responsive_markers.get("primary_nav_visible")
         else "FAIL",
         "VS4-REG-007": "PASS" if cli_checks.get("cli_parity") and detail_markers.get("cli_parity_required") else "FAIL",
     }
@@ -25925,6 +26007,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json",
         f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html",
         f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png",
+        "packages/cornerstone_cli/product_runtime.py",
+    ]
+    mobile_browser_evidence = [
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json",
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/home.dom.html",
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/home.png",
+        DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
         "packages/cornerstone_cli/product_runtime.py",
     ]
     cli_evidence = [
@@ -25952,16 +26041,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
             "python3 scripts/verify_scenario_matrix.py docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md",
             "git diff --check",
         ],
-        "VS4-UI-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-UI-001": [*browser_evidence, *mobile_browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-002": [*browser_evidence, *cli_evidence],
         "VS4-UI-003": [*browser_evidence, *cli_evidence],
-        "VS4-UI-004": [*browser_evidence, *cli_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-UI-004": [*browser_evidence, *mobile_browser_evidence, *cli_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-005": [*browser_evidence, *cli_evidence],
         "VS4-UI-006": [*browser_evidence, *cli_evidence],
         "VS4-UI-007": cli_evidence,
@@ -25969,20 +26059,25 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-009": cli_evidence,
         "VS4-UI-010": [*browser_evidence, *cli_evidence],
         "VS4-UI-011": [*browser_evidence, *cli_evidence],
-        "VS4-UI-012": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-UI-012": [*browser_evidence, *mobile_browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-013": [*browser_evidence, *slice3_evidence],
         "VS4-UI-014": [*browser_evidence, *slice3_evidence],
-        "VS4-UI-015": browser_evidence,
-        "VS4-UI-016": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
-        "VS4-STATE-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT],
+        "VS4-UI-015": [*browser_evidence, *mobile_browser_evidence],
+        "VS4-UI-016": [*browser_evidence, *mobile_browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-STATE-001": [*browser_evidence, *mobile_browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT],
         "VS4-REF-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT, "docs/design/reference-images/README.md"],
         "VS4-REF-002": [*browser_evidence, *cli_evidence],
         "VS4-REG-001": regression_evidence,
         "VS4-REG-002": regression_evidence,
-        "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-REG-003": [
+            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json",
+            f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json",
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
+        ],
         "VS4-REG-004": cli_evidence,
         "VS4-REG-005": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT],
-        "VS4-REG-006": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-REG-006": [*browser_evidence, *mobile_browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-REG-007": cli_evidence,
     }
     notes_by_id = {
@@ -26025,19 +26120,27 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_002_SCENARIOS
             or scenario_id in VS4_SLICE_003_SCENARIOS
             or scenario_id in VS4_SLICE_005_SCENARIOS
+            or scenario_id in VS4_SLICE_006_SCENARIOS
         ):
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_005_SCENARIOS:
+        elif scenario_id in VS4_SLICE_006_SCENARIOS:
             classification = "in_this_slice"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS or scenario_id in VS4_SLICE_003_SCENARIOS:
+        elif (
+            scenario_id in VS4_SLICE_001_SCENARIOS
+            or scenario_id in VS4_SLICE_002_SCENARIOS
+            or scenario_id in VS4_SLICE_003_SCENARIOS
+            or scenario_id in VS4_SLICE_005_SCENARIOS
+        ):
             classification = "previous_slice"
         else:
             classification = "later_slice"
-        if scenario_id in VS4_SLICE_005_SCENARIOS:
+        if scenario_id in VS4_SLICE_006_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT
+        elif scenario_id in VS4_SLICE_005_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT
         elif scenario_id in VS4_SLICE_003_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT
@@ -26081,30 +26184,33 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
             "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
             "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
-            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001/002 proof.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 006 proof.",
         }
     ]
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-005-ux-polish-learn",
+        "slice": "slice-006-responsive-mobile-proof",
         "state_dir": {
             "browser": browser_state_rel,
+            "mobile_browser": mobile_browser_state_rel,
             "cli": cli_state_rel,
             "slice_003_cli": slice3_cli_state_rel,
         },
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
             "slice_003": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
             "slice_004": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
             "slice_005": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
+            "slice_006": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
         },
         "browser_proof": browser_proof,
+        "mobile_browser_proof": mobile_browser_proof,
         "cli_workflow": cli_workflow,
         "slice_003_cli_workflow": slice3_cli_workflow,
         "regression_workflows": regression_workflows,
@@ -26120,6 +26226,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "vs4_slice_001_product_shell": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "vs4_slice_002_brief_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "vs4_slice_003_ask_packs_states_regression": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+            "vs4_slice_006_responsive_mobile": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",
@@ -26344,6 +26451,7 @@ def build_vs4_human_gate_package(
             "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
             "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
             "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
+            "Inspect the narrow mobile proof and confirm Drop, Ask, Ops Inbox, workspace context, Brief detail, and Learn review remain understandable without body-level horizontal overflow.",
             "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
             "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note.",
         ],
@@ -26378,10 +26486,15 @@ def build_vs4_human_gate_package(
             {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "kind": "browser_proof"},
             {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html", "kind": "dom_snapshot"},
             {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png", "kind": "screenshot"},
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json", "kind": "mobile_browser_proof"},
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/home.dom.html", "kind": "mobile_dom_snapshot"},
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/home.png", "kind": "mobile_screenshot"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT, "kind": "slice_contract"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT, "kind": "slice_contract"},
         ],
         "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-responsive-mobile",
             "make verify-vs4-product-alpha-ux-polish-learn",
             "make verify-vs4-product-alpha-human-package",
             "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
@@ -26414,6 +26527,7 @@ def build_vs4_human_gate_package(
             DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             report_rel,
             package_rel,
         ],
@@ -26645,6 +26759,7 @@ def validate_vs4_human_gate_review_record(
             package.get("package_path"),
             package.get("scenario_report", {}).get("path"),
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
         ],
         "audit_refs": [],
     }

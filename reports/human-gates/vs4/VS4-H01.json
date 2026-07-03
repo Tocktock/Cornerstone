@@ -35,6 +35,7 @@
     "vs4_h01_remains_human_required": true
   },
   "commands_to_run_before_review": [
+    "make verify-vs4-product-alpha-responsive-mobile",
     "make verify-vs4-product-alpha-ux-polish-learn",
     "make verify-vs4-product-alpha-human-package",
     "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
@@ -45,7 +46,8 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md",
-    "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md",
+    "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "reports/human-gates/vs4/VS4-H01.json"
   ],
   "expected_behavior": "Human accepts or rejects whether the daily loop is usable, understandable, product-first, evidence-aware, and not misleading.",
@@ -63,13 +65,13 @@
     "production_readiness_claimed_by_package": 0,
     "security_acceptance_claimed_by_package": 0
   },
-  "package_digest_sha256": "3cc823da55503fa59cf0707a875d98cf6c859ab6771001cf84ac56ffbd799fe2",
+  "package_digest_sha256": "a86f22e00983755f505721e6b919df7d4b843a5956cc377fdec70c856a8c65d7",
   "package_id": "vs4_human_gate_vs4_h01",
   "package_path": "reports/human-gates/vs4/VS4-H01.json",
   "pass_claim_allowed": false,
   "product_claim_allowed": false,
   "readiness_status": "ready_for_human_review",
-  "record_template_path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+  "record_template_path": "tmp/test-vs4-h01.review-record.template.json",
   "reject_conditions": [
     "The user cannot tell what stayed local/mock or whether live external writeback happened.",
     "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
@@ -102,22 +104,23 @@
     "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
     "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
     "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
+    "Inspect the narrow mobile proof and confirm Drop, Ask, Ops Inbox, workspace context, Brief detail, and Learn review remain understandable without body-level horizontal overflow.",
     "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
     "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
   ],
   "review_input_artifacts": [
     {
-      "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+      "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
       "present": true,
-      "sha256": "1f07a39c5d93c7c0977f8566f14fc01686b19c2ff7c9bc4859d913143793ca63",
+      "sha256": "cf49ce10ebe89ec76ddc4a4aad7587e08b27ea65842e6c485803c0d110e06ab2",
       "summary": {
         "blocking": 0,
         "fail": 0,
         "human_required": 1,
-        "in_this_slice": 6,
+        "in_this_slice": 9,
         "not_run": 0,
         "pass": 27,
-        "previous_slice": 21,
+        "previous_slice": 18,
         "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
         "scenario_count": 28
       }
@@ -135,12 +138,28 @@
       "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png"
     },
     {
+      "kind": "mobile_browser_proof",
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json"
+    },
+    {
+      "kind": "mobile_dom_snapshot",
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html"
+    },
+    {
+      "kind": "mobile_screenshot",
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png"
+    },
+    {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md"
     },
     {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md"
     }
   ],
   "review_record_contract": {
@@ -174,17 +193,17 @@
   },
   "scenario_id": "VS4-H01",
   "scenario_report": {
-    "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "present": true,
-    "sha256": "1f07a39c5d93c7c0977f8566f14fc01686b19c2ff7c9bc4859d913143793ca63",
+    "sha256": "cf49ce10ebe89ec76ddc4a4aad7587e08b27ea65842e6c485803c0d110e06ab2",
     "summary": {
       "blocking": 0,
       "fail": 0,
       "human_required": 1,
-      "in_this_slice": 6,
+      "in_this_slice": 9,
       "not_run": 0,
       "pass": 27,
-      "previous_slice": 21,
+      "previous_slice": 18,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
       "scenario_count": 28
     }

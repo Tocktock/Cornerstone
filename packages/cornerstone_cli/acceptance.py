@@ -43,6 +43,7 @@ DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR = "reports/browser/vs1-ontology-suggest-p
 DEFAULT_VS1_ONTOLOGY_REPORT = "docs/verification-reports/VS1_ONTOLOGY_AUTO_SUGGEST_PROMOTE_REPORT_2026-06-15.md"
 DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
 DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001"
+DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile"
 
 
 def utc_now() -> str:
@@ -1229,6 +1230,14 @@ def capture_vs4_product_alpha_browser_proof(
     brief_evidence = base.get("runtime_evidence") if isinstance(base.get("runtime_evidence"), dict) else {}
     brief_state = brief_evidence.get("state", {}) if isinstance(brief_evidence.get("state"), dict) else {}
     brief_markers = brief_evidence.get("markers", {}) if isinstance(brief_evidence.get("markers"), dict) else {}
+    responsive_layout = (
+        brief_evidence.get("responsive_layout", {}) if isinstance(brief_evidence.get("responsive_layout"), dict) else {}
+    )
+    responsive_visible = (
+        responsive_layout.get("visible", {}) if isinstance(responsive_layout.get("visible"), dict) else {}
+    )
+    browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
+    responsive_required = browser_window_size == "390,844"
     shell_markers = {
         "browser_base_passed": base.get("status") == "passed",
         "product_alpha_shell_present": shell_index >= 0,
@@ -1282,8 +1291,32 @@ def capture_vs4_product_alpha_browser_proof(
         "reference_images_not_pass_evidence": brief_markers.get("reference_images_not_pass_evidence") is True,
         "cli_parity_required": brief_markers.get("cli_parity_required") is True,
     }
+    responsive_markers = {
+        "mobile_window_size": browser_window_size == "390,844" and responsive_layout.get("inner_width", 9999) <= 760,
+        "viewport_meta_present": responsive_layout.get("viewport_meta_present") is True,
+        "mobile_breakpoint_applied": responsive_layout.get("mobile_breakpoint_applied") is True,
+        "document_scroll_width_lte_viewport_width": responsive_layout.get("horizontal_overflow") is False,
+        "primary_nav_visible": responsive_visible.get("primary_nav") is True and shell_markers.get("small_normal_nav") is True,
+        "global_search_visible": responsive_visible.get("global_search") is True,
+        "product_shell_visible": responsive_visible.get("product_shell") is True and shell_markers.get("product_alpha_shell_present") is True,
+        "drop_ask_visible": responsive_visible.get("drop") is True and responsive_visible.get("ask") is True,
+        "ops_inbox_visible": responsive_visible.get("ops_inbox") is True and shell_markers.get("ops_inbox_visible") is True,
+        "workspace_context_visible": responsive_visible.get("workspace_context") is True and shell_markers.get("workspace_context_visible") is True,
+        "learn_review_visible": responsive_visible.get("learn_review") is True and shell_markers.get("learn_review_visible") is True,
+        "brief_detail_visible": responsive_visible.get("brief_detail") is True and detail_markers.get("brief_detail_visible") is True,
+        "state_matrix_scroll_contained": responsive_layout.get("state_matrix_scroll_contained") is True,
+        "one_column_ops_grid": responsive_layout.get("ops_grid_columns") == 1,
+        "one_column_work_rows": responsive_layout.get("work_row_grid_columns") == 1,
+    }
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
-    status = "PASS" if screenshot_exists and all(shell_markers.values()) and all(detail_markers.values()) else "FAIL"
+    status = (
+        "PASS"
+        if screenshot_exists
+        and all(shell_markers.values())
+        and all(detail_markers.values())
+        and (not responsive_required or all(responsive_markers.values()))
+        else "FAIL"
+    )
     proof = {
         "schema_version": "cs.vs4_product_alpha_browser_proof.v0",
         "status": status,
@@ -1302,6 +1335,9 @@ def capture_vs4_product_alpha_browser_proof(
         "shell_markers": shell_markers,
         "brief_evidence": brief_evidence,
         "brief_detail_markers": detail_markers,
+        "responsive_required": responsive_required,
+        "responsive_layout": responsive_layout,
+        "responsive_markers": responsive_markers,
         "negative_evidence": {
             **(brief_state.get("negative_evidence", {}) if isinstance(brief_state.get("negative_evidence"), dict) else {}),
             "production_readiness_claimed": 0 if "production_release_ready=true" not in dom else 1,
@@ -1313,7 +1349,15 @@ def capture_vs4_product_alpha_browser_proof(
         },
         "errors": []
         if status == "PASS"
-        else [key for key, value in {**shell_markers, **detail_markers}.items() if not value],
+        else [
+            key
+            for key, value in {
+                **shell_markers,
+                **detail_markers,
+                **(responsive_markers if responsive_required else {}),
+            }.items()
+            if not value
+        ],
     }
     write_json(proof_path, proof)
     return proof

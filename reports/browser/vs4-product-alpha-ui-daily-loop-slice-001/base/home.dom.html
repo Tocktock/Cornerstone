@@ -27,12 +27,19 @@
       background: var(--surface);
       padding: 20px 28px;
     }
+    section, .product-panel {
+      min-width: 0;
+    }
     main {
       display: grid;
       grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
       min-height: calc(100vh - 81px);
     }
+    main > *, main > div {
+      min-width: 0;
+    }
     nav {
+      min-width: 0;
       border-right: 1px solid var(--line);
       background: #fbfcfd;
       padding: 20px;
@@ -252,9 +259,18 @@
     }
     .state-matrix {
       width: 100%;
+      min-width: 720px;
       border-collapse: collapse;
       margin-top: 12px;
       font-size: 13px;
+    }
+    .table-scroll {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .state-matrix th, .state-matrix td {
       border-top: 1px solid var(--line);
@@ -522,12 +538,13 @@
     }
     pre { white-space: pre-wrap; word-break: break-word; background: #eef3f7; border: 1px solid var(--line); border-radius: 6px; padding: 10px; max-height: 320px; overflow: auto; }
     @media (max-width: 760px) {
-      main { grid-template-columns: 1fr; }
+      main { grid-template-columns: minmax(0, 1fr); }
       nav { border-right: 0; border-bottom: 1px solid var(--line); }
       header, section { padding-left: 18px; padding-right: 18px; }
       .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid { grid-template-columns: 1fr; }
       .workspace-strip { justify-content: flex-start; }
       .work-row { grid-template-columns: 1fr; }
+      .state-matrix { min-width: 720px; }
     }
   </style>
 </head>
@@ -591,8 +608,8 @@
                 <button id="run-vs4-ask-flow" type="button">Ask with evidence</button>
                 <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="ready">
                   <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="evidence_backed">Ask: Evidence-backed work item ready</span>
-                  <p id="vs4-ask-answer">Answer uses evidence and created reviewable work: brief:brief_eb93c81ac8f863bf, claim:claim_7db8c6396e4ef465, memory_candidate:evb_436873258cd17841, action:action_38eca6040f2101d5</p>
-                  <code id="vs4-ask-created-refs" data-vs4-created-work-kind="brief,claim,memory-candidate,action-card">brief:brief_eb93c81ac8f863bf | claim:claim_7db8c6396e4ef465 | memory_candidate:evb_436873258cd17841 | action:action_38eca6040f2101d5</code>
+                  <p id="vs4-ask-answer">Answer uses evidence and created reviewable work: brief:brief_42238c818dea5b33, claim:claim_0765d9f901ead979, memory_candidate:evb_da9a21000a780ee3, action:action_6b643a1619e2716c</p>
+                  <code id="vs4-ask-created-refs" data-vs4-created-work-kind="brief,claim,memory-candidate,action-card">brief:brief_42238c818dea5b33 | claim:claim_0765d9f901ead979 | memory_candidate:evb_da9a21000a780ee3 | action:action_6b643a1619e2716c</code>
                 </div>
               </div>
             </div>
@@ -653,9 +670,9 @@
             <h2>Same loop, different work</h2>
             <p>Personal research, company policy, and operations issue packs use the same Source, Brief, Claim, Memory/Wiki, Action, and Ops Inbox loop.</p>
             <button id="run-vs4-packs-flow" class="subtle-button" type="button">Run pack loop</button>
-            <div class="pack-list"><div class="pack-row" data-vs4-pack-row="Personal Research" data-vs4-pack-fixture="fixtures/vs1/ontology/personal_research.txt" data-vs4-pack-query="Walking Desk"><strong>Personal Research</strong><span>Reading notes, source highlights, evidence-backed brief</span><code id="vs4-pack-personal-research-status">ready: brief_a10289a20679956c / action_8e106b9fdfe072b2</code></div>
-<div class="pack-row" data-vs4-pack-row="Company Policy Review" data-vs4-pack-fixture="fixtures/vs1/ontology/internal_policy.txt" data-vs4-pack-query="Local Action Approval Policy"><strong>Company Policy Review</strong><span>Policy excerpt, claim candidate, safety check</span><code id="vs4-pack-company-policy-review-status">ready: brief_b4de1eb193a3720f / action_e7e5238a2b1e2470</code></div>
-<div class="pack-row" data-vs4-pack-row="Operations Issue" data-vs4-pack-fixture="fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt" data-vs4-pack-query="learning-failure-anchor"><strong>Operations Issue</strong><span>Incident note, follow-up action, audit-ready activity</span><code id="vs4-pack-operations-issue-status">ready: brief_c955d17b28d6f91f / action_e9b6c6f64b1de232</code></div></div>
+            <div class="pack-list"><div class="pack-row" data-vs4-pack-row="Personal Research" data-vs4-pack-fixture="fixtures/vs1/ontology/personal_research.txt" data-vs4-pack-query="Walking Desk"><strong>Personal Research</strong><span>Reading notes, source highlights, evidence-backed brief</span><code id="vs4-pack-personal-research-status">ready: brief_0c3f4995cd71c8f2 / action_839671e46faf6f74</code></div>
+<div class="pack-row" data-vs4-pack-row="Company Policy Review" data-vs4-pack-fixture="fixtures/vs1/ontology/internal_policy.txt" data-vs4-pack-query="Local Action Approval Policy"><strong>Company Policy Review</strong><span>Policy excerpt, claim candidate, safety check</span><code id="vs4-pack-company-policy-review-status">ready: brief_c6cc3e2f81a39edf / action_3c5a15092db4bd7e</code></div>
+<div class="pack-row" data-vs4-pack-row="Operations Issue" data-vs4-pack-fixture="fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt" data-vs4-pack-query="learning-failure-anchor"><strong>Operations Issue</strong><span>Incident note, follow-up action, audit-ready activity</span><code id="vs4-pack-operations-issue-status">ready: brief_ff737ba87276bf29 / action_d3b46f9c07c8754d</code></div></div>
           </div>
           <aside class="product-panel" data-vs4-learn-boundary="review-required">
             <div class="label">Learning boundary</div>
@@ -695,7 +712,7 @@
               <ul>
                 <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">alpha-evidence-anchor.</span></li>
                 <li><strong>Gap / uncertainty:</strong> <span id="vs4-brief-gap">This brief is grounded only in the attached Evidence Bundle.</span></li>
-                <li><strong>Activity:</strong> <span id="vs4-brief-activity">brief:brief_eb93c81ac8f863bf created; audit refs audit:audit_ae6f1986ba351180</span></li>
+                <li><strong>Activity:</strong> <span id="vs4-brief-activity">brief:brief_42238c818dea5b33 created; audit refs audit:audit_3483380b1ed6565a</span></li>
               </ul>
             </div>
             <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
@@ -706,7 +723,7 @@
                 <div><span class="label">Why it supports</span><span id="vs4-evidence-rationale">Finding is supported because it comes from the saved source and Evidence Bundle.</span></div>
                 <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">storage=sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be; derived=derived/art_2735313e0cb92563.txt</span></div>
                 <div><span class="label">Related objects</span><span id="vs4-evidence-related">Brief, Claim candidate, Memory candidate, and Action Card.</span></div>
-                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">audit:audit_0dbcf3bcc5f3a693, audit:audit_ae6f1986ba351180; audit=success</span></div>
+                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">audit:audit_0c2d73418b704497, audit:audit_3483380b1ed6565a; audit=success</span></div>
               </div>
             </details>
           </div>
@@ -719,13 +736,13 @@
                 <span class="trust-step" id="vs4-trust-evidence-backed" data-state="active">Evidence-backed</span>
                 <span class="trust-step" id="vs4-trust-approved" data-state="pending">Approved</span>
               </div>
-              <p id="vs4-claim-rationale">Rationale: supported by evidence_bundle:evb_436873258cd17841 and still scoped to default.</p>
+              <p id="vs4-claim-rationale">Rationale: supported by evidence_bundle:evb_da9a21000a780ee3 and still scoped to default.</p>
               <div class="danger-note" id="vs4-zero-evidence-denial">CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.</div>
             </div>
             <div class="brief-block" id="vs4-memory-candidate-detail" data-vs4-memory-candidate-detail="visible">
               <div class="label">Memory/Wiki candidate</div>
               <h3>Draft / Needs review</h3>
-              <p id="vs4-memory-rationale">Draft candidate from evidence_bundle:evb_436873258cd17841; not approved durable memory.</p>
+              <p id="vs4-memory-rationale">Draft candidate from evidence_bundle:evb_da9a21000a780ee3; not approved durable memory.</p>
               <div class="detail-grid">
                 <div><span class="label">Trust</span><span id="vs4-memory-trust">draft; owner_approved=false</span></div>
                 <div><span class="label">Freshness</span><span id="vs4-memory-freshness">current; review required before durable use</span></div>
@@ -738,23 +755,23 @@
               <h3 id="vs4-action-goal">Create local follow-up from the Evidence-backed Brief</h3>
               <p id="vs4-action-why">Why: preserve the review next step without external writeback.</p>
               <div class="detail-grid">
-                <div><span class="label">Evidence</span><span id="vs4-action-evidence">evidence_bundle:evb_436873258cd17841</span></div>
-                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">brief:brief_eb93c81ac8f863bf; claim:claim_db726453f609c873</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-action-evidence">evidence_bundle:evb_da9a21000a780ee3</span></div>
+                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">brief:brief_42238c818dea5b33; claim:claim_ab7f8cc780cda5bf</span></div>
                 <div><span class="label">Proposed change</span><span id="vs4-action-change">would perform draft_task against mock://vs4-brief-detail/browser</span></div>
                 <div><span class="label">Expected impact</span><span id="vs4-action-impact">expected_connector_calls=0; real_external_http_calls=0</span></div>
                 <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
                 <div><span class="label">Approval</span><span id="vs4-action-approval">not_required</span></div>
                 <div><span class="label">Execution mode</span><span id="vs4-action-execution-mode">Draft / Local / Mock; connector=mock_connector</span></div>
-                <div><span class="label">Activity</span><span id="vs4-action-activity">action:action_38eca6040f2101d5; dry_run:dryrun_8f85500e8195009a</span></div>
+                <div><span class="label">Activity</span><span id="vs4-action-activity">action:action_6b643a1619e2716c; dry_run:dryrun_c082adb0e033d34c</span></div>
               </div>
               <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
             </div>
             <div class="brief-block" id="vs4-learn-candidate-detail" data-vs4-learn-candidate-detail="visible" data-vs4-learning-can-change-durable-behavior="false">
               <div class="label">Learn review</div>
-              <h3 id="vs4-learn-title">Learning candidate: brief_eb93c81ac8f863bf</h3>
+              <h3 id="vs4-learn-title">Learning candidate: brief_42238c818dea5b33</h3>
               <p id="vs4-learn-rationale">Outcome, correction, rejection, or failure notes can become future evidence only after owner-scoped review.</p>
               <div class="detail-grid">
-                <div><span class="label">Evidence</span><span id="vs4-learn-evidence">evidence_bundle:evb_436873258cd17841 | brief:brief_eb93c81ac8f863bf | action:action_38eca6040f2101d5</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-learn-evidence">evidence_bundle:evb_da9a21000a780ee3 | brief:brief_42238c818dea5b33 | action:action_6b643a1619e2716c</span></div>
                 <div><span class="label">Owner scope</span><span id="vs4-learn-scope">local-user / default</span></div>
                 <div><span class="label">Review state</span><span id="vs4-learn-state">needs review; review_required=true</span></div>
                 <div><span class="label">Durable change</span><span id="vs4-learn-durable-change">cannot change durable memory, answers, claims, or actions before review</span></div>
@@ -835,14 +852,15 @@ Search phrase: alpha-evidence-anchor.</code>
         <div class="product-panel">
           <div class="label">Page states</div>
           <h2>Major surfaces expose recovery and review states.</h2>
-          <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
-            <thead>
-              <tr>
-                <th scope="col">Surface</th>
-                <th scope="col">empty</th><th scope="col">loading</th><th scope="col">ready</th><th scope="col">partial degraded</th><th scope="col">needs review</th><th scope="col">permission denied</th><th scope="col">policy blocked</th><th scope="col">failed with recovery</th><th scope="col">audit log available</th>
-              </tr>
-            </thead>
-            <tbody><tr data-vs4-state-surface="Home/Ops Inbox" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Home/Ops Inbox</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+          <div class="table-scroll" data-vs4-state-matrix-scroll="contained">
+            <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
+              <thead>
+                <tr>
+                  <th scope="col">Surface</th>
+                  <th scope="col">empty</th><th scope="col">loading</th><th scope="col">ready</th><th scope="col">partial degraded</th><th scope="col">needs review</th><th scope="col">permission denied</th><th scope="col">policy blocked</th><th scope="col">failed with recovery</th><th scope="col">audit log available</th>
+                </tr>
+              </thead>
+              <tbody><tr data-vs4-state-surface="Home/Ops Inbox" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Home/Ops Inbox</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
 <tr data-vs4-state-surface="Ask Workbench" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Ask Workbench</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
 <tr data-vs4-state-surface="Search" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Search</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
 <tr data-vs4-state-surface="Artifact Viewer" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Artifact Viewer</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
@@ -852,7 +870,8 @@ Search phrase: alpha-evidence-anchor.</code>
 <tr data-vs4-state-surface="Action Card" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Action Card</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
 <tr data-vs4-state-surface="Evidence/Audit" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Evidence/Audit</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
 <tr data-vs4-state-surface="Learn Review" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Learn Review</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr></tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </section>
       <section id="vs4-reference-alignment" data-vs4-reference-alignment="home-search-artifact" data-vs4-reference-images-pass-evidence="false">
@@ -1351,6 +1370,70 @@ Search phrase: alpha-evidence-anchor.</code>
       vs4State.negative_evidence.home_search_artifact_reference_gap = alignment.complete ? 0 : 1;
       return alignment;
     }
+    function gridColumnCount(selector) {
+      const node = document.querySelector(selector);
+      if (!node) return 0;
+      const style = window.getComputedStyle(node);
+      if (!style || !style.gridTemplateColumns || style.gridTemplateColumns === "none") return 0;
+      return style.gridTemplateColumns.split(" ").filter(Boolean).length;
+    }
+    function isVisible(selector) {
+      const node = document.querySelector(selector);
+      if (!node) return false;
+      const rect = node.getBoundingClientRect();
+      const style = window.getComputedStyle(node);
+      return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+    }
+    function collectVs4ResponsiveLayout() {
+      const doc = document.documentElement;
+      const body = document.body;
+      const innerWidth = window.innerWidth || doc.clientWidth || 0;
+      const documentScrollWidth = Math.max(doc.scrollWidth || 0, body.scrollWidth || 0);
+      const stateScroll = document.querySelector("[data-vs4-state-matrix-scroll='contained']");
+      const stateTable = document.querySelector(".state-matrix");
+      const stateScrollRect = stateScroll ? stateScroll.getBoundingClientRect() : null;
+      const stateTableRect = stateTable ? stateTable.getBoundingClientRect() : null;
+      const layout = {
+        inner_width: innerWidth,
+        inner_height: window.innerHeight || doc.clientHeight || 0,
+        document_scroll_width: documentScrollWidth,
+        viewport_meta_present: Boolean(document.querySelector("meta[name='viewport'][content*='width=device-width']")),
+        horizontal_overflow: documentScrollWidth > innerWidth + 1,
+        main_grid_columns: gridColumnCount("main"),
+        topbar_grid_columns: gridColumnCount(".topbar"),
+        drop_ask_grid_columns: gridColumnCount(".drop-ask-grid"),
+        ops_grid_columns: gridColumnCount(".ops-grid"),
+        work_row_grid_columns: gridColumnCount(".work-row"),
+        brief_workbench_grid_columns: gridColumnCount(".brief-workbench"),
+        state_matrix_scroll_contained: Boolean(
+          stateScroll &&
+          stateTable &&
+          stateScrollRect &&
+          stateTableRect &&
+          stateScrollRect.width <= innerWidth + 1 &&
+          stateScroll.scrollWidth >= stateScroll.clientWidth &&
+          stateTableRect.width >= stateScrollRect.width
+        ),
+        visible: {
+          primary_nav: isVisible("#primary-nav"),
+          global_search: isVisible(".global-search"),
+          product_shell: isVisible("[data-vs4-surface='home-ops-inbox']"),
+          drop: isVisible("[data-vs4-drop-zone='visible']"),
+          ask: isVisible("[data-vs4-ask-box='visible']"),
+          ops_inbox: isVisible("[data-vs4-ops-inbox='visible']"),
+          workspace_context: isVisible(".workspace-strip"),
+          learn_review: isVisible("[data-vs4-learn-review='visible']"),
+          brief_detail: isVisible("[data-vs4-brief-detail='visible']")
+        }
+      };
+      layout.mobile_breakpoint_applied = innerWidth <= 760 &&
+        layout.main_grid_columns === 1 &&
+        layout.topbar_grid_columns === 1 &&
+        layout.drop_ask_grid_columns === 1 &&
+        layout.ops_grid_columns === 1 &&
+        layout.work_row_grid_columns === 1;
+      return layout;
+    }
     function vs4Slice003Passes() {
       const coverage = collectVs4StateCoverage();
       const reference = collectVs4ReferenceAlignment();
@@ -1695,6 +1778,7 @@ Search phrase: alpha-evidence-anchor.</code>
     window.__cornerstoneVs4BriefEvidence = function() {
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
+      const responsiveLayout = collectVs4ResponsiveLayout();
       return {
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -1702,6 +1786,7 @@ Search phrase: alpha-evidence-anchor.</code>
         slice_003_passes: vs4Slice003Passes(),
         state: vs4State,
         trace: vs4Trace,
+        responsive_layout: responsiveLayout,
         markers: {
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
