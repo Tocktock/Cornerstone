@@ -511,7 +511,11 @@ def _surface_payload(args: argparse.Namespace, command: str) -> tuple[Path, Loca
 
 def command_product_mission_control(args: argparse.Namespace) -> int:
     _, store, requested_scope, payload = _surface_payload(args, "cornerstone product mission-control")
-    result = store.mission_control_view(requested_scope)
+    result = store.mission_control_view(
+        requested_scope,
+        lane=args.lane or "",
+        selected_item_id=args.selected_item or "",
+    )
     surface = result["mission_control"]
     payload["mission_control"] = surface
     payload["ids"].update({"mission_control_id": surface["surface_id"]})
@@ -528,6 +532,7 @@ def command_product_loop_view(args: argparse.Namespace) -> int:
         conversation_id=args.conversation_id or "",
         brief_id=args.brief_id or "",
         claim_id=args.claim_id or "",
+        memory_id=args.memory_id or "",
         mission_id=args.mission_id or "",
         action_id=args.action_id or "",
         outcome_id=args.outcome_id or "",
@@ -19703,6 +19708,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19725,6 +19731,11 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "same_checksum_user_paste_kept_trusted",
     "user_paste_probe_external_http_calls",
     "user_paste_probe_authority_expanded",
+    "ops_inbox_selection_lost_evidence_refs",
+    "ops_inbox_selection_lost_audit_refs",
+    "ops_inbox_selection_live_writeback_claimed",
+    "ops_inbox_selection_human_acceptance_claimed",
+    "ops_inbox_selection_loop_view_missing",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
@@ -22990,6 +23001,8 @@ def build_parser() -> argparse.ArgumentParser:
     mission_control = product_sub.add_parser("mission-control", help="Show Mission Control / Ops Inbox projection")
     add_state_argument(mission_control)
     add_scope_arguments(mission_control)
+    mission_control.add_argument("--lane", help="Select an Ops Inbox lane")
+    mission_control.add_argument("--selected-item", help="Select an Ops Inbox work item")
     mission_control.add_argument("--json", action="store_true", help="Emit JSON output")
     mission_control.set_defaults(func=command_product_mission_control)
 
@@ -22997,6 +23010,7 @@ def build_parser() -> argparse.ArgumentParser:
     loop_view.add_argument("--conversation-id")
     loop_view.add_argument("--brief-id")
     loop_view.add_argument("--claim-id")
+    loop_view.add_argument("--memory-id")
     loop_view.add_argument("--mission-id")
     loop_view.add_argument("--action-id")
     loop_view.add_argument("--outcome-id")

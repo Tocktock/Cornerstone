@@ -137,6 +137,7 @@ VS4_INBOX_LANES = [
 
 VS4_OPS_INBOX_ITEMS = [
     {
+        "id": "brief-review",
         "lane": "needs-review",
         "kind": "Brief",
         "title": "Evidence-backed Brief",
@@ -152,6 +153,7 @@ VS4_OPS_INBOX_ITEMS = [
         "next_action": "Open Brief detail",
     },
     {
+        "id": "claim-candidate",
         "lane": "needs-review",
         "kind": "Claim",
         "title": "Claim candidate",
@@ -167,6 +169,7 @@ VS4_OPS_INBOX_ITEMS = [
         "next_action": "Review support",
     },
     {
+        "id": "memory-candidate",
         "lane": "needs-review",
         "kind": "Memory",
         "title": "Memory/Wiki candidate",
@@ -182,6 +185,7 @@ VS4_OPS_INBOX_ITEMS = [
         "next_action": "Inspect candidate",
     },
     {
+        "id": "action-card-draft",
         "lane": "approval-requests",
         "kind": "Action",
         "title": "Action Card draft",
@@ -197,6 +201,7 @@ VS4_OPS_INBOX_ITEMS = [
         "next_action": "Open Action Card",
     },
     {
+        "id": "evidence-free-approval-attempt",
         "lane": "policy-blocked",
         "kind": "Claim",
         "title": "Evidence-free approval attempt",
@@ -212,6 +217,7 @@ VS4_OPS_INBOX_ITEMS = [
         "next_action": "Attach evidence",
     },
     {
+        "id": "learning-recovery-candidate",
         "lane": "failed-recovery",
         "kind": "Learn",
         "title": "Learning recovery candidate",
@@ -313,6 +319,7 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-interactive-ops-inbox",
     "make verify-vs4-product-alpha-drop-ask-trust-boundary",
     "make verify-vs4-product-alpha-user-drop-ask-source",
     "make verify-vs4-product-alpha-evidence-audit-detail",
@@ -499,6 +506,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         "<button class='inbox-lane' type='button' role='tab' "
         f"data-vs4-inbox-lane='{html.escape(lane['key'])}' "
         f"data-vs4-inbox-lane-count='{int(lane['count'])}' "
+        "aria-controls='vs4-inbox-list' "
         f"aria-selected='{'true' if index == 0 else 'false'}'>"
         f"<span>{html.escape(lane['label'])}</span>"
         f"<strong>{int(lane['count'])}</strong>"
@@ -508,9 +516,20 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     )
     inbox_rows = "\n".join(
         "<article class='inbox-row' "
+        f"id='vs4-inbox-item-{html.escape(item['id'])}' "
+        "role='option' tabindex='0' "
+        f"aria-selected='{'true' if index == 0 else 'false'}' "
+        f"data-vs4-inbox-item-id='{html.escape(item['id'])}' "
         f"data-vs4-inbox-item='{html.escape(item['kind'].lower())}' "
         f"data-vs4-inbox-lane-ref='{html.escape(item['lane'])}' "
         f"data-vs4-inbox-status='{html.escape(item['status'].lower().replace(' ', '-'))}' "
+        f"data-vs4-inbox-title='{html.escape(item['title'])}' "
+        f"data-vs4-inbox-kind='{html.escape(item['kind'])}' "
+        f"data-vs4-inbox-body='{html.escape(item['body'])}' "
+        f"data-vs4-inbox-risk='{html.escape(item['risk'])}' "
+        f"data-vs4-inbox-owner='{html.escape(item['owner'])}' "
+        f"data-vs4-inbox-next-action='{html.escape(item['next_action'])}' "
+        f"data-vs4-inbox-href='{html.escape(item['href'])}' "
         f"data-vs4-inbox-evidence-ref='{html.escape(item['evidence'])}' "
         f"data-vs4-inbox-audit-ref='{html.escape(item['audit'])}'>"
         "<div>"
@@ -526,21 +545,27 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         f"<a class='text-link' href='{html.escape(item['href'])}'>Continue</a>"
         "</div>"
         "</article>"
-        for item in VS4_OPS_INBOX_ITEMS
+        for index, item in enumerate(VS4_OPS_INBOX_ITEMS)
     )
     selected_item = VS4_OPS_INBOX_ITEMS[0]
     inbox_selected_detail = (
-        "<aside class='product-panel inbox-detail' data-vs4-inbox-selected-detail='visible'>"
+        "<aside class='product-panel inbox-detail' data-vs4-inbox-selected-detail='visible' "
+        f"data-vs4-inbox-selected-item-id='{html.escape(selected_item['id'])}' "
+        f"data-vs4-inbox-selected-lane='{html.escape(selected_item['lane'])}'>"
         "<div class='label'>Selected work</div>"
-        f"<h3>{html.escape(selected_item['title'])}</h3>"
-        f"<p>{html.escape(selected_item['body'])}</p>"
+        f"<h3 data-vs4-inbox-selected-title>{html.escape(selected_item['title'])}</h3>"
+        f"<p data-vs4-inbox-selected-body>{html.escape(selected_item['body'])}</p>"
         "<div class='detail-grid'>"
+        f"<div><span class='label'>Kind</span><span data-vs4-inbox-selected-kind>{html.escape(selected_item['kind'])}</span></div>"
+        f"<div><span class='label'>Lane</span><span data-vs4-inbox-selected-lane-label>{html.escape(selected_item['lane'])}</span></div>"
         f"<div><span class='label'>Status</span><span data-vs4-inbox-selected-status>{html.escape(selected_item['status'])}</span></div>"
         f"<div><span class='label'>Owner / workspace</span><span data-vs4-inbox-selected-scope>{html.escape(selected_item['owner'])} / Personal / Project / default</span></div>"
         f"<div><span class='label'>Evidence</span><span data-vs4-inbox-selected-evidence>{html.escape(selected_item['evidence'])}</span></div>"
         f"<div><span class='label'>Risk</span><span data-vs4-inbox-selected-risk>{html.escape(selected_item['risk'])}</span></div>"
         f"<div><span class='label'>Next action</span><span data-vs4-inbox-selected-next-action>{html.escape(selected_item['next_action'])}</span></div>"
         f"<div><span class='label'>Activity</span><span data-vs4-inbox-selected-audit>{html.escape(selected_item['audit'])}</span></div>"
+        f"<div><span class='label'>Continue</span><a class='text-link' data-vs4-inbox-selected-continue href='{html.escape(selected_item['href'])}'>Open selected work</a></div>"
+        "<div><span class='label'>Journey</span><span data-vs4-inbox-selected-journey>Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn</span></div>"
         "</div>"
         "<div class='activity-list' data-vs4-inbox-activity='visible'>"
         "<div class='activity-row'><strong>Evidence gap</strong><span>Claim approval waits for supporting evidence.</span></div>"
@@ -794,7 +819,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       background: #fbfcfd;
       color: var(--ink);
       padding: 10px;
-      cursor: default;
+      cursor: pointer;
     }}
     .inbox-lane[aria-selected="true"] {{
       border-color: #8fb9b8;
@@ -823,6 +848,20 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       align-items: center;
       border-top: 1px solid var(--line);
       padding: 12px 0;
+      cursor: pointer;
+    }}
+    .inbox-row[hidden] {{
+      display: none;
+    }}
+    .inbox-row[aria-selected="true"] {{
+      background: #f5fbfa;
+      box-shadow: inset 3px 0 0 #2d7d7b;
+      padding-left: 10px;
+    }}
+    .inbox-lane:focus-visible,
+    .inbox-row:focus-visible {{
+      outline: 3px solid rgba(45, 125, 123, 0.25);
+      outline-offset: 2px;
     }}
     .inbox-row:first-child {{
       border-top: 0;
@@ -1475,7 +1514,7 @@ Follow-up should stay local until an owner reviews the claim, memory, and action
             <div class="label">Ops Inbox</div>
             <h2>Continue work</h2>
             <div class="inbox-lanes" role="tablist" aria-label="Ops Inbox triage lanes">{inbox_lanes}</div>
-            <div class="inbox-list" data-vs4-inbox-list="triage">{inbox_rows}</div>
+            <div id="vs4-inbox-list" class="inbox-list" role="listbox" aria-label="Ops Inbox work items" data-vs4-inbox-list="triage">{inbox_rows}</div>
             <h3 class="section-kicker">Continue links</h3>
             <div class="work-list">{continue_rows}</div>
           </div>
@@ -3250,13 +3289,149 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function setupVs4OpsInboxInteractions() {{
+      if (window.__cornerstoneVs4InboxBound) return;
+      window.__cornerstoneVs4InboxBound = true;
+      window.__cornerstoneVs4InboxTrace = [];
+      const lanes = Array.from(document.querySelectorAll("[data-vs4-inbox-lane]"));
+      const rows = Array.from(document.querySelectorAll("[data-vs4-inbox-item-id]"));
+      lanes.forEach((lane) => {{
+        lane.addEventListener("click", () => selectVs4InboxLane(lane.dataset.vs4InboxLane || ""));
+        lane.addEventListener("keydown", (event) => {{
+          if (event.key === "Enter" || event.key === " ") {{
+            event.preventDefault();
+            selectVs4InboxLane(lane.dataset.vs4InboxLane || "");
+          }}
+        }});
+      }});
+      rows.forEach((row) => {{
+        row.addEventListener("click", (event) => {{
+          if (event.target && event.target.closest && event.target.closest("a")) return;
+          selectVs4InboxItem(row);
+        }});
+        row.addEventListener("keydown", (event) => {{
+          if (event.key === "Enter" || event.key === " ") {{
+            event.preventDefault();
+            selectVs4InboxItem(row, "keyboard");
+          }}
+        }});
+      }});
+      selectVs4InboxLane("needs-review", {{restore: true}});
+    }}
+    function selectedOpsInboxText() {{
+      const selected = document.querySelector("[data-vs4-inbox-selected-detail='visible']");
+      return selected ? selected.textContent || "" : "";
+    }}
+    function setSelectedText(selector, value) {{
+      const node = document.querySelector(selector);
+      if (node) node.textContent = value || "";
+    }}
+    function selectVs4InboxItem(row, source) {{
+      if (!row) return false;
+      const selected = document.querySelector("[data-vs4-inbox-selected-detail='visible']");
+      if (!selected) return false;
+      const rows = Array.from(document.querySelectorAll("[data-vs4-inbox-item-id]"));
+      rows.forEach((item) => item.setAttribute("aria-selected", item === row ? "true" : "false"));
+      const laneKey = row.dataset.vs4InboxLaneRef || "";
+      const itemId = row.dataset.vs4InboxItemId || "";
+      selected.dataset.vs4InboxSelectedItemId = itemId;
+      selected.dataset.vs4InboxSelectedLane = laneKey;
+      setSelectedText("[data-vs4-inbox-selected-title]", row.dataset.vs4InboxTitle || "");
+      setSelectedText("[data-vs4-inbox-selected-body]", row.dataset.vs4InboxBody || "");
+      setSelectedText("[data-vs4-inbox-selected-kind]", row.dataset.vs4InboxKind || "");
+      setSelectedText("[data-vs4-inbox-selected-lane-label]", laneKey);
+      setSelectedText("[data-vs4-inbox-selected-status]", (row.dataset.vs4InboxStatus || "").replace(/-/g, " "));
+      setSelectedText("[data-vs4-inbox-selected-scope]", `${{row.dataset.vs4InboxOwner || "local-user"}} / Personal / Project / default`);
+      setSelectedText("[data-vs4-inbox-selected-evidence]", row.dataset.vs4InboxEvidenceRef || "");
+      setSelectedText("[data-vs4-inbox-selected-risk]", row.dataset.vs4InboxRisk || "");
+      setSelectedText("[data-vs4-inbox-selected-next-action]", row.dataset.vs4InboxNextAction || "");
+      setSelectedText("[data-vs4-inbox-selected-audit]", row.dataset.vs4InboxAuditRef || "");
+      const continueLink = document.querySelector("[data-vs4-inbox-selected-continue]");
+      if (continueLink) continueLink.setAttribute("href", row.dataset.vs4InboxHref || "#");
+      window.__cornerstoneVs4InboxTrace = window.__cornerstoneVs4InboxTrace || [];
+      window.__cornerstoneVs4InboxTrace.push({{
+        source: source || "click",
+        item_id: itemId,
+        lane: laneKey,
+        title: row.dataset.vs4InboxTitle || "",
+        continue_target: row.dataset.vs4InboxHref || "",
+        evidence_ref: row.dataset.vs4InboxEvidenceRef || "",
+        audit_ref: row.dataset.vs4InboxAuditRef || ""
+      }});
+      return true;
+    }}
+    function selectVs4InboxLane(laneKey, options) {{
+      setupVs4OpsInboxInteractions();
+      const lanes = Array.from(document.querySelectorAll("[data-vs4-inbox-lane]"));
+      const rows = Array.from(document.querySelectorAll("[data-vs4-inbox-item-id]"));
+      lanes.forEach((lane) => lane.setAttribute("aria-selected", lane.dataset.vs4InboxLane === laneKey ? "true" : "false"));
+      rows.forEach((row) => {{
+        const visible = row.dataset.vs4InboxLaneRef === laneKey;
+        row.hidden = !visible;
+        row.setAttribute("aria-hidden", visible ? "false" : "true");
+      }});
+      const selectedInLane = rows.find((row) => row.dataset.vs4InboxLaneRef === laneKey && row.getAttribute("aria-selected") === "true");
+      const firstInLane = rows.find((row) => row.dataset.vs4InboxLaneRef === laneKey);
+      const picked = selectedInLane || firstInLane;
+      if (picked) selectVs4InboxItem(picked, options && options.restore ? "restore" : "lane");
+      return Boolean(picked);
+    }}
+    function runVs4OpsInboxInteractionProof() {{
+      setupVs4OpsInboxInteractions();
+      const traceStart = (window.__cornerstoneVs4InboxTrace || []).length;
+      const beforeTitle = document.querySelector("[data-vs4-inbox-selected-title]")?.textContent || "";
+      const policySelected = selectVs4InboxLane("policy-blocked");
+      const policyText = selectedOpsInboxText();
+      const policyVisibleRows = Array.from(document.querySelectorAll("[data-vs4-inbox-item-id]")).filter((row) => !row.hidden);
+      const approvalSelected = selectVs4InboxLane("approval-requests");
+      const actionRow = document.querySelector("[data-vs4-inbox-item-id='action-card-draft']");
+      if (actionRow) actionRow.click();
+      const actionText = selectedOpsInboxText();
+      const actionContinue = document.querySelector("[data-vs4-inbox-selected-continue]")?.getAttribute("href") || "";
+      const failedSelected = selectVs4InboxLane("failed-recovery");
+      const failedRow = document.querySelector("[data-vs4-inbox-item-id='learning-recovery-candidate']");
+      if (failedRow) {{
+        failedRow.focus();
+        failedRow.dispatchEvent(new KeyboardEvent("keydown", {{key: "Enter", bubbles: true}}));
+      }}
+      const failedText = selectedOpsInboxText();
+      selectVs4InboxLane("needs-review", {{restore: true}});
+      const restoredText = selectedOpsInboxText();
+      const trace = window.__cornerstoneVs4InboxTrace || [];
+      const traceSlice = trace.slice(traceStart);
+      return {{
+        policy_selected: policySelected,
+        policy_visible_row_count: policyVisibleRows.length,
+        policy_visible_rows_match_lane: policyVisibleRows.length > 0 && policyVisibleRows.every((row) => row.dataset.vs4InboxLaneRef === "policy-blocked"),
+        policy_detail_updated: policyText.includes("Evidence-free approval attempt") && policyText.includes("policy:CS_CLAIM_EVIDENCE_REQUIRED"),
+        approval_selected: approvalSelected,
+        row_click_changed_title: beforeTitle !== "" && actionText.includes("Action Card draft") && !actionText.includes(beforeTitle),
+        action_detail_matches_row: Boolean(actionRow) &&
+          actionText.includes(actionRow.dataset.vs4InboxTitle || "") &&
+          actionText.includes(actionRow.dataset.vs4InboxEvidenceRef || "") &&
+          actionText.includes(actionRow.dataset.vs4InboxAuditRef || "") &&
+          actionText.includes(actionRow.dataset.vs4InboxNextAction || ""),
+        action_continue_target_matches: actionContinue === "#action-card",
+        failed_selected: failedSelected,
+        keyboard_selection_changed_detail: failedText.includes("Learning recovery candidate") && failedText.includes("learning:local_vs4_recovery"),
+        restored_default_lane: restoredText.includes("Evidence-backed Brief") && document.querySelector("[data-vs4-inbox-lane='needs-review']")?.getAttribute("aria-selected") === "true",
+        trace_has_click_and_keyboard: traceSlice.some((entry) => entry.source === "click") && traceSlice.some((entry) => entry.source === "keyboard"),
+        journey_path_visible: actionText.includes("Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn") || restoredText.includes("Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn"),
+        no_live_writeback_after_selection: !document.querySelector("[data-vs4-live-provider-claimed='true']") &&
+          vs4State.negative_evidence.live_external_writeback_claimed === 0 &&
+          !document.querySelector("[data-vs4-human-ux-claimed='true']")
+      }};
+    }}
     function collectVs4OpsInboxTriage() {{
+      setupVs4OpsInboxInteractions();
+      const interactionProof = runVs4OpsInboxInteractionProof();
       const lanes = Array.from(document.querySelectorAll("[data-vs4-inbox-lane]"));
       const rows = Array.from(document.querySelectorAll("[data-vs4-inbox-item]"));
       const selected = document.querySelector("[data-vs4-inbox-selected-detail='visible']");
       const selectedText = selected ? selected.textContent || "" : "";
       const laneKeys = lanes.map((lane) => lane.dataset.vs4InboxLane || "");
       const rowLaneKeys = rows.map((row) => row.dataset.vs4InboxLaneRef || "");
+      const selectedContinue = document.querySelector("[data-vs4-inbox-selected-continue]");
       const markerSet = {{
         lanes_visible: lanes.length >= 4,
         lane_counts_visible: lanes.every((lane) => Number(lane.dataset.vs4InboxLaneCount || "0") > 0),
@@ -3270,6 +3445,24 @@ Search phrase: alpha-evidence-anchor.</code>
         selected_detail_has_audit: selectedText.includes("audit:"),
         selected_detail_has_next_action: selectedText.includes("Next action"),
         selected_detail_has_risk: selectedText.includes("Risk"),
+        selected_detail_has_kind_lane: selectedText.includes("Kind") && selectedText.includes("Lane"),
+        selected_detail_has_continue_target: Boolean(selectedContinue && selectedContinue.getAttribute("href")),
+        selected_detail_has_journey: selectedText.includes("Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn"),
+        lane_filter_interactive: interactionProof.policy_selected &&
+          interactionProof.policy_visible_rows_match_lane &&
+          interactionProof.policy_detail_updated,
+        row_selection_interactive: interactionProof.approval_selected &&
+          interactionProof.row_click_changed_title &&
+          interactionProof.action_detail_matches_row,
+        keyboard_selection_interactive: interactionProof.failed_selected &&
+          interactionProof.keyboard_selection_changed_detail &&
+          interactionProof.trace_has_click_and_keyboard,
+        selected_detail_updates_from_row: interactionProof.action_detail_matches_row,
+        selected_detail_continue_target_matches_item: interactionProof.action_continue_target_matches,
+        workspace_scope_persists_after_selection: selectedText.includes("Personal / Project / default"),
+        evidence_audit_refs_persist_after_selection: selectedText.includes("evidence_bundle:") && selectedText.includes("audit:"),
+        journey_path_visible: interactionProof.journey_path_visible,
+        no_live_writeback_after_selection: interactionProof.no_live_writeback_after_selection,
         product_language_before_internal_ids: selectedText.indexOf("Selected work") >= 0 &&
           selectedText.indexOf("Selected work") < selectedText.indexOf("evidence_bundle:"),
         no_admin_first_inbox: !selectedText.includes("Connectors") && !selectedText.includes("Ontology") && !selectedText.includes("Scenario verifier")
@@ -3278,7 +3471,11 @@ Search phrase: alpha-evidence-anchor.</code>
         schema_version: "cs.vs4_ops_inbox_triage_proof.v0",
         lane_keys: laneKeys,
         row_count: rows.length,
+        selected_item_id: selected ? selected.dataset.vs4InboxSelectedItemId || "" : "",
+        selected_lane: selected ? selected.dataset.vs4InboxSelectedLane || "" : "",
         selected_text: selectedText.replace(/\\s+/g, " ").trim().slice(0, 1200),
+        interaction_proof: interactionProof,
+        trace: (window.__cornerstoneVs4InboxTrace || []).slice(-8),
         markers: markerSet
       }};
     }}

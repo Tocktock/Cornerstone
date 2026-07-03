@@ -148,6 +148,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
+)
 DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
@@ -25270,6 +25273,21 @@ VS4_SLICE_018_SCENARIOS = {
 }
 
 
+VS4_SLICE_019_SCENARIOS = {
+    "VS4-GATE-001",
+    "VS4-UI-001",
+    "VS4-UI-012",
+    "VS4-UI-013",
+    "VS4-UI-015",
+    "VS4-UI-016",
+    "VS4-STATE-001",
+    "VS4-REF-001",
+    "VS4-REG-003",
+    "VS4-REG-006",
+    "VS4-REG-007",
+}
+
+
 VS4_GENERAL_PURPOSE_PACKS = [
     {
         "key": "personal_research",
@@ -25467,6 +25485,31 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
     )
     run("boundary_action_show_after_denial", ["action", "show", boundary_action_id])
     run("product_mission_control", ["product", "mission-control"])
+    run(
+        "product_mission_control_policy_blocked",
+        ["product", "mission-control", "--lane", "policy-blocked", "--selected-item", "evidence-free-approval-attempt"],
+    )
+    run(
+        "product_mission_control_action_selected",
+        ["product", "mission-control", "--lane", "approval-requests", "--selected-item", "action-card-draft"],
+    )
+    run(
+        "product_loop_view_selected_action",
+        [
+            "product",
+            "loop-view",
+            "--brief-id",
+            brief_id,
+            "--claim-id",
+            claim_id,
+            "--memory-id",
+            memory_id,
+            "--mission-id",
+            mission_id,
+            "--action-id",
+            action_id,
+        ],
+    )
     run("audit_verify", ["audit", "verify"])
     run(
         "prompt_injection_artifact_ingest",
@@ -25514,6 +25557,17 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
         else {}
     )
     mission_control = _payload(transcripts["product_mission_control"]).get("mission_control", {})
+    policy_blocked_mission_control = _payload(transcripts["product_mission_control_policy_blocked"]).get(
+        "mission_control", {}
+    )
+    action_selected_mission_control = _payload(transcripts["product_mission_control_action_selected"]).get(
+        "mission_control", {}
+    )
+    selected_action_detail = action_selected_mission_control.get("selected_item_detail", {})
+    selected_policy_detail = policy_blocked_mission_control.get("selected_item_detail", {})
+    selected_action_selection = action_selected_mission_control.get("selection", {})
+    selected_policy_selection = policy_blocked_mission_control.get("selection", {})
+    product_loop = _payload(transcripts["product_loop_view_selected_action"]).get("product_loop", {})
     audit_integrity = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
     prompt_artifact = _payload(transcripts["prompt_injection_artifact_ingest"]).get("artifact", {})
     prompt_safety = prompt_artifact.get("safety", {}) if isinstance(prompt_artifact, dict) else {}
@@ -25599,6 +25653,9 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
         "boundary_action_dry_run",
         "boundary_action_show_after_denial",
         "product_mission_control",
+        "product_mission_control_policy_blocked",
+        "product_mission_control_action_selected",
+        "product_loop_view_selected_action",
         "audit_verify",
         "prompt_injection_artifact_ingest",
     ]
@@ -25702,6 +25759,32 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             and bool(mission_control.get("selected_item_detail", {}).get("activity_refs"))
             and mission_control.get("selected_item_detail", {}).get("live_external_writeback_claimed") is False
             and mission_control.get("selected_item_detail", {}).get("human_ux_acceptance_claimed") is False
+        ),
+        "ops_inbox_selection_cli_parity": (
+            _exit_ok(transcripts["product_mission_control_policy_blocked"])
+            and _exit_ok(transcripts["product_mission_control_action_selected"])
+            and selected_policy_selection.get("selected_lane") == "policy-blocked"
+            and selected_policy_selection.get("selected_item_id") == "evidence-free-approval-attempt"
+            and selected_policy_detail.get("selected_item_id") == "evidence-free-approval-attempt"
+            and selected_policy_detail.get("status") == "policy_blocked"
+            and "policy:CS_CLAIM_EVIDENCE_REQUIRED" in selected_policy_detail.get("evidence_refs", [])
+            and selected_action_selection.get("selected_lane") == "approval-requests"
+            and selected_action_selection.get("selected_item_id") == "action-card-draft"
+            and selected_action_detail.get("selected_item_id") == "action-card-draft"
+            and selected_action_detail.get("continue_target") == "#action-card"
+            and bool(selected_action_detail.get("evidence_refs"))
+            and bool(selected_action_detail.get("activity_refs"))
+            and selected_action_detail.get("owner_workspace_label") == "local-user / personal / default"
+            and selected_action_detail.get("journey") == "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn"
+            and selected_action_detail.get("live_external_writeback_claimed") is False
+            and selected_action_detail.get("human_ux_acceptance_claimed") is False
+        ),
+        "ops_inbox_loop_view_cli_parity": (
+            _exit_ok(transcripts["product_loop_view_selected_action"])
+            and product_loop.get("journey") == "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn"
+            and product_loop.get("single_item_progression_visible") is True
+            and any(stage.get("stage") == "Memory/Wiki" and stage.get("visible") is True for stage in product_loop.get("stages", []))
+            and any(stage.get("stage") == "Action" and stage.get("ref") == f"action:{action_id}" for stage in product_loop.get("stages", []))
         ),
         "prompt_injection_guard": (
             prompt_safety.get("unsafe_instruction_detected") is True
@@ -25818,6 +25901,19 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             "same_checksum_user_paste_kept_trusted": 0 if text_trust_downgrade else 1,
             "user_paste_probe_external_http_calls": int(trust_probe_safety.get("external_http_calls", 1) or 0),
             "user_paste_probe_authority_expanded": 0 if trust_probe_safety.get("authority_expanded") is False else 1,
+            "ops_inbox_selection_lost_evidence_refs": 0
+            if checks["ops_inbox_selection_cli_parity"] and selected_action_detail.get("evidence_refs")
+            else 1,
+            "ops_inbox_selection_lost_audit_refs": 0
+            if checks["ops_inbox_selection_cli_parity"] and selected_action_detail.get("activity_refs")
+            else 1,
+            "ops_inbox_selection_live_writeback_claimed": 0
+            if selected_action_detail.get("live_external_writeback_claimed") is False
+            else 1,
+            "ops_inbox_selection_human_acceptance_claimed": 0
+            if selected_action_detail.get("human_ux_acceptance_claimed") is False
+            else 1,
+            "ops_inbox_selection_loop_view_missing": 0 if checks["ops_inbox_loop_view_cli_parity"] else 1,
             "reference_images_used_as_pass_evidence": 0,
         },
     }
@@ -26466,6 +26562,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     slice16_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_016_CONTRACT).is_file()
     slice17_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT).is_file()
     slice18_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT).is_file()
+    slice19_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT).is_file()
     browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
     mobile_browser_proof = capture_vs4_product_alpha_browser_proof(
         root,
@@ -26578,6 +26675,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and slice16_contract_exists
         and slice17_contract_exists
         and slice18_contract_exists
+        and slice19_contract_exists
         else "FAIL",
         "VS4-UI-001": "PASS"
         if browser_ok
@@ -26767,6 +26865,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and shell_markers.get("memory_candidate_visible")
         and shell_markers.get("action_card_visible")
         and shell_markers.get("recent_activity_visible")
+        and cli_checks.get("ops_inbox_selection_cli_parity")
+        and cli_checks.get("ops_inbox_loop_view_cli_parity")
         and mobile_responsive_markers.get("ops_inbox_visible")
         and mobile_responsive_markers.get("one_column_ops_grid")
         and mobile_responsive_markers.get("one_column_work_rows")
@@ -26986,6 +27086,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and cli_checks.get("text_trust_downgrade")
         and cli_checks.get("action_boundary_cli_parity")
         and cli_checks.get("ops_inbox_projection")
+        and cli_checks.get("ops_inbox_selection_cli_parity")
+        and cli_checks.get("ops_inbox_loop_view_cli_parity")
         and unsafe_http_boundary_markers.get("unsafe_http_policy_and_audit_refs")
         and mobile_unsafe_http_boundary_markers.get("unsafe_http_policy_and_audit_refs")
         and evidence_audit_detail_markers.get("audit_verify_visible")
@@ -27051,9 +27153,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json#ops_inbox_triage_markers",
         f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json#ops_inbox_triage_markers",
         DEFAULT_VS4_PRODUCT_ALPHA_SLICE_011_CONTRACT,
+        DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
         "packages/cornerstone_cli/product_runtime.py",
+        "packages/cornerstone_cli/runtime.py",
+        "packages/cornerstone_cli/main.py",
         "cornerstone product mission-control --json",
+        "cornerstone product mission-control --lane policy-blocked --selected-item evidence-free-approval-attempt --json",
+        "cornerstone product mission-control --lane approval-requests --selected-item action-card-draft --json",
+        "cornerstone product loop-view --brief-id ... --claim-id ... --memory-id ... --mission-id ... --action-id ... --json",
         "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_mission_control",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_mission_control_action_selected",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json#cli_workflow.transcripts.product_loop_view_selected_action",
     ]
     action_boundary_evidence = [
         f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json#decision_pages_markers.action_execution_boundary_visible",
@@ -27210,7 +27320,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         ],
     }
     notes_by_id = {
-        "VS4-GATE-001": "VS4 parent contract, matrix, Slice 001 through Slice 018 contracts, and the VS4-specific scenario gate are structurally verified.",
+        "VS4-GATE-001": "VS4 parent contract, matrix, Slice 001 through Slice 019 contracts, and the VS4-specific scenario gate are structurally verified.",
         "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, readable created-work handoff, Ops Inbox triage, Continue, local boundary, product-language status, progressive proof details, human-review handoff, skip link, primary nav, visible focus proof, desktop overflow containment, and user-pasted source intake as first visible work.",
         "VS4-UI-002": "User-pasted Drop text is preserved as an untrusted Source/Artifact with sha256 original storage ref, provenance, safety markers, ready derived text, HTTP text-intake trust forcing, and same-checksum CLI trust downgrade.",
         "VS4-UI-003": "Evidence-backed Brief is created from the user-pasted source Evidence Bundle, not the fixed artifact fixture.",
@@ -27222,7 +27332,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-009": "Draft memory cannot influence answers or actions, is not hidden durable memory, unsafe Ask text creates zero durable memory side effects across CLI and HTTP/API paths, and unauthorized Action approval remains pending.",
         "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, local activity, denied-until-authorized detail, safety envelope detail, wrapped long reason codes, and keyboard-reachable detail from the normal Actions nav page.",
         "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0, exposes the no-live-writeback boundary on the Actions nav page, wraps long no-live-writeback and denial text, and proves denied execution/approval plus unsafe HTTP Ask promotion create no provider, workflow, or live writeback side effects.",
-        "VS4-UI-012": "Ops Inbox shows needs-review, approval request, policy-blocked, and failed-with-recovery triage lanes, selected-item detail, pending brief, evidence gap, claim, memory, action, Learn, Evidence/Audit detail path, human-review handoff, activity follow-up rows, valid Continue targets, CLI mission-control projection, and Ask-created work kind alignment.",
+        "VS4-UI-012": "Ops Inbox shows needs-review, approval request, policy-blocked, and failed-with-recovery triage lanes, selected-item detail, lane filtering, row click selection, keyboard selection, pending brief, evidence gap, claim, memory, action, Learn, Evidence/Audit detail path, human-review handoff, activity follow-up rows, valid Continue targets, CLI mission-control selected-item projection, loop-view journey parity, and Ask-created work kind alignment.",
         "VS4-UI-013": "Ask uses the user's question and pasted source context to create a conversation-backed answer and reviewable Brief, Claim, Memory/Wiki candidate, Action Card, evidence, and audit refs from a labeled keyboard-runnable control, while unsafe Ask text stays evidence-only and cannot become authority through CLI or HTTP/API promotion.",
         "VS4-UI-014": "Personal Research, Company Policy Review, and Operations Issue packs each produce Brief, Claim, Memory/Wiki candidate, Action Card, and Ops Inbox follow-up refs.",
         "VS4-UI-015": "Workspace and owner context are visible in the shell, Ops Inbox selected-item detail, and VS4-H01 review handoff.",
@@ -27236,7 +27346,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-REG-004": "Prompt-injection fixture, same-checksum user-paste trust downgrade, unsafe Ask text, unsafe HTTP/API promotion, unauthorized Action execution, and unauthorized Action approval are detected or denied; they create no claim approval, memory approval, action execution, external calls, policy change, or authority expansion.",
         "VS4-REG-005": "Reference images remain design guidance only; PASS and human-acceptance evidence comes from runtime/docs/CLI/browser proof and a dated human record.",
         "VS4-REG-006": "The first screen remains product-first with user-pasted Drop/Ask source intake, readable Ask results, Ops Inbox triage, Evidence/Audit detail reached contextually, human-review handoff, product-ready Claim/Action nav destinations, and contained long policy text, while primary nav omits admin, connector, ontology, and verifier-first entries.",
-        "VS4-REG-007": "Brief detail, user text source intake, same-checksum trust downgrade, Ask injection-boundary, Ops Inbox mission-control, Action execution-boundary, Evidence/Audit audit-verify evidence, unsafe HTTP boundary browser proof, and VS4-H01 human-gate package paths have native CLI transcripts or commands with JSON output and expected negative/human-required boundaries where applicable.",
+        "VS4-REG-007": "Brief detail, user text source intake, same-checksum trust downgrade, Ask injection-boundary, Ops Inbox mission-control selected-item projection, product loop-view, Action execution-boundary, Evidence/Audit audit-verify evidence, unsafe HTTP boundary browser proof, and VS4-H01 human-gate package paths have native CLI transcripts or commands with JSON output and expected negative/human-required boundaries where applicable.",
     }
     scenario_results: list[dict[str, Any]] = []
     for matrix_row in rows_from_matrix:
@@ -27262,14 +27372,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_016_SCENARIOS
             or scenario_id in VS4_SLICE_017_SCENARIOS
             or scenario_id in VS4_SLICE_018_SCENARIOS
+            or scenario_id in VS4_SLICE_019_SCENARIOS
         ):
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_018_SCENARIOS:
+        elif scenario_id in VS4_SLICE_019_SCENARIOS:
             classification = "in_this_slice"
+        elif scenario_id in VS4_SLICE_018_SCENARIOS:
+            classification = "previous_slice"
         elif scenario_id in VS4_SLICE_017_SCENARIOS:
             classification = "previous_slice"
         elif scenario_id in VS4_SLICE_016_SCENARIOS:
@@ -27297,11 +27410,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_015_SCENARIOS
             or scenario_id in VS4_SLICE_016_SCENARIOS
             or scenario_id in VS4_SLICE_017_SCENARIOS
+            or scenario_id in VS4_SLICE_018_SCENARIOS
         ):
             classification = "previous_slice"
         else:
             classification = "later_slice"
-        if scenario_id in VS4_SLICE_018_SCENARIOS:
+        if scenario_id in VS4_SLICE_019_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT
+        elif scenario_id in VS4_SLICE_018_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT
         elif scenario_id in VS4_SLICE_017_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT
@@ -27371,13 +27487,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
             "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
             "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
-            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 018 proof.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 019 proof.",
         }
     ]
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-018-drop-ask-trust-boundary",
+        "slice": "slice-019-interactive-ops-inbox",
         "state_dir": {
             "browser": browser_state_rel,
             "mobile_browser": mobile_browser_state_rel,
@@ -27387,7 +27503,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
@@ -27407,6 +27523,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "slice_016": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_016_CONTRACT,
             "slice_017": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT,
             "slice_018": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
+            "slice_019": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
         },
         "browser_proof": browser_proof,
         "mobile_browser_proof": mobile_browser_proof,
@@ -27439,6 +27556,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+            "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
             "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",
@@ -27723,8 +27841,10 @@ def build_vs4_human_gate_package(
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_016_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT, "kind": "slice_contract"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT, "kind": "slice_contract"},
         ],
         "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-interactive-ops-inbox",
             "make verify-vs4-product-alpha-drop-ask-trust-boundary",
             "make verify-vs4-product-alpha-user-drop-ask-source",
             "make verify-vs4-product-alpha-evidence-audit-detail",
@@ -27783,6 +27903,7 @@ def build_vs4_human_gate_package(
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_016_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_017_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_018_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_019_CONTRACT,
             report_rel,
             package_rel,
         ],

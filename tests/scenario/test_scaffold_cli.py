@@ -14,6 +14,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
+VS4_ACTIVE_SLICE = "slice-019-interactive-ops-inbox"
+VS4_ACTIVE_SLICE_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
+)
+
 from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
 from cornerstone_cli.scenarios import (
     _vs2_regression_guard_enabled,
@@ -11392,8 +11397,8 @@ class ScaffoldCliTests(unittest.TestCase):
     def _vs4_gate_fixture_report(self, report_rel: str, mutator: Any | None = None) -> str:
         source_path = ROOT / "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
         report = json.loads(source_path.read_text())
-        report["slice"] = "slice-018-drop-ask-trust-boundary"
-        report["slice_contract"] = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md"
+        report["slice"] = VS4_ACTIVE_SLICE
+        report["slice_contract"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("slice_contracts", {})["slice_016"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md"
         )
@@ -11403,6 +11408,7 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("slice_contracts", {})["slice_018"] = (
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md"
         )
+        report.setdefault("slice_contracts", {})["slice_019"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11410,6 +11416,9 @@ class ScaffoldCliTests(unittest.TestCase):
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         report.setdefault("proof_boundary", {})["vs4_slice_018_drop_ask_trust_boundary"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
+        report.setdefault("proof_boundary", {})["vs4_slice_019_interactive_ops_inbox"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         unsafe_markers = {
@@ -11430,6 +11439,11 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("negative_evidence", {})["same_checksum_user_paste_kept_trusted"] = 0
         report["negative_evidence"]["user_paste_probe_external_http_calls"] = 0
         report["negative_evidence"]["user_paste_probe_authority_expanded"] = 0
+        report["negative_evidence"]["ops_inbox_selection_lost_evidence_refs"] = 0
+        report["negative_evidence"]["ops_inbox_selection_lost_audit_refs"] = 0
+        report["negative_evidence"]["ops_inbox_selection_live_writeback_claimed"] = 0
+        report["negative_evidence"]["ops_inbox_selection_human_acceptance_claimed"] = 0
+        report["negative_evidence"]["ops_inbox_selection_loop_view_missing"] = 0
         report["source_tree"] = git_verification_metadata(ROOT)
         report.setdefault("self_command_transcript", {})["command"] = [
             "cornerstone",
@@ -11488,7 +11502,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11531,7 +11545,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11589,7 +11603,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11639,7 +11653,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11678,7 +11692,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11719,7 +11733,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11760,7 +11774,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11809,7 +11823,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11867,12 +11881,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11920,6 +11934,7 @@ class ScaffoldCliTests(unittest.TestCase):
             "VS4-GATE-001",
             "VS4-UI-001",
             "VS4-UI-012",
+            "VS4-UI-013",
             "VS4-UI-015",
             "VS4-UI-016",
             "VS4-STATE-001",
@@ -11931,17 +11946,18 @@ class ScaffoldCliTests(unittest.TestCase):
         args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
         for scenario_id in selected:
             args.extend(["--scenario", scenario_id])
-        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-ops-inbox-triage.json"])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-interactive-ops-inbox.json"])
         result = run_cli(*args)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11950,7 +11966,33 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["mobile_browser_proof"]["status"], "PASS")
         self.assertTrue(all(payload["mobile_browser_proof"]["ops_inbox_triage_markers"].values()))
         self.assertTrue(payload["cli_workflow"]["checks"]["ops_inbox_projection"])
+        self.assertTrue(payload["cli_workflow"]["checks"]["ops_inbox_selection_cli_parity"])
+        self.assertTrue(payload["cli_workflow"]["checks"]["ops_inbox_loop_view_cli_parity"])
+        ops_markers = payload["browser_proof"]["ops_inbox_triage_markers"]
+        mobile_ops_markers = payload["mobile_browser_proof"]["ops_inbox_triage_markers"]
+        for marker in [
+            "lane_filter_interactive",
+            "row_selection_interactive",
+            "keyboard_selection_interactive",
+            "selected_detail_updates_from_row",
+            "selected_detail_continue_target_matches_item",
+            "workspace_scope_persists_after_selection",
+            "evidence_audit_refs_persist_after_selection",
+            "journey_path_visible",
+            "no_live_writeback_after_selection",
+        ]:
+            self.assertTrue(ops_markers[marker], marker)
+            self.assertTrue(mobile_ops_markers[marker], marker)
         mission_control = payload["cli_workflow"]["transcripts"]["product_mission_control"]["stdout_json"]["mission_control"]
+        action_selected = payload["cli_workflow"]["transcripts"]["product_mission_control_action_selected"]["stdout_json"][
+            "mission_control"
+        ]
+        policy_selected = payload["cli_workflow"]["transcripts"]["product_mission_control_policy_blocked"]["stdout_json"][
+            "mission_control"
+        ]
+        loop_view = payload["cli_workflow"]["transcripts"]["product_loop_view_selected_action"]["stdout_json"][
+            "product_loop"
+        ]
         lanes = {lane["key"]: lane for lane in mission_control["triage_lanes"]}
         self.assertEqual(
             set(lanes),
@@ -11962,6 +12004,23 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(selected_item["activity_refs"])
         self.assertFalse(selected_item["live_external_writeback_claimed"])
         self.assertFalse(selected_item["human_ux_acceptance_claimed"])
+        action_detail = action_selected["selected_item_detail"]
+        self.assertEqual(action_detail["selected_item_id"], "action-card-draft")
+        self.assertEqual(action_detail["lane"], "approval-requests")
+        self.assertEqual(action_detail["continue_target"], "#action-card")
+        self.assertTrue(action_detail["evidence_refs"])
+        self.assertTrue(action_detail["activity_refs"])
+        self.assertFalse(action_detail["live_external_writeback_claimed"])
+        self.assertFalse(action_detail["human_ux_acceptance_claimed"])
+        policy_detail = policy_selected["selected_item_detail"]
+        self.assertEqual(policy_detail["selected_item_id"], "evidence-free-approval-attempt")
+        self.assertEqual(policy_detail["lane"], "policy-blocked")
+        self.assertEqual(policy_detail["status"], "policy_blocked")
+        self.assertTrue(policy_detail["evidence_refs"])
+        self.assertTrue(policy_detail["activity_refs"])
+        self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
+        self.assertTrue(any(stage["stage"] == "Memory/Wiki" and stage["visible"] for stage in loop_view["stages"]))
+        self.assertTrue(any(stage["stage"] == "Action" and stage["visible"] for stage in loop_view["stages"]))
         self.assertEqual(
             payload["browser_proof"]["primary_nav_labels"],
             ["Home", "Search", "Artifacts", "Claims", "Actions"],
@@ -11970,7 +12029,20 @@ class ScaffoldCliTests(unittest.TestCase):
             payload["proof_boundary"]["vs4_slice_011_ops_inbox_triage_detail"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
         )
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_019_interactive_ops_inbox"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for key in [
+            "ops_inbox_selection_lost_evidence_refs",
+            "ops_inbox_selection_lost_audit_refs",
+            "ops_inbox_selection_live_writeback_claimed",
+            "ops_inbox_selection_human_acceptance_claimed",
+            "ops_inbox_selection_loop_view_missing",
+        ]:
+            self.assertIn(key, payload["negative_evidence"])
+            self.assertEqual(payload["negative_evidence"][key], 0, key)
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -11994,12 +12066,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12087,13 +12159,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12154,13 +12226,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12172,6 +12244,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(all(payload["mobile_browser_proof"]["human_review_handoff_markers"].values()))
         self.assertIn("VS4-H01 remains HUMAN_REQUIRED", handoff["package_text"])
         self.assertIn("Review input only", handoff["handoff_text"])
+        self.assertIn("make verify-vs4-product-alpha-interactive-ops-inbox", handoff["commands"])
         self.assertIn("make verify-vs4-product-alpha-human-review-handoff", handoff["commands"])
         self.assertIn("reports/human-gates/vs4/review-kit.json", handoff["artifact_paths"])
         self.assertIn(
@@ -12231,13 +12304,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12297,13 +12370,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
-        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 9)
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12374,16 +12447,16 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-018-drop-ask-trust-boundary")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(
             payload["slice_contract"],
-            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
+            VS4_ACTIVE_SLICE_CONTRACT,
         )
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], 11)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12564,6 +12637,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("Action execution boundary" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("desktop overflow proof" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("trust-boundary" in item for item in package_row["review_checklist"]))
+        self.assertIn("make verify-vs4-product-alpha-interactive-ops-inbox", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-drop-ask-trust-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-human-review-handoff", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-user-drop-ask-source", package_row["commands_to_run_before_review"])
@@ -12606,6 +12680,7 @@ class ScaffoldCliTests(unittest.TestCase):
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
             package_row["evidence_refs"],
         )
+        self.assertIn(VS4_ACTIVE_SLICE_CONTRACT, package_row["evidence_refs"])
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())
 

@@ -35,6 +35,10 @@
     "vs4_h01_remains_human_required": true
   },
   "commands_to_run_before_review": [
+    "make verify-vs4-product-alpha-interactive-ops-inbox",
+    "make verify-vs4-product-alpha-drop-ask-trust-boundary",
+    "make verify-vs4-product-alpha-user-drop-ask-source",
+    "make verify-vs4-product-alpha-evidence-audit-detail",
     "make verify-vs4-product-alpha-gate-integrity",
     "make verify-vs4-product-alpha-human-review-handoff",
     "make verify-vs4-product-alpha-desktop-overflow",
@@ -65,6 +69,10 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_014_HUMAN_REVIEW_HANDOFF.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_015_GATE_INTEGRITY.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md",
     "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "reports/human-gates/vs4/VS4-H01.json"
   ],
@@ -83,7 +91,7 @@
     "production_readiness_claimed_by_package": 0,
     "security_acceptance_claimed_by_package": 0
   },
-  "package_digest_sha256": "fa50a4c63ab6b11e18323f57bb726d2ca16b727d784b2d7460bf4cb622949429",
+  "package_digest_sha256": "da8ae16d4d1066c4a6dec5a711a05bcaa68706b0f11e151eb978288ba6f403ba",
   "package_id": "vs4_human_gate_vs4_h01",
   "package_path": "reports/human-gates/vs4/VS4-H01.json",
   "pass_claim_allowed": false,
@@ -127,6 +135,7 @@
     "Walk the keyboard/focus proof and confirm skip link, primary nav, Continue links, Evidence Drawer, Ask, Claim, Action Card, and proof details are reachable and understandable.",
     "Inspect the Ask result and confirm created work is readable before raw refs while evidence refs remain available in progressive detail.",
     "Inspect unsafe Ask prompt evidence and confirm it cannot approve memory, approve claims, execute actions, change policy, call providers, or expand authority.",
+    "Inspect Drop/Ask trust-boundary evidence and confirm user-pasted text stays untrusted even when callers or deduplication try to mark it trusted.",
     "Inspect the Action execution boundary and confirm unauthorized execution/approval denial shows policy, audit, safety envelope, resolution path, and zero provider/writeback side effects.",
     "Inspect desktop overflow proof and confirm long policy, safety-envelope, evidence, and audit tokens wrap without body-level horizontal scrolling.",
     "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
@@ -136,15 +145,15 @@
     {
       "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
       "present": true,
-      "sha256": "3fec0764a6b1e449e9d0dc4e3d445196d407f32dc888414d2cd6d1aeaedbbfe2",
+      "sha256": "550ecc18a2b33a3ff71781f5af0162a9bfd0d4796c610f3b01ca663fe6f0e36a",
       "summary": {
         "blocking": 0,
         "fail": 0,
         "human_required": 1,
-        "in_this_slice": 5,
+        "in_this_slice": 11,
         "not_run": 0,
         "pass": 27,
-        "previous_slice": 22,
+        "previous_slice": 16,
         "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
         "scenario_count": 28
       }
@@ -220,6 +229,22 @@
     {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_015_GATE_INTEGRITY.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_016_EVIDENCE_AUDIT_DETAIL.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
     }
   ],
   "review_record_contract": {
@@ -255,15 +280,15 @@
   "scenario_report": {
     "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "present": true,
-    "sha256": "3fec0764a6b1e449e9d0dc4e3d445196d407f32dc888414d2cd6d1aeaedbbfe2",
+    "sha256": "550ecc18a2b33a3ff71781f5af0162a9bfd0d4796c610f3b01ca663fe6f0e36a",
     "summary": {
       "blocking": 0,
       "fail": 0,
       "human_required": 1,
-      "in_this_slice": 5,
+      "in_this_slice": 11,
       "not_run": 0,
       "pass": 27,
-      "previous_slice": 22,
+      "previous_slice": 16,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
       "scenario_count": 28
     }

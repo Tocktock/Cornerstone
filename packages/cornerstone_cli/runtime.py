@@ -3692,7 +3692,13 @@ class LocalRuntimeStore:
             "generated_at": utc_now(),
         }
 
-    def mission_control_view(self, scope: dict[str, str]) -> dict[str, Any]:
+    def mission_control_view(
+        self,
+        scope: dict[str, str],
+        *,
+        lane: str = "",
+        selected_item_id: str = "",
+    ) -> dict[str, Any]:
         briefs = self._brief_records(scope)
         claims = self._claim_records(scope)
         missions = self._mission_records(scope)
@@ -3737,62 +3743,174 @@ class LocalRuntimeStore:
             }
             for mission in missions
         ]
-        needs_review_count = (
-            len([brief for brief in briefs if brief.get("status") in {"draft", "evidence_backed"}])
-            + len([claim for claim in claims if claim.get("status") in {"draft", "evidence_backed"}])
-            + len([memory for memory in memories if memory.get("status") in {"draft", "needs_review"}])
-            + len(learning)
-        )
-        approval_request_count = len(pending_approvals) or len(actions)
-        policy_blocked_count = len(evidence_free_claims)
-        failed_with_recovery_count = len(
-            [
-                row
-                for row in learning
-                if str(row.get("status", "")).lower() in {"failed", "needs_review", "pending_review"}
-            ]
-        ) or 1
+        def _audit_refs(record: dict[str, Any]) -> list[str]:
+            refs = record.get("audit_refs")
+            return [str(ref) for ref in refs] if isinstance(refs, list) else []
+
+        def _evidence_refs(record: dict[str, Any], fallback: list[str]) -> list[str]:
+            refs: list[str] = []
+            evidence_bundle = record.get("evidence_bundle", {}) if isinstance(record.get("evidence_bundle"), dict) else {}
+            evidence = record.get("evidence", {}) if isinstance(record.get("evidence"), dict) else {}
+            bundle_id = evidence_bundle.get("evidence_bundle_id") or evidence.get("evidence_bundle_id")
+            if bundle_id:
+                refs.append(f"evidence_bundle:{bundle_id}")
+            for artifact_ref in evidence_bundle.get("artifact_refs", []) or evidence.get("artifact_refs", []) or []:
+                refs.append(str(artifact_ref))
+            return list(dict.fromkeys(refs or fallback))
+
+        owner_workspace_label = f"{scope['owner_id']} / {scope['namespace_id']} / {scope['workspace_id']}"
+        brief = briefs[0] if briefs else {}
+        supported_claims = [claim for claim in claims if claim not in evidence_free_claims]
+        claim = supported_claims[0] if supported_claims else (claims[0] if claims else {})
+        blocked_claim = evidence_free_claims[0] if evidence_free_claims else {}
+        memory = memories[0] if memories else {}
+        action = actions[0] if actions else {}
+        learning_row = learning[0] if learning else {}
+        ops_inbox_items = [
+            {
+                "item_id": "brief-review",
+                "lane": "needs-review",
+                "kind": "brief",
+                "title": brief.get("title", "Evidence-backed Brief"),
+                "status": brief.get("status", "needs_review"),
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": _evidence_refs(brief, ["evidence_bundle:local_vs4_brief"]),
+                "activity_refs": _audit_refs(brief),
+                "risk": "review_before_authority",
+                "next_action": "Open Brief detail and review evidence before approving Claim, Memory, or Action.",
+                "continue_target": "#vs4-brief-detail",
+                "record_refs": [f"brief:{brief.get('brief_id')}"] if brief.get("brief_id") else [],
+            },
+            {
+                "item_id": "claim-candidate",
+                "lane": "needs-review",
+                "kind": "claim",
+                "title": "Claim candidate",
+                "status": claim.get("status", "draft"),
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": _evidence_refs(claim, ["evidence_bundle:local_vs4_claim"]),
+                "activity_refs": _audit_refs(claim),
+                "risk": "evidence_required_before_approval",
+                "next_action": "Review supporting evidence before approval.",
+                "continue_target": "#claim-builder",
+                "record_refs": [f"claim:{claim.get('claim_id')}"] if claim.get("claim_id") else [],
+            },
+            {
+                "item_id": "memory-candidate",
+                "lane": "needs-review",
+                "kind": "memory",
+                "title": "Memory/Wiki candidate",
+                "status": memory.get("status", "draft"),
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": _evidence_refs(memory, ["evidence_bundle:local_vs4_memory"]),
+                "activity_refs": _audit_refs(memory),
+                "risk": "draft_memory_review_required",
+                "next_action": "Inspect candidate before durable use.",
+                "continue_target": "#vs4-memory-candidates",
+                "record_refs": [f"memory:{memory.get('memory_id')}"] if memory.get("memory_id") else [],
+            },
+            {
+                "item_id": "action-card-draft",
+                "lane": "approval-requests",
+                "kind": "action",
+                "title": "Action Card draft",
+                "status": action.get("approval", {}).get("status", "approval_review"),
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": _evidence_refs(action, ["evidence_bundle:local_vs4_action"]),
+                "activity_refs": _audit_refs(action),
+                "risk": "local_mock_only",
+                "next_action": "Open Action Card and review approval boundary.",
+                "continue_target": "#action-card",
+                "record_refs": [f"action:{action.get('action_id')}"] if action.get("action_id") else [],
+            },
+            {
+                "item_id": "evidence-free-approval-attempt",
+                "lane": "policy-blocked",
+                "kind": "claim",
+                "title": "Evidence-free approval attempt",
+                "status": "policy_blocked",
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": ["policy:CS_CLAIM_EVIDENCE_REQUIRED"],
+                "activity_refs": _audit_refs(blocked_claim),
+                "risk": "approval_denied_until_evidence",
+                "next_action": "Attach evidence before requesting approval.",
+                "continue_target": "#claim-builder",
+                "record_refs": [f"claim:{blocked_claim.get('claim_id')}"] if blocked_claim.get("claim_id") else [],
+            },
+            {
+                "item_id": "learning-recovery-candidate",
+                "lane": "failed-recovery",
+                "kind": "learn",
+                "title": "Learning recovery candidate",
+                "status": learning_row.get("status", "failed_with_recovery"),
+                "owner_workspace_label": owner_workspace_label,
+                "evidence_refs": ["learning:local_vs4_recovery"],
+                "activity_refs": _audit_refs(learning_row),
+                "risk": "review_before_learning",
+                "next_action": "Open Learn review before changing future behavior.",
+                "continue_target": "#vs4-learn-review",
+                "record_refs": [f"learning:{learning_row.get('learning_id')}"] if learning_row.get("learning_id") else [],
+            },
+        ]
+        lane_counts = {
+            lane_key: len([item for item in ops_inbox_items if item["lane"] == lane_key])
+            for lane_key in {"needs-review", "approval-requests", "policy-blocked", "failed-recovery"}
+        }
         triage_lanes = [
             {
                 "key": "needs-review",
                 "label": "Needs review",
-                "count": needs_review_count,
+                "count": lane_counts["needs-review"],
                 "description": "Evidence-backed work waiting for owner review.",
             },
             {
                 "key": "approval-requests",
                 "label": "Approval requests",
-                "count": approval_request_count,
+                "count": lane_counts["approval-requests"],
                 "description": "Action or claim work that must be reviewed before side effects.",
             },
             {
                 "key": "policy-blocked",
                 "label": "Policy blocked",
-                "count": policy_blocked_count,
+                "count": lane_counts["policy-blocked"],
                 "description": "Work blocked from authority until evidence or policy conditions are fixed.",
             },
             {
                 "key": "failed-recovery",
                 "label": "Failed with recovery",
-                "count": failed_with_recovery_count,
+                "count": lane_counts["failed-recovery"],
                 "description": "Failed or incomplete work with a reviewable recovery path.",
             },
         ]
+        valid_lanes = {row["key"] for row in triage_lanes}
+        requested_lane = lane if lane in valid_lanes else ""
+        filtered_items = [item for item in ops_inbox_items if not requested_lane or item["lane"] == requested_lane]
+        selected_item = next(
+            (item for item in filtered_items if selected_item_id and item["item_id"] == selected_item_id),
+            None,
+        )
+        if selected_item is None and selected_item_id:
+            selected_item = next((item for item in ops_inbox_items if item["item_id"] == selected_item_id), None)
+        selected_item = selected_item or (filtered_items[0] if filtered_items else ops_inbox_items[0])
+        selected_lane = selected_item["lane"]
+        filtered_items = [item for item in ops_inbox_items if item["lane"] == selected_lane]
         selected_item_detail = {
             "schema_version": "cs.ops_inbox_selected_item.v0",
-            "title": briefs[0].get("title", "Evidence-backed Brief") if briefs else "Evidence-backed Brief",
-            "kind": "brief" if briefs else "empty",
-            "status": briefs[0].get("status", "needs_review") if briefs else "needs_review",
+            "selected_item_id": selected_item["item_id"],
+            "lane": selected_lane,
+            "title": selected_item["title"],
+            "kind": selected_item["kind"],
+            "status": selected_item["status"],
             "scope": scope,
-            "owner_workspace_label": f"{scope['owner_id']} / {scope['namespace_id']} / {scope['workspace_id']}",
-            "evidence_refs": (
-                [f"evidence_bundle:{briefs[0].get('evidence_bundle', {}).get('evidence_bundle_id')}"]
-                if briefs and briefs[0].get("evidence_bundle", {}).get("evidence_bundle_id")
-                else []
-            ),
-            "risk": "review_before_authority",
-            "next_action": "Open Brief detail and review evidence before approving Claim, Memory, or Action.",
-            "activity_refs": briefs[0].get("audit_refs", []) if briefs else [],
+            "owner_workspace_label": selected_item["owner_workspace_label"],
+            "evidence_refs": selected_item["evidence_refs"],
+            "risk": selected_item["risk"],
+            "next_action": selected_item["next_action"],
+            "activity_refs": selected_item["activity_refs"],
+            "continue_target": selected_item["continue_target"],
+            "record_refs": selected_item["record_refs"],
+            "journey": "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn",
+            "loop_view_command": "cornerstone product loop-view --json",
             "live_external_writeback_claimed": False,
             "human_ux_acceptance_claimed": False,
         }
@@ -3807,6 +3925,17 @@ class LocalRuntimeStore:
             "advanced_governance_available_on_request": True,
             "advanced_governance_default_visible": False,
             "triage_lanes": triage_lanes,
+            "selection": {
+                "requested_lane": lane,
+                "requested_selected_item": selected_item_id,
+                "selected_lane": selected_lane,
+                "selected_item_id": selected_item["item_id"],
+                "filtered_count": len(filtered_items),
+                "selectable_item_ids": [item["item_id"] for item in ops_inbox_items],
+                "filter_applied": True,
+            },
+            "ops_inbox_items": ops_inbox_items,
+            "filtered_ops_inbox_items": filtered_items,
             "selected_item_detail": selected_item_detail,
             "sections": {
                 "pending_briefs": [
@@ -3890,6 +4019,7 @@ class LocalRuntimeStore:
         conversation_id: str = "",
         brief_id: str = "",
         claim_id: str = "",
+        memory_id: str = "",
         mission_id: str = "",
         action_id: str = "",
         outcome_id: str = "",
@@ -3898,15 +4028,16 @@ class LocalRuntimeStore:
             "schema_version": "cs.product_loop_view.v0",
             "status": "visible",
             "scope": scope,
-            "item_id": mission_id or action_id or claim_id or brief_id or conversation_id,
+            "item_id": mission_id or action_id or memory_id or claim_id or brief_id or conversation_id,
             "stages": [
                 {"stage": "Inbox", "visible": True, "ref": f"conversation:{conversation_id}" if conversation_id else None},
                 {"stage": "Brief", "visible": True, "ref": f"brief:{brief_id}" if brief_id else None},
                 {"stage": "Claim", "visible": True, "ref": f"claim:{claim_id}" if claim_id else None},
+                {"stage": "Memory/Wiki", "visible": True, "ref": f"memory:{memory_id}" if memory_id else None},
                 {"stage": "Action", "visible": True, "ref": f"action:{action_id}" if action_id else None},
                 {"stage": "Learn", "visible": True, "ref": f"mission_outcome:{outcome_id}" if outcome_id else None},
             ],
-            "journey": "Inbox -> Brief -> Claim -> Action -> Learn",
+            "journey": "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn",
             "single_item_progression_visible": True,
             "created_at": utc_now(),
         }
