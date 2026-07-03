@@ -42,6 +42,7 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_007_KEYBOARD_FOCUS_REVIEW.md",
     "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json",
     "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
@@ -119,6 +120,7 @@
           "vs4_h01_remains_human_required": true
         },
         "commands_to_run_before_review": [
+          "make verify-vs4-product-alpha-keyboard-focus",
           "make verify-vs4-product-alpha-responsive-mobile",
           "make verify-vs4-product-alpha-ux-polish-learn",
           "make verify-vs4-product-alpha-human-package",
@@ -131,6 +133,7 @@
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_005_UX_POLISH_LEARN.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_007_KEYBOARD_FOCUS_REVIEW.md",
           "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "reports/human-gates/vs4/VS4-H01.json"
         ],
@@ -149,7 +152,7 @@
           "production_readiness_claimed_by_package": 0,
           "security_acceptance_claimed_by_package": 0
         },
-        "package_digest_sha256": "3e5ab602e7763ad2b2e52bdb174f9b3ea8138ca21331ceec065f18a65a010524",
+        "package_digest_sha256": "f888b7983352a396899baf8e6839e3ff2ca694c223de7359fa8fac60f098e0b4",
         "package_id": "vs4_human_gate_vs4_h01",
         "package_path": "reports/human-gates/vs4/VS4-H01.json",
         "pass_claim_allowed": false,
@@ -189,6 +192,7 @@
           "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
           "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
           "Inspect the narrow mobile proof and confirm Drop, Ask, Ops Inbox, workspace context, Brief detail, and Learn review remain understandable without body-level horizontal overflow.",
+          "Walk the keyboard/focus proof and confirm skip link, primary nav, Continue links, Evidence Drawer, Ask, Claim, Action Card, and proof details are reachable and understandable.",
           "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
           "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
         ],
@@ -196,15 +200,15 @@
           {
             "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
             "present": true,
-            "sha256": "e774d561bf2144173793882918201286a086da5b972864460332821caff6c45c",
+            "sha256": "a008090570cfe2499480ffcca7e4c4d6a6b6697228c4dc7a39d1163b0ebe4e51",
             "summary": {
               "blocking": 0,
               "fail": 0,
               "human_required": 1,
-              "in_this_slice": 9,
+              "in_this_slice": 12,
               "not_run": 0,
               "pass": 27,
-              "previous_slice": 18,
+              "previous_slice": 15,
               "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
               "scenario_count": 28
             }
@@ -244,6 +248,10 @@
           {
             "kind": "slice_contract",
             "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_006_RESPONSIVE_MOBILE_PROOF.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_007_KEYBOARD_FOCUS_REVIEW.md"
           }
         ],
         "review_record_contract": {
@@ -279,15 +287,15 @@
         "scenario_report": {
           "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "present": true,
-          "sha256": "e774d561bf2144173793882918201286a086da5b972864460332821caff6c45c",
+          "sha256": "a008090570cfe2499480ffcca7e4c4d6a6b6697228c4dc7a39d1163b0ebe4e51",
           "summary": {
             "blocking": 0,
             "fail": 0,
             "human_required": 1,
-            "in_this_slice": 9,
+            "in_this_slice": 12,
             "not_run": 0,
             "pass": 27,
-            "previous_slice": 18,
+            "previous_slice": 15,
             "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
             "scenario_count": 28
           }
@@ -380,7 +388,7 @@
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "ids": {
-    "git_commit": "9e5e450",
+    "git_commit": "2aab824",
     "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
   },
   "mode": "local_scaffold",

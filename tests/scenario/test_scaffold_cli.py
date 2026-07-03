@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-006-responsive-mobile-proof")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11450,7 +11450,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-006-responsive-mobile-proof")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11505,7 +11505,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-006-responsive-mobile-proof")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11555,7 +11555,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-006-responsive-mobile-proof")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11594,7 +11594,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-006-responsive-mobile-proof")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11608,6 +11608,52 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(all(payload["mobile_browser_proof"]["responsive_markers"].values()))
         self.assertFalse(payload["mobile_browser_proof"]["responsive_layout"]["horizontal_overflow"])
         self.assertEqual(payload["proof_boundary"]["vs4_slice_006_responsive_mobile"], "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS")
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_keyboard_focus_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-005",
+            "VS4-UI-010",
+            "VS4-UI-012",
+            "VS4-UI-013",
+            "VS4-UI-016",
+            "VS4-STATE-001",
+            "VS4-REF-001",
+            "VS4-REF-002",
+            "VS4-REG-003",
+            "VS4-REG-006",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-keyboard-focus.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-007-keyboard-focus-review")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        desktop_keyboard = payload["browser_proof"]["keyboard_focus"]
+        mobile_keyboard = payload["mobile_browser_proof"]["keyboard_focus"]
+        self.assertTrue(all(payload["browser_proof"]["keyboard_focus_markers"].values()))
+        self.assertTrue(all(payload["mobile_browser_proof"]["keyboard_focus_markers"].values()))
+        self.assertIn("Skip to daily work", desktop_keyboard["focus_order_preview"])
+        self.assertIn("Home", desktop_keyboard["focus_order_preview"])
+        self.assertEqual(desktop_keyboard["invalid_links"], [])
+        self.assertEqual(desktop_keyboard["unnamed_controls"], [])
+        self.assertGreaterEqual(desktop_keyboard["focusable_count"], 20)
+        self.assertGreaterEqual(mobile_keyboard["focusable_count"], 20)
+        self.assertEqual(payload["proof_boundary"]["vs4_slice_007_keyboard_focus"], "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
@@ -11673,6 +11719,8 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("Learn review" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("proof details" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("mobile proof" in item for item in package_row["review_checklist"]))
+        self.assertTrue(any("keyboard/focus proof" in item for item in package_row["review_checklist"]))
+        self.assertIn("make verify-vs4-product-alpha-keyboard-focus", package_row["commands_to_run_before_review"])
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())
 

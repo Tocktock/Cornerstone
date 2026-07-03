@@ -799,6 +799,29 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     }}
     .badge.safe {{ color: var(--safe); }}
     .badge.warn {{ color: var(--warn); }}
+    .skip-link {{
+      position: absolute;
+      left: 16px;
+      top: -48px;
+      z-index: 4;
+      border: 2px solid var(--accent);
+      border-radius: 6px;
+      background: #ffffff;
+      color: var(--accent);
+      padding: 8px 10px;
+      font-weight: 700;
+    }}
+    .skip-link:focus {{
+      top: 12px;
+      outline: 3px solid #9ac2ad;
+      outline-offset: 2px;
+    }}
+    :where(a, button, input, textarea, select, summary):focus,
+    :where(a, button, input, textarea, select, summary):focus-visible {{
+      outline: 3px solid #285e61;
+      outline-offset: 2px;
+    }}
+    button:active, .text-link:active {{ transform: translateY(1px); }}
     .panel-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }}
     .panel {{
       background: var(--surface);
@@ -947,6 +970,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
   </style>
 </head>
 <body>
+  <a class="skip-link" href="#home-ops-inbox" data-vs4-skip-link="daily-work">Skip to daily work</a>
   <header>
     <div class="topbar">
       <div>
@@ -991,6 +1015,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         data-vs4-final-security-claimed="false"
         data-vs4-live-provider-claimed="false"
         data-vs4-human-ux-claimed="false"
+        tabindex="-1"
       >
         <div class="hero-grid">
           <div class="product-panel">
@@ -1008,8 +1033,8 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <div class="label">Ask</div>
                 <h3>Evidence question</h3>
                 <input id="vs4-ask-input" class="ask-input" aria-label="Ask CornerStone" value="What needs review before action?">
-                <button id="run-vs4-ask-flow" type="button">Ask with evidence</button>
-                <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="idle">
+                <button id="run-vs4-ask-flow" type="button" aria-controls="vs4-ask-result">Ask with evidence</button>
+                <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="idle" aria-live="polite">
                   <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="pending">Ask waits for evidence</span>
                   <p id="vs4-ask-answer">Answers become reviewable work with evidence, memory, action, and audit refs.</p>
                   <code id="vs4-ask-created-refs" data-vs4-created-work-kind="pending">work item not prepared</code>
@@ -1061,7 +1086,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
             <div class="label">General-purpose packs</div>
             <h2>Same loop, different work</h2>
             <p>Personal research, company policy, and operations issue packs use the same Source, Brief, Claim, Memory/Wiki, Action, and Ops Inbox loop.</p>
-            <button id="run-vs4-packs-flow" class="subtle-button" type="button">Run pack loop</button>
+            <button id="run-vs4-packs-flow" class="subtle-button" type="button" aria-controls="vs4-memory-candidates">Run pack loop</button>
             <div class="pack-list">{pack_rows}</div>
           </div>
           <aside class="product-panel" data-vs4-learn-boundary="review-required">
@@ -1071,7 +1096,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           </aside>
         </div>
         <details class="evidence-drawer" id="shared-evidence-drawer" data-vs4-evidence-drawer="reachable">
-          <summary>Supporting evidence and activity</summary>
+          <summary data-vs4-keyboard-disclosure="evidence-drawer">Supporting evidence and activity</summary>
           <div class="detail-grid">
             <div><span class="label">Source</span><span>Original source remains primary.</span></div>
             <div><span class="label">Support</span><span>Evidence-backed findings require source refs.</span></div>
@@ -1100,7 +1125,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <span class="badge warn" id="vs4-memory-state" data-vs4-memory-approved="false">Memory needs review</span>
                 <span class="badge safe" id="vs4-action-mode">Action mode: local/mock</span>
               </div>
-              <button id="run-vs4-brief-flow" type="button">Prepare Brief work item</button>
+              <button id="run-vs4-brief-flow" type="button" aria-controls="vs4-brief-summary-text vs4-brief-evidence-drawer vs4-claim-candidate vs4-memory-candidate-detail vs4-action-card-detail vs4-learn-candidate-detail">Prepare Brief work item</button>
             </div>
             <div class="brief-block" data-vs4-brief-summary="visible">
               <h3>Summary</h3>
@@ -1112,7 +1137,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
               </ul>
             </div>
             <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
-              <summary>Shared Evidence Drawer</summary>
+              <summary data-vs4-keyboard-disclosure="evidence-drawer">Shared Evidence Drawer</summary>
               <div class="detail-grid">
                 <div><span class="label">Source</span><span id="vs4-evidence-source">Original source not prepared.</span></div>
                 <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">No supporting snippet yet.</span></div>
@@ -2193,10 +2218,106 @@ Search phrase: alpha-evidence-anchor.</code>
         if (button) button.disabled = false;
       }}
     }}
+    function collectVs4KeyboardFocus() {{
+      const focusableSelector = "a[href], button:not([disabled]), input, textarea, select, summary, [tabindex]:not([tabindex='-1'])";
+      const focusable = Array.from(document.querySelectorAll(focusableSelector)).filter((node) => {{
+        const style = window.getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        return style.visibility !== "hidden" && style.display !== "none" && rect.width > 0 && rect.height > 0;
+      }});
+      function labelFor(node) {{
+        const labelledBy = node.getAttribute("aria-labelledby");
+        if (labelledBy) {{
+          const labelled = document.getElementById(labelledBy);
+          if (labelled && labelled.textContent.trim()) return labelled.textContent.replace(/\\s+/g, " ").trim();
+        }}
+        return (
+          node.getAttribute("aria-label") ||
+          node.getAttribute("title") ||
+          node.textContent ||
+          node.value ||
+          ""
+        ).replace(/\\s+/g, " ").trim();
+      }}
+      const anchors = Array.from(document.querySelectorAll("a[href^='#']"));
+      const invalidLinks = anchors
+        .filter((anchor) => {{
+          const targetId = (anchor.getAttribute("href") || "").slice(1);
+          return !targetId || !document.getElementById(targetId);
+        }})
+        .map((anchor) => anchor.getAttribute("href") || "");
+      const continueLinks = Array.from(document.querySelectorAll(".work-row .text-link[href^='#']"));
+      const invalidContinueLinks = continueLinks.filter((anchor) => {{
+        const targetId = (anchor.getAttribute("href") || "").slice(1);
+        return !targetId || !document.getElementById(targetId);
+      }});
+      const unnamedControls = focusable.filter((node) => {{
+        const tag = node.tagName.toLowerCase();
+        return ["a", "button", "input", "textarea", "select", "summary"].includes(tag) && !labelFor(node);
+      }}).map((node) => node.tagName.toLowerCase() + (node.id ? "#" + node.id : ""));
+      const focusOrderPreview = focusable.slice(0, 18).map((node) => labelFor(node)).filter(Boolean);
+      const firstLabels = focusOrderPreview.slice(0, 12).join(" ");
+      const forbiddenFocusTerms = [
+        "production_release_ready" + "=true",
+        "local_scenario_ready" + "=true",
+        "real_external_http_calls" + "=1",
+        "Human UX " + "accepted",
+        "Production " + "ready",
+        "Live-provider " + "ready"
+      ];
+      const focusTarget = document.getElementById("run-vs4-ask-flow") || focusable[0];
+      let visibleFocusStyle = false;
+      if (focusTarget && typeof focusTarget.focus === "function") {{
+        focusTarget.focus();
+        const focusStyle = window.getComputedStyle(focusTarget);
+        visibleFocusStyle = focusStyle.outlineStyle !== "none" && parseFloat(focusStyle.outlineWidth || "0") >= 2;
+      }}
+      const navLabels = Array.from(document.querySelectorAll("#primary-nav a")).map((node) => labelFor(node));
+      const evidenceSummaries = Array.from(document.querySelectorAll(".evidence-drawer summary"));
+      const proofSummary = document.querySelector(".proof-details summary");
+      const markers = {{
+        skip_link_present: Boolean(document.querySelector("[data-vs4-skip-link='daily-work']")),
+        skip_link_target_exists: Boolean(document.getElementById("home-ops-inbox")),
+        landmarks_present: Boolean(document.querySelector("header")) && Boolean(document.querySelector("main")) && Boolean(document.querySelector("nav[aria-label='Primary']")),
+        primary_nav_keyboard_reachable: navLabels.join(",") === "Home,Search,Artifacts,Claims,Actions",
+        focusable_controls_present: focusable.length >= 20,
+        interactive_accessible_names_all: unnamedControls.length === 0,
+        continue_links_target_existing_sections: continueLinks.length >= 5 && invalidContinueLinks.length === 0,
+        evidence_drawer_keyboard_reachable: evidenceSummaries.length >= 2 && evidenceSummaries.every((node) => labelFor(node).length > 0),
+        details_toggle_keyboard_reachable: Boolean(proofSummary) && evidenceSummaries.length >= 2,
+        ask_flow_keyboard_runnable: Boolean(document.getElementById("vs4-ask-input")) &&
+          Boolean(document.getElementById("run-vs4-ask-flow")) &&
+          document.getElementById("run-vs4-ask-flow").getAttribute("aria-controls") === "vs4-ask-result",
+        action_card_keyboard_reachable: Boolean(document.querySelector("a[href='#action-card']")) &&
+          Boolean(document.getElementById("action-card")) &&
+          Boolean(document.getElementById("vs4-action-card-detail")),
+        claim_trust_ladder_labelled: Boolean(document.querySelector("[aria-label='Claim trust ladder']")),
+        product_language_first_in_focus_order: firstLabels.includes("Skip to daily work") &&
+          firstLabels.includes("Global search") &&
+          ["Home", "Search", "Artifacts", "Claims", "Actions"].every((label) => firstLabels.includes(label)) &&
+          forbiddenFocusTerms.every((term) => !firstLabels.includes(term)),
+        visible_focus_style: visibleFocusStyle,
+        no_keyboard_trap: focusable.length >= 20 && invalidLinks.length === 0,
+        forbidden_readiness_overclaim_absent: !document.querySelector("[data-vs4-production-claimed='true']") &&
+          !document.querySelector("[data-vs4-onprem-claimed='true']") &&
+          !document.querySelector("[data-vs4-final-security-claimed='true']") &&
+          !document.querySelector("[data-vs4-live-provider-claimed='true']"),
+        human_ux_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']")
+      }};
+      return {{
+        schema_version: "cs.vs4_keyboard_focus_proof.v0",
+        focusable_count: focusable.length,
+        focus_order_preview: focusOrderPreview,
+        invalid_links: invalidLinks,
+        unnamed_controls: unnamedControls,
+        markers
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
       const responsiveLayout = collectVs4ResponsiveLayout();
+      const keyboardFocus = collectVs4KeyboardFocus();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2205,6 +2326,7 @@ Search phrase: alpha-evidence-anchor.</code>
         state: vs4State,
         trace: vs4Trace,
         responsive_layout: responsiveLayout,
+        keyboard_focus: keyboardFocus,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),

@@ -1236,6 +1236,12 @@ def capture_vs4_product_alpha_browser_proof(
     responsive_visible = (
         responsive_layout.get("visible", {}) if isinstance(responsive_layout.get("visible"), dict) else {}
     )
+    keyboard_focus = (
+        brief_evidence.get("keyboard_focus", {}) if isinstance(brief_evidence.get("keyboard_focus"), dict) else {}
+    )
+    keyboard_focus_markers = (
+        keyboard_focus.get("markers", {}) if isinstance(keyboard_focus.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1309,11 +1315,13 @@ def capture_vs4_product_alpha_browser_proof(
         "one_column_work_rows": responsive_layout.get("work_row_grid_columns") == 1,
     }
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
+    keyboard_focus_ok = bool(keyboard_focus_markers) and all(keyboard_focus_markers.values())
     status = (
         "PASS"
         if screenshot_exists
         and all(shell_markers.values())
         and all(detail_markers.values())
+        and keyboard_focus_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1335,6 +1343,9 @@ def capture_vs4_product_alpha_browser_proof(
         "shell_markers": shell_markers,
         "brief_evidence": brief_evidence,
         "brief_detail_markers": detail_markers,
+        "keyboard_focus_required": True,
+        "keyboard_focus": keyboard_focus,
+        "keyboard_focus_markers": keyboard_focus_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1345,6 +1356,7 @@ def capture_vs4_product_alpha_browser_proof(
             "final_security_claimed": 0 if "vs4-final-security-claimed=\"true\"" not in dom else 1,
             "live_provider_claimed": 0 if "vs4-live-provider-claimed=\"true\"" not in dom else 1,
             "human_ux_acceptance_claimed": 0 if "vs4-human-ux-claimed=\"true\"" not in dom else 1,
+            "accessibility_certification_claimed": 0 if "WCAG certified" not in dom and "accessibility certified" not in dom else 1,
             "reference_images_used_as_pass_evidence": 0,
         },
         "errors": []
@@ -1354,6 +1366,8 @@ def capture_vs4_product_alpha_browser_proof(
             for key, value in {
                 **shell_markers,
                 **detail_markers,
+                "keyboard_focus_markers_present": keyboard_focus_ok,
+                **keyboard_focus_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value
