@@ -1163,7 +1163,7 @@ def capture_vs4_product_alpha_browser_proof(
           const evidence = window.__cornerstoneVs4BriefEvidence
             ? window.__cornerstoneVs4BriefEvidence()
             : null;
-          if (evidence && evidence.completed) {
+          if (evidence && evidence.completed && evidence.slice_003_passes) {
             resolve(evidence);
             return;
           }
@@ -1239,6 +1239,10 @@ def capture_vs4_product_alpha_browser_proof(
         "local_mode_boundary_visible": "Local Product Alpha" in dom and "No live external writeback" in dom,
         "evidence_drawer_reachable": 'data-vs4-evidence-drawer="reachable"' in dom,
         "general_packs_visible": all(name in dom for name in ["Personal Research", "Company Policy Review", "Operations Issue"]),
+        "search_reference_visible": 'data-vs4-search-reference="prominent-scoped-evidence"' in dom and 'data-vs4-search-results="visible"' in dom,
+        "artifact_reference_visible": 'data-vs4-artifact-reference="original-source-primary"' in dom and 'data-vs4-original-source-preview="visible"' in dom,
+        "state_coverage_visible": 'data-vs4-state-coverage="visible"' in dom,
+        "reference_alignment_visible": 'data-vs4-reference-alignment="home-search-artifact"' in dom,
         "product_language_first": all(marker in dom for marker in ["Source intake", "Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft"]),
         "legacy_vs0_vs1_reachable": "id=\"vs0-evux-loop\"" in dom and "id=\"vs1-ontology-loop\"" in dom,
         "forbidden_readiness_overclaim_absent": all(claim not in dom for claim in forbidden_readiness_claims),
@@ -1253,6 +1257,10 @@ def capture_vs4_product_alpha_browser_proof(
         "memory_candidate_detail_visible": brief_markers.get("memory_candidate_visible") is True and brief_state.get("memory", {}).get("status") == "draft",
         "action_card_detail_visible": brief_markers.get("action_card_visible") is True and bool(brief_state.get("action", {}).get("action_id")),
         "brief_evidence_drawer_reachable": brief_markers.get("shared_evidence_drawer_visible") is True,
+        "ask_flow_complete": brief_markers.get("ask_flow_complete") is True and bool(brief_state.get("ask", {}).get("created_work_item_refs")),
+        "general_packs_complete": brief_markers.get("general_packs_complete") is True and len(brief_state.get("packs", [])) == 3,
+        "state_coverage_complete": brief_markers.get("state_coverage_complete") is True and brief_state.get("state_coverage", {}).get("complete") is True,
+        "home_search_artifact_reference_complete": brief_markers.get("home_search_artifact_reference_complete") is True and brief_state.get("reference_alignment", {}).get("complete") is True,
         "reference_images_not_pass_evidence": brief_markers.get("reference_images_not_pass_evidence") is True,
         "cli_parity_required": brief_markers.get("cli_parity_required") is True,
     }
@@ -1277,6 +1285,7 @@ def capture_vs4_product_alpha_browser_proof(
         "brief_evidence": brief_evidence,
         "brief_detail_markers": detail_markers,
         "negative_evidence": {
+            **(brief_state.get("negative_evidence", {}) if isinstance(brief_state.get("negative_evidence"), dict) else {}),
             "production_readiness_claimed": 0 if "production_release_ready=true" not in dom else 1,
             "onprem_readiness_claimed": 0 if "vs4-onprem-claimed=\"true\"" not in dom else 1,
             "final_security_claimed": 0 if "vs4-final-security-claimed=\"true\"" not in dom else 1,

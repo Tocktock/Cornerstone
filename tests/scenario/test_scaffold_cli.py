@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-002-brief-detail")
+        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11419,7 +11419,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(all(payload["browser_proof"]["shell_markers"].values()))
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
-        self.assertEqual(payload["proof_boundary"]["full_vs4"], "NOT_COMPLETE")
+        self.assertEqual(payload["proof_boundary"]["full_vs4"], "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
 
     def test_vs4_product_alpha_brief_detail_slice_verify(self) -> None:
@@ -11447,7 +11447,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-002-brief-detail")
+        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11481,8 +11481,58 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(checks["all_pass"])
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
-        self.assertEqual(payload["proof_boundary"]["full_vs4"], "NOT_COMPLETE")
+        self.assertEqual(payload["proof_boundary"]["full_vs4"], "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED")
         self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
+
+    def test_vs4_product_alpha_slice_003_verify(self) -> None:
+        selected = [
+            "VS4-UI-013",
+            "VS4-UI-014",
+            "VS4-STATE-001",
+            "VS4-REF-001",
+            "VS4-REG-001",
+            "VS4-REG-002",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-slice-003.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-003-ask-packs-states-regression")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        markers = payload["browser_proof"]["brief_detail_markers"]
+        self.assertTrue(markers["ask_flow_complete"])
+        self.assertTrue(markers["general_packs_complete"])
+        self.assertTrue(markers["state_coverage_complete"])
+        self.assertTrue(markers["home_search_artifact_reference_complete"])
+
+        checks = payload["slice_003_cli_workflow"]["checks"]
+        for key in [
+            "ask_to_work_item",
+            "ask_not_chatbot_only",
+            "ask_evidence_memory_action_refs",
+            "three_general_purpose_packs",
+            "pack_domains_not_logistics_only",
+            "pack_outputs_complete",
+            "audit_verified",
+            "cli_parity",
+        ]:
+            self.assertTrue(checks[key], key)
+        self.assertTrue(payload["regression_workflows"]["checks"]["vs0_regression_passed"])
+        self.assertTrue(payload["regression_workflows"]["checks"]["vs1_regression_passed"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
 
     def test_vs0_evux_quickstart_verify(self) -> None:
         output_path = ROOT / "tmp/test-vs0-evux-quickstart.json"

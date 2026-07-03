@@ -99,6 +99,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md"
+)
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
 DEFAULT_VS3_REQUEST_CONTEXT_REPORT = "reports/security/vs3-request-context-proof.json"
@@ -611,8 +614,9 @@ def verify_vs0_fixtures(root: Path, corpus: str = "fixtures/vs0", model_provider
     }
 
 
-def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
+def _run_cli_json(root: Path, args: list[str], *, timeout: float | None = None) -> dict[str, Any]:
     command = [str(root / "cornerstone"), *args]
+    timeout_seconds = timeout if timeout is not None else SCENARIO_CLI_TIMEOUT_SECONDS
     try:
         result = subprocess.run(
             command,
@@ -620,7 +624,7 @@ def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
             text=True,
             capture_output=True,
             check=False,
-            timeout=SCENARIO_CLI_TIMEOUT_SECONDS,
+            timeout=timeout_seconds,
         )
         stdout = result.stdout
         stderr = result.stderr
@@ -629,7 +633,7 @@ def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
     except subprocess.TimeoutExpired as error:
         stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
         stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
-        stderr = f"command timed out after {SCENARIO_CLI_TIMEOUT_SECONDS:g}s: {' '.join(command)}\n{stderr}"
+        stderr = f"command timed out after {timeout_seconds:g}s: {' '.join(command)}\n{stderr}"
         exit_code = 124
         timed_out = True
     stdout_json: dict[str, Any] | None = None
@@ -643,7 +647,7 @@ def _run_cli_json(root: Path, args: list[str]) -> dict[str, Any]:
         "command": ["cornerstone", *args],
         "exit_code": exit_code,
         "timed_out": timed_out,
-        "timeout_seconds": SCENARIO_CLI_TIMEOUT_SECONDS,
+        "timeout_seconds": timeout_seconds,
         "stdout_json": stdout_json,
         "stderr_redacted": redact_text(stderr),
         "json_error": json_error,
@@ -25037,6 +25041,38 @@ VS4_SLICE_002_SCENARIOS = {
 }
 
 
+VS4_SLICE_003_SCENARIOS = {
+    "VS4-UI-013",
+    "VS4-UI-014",
+    "VS4-STATE-001",
+    "VS4-REF-001",
+    "VS4-REG-001",
+    "VS4-REG-002",
+}
+
+
+VS4_GENERAL_PURPOSE_PACKS = [
+    {
+        "key": "personal_research",
+        "name": "Personal Research",
+        "fixture": "fixtures/vs1/ontology/personal_research.txt",
+        "query": "Walking Desk",
+    },
+    {
+        "key": "company_policy_review",
+        "name": "Company Policy Review",
+        "fixture": "fixtures/vs1/ontology/internal_policy.txt",
+        "query": "Local Action Approval Policy",
+    },
+    {
+        "key": "operations_issue",
+        "name": "Operations Issue",
+        "fixture": "fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt",
+        "query": "learning-failure-anchor",
+    },
+]
+
+
 def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, Any]:
     transcripts: dict[str, dict[str, Any]] = {}
 
@@ -25291,6 +25327,405 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
     }
 
 
+def _run_vs4_ask_packs_states_cli_workflow(root: Path, state_rel: str) -> dict[str, Any]:
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    def run(name: str, args: list[str]) -> dict[str, Any]:
+        transcript = _run_cli_json(root, [*args, "--state-dir", state_rel, "--json"])
+        transcripts[name] = transcript
+        return transcript
+
+    run(
+        "ask_conversation_start",
+        [
+            "conversation",
+            "start",
+            "--message",
+            "VS4 Ask work item: What needs review before action? Anchor alpha-evidence-anchor.",
+        ],
+    )
+    ask_conversation = _payload(transcripts["ask_conversation_start"]).get("conversation", {})
+    ask_conversation_id = str(ask_conversation.get("conversation_id", ""))
+    run(
+        "ask_source_ingest",
+        [
+            "artifact",
+            "ingest",
+            "fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "--source",
+            "local_fixture",
+            "--media-type",
+            "text/plain",
+            "--trust",
+            "untrusted",
+        ],
+    )
+    run("ask_search", ["search", "query", "alpha-evidence-anchor"])
+    ask_search_id = str(_payload(transcripts["ask_search"]).get("ids", {}).get("search_snapshot_id", ""))
+    run("ask_evidence_bundle_create", ["evidence", "bundle", "create", "--search-snapshot-id", ask_search_id])
+    ask_bundle_id = str(_payload(transcripts["ask_evidence_bundle_create"]).get("ids", {}).get("evidence_bundle_id", ""))
+    run("ask_brief_create", ["brief", "create", "--evidence-bundle-id", ask_bundle_id])
+    ask_brief_id = str(_payload(transcripts["ask_brief_create"]).get("ids", {}).get("brief_id", ""))
+    run("ask_conversation_answer", ["conversation", "answer", ask_conversation_id, "--question", "alpha-evidence-anchor review action"])
+    run(
+        "ask_conversation_promote_claim",
+        [
+            "conversation",
+            "promote",
+            ask_conversation_id,
+            "--kind",
+            "claim",
+            "--statement",
+            "Ask work item is ready for evidence-backed review before local action.",
+            "--evidence-bundle-id",
+            ask_bundle_id,
+        ],
+    )
+    ask_claim_id = str(_payload(transcripts["ask_conversation_promote_claim"]).get("ids", {}).get("claim_id", ""))
+    run(
+        "ask_memory_create",
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            ask_bundle_id,
+            "--statement",
+            "Draft VS4 Ask memory candidate from alpha-evidence-anchor review.",
+            "--status",
+            "draft",
+            "--trust-state",
+            "draft",
+            "--memory-type",
+            "knowledge_candidate",
+            "--synthesis-mode",
+            "auto",
+        ],
+    )
+    ask_memory_id = str(_payload(transcripts["ask_memory_create"]).get("ids", {}).get("memory_id", ""))
+    run(
+        "ask_mission_create",
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Create local follow-up from VS4 Ask work item",
+            "--claim-id",
+            ask_claim_id,
+            "--evidence-bundle-id",
+            ask_bundle_id,
+        ],
+    )
+    ask_mission_id = str(_payload(transcripts["ask_mission_create"]).get("ids", {}).get("mission_id", ""))
+    run(
+        "ask_action_propose",
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            ask_mission_id,
+            "--claim-id",
+            ask_claim_id,
+            "--goal",
+            "Create local follow-up from VS4 Ask work item",
+            "--action-kind",
+            "draft_task",
+            "--risk",
+            "medium",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://vs4-ask/cli",
+        ],
+    )
+    ask_action_id = str(_payload(transcripts["ask_action_propose"]).get("ids", {}).get("action_id", ""))
+    run("ask_action_dry_run", ["action", "dry-run", ask_action_id])
+
+    pack_outputs: list[dict[str, Any]] = []
+    for pack in VS4_GENERAL_PURPOSE_PACKS:
+        key = pack["key"]
+        run(
+            f"{key}_artifact_ingest",
+            [
+                "artifact",
+                "ingest",
+                pack["fixture"],
+                "--source",
+                "local_fixture",
+                "--media-type",
+                "text/plain",
+                "--trust",
+                "untrusted",
+            ],
+        )
+        run(f"{key}_search", ["search", "query", pack["query"]])
+        search_id = str(_payload(transcripts[f"{key}_search"]).get("ids", {}).get("search_snapshot_id", ""))
+        run(f"{key}_evidence_bundle_create", ["evidence", "bundle", "create", "--search-snapshot-id", search_id])
+        bundle_id = str(_payload(transcripts[f"{key}_evidence_bundle_create"]).get("ids", {}).get("evidence_bundle_id", ""))
+        run(f"{key}_brief_create", ["brief", "create", "--evidence-bundle-id", bundle_id])
+        brief_id = str(_payload(transcripts[f"{key}_brief_create"]).get("ids", {}).get("brief_id", ""))
+        run(
+            f"{key}_claim_create",
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--statement",
+                f"{pack['name']} has enough source-backed context for local Product Alpha review.",
+            ],
+        )
+        claim_id = str(_payload(transcripts[f"{key}_claim_create"]).get("ids", {}).get("claim_id", ""))
+        run(
+            f"{key}_memory_create",
+            [
+                "memory",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--statement",
+                f"Draft VS4 memory candidate for {pack['name']}.",
+                "--status",
+                "draft",
+                "--trust-state",
+                "draft",
+                "--memory-type",
+                "knowledge_candidate",
+                "--synthesis-mode",
+                "auto",
+            ],
+        )
+        memory_id = str(_payload(transcripts[f"{key}_memory_create"]).get("ids", {}).get("memory_id", ""))
+        run(
+            f"{key}_mission_create",
+            [
+                "mission",
+                "create",
+                "--goal",
+                f"Create local follow-up for {pack['name']}",
+                "--claim-id",
+                claim_id,
+                "--evidence-bundle-id",
+                bundle_id,
+            ],
+        )
+        mission_id = str(_payload(transcripts[f"{key}_mission_create"]).get("ids", {}).get("mission_id", ""))
+        run(
+            f"{key}_action_propose",
+            [
+                "action",
+                "propose",
+                "--mission-id",
+                mission_id,
+                "--claim-id",
+                claim_id,
+                "--goal",
+                f"Create local follow-up for {pack['name']}",
+                "--action-kind",
+                "draft_task",
+                "--risk",
+                "medium",
+                "--connector",
+                "mock_connector",
+                "--target",
+                f"mock://vs4-pack/{key}",
+            ],
+        )
+        action_id = str(_payload(transcripts[f"{key}_action_propose"]).get("ids", {}).get("action_id", ""))
+        run(f"{key}_action_dry_run", ["action", "dry-run", action_id])
+        artifact = _payload(transcripts[f"{key}_artifact_ingest"]).get("artifact", {})
+        action = _payload(transcripts[f"{key}_action_propose"]).get("action_card", {})
+        dry_run = _payload(transcripts[f"{key}_action_dry_run"]).get("dry_run", {})
+        impact = dry_run.get("expected_impact", {}) if isinstance(dry_run, dict) else {}
+        pack_outputs.append(
+            {
+                "key": key,
+                "name": pack["name"],
+                "fixture": pack["fixture"],
+                "artifact_id": artifact.get("artifact_id"),
+                "search_snapshot_id": search_id,
+                "evidence_bundle_id": bundle_id,
+                "brief_id": brief_id,
+                "claim_id": claim_id,
+                "memory_id": memory_id,
+                "action_id": action_id,
+                "ops_followup_id": f"ops_followup:{action_id}" if action_id else "",
+                "action_policy_decision": action.get("policy_decision", {}).get("decision"),
+                "real_external_http_calls": int(impact.get("real_external_http_calls", 1) or 0),
+            }
+        )
+
+    run("audit_verify", ["audit", "verify"])
+
+    ask_answer = _payload(transcripts["ask_conversation_answer"]).get("answer", {})
+    ask_promoted_claim = _payload(transcripts["ask_conversation_promote_claim"]).get("claim", {})
+    ask_memory = _payload(transcripts["ask_memory_create"]).get("memory", {})
+    ask_action = _payload(transcripts["ask_action_propose"]).get("action_card", {})
+    ask_dry_run = _payload(transcripts["ask_action_dry_run"]).get("dry_run", {})
+    ask_impact = ask_dry_run.get("expected_impact", {}) if isinstance(ask_dry_run, dict) else {}
+    audit_integrity = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
+
+    ask_required_success = [
+        "ask_conversation_start",
+        "ask_source_ingest",
+        "ask_search",
+        "ask_evidence_bundle_create",
+        "ask_brief_create",
+        "ask_conversation_answer",
+        "ask_conversation_promote_claim",
+        "ask_memory_create",
+        "ask_mission_create",
+        "ask_action_propose",
+        "ask_action_dry_run",
+        "audit_verify",
+    ]
+    pack_required_success = [
+        f"{pack['key']}_{step}"
+        for pack in VS4_GENERAL_PURPOSE_PACKS
+        for step in [
+            "artifact_ingest",
+            "search",
+            "evidence_bundle_create",
+            "brief_create",
+            "claim_create",
+            "memory_create",
+            "mission_create",
+            "action_propose",
+            "action_dry_run",
+        ]
+    ]
+    pack_complete = (
+        len(pack_outputs) == 3
+        and all(
+            output.get("artifact_id")
+            and output.get("search_snapshot_id")
+            and output.get("evidence_bundle_id")
+            and output.get("brief_id")
+            and output.get("claim_id")
+            and output.get("memory_id")
+            and output.get("action_id")
+            and output.get("ops_followup_id")
+            and output.get("real_external_http_calls") == 0
+            for output in pack_outputs
+        )
+    )
+    ask_complete = (
+        all(_exit_ok(transcripts[name]) for name in ask_required_success)
+        and ask_answer.get("label") == "evidence_backed"
+        and bool(ask_answer.get("evidence_refs"))
+        and ask_promoted_claim.get("trust_state") == "evidence_backed"
+        and ask_memory.get("status") == "draft"
+        and ask_memory.get("usage_permissions", {}).get("can_influence_answers") is False
+        and bool(ask_action.get("action_id"))
+        and int(ask_impact.get("real_external_http_calls", 1) or 0) == 0
+    )
+    checks = {
+        "ask_to_work_item": ask_complete,
+        "ask_not_chatbot_only": ask_complete and bool(ask_brief_id) and bool(ask_claim_id) and bool(ask_memory_id) and bool(ask_action_id),
+        "ask_evidence_memory_action_refs": bool(ask_answer.get("evidence_refs")) and bool(ask_memory_id) and bool(ask_action_id),
+        "three_general_purpose_packs": all(_exit_ok(transcripts[name]) for name in pack_required_success) and pack_complete,
+        "pack_domains_not_logistics_only": {output.get("name") for output in pack_outputs} == {"Personal Research", "Company Policy Review", "Operations Issue"},
+        "pack_outputs_complete": pack_complete,
+        "audit_verified": audit_integrity.get("status") == "success",
+        "cli_parity": all(_exit_ok(transcripts[name]) for name in [*ask_required_success, *pack_required_success]),
+    }
+    checks["all_pass"] = all(checks.values())
+    real_external_http_calls = int(ask_impact.get("real_external_http_calls", 1) or 0) + sum(
+        int(output.get("real_external_http_calls", 1) or 0) for output in pack_outputs
+    )
+    return {
+        "state_dir": state_rel,
+        "ids": {
+            "ask_conversation_id": ask_conversation_id,
+            "ask_brief_id": ask_brief_id,
+            "ask_claim_id": ask_claim_id,
+            "ask_memory_id": ask_memory_id,
+            "ask_action_id": ask_action_id,
+            "pack_action_ids": {output["key"]: output.get("action_id") for output in pack_outputs},
+        },
+        "checks": checks,
+        "pack_outputs": pack_outputs,
+        "transcripts": transcripts,
+        "negative_evidence": {
+            "chatbot_only_ask_output": 0 if checks["ask_not_chatbot_only"] else 1,
+            "ask_missing_evidence_refs": 0 if ask_answer.get("evidence_refs") else 1,
+            "general_pack_missing_output": 0 if pack_complete else 1,
+            "logistics_only_pack_core": 0 if checks["pack_domains_not_logistics_only"] else 1,
+            "real_external_http_calls": real_external_http_calls,
+            "audit_verify_failed": 0 if checks["audit_verified"] else 1,
+        },
+    }
+
+
+def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
+    vs0_rows = [
+        "VS0-UI-001",
+        "VS0-UI-002",
+        "VS0-UI-003",
+        "VS0-UI-004",
+        "VS0-UI-005",
+        "VS0-UI-006",
+        "VS0-UI-007",
+        "VS0-UI-008",
+        "VS0-UI-009",
+        "VS0-UI-010",
+    ]
+    vs0_command = [
+        "scenario",
+        "verify",
+        "vs0-operator-acceptance-ui",
+        "--output",
+        "tmp/vs4-regression-vs0-operator-acceptance-ui.json",
+    ]
+    for scenario_id in vs0_rows:
+        vs0_command.extend(["--scenario", scenario_id])
+    vs0_command.append("--json")
+    transcripts = {
+        "vs0_operator_acceptance_ui": _run_cli_json(root, vs0_command, timeout=420),
+    }
+    vs1_workflow = _run_vs1_ontology_cli_workflow(root, root / _scenario_state_rel("vs4-regression-vs1-ontology-cli"))
+    vs0 = _payload(transcripts["vs0_operator_acceptance_ui"])
+    vs1_checks = vs1_workflow.get("checks", {})
+    vs0_ok = (
+        _exit_ok(transcripts["vs0_operator_acceptance_ui"])
+        and vs0.get("scenario_set") == "vs0-operator-acceptance-ui"
+        and vs0.get("status") == "success"
+        and vs0.get("summary", {}).get("blocking") == 0
+        and {row.get("id") for row in vs0.get("scenario_results", [])} == set(vs0_rows)
+        and str(vs0.get("browser_proof", {}).get("status")).lower() in {"pass", "passed"}
+    )
+    vs1_ok = (
+        vs1_workflow.get("status") == "success"
+        and vs1_checks.get("cli_artifact_search_suggest")
+        and vs1_checks.get("cli_draft_truth_guard")
+        and vs1_checks.get("cli_review_promote")
+        and vs1_checks.get("cli_profile_search")
+        and vs1_checks.get("cli_claim_action")
+        and vs1_checks.get("cli_invalid_graph")
+    )
+    vs1_cli_transcripts = vs1_workflow.get("cli_transcripts", {})
+    return {
+        "checks": {
+            "vs0_regression_passed": vs0_ok,
+            "vs1_regression_passed": vs1_ok,
+            "fresh_command_outputs": _exit_ok(transcripts["vs0_operator_acceptance_ui"]) and vs1_workflow.get("status") == "success",
+            "all_pass": vs0_ok and vs1_ok,
+        },
+        "transcripts": {
+            **transcripts,
+            "vs1_ontology_cli_workflow": vs1_workflow,
+        },
+        "negative_evidence": {
+            "vs0_regression_failed": 0 if vs0_ok else 1,
+            "vs1_regression_failed": 0 if vs1_ok else 1,
+            "vs1_cli_auto_promotions": 0 if vs1_checks.get("cli_review_promote") and vs1_checks.get("cli_draft_truth_guard") else 1,
+            "vs1_cli_external_http_calls": 0
+            if _payload(vs1_cli_transcripts.get("action_execute", {})).get("action_result", {}).get("external_http_calls") == 0
+            else 1,
+            "stale_regression_report_reused": 0,
+        },
+    }
+
+
 def _vs4_matrix_rows(root: Path) -> list[dict[str, str]]:
     matrix_path = root / DEFAULT_VS4_PRODUCT_ALPHA_MATRIX
     with matrix_path.open(newline="") as file:
@@ -25343,10 +25778,12 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
 def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-browser")
     cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-cli")
+    slice3_cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-slice-003-cli")
     browser_state_path = root / browser_state_rel
     cli_state_path = root / cli_state_rel
+    slice3_cli_state_path = root / slice3_cli_state_rel
     browser_proof_dir = root / DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR
-    for path in [browser_state_path, cli_state_path, browser_proof_dir]:
+    for path in [browser_state_path, cli_state_path, slice3_cli_state_path, browser_proof_dir]:
         if path.exists():
             shutil.rmtree(path)
 
@@ -25362,12 +25799,18 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     diff_check = _run_command(root, ["git", "diff", "--check"])
     browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
     cli_workflow = _run_vs4_brief_detail_cli_workflow(root, cli_state_rel)
+    slice3_cli_workflow = _run_vs4_ask_packs_states_cli_workflow(root, slice3_cli_state_rel)
+    regression_workflows = _run_vs4_regression_workflows(root)
     shell_markers = browser_proof.get("shell_markers", {})
     detail_markers = browser_proof.get("brief_detail_markers", {})
     browser_negative = browser_proof.get("negative_evidence", {})
     cli_checks = cli_workflow.get("checks", {})
+    slice3_checks = slice3_cli_workflow.get("checks", {})
+    regression_checks = regression_workflows.get("checks", {})
     cli_negative = cli_workflow.get("negative_evidence", {})
-    negative = {**browser_negative, **cli_negative}
+    slice3_negative = slice3_cli_workflow.get("negative_evidence", {})
+    regression_negative = regression_workflows.get("negative_evidence", {})
+    negative = {**browser_negative, **cli_negative, **slice3_negative, **regression_negative}
     docs_ok = (
         docs_result.get("exit_code") == 0
         and cli_docs_result.get("exit_code") == 0
@@ -25406,8 +25849,37 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and shell_markers.get("action_card_visible")
         and shell_markers.get("recent_activity_visible")
         else "FAIL",
+        "VS4-UI-013": "PASS"
+        if browser_ok
+        and detail_markers.get("ask_flow_complete")
+        and slice3_checks.get("ask_to_work_item")
+        and slice3_checks.get("ask_not_chatbot_only")
+        and slice3_checks.get("ask_evidence_memory_action_refs")
+        else "FAIL",
+        "VS4-UI-014": "PASS"
+        if browser_ok
+        and detail_markers.get("general_packs_complete")
+        and shell_markers.get("general_packs_visible")
+        and slice3_checks.get("three_general_purpose_packs")
+        and slice3_checks.get("pack_outputs_complete")
+        and slice3_checks.get("pack_domains_not_logistics_only")
+        else "FAIL",
         "VS4-UI-015": "PASS" if browser_ok and shell_markers.get("workspace_context_visible") else "FAIL",
         "VS4-UI-016": "PASS" if browser_ok and shell_markers.get("product_language_first") else "FAIL",
+        "VS4-STATE-001": "PASS"
+        if browser_ok
+        and shell_markers.get("state_coverage_visible")
+        and detail_markers.get("state_coverage_complete")
+        and negative.get("required_page_state_missing", 0) == 0
+        else "FAIL",
+        "VS4-REF-001": "PASS"
+        if browser_ok
+        and shell_markers.get("search_reference_visible")
+        and shell_markers.get("artifact_reference_visible")
+        and shell_markers.get("reference_alignment_visible")
+        and detail_markers.get("home_search_artifact_reference_complete")
+        and negative.get("reference_images_used_as_pass_evidence", 0) == 0
+        else "FAIL",
         "VS4-REF-002": "PASS"
         if browser_ok
         and cli_checks.get("claim_action_reference_alignment")
@@ -25415,6 +25887,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and detail_markers.get("action_card_detail_visible")
         and detail_markers.get("reference_images_not_pass_evidence")
         else "FAIL",
+        "VS4-REG-001": "PASS" if regression_checks.get("vs0_regression_passed") and negative.get("vs0_regression_failed", 1) == 0 else "FAIL",
+        "VS4-REG-002": "PASS" if regression_checks.get("vs1_regression_passed") and negative.get("vs1_regression_failed", 1) == 0 else "FAIL",
         "VS4-REG-003": "PASS"
         if browser_ok
         and shell_markers.get("forbidden_readiness_overclaim_absent")
@@ -25441,12 +25915,25 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "packages/cornerstone_cli/scenarios.py",
         "cornerstone artifact ingest/search/evidence/brief/claim/memory/wiki/mission/action/audit CLI transcripts",
     ]
+    slice3_evidence = [
+        DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
+        DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
+        "packages/cornerstone_cli/product_runtime.py",
+        "cornerstone conversation start/answer/promote CLI transcripts",
+        "cornerstone artifact/search/evidence/brief/claim/memory/mission/action/audit CLI transcripts for three packs",
+    ]
+    regression_evidence = [
+        DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
+        "cornerstone scenario verify vs0-operator-acceptance-ui --json",
+        "cornerstone scenario verify vs1-ontology-suggest-promote --json",
+    ]
     evidence_by_id = {
         "VS4-GATE-001": [
             DEFAULT_VS4_PRODUCT_ALPHA_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
@@ -25465,9 +25952,15 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-010": [*browser_evidence, *cli_evidence],
         "VS4-UI-011": [*browser_evidence, *cli_evidence],
         "VS4-UI-012": browser_evidence,
+        "VS4-UI-013": [*browser_evidence, *slice3_evidence],
+        "VS4-UI-014": [*browser_evidence, *slice3_evidence],
         "VS4-UI-015": browser_evidence,
         "VS4-UI-016": browser_evidence,
+        "VS4-STATE-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT],
+        "VS4-REF-001": [*browser_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT, "docs/design/reference-images/README.md"],
         "VS4-REF-002": [*browser_evidence, *cli_evidence],
+        "VS4-REG-001": regression_evidence,
+        "VS4-REG-002": regression_evidence,
         "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json"],
         "VS4-REG-004": cli_evidence,
         "VS4-REG-005": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT],
@@ -25488,9 +25981,15 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, and local activity.",
         "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0.",
         "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, and activity follow-up rows.",
+        "VS4-UI-013": "Ask creates a conversation-backed answer and reviewable Brief, Claim, Memory/Wiki candidate, Action Card, evidence, and audit refs.",
+        "VS4-UI-014": "Personal Research, Company Policy Review, and Operations Issue packs each produce Brief, Claim, Memory/Wiki candidate, Action Card, and Ops Inbox follow-up refs.",
         "VS4-UI-015": "Workspace and owner context are visible in the shell.",
         "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, and Activity record language.",
+        "VS4-STATE-001": "Major Product Alpha surfaces expose empty, loading, ready, partial/degraded, needs-review, permission denied, policy blocked, failed-with-recovery, and audit/log states.",
+        "VS4-REF-001": "Home, Search, and Artifact surfaces align with reference direction using DOM/browser/source evidence; reference images are not PASS evidence.",
         "VS4-REF-002": "Claim and Action references align to the runtime Brief detail design without using reference images as PASS evidence.",
+        "VS4-REG-001": "Fresh VS0 operator acceptance UI regression passes on the current tree.",
+        "VS4-REG-002": "Fresh VS1 ontology suggest/review/promote regression passes with zero auto-promotion.",
         "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness.",
         "VS4-REG-004": "Prompt-injection fixture is detected and creates no tool calls, actions, external calls, or authority expansion.",
         "VS4-REG-005": "Reference images remain design guidance only; PASS evidence is runtime/docs/CLI output.",
@@ -25503,19 +26002,24 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         owner = "Human" if matrix_row.get("owner") == "Human" else "AI"
         if owner == "Human":
             status = "HUMAN_REQUIRED"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS:
+        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS or scenario_id in VS4_SLICE_003_SCENARIOS:
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS:
+        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS:
             classification = "previous_slice"
-        elif scenario_id in VS4_SLICE_002_SCENARIOS:
+        elif scenario_id in VS4_SLICE_003_SCENARIOS:
             classification = "in_this_slice"
         else:
             classification = "later_slice"
-        default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT if scenario_id in VS4_SLICE_002_SCENARIOS else DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT
+        if scenario_id in VS4_SLICE_003_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT
+        elif scenario_id in VS4_SLICE_002_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT
+        else:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT
         row = _row(
             scenario_id,
             matrix_row.get("priority", "MUST_PASS"),
@@ -25536,7 +26040,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         scenario_results.append(row)
 
     summary = _governance_summary(scenario_results)
-    summary["product_feature_claims"] = "LOCAL_VS4_SLICE_002_BRIEF_DETAIL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED"
+    summary["product_feature_claims"] = "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED"
     summary["not_run"] = len([row for row in scenario_results if row.get("status") == "NOT_RUN"])
     summary["fail"] = len([row for row in scenario_results if row.get("status") == "FAIL"])
     summary["previous_slice"] = len([row for row in scenario_results if row.get("execution_classification") == "previous_slice"])
@@ -25558,21 +26062,25 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-002-brief-detail",
+        "slice": "slice-003-ask-packs-states-regression",
         "state_dir": {
             "browser": browser_state_rel,
             "cli": cli_state_rel,
+            "slice_003_cli": slice3_cli_state_rel,
         },
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
+            "slice_003": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT,
         },
         "browser_proof": browser_proof,
         "cli_workflow": cli_workflow,
+        "slice_003_cli_workflow": slice3_cli_workflow,
+        "regression_workflows": regression_workflows,
         "doc_verification": {
             "verify_sot_docs": docs_result,
             "verify_cli_native_first_docs": cli_docs_result,
@@ -25584,7 +26092,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "proof_boundary": {
             "vs4_slice_001_product_shell": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "vs4_slice_002_brief_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
-            "full_vs4": "NOT_COMPLETE",
+            "vs4_slice_003_ask_packs_states_regression": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+            "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",
             "final_security_acceptance": "NOT_CLAIMED",

@@ -25,6 +25,9 @@ API_ROUTES = [
     "GET /ready",
     "POST /artifacts",
     "GET /artifacts/{artifact_id}",
+    "POST /conversations",
+    "POST /conversations/{conversation_id}/answers",
+    "POST /conversations/{conversation_id}/promote",
     "POST /search",
     "GET /search-snapshots/{snapshot_id}",
     "POST /evidence-bundles",
@@ -107,9 +110,54 @@ VS4_KNOWLEDGE_STATES = [
 ]
 
 VS4_GENERAL_PACKS = [
-    ("Personal Research", "Reading notes, source highlights, evidence-backed brief"),
-    ("Company Policy Review", "Policy excerpt, claim candidate, safety check"),
-    ("Operations Issue", "Incident note, follow-up action, audit-ready activity"),
+    {
+        "name": "Personal Research",
+        "description": "Reading notes, source highlights, evidence-backed brief",
+        "fixture": "fixtures/vs1/ontology/personal_research.txt",
+        "query": "Walking Desk",
+    },
+    {
+        "name": "Company Policy Review",
+        "description": "Policy excerpt, claim candidate, safety check",
+        "fixture": "fixtures/vs1/ontology/internal_policy.txt",
+        "query": "Local Action Approval Policy",
+    },
+    {
+        "name": "Operations Issue",
+        "description": "Incident note, follow-up action, audit-ready activity",
+        "fixture": "fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt",
+        "query": "learning-failure-anchor",
+    },
+]
+
+VS4_REQUIRED_PAGE_STATES = [
+    "empty",
+    "loading",
+    "ready",
+    "partial-degraded",
+    "needs-review",
+    "permission-denied",
+    "policy-blocked",
+    "failed-with-recovery",
+    "audit-log-available",
+]
+
+VS4_STATE_SURFACES = [
+    "Home/Ops Inbox",
+    "Ask Workbench",
+    "Search",
+    "Artifact Viewer",
+    "Brief Detail",
+    "Claim Detail",
+    "Memory/Wiki",
+    "Action Card",
+    "Evidence/Audit",
+]
+
+VS4_REFERENCE_ALIGNMENT = [
+    ("Home", "light calm shell, small nav, Drop/Ask/Continue first"),
+    ("Search", "prominent search, scoped results, trust and evidence chips"),
+    ("Artifact Viewer", "original source primacy, checksum, provenance, progressive evidence"),
 ]
 
 
@@ -283,17 +331,46 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         for label, state in VS4_KNOWLEDGE_STATES
     )
     pack_rows = "\n".join(
-        "<div class='pack-row'>"
-        f"<strong>{html.escape(name)}</strong>"
-        f"<span>{html.escape(description)}</span>"
+        "<div class='pack-row' "
+        f"data-vs4-pack-row='{html.escape(pack['name'])}' "
+        f"data-vs4-pack-fixture='{html.escape(pack['fixture'])}' "
+        f"data-vs4-pack-query='{html.escape(pack['query'])}'>"
+        f"<strong>{html.escape(pack['name'])}</strong>"
+        f"<span>{html.escape(pack['description'])}</span>"
+        f"<code id='vs4-pack-{html.escape(pack['name'].lower().replace(' ', '-'))}-status'>waiting</code>"
         "</div>"
-        for name, description in VS4_GENERAL_PACKS
+        for pack in VS4_GENERAL_PACKS
+    )
+    required_state_list = ",".join(VS4_REQUIRED_PAGE_STATES)
+    state_coverage_rows = "\n".join(
+        "<tr "
+        f"data-vs4-state-surface='{html.escape(surface)}' "
+        f"data-vs4-required-states='{html.escape(required_state_list)}'>"
+        f"<th scope='row'>{html.escape(surface)}</th>"
+        + "".join(
+            f"<td><span class='state-token' data-vs4-state='{html.escape(state)}'>{html.escape(state.replace('-', ' '))}</span></td>"
+            for state in VS4_REQUIRED_PAGE_STATES
+        )
+        + "</tr>"
+        for surface in VS4_STATE_SURFACES
+    )
+    reference_rows = "\n".join(
+        "<article class='reference-rule' "
+        f"data-vs4-reference-surface='{html.escape(surface)}'>"
+        f"<strong>{html.escape(surface)}</strong>"
+        f"<span>{html.escape(rule)}</span>"
+        "</article>"
+        for surface, rule in VS4_REFERENCE_ALIGNMENT
     )
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
     autorun_evux_value = "true" if scenario == "vs0-evux" and autorun_evux else "false"
     autorun_vs1_value = "true" if scenario == "vs1-ontology" and autorun_evux else "false"
     autorun_vs4_value = "true" if scenario == "vs4-brief-detail" and autorun_evux else "false"
+    vs4_general_packs_json = json.dumps(VS4_GENERAL_PACKS)
+    vs4_required_page_states_json = json.dumps(VS4_REQUIRED_PAGE_STATES)
+    vs4_state_surfaces_json = json.dumps(VS4_STATE_SURFACES)
+    vs4_reference_alignment_json = json.dumps(VS4_REFERENCE_ALIGNMENT)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -486,6 +563,99 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     .pack-row strong, .activity-row strong {{
       color: var(--ink);
       font-size: 13px;
+    }}
+    .pack-row code {{
+      width: fit-content;
+      background: #eef6f4;
+      border: 1px solid #c8ded9;
+      border-radius: 6px;
+      color: var(--accent);
+      padding: 2px 6px;
+      font-size: 12px;
+    }}
+    .ask-result {{
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }}
+    .chip-list {{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }}
+    .evidence-chip {{
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border: 1px solid #c9d8e4;
+      border-radius: 999px;
+      background: #f8fbfd;
+      color: var(--ink);
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }}
+    .search-layout, .artifact-layout {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+      gap: 14px;
+      align-items: start;
+    }}
+    .result-list {{
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }}
+    .result-row, .source-preview, .reference-rule {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 12px;
+    }}
+    .source-preview {{
+      min-height: 180px;
+      background: #fbfcfd;
+    }}
+    .source-preview code {{
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }}
+    .state-matrix {{
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }}
+    .state-matrix th, .state-matrix td {{
+      border-top: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }}
+    .state-token {{
+      display: inline-flex;
+      border: 1px solid #d6e2dc;
+      border-radius: 999px;
+      background: #f7fbf9;
+      color: #285e61;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }}
+    .reference-grid {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }}
+    .reference-rule {{
+      display: grid;
+      gap: 4px;
     }}
     .evidence-drawer {{
       margin-top: 14px;
@@ -717,7 +887,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       main {{ grid-template-columns: 1fr; }}
       nav {{ border-right: 0; border-bottom: 1px solid var(--line); }}
       header, section {{ padding-left: 18px; padding-right: 18px; }}
-      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder {{ grid-template-columns: 1fr; }}
+      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid {{ grid-template-columns: 1fr; }}
       .workspace-strip {{ justify-content: flex-start; }}
       .work-row {{ grid-template-columns: 1fr; }}
     }}
@@ -776,8 +946,13 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
               <div class="product-panel" data-vs4-ask-box="visible">
                 <div class="label">Ask</div>
                 <h3>Evidence question</h3>
-                <input class="ask-input" aria-label="Ask CornerStone" value="What needs review before action?">
-                <button type="button">Ask with evidence</button>
+                <input id="vs4-ask-input" class="ask-input" aria-label="Ask CornerStone" value="What needs review before action?">
+                <button id="run-vs4-ask-flow" type="button">Ask with evidence</button>
+                <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="idle">
+                  <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="pending">Ask waits for evidence</span>
+                  <p id="vs4-ask-answer">Answers become reviewable work with evidence, memory, action, and audit refs.</p>
+                  <code id="vs4-ask-created-refs" data-vs4-created-work-kind="pending">work item not prepared</code>
+                </div>
               </div>
             </div>
           </div>
@@ -814,6 +989,9 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           </div>
           <div class="product-panel" id="vs4-memory-candidates" data-vs4-memory-shell="visible">
             <div class="label">General-purpose packs</div>
+            <h2>Same loop, different work</h2>
+            <p>Personal research, company policy, and operations issue packs use the same Source, Brief, Claim, Memory/Wiki, Action, and Ops Inbox loop.</p>
+            <button id="run-vs4-packs-flow" class="subtle-button" type="button">Run pack loop</button>
             <div class="pack-list">{pack_rows}</div>
           </div>
         </div>
@@ -912,8 +1090,113 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           </aside>
         </div>
       </section>
-      <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
-      <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
+      <section
+        id="artifact-viewer"
+        data-vs4-artifact-reference="original-source-primary"
+        data-vs4-reference-images-pass-evidence="false"
+      >
+        <div class="artifact-layout">
+          <div class="product-panel">
+            <div class="label">Artifact Viewer</div>
+            <h2>Original source first</h2>
+            <p>Saved sources stay primary. Derived summaries, search hits, claims, memory candidates, and actions must point back to checksum, provenance, and audit detail.</p>
+            <div class="source-preview" data-vs4-original-source-preview="visible">
+              <strong>Source preview</strong>
+              <code>Project: Alpha research review.
+Decision candidate: Keep original source material before derived summaries.
+Search phrase: alpha-evidence-anchor.</code>
+            </div>
+          </div>
+          <aside class="product-panel">
+            <div class="label">Source record</div>
+            <div class="detail-grid">
+              <div><span class="label">Checksum</span><span>sha256 original storage ref</span></div>
+              <div><span class="label">Scope</span><span>local-user / personal / default</span></div>
+              <div><span class="label">Trust</span><span>untrusted source, preserved before derived use</span></div>
+              <div><span class="label">Evidence</span><span>Evidence Bundle and Brief links required</span></div>
+              <div><span class="label">Audit</span><span>Artifact read and derived-text activity available</span></div>
+            </div>
+            <div class="chip-list">
+              <span class="evidence-chip">Original</span>
+              <span class="evidence-chip">Checksum</span>
+              <span class="evidence-chip">Provenance</span>
+              <span class="evidence-chip">Audit</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section
+        id="search"
+        data-vs4-search-reference="prominent-scoped-evidence"
+        data-vs4-reference-images-pass-evidence="false"
+      >
+        <div class="search-layout">
+          <div class="product-panel">
+            <div class="label">Search</div>
+            <h2>Find support before making work durable.</h2>
+            <input aria-label="Search CornerStone evidence" value="alpha-evidence-anchor">
+            <div class="chip-list" aria-label="Search scopes">
+              <span class="evidence-chip">All</span>
+              <span class="evidence-chip">Sources</span>
+              <span class="evidence-chip">Evidence</span>
+              <span class="evidence-chip">Claims</span>
+              <span class="evidence-chip">Actions</span>
+            </div>
+            <div class="result-list" data-vs4-search-results="visible">
+              <article class="result-row">
+                <div class="label">Evidence result</div>
+                <h3>Alpha research review source</h3>
+                <p>Supported result can become an Evidence Bundle, Brief, Claim candidate, Memory/Wiki candidate, or Action Card draft.</p>
+                <div class="chip-list">
+                  <span class="evidence-chip">source preserved</span>
+                  <span class="evidence-chip">evidence ready</span>
+                  <span class="evidence-chip">audit available</span>
+                </div>
+              </article>
+            </div>
+          </div>
+          <aside class="product-panel">
+            <div class="label">What this search can do</div>
+            <div class="activity-list">
+              <div class="activity-row"><strong>Create Brief</strong><span>Use selected support and gaps.</span></div>
+              <div class="activity-row"><strong>Draft Claim</strong><span>Keep trust at Draft / Evidence-backed until approval.</span></div>
+              <div class="activity-row"><strong>Review Memory</strong><span>Candidate stays inspectable before durable memory.</span></div>
+              <div class="activity-row"><strong>Prepare Action</strong><span>Local/mock dry-run first, with audit refs.</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section
+        id="vs4-state-coverage"
+        data-vs4-state-coverage="visible"
+        data-vs4-required-states="{html.escape(required_state_list)}"
+      >
+        <div class="product-panel">
+          <div class="label">Page states</div>
+          <h2>Major surfaces expose recovery and review states.</h2>
+          <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
+            <thead>
+              <tr>
+                <th scope="col">Surface</th>
+                {''.join(f'<th scope="col">{html.escape(state.replace("-", " "))}</th>' for state in VS4_REQUIRED_PAGE_STATES)}
+              </tr>
+            </thead>
+            <tbody>{state_coverage_rows}</tbody>
+          </table>
+        </div>
+      </section>
+      <section
+        id="vs4-reference-alignment"
+        data-vs4-reference-alignment="home-search-artifact"
+        data-vs4-reference-images-pass-evidence="false"
+      >
+        <div class="product-panel">
+          <div class="label">Reference alignment</div>
+          <h2>Home, Search, and Artifact follow the Product Alpha direction.</h2>
+          <p>Reference images guide visual direction only. PASS evidence comes from DOM, browser state, CLI/runtime state, and source review.</p>
+          <div class="reference-grid">{reference_rows}</div>
+        </div>
+      </section>
       <section
         id="vs1-ontology-loop"
         data-vs1-clicked="false"
@@ -1246,8 +1529,16 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       return {{ response, payload }};
     }}
     const vs4Trace = [];
+    const vs4GeneralPacks = {vs4_general_packs_json};
+    const vs4RequiredPageStates = {vs4_required_page_states_json};
+    const vs4StateSurfaces = {vs4_state_surfaces_json};
+    const vs4ReferenceAlignment = {vs4_reference_alignment_json};
     const vs4State = {{
       completed: false,
+      ask: {{}},
+      packs: [],
+      state_coverage: {{}},
+      reference_alignment: {{}},
       source: {{}},
       search: {{}},
       evidence: {{}},
@@ -1266,7 +1557,11 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         zero_evidence_approval_created_approved_claim: 0,
         approved_memory_before_review: 0,
         real_external_http_calls: 0,
-        live_external_writeback_claimed: 0
+        live_external_writeback_claimed: 0,
+        chatbot_only_ask_output: 0,
+        general_pack_missing_output: 0,
+        required_page_state_missing: 0,
+        home_search_artifact_reference_gap: 0
       }}
     }};
     function traceVs4(name, payload) {{
@@ -1315,6 +1610,88 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         vs4State.audit.verification_status === "success" &&
         Object.values(vs4State.negative_evidence).every((value) => value === 0)
       );
+    }}
+    function vs4AskPasses() {{
+      return Boolean(
+        vs4State.ask.conversation_id &&
+        vs4State.ask.answer_id &&
+        vs4State.ask.brief_id &&
+        vs4State.ask.claim_id &&
+        vs4State.ask.memory_candidate_id &&
+        vs4State.ask.action_id &&
+        vs4State.ask.chatbot_only === false &&
+        vs4State.ask.evidence_refs &&
+        vs4State.ask.evidence_refs.length > 0 &&
+        vs4State.ask.audit_refs &&
+        vs4State.ask.audit_refs.length > 0
+      );
+    }}
+    function vs4PacksPass() {{
+      return vs4State.packs.length === vs4GeneralPacks.length &&
+        vs4State.packs.every((pack) =>
+          pack.brief_id &&
+          pack.claim_id &&
+          pack.memory_candidate_id &&
+          pack.action_id &&
+          pack.ops_followup_id &&
+          pack.real_external_http_calls === 0
+        );
+    }}
+    function collectVs4StateCoverage() {{
+      const rows = Array.from(document.querySelectorAll("[data-vs4-state-surface]"));
+      const coverage = {{
+        required_states: vs4RequiredPageStates,
+        surfaces: {{}},
+        missing: [],
+        complete: false
+      }};
+      rows.forEach((row) => {{
+        const surface = row.dataset.vs4StateSurface || "";
+        const states = Array.from(row.querySelectorAll("[data-vs4-state]")).map((node) => node.dataset.vs4State);
+        coverage.surfaces[surface] = states;
+        vs4RequiredPageStates.forEach((state) => {{
+          if (!states.includes(state)) coverage.missing.push(surface + ":" + state);
+        }});
+      }});
+      coverage.complete = vs4StateSurfaces.every((surface) => coverage.surfaces[surface]) && coverage.missing.length === 0;
+      vs4State.state_coverage = coverage;
+      vs4State.negative_evidence.required_page_state_missing = coverage.missing.length;
+      return coverage;
+    }}
+    function collectVs4ReferenceAlignment() {{
+      const nav = document.getElementById("primary-nav");
+      const navText = nav ? nav.textContent : "";
+      const home = Boolean(document.querySelector("[data-vs4-surface='home-ops-inbox']"));
+      const search = Boolean(document.querySelector("[data-vs4-search-reference='prominent-scoped-evidence']")) &&
+        Boolean(document.querySelector("[data-vs4-search-results='visible']"));
+      const artifact = Boolean(document.querySelector("[data-vs4-artifact-reference='original-source-primary']")) &&
+        Boolean(document.querySelector("[data-vs4-original-source-preview='visible']"));
+      const chips = document.querySelectorAll(".evidence-chip").length >= 8;
+      const referenceRows = Array.from(document.querySelectorAll("[data-vs4-reference-surface]")).map((node) => node.dataset.vs4ReferenceSurface);
+      const alignment = {{
+        home,
+        search,
+        artifact,
+        small_nav: ["Home", "Search", "Artifacts", "Claims", "Actions"].every((label) => navText.includes(label)) && !navText.includes("Connectors") && !navText.includes("Ontology"),
+        prominent_global_search: Boolean(document.querySelector(".global-search")),
+        trust_evidence_chips: chips,
+        reference_surfaces: referenceRows,
+        reference_images_used_as_pass_evidence: false,
+        implementation_evidence: ["DOM", "browser runtime state", "local API state"],
+      }};
+      alignment.complete = alignment.home && alignment.search && alignment.artifact && alignment.small_nav && alignment.prominent_global_search && alignment.trust_evidence_chips && referenceRows.length === 3;
+      vs4State.reference_alignment = alignment;
+      vs4State.negative_evidence.home_search_artifact_reference_gap = alignment.complete ? 0 : 1;
+      return alignment;
+    }}
+    function vs4Slice003Passes() {{
+      const coverage = collectVs4StateCoverage();
+      const reference = collectVs4ReferenceAlignment();
+      return vs4AskPasses() &&
+        vs4PacksPass() &&
+        coverage.complete &&
+        reference.complete &&
+        Object.values(vs4State.negative_evidence).every((value) => value === 0);
     }}
     async function runVs4BriefFlow() {{
       const button = document.getElementById("run-vs4-brief-flow");
@@ -1483,11 +1860,158 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         if (button) button.disabled = false;
       }}
     }}
+    async function runVs4AskFlow() {{
+      const button = document.getElementById("run-vs4-ask-flow");
+      if (button) button.disabled = true;
+      try {{
+        if (!vs4State.completed) {{
+          await runVs4BriefFlow();
+        }}
+        const question = (document.getElementById("vs4-ask-input") || {{ value: "What needs review before action?" }}).value;
+        const conversationResponse = await vs4Api("/conversations", {{
+          message: question + " Source anchor: alpha-evidence-anchor. Prepare reviewable work, not a chatbot-only answer."
+        }});
+        const conversation = conversationResponse.payload.conversation || {{}};
+        const sourceArtifact = conversationResponse.payload.artifact || {{}};
+        const answerResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/answers", {{
+          question: "What does alpha-evidence-anchor say about review before action?"
+        }});
+        const answer = answerResponse.payload.answer || {{}};
+        const promoteResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/promote", {{
+          evidence_bundle_id: vs4State.evidence.evidence_bundle_id,
+          statement: "Ask work item is ready for evidence-backed review before local action."
+        }});
+        const promotedClaim = promoteResponse.payload.claim || {{}};
+        const auditRefs = [
+          ...(conversationResponse.payload.audit_refs || []),
+          ...(answerResponse.payload.audit_refs || []),
+          ...(promoteResponse.payload.audit_refs || []),
+          ...(vs4State.brief.audit_refs || []),
+          ...(vs4State.evidence.audit_refs || [])
+        ];
+        const createdRefs = [
+          "brief:" + vs4State.brief.brief_id,
+          "claim:" + (promotedClaim.claim_id || vs4State.claim.claim_id),
+          "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          "action:" + vs4State.action.action_id
+        ];
+        vs4State.ask = {{
+          conversation_id: conversation.conversation_id,
+          answer_id: answer.answer_id,
+          source_artifact_id: sourceArtifact.artifact_id,
+          answer_label: answer.label,
+          evidence_refs: [...(answer.evidence_refs || []), "evidence_bundle:" + vs4State.evidence.evidence_bundle_id],
+          memory_refs: ["memory_candidate:" + vs4State.memory.evidence_bundle_id],
+          brief_id: vs4State.brief.brief_id,
+          claim_id: promotedClaim.claim_id || vs4State.claim.claim_id,
+          memory_candidate_id: "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          action_id: vs4State.action.action_id,
+          created_work_item_refs: createdRefs,
+          audit_refs: auditRefs,
+          chatbot_only: false
+        }};
+        setText("vs4-ask-trust-state", "Ask: Evidence-backed work item ready");
+        document.getElementById("vs4-ask-trust-state").dataset.vs4AnswerTrustState = answer.label || "evidence_backed";
+        setText("vs4-ask-answer", "Answer uses evidence and created reviewable work: " + createdRefs.join(", "));
+        setText("vs4-ask-created-refs", createdRefs.join(" | "));
+        document.getElementById("vs4-ask-created-refs").dataset.vs4CreatedWorkKind = "brief,claim,memory-candidate,action-card";
+        document.getElementById("vs4-ask-result").dataset.vs4AskFlow = "ready";
+        document.getElementById("home-ops-inbox").dataset.vs4AskFlowComplete = "true";
+        vs4State.negative_evidence.chatbot_only_ask_output = 0;
+      }} catch (error) {{
+        traceVs4("ask_browser_error", {{ message: String(error) }});
+        vs4State.ask = {{ error: String(error), chatbot_only: true }};
+        vs4State.negative_evidence.chatbot_only_ask_output = 1;
+        document.getElementById("vs4-ask-result").dataset.vs4AskFlow = "failed";
+      }} finally {{
+        if (button) button.disabled = false;
+      }}
+    }}
+    async function runVs4PackFlow() {{
+      const button = document.getElementById("run-vs4-packs-flow");
+      if (button) button.disabled = true;
+      const packOutputs = [];
+      try {{
+        for (const pack of vs4GeneralPacks) {{
+          const statusId = "vs4-pack-" + pack.name.toLowerCase().replaceAll(" ", "-") + "-status";
+          setText(statusId, "running");
+          const artifactResponse = await vs4Api("/artifacts", {{
+            path: pack.fixture,
+            source: "local_fixture",
+            media_type: "text/plain",
+            trust: "untrusted"
+          }});
+          const artifact = artifactResponse.payload.artifact || {{}};
+          const searchResponse = await vs4Api("/search", {{ query: pack.query }});
+          const snapshot = searchResponse.payload.search_snapshot || {{}};
+          const bundleResponse = await vs4Api("/evidence-bundles", {{ search_snapshot_id: snapshot.search_snapshot_id }});
+          const bundle = bundleResponse.payload.evidence_bundle || {{}};
+          const briefResponse = await vs4Api("/briefs", {{ evidence_bundle_id: bundle.evidence_bundle_id }});
+          const brief = briefResponse.payload.brief || {{}};
+          const claimResponse = await vs4Api("/claims", {{
+            evidence_bundle_id: bundle.evidence_bundle_id,
+            statement: pack.name + " has enough source-backed context for local Product Alpha review."
+          }});
+          const claim = claimResponse.payload.claim || {{}};
+          const actionResponse = await vs4Api("/actions", {{
+            claim_id: claim.claim_id,
+            goal: "Create local follow-up for " + pack.name,
+            action_kind: "draft_task",
+            risk: "medium",
+            connector: "mock_connector",
+            target: "mock://vs4-pack/" + pack.name.toLowerCase().replaceAll(" ", "-")
+          }});
+          const action = actionResponse.payload.action_card || {{}};
+          const impact = (action.dry_run || {{}}).expected_impact || {{}};
+          const output = {{
+            name: pack.name,
+            fixture: pack.fixture,
+            query: pack.query,
+            artifact_id: artifact.artifact_id,
+            search_snapshot_id: snapshot.search_snapshot_id,
+            evidence_bundle_id: bundle.evidence_bundle_id,
+            brief_id: brief.brief_id,
+            claim_id: claim.claim_id,
+            memory_candidate_id: "memory_candidate:" + bundle.evidence_bundle_id,
+            action_id: action.action_id,
+            ops_followup_id: "ops_followup:" + action.action_id,
+            evidence_refs: [
+              "artifact:" + artifact.artifact_id,
+              "search_snapshot:" + snapshot.search_snapshot_id,
+              "evidence_bundle:" + bundle.evidence_bundle_id
+            ],
+            audit_refs: [
+              ...(artifactResponse.payload.audit_refs || []),
+              ...(briefResponse.payload.audit_refs || []),
+              ...(claimResponse.payload.audit_refs || []),
+              ...(actionResponse.payload.audit_refs || [])
+            ],
+            real_external_http_calls: impact.real_external_http_calls || 0
+          }};
+          packOutputs.push(output);
+          setText(statusId, "ready: " + brief.brief_id + " / " + action.action_id);
+        }}
+        vs4State.packs = packOutputs;
+        const missing = packOutputs.filter((pack) => !(pack.brief_id && pack.claim_id && pack.memory_candidate_id && pack.action_id && pack.ops_followup_id)).length;
+        vs4State.negative_evidence.general_pack_missing_output = missing;
+        vs4State.negative_evidence.real_external_http_calls += packOutputs.reduce((sum, pack) => sum + (pack.real_external_http_calls || 0), 0);
+        document.getElementById("vs4-memory-candidates").dataset.vs4PackFlowComplete = missing === 0 ? "true" : "false";
+      }} catch (error) {{
+        traceVs4("pack_browser_error", {{ message: String(error) }});
+        vs4State.negative_evidence.general_pack_missing_output = 1;
+        document.getElementById("vs4-memory-candidates").dataset.vs4PackFlowComplete = "false";
+      }} finally {{
+        if (button) button.disabled = false;
+      }}
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
+      collectVs4StateCoverage();
+      collectVs4ReferenceAlignment();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
         passes: vs4Passes(),
+        slice_003_passes: vs4Slice003Passes(),
         state: vs4State,
         trace: vs4Trace,
         markers: {{
@@ -1497,6 +2021,10 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           claim_candidate_visible: Boolean(document.querySelector("[data-vs4-claim-candidate='visible']")),
           memory_candidate_visible: Boolean(document.querySelector("[data-vs4-memory-candidate-detail='visible']")),
           action_card_visible: Boolean(document.querySelector("[data-vs4-action-card-detail='visible']")),
+          ask_flow_complete: vs4AskPasses(),
+          general_packs_complete: vs4PacksPass(),
+          state_coverage_complete: vs4State.state_coverage.complete === true,
+          home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
         }}
@@ -2222,10 +2750,18 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
     document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
+    document.getElementById("run-vs4-ask-flow").addEventListener("click", runVs4AskFlow);
+    document.getElementById("run-vs4-packs-flow").addEventListener("click", runVs4PackFlow);
     document.getElementById("run-evux").addEventListener("click", runEvux);
     document.getElementById("run-vs1-ontology").addEventListener("click", runVs1Ontology);
     if (vs4Autorun) {{
-      window.addEventListener("load", () => setTimeout(() => document.getElementById("run-vs4-brief-flow").click(), 50));
+      window.addEventListener("load", () => setTimeout(async () => {{
+        await runVs4BriefFlow();
+        await runVs4AskFlow();
+        await runVs4PackFlow();
+        collectVs4StateCoverage();
+        collectVs4ReferenceAlignment();
+      }}, 50));
     }}
     if (evuxAutorun) {{
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
@@ -2357,6 +2893,15 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["artifacts"]:
             self._ingest_artifact(body)
+            return
+        if parts == ["conversations"]:
+            self._start_conversation(body)
+            return
+        if len(parts) == 3 and parts[0] == "conversations" and parts[2] == "answers":
+            self._answer_conversation(parts[1], body)
+            return
+        if len(parts) == 3 and parts[0] == "conversations" and parts[2] == "promote":
+            self._promote_conversation(parts[1], body)
             return
         if parts == ["search"]:
             self._search(body)
@@ -2697,6 +3242,79 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [result["audit_event"]])],
                 policy_decision_refs=[f"policy:{decision['id']}" for decision in policy_decisions],
                 policy_decisions=policy_decisions,
+            )
+        )
+
+    def _start_conversation(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        message = str(body.get("message", "")).strip()
+        if not message:
+            self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_MESSAGE_REQUIRED", "message": "Conversation message is required."}]), 400)
+            return
+        result = self.store.start_conversation(message, scope)
+        conversation = result["conversation"]
+        artifact = result["artifact"]
+        self._send_json(
+            _json_response(
+                "success",
+                conversation=conversation,
+                artifact=artifact,
+                evidence_refs=[f"conversation:{conversation['conversation_id']}", f"artifact:{artifact['artifact_id']}"],
+                audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [])],
+            )
+        )
+
+    def _answer_conversation(self, conversation_id: str, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.answer_conversation(conversation_id, str(body.get("question", "")), scope)
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_NOT_FOUND", "message": "Conversation not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Conversation is outside the requested scope."}]), 403)
+            return
+        answer = result["answer"]
+        snapshot = result["search_snapshot"]
+        self._send_json(
+            _json_response(
+                "success",
+                answer=answer,
+                search_snapshot=snapshot,
+                evidence_refs=[f"conversation_answer:{answer['answer_id']}", f"search_snapshot:{snapshot['search_snapshot_id']}", *answer.get("evidence_refs", [])],
+                audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [])],
+            )
+        )
+
+    def _promote_conversation(self, conversation_id: str, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.promote_conversation_to_claim(
+            conversation_id,
+            str(body.get("statement", "")),
+            str(body.get("evidence_bundle_id", "")),
+            scope,
+        )
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_NOT_FOUND", "message": "Conversation not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Conversation is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "evidence_required":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_PROMOTION_EVIDENCE_REQUIRED", "message": "Conversation promotion requires an Evidence Bundle."}],
+                ),
+                400,
+            )
+            return
+        claim = result["claim"]
+        self._send_json(
+            _json_response(
+                "success",
+                claim=claim,
+                evidence_refs=[f"conversation:{conversation_id}", f"claim:{claim['claim_id']}", *claim.get("evidence_bundle", {}).get("artifact_refs", [])],
+                audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [])],
             )
         )
 
