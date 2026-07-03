@@ -22,6 +22,13 @@ VS4_ACTIVE_SLICE_SCENARIO_COUNT = 16
 VS4_RUNTIME_LOOP_COHERENCE_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
 )
+VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md"
+)
+VS4_SLICE_022_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage.json"
+VS4_SLICE_022_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage-gate.json"
+VS4_FULL_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
+VS4_FULL_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
 
 from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
 from cornerstone_cli.scenarios import (
@@ -32,6 +39,7 @@ from cornerstone_cli.scenarios import (
 from cornerstone_cli.main import (
     _vs3_human_gate_self_transcript_validation,
     _vs3_local_checkpoint_self_transcript_validation,
+    _vs4_filtered_scenario_report_path,
 )
 
 SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
@@ -11420,6 +11428,7 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         report.setdefault("slice_contracts", {})["slice_021"] = VS4_RUNTIME_LOOP_COHERENCE_CONTRACT
         report.setdefault("slice_contracts", {})["slice_022"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_023"] = VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11439,6 +11448,9 @@ class ScaffoldCliTests(unittest.TestCase):
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         report.setdefault("proof_boundary", {})["vs4_slice_022_return_to_work_lineage_guard"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
+        report.setdefault("proof_boundary", {})["vs4_slice_023_report_package_integrity"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
         report["active_proof"] = {
@@ -12843,6 +12855,40 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["vs4_gate_validation"]["status"], "passed")
         self.assertTrue((ROOT / "tmp/test-vs4-gate-valid-report.gate.json").exists())
 
+    def test_vs4_report_package_path_integrity(self) -> None:
+        makefile = (ROOT / "Makefile").read_text()
+
+        def target_body(name: str) -> str:
+            marker = f"\n{name}:"
+            start = makefile.find(marker)
+            self.assertGreaterEqual(start, 0, f"missing Makefile target {name}")
+            next_target = makefile.find("\nverify-", start + 1)
+            if next_target == -1:
+                next_target = len(makefile)
+            return makefile[start:next_target]
+
+        return_target = target_body("verify-vs4-product-alpha-return-to-work-lineage")
+        self.assertIn(VS4_SLICE_022_REPORT, return_target)
+        self.assertIn(f"scenario gate {VS4_SLICE_022_REPORT}", return_target)
+        self.assertIn(f"--output {VS4_SLICE_022_GATE_REPORT}", return_target)
+        self.assertNotIn(f"--output {VS4_FULL_REPORT}", return_target)
+        self.assertNotIn(f"scenario gate {VS4_FULL_REPORT}", return_target)
+
+        package_target = target_body("verify-vs4-product-alpha-human-package")
+        self.assertIn(f"--output {VS4_FULL_REPORT}", package_target)
+        self.assertIn(f"scenario gate {VS4_FULL_REPORT}", package_target)
+        self.assertIn(f"--output {VS4_FULL_GATE_REPORT}", package_target)
+        self.assertIn(f"--scenario-report {VS4_FULL_REPORT}", package_target)
+        self.assertNotIn(VS4_SLICE_022_REPORT, package_target)
+
+        filtered_path = _vs4_filtered_scenario_report_path(["VS4-GATE-001", "VS4-UI-012"])
+        self.assertNotEqual(filtered_path, VS4_FULL_REPORT)
+        self.assertTrue(
+            filtered_path.startswith("reports/scenario/vs4-product-alpha-ui-daily-loop-filtered-"),
+            filtered_path,
+        )
+        self.assertTrue((ROOT / VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT).is_file())
+
     def test_vs4_scenario_gate_rejects_h01_marked_pass(self) -> None:
         def tamper(report: dict[str, Any]) -> None:
             for row in report["scenario_results"]:
@@ -13000,6 +13046,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("make verify-vs4-product-alpha-desktop-overflow", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-return-to-work-lineage", package_row["commands_to_run_before_review"])
+        self.assertIn("make verify-vs4-product-alpha-report-package-integrity", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-decision-pages", package_row["commands_to_run_before_review"])
@@ -13037,6 +13084,7 @@ class ScaffoldCliTests(unittest.TestCase):
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
             package_row["evidence_refs"],
         )
+        self.assertIn(VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT, package_row["evidence_refs"])
         self.assertIn(VS4_ACTIVE_SLICE_CONTRACT, package_row["evidence_refs"])
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())

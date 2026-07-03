@@ -35,6 +35,10 @@
     "vs4_h01_remains_human_required": true
   },
   "commands_to_run_before_review": [
+    "make verify-vs4-product-alpha-report-package-integrity",
+    "make verify-vs4-product-alpha-return-to-work-lineage",
+    "make verify-vs4-product-alpha-runtime-loop-coherence",
+    "make verify-vs4-product-alpha-runtime-backed-ops-inbox",
     "make verify-vs4-product-alpha-interactive-ops-inbox",
     "make verify-vs4-product-alpha-drop-ask-trust-boundary",
     "make verify-vs4-product-alpha-user-drop-ask-source",
@@ -73,7 +77,11 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_017_USER_DROP_ASK_SOURCE.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_018_DROP_ASK_TRUST_BOUNDARY.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md",
-    "tmp/test-vs4-product-alpha-full-for-human-package.json",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md",
+    "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json"
   ],
   "expected_behavior": "Human accepts or rejects whether the daily loop is usable, understandable, product-first, evidence-aware, and not misleading.",
@@ -91,13 +99,13 @@
     "production_readiness_claimed_by_package": 0,
     "security_acceptance_claimed_by_package": 0
   },
-  "package_digest_sha256": "da8ae16d4d1066c4a6dec5a711a05bcaa68706b0f11e151eb978288ba6f403ba",
+  "package_digest_sha256": "6834fc391d046e145a753e1ade0cc8a4b699cf1fe18284c77c79a08dc27f9956",
   "package_id": "vs4_human_gate_vs4_h01",
   "package_path": "reports/human-gates/vs4/VS4-H01.json",
   "pass_claim_allowed": false,
   "product_claim_allowed": false,
   "readiness_status": "ready_for_human_review",
-  "record_template_path": "tmp/test-vs4-h01.review-record.template.json",
+  "record_template_path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
   "reject_conditions": [
     "The user cannot tell what stayed local/mock or whether live external writeback happened.",
     "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
@@ -143,44 +151,44 @@
   ],
   "review_input_artifacts": [
     {
-      "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
+      "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
       "present": true,
-      "sha256": "550ecc18a2b33a3ff71781f5af0162a9bfd0d4796c610f3b01ca663fe6f0e36a",
+      "sha256": "ee4f2f5529bfa09b958edee9b830fcbde8276c79c1c9b10205f2107f74abcf0a",
       "summary": {
         "blocking": 0,
         "fail": 0,
         "human_required": 1,
-        "in_this_slice": 11,
+        "in_this_slice": 16,
         "not_run": 0,
         "pass": 27,
-        "previous_slice": 16,
+        "previous_slice": 11,
         "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
         "scenario_count": 28
       }
     },
     {
       "kind": "browser_proof",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json"
     },
     {
       "kind": "dom_snapshot",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html"
     },
     {
       "kind": "screenshot",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png"
     },
     {
       "kind": "mobile_browser_proof",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json"
     },
     {
       "kind": "mobile_dom_snapshot",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.dom.html"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html"
     },
     {
       "kind": "mobile_screenshot",
-      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/home.png"
+      "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.png"
     },
     {
       "kind": "slice_contract",
@@ -245,6 +253,22 @@
     {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_019_INTERACTIVE_OPS_INBOX.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md"
     }
   ],
   "review_record_contract": {
@@ -278,17 +302,17 @@
   },
   "scenario_id": "VS4-H01",
   "scenario_report": {
-    "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
+    "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "present": true,
-    "sha256": "550ecc18a2b33a3ff71781f5af0162a9bfd0d4796c610f3b01ca663fe6f0e36a",
+    "sha256": "ee4f2f5529bfa09b958edee9b830fcbde8276c79c1c9b10205f2107f74abcf0a",
     "summary": {
       "blocking": 0,
       "fail": 0,
       "human_required": 1,
-      "in_this_slice": 11,
+      "in_this_slice": 16,
       "not_run": 0,
       "pass": 27,
-      "previous_slice": 16,
+      "previous_slice": 11,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
       "scenario_count": 28
     }

@@ -19553,7 +19553,11 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     if args.contract == "vs1-ontology-suggest-promote" and not output_arg:
         output_arg = DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT
     if args.contract == "vs4-product-alpha-ui-daily-loop" and not output_arg:
-        output_arg = DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT
+        output_arg = (
+            _vs4_filtered_scenario_report_path(args.scenario or [])
+            if args.scenario
+            else DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT
+        )
     if args.contract == "vs2-policy-tenancy-egress" and not output_arg:
         output_arg = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
     if args.contract == "vs3-onprem-trusted-extension" and not output_arg:
@@ -19730,6 +19734,14 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
 VS4_PRODUCT_ALPHA_SCENARIO_SET = "vs4-product-alpha-ui-daily-loop"
 VS4_PRODUCT_ALPHA_MATRIX_PATH = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv"
 VS4_HUMAN_REQUIRED_SCENARIO_ID = "VS4-H01"
+
+
+def _vs4_filtered_scenario_report_path(scenario_ids: list[str]) -> str:
+    stable_ids = sorted({scenario_id for scenario_id in scenario_ids if scenario_id})
+    digest = hashlib.sha256("\n".join(stable_ids).encode("utf-8")).hexdigest()[:12]
+    return f"reports/scenario/vs4-product-alpha-ui-daily-loop-filtered-{digest}.json"
+
+
 VS4_FULL_REPORT_EXPECTED_SUMMARY = {
     "scenario_count": 28,
     "pass": 27,
@@ -19754,6 +19766,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_023_report_package_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",

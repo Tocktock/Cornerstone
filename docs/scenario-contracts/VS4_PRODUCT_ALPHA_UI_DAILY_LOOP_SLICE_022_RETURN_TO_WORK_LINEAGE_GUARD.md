@@ -81,8 +81,8 @@ Slice 021 made the happy path coherent through runtime-backed Learn and active p
 
 ## Required Verification
 
-- `cornerstone scenario verify vs4-product-alpha-ui-daily-loop --scenario VS4-GATE-001 --scenario VS4-UI-008 --scenario VS4-UI-009 --scenario VS4-UI-010 --scenario VS4-UI-011 --scenario VS4-UI-012 --scenario VS4-UI-013 --scenario VS4-UI-015 --scenario VS4-UI-016 --scenario VS4-STATE-001 --scenario VS4-REF-002 --scenario VS4-REG-003 --scenario VS4-REG-004 --scenario VS4-REG-005 --scenario VS4-REG-006 --scenario VS4-REG-007 --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json`
-- `cornerstone scenario gate reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json`
+- `cornerstone scenario verify vs4-product-alpha-ui-daily-loop --scenario VS4-GATE-001 --scenario VS4-UI-008 --scenario VS4-UI-009 --scenario VS4-UI-010 --scenario VS4-UI-011 --scenario VS4-UI-012 --scenario VS4-UI-013 --scenario VS4-UI-015 --scenario VS4-UI-016 --scenario VS4-STATE-001 --scenario VS4-REF-002 --scenario VS4-REG-003 --scenario VS4-REG-004 --scenario VS4-REG-005 --scenario VS4-REG-006 --scenario VS4-REG-007 --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage.json`
+- `cornerstone scenario gate reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage.json --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage-gate.json`
 - CLI transcripts for:
   - valid same-lineage `cornerstone product loop-view --json`;
   - missing Brief/Claim/Memory/Mission/Action/Lesson ref rejection;
