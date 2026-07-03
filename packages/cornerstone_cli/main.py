@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -19633,6 +19634,357 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     return exit_code
 
 
+VS4_PRODUCT_ALPHA_SCENARIO_SET = "vs4-product-alpha-ui-daily-loop"
+VS4_PRODUCT_ALPHA_MATRIX_PATH = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv"
+VS4_HUMAN_REQUIRED_SCENARIO_ID = "VS4-H01"
+VS4_FULL_REPORT_EXPECTED_SUMMARY = {
+    "scenario_count": 28,
+    "pass": 27,
+    "human_required": 1,
+    "blocking": 0,
+    "fail": 0,
+    "not_run": 0,
+}
+VS4_REQUIRED_PROOF_BOUNDARY = {
+    "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
+    "production": "NOT_CLAIMED",
+    "production_onprem": "NOT_CLAIMED",
+    "final_security_acceptance": "NOT_CLAIMED",
+    "live_provider": "NOT_CLAIMED",
+    "human_ux_acceptance": "HUMAN_REQUIRED",
+    "vs3_h01_to_h07": "CONDITIONAL_DEFERRED_FOR_PRODUCTION_ONPREM_SECURITY_LIVE_PROVIDER_AND_HUMAN_ACCEPTANCE_CLAIMS",
+    "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+}
+VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
+    "production_readiness_claimed",
+    "onprem_readiness_claimed",
+    "final_security_claimed",
+    "live_provider_claimed",
+    "human_ux_acceptance_claimed",
+    "reference_images_used_as_pass_evidence",
+    "reference_images_used_as_human_acceptance_evidence",
+    "unsafe_ask_claim_approvals_created",
+    "unsafe_ask_memory_approvals_created",
+    "unsafe_ask_action_executions_created",
+    "unsafe_ask_policy_changes_created",
+    "unsafe_ask_external_http_calls",
+    "unsafe_ask_direct_provider_access",
+    "vs4_action_execution_without_authorized_approval",
+    "vs4_unauthorized_action_approval_accepted",
+    "vs4_provider_mutations_on_denial",
+    "vs4_external_http_calls_on_denial",
+}
+VS4_REQUIRED_SOURCE_TREE_FIELDS = {
+    "verified_base_commit",
+    "verified_base_commit_full",
+    "verified_base_tree_hash",
+    "verified_source_worktree_hash",
+    "verified_source_snapshot_paths",
+    "generated_dirty_paths",
+    "generated_dirty_snapshot_hash",
+    "generated_dirty_snapshot_paths",
+    "worktree_dirty_at_verification",
+    "report_generated_before_commit",
+}
+
+
+def _scenario_row_id(row: dict[str, Any]) -> str:
+    value = row.get("scenario_id") or row.get("id")
+    return str(value) if value is not None else ""
+
+
+def _vs4_product_alpha_matrix_rows(root: Path) -> list[dict[str, str]]:
+    matrix_path = root / VS4_PRODUCT_ALPHA_MATRIX_PATH
+    with matrix_path.open(newline="") as file:
+        return list(csv.DictReader(file))
+
+
+def _vs4_product_alpha_gate_validation(
+    root: Path,
+    report_path: Path,
+    data: dict[str, Any],
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    expected_scenarios = _vs4_product_alpha_matrix_rows(root)
+    expected_ids_all = [
+        str(scenario["scenario_id"])
+        for scenario in expected_scenarios
+        if scenario.get("scenario_id")
+    ]
+    scenario_filter_raw = data.get("scenario_filter")
+    scenario_filter = [
+        str(item)
+        for item in scenario_filter_raw
+        if isinstance(item, str) and item
+    ] if isinstance(scenario_filter_raw, list) else []
+    expected_ids = scenario_filter or expected_ids_all
+    full_report = not scenario_filter
+    actual_ids = [_scenario_row_id(row) for row in rows if isinstance(row, dict)]
+    actual_id_set = set(actual_ids)
+    expected_id_set = set(expected_ids)
+    duplicate_ids = sorted({scenario_id for scenario_id in actual_ids if actual_ids.count(scenario_id) > 1})
+    missing_ids = sorted(expected_id_set - actual_id_set)
+    unexpected_ids = sorted(actual_id_set - expected_id_set)
+    rows_by_id = {
+        _scenario_row_id(row): row
+        for row in rows
+        if isinstance(row, dict) and _scenario_row_id(row)
+    }
+    ai_ids = [
+        scenario_id
+        for scenario_id in expected_ids
+        if scenario_id != VS4_HUMAN_REQUIRED_SCENARIO_ID
+    ]
+    human_expected = VS4_HUMAN_REQUIRED_SCENARIO_ID in expected_id_set
+    summary = data.get("summary") if isinstance(data.get("summary"), dict) else {}
+    proof_boundary = data.get("proof_boundary") if isinstance(data.get("proof_boundary"), dict) else {}
+    negative_evidence = data.get("negative_evidence") if isinstance(data.get("negative_evidence"), dict) else {}
+    source_tree = data.get("source_tree") if isinstance(data.get("source_tree"), dict) else {}
+    self_transcript = (
+        data.get("self_command_transcript")
+        if isinstance(data.get("self_command_transcript"), dict)
+        else {}
+    )
+    browser_proof = data.get("browser_proof") if isinstance(data.get("browser_proof"), dict) else {}
+    mobile_browser_proof = (
+        data.get("mobile_browser_proof")
+        if isinstance(data.get("mobile_browser_proof"), dict)
+        else {}
+    )
+    cli_workflow = data.get("cli_workflow") if isinstance(data.get("cli_workflow"), dict) else {}
+    slice_003_cli_workflow = (
+        data.get("slice_003_cli_workflow")
+        if isinstance(data.get("slice_003_cli_workflow"), dict)
+        else {}
+    )
+    regression_workflows = (
+        data.get("regression_workflows")
+        if isinstance(data.get("regression_workflows"), dict)
+        else {}
+    )
+    failures: list[dict[str, Any]] = []
+    conditions: dict[str, bool] = {}
+
+    def record(name: str, passed: bool, message: str, **details: Any) -> None:
+        conditions[name] = bool(passed)
+        if not passed:
+            failure = {"condition": name, "message": message}
+            failure.update(details)
+            failures.append(failure)
+
+    record(
+        "report_identity",
+        data.get("scenario_set") == VS4_PRODUCT_ALPHA_SCENARIO_SET and data.get("status") == "success",
+        "VS4 scenario gate requires a successful VS4 Product Alpha report.",
+        actual_scenario_set=data.get("scenario_set"),
+        actual_status=data.get("status"),
+    )
+    record(
+        "row_coverage",
+        not missing_ids and not unexpected_ids and not duplicate_ids and len(rows) == len(expected_ids),
+        "VS4 report rows must exactly match the expected full or filtered scenario set.",
+        missing_ids=missing_ids,
+        unexpected_ids=unexpected_ids,
+        duplicate_ids=duplicate_ids,
+        expected_count=len(expected_ids),
+        actual_count=len(rows),
+    )
+    row_identity_mismatches = [
+        {
+            "row_index": index,
+            "id": row.get("id"),
+            "scenario_id": row.get("scenario_id"),
+        }
+        for index, row in enumerate(rows)
+        if isinstance(row, dict)
+        and row.get("id")
+        and row.get("scenario_id")
+        and row.get("id") != row.get("scenario_id")
+    ]
+    record(
+        "row_identity",
+        not row_identity_mismatches,
+        "VS4 report row id and scenario_id must match when both are present.",
+        mismatches=row_identity_mismatches,
+    )
+    ai_non_pass = [
+        {"scenario_id": scenario_id, "status": rows_by_id.get(scenario_id, {}).get("status")}
+        for scenario_id in ai_ids
+        if rows_by_id.get(scenario_id, {}).get("status") != "PASS"
+    ]
+    h01_row = rows_by_id.get(VS4_HUMAN_REQUIRED_SCENARIO_ID)
+    record(
+        "row_status",
+        not ai_non_pass
+        and (
+            not human_expected
+            or (
+                isinstance(h01_row, dict)
+                and h01_row.get("status") == "HUMAN_REQUIRED"
+                and h01_row.get("owner") == "Human"
+            )
+        ),
+        "VS4 AI rows must be PASS and VS4-H01 must remain HUMAN_REQUIRED when present.",
+        ai_non_pass=ai_non_pass,
+        vs4_h01_status=h01_row.get("status") if isinstance(h01_row, dict) else None,
+        vs4_h01_owner=h01_row.get("owner") if isinstance(h01_row, dict) else None,
+    )
+    expected_summary = {
+        "scenario_count": len(expected_ids),
+        "pass": len(ai_ids),
+        "human_required": 1 if human_expected else 0,
+        "blocking": 0,
+        "fail": 0,
+        "not_run": 0,
+    }
+    summary_mismatches = {
+        key: {"expected": expected, "actual": summary.get(key)}
+        for key, expected in expected_summary.items()
+        if summary.get(key) != expected
+    }
+    if full_report:
+        for key, expected in VS4_FULL_REPORT_EXPECTED_SUMMARY.items():
+            if summary.get(key) != expected:
+                summary_mismatches[key] = {"expected": expected, "actual": summary.get(key)}
+    record(
+        "summary_counts",
+        not summary_mismatches
+        and (
+            not full_report
+            or summary.get("product_feature_claims")
+            == "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED"
+        ),
+        "VS4 report summary must match the gated scenario rows and preserve the local/human-required claim boundary.",
+        mismatches=summary_mismatches,
+        product_feature_claims=summary.get("product_feature_claims"),
+    )
+    proof_mismatches = {
+        key: {"expected": expected, "actual": proof_boundary.get(key)}
+        for key, expected in VS4_REQUIRED_PROOF_BOUNDARY.items()
+        if proof_boundary.get(key) != expected
+    }
+    record(
+        "proof_boundary",
+        not proof_mismatches,
+        "VS4 report proof boundary must not claim production, on-prem, final security, live provider, or human UX readiness.",
+        mismatches=proof_mismatches,
+    )
+    negative_missing = sorted(VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS - set(negative_evidence))
+    negative_nonzero = {
+        key: value
+        for key, value in negative_evidence.items()
+        if value != 0 or isinstance(value, bool) or not isinstance(value, (int, float))
+    }
+    record(
+        "negative_evidence",
+        isinstance(negative_evidence, dict)
+        and bool(negative_evidence)
+        and not negative_missing
+        and not negative_nonzero,
+        "VS4 report negative-evidence counters must be complete, numeric, and zero.",
+        missing_keys=negative_missing,
+        nonzero_or_malformed=negative_nonzero,
+    )
+    detail_markers = (
+        browser_proof.get("brief_detail_markers")
+        if isinstance(browser_proof.get("brief_detail_markers"), dict)
+        else {}
+    )
+    human_review_markers = (
+        browser_proof.get("human_review_handoff_markers")
+        if isinstance(browser_proof.get("human_review_handoff_markers"), dict)
+        else {}
+    )
+    mobile_human_review_markers = (
+        mobile_browser_proof.get("human_review_handoff_markers")
+        if isinstance(mobile_browser_proof.get("human_review_handoff_markers"), dict)
+        else {}
+    )
+    record(
+        "reference_image_boundary",
+        detail_markers.get("reference_images_not_pass_evidence") is True
+        and human_review_markers.get("reference_images_not_acceptance_evidence") is True
+        and mobile_human_review_markers.get("reference_images_not_acceptance_evidence") is True
+        and negative_evidence.get("reference_images_used_as_pass_evidence") == 0
+        and negative_evidence.get("reference_images_used_as_human_acceptance_evidence") == 0,
+        "VS4 reference images may guide design only; they cannot be PASS or human-acceptance evidence.",
+    )
+    self_command = self_transcript.get("command")
+    record(
+        "self_command_transcript",
+        isinstance(self_command, list)
+        and self_command[:4] == ["cornerstone", "scenario", "verify", VS4_PRODUCT_ALPHA_SCENARIO_SET]
+        and "--json" in self_command
+        and "--output" in self_command
+        and self_transcript.get("exit_code") == 0
+        and self_transcript.get("required") is True,
+        "VS4 report must include a replayable native scenario-verify transcript with JSON output.",
+        command=self_command,
+        exit_code=self_transcript.get("exit_code"),
+    )
+    cli_checks = cli_workflow.get("checks") if isinstance(cli_workflow.get("checks"), dict) else {}
+    slice3_checks = (
+        slice_003_cli_workflow.get("checks")
+        if isinstance(slice_003_cli_workflow.get("checks"), dict)
+        else {}
+    )
+    regression_checks = (
+        regression_workflows.get("checks")
+        if isinstance(regression_workflows.get("checks"), dict)
+        else {}
+    )
+    record(
+        "cli_parity",
+        cli_checks.get("cli_parity") is True
+        and cli_checks.get("action_boundary_cli_parity") is True
+        and slice3_checks.get("cli_parity") is True
+        and regression_checks.get("fresh_command_outputs") is True
+        and isinstance(cli_workflow.get("transcripts"), dict)
+        and bool(cli_workflow.get("transcripts"))
+        and isinstance(slice_003_cli_workflow.get("transcripts"), dict)
+        and bool(slice_003_cli_workflow.get("transcripts"))
+        and isinstance(regression_workflows.get("transcripts"), dict)
+        and bool(regression_workflows.get("transcripts"))
+        and rows_by_id.get("VS4-REG-007", {}).get("status") == "PASS",
+        "VS4 report must preserve native CLI parity transcripts and a passing VS4-REG-007 row.",
+    )
+    source_tree_missing = sorted(VS4_REQUIRED_SOURCE_TREE_FIELDS - set(source_tree))
+    record(
+        "source_tree_metadata",
+        isinstance(source_tree, dict)
+        and not source_tree_missing
+        and isinstance(source_tree.get("verified_source_snapshot_paths"), list)
+        and isinstance(source_tree.get("generated_dirty_snapshot_paths"), list)
+        and isinstance(source_tree.get("generated_dirty_paths"), list),
+        "VS4 report must include source-tree freshness metadata without requiring post-commit HEAD equality.",
+        missing_fields=source_tree_missing,
+    )
+    return {
+        "schema_version": "cs.vs4_product_alpha_scenario_gate_validation.v0",
+        "status": "passed" if not failures else "failed",
+        "scenario_set": VS4_PRODUCT_ALPHA_SCENARIO_SET,
+        "checked_report": str(report_path),
+        "full_report": full_report,
+        "scenario_filter": scenario_filter,
+        "expected_ids": expected_ids,
+        "actual_ids": actual_ids,
+        "expected_scenario_count": len(expected_ids),
+        "actual_scenario_count": len(rows),
+        "expected_full_scenario_count": len(expected_ids_all),
+        "conditions": conditions,
+        "failures": failures,
+        "failure_count": len(failures),
+        "negative_evidence": {f"{name}_failures": 0 if passed else 1 for name, passed in conditions.items()},
+        "proof_boundary": proof_boundary,
+        "summary": summary,
+        "source_tree": {
+            key: source_tree.get(key)
+            for key in sorted(VS4_REQUIRED_SOURCE_TREE_FIELDS)
+            if key in source_tree
+        },
+    }
+
+
 def command_scenario_gate(args: argparse.Namespace) -> int:
     root = repo_root()
     started_at = utc_now()
@@ -19677,6 +20029,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
     claim_boundary_markers = (
         data.get("claim_boundaries") if isinstance(data.get("claim_boundaries"), dict) else {}
     )
+    is_vs4_product_alpha_report = data.get("scenario_set") == VS4_PRODUCT_ALPHA_SCENARIO_SET
     is_vs3_onprem_report = (
         data.get("schema_version") == "cs.vs3_onprem_trusted_extension.v0"
         or data.get("scenario_set") == "vs3-onprem-trusted-extension"
@@ -22278,6 +22631,57 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
             payload["evidence_refs"].append(report_evidence_ref)
         payload["audit_refs"] = list(data.get("audit_refs") or [])
         payload["policy_decision_refs"] = list(data.get("policy_decision_refs") or [])
+    if is_vs4_product_alpha_report:
+        report_ref_path = report_path.relative_to(root) if report_path.is_relative_to(root) else report_path
+        report_evidence_ref = f"report:{report_ref_path}"
+        vs4_gate_validation = _vs4_product_alpha_gate_validation(root, report_path, data, rows)
+        payload["scenario_set"] = VS4_PRODUCT_ALPHA_SCENARIO_SET
+        payload["summary"] = {
+            **(data.get("summary") if isinstance(data.get("summary"), dict) else {}),
+            "production_readiness_claim_allowed": False,
+            "production_onprem_readiness_claim_allowed": False,
+            "final_security_acceptance_claim_allowed": False,
+            "live_provider_readiness_claim_allowed": False,
+            "human_ux_acceptance_claim_allowed": False,
+        }
+        payload["proof_boundary"] = data.get("proof_boundary")
+        payload["source_report"] = {
+            "path": str(report_path),
+            "schema_version": data.get("schema_version"),
+            "scenario_set": data.get("scenario_set"),
+            "status": data.get("status"),
+            "slice": data.get("slice"),
+            "summary": data.get("summary"),
+            "proof_boundary": data.get("proof_boundary"),
+            "source_tree": data.get("source_tree"),
+        }
+        payload["vs4_gate_validation"] = vs4_gate_validation
+        payload["scenario_gate_conditions"] = vs4_gate_validation["conditions"]
+        payload["scenario_gate_summary"] = {
+            "failure_count": vs4_gate_validation["failure_count"],
+            "full_report": vs4_gate_validation["full_report"],
+            "expected_scenario_count": vs4_gate_validation["expected_scenario_count"],
+            "actual_scenario_count": vs4_gate_validation["actual_scenario_count"],
+            "human_ux_acceptance_claim_allowed": False,
+            "production_readiness_claim_allowed": False,
+            "live_provider_readiness_claim_allowed": False,
+        }
+        payload["scenario_gate_negative_evidence"] = vs4_gate_validation["negative_evidence"]
+        payload["evidence_refs"] = list(data.get("evidence_refs") or [])
+        if report_evidence_ref not in payload["evidence_refs"]:
+            payload["evidence_refs"].append(report_evidence_ref)
+        payload["audit_refs"] = list(data.get("audit_refs") or [])
+        payload["policy_decision_refs"] = list(data.get("policy_decision_refs") or [])
+        if vs4_gate_validation["status"] != "passed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_VS4_SCENARIO_GATE_INTEGRITY_INVALID",
+                    "message": "VS4 Product Alpha reports must preserve gate integrity, no-overclaim boundaries, CLI parity, negative evidence, and human-required status before the scenario gate can pass.",
+                    "failure_count": vs4_gate_validation["failure_count"],
+                    "failures": vs4_gate_validation["failures"],
+                }
+            )
     if data.get("status") != "success" or report_errors:
         payload["status"] = "failed"
         payload["errors"].append(
@@ -22465,6 +22869,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
                 }
             )
         payload["command_transcripts"] = [gate_transcript]
+    write_payload_output(root, getattr(args, "output", None), payload)
     print_payload(payload, args.json)
     return exit_code
 
@@ -25477,6 +25882,7 @@ def build_parser() -> argparse.ArgumentParser:
     gate = scenario_sub.add_parser("gate", help="Gate a scenario report")
     gate.add_argument("report", help="Path to scenario report JSON")
     gate.add_argument("--json", action="store_true", help="Emit JSON output")
+    gate.add_argument("--output", help="Optional path to write the JSON gate report")
     gate.set_defaults(func=command_scenario_gate)
 
     return parser
