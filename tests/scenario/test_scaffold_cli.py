@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11450,7 +11450,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11476,6 +11476,9 @@ class ScaffoldCliTests(unittest.TestCase):
             "no_hidden_durable_memory",
             "action_card_review",
             "local_mock_execution_mode",
+            "action_execution_boundary",
+            "action_unauthorized_approval_denied",
+            "action_boundary_cli_parity",
             "prompt_injection_guard",
             "reference_images_not_pass_evidence",
             "cli_parity",
@@ -11505,7 +11508,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11555,7 +11558,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11594,7 +11597,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11635,7 +11638,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11676,7 +11679,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11725,7 +11728,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11740,6 +11743,11 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(decision_pages["markers"]["claim_zero_evidence_block_visible"])
         self.assertTrue(decision_pages["markers"]["action_local_mock_boundary_visible"])
         self.assertTrue(decision_pages["markers"]["action_no_live_writeback_visible"])
+        self.assertTrue(decision_pages["markers"]["action_execution_boundary_visible"])
+        self.assertTrue(decision_pages["markers"]["action_approval_denial_visible"])
+        self.assertTrue(decision_pages["markers"]["action_denial_safety_envelope_visible"])
+        self.assertTrue(decision_pages["markers"]["action_denial_no_provider_result_visible"])
+        self.assertTrue(decision_pages["markers"]["action_denial_direct_provider_absent"])
         self.assertTrue(decision_pages["markers"]["nav_claims_actions_target_product_pages"])
         self.assertTrue(mobile_decision_pages["markers"]["nav_claims_actions_target_product_pages"])
         self.assertIn("Review the Claim candidate", decision_pages["claim_page_text"])
@@ -11749,6 +11757,11 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("direct_provider_access=false", decision_pages["action_page_text"])
         self.assertIn("real_external_http_calls=0", decision_pages["action_page_text"])
         self.assertIn("policy_decision:", decision_pages["action_page_text"])
+        self.assertIn("Denied until authorized approval", decision_pages["action_page_text"])
+        self.assertIn("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED", decision_pages["action_page_text"])
+        self.assertIn("CS_ACTION_APPROVER_UNAUTHORIZED", decision_pages["action_page_text"])
+        self.assertIn("action_safety_envelope: denied", decision_pages["action_page_text"])
+        self.assertIn("workflow_run_started=false", decision_pages["action_page_text"])
         self.assertEqual(payload["proof_boundary"]["vs4_slice_009_claim_action_nav_detail"], "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
         self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
@@ -11773,12 +11786,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], 10)
+        self.assertEqual(payload["summary"]["in_this_slice"], 9)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11842,12 +11855,12 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-011-ops-inbox-triage-detail")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], 9)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -11876,6 +11889,99 @@ class ScaffoldCliTests(unittest.TestCase):
             payload["proof_boundary"]["vs4_slice_011_ops_inbox_triage_detail"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
         )
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_action_execution_boundary_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-007",
+            "VS4-UI-009",
+            "VS4-UI-010",
+            "VS4-UI-011",
+            "VS4-REF-002",
+            "VS4-REG-003",
+            "VS4-REG-004",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-action-execution-boundary.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        checks = payload["cli_workflow"]["checks"]
+        self.assertTrue(checks["action_execution_boundary"])
+        self.assertTrue(checks["action_unauthorized_approval_denied"])
+        self.assertTrue(checks["action_boundary_cli_parity"])
+        boundary = payload["cli_workflow"]["action_execution_boundary"]
+        self.assertEqual(boundary["execute_exit_code"], 8)
+        self.assertIn("CS_ACTION_POLICY_DENIED", boundary["execute_error_codes"])
+        self.assertIn("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED", boundary["execute_reason_codes"])
+        self.assertEqual(boundary["approve_exit_code"], 8)
+        self.assertIn("CS_ACTION_APPROVAL_DENIED", boundary["approve_error_codes"])
+        self.assertIn("CS_ACTION_APPROVER_UNAUTHORIZED", boundary["approve_reason_codes"])
+        self.assertEqual(boundary["approval_status_after_denial"], "pending")
+        self.assertEqual(boundary["execution_status_after_denial"], "pending_approval")
+        self.assertFalse(boundary["direct_provider_access"])
+        self.assertTrue(boundary["mocked_connector"])
+        envelope = boundary["action_safety_envelope"]
+        self.assertEqual(envelope["status"], "denied")
+        self.assertEqual(envelope["reason_code"], "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED")
+        self.assertEqual(envelope["external_http_calls"], 0)
+        self.assertEqual(envelope["provider_mutations"], 0)
+        self.assertEqual(envelope["real_provider_calls"], 0)
+        self.assertFalse(envelope["execution_result_created"])
+        self.assertFalse(envelope["workflow_run_started"])
+        for key, value in boundary["negative_evidence"].items():
+            self.assertEqual(value, 0, key)
+        for key in [
+            "vs4_action_execution_without_authorized_approval",
+            "vs4_unauthorized_action_approval_accepted",
+            "vs4_action_result_created_on_denial",
+            "vs4_workflow_run_started_on_denial",
+            "vs4_provider_receipt_created_on_denial",
+            "vs4_external_http_calls_on_denial",
+            "vs4_provider_mutations_on_denial",
+            "vs4_real_provider_calls_on_denial",
+            "vs4_direct_provider_access_on_denial",
+            "vs4_action_state_changed_to_executed_on_denial",
+        ]:
+            self.assertIn(key, payload["negative_evidence"])
+            self.assertEqual(payload["negative_evidence"][key], 0, key)
+
+        decision_pages = payload["browser_proof"]["decision_pages"]
+        mobile_decision_pages = payload["mobile_browser_proof"]["decision_pages"]
+        for marker in [
+            "action_execution_boundary_visible",
+            "action_approval_denial_visible",
+            "action_denial_safety_envelope_visible",
+            "action_denial_no_provider_result_visible",
+            "action_denial_direct_provider_absent",
+        ]:
+            self.assertTrue(decision_pages["markers"][marker], marker)
+            self.assertTrue(mobile_decision_pages["markers"][marker], marker)
+        self.assertIn("Denied until authorized approval", decision_pages["action_page_text"])
+        self.assertIn("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED", decision_pages["action_page_text"])
+        self.assertIn("CS_ACTION_APPROVER_UNAUTHORIZED", decision_pages["action_page_text"])
+        self.assertIn("action_safety_envelope: denied", decision_pages["action_page_text"])
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_012_action_execution_boundary"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+        )
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
@@ -11946,6 +12052,8 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("Claims and Actions nav" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("unsafe Ask" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("Ops Inbox triage lanes" in item for item in package_row["review_checklist"]))
+        self.assertTrue(any("Action execution boundary" in item for item in package_row["review_checklist"]))
+        self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-decision-pages", package_row["commands_to_run_before_review"])
@@ -11961,6 +12069,10 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertIn(
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
+            package_row["evidence_refs"],
+        )
+        self.assertIn(
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
             package_row["evidence_refs"],
         )
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())

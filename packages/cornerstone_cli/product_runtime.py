@@ -1497,7 +1497,14 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <div><span class="label">Controls</span><span>Inspect, correct, forget, export after review.</span></div>
               </div>
             </div>
-            <div class="brief-block" id="vs4-action-card-detail" data-vs4-action-card-detail="visible">
+            <div
+              class="brief-block"
+              id="vs4-action-card-detail"
+              data-vs4-action-card-detail="visible"
+              data-vs4-action-execution-boundary="denied-until-authorized"
+              data-vs4-action-safety-envelope="visible"
+              data-vs4-action-denial-side-effects="zero"
+            >
               <div class="label">Action Card draft</div>
               <h3 id="vs4-action-goal">Review local follow-up.</h3>
               <p id="vs4-action-why">No action executes until evidence, policy, and approval state are clear.</p>
@@ -1509,9 +1516,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
                 <div><span class="label">Approval</span><span id="vs4-action-approval">pending</span></div>
                 <div><span class="label">Execution mode</span><span id="vs4-action-execution-mode">Draft / Local / Mock</span></div>
+                <div><span class="label">Execution boundary</span><span id="vs4-action-boundary-state">Denied until authorized approval.</span></div>
+                <div><span class="label">Denied result</span><span id="vs4-action-denied-result">No action result, workflow run, provider receipt, external HTTP call, provider mutation, or direct provider access is created on denial.</span></div>
+                <div><span class="label">Safety envelope</span><span id="vs4-action-safety-envelope">policy_decision + audit + action_safety_envelope record zero side effects.</span></div>
                 <div><span class="label">Activity</span><span id="vs4-action-activity">Audit available after preparation.</span></div>
               </div>
-              <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
+              <div class="review-note">No live external writeback. Unauthorized execution returns CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED, unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED, and the denied path records external_http_calls=0.</div>
             </div>
             <div class="brief-block" id="vs4-learn-candidate-detail" data-vs4-learn-candidate-detail="visible" data-vs4-learning-can-change-durable-behavior="false">
               <div class="label">Learn review</div>
@@ -1756,6 +1766,8 @@ Search phrase: alpha-evidence-anchor.</code>
         data-vs4-action-page="visible"
         data-vs4-action-live-writeback="false"
         data-vs4-action-execution-mode="local-mock"
+        data-vs4-action-execution-boundary="denied-until-authorized"
+        data-vs4-action-denial-result="no-provider-side-effects"
         data-vs4-live-provider-claimed="false"
         data-vs4-human-ux-claimed="false"
       >
@@ -1775,19 +1787,22 @@ Search phrase: alpha-evidence-anchor.</code>
               <div><span class="label">Proposed change</span><span id="vs4-action-page-change">Draft a local follow-up task.</span></div>
               <div><span class="label">Expected impact</span><span id="vs4-action-page-impact">real_external_http_calls=0</span></div>
               <div><span class="label">Approval</span><span id="vs4-action-page-approval">pending</span></div>
+              <div><span class="label">Execution boundary</span><span id="vs4-action-page-execution-boundary">Denied until authorized approval; CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED; direct_provider_access=false; policy_decision: required; action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false.</span></div>
               <div><span class="label">Dry-run</span><span id="vs4-action-page-dry-run">Dry-run appears after preparation.</span></div>
+              <div><span class="label">Denied result</span><span id="vs4-action-page-denied-result">No action result, workflow run, provider receipt, external HTTP call, provider mutation, real provider call, direct provider access, or live writeback is created on denial.</span></div>
               <div><span class="label">Activity</span><span id="vs4-action-page-activity">Audit available after preparation.</span></div>
             </div>
           </div>
           <aside class="decision-stack">
             <div class="product-panel">
               <div class="label">Execution boundary</div>
-              <h3>No live external writeback</h3>
-              <p id="vs4-action-page-boundary">Connector access is mocked. Direct provider access and live writeback are not claimed.</p>
+              <h3>Denied until authorized approval</h3>
+              <p id="vs4-action-page-boundary">No live external writeback. Denied until authorized approval returns CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED. Connector access is mocked; direct_provider_access=false; policy_decision: required; audit: required; action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false; provider_receipt_created=false; external_http_calls=0; provider_mutations=0; real_provider_calls=0.</p>
               <div class="status-row">
                 <span class="badge safe">Local preview</span>
                 <span class="badge safe">Mock connector</span>
                 <span class="badge warn">Approval review required</span>
+                <span class="badge warn">Safety envelope on denial</span>
               </div>
             </div>
             <details class="evidence-drawer" id="vs4-action-page-evidence-detail" data-vs4-action-evidence-detail="reachable">
@@ -1797,6 +1812,8 @@ Search phrase: alpha-evidence-anchor.</code>
                 <div><span class="label">Claim</span><span id="vs4-action-page-claim">Claim candidate not prepared.</span></div>
                 <div><span class="label">Policy</span><span id="vs4-action-page-policy">Safety check pending.</span></div>
                 <div><span class="label">External calls</span><span id="vs4-action-page-calls">real_external_http_calls=0</span></div>
+                <div><span class="label">Denial codes</span><span id="vs4-action-page-denial-codes">CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; CS_ACTION_APPROVER_UNAUTHORIZED</span></div>
+                <div><span class="label">Safety envelope</span><span id="vs4-action-page-safety-envelope">action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false; provider_mutations=0</span></div>
               </div>
             </details>
           </aside>
@@ -2502,6 +2519,9 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-action-risk", action.risk || "medium");
         setText("vs4-action-approval", vs4State.action.approval_status || "pending");
         setText("vs4-action-execution-mode", vs4State.action.mode + "; connector=mock_connector");
+        setText("vs4-action-boundary-state", "Denied until authorized approval; CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED.");
+        setText("vs4-action-denied-result", "No action result, workflow run, provider receipt, external HTTP call, provider mutation, real provider call, direct provider access, or live writeback is created on denial.");
+        setText("vs4-action-safety-envelope", "policy_decision: required; audit: required; action_safety_envelope: denied; external_http_calls=0; provider_mutations=0.");
         setText("vs4-action-activity", "action:" + action.action_id + "; dry_run:" + vs4State.action.dry_run_id);
         setText("vs4-action-page-goal", action.goal || "Create local follow-up.");
         setText("vs4-action-page-why", "Preserve review next step without external writeback.");
@@ -2511,13 +2531,17 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-action-page-change", (dryRun.diff && dryRun.diff.after) || "would create local draft task");
         setText("vs4-action-page-impact", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
         setText("vs4-action-page-approval", vs4State.action.approval_status || "pending");
+        setText("vs4-action-page-execution-boundary", "Denied until authorized approval; CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED; direct_provider_access=false; policy_decision: required; action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false.");
         setText("vs4-action-page-dry-run", "dry_run:" + vs4State.action.dry_run_id);
-        setText("vs4-action-page-activity", "action:" + action.action_id + "; audit pending until verify");
-        setText("vs4-action-page-boundary", "Connector access is mocked; direct_provider_access=false; live writeback is not claimed.");
+        setText("vs4-action-page-denied-result", "No action result, workflow run, provider receipt, external HTTP call, provider mutation, real provider call, direct provider access, or live writeback is created on denial.");
+        setText("vs4-action-page-activity", "action:" + action.action_id + "; audit pending until verify; denial audit required");
+        setText("vs4-action-page-boundary", "No live external writeback. Denied until authorized approval returns CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; unauthorized approval returns CS_ACTION_APPROVER_UNAUTHORIZED. Connector access is mocked; direct_provider_access=false; live writeback is not claimed; policy_decision: required; audit: required; action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false; provider_receipt_created=false; external_http_calls=0; provider_mutations=0; real_provider_calls=0.");
         setText("vs4-action-page-id", "action:" + action.action_id);
         setText("vs4-action-page-claim", "claim:" + claim.claim_id);
         setText("vs4-action-page-policy", "policy_decision:" + (vs4State.action.policy_decision || "allow"));
         setText("vs4-action-page-calls", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
+        setText("vs4-action-page-denial-codes", "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; CS_ACTION_APPROVER_UNAUTHORIZED");
+        setText("vs4-action-page-safety-envelope", "action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false; provider_receipt_created=false; provider_mutations=0; real_provider_calls=0; external_http_calls=0");
 
         const auditResponse = await vs4Api("/audit/verify", {{}});
         const audit = auditResponse.payload.audit_integrity || {{}};
@@ -2871,6 +2895,21 @@ Search phrase: alpha-evidence-anchor.</code>
           actionText.includes("direct_provider_access=false"),
         action_no_live_writeback_visible: Boolean(actionText.includes("No live external writeback") &&
           actionPage && actionPage.dataset.vs4ActionLiveWriteback === "false"),
+        action_execution_boundary_visible: Boolean(actionText.includes("Denied until authorized approval") &&
+          actionText.includes("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED") &&
+          actionPage && actionPage.dataset.vs4ActionExecutionBoundary === "denied-until-authorized"),
+        action_approval_denial_visible: actionText.includes("CS_ACTION_APPROVER_UNAUTHORIZED"),
+        action_denial_safety_envelope_visible: actionText.includes("action_safety_envelope: denied") &&
+          actionText.includes("workflow_run_started=false") &&
+          actionText.includes("execution_result_created=false"),
+        action_denial_no_provider_result_visible: actionText.includes("No action result") &&
+          actionText.includes("workflow run") &&
+          actionText.includes("provider receipt") &&
+          actionText.includes("external_http_calls=0") &&
+          actionText.includes("provider_mutations=0") &&
+          actionText.includes("real_provider_calls=0"),
+        action_denial_direct_provider_absent: actionText.includes("direct_provider_access=false") &&
+          actionPage && actionPage.dataset.vs4ActionDenialResult === "no-provider-side-effects",
         action_evidence_and_policy_visible: actionText.includes("evidence_bundle:") &&
           actionText.includes("policy_decision:") &&
           actionText.includes("real_external_http_calls=0"),
@@ -4457,6 +4496,28 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         refs = []
         if result.get("audit_event"):
             refs.append(f"audit:{result['audit_event']['event_id']}")
+        if result.get("status") == "policy_denied":
+            decision = result["policy_decision"]
+            self._send_json(
+                _json_response(
+                    "denied",
+                    action_card=result["action_card"],
+                    evidence_refs=[f"action:{action_id}"],
+                    audit_refs=refs,
+                    policy_decisions=[decision],
+                    policy_decision_refs=[f"policy:{decision['id']}"],
+                    errors=[
+                        {
+                            "code": "CS_ACTION_APPROVAL_DENIED",
+                            "reason_code": decision.get("reason_code"),
+                            "message": decision["reason"],
+                            "resolution_path": decision["resolution_path"],
+                        }
+                    ],
+                ),
+                403,
+            )
+            return
         self._send_json(_json_response("success", action_card=result["action_card"], evidence_refs=[f"action:{action_id}"], audit_refs=refs))
 
     def _execute_action(self, action_id: str, body: dict[str, Any]) -> None:
@@ -4469,14 +4530,27 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope."}]), 403)
             return
         if result.get("status") == "policy_denied":
+            safety_envelope = result.get("action_safety_envelope") or {}
+            evidence_refs = [f"action:{action_id}"]
+            if safety_envelope.get("action_safety_envelope_id"):
+                evidence_refs.append(f"action_safety_envelope:{safety_envelope['action_safety_envelope_id']}")
             self._send_json(
                 _json_response(
                     "denied",
                     action_card=result["action_card"],
+                    action_safety_envelope=safety_envelope if safety_envelope else None,
                     policy_decisions=[result["policy_decision"]],
                     policy_decision_refs=[f"policy:{result['policy_decision']['id']}"],
+                    evidence_refs=evidence_refs,
                     audit_refs=[f"audit:{result['audit_event']['event_id']}"],
-                    errors=[{"code": "CS_ACTION_POLICY_DENIED", "message": result["policy_decision"]["reason"]}],
+                    errors=[
+                        {
+                            "code": "CS_ACTION_POLICY_DENIED",
+                            "reason_code": result.get("reason_code") or result["policy_decision"].get("reason_code"),
+                            "message": result["policy_decision"]["reason"],
+                            "resolution_path": result["policy_decision"]["resolution_path"],
+                        }
+                    ],
                 ),
                 403,
             )

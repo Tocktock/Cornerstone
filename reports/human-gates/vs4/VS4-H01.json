@@ -35,6 +35,7 @@
     "vs4_h01_remains_human_required": true
   },
   "commands_to_run_before_review": [
+    "make verify-vs4-product-alpha-action-execution-boundary",
     "make verify-vs4-product-alpha-ops-inbox-triage",
     "make verify-vs4-product-alpha-ask-injection-boundary",
     "make verify-vs4-product-alpha-decision-pages",
@@ -57,7 +58,8 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
-    "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
+    "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "reports/human-gates/vs4/VS4-H01.json"
   ],
   "expected_behavior": "Human accepts or rejects whether the daily loop is usable, understandable, product-first, evidence-aware, and not misleading.",
@@ -75,13 +77,13 @@
     "production_readiness_claimed_by_package": 0,
     "security_acceptance_claimed_by_package": 0
   },
-  "package_digest_sha256": "322eb6204eeac8e342d1eef1db596e5ed7d86c28a34b5756f139855633158d33",
+  "package_digest_sha256": "7929ba9e57328fe44d87e9e6ce7c346cc4615afeea30f0c8bb7ee043319f2a52",
   "package_id": "vs4_human_gate_vs4_h01",
   "package_path": "reports/human-gates/vs4/VS4-H01.json",
   "pass_claim_allowed": false,
   "product_claim_allowed": false,
   "readiness_status": "ready_for_human_review",
-  "record_template_path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+  "record_template_path": "tmp/test-vs4-h01.review-record.template.json",
   "reject_conditions": [
     "The user cannot tell what stayed local/mock or whether live external writeback happened.",
     "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
@@ -119,22 +121,23 @@
     "Walk the keyboard/focus proof and confirm skip link, primary nav, Continue links, Evidence Drawer, Ask, Claim, Action Card, and proof details are reachable and understandable.",
     "Inspect the Ask result and confirm created work is readable before raw refs while evidence refs remain available in progressive detail.",
     "Inspect unsafe Ask prompt evidence and confirm it cannot approve memory, approve claims, execute actions, change policy, call providers, or expand authority.",
+    "Inspect the Action execution boundary and confirm unauthorized execution/approval denial shows policy, audit, safety envelope, resolution path, and zero provider/writeback side effects.",
     "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
     "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
   ],
   "review_input_artifacts": [
     {
-      "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+      "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
       "present": true,
-      "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
+      "sha256": "d0eb9da0326addddd4e872eae041b7ba964abc5c86425efd0d17bbc9a0536c20",
       "summary": {
         "blocking": 0,
         "fail": 0,
         "human_required": 1,
-        "in_this_slice": 10,
+        "in_this_slice": 9,
         "not_run": 0,
         "pass": 27,
-        "previous_slice": 17,
+        "previous_slice": 18,
         "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
         "scenario_count": 28
       }
@@ -194,6 +197,10 @@
     {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md"
     }
   ],
   "review_record_contract": {
@@ -227,17 +234,17 @@
   },
   "scenario_id": "VS4-H01",
   "scenario_report": {
-    "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
     "present": true,
-    "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
+    "sha256": "d0eb9da0326addddd4e872eae041b7ba964abc5c86425efd0d17bbc9a0536c20",
     "summary": {
       "blocking": 0,
       "fail": 0,
       "human_required": 1,
-      "in_this_slice": 10,
+      "in_this_slice": 9,
       "not_run": 0,
       "pass": 27,
-      "previous_slice": 17,
+      "previous_slice": 18,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
       "scenario_count": 28
     }
