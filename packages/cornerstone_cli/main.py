@@ -77,9 +77,11 @@ from cornerstone_cli.scenarios import (
     VS3_SCENARIO_MODEL_PROVIDER,
     VS3_SCENARIO_VERIFY_SCOPE,
     DEFAULT_VS3_TOOL_REGISTRY_REPORT,
+    DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR,
     VS3_HUMAN_GATE_DEPENDENCIES,
     VS3_HUMAN_GATE_REVIEW_ORDER,
     _vs3_overclaim_lint,
+    build_vs4_human_gate_package,
     coverage_report,
     evaluate_vs3_policy_input,
     list_scenarios,
@@ -92,8 +94,10 @@ from cornerstone_cli.scenarios import (
     run_vs3_postgres_rls_proof,
     run_vs3_request_context_proof,
     run_vs3_tool_registry_proof,
+    validate_vs4_human_gate_review_record,
     validate_vs3_human_gate_review_record,
     vs3_human_gate_no_claim_boundary,
+    vs4_human_gate_no_claim_boundary,
     vs3_human_gate_readiness_report,
     verify_connector_contract_adapter,
     verify_vs0_evux,
@@ -6591,14 +6595,85 @@ def command_observe_status(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
+def command_vs4_human_gate_package(args: argparse.Namespace) -> int:
+    root = repo_root()
+    package_set = build_vs4_human_gate_package(
+        root,
+        scenario_report=args.scenario_report,
+        record_template_output=args.record_template_output,
+        write_files=True,
+    )
+    ready = package_set.get("status") == "ready_for_human_review"
+    payload = base_response("cornerstone human-gate package", "success" if ready else "blocked", root)
+    payload.update(
+        {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        }
+    )
+    package = package_set.get("packages", [{}])[0]
+    payload["vs4_human_gate_package_schema_version"] = "cs.vs4_human_gate_package_set.v0"
+    payload["human_gate_packages"] = package_set
+    payload["package_dir"] = package_set.get("package_dir", DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR)
+    payload["package_count"] = package_set.get("package_count", 0)
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["weakest_applicable_scenario_result"] = "HUMAN_REQUIRED"
+    payload["summary"] = package_set.get("summary", {})
+    payload["claim_boundary"] = package_set.get(
+        "claim_boundary",
+        vs4_human_gate_no_claim_boundary(surface="vs4_human_gate_package_review_input_only"),
+    )
+    payload["negative_evidence"] = package_set.get("negative_evidence", {})
+    payload["ids"].update({"vs4_human_gate_package_id": package.get("package_id")})
+    for evidence_ref in package.get("evidence_refs", []):
+        if evidence_ref:
+            payload["evidence_refs"].append(str(evidence_ref))
+    if package.get("package_path"):
+        payload["evidence_refs"].append(f"vs4_human_gate_package:{package['package_path']}")
+    if package.get("record_template_path"):
+        payload["evidence_refs"].append(f"vs4_human_gate_record_template:{package['record_template_path']}")
+    payload["command_transcripts"] = [
+        {
+            "command": [
+                "cornerstone",
+                "human-gate",
+                "package",
+                "--scope",
+                "vs4",
+                "--scenario-report",
+                args.scenario_report,
+                "--json",
+            ],
+            "exit_code": 0 if ready else 4,
+            "json_schema": "cs.cli.v0 + cs.vs4_human_gate_package_set.v0",
+        }
+    ]
+    if not ready:
+        payload["errors"].append(
+            {
+                "code": "CS_VS4_HUMAN_GATE_PACKAGE_INCOMPLETE",
+                "message": "VS4-H01 human-gate package requires a full VS4 report with 27 PASS, 1 HUMAN_REQUIRED, and 0 blocking rows.",
+                "scenario_report_conditions": package.get("scenario_report_conditions", {}),
+                "package_errors": package.get("errors", []),
+            }
+        )
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS if ready else EXIT_EVIDENCE_MISSING
+
+
 def command_human_gate_package(args: argparse.Namespace) -> int:
     root = repo_root()
+    if args.scope == "vs4":
+        return command_vs4_human_gate_package(args)
     if args.scope != "vs3":
         payload = base_response("cornerstone human-gate package", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
-                "message": "Only --scope vs3 is supported for the local human-gate package command.",
+                "message": "Only --scope vs3 or --scope vs4 is supported for the local human-gate package command.",
             }
         )
         print_payload(payload, args.json)
@@ -7399,14 +7474,196 @@ def command_human_gate_record_scaffold(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS if ready_to_write else EXIT_EVIDENCE_MISSING
 
 
+def command_vs4_human_gate_validate_record(args: argparse.Namespace) -> int:
+    root = repo_root()
+
+    def attach_failure_boundary(payload: dict[str, Any]) -> None:
+        payload["vs4_human_gate_record_validation_schema_version"] = "cs.vs4_human_gate_record_validation.v0"
+        payload["final_verdict"] = "HUMAN_REQUIRED"
+        payload["weakest_applicable_scenario_result"] = "HUMAN_REQUIRED"
+        payload["claim_boundary"] = vs4_human_gate_no_claim_boundary(
+            surface="vs4_single_record_load_failure_redacted_evidence_only"
+        ) | {
+            "load_failure_is_not_human_evidence": True,
+            "record_file_path_recorded": False,
+        }
+        payload["non_mutation_evidence"] = {
+            "approval_collected_by_validator": False,
+            "human_decision_recorded_by_validator": False,
+            "record_body_persisted_by_validator": False,
+            "record_path_persisted_by_validator": False,
+            "live_provider_calls_executed_by_validator": 0,
+            "external_mutations_executed_by_validator": 0,
+        }
+        payload["negative_evidence"] = {
+            "human_rows_marked_pass_by_validator": 0,
+            "product_claims_allowed_by_validator": 0,
+            "pass_without_owner_promotion_allowed_by_validator": 0,
+            "human_acceptance_claimed_by_validator": 0,
+            "production_readiness_claimed_by_validator": 0,
+            "production_onprem_readiness_claimed_by_validator": 0,
+            "security_acceptance_claimed_by_validator": 0,
+            "live_provider_readiness_claimed_by_validator": 0,
+            "record_body_persisted_by_validator": 0,
+            "record_path_persisted_by_validator": 0,
+            "raw_record_values_in_output": 0,
+        }
+
+    record_file = Path(args.record_file)
+    if not record_file.is_absolute():
+        record_file = root / record_file
+    payload = base_response("cornerstone human-gate validate-record", "success", root)
+    payload.update(
+        {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        }
+    )
+    if not record_file.exists():
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS4_HUMAN_GATE_RECORD_NOT_FOUND",
+                "message": "VS4 human-gate review record file was not found.",
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    try:
+        record = json.loads(record_file.read_text())
+    except json.JSONDecodeError as error:
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS4_HUMAN_GATE_RECORD_INVALID_JSON",
+                "message": "VS4 human-gate review record file must be valid JSON.",
+                "line": error.lineno,
+                "column": error.colno,
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    if not isinstance(record, dict):
+        payload["status"] = "failed"
+        attach_failure_boundary(payload)
+        payload["errors"].append(
+            {
+                "code": "CS_VS4_HUMAN_GATE_RECORD_INVALID_SHAPE",
+                "message": "VS4 human-gate review record file must contain a JSON object.",
+                "record_file_path_recorded": False,
+                "record_file_path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+
+    validation = validate_vs4_human_gate_review_record(
+        root,
+        args.scenario,
+        record,
+        record_file,
+        scenario_report=args.scenario_report,
+    )
+    payload["vs4_human_gate_record_validation_schema_version"] = "cs.vs4_human_gate_record_validation.v0"
+    payload["vs4_human_gate_record_validation"] = validation
+    payload["final_verdict"] = "HUMAN_REQUIRED"
+    payload["weakest_applicable_scenario_result"] = "HUMAN_REQUIRED"
+    payload["claim_boundary"] = validation.get(
+        "claim_boundary",
+        vs4_human_gate_no_claim_boundary(surface="vs4_single_record_structure_and_safety_only"),
+    )
+    payload["negative_evidence"] = validation.get("negative_evidence", {})
+    payload["summary"] = {
+        "validation_id": validation.get("validation_id"),
+        "scenario_id": validation.get("scenario_id"),
+        "status": validation.get("status"),
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": validation.get("weakest_applicable_scenario_result", "HUMAN_REQUIRED"),
+        "structurally_valid": validation.get("status") == "record_structurally_valid",
+        "matrix_status_after_validation": "HUMAN_REQUIRED",
+        "product_claim_allowed": validation.get("product_claim_allowed") is True,
+        "human_acceptance_claim_allowed": False,
+        "production_readiness_claim_allowed": False,
+        "production_onprem_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "pass_claim_allowed_by_validator": validation.get("pass_claim_allowed_by_validator") is True,
+        "record_body_persisted_by_validator": validation.get("non_mutation_evidence", {}).get("record_body_persisted_by_validator") is True,
+        "record_path_persisted_by_validator": validation.get("non_mutation_evidence", {}).get("record_path_persisted_by_validator") is True,
+        "sensitive_marker_findings": validation.get("negative_evidence", {}).get("sensitive_marker_findings", 0),
+        "overclaim_marker_findings": validation.get("negative_evidence", {}).get("overclaim_marker_findings", 0),
+        "promotion_rule": validation.get("promotion_rule"),
+    }
+    if validation.get("validation_id"):
+        payload["ids"].update({"vs4_human_gate_record_validation_id": validation["validation_id"]})
+        payload["evidence_refs"].append(f"vs4_human_gate_record_validation:{validation['validation_id']}")
+    for evidence_ref in validation.get("evidence_refs", []):
+        if evidence_ref:
+            payload["evidence_refs"].append(str(evidence_ref))
+    payload["command_transcripts"] = [
+        {
+            "command": [
+                "cornerstone",
+                "human-gate",
+                "validate-record",
+                "--scope",
+                "vs4",
+                "--scenario",
+                args.scenario,
+                "--record-file",
+                "<redacted-path>",
+                "--json",
+            ],
+            "exit_code": 0 if validation.get("status") == "record_structurally_valid" else 1,
+            "json_schema": "cs.cli.v0 + cs.vs4_human_gate_record_validation.v0",
+            "record_file_path_recorded": False,
+        }
+    ]
+    if validation.get("status") == "unsupported":
+        payload["status"] = "failed"
+        payload["errors"].extend(validation.get("errors", []))
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    if validation.get("status") != "record_structurally_valid":
+        payload["status"] = "blocked"
+        payload["errors"].append(
+            {
+                "code": "CS_VS4_HUMAN_GATE_RECORD_INVALID",
+                "message": "VS4 human-gate review record is not structurally valid or contains unsafe markers.",
+                "structural_errors": validation.get("structural_errors", []),
+                "negative_evidence": validation.get("negative_evidence", {}),
+            }
+        )
+        write_payload_output(root, args.output, payload)
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    write_payload_output(root, args.output, payload)
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
 def command_human_gate_validate_record(args: argparse.Namespace) -> int:
     root = repo_root()
+    if args.scope == "vs4":
+        return command_vs4_human_gate_validate_record(args)
     if args.scope != "vs3":
         payload = base_response("cornerstone human-gate validate-record", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_HUMAN_GATE_SCOPE_UNSUPPORTED",
-                "message": "Only --scope vs3 is supported for the local human-gate validate-record command.",
+                "message": "Only --scope vs3 or --scope vs4 is supported for the local human-gate validate-record command.",
             }
         )
         print_payload(payload, args.json)
@@ -22421,7 +22678,21 @@ def build_parser() -> argparse.ArgumentParser:
     human_gate_sub = human_gate.add_subparsers(dest="human_gate_command", required=True)
 
     human_gate_package = human_gate_sub.add_parser("package", help="Generate or show human-required evidence packages")
-    human_gate_package.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate package scope")
+    human_gate_package.add_argument("--scope", choices=["vs3", "vs4"], default="vs3", help="Human-gate package scope")
+    human_gate_package.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
+        help="VS4 scenario report to bind into the package when --scope vs4 is selected",
+    )
+    human_gate_package.add_argument(
+        "--record-template-output",
+        default=f"{DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR}/record-templates/VS4-H01.review-record.template.json",
+        help="Path to write the VS4-H01 blank review-record template when --scope vs4 is selected",
+    )
+    human_gate_package.add_argument(
+        "--output",
+        help="Optional path to write the VS4 human-gate package command envelope",
+    )
     human_gate_package.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
     add_state_argument(human_gate_package)
     add_scope_arguments(human_gate_package)
@@ -22531,11 +22802,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     human_gate_validate_record = human_gate_sub.add_parser(
         "validate-record",
-        help="Validate a proposed VS3 human-gate review record without promoting the scenario",
+        help="Validate a proposed VS3 or VS4 human-gate review record without promoting the scenario",
     )
-    human_gate_validate_record.add_argument("--scope", choices=["vs3"], default="vs3", help="Human-gate validation scope")
-    human_gate_validate_record.add_argument("--scenario", required=True, help="VS3 human-required scenario ID")
-    human_gate_validate_record.add_argument("--record-file", required=True, help="Path to proposed VS3 human-gate review record JSON")
+    human_gate_validate_record.add_argument("--scope", choices=["vs3", "vs4"], default="vs3", help="Human-gate validation scope")
+    human_gate_validate_record.add_argument("--scenario", required=True, help="Human-required scenario ID")
+    human_gate_validate_record.add_argument("--record-file", required=True, help="Path to proposed human-gate review record JSON")
+    human_gate_validate_record.add_argument(
+        "--scenario-report",
+        default=DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
+        help="VS4 scenario report to bind into validation when --scope vs4 is selected",
+    )
     human_gate_validate_record.add_argument("--use-existing", action="store_true", help="Use the existing VS3 observability proof report")
     human_gate_validate_record.add_argument(
         "--output",

@@ -1,0 +1,395 @@
+{
+  "audit_refs": [],
+  "claim_boundary": {
+    "blank_template_is_not_human_evidence": true,
+    "external_mutation_allowed": false,
+    "h_rows_remain_human_required": true,
+    "human_acceptance_claim_allowed": false,
+    "live_provider_readiness_claim_allowed": false,
+    "package_is_review_input_only": true,
+    "pass_claim_allowed": false,
+    "pass_claim_allowed_by_validator": false,
+    "product_alpha_human_ux_acceptance_claim_allowed": false,
+    "product_claim_allowed": false,
+    "production_onprem_readiness_claim_allowed": false,
+    "production_readiness_claim_allowed": false,
+    "security_acceptance_claim_allowed": false,
+    "structural_validation_is_not_acceptance": true,
+    "validation_surface": "vs4_human_gate_package_review_input_only",
+    "vs4_h01_remains_human_required": true
+  },
+  "cli_schema_version": "cs.cli.v0",
+  "command": "cornerstone human-gate package",
+  "command_transcripts": [
+    {
+      "command": [
+        "cornerstone",
+        "human-gate",
+        "package",
+        "--scope",
+        "vs4",
+        "--scenario-report",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+        "--json"
+      ],
+      "exit_code": 0,
+      "json_schema": "cs.cli.v0 + cs.vs4_human_gate_package_set.v0"
+    }
+  ],
+  "errors": [],
+  "evidence_refs": [
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
+    "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "reports/human-gates/vs4/VS4-H01.json",
+    "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
+    "vs4_human_gate_record_template:reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json"
+  ],
+  "final_verdict": "HUMAN_REQUIRED",
+  "human_gate_packages": {
+    "claim_boundary": {
+      "blank_template_is_not_human_evidence": true,
+      "external_mutation_allowed": false,
+      "h_rows_remain_human_required": true,
+      "human_acceptance_claim_allowed": false,
+      "live_provider_readiness_claim_allowed": false,
+      "package_is_review_input_only": true,
+      "pass_claim_allowed": false,
+      "pass_claim_allowed_by_validator": false,
+      "product_alpha_human_ux_acceptance_claim_allowed": false,
+      "product_claim_allowed": false,
+      "production_onprem_readiness_claim_allowed": false,
+      "production_readiness_claim_allowed": false,
+      "security_acceptance_claim_allowed": false,
+      "structural_validation_is_not_acceptance": true,
+      "validation_surface": "vs4_human_gate_package_review_input_only",
+      "vs4_h01_remains_human_required": true
+    },
+    "final_verdict": "HUMAN_REQUIRED",
+    "negative_evidence": {
+      "approval_collected_by_package": 0,
+      "external_mutations_executed_by_package": 0,
+      "human_acceptance_claimed_by_package": 0,
+      "human_rows_marked_pass_by_package": 0,
+      "live_provider_calls_executed_by_package": 0,
+      "live_provider_readiness_claimed_by_package": 0,
+      "production_onprem_readiness_claimed_by_package": 0,
+      "production_readiness_claimed_by_package": 0,
+      "security_acceptance_claimed_by_package": 0
+    },
+    "package_count": 1,
+    "package_dir": "reports/human-gates/vs4",
+    "packages": [
+      {
+        "approval_collected": false,
+        "audit_refs": [],
+        "blank_approval_record": {
+          "acceptance_note": null,
+          "decision": null,
+          "evidence_refs": [],
+          "issue_list": [],
+          "misleading_or_unsafe_states": [],
+          "redaction_note": null,
+          "reviewed_at": null,
+          "reviewer": null,
+          "scope": null,
+          "screenshots_or_recording_refs": [],
+          "signature_ref": null,
+          "task_outcomes": [],
+          "usability_findings": []
+        },
+        "claim_boundary": {
+          "blank_template_is_not_human_evidence": true,
+          "external_mutation_allowed": false,
+          "h_rows_remain_human_required": true,
+          "human_acceptance_claim_allowed": false,
+          "live_provider_readiness_claim_allowed": false,
+          "package_is_review_input_only": true,
+          "pass_claim_allowed": false,
+          "pass_claim_allowed_by_validator": false,
+          "product_alpha_human_ux_acceptance_claim_allowed": false,
+          "product_claim_allowed": false,
+          "production_onprem_readiness_claim_allowed": false,
+          "production_readiness_claim_allowed": false,
+          "security_acceptance_claim_allowed": false,
+          "structural_validation_is_not_acceptance": true,
+          "validation_surface": "vs4_human_gate_package_review_input_only",
+          "vs4_h01_remains_human_required": true
+        },
+        "commands_to_run_before_review": [
+          "make verify-vs4-product-alpha-human-package",
+          "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
+          "cornerstone human-gate package --scope vs4 --json",
+          "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json"
+        ],
+        "evidence_refs": [
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md",
+          "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+          "reports/human-gates/vs4/VS4-H01.json"
+        ],
+        "expected_behavior": "Human accepts or rejects whether the daily loop is usable, understandable, product-first, evidence-aware, and not misleading.",
+        "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
+        "given": "JiYong/Tars uses the VS4 Product Alpha UI flow.",
+        "human_acceptance_claim_allowed": false,
+        "negative_evidence": {
+          "approval_collected_by_package": 0,
+          "external_mutations_executed_by_package": 0,
+          "human_acceptance_claimed_by_package": 0,
+          "human_rows_marked_pass_by_package": 0,
+          "live_provider_calls_executed_by_package": 0,
+          "live_provider_readiness_claimed_by_package": 0,
+          "production_onprem_readiness_claimed_by_package": 0,
+          "production_readiness_claimed_by_package": 0,
+          "security_acceptance_claimed_by_package": 0
+        },
+        "package_digest_sha256": "d8de3d068f7b82086276abc33a9b7adf84ecac7afb7e669303780a50a82ebaaa",
+        "package_id": "vs4_human_gate_vs4_h01",
+        "package_path": "reports/human-gates/vs4/VS4-H01.json",
+        "pass_claim_allowed": false,
+        "product_claim_allowed": false,
+        "readiness_status": "ready_for_human_review",
+        "record_template_path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+        "reject_conditions": [
+          "The user cannot tell what stayed local/mock or whether live external writeback happened.",
+          "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
+          "Evidence/Audit detail is not reachable from the work item being reviewed.",
+          "Default UI is admin, connector, ontology, or scenario-verifier first.",
+          "The package, template, report, or UI implies human UX acceptance before a dated human record exists."
+        ],
+        "release_impact": "Remains HUMAN_REQUIRED until JiYong/Tars records explicit acceptance; blocks product-alpha human UX acceptance claim.",
+        "required_evidence_fields": [
+          "scenario_id",
+          "reviewer",
+          "reviewed_at",
+          "decision",
+          "scope",
+          "task_outcomes",
+          "screenshots_or_recording_refs",
+          "issue_list",
+          "usability_findings",
+          "misleading_or_unsafe_states",
+          "acceptance_note",
+          "evidence_refs",
+          "redaction_note",
+          "signature_ref"
+        ],
+        "required_human_action": "Human walkthrough.",
+        "review_checklist": [
+          "Open Product Alpha Home and confirm Drop, Ask, Continue, workspace context, and local-mode boundary are understandable.",
+          "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
+          "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
+          "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
+          "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use.",
+          "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
+          "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
+        ],
+        "review_input_artifacts": [
+          {
+            "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+            "present": true,
+            "sha256": "50694ac7b68439b1bd37d1d1b8435b8db708ec2003e37cd128addc355aa32f7d",
+            "summary": {
+              "blocking": 0,
+              "fail": 0,
+              "human_required": 1,
+              "in_this_slice": 6,
+              "not_run": 0,
+              "pass": 27,
+              "previous_slice": 21,
+              "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
+              "scenario_count": 28
+            }
+          },
+          {
+            "kind": "browser_proof",
+            "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json"
+          },
+          {
+            "kind": "dom_snapshot",
+            "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.dom.html"
+          },
+          {
+            "kind": "screenshot",
+            "path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md"
+          }
+        ],
+        "review_record_contract": {
+          "allowed_decisions": [
+            "APPROVE",
+            "APPROVE_WITH_EXCEPTIONS",
+            "REJECT"
+          ],
+          "approval_requires_evidence_refs": true,
+          "approval_requires_signature_ref": true,
+          "blank_template_is_not_human_evidence": true,
+          "package_alone_is_not_human_evidence": true,
+          "raw_secret_values_allowed": false,
+          "required_fields": [
+            "scenario_id",
+            "reviewer",
+            "reviewed_at",
+            "decision",
+            "scope",
+            "task_outcomes",
+            "screenshots_or_recording_refs",
+            "issue_list",
+            "usability_findings",
+            "misleading_or_unsafe_states",
+            "acceptance_note",
+            "evidence_refs",
+            "redaction_note",
+            "signature_ref"
+          ],
+          "schema_version": "cs.vs4_human_gate_review_record.v0"
+        },
+        "scenario_id": "VS4-H01",
+        "scenario_report": {
+          "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+          "present": true,
+          "sha256": "50694ac7b68439b1bd37d1d1b8435b8db708ec2003e37cd128addc355aa32f7d",
+          "summary": {
+            "blocking": 0,
+            "fail": 0,
+            "human_required": 1,
+            "in_this_slice": 6,
+            "not_run": 0,
+            "pass": 27,
+            "previous_slice": 21,
+            "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
+            "scenario_count": 28
+          }
+        },
+        "scenario_report_conditions": {
+          "blocking_count_0": true,
+          "final_security_not_claimed": true,
+          "human_required_count_1": true,
+          "human_ux_acceptance_required": true,
+          "live_provider_not_claimed": true,
+          "not_run_count_0": true,
+          "pass_count_27": true,
+          "production_not_claimed": true,
+          "production_onprem_not_claimed": true,
+          "scenario_count_28": true,
+          "scenario_report_status_success": true,
+          "vs4_h01_human_required": true,
+          "vs4_h01_present": true
+        },
+        "schema_version": "cs.vs4_human_gate_package.v0",
+        "scope": {
+          "namespace_id": "personal",
+          "owner_id": "local-user",
+          "tenant_id": "local-dev",
+          "workspace_id": "default"
+        },
+        "status": "HUMAN_REQUIRED",
+        "validation_command": "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>",
+        "when": "Human walkthrough occurs.",
+        "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective and requires JiYong/Tars review."
+      }
+    ],
+    "record_template": {
+      "_template_metadata": {
+        "allowed_decisions": [
+          "APPROVE",
+          "APPROVE_WITH_EXCEPTIONS",
+          "REJECT"
+        ],
+        "blank_template_is_not_approval": true,
+        "package_alone_is_not_human_evidence": true,
+        "package_path": "reports/human-gates/vs4/VS4-H01.json",
+        "redaction_required": true,
+        "template_only": true,
+        "validation_command": "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>"
+      },
+      "acceptance_note": "",
+      "decision": "",
+      "evidence_refs": [],
+      "issue_list": [],
+      "misleading_or_unsafe_states": [],
+      "redaction_note": "",
+      "reviewed_at": "YYYY-MM-DDTHH:MM:SSZ",
+      "reviewer": "",
+      "scenario_id": "VS4-H01",
+      "schema_version": "cs.vs4_human_gate_review_record.v0",
+      "scope": {
+        "namespace_id": "personal",
+        "owner_id": "local-user",
+        "tenant_id": "local-dev",
+        "workspace_id": "default"
+      },
+      "screenshots_or_recording_refs": [],
+      "signature_ref": "",
+      "task_outcomes": [],
+      "usability_findings": []
+    },
+    "record_template_artifact": {
+      "blank_template_is_not_approval": true,
+      "bytes": 1082,
+      "path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+      "present": true,
+      "sha256": "26d3e1dda1082c9cc9633baaad251f3e24a8cd6b22ff8b57017cd91d2e7a7767",
+      "template_only": true,
+      "validation_command": "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json --output <redacted-validation-envelope.json>"
+    },
+    "schema_version": "cs.vs4_human_gate_package_set.v0",
+    "status": "ready_for_human_review",
+    "summary": {
+      "blocking": 0,
+      "human_acceptance_claim_allowed": false,
+      "human_required": 1,
+      "pass": 27,
+      "pass_claim_allowed": false,
+      "product_claim_allowed": false,
+      "scenario_count": 28,
+      "status": "ready_for_human_review",
+      "vs4_h01_status": "HUMAN_REQUIRED"
+    },
+    "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
+  },
+  "ids": {
+    "git_commit": "9079982",
+    "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
+  },
+  "mode": "local_scaffold",
+  "namespace_id": "personal",
+  "negative_evidence": {
+    "approval_collected_by_package": 0,
+    "external_mutations_executed_by_package": 0,
+    "human_acceptance_claimed_by_package": 0,
+    "human_rows_marked_pass_by_package": 0,
+    "live_provider_calls_executed_by_package": 0,
+    "live_provider_readiness_claimed_by_package": 0,
+    "production_onprem_readiness_claimed_by_package": 0,
+    "production_readiness_claimed_by_package": 0,
+    "security_acceptance_claimed_by_package": 0
+  },
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/human-gates/vs4/review-kit.json",
+  "owner_id": "local-user",
+  "package_count": 1,
+  "package_dir": "reports/human-gates/vs4",
+  "policy_decision_refs": [],
+  "product": "CornerStone",
+  "schema_version": "cs.cli.v0",
+  "status": "success",
+  "summary": {
+    "blocking": 0,
+    "human_acceptance_claim_allowed": false,
+    "human_required": 1,
+    "pass": 27,
+    "pass_claim_allowed": false,
+    "product_claim_allowed": false,
+    "scenario_count": 28,
+    "status": "ready_for_human_review",
+    "vs4_h01_status": "HUMAN_REQUIRED"
+  },
+  "tenant_id": "local-dev",
+  "version": "0.0.0-scaffold",
+  "vs4_human_gate_package_schema_version": "cs.vs4_human_gate_package_set.v0",
+  "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+  "workspace_id": "default"
+}

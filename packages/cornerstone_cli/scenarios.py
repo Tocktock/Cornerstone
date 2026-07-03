@@ -102,6 +102,10 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_003_ASK_PACKS_STATES_REGRESSION.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_004_HUMAN_ACCEPTANCE_PACKAGE.md"
+)
+DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
 DEFAULT_VS3_REQUEST_CONTEXT_REPORT = "reports/security/vs3-request-context-proof.json"
@@ -26103,6 +26107,523 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         },
         "human_required": human_required,
     }
+
+
+VS4_HUMAN_GATE_SCENARIO_ID = "VS4-H01"
+VS4_HUMAN_GATE_REVIEW_RECORD_SCHEMA = "cs.vs4_human_gate_review_record.v0"
+VS4_HUMAN_GATE_PACKAGE_SCHEMA = "cs.vs4_human_gate_package.v0"
+VS4_HUMAN_GATE_VALIDATION_SCHEMA = "cs.vs4_human_gate_record_validation.v0"
+VS4_HUMAN_GATE_ALLOWED_DECISIONS = ["APPROVE", "APPROVE_WITH_EXCEPTIONS", "REJECT"]
+VS4_HUMAN_GATE_REQUIRED_FIELDS = [
+    "scenario_id",
+    "reviewer",
+    "reviewed_at",
+    "decision",
+    "scope",
+    "task_outcomes",
+    "screenshots_or_recording_refs",
+    "issue_list",
+    "usability_findings",
+    "misleading_or_unsafe_states",
+    "acceptance_note",
+    "evidence_refs",
+    "redaction_note",
+    "signature_ref",
+]
+
+
+def vs4_human_gate_no_claim_boundary(*, surface: str | None = None) -> dict[str, Any]:
+    boundary = {
+        "h_rows_remain_human_required": True,
+        "vs4_h01_remains_human_required": True,
+        "structural_validation_is_not_acceptance": True,
+        "package_is_review_input_only": True,
+        "blank_template_is_not_human_evidence": True,
+        "product_alpha_human_ux_acceptance_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+        "product_claim_allowed": False,
+        "pass_claim_allowed": False,
+        "pass_claim_allowed_by_validator": False,
+        "production_readiness_claim_allowed": False,
+        "production_onprem_readiness_claim_allowed": False,
+        "security_acceptance_claim_allowed": False,
+        "live_provider_readiness_claim_allowed": False,
+        "external_mutation_allowed": False,
+    }
+    if surface:
+        boundary["validation_surface"] = surface
+    return boundary
+
+
+def _vs4_rel_path(root: Path, path: Path) -> str:
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
+
+
+def _load_vs4_scenario_report(root: Path, scenario_report: str | Path | None = None) -> tuple[dict[str, Any], Path, dict[str, Any] | None]:
+    report_path = Path(scenario_report or DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT)
+    if not report_path.is_absolute():
+        report_path = root / report_path
+    if not report_path.exists() or not report_path.is_file():
+        return {}, report_path, {
+            "code": "CS_VS4_HUMAN_GATE_SCENARIO_REPORT_MISSING",
+            "message": "VS4 human-gate package requires the full VS4 scenario report.",
+            "scenario_report_path": _vs4_rel_path(root, report_path),
+            "scenario_report_path_sha256": hashlib.sha256(str(report_path).encode("utf-8")).hexdigest(),
+        }
+    try:
+        return json.loads(report_path.read_text()), report_path, None
+    except json.JSONDecodeError as error:
+        return {}, report_path, {
+            "code": "CS_VS4_HUMAN_GATE_SCENARIO_REPORT_INVALID_JSON",
+            "message": "VS4 human-gate scenario report must be valid JSON.",
+            "line": error.lineno,
+            "column": error.colno,
+            "scenario_report_path": _vs4_rel_path(root, report_path),
+            "scenario_report_path_sha256": hashlib.sha256(str(report_path).encode("utf-8")).hexdigest(),
+        }
+
+
+def _vs4_human_gate_matrix_row(root: Path) -> dict[str, str]:
+    rows, _error = _read_csv_rows(root / DEFAULT_VS4_PRODUCT_ALPHA_MATRIX)
+    for row in rows:
+        if row.get("scenario_id") == VS4_HUMAN_GATE_SCENARIO_ID:
+            return row
+    return {
+        "scenario_id": VS4_HUMAN_GATE_SCENARIO_ID,
+        "priority": "HUMAN_REQUIRED",
+        "given": "JiYong/Tars uses the VS4 Product Alpha UI flow.",
+        "when": "Human walkthrough occurs.",
+        "then": "Human accepts or rejects the daily loop.",
+        "verification": "Human walkthrough.",
+        "evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
+        "pass_fail_criteria": "Remains HUMAN_REQUIRED until JiYong/Tars records explicit acceptance.",
+    }
+
+
+def _vs4_human_gate_report_conditions(report: dict[str, Any]) -> dict[str, bool]:
+    summary = report.get("summary", {}) if isinstance(report, dict) else {}
+    proof_boundary = report.get("proof_boundary", {}) if isinstance(report, dict) else {}
+    scenario_results = report.get("scenario_results", []) if isinstance(report.get("scenario_results"), list) else []
+    human_rows = [
+        row for row in scenario_results
+        if isinstance(row, dict) and row.get("scenario_id") == VS4_HUMAN_GATE_SCENARIO_ID
+    ]
+    return {
+        "scenario_report_status_success": report.get("status") == "success",
+        "scenario_count_28": summary.get("scenario_count") == 28,
+        "pass_count_27": summary.get("pass") == 27,
+        "human_required_count_1": summary.get("human_required") == 1,
+        "blocking_count_0": summary.get("blocking") == 0,
+        "not_run_count_0": summary.get("not_run") == 0,
+        "vs4_h01_present": len(human_rows) == 1,
+        "vs4_h01_human_required": len(human_rows) == 1 and human_rows[0].get("status") == "HUMAN_REQUIRED",
+        "production_not_claimed": proof_boundary.get("production") == "NOT_CLAIMED",
+        "production_onprem_not_claimed": proof_boundary.get("production_onprem") == "NOT_CLAIMED",
+        "final_security_not_claimed": proof_boundary.get("final_security_acceptance") == "NOT_CLAIMED",
+        "live_provider_not_claimed": proof_boundary.get("live_provider") == "NOT_CLAIMED",
+        "human_ux_acceptance_required": proof_boundary.get("human_ux_acceptance") == "HUMAN_REQUIRED",
+    }
+
+
+def _vs4_human_gate_review_template(package: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "_template_metadata": {
+            "template_only": True,
+            "blank_template_is_not_approval": True,
+            "package_alone_is_not_human_evidence": True,
+            "redaction_required": True,
+            "package_path": package.get("package_path"),
+            "allowed_decisions": VS4_HUMAN_GATE_ALLOWED_DECISIONS,
+            "validation_command": package.get("validation_command"),
+        },
+        "schema_version": VS4_HUMAN_GATE_REVIEW_RECORD_SCHEMA,
+        "scenario_id": VS4_HUMAN_GATE_SCENARIO_ID,
+        "reviewer": "",
+        "reviewed_at": "YYYY-MM-DDTHH:MM:SSZ",
+        "decision": "",
+        "scope": {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        },
+        "task_outcomes": [],
+        "screenshots_or_recording_refs": [],
+        "issue_list": [],
+        "usability_findings": [],
+        "misleading_or_unsafe_states": [],
+        "acceptance_note": "",
+        "evidence_refs": [],
+        "redaction_note": "",
+        "signature_ref": "",
+    }
+
+
+def build_vs4_human_gate_package(
+    root: Path,
+    *,
+    scenario_report: str | Path | None = None,
+    package_path: str | Path | None = None,
+    record_template_output: str | Path | None = None,
+    write_files: bool = False,
+) -> dict[str, Any]:
+    root = root.resolve()
+    report, report_path, report_error = _load_vs4_scenario_report(root, scenario_report)
+    row = _vs4_human_gate_matrix_row(root)
+    package_path_obj = Path(package_path or f"{DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR}/{VS4_HUMAN_GATE_SCENARIO_ID}.json")
+    template_path_obj = Path(
+        record_template_output
+        or f"{DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR}/record-templates/{VS4_HUMAN_GATE_SCENARIO_ID}.review-record.template.json"
+    )
+    if not package_path_obj.is_absolute():
+        package_path_obj = root / package_path_obj
+    if not template_path_obj.is_absolute():
+        template_path_obj = root / template_path_obj
+    package_rel = _vs4_rel_path(root, package_path_obj)
+    template_rel = _vs4_rel_path(root, template_path_obj)
+    report_rel = _vs4_rel_path(root, report_path)
+    conditions = _vs4_human_gate_report_conditions(report)
+    ready = report_error is None and all(conditions.values())
+    claim_boundary = vs4_human_gate_no_claim_boundary(surface="vs4_human_gate_package_review_input_only")
+    summary = report.get("summary", {}) if isinstance(report, dict) else {}
+    scenario_report_artifact = {
+        "path": report_rel,
+        "present": report_error is None,
+        "sha256": _sha256_file(report_path) if report_error is None else None,
+        "summary": summary,
+    }
+    package_base = {
+        "schema_version": VS4_HUMAN_GATE_PACKAGE_SCHEMA,
+        "scenario_id": VS4_HUMAN_GATE_SCENARIO_ID,
+        "package_id": "vs4_human_gate_vs4_h01",
+        "status": "HUMAN_REQUIRED",
+        "readiness_status": "ready_for_human_review" if ready else "incomplete",
+        "scope": {
+            "tenant_id": "local-dev",
+            "owner_id": "local-user",
+            "namespace_id": "personal",
+            "workspace_id": "default",
+        },
+        "given": row.get("given", ""),
+        "when": row.get("when", ""),
+        "expected_behavior": row.get("then", ""),
+        "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective and requires JiYong/Tars review.",
+        "required_human_action": row.get("verification", "Human walkthrough."),
+        "expected_evidence": row.get("evidence", "Acceptance note with screenshots/recording, or rejection note with issue list."),
+        "release_impact": row.get("pass_fail_criteria", "Blocks product-alpha human UX acceptance claim only."),
+        "review_checklist": [
+            "Open Product Alpha Home and confirm Drop, Ask, Continue, workspace context, and local-mode boundary are understandable.",
+            "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
+            "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
+            "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
+            "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use.",
+            "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
+            "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note.",
+        ],
+        "required_evidence_fields": VS4_HUMAN_GATE_REQUIRED_FIELDS,
+        "reject_conditions": [
+            "The user cannot tell what stayed local/mock or whether live external writeback happened.",
+            "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
+            "Evidence/Audit detail is not reachable from the work item being reviewed.",
+            "Default UI is admin, connector, ontology, or scenario-verifier first.",
+            "The package, template, report, or UI implies human UX acceptance before a dated human record exists.",
+        ],
+        "validation_command": (
+            "cornerstone human-gate validate-record "
+            f"--scope vs4 --scenario {VS4_HUMAN_GATE_SCENARIO_ID} "
+            "--record-file <filled-review-record.json> --json "
+            "--output <redacted-validation-envelope.json>"
+        ),
+        "review_record_contract": {
+            "schema_version": VS4_HUMAN_GATE_REVIEW_RECORD_SCHEMA,
+            "allowed_decisions": VS4_HUMAN_GATE_ALLOWED_DECISIONS,
+            "required_fields": VS4_HUMAN_GATE_REQUIRED_FIELDS,
+            "approval_requires_evidence_refs": True,
+            "approval_requires_signature_ref": True,
+            "package_alone_is_not_human_evidence": True,
+            "blank_template_is_not_human_evidence": True,
+            "raw_secret_values_allowed": False,
+        },
+        "scenario_report": scenario_report_artifact,
+        "scenario_report_conditions": conditions,
+        "review_input_artifacts": [
+            scenario_report_artifact,
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "kind": "browser_proof"},
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html", "kind": "dom_snapshot"},
+            {"path": f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png", "kind": "screenshot"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT, "kind": "slice_contract"},
+        ],
+        "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-human-package",
+            "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
+            "cornerstone human-gate package --scope vs4 --json",
+            "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json",
+        ],
+        "blank_approval_record": {
+            "decision": None,
+            "reviewer": None,
+            "reviewed_at": None,
+            "scope": None,
+            "task_outcomes": [],
+            "screenshots_or_recording_refs": [],
+            "issue_list": [],
+            "usability_findings": [],
+            "misleading_or_unsafe_states": [],
+            "acceptance_note": None,
+            "evidence_refs": [],
+            "redaction_note": None,
+            "signature_ref": None,
+        },
+        "claim_boundary": claim_boundary,
+        "approval_collected": False,
+        "pass_claim_allowed": False,
+        "product_claim_allowed": False,
+        "human_acceptance_claim_allowed": False,
+        "package_path": package_rel,
+        "record_template_path": template_rel,
+        "evidence_refs": [
+            DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
+            report_rel,
+            package_rel,
+        ],
+        "audit_refs": [],
+        "negative_evidence": {
+            "human_rows_marked_pass_by_package": 0,
+            "approval_collected_by_package": 0,
+            "human_acceptance_claimed_by_package": 0,
+            "production_readiness_claimed_by_package": 0,
+            "production_onprem_readiness_claimed_by_package": 0,
+            "security_acceptance_claimed_by_package": 0,
+            "live_provider_readiness_claimed_by_package": 0,
+            "live_provider_calls_executed_by_package": 0,
+            "external_mutations_executed_by_package": 0,
+        },
+    }
+    if report_error is not None:
+        package_base["errors"] = [report_error]
+    package_base["package_digest_sha256"] = _vs3_canonical_digest(package_base)
+    template = _vs4_human_gate_review_template(package_base)
+    template_artifact = {
+        "path": template_rel,
+        "present": False,
+        "template_only": True,
+        "blank_template_is_not_approval": True,
+        "validation_command": package_base["validation_command"],
+    }
+    if write_files and ready:
+        package_path_obj.parent.mkdir(parents=True, exist_ok=True)
+        template_path_obj.parent.mkdir(parents=True, exist_ok=True)
+        package_path_obj.write_text(json.dumps(package_base, indent=2, sort_keys=True) + "\n")
+        template_path_obj.write_text(json.dumps(template, indent=2, sort_keys=True) + "\n")
+        template_artifact.update(
+            {
+                "present": True,
+                "bytes": template_path_obj.stat().st_size,
+                "sha256": _sha256_file(template_path_obj),
+            }
+        )
+    package_set = {
+        "schema_version": "cs.vs4_human_gate_package_set.v0",
+        "status": "ready_for_human_review" if ready else "incomplete",
+        "package_dir": DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR,
+        "package_count": 1 if ready else 0,
+        "packages": [package_base],
+        "record_template": template,
+        "record_template_artifact": template_artifact,
+        "summary": {
+            "status": "ready_for_human_review" if ready else "incomplete",
+            "scenario_count": summary.get("scenario_count"),
+            "pass": summary.get("pass"),
+            "human_required": summary.get("human_required"),
+            "blocking": summary.get("blocking"),
+            "vs4_h01_status": "HUMAN_REQUIRED",
+            "human_acceptance_claim_allowed": False,
+            "product_claim_allowed": False,
+            "pass_claim_allowed": False,
+        },
+        "claim_boundary": claim_boundary,
+        "negative_evidence": package_base["negative_evidence"],
+        "final_verdict": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+    }
+    return package_set
+
+
+def validate_vs4_human_gate_review_record(
+    root: Path,
+    scenario_id: str,
+    record: dict[str, Any],
+    record_file: Path,
+    *,
+    scenario_report: str | Path | None = None,
+) -> dict[str, Any]:
+    root = root.resolve()
+    package_set = build_vs4_human_gate_package(root, scenario_report=scenario_report, write_files=False)
+    package = package_set["packages"][0]
+    if scenario_id != VS4_HUMAN_GATE_SCENARIO_ID:
+        return {
+            "schema_version": VS4_HUMAN_GATE_VALIDATION_SCHEMA,
+            "scenario_id": scenario_id,
+            "status": "unsupported",
+            "errors": [
+                {
+                    "code": "CS_VS4_HUMAN_GATE_UNSUPPORTED",
+                    "message": "Supported VS4 human-gate review record is VS4-H01.",
+                }
+            ],
+            "final_verdict": "HUMAN_REQUIRED",
+            "matrix_status_after_validation": "HUMAN_REQUIRED",
+            "product_claim_allowed": False,
+            "pass_claim_allowed_by_validator": False,
+        }
+
+    required_fields = list(package["review_record_contract"]["required_fields"])
+    allowed_decisions = list(package["review_record_contract"]["allowed_decisions"])
+    decision = record.get("decision")
+    record_scenario_id = str(record.get("scenario_id") or "")
+    missing_required_fields = [field for field in required_fields if field not in record]
+    empty_required_fields = [
+        field for field in required_fields
+        if field in record and _vs3_empty_record_value(record.get(field))
+    ]
+    invalid_field_formats: list[str] = []
+    invalid_field_types: list[str] = []
+    if "reviewed_at" in record and not _vs3_empty_record_value(record.get("reviewed_at")):
+        if not _vs3_review_timestamp_valid(record.get("reviewed_at")):
+            invalid_field_formats.append("reviewed_at")
+    if "scope" in record and not isinstance(record.get("scope"), dict):
+        invalid_field_types.append("scope")
+    elif isinstance(record.get("scope"), dict):
+        scope = record["scope"]
+        for field in ["tenant_id", "owner_id", "namespace_id", "workspace_id"]:
+            if _vs3_empty_record_value(scope.get(field)):
+                invalid_field_formats.append(f"scope.{field}")
+    for field in [
+        "task_outcomes",
+        "screenshots_or_recording_refs",
+        "issue_list",
+        "usability_findings",
+        "misleading_or_unsafe_states",
+        "evidence_refs",
+    ]:
+        if field in record and not (
+            isinstance(record.get(field), list)
+            and all(isinstance(item, str) and item.strip() for item in record.get(field, []))
+        ):
+            invalid_field_types.append(field)
+    required_redaction_note_present = not _vs3_empty_record_value(record.get("redaction_note"))
+    sensitive_findings = _vs3_scan_sensitive_markers(record)
+    overclaim_findings = _vs3_scan_human_gate_record_overclaims(record)
+    structural_errors: list[str] = []
+    if record_scenario_id != scenario_id:
+        structural_errors.append("scenario_id_mismatch")
+    if decision not in allowed_decisions:
+        structural_errors.append("decision_not_allowed")
+    if missing_required_fields:
+        structural_errors.append("missing_required_fields")
+    if empty_required_fields:
+        structural_errors.append("empty_required_fields")
+    if invalid_field_formats:
+        structural_errors.append("invalid_field_formats")
+    if invalid_field_types:
+        structural_errors.append("invalid_field_types")
+    if not required_redaction_note_present:
+        structural_errors.append("missing_redaction_note")
+    if sensitive_findings:
+        structural_errors.append("sensitive_marker_detected")
+    if overclaim_findings:
+        structural_errors.append("overclaim_marker_detected")
+
+    validation_status = "record_structurally_valid" if not structural_errors else "record_structurally_invalid"
+    validation_base = {
+        "schema_version": VS4_HUMAN_GATE_VALIDATION_SCHEMA,
+        "scenario_id": scenario_id,
+        "record_scenario_id": record_scenario_id,
+        "package_id": package.get("package_id"),
+        "package_path": package.get("package_path"),
+        "package_digest_sha256": package.get("package_digest_sha256"),
+        "status": validation_status,
+        "scope": package.get("scope", {}),
+        "validation_scope": "structure_and_safety_only",
+        "record_file": {
+            "sha256": _sha256_file(record_file) if record_file.exists() and record_file.is_file() else None,
+            "path_sha256": hashlib.sha256(str(record_file).encode("utf-8")).hexdigest(),
+            "path_recorded_by_validator": False,
+        },
+        "provided_fields": sorted(str(key) for key in record.keys()),
+        "decision_present": not _vs3_empty_record_value(decision),
+        "decision_allowed": decision in allowed_decisions,
+        "decision_recorded_by_validator": False,
+        "allowed_decisions": allowed_decisions,
+        "scenario_matches": record_scenario_id == scenario_id,
+        "required_fields": required_fields,
+        "missing_required_fields": missing_required_fields,
+        "empty_required_fields": empty_required_fields,
+        "invalid_field_formats": invalid_field_formats,
+        "invalid_field_types": invalid_field_types,
+        "required_redaction_note_present": required_redaction_note_present,
+        "review_checklist": package.get("review_checklist", []),
+        "reject_conditions": package.get("reject_conditions", []),
+        "required_evidence_fields": package.get("required_evidence_fields", []),
+        "review_record_contract": package.get("review_record_contract", {}),
+        "sensitive_marker_findings": sensitive_findings,
+        "sensitive_fields": sorted({finding["field"] for finding in sensitive_findings}),
+        "overclaim_marker_findings": overclaim_findings,
+        "overclaim_fields": sorted({finding["field"] for finding in overclaim_findings}),
+        "structural_errors": structural_errors,
+        "claim_boundary": vs4_human_gate_no_claim_boundary(surface="vs4_single_record_structure_and_safety_only"),
+        "source_package_claim_boundary": package.get("claim_boundary", {}),
+        "product_claim_allowed": False,
+        "pass_claim_allowed_by_validator": False,
+        "matrix_status_after_validation": "HUMAN_REQUIRED",
+        "weakest_applicable_scenario_result": "HUMAN_REQUIRED",
+        "final_verdict": "HUMAN_REQUIRED",
+        "promotion_rule": (
+            "This validator checks reviewer-record structure and redaction safety only. "
+            "It never records approval, never persists raw reviewer content, and never moves "
+            "VS4-H01 out of HUMAN_REQUIRED."
+        ),
+        "non_mutation_evidence": {
+            "approval_collected_by_validator": False,
+            "human_decision_recorded_by_validator": False,
+            "live_provider_calls_executed_by_validator": 0,
+            "external_mutations_executed_by_validator": 0,
+            "record_body_persisted_by_validator": False,
+            "record_path_persisted_by_validator": False,
+            "field_values_persisted_by_validator": False,
+            "raw_record_values_in_output": False,
+        },
+        "negative_evidence": {
+            "human_rows_marked_pass_by_validator": 0,
+            "product_claims_allowed_by_validator": 0,
+            "pass_without_owner_promotion_allowed_by_validator": 0,
+            "human_acceptance_claimed_by_validator": 0,
+            "production_readiness_claimed_by_validator": 0,
+            "production_onprem_readiness_claimed_by_validator": 0,
+            "security_acceptance_claimed_by_validator": 0,
+            "live_provider_readiness_claimed_by_validator": 0,
+            "live_provider_calls_executed_by_validator": 0,
+            "external_mutations_executed_by_validator": 0,
+            "record_body_persisted_by_validator": 0,
+            "record_path_persisted_by_validator": 0,
+            "raw_record_values_in_output": 0,
+            "sensitive_marker_findings": len(sensitive_findings),
+            "overclaim_marker_findings": len(overclaim_findings),
+        },
+        "evidence_refs": [
+            package.get("package_path"),
+            package.get("scenario_report", {}).get("path"),
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_004_CONTRACT,
+        ],
+        "audit_refs": [],
+    }
+    validation = dict(validation_base)
+    validation["validation_id"] = f"vs4hval_{_vs3_canonical_digest(validation_base)[:16]}"
+    return validation
 
 
 def verify_vs0_evux(root: Path) -> dict[str, Any]:

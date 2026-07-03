@@ -11534,6 +11534,138 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(value, 0)
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
 
+    def test_vs4_human_gate_package_prepares_review_without_acceptance(self) -> None:
+        scenario_report = "tmp/test-vs4-product-alpha-full-for-human-package.json"
+        template_output = "tmp/test-vs4-h01.review-record.template.json"
+        package_output = "tmp/test-vs4-human-gate-package.json"
+        validation_output = "tmp/test-vs4-h01.validation.json"
+        filled_record = ROOT / "tmp/test-vs4-h01.review-record.json"
+        for path in [
+            ROOT / scenario_report,
+            ROOT / template_output,
+            ROOT / package_output,
+            ROOT / validation_output,
+            filled_record,
+        ]:
+            if path.exists():
+                path.unlink()
+
+        verify = run_cli(
+            "scenario",
+            "verify",
+            "vs4-product-alpha-ui-daily-loop",
+            "--json",
+            "--output",
+            scenario_report,
+        )
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+        verify_payload = json.loads(verify.stdout)
+        self.assertEqual(verify_payload["summary"]["scenario_count"], 28)
+        self.assertEqual(verify_payload["summary"]["pass"], 27)
+        self.assertEqual(verify_payload["summary"]["human_required"], 1)
+        self.assertEqual(verify_payload["summary"]["blocking"], 0)
+        self.assertEqual(verify_payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+
+        package = run_cli(
+            "human-gate",
+            "package",
+            "--scope",
+            "vs4",
+            "--scenario-report",
+            scenario_report,
+            "--record-template-output",
+            template_output,
+            "--json",
+            "--output",
+            package_output,
+        )
+        self.assertEqual(package.returncode, 0, package.stdout + package.stderr)
+        package_payload = json.loads(package.stdout)
+        self.assertEqual(package_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(package_payload["summary"]["status"], "ready_for_human_review")
+        self.assertEqual(package_payload["summary"]["pass"], 27)
+        self.assertEqual(package_payload["summary"]["human_required"], 1)
+        self.assertFalse(package_payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertEqual(package_payload["package_count"], 1)
+        package_row = package_payload["human_gate_packages"]["packages"][0]
+        self.assertEqual(package_row["scenario_id"], "VS4-H01")
+        self.assertEqual(package_row["status"], "HUMAN_REQUIRED")
+        self.assertFalse(package_row["approval_collected"])
+        self.assertFalse(package_row["claim_boundary"]["human_acceptance_claim_allowed"])
+        self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
+        self.assertTrue((ROOT / template_output).exists())
+
+        record = {
+            "schema_version": "cs.vs4_human_gate_review_record.v0",
+            "scenario_id": "VS4-H01",
+            "reviewer": "redacted-reviewer",
+            "reviewed_at": "2026-07-03T10:00:00Z",
+            "decision": "APPROVE_WITH_EXCEPTIONS",
+            "scope": {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            },
+            "task_outcomes": [
+                "Walked through Drop/Ask, Brief, Claim, Memory/Wiki, Action Card, Ops Inbox, Evidence/Audit, and Learn review prompts."
+            ],
+            "screenshots_or_recording_refs": ["report:vs4-local-redacted-walkthrough"],
+            "issue_list": ["Keep product polish issues separate from local AI-verifiable PASS rows."],
+            "usability_findings": ["Daily loop is reviewable with local-mode boundary visible."],
+            "misleading_or_unsafe_states": ["No production, live-provider, or human UX readiness claim accepted by this validator."],
+            "acceptance_note": "Redacted structural test record only; this is not JiYong/Tars acceptance.",
+            "evidence_refs": [scenario_report, "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json"],
+            "redaction_note": "Reviewer identity is redacted and no raw secrets or provider tokens are included.",
+            "signature_ref": "sig:redacted-vs4-h01-review",
+        }
+        filled_record.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")
+        validation = run_cli(
+            "human-gate",
+            "validate-record",
+            "--scope",
+            "vs4",
+            "--scenario",
+            "VS4-H01",
+            "--scenario-report",
+            scenario_report,
+            "--record-file",
+            str(filled_record.relative_to(ROOT)),
+            "--json",
+            "--output",
+            validation_output,
+        )
+        self.assertEqual(validation.returncode, 0, validation.stdout + validation.stderr)
+        validation_payload = json.loads(validation.stdout)
+        self.assertEqual(validation_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(validation_payload["summary"]["status"], "record_structurally_valid")
+        self.assertEqual(validation_payload["summary"]["matrix_status_after_validation"], "HUMAN_REQUIRED")
+        self.assertFalse(validation_payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertFalse(validation_payload["summary"]["pass_claim_allowed_by_validator"])
+        self.assertFalse(validation_payload["summary"]["record_body_persisted_by_validator"])
+        for value in validation_payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+        blank_validation = run_cli(
+            "human-gate",
+            "validate-record",
+            "--scope",
+            "vs4",
+            "--scenario",
+            "VS4-H01",
+            "--scenario-report",
+            scenario_report,
+            "--record-file",
+            template_output,
+            "--json",
+        )
+        self.assertEqual(blank_validation.returncode, 1, blank_validation.stdout + blank_validation.stderr)
+        blank_payload = json.loads(blank_validation.stdout)
+        self.assertEqual(blank_payload["final_verdict"], "HUMAN_REQUIRED")
+        self.assertEqual(blank_payload["summary"]["status"], "record_structurally_invalid")
+        self.assertFalse(blank_payload["summary"]["human_acceptance_claim_allowed"])
+        self.assertIn("empty_required_fields", blank_payload["errors"][0]["structural_errors"])
+
     def test_vs0_evux_quickstart_verify(self) -> None:
         output_path = ROOT / "tmp/test-vs0-evux-quickstart.json"
         if output_path.exists():
