@@ -320,11 +320,13 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
     ("Review kit", "reports/human-gates/vs4/review-kit.json"),
     ("Blank review template", "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json"),
     ("Full scenario report", "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"),
+    ("Active coherence report", "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"),
     ("Desktop browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json"),
     ("Mobile browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json"),
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-active-report-package-coherence",
     "make verify-vs4-product-alpha-report-package-integrity",
     "make verify-vs4-product-alpha-return-to-work-lineage",
     "make verify-vs4-product-alpha-runtime-loop-coherence",

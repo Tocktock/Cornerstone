@@ -19734,6 +19734,12 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
 VS4_PRODUCT_ALPHA_SCENARIO_SET = "vs4-product-alpha-ui-daily-loop"
 VS4_PRODUCT_ALPHA_MATRIX_PATH = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv"
 VS4_HUMAN_REQUIRED_SCENARIO_ID = "VS4-H01"
+VS4_ACTIVE_SLICE = "slice-024-active-report-package-coherence"
+VS4_ACTIVE_SLICE_CONTRACT = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
+VS4_ACTIVE_SLICE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"
+VS4_ACTIVE_SLICE_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence-gate.json"
+VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY = "vs4_slice_024_active_report_package_coherence"
+VS4_SLICE_PROOF_BOUNDARY_VALUE = "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
 
 
 def _vs4_filtered_scenario_report_path(scenario_ids: list[str]) -> str:
@@ -19758,15 +19764,16 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "live_provider": "NOT_CLAIMED",
     "human_ux_acceptance": "HUMAN_REQUIRED",
     "vs3_h01_to_h07": "CONDITIONAL_DEFERRED_FOR_PRODUCTION_ONPREM_SECURITY_LIVE_PROVIDER_AND_HUMAN_ACCEPTANCE_CLAIMS",
-    "vs4_slice_015_gate_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_016_evidence_audit_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_017_user_drop_ask_source": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_018_drop_ask_trust_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_019_interactive_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_020_runtime_backed_ops_inbox": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_021_runtime_loop_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_022_return_to_work_lineage_guard": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
-    "vs4_slice_023_report_package_integrity": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+    "vs4_slice_015_gate_integrity": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_016_evidence_audit_detail": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_017_user_drop_ask_source": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_018_drop_ask_trust_boundary": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_019_interactive_ops_inbox": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_020_runtime_backed_ops_inbox": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_021_runtime_loop_coherence": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_022_return_to_work_lineage_guard": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_023_report_package_integrity": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY: VS4_SLICE_PROOF_BOUNDARY_VALUE,
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "production_readiness_claimed",
@@ -19899,6 +19906,14 @@ def _vs4_product_alpha_gate_validation(
         else {}
     )
     active_proof = data.get("active_proof") if isinstance(data.get("active_proof"), dict) else {}
+    active_report_package_coherence = (
+        data.get("active_report_package_coherence")
+        if isinstance(data.get("active_report_package_coherence"), dict)
+        else {}
+    )
+    slice_contracts = (
+        data.get("slice_contracts") if isinstance(data.get("slice_contracts"), dict) else {}
+    )
     cli_workflow = data.get("cli_workflow") if isinstance(data.get("cli_workflow"), dict) else {}
     slice_003_cli_workflow = (
         data.get("slice_003_cli_workflow")
@@ -20133,7 +20148,7 @@ def _vs4_product_alpha_gate_validation(
     record(
         "return_to_work_lineage_guard",
         proof_boundary.get("vs4_slice_022_return_to_work_lineage_guard")
-        == "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        == VS4_SLICE_PROOF_BOUNDARY_VALUE
         and cli_checks.get("loop_lineage_guard_cli_parity") is True
         and cli_checks.get("loop_missing_ref_denied") is True
         and cli_checks.get("loop_cross_scope_denied") is True
@@ -20171,6 +20186,34 @@ def _vs4_product_alpha_gate_validation(
         cli_checks=cli_checks,
         desktop_markers=ops_markers,
         mobile_markers=mobile_ops_markers,
+    )
+    record(
+        "active_report_package_coherence",
+        data.get("slice") == VS4_ACTIVE_SLICE
+        and data.get("slice_contract") == VS4_ACTIVE_SLICE_CONTRACT
+        and slice_contracts.get("slice_024") == VS4_ACTIVE_SLICE_CONTRACT
+        and proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY) == VS4_SLICE_PROOF_BOUNDARY_VALUE
+        and active_report_package_coherence.get("status") == "bound"
+        and active_report_package_coherence.get("active_slice") == VS4_ACTIVE_SLICE
+        and active_report_package_coherence.get("active_slice_contract") == VS4_ACTIVE_SLICE_CONTRACT
+        and active_report_package_coherence.get("full_report_path") == DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT
+        and active_report_package_coherence.get("full_gate_report_path")
+        == "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
+        and active_report_package_coherence.get("focused_slice_report_path") == VS4_ACTIVE_SLICE_REPORT
+        and active_report_package_coherence.get("focused_slice_gate_report_path") == VS4_ACTIVE_SLICE_GATE_REPORT
+        and active_report_package_coherence.get("full_report_reserved_for_h01") is True
+        and active_report_package_coherence.get("focused_reports_are_not_h01_package_input") is True
+        and active_report_package_coherence.get("paths_distinct") is True
+        and active_report_package_coherence.get("vs4_h01_remains_human_required") is True
+        and active_report_package_coherence.get("production_claimed") is False
+        and active_report_package_coherence.get("live_provider_claimed") is False
+        and active_report_package_coherence.get("reference_images_are_not_pass_evidence") is True,
+        "VS4 active report metadata, Slice 024 contract refs, full-report package path, and focused slice paths must stay coherent.",
+        report_slice=data.get("slice"),
+        report_slice_contract=data.get("slice_contract"),
+        slice_024_contract=slice_contracts.get("slice_024"),
+        proof_boundary_value=proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY),
+        active_report_package_coherence=active_report_package_coherence,
     )
     self_command = self_transcript.get("command")
     record(
@@ -22906,6 +22949,9 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
             "scenario_set": data.get("scenario_set"),
             "status": data.get("status"),
             "slice": data.get("slice"),
+            "slice_contract": data.get("slice_contract"),
+            "slice_contracts": data.get("slice_contracts"),
+            "active_report_package_coherence": data.get("active_report_package_coherence"),
             "summary": data.get("summary"),
             "proof_boundary": data.get("proof_boundary"),
             "source_tree": data.get("source_tree"),

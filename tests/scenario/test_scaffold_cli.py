@@ -14,19 +14,25 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-VS4_ACTIVE_SLICE = "slice-022-return-to-work-lineage-guard"
+VS4_ACTIVE_SLICE = "slice-024-active-report-package-coherence"
 VS4_ACTIVE_SLICE_CONTRACT = (
-    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md"
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
 )
-VS4_ACTIVE_SLICE_SCENARIO_COUNT = 16
+VS4_ACTIVE_SLICE_SCENARIO_COUNT = 6
 VS4_RUNTIME_LOOP_COHERENCE_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
+)
+VS4_RETURN_TO_WORK_LINEAGE_SLICE = "slice-022-return-to-work-lineage-guard"
+VS4_RETURN_TO_WORK_LINEAGE_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md"
 )
 VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md"
 )
 VS4_SLICE_022_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage.json"
 VS4_SLICE_022_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage-gate.json"
+VS4_SLICE_024_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"
+VS4_SLICE_024_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence-gate.json"
 VS4_FULL_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
 VS4_FULL_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
 
@@ -11427,8 +11433,9 @@ class ScaffoldCliTests(unittest.TestCase):
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_020_RUNTIME_BACKED_OPS_INBOX.md"
         )
         report.setdefault("slice_contracts", {})["slice_021"] = VS4_RUNTIME_LOOP_COHERENCE_CONTRACT
-        report.setdefault("slice_contracts", {})["slice_022"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_022"] = VS4_RETURN_TO_WORK_LINEAGE_CONTRACT
         report.setdefault("slice_contracts", {})["slice_023"] = VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_024"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11453,6 +11460,9 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("proof_boundary", {})["vs4_slice_023_report_package_integrity"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
+        report.setdefault("proof_boundary", {})["vs4_slice_024_active_report_package_coherence"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
         report["active_proof"] = {
             "schema_version": "cs.vs4_active_proof.v0",
             "status": "bound",
@@ -11466,9 +11476,28 @@ class ScaffoldCliTests(unittest.TestCase):
             "reference_images_are_not_pass_evidence": True,
         }
         report["lineage_guard_slice"] = {
-            "slice": VS4_ACTIVE_SLICE,
-            "slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
+            "slice": VS4_RETURN_TO_WORK_LINEAGE_SLICE,
+            "slice_contract": VS4_RETURN_TO_WORK_LINEAGE_CONTRACT,
             "proof_boundary": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        }
+        report["active_report_package_coherence"] = {
+            "schema_version": "cs.vs4_active_report_package_coherence.v0",
+            "status": "bound",
+            "active_slice": VS4_ACTIVE_SLICE,
+            "active_slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
+            "full_report_path": VS4_FULL_REPORT,
+            "full_gate_report_path": VS4_FULL_GATE_REPORT,
+            "focused_slice_report_path": VS4_SLICE_024_REPORT,
+            "focused_slice_gate_report_path": VS4_SLICE_024_GATE_REPORT,
+            "full_report_reserved_for_h01": True,
+            "focused_reports_are_not_h01_package_input": True,
+            "paths_distinct": True,
+            "slice_023_contract_present": True,
+            "slice_024_contract_present": True,
+            "vs4_h01_remains_human_required": True,
+            "production_claimed": False,
+            "live_provider_claimed": False,
+            "reference_images_are_not_pass_evidence": True,
         }
         unsafe_markers = {
             "http_text_intake_forces_user_paste_untrusted": True,
@@ -12346,6 +12375,15 @@ class ScaffoldCliTests(unittest.TestCase):
             payload["proof_boundary"]["vs4_slice_022_return_to_work_lineage_guard"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
         )
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_024_active_report_package_coherence"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["slice_contracts"]["slice_024"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["active_report_package_coherence"]["status"], "bound")
+        self.assertEqual(payload["active_report_package_coherence"]["active_slice"], VS4_ACTIVE_SLICE)
         for proof_key in ["browser_proof", "mobile_browser_proof"]:
             markers = payload[proof_key]["ops_inbox_triage_markers"]
             for marker in [
@@ -12874,6 +12912,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertNotIn(f"--output {VS4_FULL_REPORT}", return_target)
         self.assertNotIn(f"scenario gate {VS4_FULL_REPORT}", return_target)
 
+        active_target = target_body("verify-vs4-product-alpha-active-report-package-coherence")
+        self.assertIn(VS4_SLICE_024_REPORT, active_target)
+        self.assertIn(f"scenario gate {VS4_SLICE_024_REPORT}", active_target)
+        self.assertIn(f"--output {VS4_SLICE_024_GATE_REPORT}", active_target)
+        self.assertNotIn(f"--output {VS4_FULL_REPORT}", active_target)
+        self.assertNotIn(f"scenario gate {VS4_FULL_REPORT}", active_target)
+
         package_target = target_body("verify-vs4-product-alpha-human-package")
         self.assertIn(f"--output {VS4_FULL_REPORT}", package_target)
         self.assertIn(f"scenario gate {VS4_FULL_REPORT}", package_target)
@@ -12888,6 +12933,20 @@ class ScaffoldCliTests(unittest.TestCase):
             filtered_path,
         )
         self.assertTrue((ROOT / VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT).is_file())
+        self.assertTrue((ROOT / VS4_ACTIVE_SLICE_CONTRACT).is_file())
+
+    def test_vs4_scenario_gate_rejects_stale_active_report_package_metadata(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            report["slice"] = VS4_RETURN_TO_WORK_LINEAGE_SLICE
+            report["slice_contract"] = VS4_RETURN_TO_WORK_LINEAGE_CONTRACT
+            report["slice_contracts"].pop("slice_024", None)
+            report["proof_boundary"].pop("vs4_slice_024_active_report_package_coherence", None)
+            report["active_report_package_coherence"]["status"] = "stale_or_incomplete"
+            report["active_report_package_coherence"]["active_slice"] = VS4_RETURN_TO_WORK_LINEAGE_SLICE
+
+        report_rel = self._vs4_gate_fixture_report("tmp/test-vs4-gate-stale-active-slice.json", tamper)
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "active_report_package_coherence")
 
     def test_vs4_scenario_gate_rejects_h01_marked_pass(self) -> None:
         def tamper(report: dict[str, Any]) -> None:
@@ -13046,6 +13105,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("make verify-vs4-product-alpha-desktop-overflow", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-return-to-work-lineage", package_row["commands_to_run_before_review"])
+        self.assertIn("make verify-vs4-product-alpha-active-report-package-coherence", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-report-package-integrity", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])
@@ -13086,6 +13146,8 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertIn(VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT, package_row["evidence_refs"])
         self.assertIn(VS4_ACTIVE_SLICE_CONTRACT, package_row["evidence_refs"])
+        self.assertIn(VS4_ACTIVE_SLICE_CONTRACT, [item["path"] for item in package_row["review_input_artifacts"]])
+        self.assertTrue(package_row["scenario_report_conditions"]["active_report_package_coherence_bound"])
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())
 

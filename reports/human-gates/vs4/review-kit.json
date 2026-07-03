@@ -59,6 +59,7 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md",
     "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json",
     "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
@@ -137,6 +138,7 @@
         },
         "commands_to_run_before_review": [
           "make verify-vs4-product-alpha-report-package-integrity",
+          "make verify-vs4-product-alpha-active-report-package-coherence",
           "make verify-vs4-product-alpha-return-to-work-lineage",
           "make verify-vs4-product-alpha-runtime-loop-coherence",
           "make verify-vs4-product-alpha-runtime-backed-ops-inbox",
@@ -182,6 +184,7 @@
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_022_RETURN_TO_WORK_LINEAGE_GUARD.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md",
           "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "reports/human-gates/vs4/VS4-H01.json"
         ],
@@ -200,7 +203,7 @@
           "production_readiness_claimed_by_package": 0,
           "security_acceptance_claimed_by_package": 0
         },
-        "package_digest_sha256": "6834fc391d046e145a753e1ade0cc8a4b699cf1fe18284c77c79a08dc27f9956",
+        "package_digest_sha256": "1e08a11e5cb15ece93a5083b07d97434d184e24246f02af8eb00c61e8991b34a",
         "package_id": "vs4_human_gate_vs4_h01",
         "package_path": "reports/human-gates/vs4/VS4-H01.json",
         "pass_claim_allowed": false,
@@ -254,15 +257,15 @@
           {
             "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
             "present": true,
-            "sha256": "ee4f2f5529bfa09b958edee9b830fcbde8276c79c1c9b10205f2107f74abcf0a",
+            "sha256": "46d0cf6a286af630d8b629a0a98e26f6915c94967a60b917d4d7a033aa9c441d",
             "summary": {
               "blocking": 0,
               "fail": 0,
               "human_required": 1,
-              "in_this_slice": 16,
+              "in_this_slice": 6,
               "not_run": 0,
               "pass": 27,
-              "previous_slice": 11,
+              "previous_slice": 21,
               "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
               "scenario_count": 28
             }
@@ -370,6 +373,10 @@
           {
             "kind": "slice_contract",
             "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_023_REPORT_PACKAGE_INTEGRITY.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
           }
         ],
         "review_record_contract": {
@@ -405,20 +412,23 @@
         "scenario_report": {
           "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "present": true,
-          "sha256": "ee4f2f5529bfa09b958edee9b830fcbde8276c79c1c9b10205f2107f74abcf0a",
+          "sha256": "46d0cf6a286af630d8b629a0a98e26f6915c94967a60b917d4d7a033aa9c441d",
           "summary": {
             "blocking": 0,
             "fail": 0,
             "human_required": 1,
-            "in_this_slice": 16,
+            "in_this_slice": 6,
             "not_run": 0,
             "pass": 27,
-            "previous_slice": 11,
+            "previous_slice": 21,
             "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
             "scenario_count": 28
           }
         },
         "scenario_report_conditions": {
+          "active_report_package_coherence_bound": true,
+          "active_slice_contract_current": true,
+          "active_slice_current": true,
           "blocking_count_0": true,
           "final_security_not_claimed": true,
           "human_required_count_1": true,
@@ -430,6 +440,8 @@
           "production_onprem_not_claimed": true,
           "scenario_count_28": true,
           "scenario_report_status_success": true,
+          "slice_024_contract_present": true,
+          "slice_024_proof_boundary_present": true,
           "vs4_h01_human_required": true,
           "vs4_h01_present": true
         },
@@ -506,7 +518,7 @@
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "ids": {
-    "git_commit": "f126f47e6",
+    "git_commit": "1af564eee",
     "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
   },
   "mode": "local_scaffold",
