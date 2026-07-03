@@ -108,6 +108,126 @@ VS4_CONTINUE_WORK = [
     },
 ]
 
+VS4_INBOX_LANES = [
+    {
+        "key": "needs-review",
+        "label": "Needs review",
+        "count": 4,
+        "description": "Briefs, claims, memory candidates, and learning items waiting for owner review.",
+    },
+    {
+        "key": "approval-requests",
+        "label": "Approval requests",
+        "count": 1,
+        "description": "Actions that need explicit approval before execution can be considered.",
+    },
+    {
+        "key": "policy-blocked",
+        "label": "Policy blocked",
+        "count": 1,
+        "description": "Work that is safe to inspect but blocked from becoming authority or side effect.",
+    },
+    {
+        "key": "failed-recovery",
+        "label": "Failed with recovery",
+        "count": 1,
+        "description": "Failed or incomplete work that has a recovery path and audit detail.",
+    },
+]
+
+VS4_OPS_INBOX_ITEMS = [
+    {
+        "lane": "needs-review",
+        "kind": "Brief",
+        "title": "Evidence-backed Brief",
+        "status": "Needs review",
+        "priority": "High",
+        "risk": "Evidence-backed",
+        "owner": "local-user",
+        "time": "today",
+        "body": "Vendor renewal notes are ready for support check, claim draft, memory review, and local action preview.",
+        "href": "#vs4-brief-detail",
+        "evidence": "evidence_bundle:local_vs4_brief",
+        "audit": "audit:local_vs4_brief_created",
+        "next_action": "Open Brief detail",
+    },
+    {
+        "lane": "needs-review",
+        "kind": "Claim",
+        "title": "Claim candidate",
+        "status": "Draft",
+        "priority": "Medium",
+        "risk": "Evidence required",
+        "owner": "local-user",
+        "time": "today",
+        "body": "One claim is waiting for supporting evidence before approval can be requested.",
+        "href": "#claim-builder",
+        "evidence": "evidence_bundle:local_vs4_claim",
+        "audit": "audit:local_vs4_claim_review",
+        "next_action": "Review support",
+    },
+    {
+        "lane": "needs-review",
+        "kind": "Memory",
+        "title": "Memory/Wiki candidate",
+        "status": "Needs review",
+        "priority": "Medium",
+        "risk": "Draft memory",
+        "owner": "local-user",
+        "time": "today",
+        "body": "A durable knowledge proposal is visible but not saved as approved memory.",
+        "href": "#vs4-memory-candidates",
+        "evidence": "evidence_bundle:local_vs4_memory",
+        "audit": "audit:local_vs4_memory_review",
+        "next_action": "Inspect candidate",
+    },
+    {
+        "lane": "approval-requests",
+        "kind": "Action",
+        "title": "Action Card draft",
+        "status": "Approval review",
+        "priority": "High",
+        "risk": "Local/mock only",
+        "owner": "local-user",
+        "time": "today",
+        "body": "A follow-up action is prepared with expected impact, risk, evidence, and no live writeback.",
+        "href": "#action-card",
+        "evidence": "evidence_bundle:local_vs4_action",
+        "audit": "audit:local_vs4_action_review",
+        "next_action": "Open Action Card",
+    },
+    {
+        "lane": "policy-blocked",
+        "kind": "Claim",
+        "title": "Evidence-free approval attempt",
+        "status": "Policy blocked",
+        "priority": "High",
+        "risk": "Approval denied",
+        "owner": "local-user",
+        "time": "today",
+        "body": "Approval stays blocked until an Evidence Bundle is attached and reviewed.",
+        "href": "#claim-builder",
+        "evidence": "policy:CS_CLAIM_EVIDENCE_REQUIRED",
+        "audit": "audit:local_vs4_claim_denied",
+        "next_action": "Attach evidence",
+    },
+    {
+        "lane": "failed-recovery",
+        "kind": "Learn",
+        "title": "Learning recovery candidate",
+        "status": "Failed with recovery",
+        "priority": "Medium",
+        "risk": "Review before learning",
+        "owner": "local-user",
+        "time": "today",
+        "body": "Outcome or failure notes wait for review before changing future behavior.",
+        "href": "#vs4-learn-review",
+        "evidence": "learning:local_vs4_recovery",
+        "audit": "audit:local_vs4_recovery_review",
+        "next_action": "Open Learn review",
+    },
+]
+
 VS4_KNOWLEDGE_STATES = [
     ("Saved source", "ready"),
     ("Searchable", "ready"),
@@ -341,6 +461,63 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         "</article>"
         for item in VS4_CONTINUE_WORK
     )
+    inbox_lanes = "\n".join(
+        "<button class='inbox-lane' type='button' role='tab' "
+        f"data-vs4-inbox-lane='{html.escape(lane['key'])}' "
+        f"data-vs4-inbox-lane-count='{int(lane['count'])}' "
+        f"aria-selected='{'true' if index == 0 else 'false'}'>"
+        f"<span>{html.escape(lane['label'])}</span>"
+        f"<strong>{int(lane['count'])}</strong>"
+        f"<small>{html.escape(lane['description'])}</small>"
+        "</button>"
+        for index, lane in enumerate(VS4_INBOX_LANES)
+    )
+    inbox_rows = "\n".join(
+        "<article class='inbox-row' "
+        f"data-vs4-inbox-item='{html.escape(item['kind'].lower())}' "
+        f"data-vs4-inbox-lane-ref='{html.escape(item['lane'])}' "
+        f"data-vs4-inbox-status='{html.escape(item['status'].lower().replace(' ', '-'))}' "
+        f"data-vs4-inbox-evidence-ref='{html.escape(item['evidence'])}' "
+        f"data-vs4-inbox-audit-ref='{html.escape(item['audit'])}'>"
+        "<div>"
+        f"<span class='label'>{html.escape(item['kind'])}</span>"
+        f"<h3>{html.escape(item['title'])}</h3>"
+        f"<p>{html.escape(item['body'])}</p>"
+        "</div>"
+        "<div class='inbox-meta'>"
+        f"<span>{html.escape(item['owner'])}</span>"
+        f"<span>{html.escape(item['time'])}</span>"
+        f"<span class='state-chip {html.escape('blocked' if item['lane'] == 'policy-blocked' else 'review' if item['lane'] in {'needs-review', 'failed-recovery'} else 'ready')}'>{html.escape(item['priority'])}</span>"
+        f"<span class='state-chip {html.escape('blocked' if item['lane'] == 'policy-blocked' else 'review' if item['lane'] == 'failed-recovery' else 'ready')}'>{html.escape(item['risk'])}</span>"
+        f"<a class='text-link' href='{html.escape(item['href'])}'>Continue</a>"
+        "</div>"
+        "</article>"
+        for item in VS4_OPS_INBOX_ITEMS
+    )
+    selected_item = VS4_OPS_INBOX_ITEMS[0]
+    inbox_selected_detail = (
+        "<aside class='product-panel inbox-detail' data-vs4-inbox-selected-detail='visible'>"
+        "<div class='label'>Selected work</div>"
+        f"<h3>{html.escape(selected_item['title'])}</h3>"
+        f"<p>{html.escape(selected_item['body'])}</p>"
+        "<div class='detail-grid'>"
+        f"<div><span class='label'>Status</span><span data-vs4-inbox-selected-status>{html.escape(selected_item['status'])}</span></div>"
+        f"<div><span class='label'>Owner / workspace</span><span data-vs4-inbox-selected-scope>{html.escape(selected_item['owner'])} / Personal / Project / default</span></div>"
+        f"<div><span class='label'>Evidence</span><span data-vs4-inbox-selected-evidence>{html.escape(selected_item['evidence'])}</span></div>"
+        f"<div><span class='label'>Risk</span><span data-vs4-inbox-selected-risk>{html.escape(selected_item['risk'])}</span></div>"
+        f"<div><span class='label'>Next action</span><span data-vs4-inbox-selected-next-action>{html.escape(selected_item['next_action'])}</span></div>"
+        f"<div><span class='label'>Activity</span><span data-vs4-inbox-selected-audit>{html.escape(selected_item['audit'])}</span></div>"
+        "</div>"
+        "<div class='activity-list' data-vs4-inbox-activity='visible'>"
+        "<div class='activity-row'><strong>Evidence gap</strong><span>Claim approval waits for supporting evidence.</span></div>"
+        "<div class='activity-row'><strong>Memory review</strong><span>Candidate knowledge remains draft until reviewed.</span></div>"
+        "<div class='activity-row'><strong>Action preview</strong><span>Execution mode is local/mock by default.</span></div>"
+        "<div class='activity-row'><strong>Activity record</strong><span>Audit detail is available from evidence, claims, and actions.</span></div>"
+        "<div class='activity-row'><strong>Learn review</strong><span>Outcomes and corrections stay as review candidates before changing future behavior.</span></div>"
+        "</div>"
+        "<div class='review-note'>Review source, evidence, and audit detail before approving a claim, memory, or action.</div>"
+        "</aside>"
+    )
     knowledge_chips = "\n".join(
         f"<span class='state-chip {html.escape(state)}'>{html.escape(label)}</span>"
         for label, state in VS4_KNOWLEDGE_STATES
@@ -495,6 +672,13 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       font-size: 16px;
       letter-spacing: 0;
     }}
+    .section-kicker {{
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0;
+    }}
     .product-panel p, .work-row p {{
       margin: 0;
       color: var(--muted);
@@ -541,6 +725,75 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-radius: 8px;
       background: #ffffff;
       padding: 12px;
+    }}
+    .inbox-lanes {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }}
+    .inbox-lane {{
+      display: grid;
+      gap: 3px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      color: var(--ink);
+      padding: 10px;
+      cursor: default;
+    }}
+    .inbox-lane[aria-selected="true"] {{
+      border-color: #8fb9b8;
+      background: #eef7f6;
+    }}
+    .inbox-lane span {{
+      font-weight: 800;
+      font-size: 13px;
+    }}
+    .inbox-lane strong {{
+      font-size: 20px;
+      line-height: 1;
+    }}
+    .inbox-lane small {{
+      color: var(--muted);
+      line-height: 1.25;
+    }}
+    .inbox-list {{
+      display: grid;
+      gap: 8px;
+    }}
+    .inbox-row {{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, auto);
+      gap: 12px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding: 12px 0;
+    }}
+    .inbox-row:first-child {{
+      border-top: 0;
+    }}
+    .inbox-row h3 {{
+      margin: 0 0 4px;
+      font-size: 15px;
+      letter-spacing: 0;
+    }}
+    .inbox-row p {{
+      margin: 0;
+      color: var(--muted);
+    }}
+    .inbox-meta {{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      align-items: center;
+    }}
+    .inbox-detail .detail-grid {{
+      margin-top: 12px;
     }}
     .text-link {{
       color: var(--accent);
@@ -1040,6 +1293,8 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid, .decision-layout, .decision-flow {{ grid-template-columns: 1fr; }}
       .workspace-strip {{ justify-content: flex-start; }}
       .work-row {{ grid-template-columns: 1fr; }}
+      .inbox-lanes, .inbox-row {{ grid-template-columns: 1fr; }}
+      .inbox-meta {{ justify-content: flex-start; }}
       .state-matrix {{ min-width: 720px; }}
     }}
   </style>
@@ -1129,23 +1384,15 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
           </aside>
         </div>
         <div class="ops-grid">
-          <div class="product-panel" data-vs4-ops-inbox="visible">
+          <div class="product-panel" data-vs4-ops-inbox="visible" data-vs4-ops-inbox-triage="visible">
             <div class="label">Ops Inbox</div>
             <h2>Continue work</h2>
+            <div class="inbox-lanes" role="tablist" aria-label="Ops Inbox triage lanes">{inbox_lanes}</div>
+            <div class="inbox-list" data-vs4-inbox-list="triage">{inbox_rows}</div>
+            <h3 class="section-kicker">Continue links</h3>
             <div class="work-list">{continue_rows}</div>
           </div>
-          <aside class="product-panel" data-vs4-right-rail="visible">
-            <div class="label">Workspace context</div>
-            <h3>Personal / Project</h3>
-            <p>Scope stays visible before claims, memory, or actions can become durable.</p>
-            <div class="activity-list">
-              <div class="activity-row"><strong>Evidence gap</strong><span>Claim approval waits for supporting evidence.</span></div>
-              <div class="activity-row"><strong>Memory review</strong><span>Candidate knowledge remains draft until reviewed.</span></div>
-              <div class="activity-row"><strong>Action preview</strong><span>Execution mode is local/mock by default.</span></div>
-              <div class="activity-row"><strong>Activity record</strong><span>Audit detail is available from evidence, claims, and actions.</span></div>
-              <div class="activity-row"><strong>Learn review</strong><span>Outcomes and corrections stay as review candidates before changing future behavior.</span></div>
-            </div>
-          </aside>
+          {inbox_selected_detail}
         </div>
         <div class="ops-grid">
           <div class="product-panel" id="vs4-brief-preview" data-vs4-brief-shell="visible">
@@ -1703,6 +1950,9 @@ Search phrase: alpha-evidence-anchor.</code>
     window.__cornerstoneVs4ShellEvidence = function() {{
       const shell = document.getElementById("home-ops-inbox");
       const nav = Array.from(document.querySelectorAll("#primary-nav a")).map((item) => item.textContent || "");
+      const inboxLanes = Array.from(document.querySelectorAll("[data-vs4-inbox-lane]"));
+      const inboxItems = Array.from(document.querySelectorAll("[data-vs4-inbox-item]"));
+      const selectedDetail = document.querySelector("[data-vs4-inbox-selected-detail='visible']");
       return {{
         schema_version: "cs.vs4_product_alpha_shell_state.v0",
         product_alpha_shell: shell ? shell.dataset.vs4Surface === "home-ops-inbox" : false,
@@ -1710,6 +1960,20 @@ Search phrase: alpha-evidence-anchor.</code>
         drop_visible: Boolean(document.querySelector("[data-vs4-drop-zone='visible']")),
         ask_visible: Boolean(document.querySelector("[data-vs4-ask-box='visible']")),
         ops_inbox_visible: Boolean(document.querySelector("[data-vs4-ops-inbox='visible']")),
+        ops_inbox_triage: {{
+          lanes_visible: inboxLanes.length >= 4,
+          lane_keys: inboxLanes.map((lane) => lane.dataset.vs4InboxLane || ""),
+          item_count: inboxItems.length,
+          has_needs_review: inboxItems.some((item) => item.dataset.vs4InboxLaneRef === "needs-review"),
+          has_approval_request: inboxItems.some((item) => item.dataset.vs4InboxLaneRef === "approval-requests"),
+          has_policy_blocked: inboxItems.some((item) => item.dataset.vs4InboxLaneRef === "policy-blocked"),
+          has_failed_recovery: inboxItems.some((item) => item.dataset.vs4InboxLaneRef === "failed-recovery"),
+          selected_detail_visible: Boolean(selectedDetail),
+          selected_detail_has_scope: Boolean(selectedDetail && selectedDetail.textContent.includes("Personal / Project / default")),
+          selected_detail_has_evidence: Boolean(selectedDetail && selectedDetail.textContent.includes("evidence_bundle:")),
+          selected_detail_has_audit: Boolean(selectedDetail && selectedDetail.textContent.includes("audit:")),
+          selected_detail_has_next_action: Boolean(selectedDetail && selectedDetail.textContent.includes("Next action"))
+        }},
         continue_work_count: document.querySelectorAll("[data-vs4-work-kind]").length,
         workspace_visible: Boolean(document.querySelector("[data-vs4-workspace]")),
         local_boundary_visible: Boolean(document.querySelector("[data-vs4-local-boundary='visible']")),
@@ -2035,6 +2299,8 @@ Search phrase: alpha-evidence-anchor.</code>
         topbar_grid_columns: gridColumnCount(".topbar"),
         drop_ask_grid_columns: gridColumnCount(".drop-ask-grid"),
         ops_grid_columns: gridColumnCount(".ops-grid"),
+        inbox_lane_grid_columns: gridColumnCount(".inbox-lanes"),
+        inbox_row_grid_columns: gridColumnCount(".inbox-row"),
         work_row_grid_columns: gridColumnCount(".work-row"),
         brief_workbench_grid_columns: gridColumnCount(".brief-workbench"),
         state_matrix_scroll_contained: Boolean(
@@ -2065,6 +2331,8 @@ Search phrase: alpha-evidence-anchor.</code>
         layout.topbar_grid_columns === 1 &&
         layout.drop_ask_grid_columns === 1 &&
         layout.ops_grid_columns === 1 &&
+        layout.inbox_lane_grid_columns === 1 &&
+        layout.inbox_row_grid_columns === 1 &&
         layout.work_row_grid_columns === 1;
       return layout;
     }}
@@ -2621,6 +2889,38 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function collectVs4OpsInboxTriage() {{
+      const lanes = Array.from(document.querySelectorAll("[data-vs4-inbox-lane]"));
+      const rows = Array.from(document.querySelectorAll("[data-vs4-inbox-item]"));
+      const selected = document.querySelector("[data-vs4-inbox-selected-detail='visible']");
+      const selectedText = selected ? selected.textContent || "" : "";
+      const laneKeys = lanes.map((lane) => lane.dataset.vs4InboxLane || "");
+      const rowLaneKeys = rows.map((row) => row.dataset.vs4InboxLaneRef || "");
+      const markerSet = {{
+        lanes_visible: lanes.length >= 4,
+        lane_counts_visible: lanes.every((lane) => Number(lane.dataset.vs4InboxLaneCount || "0") > 0),
+        needs_review_lane_visible: laneKeys.includes("needs-review") && rowLaneKeys.includes("needs-review"),
+        approval_requests_lane_visible: laneKeys.includes("approval-requests") && rowLaneKeys.includes("approval-requests"),
+        policy_blocked_lane_visible: laneKeys.includes("policy-blocked") && rowLaneKeys.includes("policy-blocked"),
+        failed_recovery_lane_visible: laneKeys.includes("failed-recovery") && rowLaneKeys.includes("failed-recovery"),
+        selected_detail_visible: Boolean(selected),
+        selected_detail_has_scope: selectedText.includes("Personal / Project / default"),
+        selected_detail_has_evidence: selectedText.includes("evidence_bundle:"),
+        selected_detail_has_audit: selectedText.includes("audit:"),
+        selected_detail_has_next_action: selectedText.includes("Next action"),
+        selected_detail_has_risk: selectedText.includes("Risk"),
+        product_language_before_internal_ids: selectedText.indexOf("Selected work") >= 0 &&
+          selectedText.indexOf("Selected work") < selectedText.indexOf("evidence_bundle:"),
+        no_admin_first_inbox: !selectedText.includes("Connectors") && !selectedText.includes("Ontology") && !selectedText.includes("Scenario verifier")
+      }};
+      return {{
+        schema_version: "cs.vs4_ops_inbox_triage_proof.v0",
+        lane_keys: laneKeys,
+        row_count: rows.length,
+        selected_text: selectedText.replace(/\\s+/g, " ").trim().slice(0, 1200),
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
@@ -2628,6 +2928,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const keyboardFocus = collectVs4KeyboardFocus();
       const askReadability = collectVs4AskReadability();
       const decisionPages = collectVs4DecisionPages();
+      const opsInboxTriage = collectVs4OpsInboxTriage();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2639,6 +2940,7 @@ Search phrase: alpha-evidence-anchor.</code>
         keyboard_focus: keyboardFocus,
         ask_readability: askReadability,
         decision_pages: decisionPages,
+        ops_inbox_triage: opsInboxTriage,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -2654,6 +2956,7 @@ Search phrase: alpha-evidence-anchor.</code>
           general_packs_complete: vs4PacksPass(),
           state_coverage_complete: vs4State.state_coverage.complete === true,
           home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
+          ops_inbox_triage_complete: Object.values(opsInboxTriage.markers).every((value) => value === true),
           claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"

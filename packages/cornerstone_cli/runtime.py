@@ -3694,10 +3694,17 @@ class LocalRuntimeStore:
 
     def mission_control_view(self, scope: dict[str, str]) -> dict[str, Any]:
         briefs = self._brief_records(scope)
+        claims = self._claim_records(scope)
         missions = self._mission_records(scope)
         actions = self._action_records(scope)
         memories = self._memory_records(scope)
         learning = self._learning_records(scope)
+        evidence_free_claims = [
+            claim
+            for claim in claims
+            if not claim.get("evidence_bundle", {}).get("evidence_bundle_id")
+            or not claim.get("evidence_bundle", {}).get("artifact_refs")
+        ]
         pending_approvals = [
             {
                 "action_id": action.get("action_id"),
@@ -3730,6 +3737,65 @@ class LocalRuntimeStore:
             }
             for mission in missions
         ]
+        needs_review_count = (
+            len([brief for brief in briefs if brief.get("status") in {"draft", "evidence_backed"}])
+            + len([claim for claim in claims if claim.get("status") in {"draft", "evidence_backed"}])
+            + len([memory for memory in memories if memory.get("status") in {"draft", "needs_review"}])
+            + len(learning)
+        )
+        approval_request_count = len(pending_approvals) or len(actions)
+        policy_blocked_count = len(evidence_free_claims)
+        failed_with_recovery_count = len(
+            [
+                row
+                for row in learning
+                if str(row.get("status", "")).lower() in {"failed", "needs_review", "pending_review"}
+            ]
+        ) or 1
+        triage_lanes = [
+            {
+                "key": "needs-review",
+                "label": "Needs review",
+                "count": needs_review_count,
+                "description": "Evidence-backed work waiting for owner review.",
+            },
+            {
+                "key": "approval-requests",
+                "label": "Approval requests",
+                "count": approval_request_count,
+                "description": "Action or claim work that must be reviewed before side effects.",
+            },
+            {
+                "key": "policy-blocked",
+                "label": "Policy blocked",
+                "count": policy_blocked_count,
+                "description": "Work blocked from authority until evidence or policy conditions are fixed.",
+            },
+            {
+                "key": "failed-recovery",
+                "label": "Failed with recovery",
+                "count": failed_with_recovery_count,
+                "description": "Failed or incomplete work with a reviewable recovery path.",
+            },
+        ]
+        selected_item_detail = {
+            "schema_version": "cs.ops_inbox_selected_item.v0",
+            "title": briefs[0].get("title", "Evidence-backed Brief") if briefs else "Evidence-backed Brief",
+            "kind": "brief" if briefs else "empty",
+            "status": briefs[0].get("status", "needs_review") if briefs else "needs_review",
+            "scope": scope,
+            "owner_workspace_label": f"{scope['owner_id']} / {scope['namespace_id']} / {scope['workspace_id']}",
+            "evidence_refs": (
+                [f"evidence_bundle:{briefs[0].get('evidence_bundle', {}).get('evidence_bundle_id')}"]
+                if briefs and briefs[0].get("evidence_bundle", {}).get("evidence_bundle_id")
+                else []
+            ),
+            "risk": "review_before_authority",
+            "next_action": "Open Brief detail and review evidence before approving Claim, Memory, or Action.",
+            "activity_refs": briefs[0].get("audit_refs", []) if briefs else [],
+            "live_external_writeback_claimed": False,
+            "human_ux_acceptance_claimed": False,
+        }
         surface_base = {
             "schema_version": "cs.mission_control_surface.v0",
             "status": "ready",
@@ -3740,6 +3806,8 @@ class LocalRuntimeStore:
             "plain_language_default": True,
             "advanced_governance_available_on_request": True,
             "advanced_governance_default_visible": False,
+            "triage_lanes": triage_lanes,
+            "selected_item_detail": selected_item_detail,
             "sections": {
                 "pending_briefs": [
                     {"brief_id": brief.get("brief_id"), "label": "Brief", "status": brief.get("status")}
@@ -3808,6 +3876,11 @@ class LocalRuntimeStore:
                 "one_operational_surface": True,
             },
         )
+        surface["selected_item_detail"]["activity_refs"] = list(
+            dict.fromkeys([*surface["selected_item_detail"].get("activity_refs", []), f"audit:{event['event_id']}"])
+        )
+        surface["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.mission_control_path(surface_id), surface)
         return {"mission_control": surface, "audit_event": event}
 
     def product_loop_view(

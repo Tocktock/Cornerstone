@@ -1254,6 +1254,12 @@ def capture_vs4_product_alpha_browser_proof(
     decision_pages_markers = (
         decision_pages.get("markers", {}) if isinstance(decision_pages.get("markers"), dict) else {}
     )
+    ops_inbox_triage = (
+        brief_evidence.get("ops_inbox_triage", {}) if isinstance(brief_evidence.get("ops_inbox_triage"), dict) else {}
+    )
+    ops_inbox_triage_markers = (
+        ops_inbox_triage.get("markers", {}) if isinstance(ops_inbox_triage.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1264,6 +1270,9 @@ def capture_vs4_product_alpha_browser_proof(
         "drop_visible": 'data-vs4-drop-zone="visible"' in dom,
         "ask_visible": 'data-vs4-ask-box="visible"' in dom,
         "ops_inbox_visible": 'data-vs4-ops-inbox="visible"' in dom,
+        "ops_inbox_triage_visible": 'data-vs4-ops-inbox-triage="visible"' in dom
+        and bool(ops_inbox_triage_markers)
+        and all(value is True for value in ops_inbox_triage_markers.values()),
         "continue_work_rows": dom.count("data-vs4-work-kind=") >= 4,
         "pending_evidence_gap_visible": "Evidence gap" in dom and "Claim approval waits for supporting evidence" in dom,
         "memory_candidate_visible": "Memory/Wiki candidate" in dom and "durable knowledge proposal" in dom,
@@ -1324,12 +1333,17 @@ def capture_vs4_product_alpha_browser_proof(
         "brief_detail_visible": responsive_visible.get("brief_detail") is True and detail_markers.get("brief_detail_visible") is True,
         "state_matrix_scroll_contained": responsive_layout.get("state_matrix_scroll_contained") is True,
         "one_column_ops_grid": responsive_layout.get("ops_grid_columns") == 1,
+        "one_column_inbox_lanes": responsive_layout.get("inbox_lane_grid_columns") == 1,
+        "one_column_inbox_rows": responsive_layout.get("inbox_row_grid_columns") == 1,
         "one_column_work_rows": responsive_layout.get("work_row_grid_columns") == 1,
     }
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
     keyboard_focus_ok = bool(keyboard_focus_markers) and all(keyboard_focus_markers.values())
     ask_readability_ok = bool(ask_readability_markers) and all(ask_readability_markers.values())
     decision_pages_ok = bool(decision_pages_markers) and all(value is True for value in decision_pages_markers.values())
+    ops_inbox_triage_ok = bool(ops_inbox_triage_markers) and all(
+        value is True for value in ops_inbox_triage_markers.values()
+    )
     status = (
         "PASS"
         if screenshot_exists
@@ -1338,6 +1352,7 @@ def capture_vs4_product_alpha_browser_proof(
         and keyboard_focus_ok
         and ask_readability_ok
         and decision_pages_ok
+        and ops_inbox_triage_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1368,6 +1383,9 @@ def capture_vs4_product_alpha_browser_proof(
         "decision_pages_required": True,
         "decision_pages": decision_pages,
         "decision_pages_markers": decision_pages_markers,
+        "ops_inbox_triage_required": True,
+        "ops_inbox_triage": ops_inbox_triage,
+        "ops_inbox_triage_markers": ops_inbox_triage_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1394,6 +1412,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **ask_readability_markers,
                 "decision_pages_markers_present": decision_pages_ok,
                 **decision_pages_markers,
+                "ops_inbox_triage_markers_present": ops_inbox_triage_ok,
+                **ops_inbox_triage_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value

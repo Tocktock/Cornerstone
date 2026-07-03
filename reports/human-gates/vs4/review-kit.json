@@ -46,6 +46,7 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_008_ASK_RESULT_READABILITY.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
     "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json",
     "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
@@ -123,6 +124,7 @@
           "vs4_h01_remains_human_required": true
         },
         "commands_to_run_before_review": [
+          "make verify-vs4-product-alpha-ops-inbox-triage",
           "make verify-vs4-product-alpha-ask-injection-boundary",
           "make verify-vs4-product-alpha-decision-pages",
           "make verify-vs4-product-alpha-ask-readability",
@@ -143,6 +145,7 @@
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_008_ASK_RESULT_READABILITY.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
           "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "reports/human-gates/vs4/VS4-H01.json"
         ],
@@ -161,7 +164,7 @@
           "production_readiness_claimed_by_package": 0,
           "security_acceptance_claimed_by_package": 0
         },
-        "package_digest_sha256": "dd94b60d3a552041dab0a344aeea7a2fba716732ef79911f2bfc2cd038c11d26",
+        "package_digest_sha256": "322eb6204eeac8e342d1eef1db596e5ed7d86c28a34b5756f139855633158d33",
         "package_id": "vs4_human_gate_vs4_h01",
         "package_path": "reports/human-gates/vs4/VS4-H01.json",
         "pass_claim_allowed": false,
@@ -198,7 +201,7 @@
           "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
           "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
           "Use the Claims and Actions nav items and confirm the destination pages expose review state, evidence, policy, dry-run, local/mock boundary, and no-live-writeback status.",
-          "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
+          "Inspect Ops Inbox triage lanes, selected-item detail, and Evidence/Audit detail and confirm returning work is understandable.",
           "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
           "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
           "Inspect the narrow mobile proof and confirm Drop, Ask, Ops Inbox, workspace context, Brief detail, and Learn review remain understandable without body-level horizontal overflow.",
@@ -212,15 +215,15 @@
           {
             "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
             "present": true,
-            "sha256": "93993117fbfaa7e9d834ab7ecd963df331ab9aa569ca7f2ac0687448ea4e24b7",
+            "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
             "summary": {
               "blocking": 0,
               "fail": 0,
               "human_required": 1,
-              "in_this_slice": 7,
+              "in_this_slice": 10,
               "not_run": 0,
               "pass": 27,
-              "previous_slice": 20,
+              "previous_slice": 17,
               "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
               "scenario_count": 28
             }
@@ -276,6 +279,10 @@
           {
             "kind": "slice_contract",
             "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md"
           }
         ],
         "review_record_contract": {
@@ -311,15 +318,15 @@
         "scenario_report": {
           "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "present": true,
-          "sha256": "93993117fbfaa7e9d834ab7ecd963df331ab9aa569ca7f2ac0687448ea4e24b7",
+          "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
           "summary": {
             "blocking": 0,
             "fail": 0,
             "human_required": 1,
-            "in_this_slice": 7,
+            "in_this_slice": 10,
             "not_run": 0,
             "pass": 27,
-            "previous_slice": 20,
+            "previous_slice": 17,
             "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
             "scenario_count": 28
           }
@@ -412,7 +419,7 @@
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "ids": {
-    "git_commit": "a501075",
+    "git_commit": "b0f3179",
     "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
   },
   "mode": "local_scaffold",
