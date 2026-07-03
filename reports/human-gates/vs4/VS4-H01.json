@@ -35,6 +35,7 @@
     "vs4_h01_remains_human_required": true
   },
   "commands_to_run_before_review": [
+    "make verify-vs4-product-alpha-desktop-overflow",
     "make verify-vs4-product-alpha-action-execution-boundary",
     "make verify-vs4-product-alpha-ops-inbox-triage",
     "make verify-vs4-product-alpha-ask-injection-boundary",
@@ -59,7 +60,8 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
-    "tmp/test-vs4-product-alpha-full-for-human-package.json",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md",
+    "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json"
   ],
   "expected_behavior": "Human accepts or rejects whether the daily loop is usable, understandable, product-first, evidence-aware, and not misleading.",
@@ -77,13 +79,13 @@
     "production_readiness_claimed_by_package": 0,
     "security_acceptance_claimed_by_package": 0
   },
-  "package_digest_sha256": "7929ba9e57328fe44d87e9e6ce7c346cc4615afeea30f0c8bb7ee043319f2a52",
+  "package_digest_sha256": "6d24ee654ae1843eff5a086150607d7cb07df9086a3dc68416cf4b583d576d1b",
   "package_id": "vs4_human_gate_vs4_h01",
   "package_path": "reports/human-gates/vs4/VS4-H01.json",
   "pass_claim_allowed": false,
   "product_claim_allowed": false,
   "readiness_status": "ready_for_human_review",
-  "record_template_path": "tmp/test-vs4-h01.review-record.template.json",
+  "record_template_path": "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
   "reject_conditions": [
     "The user cannot tell what stayed local/mock or whether live external writeback happened.",
     "A Claim, Memory/Wiki candidate, or Action Card appears approved or durable without review evidence.",
@@ -122,14 +124,15 @@
     "Inspect the Ask result and confirm created work is readable before raw refs while evidence refs remain available in progressive detail.",
     "Inspect unsafe Ask prompt evidence and confirm it cannot approve memory, approve claims, execute actions, change policy, call providers, or expand authority.",
     "Inspect the Action execution boundary and confirm unauthorized execution/approval denial shows policy, audit, safety envelope, resolution path, and zero provider/writeback side effects.",
+    "Inspect desktop overflow proof and confirm long policy, safety-envelope, evidence, and audit tokens wrap without body-level horizontal scrolling.",
     "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
     "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
   ],
   "review_input_artifacts": [
     {
-      "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
+      "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
       "present": true,
-      "sha256": "d0eb9da0326addddd4e872eae041b7ba964abc5c86425efd0d17bbc9a0536c20",
+      "sha256": "360e0fd54c18b68ea3c0de4b0a9588ff6442c223b9cb10b0cf61ce3d179c18bb",
       "summary": {
         "blocking": 0,
         "fail": 0,
@@ -201,6 +204,10 @@
     {
       "kind": "slice_contract",
       "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md"
+    },
+    {
+      "kind": "slice_contract",
+      "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md"
     }
   ],
   "review_record_contract": {
@@ -234,9 +241,9 @@
   },
   "scenario_id": "VS4-H01",
   "scenario_report": {
-    "path": "tmp/test-vs4-product-alpha-full-for-human-package.json",
+    "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "present": true,
-    "sha256": "d0eb9da0326addddd4e872eae041b7ba964abc5c86425efd0d17bbc9a0536c20",
+    "sha256": "360e0fd54c18b68ea3c0de4b0a9588ff6442c223b9cb10b0cf61ce3d179c18bb",
     "summary": {
       "blocking": 0,
       "fail": 0,

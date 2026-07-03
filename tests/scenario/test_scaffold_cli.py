@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11450,7 +11450,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11508,7 +11508,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11558,7 +11558,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11597,7 +11597,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11638,7 +11638,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11679,7 +11679,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11728,7 +11728,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11786,7 +11786,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11855,7 +11855,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11913,7 +11913,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-012-action-execution-boundary")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11979,6 +11979,72 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("action_safety_envelope: denied", decision_pages["action_page_text"])
         self.assertEqual(
             payload["proof_boundary"]["vs4_slice_012_action_execution_boundary"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+        )
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_desktop_overflow_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-004",
+            "VS4-UI-010",
+            "VS4-UI-011",
+            "VS4-REF-002",
+            "VS4-REG-003",
+            "VS4-REG-006",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-desktop-overflow.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-013-desktop-overflow-containment")
+        self.assertEqual(payload["slice_contract"], "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        desktop_layout = payload["browser_proof"]["responsive_layout"]
+        desktop_markers = payload["browser_proof"]["responsive_markers"]
+        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        self.assertFalse(desktop_layout["horizontal_overflow"])
+        self.assertTrue(desktop_layout["desktop_overflow_contained"])
+        self.assertTrue(desktop_layout["long_token_wrapping_ok"])
+        self.assertLessEqual(desktop_layout["document_scroll_width"], desktop_layout["inner_width"] + 1)
+        self.assertEqual(desktop_layout["horizontal_overflow_delta_px"], 0)
+        self.assertTrue(desktop_markers["document_scroll_width_lte_viewport_width"])
+
+        mobile_layout = payload["mobile_browser_proof"]["responsive_layout"]
+        self.assertEqual(payload["mobile_browser_proof"]["status"], "PASS")
+        self.assertFalse(mobile_layout["horizontal_overflow"])
+        self.assertLessEqual(mobile_layout["document_scroll_width"], mobile_layout["inner_width"] + 1)
+
+        decision_pages = payload["browser_proof"]["decision_pages"]
+        for marker in [
+            "action_execution_boundary_visible",
+            "action_approval_denial_visible",
+            "action_denial_safety_envelope_visible",
+            "action_denial_no_provider_result_visible",
+            "action_denial_direct_provider_absent",
+        ]:
+            self.assertTrue(decision_pages["markers"][marker], marker)
+        self.assertIn("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED", decision_pages["action_page_text"])
+        self.assertIn("CS_ACTION_APPROVER_UNAUTHORIZED", decision_pages["action_page_text"])
+        self.assertIn("action_safety_envelope: denied", decision_pages["action_page_text"])
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_013_desktop_overflow_containment"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
         )
         self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
@@ -12053,6 +12119,8 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("unsafe Ask" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("Ops Inbox triage lanes" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("Action execution boundary" in item for item in package_row["review_checklist"]))
+        self.assertTrue(any("desktop overflow proof" in item for item in package_row["review_checklist"]))
+        self.assertIn("make verify-vs4-product-alpha-desktop-overflow", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])
@@ -12073,6 +12141,10 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertIn(
             "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
+            package_row["evidence_refs"],
+        )
+        self.assertIn(
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md",
             package_row["evidence_refs"],
         )
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())

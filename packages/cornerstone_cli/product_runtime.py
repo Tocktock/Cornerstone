@@ -666,6 +666,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border: 1px solid var(--line);
       border-radius: 8px;
       padding: 18px;
+      min-width: 0;
     }}
     .product-panel h3, .work-row h3 {{
       margin: 0 0 6px;
@@ -903,6 +904,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       display: inline-flex;
       align-items: center;
       min-height: 26px;
+      min-width: 0;
       border: 1px solid #c9d8e4;
       border-radius: 999px;
       background: #f8fbfd;
@@ -910,6 +912,8 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       padding: 3px 8px;
       font-size: 12px;
       font-weight: 700;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }}
     .search-layout, .artifact-layout {{
       display: grid;
@@ -927,6 +931,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-radius: 8px;
       background: #ffffff;
       padding: 12px;
+      min-width: 0;
     }}
     .source-preview {{
       min-height: 180px;
@@ -1086,6 +1091,9 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-radius: 8px;
       padding: 10px 12px;
       color: #5f4305;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }}
     .danger-note {{
       border-left: 4px solid #b91c1c;
@@ -1093,6 +1101,9 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-radius: 8px;
       padding: 10px 12px;
       color: #7f1d1d;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }}
     section {{ padding: 22px 28px; border-bottom: 1px solid var(--line); }}
     h1 {{ margin: 0; font-size: 24px; letter-spacing: 0; }}
@@ -1192,7 +1203,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     }}
     .detail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 12px; min-width: 0; }}
     .detail-grid div {{ border-top: 1px solid var(--line); padding-top: 8px; min-height: 54px; min-width: 0; }}
-    .detail-grid span:not(.label), .detail-grid code, .brief-block p, .source-preview code {{
+    .detail-grid span:not(.label), .detail-grid code, .brief-block p, .source-preview code, .product-panel p, .badge {{
       overflow-wrap: anywhere;
       word-break: break-word;
     }}
@@ -2301,7 +2312,9 @@ Search phrase: alpha-evidence-anchor.</code>
       const doc = document.documentElement;
       const body = document.body;
       const innerWidth = window.innerWidth || doc.clientWidth || 0;
-      const documentScrollWidth = Math.max(doc.scrollWidth || 0, body.scrollWidth || 0);
+      const bodyScrollWidth = body.scrollWidth || 0;
+      const documentScrollWidth = Math.max(doc.scrollWidth || 0, bodyScrollWidth);
+      const horizontalOverflow = documentScrollWidth > innerWidth + 1;
       const stateScroll = document.querySelector("[data-vs4-state-matrix-scroll='contained']");
       const stateTable = document.querySelector(".state-matrix");
       const stateScrollRect = stateScroll ? stateScroll.getBoundingClientRect() : null;
@@ -2310,8 +2323,12 @@ Search phrase: alpha-evidence-anchor.</code>
         inner_width: innerWidth,
         inner_height: window.innerHeight || doc.clientHeight || 0,
         document_scroll_width: documentScrollWidth,
+        body_scroll_width: bodyScrollWidth,
+        horizontal_overflow_delta_px: Math.max(0, documentScrollWidth - innerWidth),
+        desktop_overflow_contained: !horizontalOverflow,
+        long_token_wrapping_ok: !horizontalOverflow,
         viewport_meta_present: Boolean(document.querySelector("meta[name='viewport'][content*='width=device-width']")),
-        horizontal_overflow: documentScrollWidth > innerWidth + 1,
+        horizontal_overflow: horizontalOverflow,
         main_grid_columns: gridColumnCount("main"),
         topbar_grid_columns: gridColumnCount(".topbar"),
         drop_ask_grid_columns: gridColumnCount(".drop-ask-grid"),

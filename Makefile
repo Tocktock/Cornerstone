@@ -1,4 +1,4 @@
-.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs4-product-alpha-shell verify-vs4-product-alpha-brief-detail verify-vs4-product-alpha-slice-003 verify-vs4-product-alpha-human-package verify-vs4-product-alpha-ux-polish-learn verify-vs4-product-alpha-responsive-mobile verify-vs4-product-alpha-keyboard-focus verify-vs4-product-alpha-ask-readability verify-vs4-product-alpha-decision-pages verify-vs4-product-alpha-ask-injection-boundary verify-vs4-product-alpha-ops-inbox-triage verify-vs4-product-alpha-action-execution-boundary verify-vs2-local-range verify-vs2-production-like verify-vs2-security verify-connector-contract-adapter generate-connectorhub-human-gate-artifacts generate-connectorhub-engineering-trail-manifest verify-connectorhub-engineering-trail verify-local-fast
+.PHONY: verify-docs verify-scenario-matrix verify-scaffold-cli verify-vs0-runtime verify-vs0-acceptance verify-vs0-evux verify-vs0-operator-ui verify-vs1-ontology verify-vs4-product-alpha-shell verify-vs4-product-alpha-brief-detail verify-vs4-product-alpha-slice-003 verify-vs4-product-alpha-human-package verify-vs4-product-alpha-ux-polish-learn verify-vs4-product-alpha-responsive-mobile verify-vs4-product-alpha-keyboard-focus verify-vs4-product-alpha-ask-readability verify-vs4-product-alpha-decision-pages verify-vs4-product-alpha-ask-injection-boundary verify-vs4-product-alpha-ops-inbox-triage verify-vs4-product-alpha-action-execution-boundary verify-vs4-product-alpha-desktop-overflow verify-vs2-local-range verify-vs2-production-like verify-vs2-security verify-connector-contract-adapter generate-connectorhub-human-gate-artifacts generate-connectorhub-engineering-trail-manifest verify-connectorhub-engineering-trail verify-local-fast
 
 verify-docs:
 	scripts/verify_sot_docs.sh
@@ -81,6 +81,10 @@ verify-vs4-product-alpha-ops-inbox-triage:
 
 verify-vs4-product-alpha-action-execution-boundary:
 	PATH="$(PWD):$$PATH" cornerstone scenario verify vs4-product-alpha-ui-daily-loop --scenario VS4-GATE-001 --scenario VS4-UI-007 --scenario VS4-UI-009 --scenario VS4-UI-010 --scenario VS4-UI-011 --scenario VS4-REF-002 --scenario VS4-REG-003 --scenario VS4-REG-004 --scenario VS4-REG-007 --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json
+	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json --json
+
+verify-vs4-product-alpha-desktop-overflow:
+	PATH="$(PWD):$$PATH" cornerstone scenario verify vs4-product-alpha-ui-daily-loop --scenario VS4-GATE-001 --scenario VS4-UI-001 --scenario VS4-UI-004 --scenario VS4-UI-010 --scenario VS4-UI-011 --scenario VS4-REF-002 --scenario VS4-REG-003 --scenario VS4-REG-006 --scenario VS4-REG-007 --json --output reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json
 	PATH="$(PWD):$$PATH" cornerstone scenario gate reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json --json
 
 verify-vs2-security:

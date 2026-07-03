@@ -47,6 +47,8 @@
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md",
     "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
     "reports/human-gates/vs4/VS4-H01.json",
     "vs4_human_gate_package:reports/human-gates/vs4/VS4-H01.json",
@@ -124,6 +126,8 @@
           "vs4_h01_remains_human_required": true
         },
         "commands_to_run_before_review": [
+          "make verify-vs4-product-alpha-desktop-overflow",
+          "make verify-vs4-product-alpha-action-execution-boundary",
           "make verify-vs4-product-alpha-ops-inbox-triage",
           "make verify-vs4-product-alpha-ask-injection-boundary",
           "make verify-vs4-product-alpha-decision-pages",
@@ -146,6 +150,8 @@
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_010_ASK_INJECTION_BOUNDARY.md",
           "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md",
+          "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md",
           "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "reports/human-gates/vs4/VS4-H01.json"
         ],
@@ -164,7 +170,7 @@
           "production_readiness_claimed_by_package": 0,
           "security_acceptance_claimed_by_package": 0
         },
-        "package_digest_sha256": "322eb6204eeac8e342d1eef1db596e5ed7d86c28a34b5756f139855633158d33",
+        "package_digest_sha256": "6d24ee654ae1843eff5a086150607d7cb07df9086a3dc68416cf4b583d576d1b",
         "package_id": "vs4_human_gate_vs4_h01",
         "package_path": "reports/human-gates/vs4/VS4-H01.json",
         "pass_claim_allowed": false,
@@ -208,6 +214,8 @@
           "Walk the keyboard/focus proof and confirm skip link, primary nav, Continue links, Evidence Drawer, Ask, Claim, Action Card, and proof details are reachable and understandable.",
           "Inspect the Ask result and confirm created work is readable before raw refs while evidence refs remain available in progressive detail.",
           "Inspect unsafe Ask prompt evidence and confirm it cannot approve memory, approve claims, execute actions, change policy, call providers, or expand authority.",
+          "Inspect the Action execution boundary and confirm unauthorized execution/approval denial shows policy, audit, safety envelope, resolution path, and zero provider/writeback side effects.",
+          "Inspect desktop overflow proof and confirm long policy, safety-envelope, evidence, and audit tokens wrap without body-level horizontal scrolling.",
           "Confirm the UI does not imply production, on-prem, final security, live-provider, or human UX readiness.",
           "Record accept/reject decision, screenshots or recording refs, task outcomes, issues, and redaction note."
         ],
@@ -215,15 +223,15 @@
           {
             "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
             "present": true,
-            "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
+            "sha256": "360e0fd54c18b68ea3c0de4b0a9588ff6442c223b9cb10b0cf61ce3d179c18bb",
             "summary": {
               "blocking": 0,
               "fail": 0,
               "human_required": 1,
-              "in_this_slice": 10,
+              "in_this_slice": 9,
               "not_run": 0,
               "pass": 27,
-              "previous_slice": 17,
+              "previous_slice": 18,
               "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
               "scenario_count": 28
             }
@@ -283,6 +291,14 @@
           {
             "kind": "slice_contract",
             "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_011_OPS_INBOX_TRIAGE_DETAIL.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_012_ACTION_EXECUTION_BOUNDARY.md"
+          },
+          {
+            "kind": "slice_contract",
+            "path": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_013_DESKTOP_OVERFLOW_CONTAINMENT.md"
           }
         ],
         "review_record_contract": {
@@ -318,15 +334,15 @@
         "scenario_report": {
           "path": "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
           "present": true,
-          "sha256": "baabb15d742539ecfc5ad1f64fa4e852947ff6e0283cc609d1b59aad21782c2f",
+          "sha256": "360e0fd54c18b68ea3c0de4b0a9588ff6442c223b9cb10b0cf61ce3d179c18bb",
           "summary": {
             "blocking": 0,
             "fail": 0,
             "human_required": 1,
-            "in_this_slice": 10,
+            "in_this_slice": 9,
             "not_run": 0,
             "pass": 27,
-            "previous_slice": 17,
+            "previous_slice": 18,
             "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
             "scenario_count": 28
           }
@@ -419,7 +435,7 @@
     "weakest_applicable_scenario_result": "HUMAN_REQUIRED"
   },
   "ids": {
-    "git_commit": "b0f3179",
+    "git_commit": "08069a8",
     "vs4_human_gate_package_id": "vs4_human_gate_vs4_h01"
   },
   "mode": "local_scaffold",
