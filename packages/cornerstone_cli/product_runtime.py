@@ -313,6 +313,7 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-evidence-audit-detail",
     "make verify-vs4-product-alpha-human-review-handoff",
     "make verify-vs4-product-alpha-human-package",
     "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
@@ -1545,13 +1546,13 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         </div>
         <details class="evidence-drawer" id="shared-evidence-drawer" data-vs4-evidence-drawer="reachable">
           <summary data-vs4-keyboard-disclosure="evidence-drawer">Supporting evidence and activity</summary>
-          <div class="detail-grid">
-            <div><span class="label">Source</span><span>Original source remains primary.</span></div>
-            <div><span class="label">Support</span><span>Evidence-backed findings require source refs.</span></div>
-            <div><span class="label">Safety check</span><span>Approval and local/mock action state stay attached.</span></div>
-            <div><span class="label">Activity</span><span>Audit detail remains one action away.</span></div>
-          </div>
-        </details>
+              <div class="detail-grid">
+                <div><span class="label">Source</span><span>Original source remains primary.</span></div>
+                <div><span class="label">Support</span><span>Evidence-backed findings require source refs.</span></div>
+                <div><span class="label">Safety check</span><span>Approval and local/mock action state stay attached.</span></div>
+                <div><span class="label">Activity</span><span>Audit detail remains one action away.</span> <a class="text-link" href="#audit-detail">Open audit detail</a></div>
+              </div>
+            </details>
       </section>
       <section
         id="vs4-brief-detail"
@@ -1936,12 +1937,64 @@ Search phrase: alpha-evidence-anchor.</code>
                 <div><span class="label">External calls</span><span id="vs4-action-page-calls">real_external_http_calls=0</span></div>
                 <div><span class="label">Denial codes</span><span id="vs4-action-page-denial-codes">CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED; CS_ACTION_APPROVER_UNAUTHORIZED</span></div>
                 <div><span class="label">Safety envelope</span><span id="vs4-action-page-safety-envelope">action_safety_envelope: denied; workflow_run_started=false; execution_result_created=false; provider_mutations=0</span></div>
+                <div><span class="label">Activity detail</span><a class="text-link" href="#audit-detail">Open Evidence / Audit</a></div>
               </div>
             </details>
           </aside>
         </div>
       </section>
-      <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
+      <section
+        id="audit-detail"
+        data-surface-name="Audit Detail"
+        data-vs4-audit-detail="visible"
+        data-vs4-evidence-audit-detail="product"
+        data-vs4-audit-live-provider-claimed="false"
+        data-vs4-human-ux-claimed="false"
+      >
+        <div class="decision-layout">
+          <div class="product-panel">
+            <div class="label">Evidence / Audit</div>
+            <h2>Inspect the source, safety check, activity, and learning path.</h2>
+            <p id="vs4-audit-summary">Activity records keep the daily loop explainable before any claim, memory, action, or learning candidate becomes durable authority.</p>
+            <div class="detail-grid">
+              <div><span class="label">Source</span><span id="vs4-audit-source-ref">Source waits for preserved artifact.</span></div>
+              <div><span class="label">Provenance</span><span id="vs4-audit-provenance-ref">Checksum and derived text refs stay attached.</span></div>
+              <div><span class="label">Supporting evidence</span><span id="vs4-audit-evidence-ref">Evidence Bundle waits for preparation.</span></div>
+              <div><span class="label">Claim</span><span id="vs4-audit-claim-ref">Claim candidate waits for evidence-backed review.</span></div>
+              <div><span class="label">Action</span><span id="vs4-audit-action-ref">Action Card remains local/mock and approval pending.</span></div>
+              <div><span class="label">Safety check</span><span id="vs4-audit-policy-ref">No live external writeback; safety check pending.</span></div>
+            </div>
+            <div class="activity-list" data-vs4-audit-timeline="visible">
+              <div class="activity-row"><strong>Source saved</strong><span id="vs4-audit-source-activity">Artifact preservation not run.</span></div>
+              <div class="activity-row"><strong>Evidence linked</strong><span id="vs4-audit-evidence-activity">Evidence Bundle not run.</span></div>
+              <div class="activity-row"><strong>Claim guarded</strong><span id="vs4-audit-claim-activity">Evidence-free approval remains blocked.</span></div>
+              <div class="activity-row"><strong>Action previewed</strong><span id="vs4-audit-action-activity">Local/mock action preview not run.</span></div>
+              <div class="activity-row"><strong>Learn review</strong><span id="vs4-audit-learn-activity">Learning candidate waits for outcome evidence.</span></div>
+            </div>
+          </div>
+          <aside class="decision-stack">
+            <div class="product-panel" data-vs4-audit-safety-boundary="visible">
+              <div class="label">Boundary</div>
+              <h3>Local activity record</h3>
+              <p id="vs4-audit-boundary">Production, on-prem, final security, live-provider, and human UX readiness are not claimed. Audit detail is local Product Alpha evidence only.</p>
+              <div class="status-row">
+                <span class="badge safe">Local mode</span>
+                <span class="badge safe">No live writeback</span>
+                <span class="badge warn">Review required</span>
+              </div>
+            </div>
+            <details class="evidence-drawer" id="vs4-audit-evidence-drawer" data-vs4-audit-evidence-drawer="reachable">
+              <summary>Evidence and activity refs</summary>
+              <div class="detail-grid">
+                <div><span class="label">Brief</span><span id="vs4-audit-brief-ref">Brief not prepared.</span></div>
+                <div><span class="label">Audit verification</span><span id="vs4-audit-verify-state">cornerstone audit verify --json not run.</span></div>
+                <div><span class="label">Learn candidate</span><span id="vs4-audit-learn-ref">Learn review not prepared.</span></div>
+                <div><span class="label">External calls</span><span id="vs4-audit-external-calls">real_external_http_calls=0</span></div>
+              </div>
+            </details>
+          </aside>
+        </div>
+      </section>
       <section
         id="vs0-evux-loop"
         data-evux-clicked="false"
@@ -2675,9 +2728,35 @@ Search phrase: alpha-evidence-anchor.</code>
         const audit = auditResponse.payload.audit_integrity || {{}};
         vs4State.audit = {{
           verification_status: audit.status,
-          event_count: audit.event_count
+          event_count: audit.event_count,
+          audit_refs: auditResponse.payload.audit_refs || [],
+          evidence_refs: [
+            "artifact:" + firstEvidence.artifact_id,
+            "evidence_bundle:" + bundle.evidence_bundle_id,
+            "brief:" + brief.brief_id,
+            "claim:" + claim.claim_id,
+            "action:" + action.action_id
+          ],
+          policy_decision: vs4State.action.policy_decision || "allow",
+          local_only: true,
+          live_provider_claimed: false
         }};
         setText("vs4-evidence-audit", document.getElementById("vs4-evidence-audit").textContent + "; audit=" + audit.status);
+        setText("vs4-audit-summary", "Activity records connect Source, Brief, Claim, Memory/Wiki, Action Card, and Learn review without changing durable authority.");
+        setText("vs4-audit-source-ref", "artifact:" + firstEvidence.artifact_id);
+        setText("vs4-audit-provenance-ref", "storage=" + firstEvidence.original_storage_ref + "; derived=" + firstEvidence.derived_text_ref);
+        setText("vs4-audit-evidence-ref", "evidence_bundle:" + bundle.evidence_bundle_id);
+        setText("vs4-audit-claim-ref", "claim:" + claim.claim_id + "; trust=" + (claim.trust_state || "evidence_backed"));
+        setText("vs4-audit-action-ref", "action:" + action.action_id + "; mode=Draft / Local / Mock");
+        setText("vs4-audit-policy-ref", "policy_decision:" + vs4State.audit.policy_decision + "; real_external_http_calls=0");
+        setText("vs4-audit-source-activity", "Saved source artifact:" + firstEvidence.artifact_id + "; original preserved.");
+        setText("vs4-audit-evidence-activity", "Evidence Bundle " + bundle.evidence_bundle_id + " supports the Brief and Claim candidate.");
+        setText("vs4-audit-claim-activity", "CS_CLAIM_EVIDENCE_REQUIRED blocked evidence-free approval; supported claim remains reviewable.");
+        setText("vs4-audit-action-activity", "Action " + action.action_id + " has dry-run " + vs4State.action.dry_run_id + " and no live writeback.");
+        setText("vs4-audit-boundary", "Local Product Alpha evidence only. Production, on-prem, final security, live-provider, and human UX readiness are not claimed.");
+        setText("vs4-audit-brief-ref", "brief:" + brief.brief_id);
+        setText("vs4-audit-verify-state", "cornerstone audit verify --json => " + (audit.status || "unknown") + "; event_count=" + (audit.event_count || 0));
+        setText("vs4-audit-external-calls", "real_external_http_calls=0; provider_mutations=0");
 
         vs4State.learn = {{
           learning_candidate_id: "learn:" + brief.brief_id,
@@ -2699,6 +2778,8 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-learn-scope", vs4State.learn.owner_scope);
         setText("vs4-learn-state", "needs review; review_required=true");
         setText("vs4-learn-durable-change", "cannot change durable memory, answers, claims, or actions before review");
+        setText("vs4-audit-learn-activity", "Learn candidate " + vs4State.learn.learning_candidate_id + " stays needs review before durable behavior changes.");
+        setText("vs4-audit-learn-ref", vs4State.learn.learning_candidate_id + "; review_required=true");
 
         vs4State.completed = vs4Passes();
         document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
@@ -3147,6 +3228,38 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function collectVs4EvidenceAuditDetail() {{
+      const auditDetail = document.getElementById("audit-detail");
+      const auditText = auditDetail ? auditDetail.textContent || "" : "";
+      const drawer = document.getElementById("vs4-audit-evidence-drawer");
+      const sharedDrawerLink = document.querySelector("#shared-evidence-drawer a[href='#audit-detail']");
+      const actionDrawerLink = document.querySelector("#vs4-action-page-evidence-detail a[href='#audit-detail']");
+      const timelineRows = Array.from(document.querySelectorAll("[data-vs4-audit-timeline='visible'] .activity-row"));
+      const markerSet = {{
+        audit_detail_visible: Boolean(auditDetail && auditDetail.dataset.vs4AuditDetail === "visible"),
+        product_language_visible: ["Evidence / Audit", "Inspect the source", "Activity records", "Learn review"].every((term) => auditText.includes(term)),
+        source_provenance_visible: auditText.includes("artifact:") && auditText.includes("storage=") && auditText.includes("derived="),
+        evidence_claim_action_refs_visible: ["evidence_bundle:", "brief:", "claim:", "action:"].every((term) => auditText.includes(term)),
+        safety_check_visible: auditText.includes("policy_decision:") && auditText.includes("real_external_http_calls=0"),
+        timeline_visible: timelineRows.length >= 5 && ["Source saved", "Evidence linked", "Claim guarded", "Action previewed", "Learn review"].every((term) => auditText.includes(term)),
+        learn_review_linked: auditText.includes("Learn candidate learn:") && auditText.includes("review_required=true"),
+        progressive_refs_visible: Boolean(drawer && drawer.tagName.toLowerCase() === "details" && drawer.open === false),
+        reachable_from_evidence_drawer: Boolean(sharedDrawerLink),
+        reachable_from_action_detail: Boolean(actionDrawerLink),
+        audit_verify_visible: auditText.includes("cornerstone audit verify --json => success"),
+        local_boundary_visible: Boolean(auditDetail && auditDetail.dataset.vs4AuditLiveProviderClaimed === "false") &&
+          auditText.includes("Local Product Alpha evidence only") &&
+          auditText.includes("not claimed"),
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']") &&
+          Boolean(auditDetail && auditDetail.dataset.vs4HumanUxClaimed === "false")
+      }};
+      return {{
+        schema_version: "cs.vs4_evidence_audit_detail_proof.v0",
+        timeline_row_count: timelineRows.length,
+        audit_text: auditText.replace(/\\s+/g, " ").trim().slice(0, 1800),
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
@@ -3156,6 +3269,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const decisionPages = collectVs4DecisionPages();
       const opsInboxTriage = collectVs4OpsInboxTriage();
       const humanReviewHandoff = collectVs4HumanReviewHandoff();
+      const evidenceAuditDetail = collectVs4EvidenceAuditDetail();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -3169,6 +3283,7 @@ Search phrase: alpha-evidence-anchor.</code>
         decision_pages: decisionPages,
         ops_inbox_triage: opsInboxTriage,
         human_review_handoff: humanReviewHandoff,
+        evidence_audit_detail: evidenceAuditDetail,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -3186,6 +3301,7 @@ Search phrase: alpha-evidence-anchor.</code>
           home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
           ops_inbox_triage_complete: Object.values(opsInboxTriage.markers).every((value) => value === true),
           human_review_handoff_complete: Object.values(humanReviewHandoff.markers).every((value) => value === true),
+          evidence_audit_detail_complete: Object.values(evidenceAuditDetail.markers).every((value) => value === true),
           claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
