@@ -29,6 +29,8 @@ API_ROUTES = [
     "GET /search-snapshots/{snapshot_id}",
     "POST /evidence-bundles",
     "GET /evidence-bundles/{evidence_bundle_id}",
+    "POST /briefs",
+    "GET /briefs/{brief_id}",
     "POST /ontology/suggestion-sets",
     "POST /ontology/suggestion-sets/{suggestion_set_id}/review",
     "POST /ontology/suggestion-sets/{suggestion_set_id}/promote",
@@ -49,6 +51,7 @@ API_ROUTES = [
 
 UI_SURFACES = [
     "Home/Ops Inbox",
+    "Brief Detail",
     "Artifact Viewer",
     "Search",
     "Claim Builder",
@@ -70,7 +73,7 @@ VS4_CONTINUE_WORK = [
         "title": "Evidence-backed Brief",
         "status": "Needs review",
         "body": "Vendor renewal notes are ready for support check, claim draft, memory review, and local action preview.",
-        "href": "#vs4-brief-preview",
+        "href": "#vs4-brief-detail",
     },
     {
         "kind": "Claim",
@@ -216,7 +219,7 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
         all(row["present"] for row in checks if row["name"] in {name for name, _ in runtime_checks})
         and len(API_ROUTES) >= 15
         and set(UI_SURFACES)
-        == {"Home/Ops Inbox", "Artifact Viewer", "Search", "Claim Builder", "Action Card", "Audit Detail"}
+        == {"Home/Ops Inbox", "Brief Detail", "Artifact Viewer", "Search", "Claim Builder", "Action Card", "Audit Detail"}
     )
     production_release_ready = False
     last_runtime_report = _latest_successful_report(root, "vs0-product-runtime")
@@ -290,6 +293,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
     autorun_evux_value = "true" if scenario == "vs0-evux" and autorun_evux else "false"
     autorun_vs1_value = "true" if scenario == "vs1-ontology" and autorun_evux else "false"
+    autorun_vs4_value = "true" if scenario == "vs4-brief-detail" and autorun_evux else "false"
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -495,6 +499,69 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       font-weight: 700;
       color: var(--accent);
     }}
+    .brief-workbench {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+      gap: 16px;
+      align-items: start;
+    }}
+    .brief-stack, .brief-rail {{
+      display: grid;
+      gap: 12px;
+    }}
+    .brief-block {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 14px;
+    }}
+    .brief-block h3 {{
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }}
+    .brief-block ul {{
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }}
+    .brief-block li {{
+      margin: 6px 0;
+    }}
+    .trust-ladder {{
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }}
+    .trust-step {{
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fbfcfd;
+      padding: 7px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }}
+    .trust-step[data-state="active"] {{
+      color: var(--safe);
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+    }}
+    .review-note {{
+      border-left: 4px solid var(--warn);
+      background: #fffbeb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #5f4305;
+    }}
+    .danger-note {{
+      border-left: 4px solid #b91c1c;
+      background: #fef2f2;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #7f1d1d;
+    }}
     section {{ padding: 22px 28px; border-bottom: 1px solid var(--line); }}
     h1 {{ margin: 0; font-size: 24px; letter-spacing: 0; }}
     h2 {{ margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }}
@@ -650,7 +717,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       main {{ grid-template-columns: 1fr; }}
       nav {{ border-right: 0; border-bottom: 1px solid var(--line); }}
       header, section {{ padding-left: 18px; padding-right: 18px; }}
-      .topbar, .hero-grid, .drop-ask-grid, .ops-grid {{ grid-template-columns: 1fr; }}
+      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder {{ grid-template-columns: 1fr; }}
       .workspace-strip {{ justify-content: flex-start; }}
       .work-row {{ grid-template-columns: 1fr; }}
     }}
@@ -759,6 +826,91 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
             <div><span class="label">Activity</span><span>Audit detail remains one action away.</span></div>
           </div>
         </details>
+      </section>
+      <section
+        id="vs4-brief-detail"
+        data-surface-name="Brief Detail"
+        data-vs4-brief-detail="visible"
+        data-vs4-reference-images-pass-evidence="false"
+        data-vs4-cli-parity="required"
+      >
+        <div class="brief-workbench">
+          <div class="brief-stack">
+            <div class="brief-block">
+              <div class="label">Evidence-backed Brief</div>
+              <h2>Brief Detail</h2>
+              <p>The Brief keeps the saved source, support, gaps, claim candidate, memory candidate, action draft, and activity together as one reviewable work item.</p>
+              <div class="status-row">
+                <span class="badge safe" id="vs4-source-state" data-vs4-source-state="pending">Source pending</span>
+                <span class="badge safe" id="vs4-brief-state" data-vs4-brief-state="pending">Brief pending</span>
+                <span class="badge warn" id="vs4-claim-approval-state" data-vs4-claim-approval-state="draft">Claim review pending</span>
+                <span class="badge warn" id="vs4-memory-state" data-vs4-memory-approved="false">Memory needs review</span>
+                <span class="badge safe" id="vs4-action-mode">Action mode: local/mock</span>
+              </div>
+              <button id="run-vs4-brief-flow" type="button">Prepare Brief work item</button>
+            </div>
+            <div class="brief-block" data-vs4-brief-summary="visible">
+              <h3>Summary</h3>
+              <p id="vs4-brief-summary-text">Waiting for preserved source and evidence-backed processing.</p>
+              <ul>
+                <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">Not prepared.</span></li>
+                <li><strong>Gap / uncertainty:</strong> <span id="vs4-brief-gap">Decision scope is not broad enough until more sources are added.</span></li>
+                <li><strong>Activity:</strong> <span id="vs4-brief-activity">No activity yet.</span></li>
+              </ul>
+            </div>
+            <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
+              <summary>Shared Evidence Drawer</summary>
+              <div class="detail-grid">
+                <div><span class="label">Source</span><span id="vs4-evidence-source">Original source not prepared.</span></div>
+                <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">No supporting snippet yet.</span></div>
+                <div><span class="label">Why it supports</span><span id="vs4-evidence-rationale">Support rationale appears after evidence is created.</span></div>
+                <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">Checksum, storage, and derived text refs remain attached.</span></div>
+                <div><span class="label">Related objects</span><span id="vs4-evidence-related">Brief, Claim candidate, Memory candidate, and Action Card.</span></div>
+                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">Audit refs appear after local processing.</span></div>
+              </div>
+            </details>
+          </div>
+          <aside class="brief-rail">
+            <div class="brief-block" id="vs4-claim-candidate" data-vs4-claim-candidate="visible">
+              <div class="label">Claim candidate</div>
+              <h3 id="vs4-claim-title">Draft claim waits for evidence.</h3>
+              <div class="trust-ladder" aria-label="Claim trust ladder">
+                <span class="trust-step" data-state="done">Draft</span>
+                <span class="trust-step" id="vs4-trust-evidence-backed" data-state="active">Evidence-backed</span>
+                <span class="trust-step" id="vs4-trust-approved" data-state="pending">Approved</span>
+              </div>
+              <p id="vs4-claim-rationale">Rationale and supporting evidence appear after Brief preparation.</p>
+              <div class="danger-note" id="vs4-zero-evidence-denial">Zero-evidence approval is blocked until an Evidence Bundle is attached.</div>
+            </div>
+            <div class="brief-block" id="vs4-memory-candidate-detail" data-vs4-memory-candidate-detail="visible">
+              <div class="label">Memory/Wiki candidate</div>
+              <h3>Draft / Needs review</h3>
+              <p id="vs4-memory-rationale">Candidate knowledge remains source-linked and cannot influence approved memory before review.</p>
+              <div class="detail-grid">
+                <div><span class="label">Trust</span><span id="vs4-memory-trust">draft</span></div>
+                <div><span class="label">Freshness</span><span id="vs4-memory-freshness">current, review required</span></div>
+                <div><span class="label">Owner / workspace</span><span>local-user / default</span></div>
+                <div><span class="label">Controls</span><span>Inspect, correct, forget, export after review.</span></div>
+              </div>
+            </div>
+            <div class="brief-block" id="vs4-action-card-detail" data-vs4-action-card-detail="visible">
+              <div class="label">Action Card draft</div>
+              <h3 id="vs4-action-goal">Review local follow-up.</h3>
+              <p id="vs4-action-why">No action executes until evidence, policy, and approval state are clear.</p>
+              <div class="detail-grid">
+                <div><span class="label">Evidence</span><span id="vs4-action-evidence">Evidence not attached.</span></div>
+                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">Brief and Claim candidate.</span></div>
+                <div><span class="label">Proposed change</span><span id="vs4-action-change">Draft a local follow-up task.</span></div>
+                <div><span class="label">Expected impact</span><span id="vs4-action-impact">real_external_http_calls=0</span></div>
+                <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
+                <div><span class="label">Approval</span><span id="vs4-action-approval">pending</span></div>
+                <div><span class="label">Execution mode</span><span id="vs4-action-execution-mode">Draft / Local / Mock</span></div>
+                <div><span class="label">Activity</span><span id="vs4-action-activity">Audit available after preparation.</span></div>
+              </div>
+              <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
+            </div>
+          </aside>
+        </div>
       </section>
       <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
       <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
@@ -1005,6 +1157,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         }}
       }};
     }};
+    const vs4Autorun = {autorun_vs4_value};
     const evuxAutorun = {autorun_evux_value};
     const evuxScope = {{
       tenant_id: "local-dev",
@@ -1092,6 +1245,263 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       traceStep(path, {{ status: response.status, payload }});
       return {{ response, payload }};
     }}
+    const vs4Trace = [];
+    const vs4State = {{
+      completed: false,
+      source: {{}},
+      search: {{}},
+      evidence: {{}},
+      brief: {{}},
+      claim: {{}},
+      memory: {{
+        status: "draft",
+        trust_state: "draft",
+        owner_approved: false,
+        can_influence_answers: false,
+        can_influence_actions: false
+      }},
+      action: {{}},
+      audit: {{}},
+      negative_evidence: {{
+        zero_evidence_approval_created_approved_claim: 0,
+        approved_memory_before_review: 0,
+        real_external_http_calls: 0,
+        live_external_writeback_claimed: 0
+      }}
+    }};
+    function traceVs4(name, payload) {{
+      vs4Trace.push({{ step: name, payload }});
+    }}
+    async function vs4Api(path, body) {{
+      const response = await fetch(path, {{
+        method: "POST",
+        headers: {{ "content-type": "application/json" }},
+        body: JSON.stringify(Object.assign({{}}, evuxScope, body || {{}}))
+      }});
+      const payload = await response.json();
+      traceVs4(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    async function vs4Get(path) {{
+      const response = await fetch(path);
+      const payload = await response.json();
+      traceVs4(path, {{ status: response.status, payload }});
+      return {{ response, payload }};
+    }}
+    function vs4Passes() {{
+      return Boolean(
+        vs4State.source.artifact_id &&
+        vs4State.source.original_storage_ref &&
+        vs4State.search.search_snapshot_id &&
+        vs4State.evidence.evidence_bundle_id &&
+        vs4State.evidence.snippet &&
+        vs4State.brief.brief_id &&
+        vs4State.brief.status === "evidence_backed" &&
+        vs4State.brief.key_point_count > 0 &&
+        vs4State.brief.evidence_link_count > 0 &&
+        vs4State.brief.gap_count > 0 &&
+        vs4State.claim.claim_id &&
+        vs4State.claim.trust_state === "evidence_backed" &&
+        vs4State.claim.zero_evidence_denied === true &&
+        vs4State.memory.status === "draft" &&
+        vs4State.memory.owner_approved === false &&
+        vs4State.memory.can_influence_answers === false &&
+        vs4State.memory.can_influence_actions === false &&
+        vs4State.action.action_id &&
+        vs4State.action.mode === "Draft / Local / Mock" &&
+        vs4State.action.connector_mocked === true &&
+        vs4State.action.direct_provider_access === false &&
+        vs4State.action.real_external_http_calls === 0 &&
+        vs4State.audit.verification_status === "success" &&
+        Object.values(vs4State.negative_evidence).every((value) => value === 0)
+      );
+    }}
+    async function runVs4BriefFlow() {{
+      const button = document.getElementById("run-vs4-brief-flow");
+      if (button) button.disabled = true;
+      try {{
+        const artifactResponse = await vs4Api("/artifacts", {{
+          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
+          source: "local_fixture",
+          media_type: "text/plain",
+          trust: "untrusted"
+        }});
+        const artifact = artifactResponse.payload.artifact || {{}};
+        vs4State.source = {{
+          artifact_id: artifact.artifact_id,
+          checksum_sha256: artifact.checksum_sha256,
+          original_storage_ref: artifact.original_storage_ref,
+          derived_status: artifact.derived && artifact.derived.status,
+          provenance: artifact.provenance || {{}},
+          audit_refs: artifactResponse.payload.audit_refs || []
+        }};
+        setText("vs4-source-state", "Saved source / Searchable");
+        document.getElementById("vs4-source-state").dataset.vs4SourceState = "saved-searchable";
+
+        const searchResponse = await vs4Api("/search", {{ query: "alpha-evidence-anchor" }});
+        const snapshot = searchResponse.payload.search_snapshot || {{}};
+        const firstResult = (snapshot.results || [])[0] || {{}};
+        vs4State.search = {{
+          search_snapshot_id: snapshot.search_snapshot_id,
+          result_count: snapshot.result_count,
+          evidence_refs: firstResult.evidence_refs || []
+        }};
+
+        const bundleResponse = await vs4Api("/evidence-bundles", {{ search_snapshot_id: snapshot.search_snapshot_id }});
+        const bundle = bundleResponse.payload.evidence_bundle || {{}};
+        const firstEvidence = (bundle.evidence_items || [])[0] || {{}};
+        vs4State.evidence = {{
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          search_snapshot_id: bundle.search_snapshot_id,
+          snippet: firstEvidence.snippet || "",
+          original_storage_ref: firstEvidence.original_storage_ref,
+          derived_text_ref: firstEvidence.derived_text_ref,
+          artifact_id: firstEvidence.artifact_id,
+          audit_refs: bundleResponse.payload.audit_refs || []
+        }};
+
+        const briefResponse = await vs4Api("/briefs", {{ evidence_bundle_id: bundle.evidence_bundle_id }});
+        const brief = briefResponse.payload.brief || {{}};
+        vs4State.brief = {{
+          brief_id: brief.brief_id,
+          status: brief.status,
+          title: brief.title,
+          key_point_count: (brief.key_points || []).length,
+          evidence_link_count: (brief.evidence_links || []).length,
+          gap_count: (brief.uncertainty || []).length,
+          suggested_outputs: brief.suggested_outputs || [],
+          audit_refs: briefResponse.payload.audit_refs || []
+        }};
+        setText("vs4-brief-state", "Evidence-backed Brief ready");
+        document.getElementById("vs4-brief-state").dataset.vs4BriefState = "evidence-backed";
+        setText("vs4-brief-summary-text", brief.title || "Evidence-backed Brief ready.");
+        setText("vs4-supported-finding", (brief.key_points || [])[0] || firstEvidence.snippet || "Supported finding attached.");
+        setText("vs4-brief-gap", (brief.uncertainty || [])[0] || "Add more source material before broad reuse.");
+        setText("vs4-brief-activity", "brief:" + brief.brief_id + " created; audit refs " + asList(briefResponse.payload.audit_refs || []));
+        setText("vs4-evidence-source", "artifact:" + firstEvidence.artifact_id);
+        setText("vs4-evidence-snippet", firstEvidence.snippet || "No snippet.");
+        setText("vs4-evidence-rationale", "Finding is supported because it comes from the saved source and Evidence Bundle.");
+        setText("vs4-evidence-provenance", "storage=" + firstEvidence.original_storage_ref + "; derived=" + firstEvidence.derived_text_ref);
+        setText("vs4-evidence-audit", asList([...(bundleResponse.payload.audit_refs || []), ...(briefResponse.payload.audit_refs || [])]));
+
+        const unsupportedClaim = await vs4Api("/claims", {{
+          statement: "Unsupported VS4 claim should not be approved."
+        }});
+        const unsupportedRecord = unsupportedClaim.payload.claim || {{}};
+        const zeroApprove = await vs4Api("/claims/" + unsupportedRecord.claim_id + "/approve", {{}});
+        const zeroDenied = zeroApprove.response.status === 400 &&
+          (zeroApprove.payload.errors || []).some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
+
+        const claimResponse = await vs4Api("/claims", {{
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          statement: "The saved source is ready for a local evidence-backed Brief review."
+        }});
+        const claim = claimResponse.payload.claim || {{}};
+        vs4State.claim = {{
+          claim_id: claim.claim_id,
+          trust_state: claim.trust_state,
+          status: claim.status,
+          statement: claim.statement,
+          evidence_bundle_id: claim.evidence_bundle && claim.evidence_bundle.evidence_bundle_id,
+          artifact_refs: claim.evidence_bundle && claim.evidence_bundle.artifact_refs || [],
+          zero_evidence_denied: zeroDenied,
+          unsupported_claim_id: unsupportedRecord.claim_id
+        }};
+        vs4State.negative_evidence.zero_evidence_approval_created_approved_claim = zeroDenied ? 0 : 1;
+        setText("vs4-claim-title", claim.statement || "Claim candidate ready.");
+        setText("vs4-claim-rationale", "Rationale: supported by evidence_bundle:" + bundle.evidence_bundle_id + " and still scoped to " + evuxScope.workspace_id + ".");
+        setText("vs4-zero-evidence-denial", "CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.");
+        setText("vs4-claim-approval-state", "Claim: Draft / Evidence-backed");
+
+        vs4State.memory = {{
+          status: "draft",
+          trust_state: "draft",
+          owner_approved: false,
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          source_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "artifact:" + firstEvidence.artifact_id],
+          freshness: "current, review required",
+          can_influence_answers: false,
+          can_influence_actions: false,
+          hidden_profile: false
+        }};
+        setText("vs4-memory-state", "Memory: Draft / Needs review");
+        setText("vs4-memory-rationale", "Draft candidate from evidence_bundle:" + bundle.evidence_bundle_id + "; not approved durable memory.");
+        setText("vs4-memory-trust", "draft; owner_approved=false");
+        setText("vs4-memory-freshness", "current; review required before durable use");
+
+        const actionResponse = await vs4Api("/actions", {{
+          claim_id: claim.claim_id,
+          goal: "Create local follow-up from the Evidence-backed Brief",
+          action_kind: "draft_task",
+          risk: "medium",
+          connector: "mock_connector",
+          target: "mock://vs4-brief-detail/browser"
+        }});
+        const action = actionResponse.payload.action_card || {{}};
+        const dryRun = action.dry_run || {{}};
+        const impact = dryRun.expected_impact || {{}};
+        vs4State.action = {{
+          action_id: action.action_id,
+          goal: action.goal,
+          evidence_bundle_id: action.evidence && action.evidence.evidence_bundle_id,
+          risk: action.risk,
+          approval_status: action.approval && action.approval.status,
+          policy_decision: action.policy_decision && action.policy_decision.decision,
+          mode: "Draft / Local / Mock",
+          connector_mocked: action.connector_boundary && action.connector_boundary.mocked === true,
+          direct_provider_access: action.connector_boundary ? action.connector_boundary.direct_provider_access : null,
+          real_external_http_calls: impact.real_external_http_calls || 0,
+          expected_connector_calls: impact.expected_connector_calls || 0,
+          dry_run_id: dryRun.dry_run_id
+        }};
+        setText("vs4-action-goal", action.goal || "Local follow-up action");
+        setText("vs4-action-why", "Why: preserve the review next step without external writeback.");
+        setText("vs4-action-evidence", "evidence_bundle:" + vs4State.action.evidence_bundle_id);
+        setText("vs4-action-impact-objects", "brief:" + brief.brief_id + "; claim:" + claim.claim_id);
+        setText("vs4-action-change", (dryRun.diff && dryRun.diff.after) || "would create local draft task");
+        setText("vs4-action-impact", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
+        setText("vs4-action-risk", action.risk || "medium");
+        setText("vs4-action-approval", vs4State.action.approval_status || "pending");
+        setText("vs4-action-execution-mode", vs4State.action.mode + "; connector=mock_connector");
+        setText("vs4-action-activity", "action:" + action.action_id + "; dry_run:" + vs4State.action.dry_run_id);
+
+        const auditResponse = await vs4Api("/audit/verify", {{}});
+        const audit = auditResponse.payload.audit_integrity || {{}};
+        vs4State.audit = {{
+          verification_status: audit.status,
+          event_count: audit.event_count
+        }};
+        setText("vs4-evidence-audit", document.getElementById("vs4-evidence-audit").textContent + "; audit=" + audit.status);
+
+        vs4State.completed = vs4Passes();
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
+      }} catch (error) {{
+        traceVs4("browser_error", {{ message: String(error) }});
+        vs4State.completed = false;
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = "false";
+      }} finally {{
+        if (button) button.disabled = false;
+      }}
+    }}
+    window.__cornerstoneVs4BriefEvidence = function() {{
+      return {{
+        schema_version: "cs.vs4_brief_ui_state.v0",
+        completed: vs4State.completed,
+        passes: vs4Passes(),
+        state: vs4State,
+        trace: vs4Trace,
+        markers: {{
+          brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
+          source_state_visible: Boolean(document.getElementById("vs4-source-state")),
+          shared_evidence_drawer_visible: Boolean(document.querySelector("[data-vs4-brief-evidence-drawer='reachable']")),
+          claim_candidate_visible: Boolean(document.querySelector("[data-vs4-claim-candidate='visible']")),
+          memory_candidate_visible: Boolean(document.querySelector("[data-vs4-memory-candidate-detail='visible']")),
+          action_card_visible: Boolean(document.querySelector("[data-vs4-action-card-detail='visible']")),
+          reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
+          cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
+        }}
+      }};
+    }};
     const vs1Autorun = {autorun_vs1_value};
     const vs1Trace = [];
     const vs1State = {{
@@ -1811,8 +2221,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     document.getElementById("step-approve-run").addEventListener("click", approveStep);
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
+    document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-evux").addEventListener("click", runEvux);
     document.getElementById("run-vs1-ontology").addEventListener("click", runVs1Ontology);
+    if (vs4Autorun) {{
+      window.addEventListener("load", () => setTimeout(() => document.getElementById("run-vs4-brief-flow").click(), 50));
+    }}
     if (evuxAutorun) {{
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
     }}
@@ -1917,6 +2331,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "evidence-bundles":
             self._show_evidence_bundle(parts[1])
             return
+        if len(parts) == 2 and parts[0] == "briefs":
+            self._show_brief(parts[1])
+            return
         if len(parts) == 2 and parts[0] == "claims":
             self._show_claim(parts[1])
             return
@@ -1946,6 +2363,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["evidence-bundles"]:
             self._create_evidence_bundle(body)
+            return
+        if parts == ["briefs"]:
+            self._create_brief(body)
             return
         if parts == ["ontology", "suggestion-sets"]:
             self._create_ontology_suggestion_set(body)
@@ -2182,6 +2602,32 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
         )
 
+    def _show_brief(self, brief_id: str) -> None:
+        scope = self._query_scope()
+        result = self.store.show_brief(brief_id, scope)
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_BRIEF_NOT_FOUND", "message": "Brief not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Brief is outside the requested scope."}]), 403)
+            return
+        brief = result["brief"]
+        evidence = brief.get("evidence_bundle", {})
+        refs = [f"brief:{brief_id}"]
+        if evidence.get("evidence_bundle_id"):
+            refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        if evidence.get("search_snapshot_id"):
+            refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
+        refs.extend(evidence.get("artifact_refs", []))
+        self._send_json(
+            _json_response(
+                "success",
+                brief=brief,
+                evidence_refs=refs,
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
     def _show_claim(self, claim_id: str) -> None:
         scope = self._query_scope()
         claim = self.store.get_claim(claim_id)
@@ -2286,6 +2732,41 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 "success",
                 evidence_bundle=bundle,
                 evidence_refs=[f"evidence_bundle:{bundle['evidence_bundle_id']}", f"search_snapshot:{bundle['search_snapshot_id']}"],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
+    def _create_brief(self, body: dict[str, Any]) -> None:
+        scope = _scope_from_body(body)
+        result = self.store.create_brief_from_evidence_bundle(str(body.get("evidence_bundle_id", "")), scope)
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_EVIDENCE_BUNDLE_NOT_FOUND", "message": "Evidence Bundle not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Evidence Bundle is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "evidence_required":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_BRIEF_EVIDENCE_REQUIRED", "message": "Evidence-backed Brief creation requires at least one evidence item."}],
+                ),
+                400,
+            )
+            return
+        brief = result["brief"]
+        evidence = brief.get("evidence_bundle", {})
+        refs = [f"brief:{brief['brief_id']}"]
+        if evidence.get("evidence_bundle_id"):
+            refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        if evidence.get("search_snapshot_id"):
+            refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
+        refs.extend(evidence.get("artifact_refs", []))
+        self._send_json(
+            _json_response(
+                "success",
+                brief=brief,
+                evidence_refs=refs,
                 audit_refs=[f"audit:{result['audit_event']['event_id']}"],
             )
         )

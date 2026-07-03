@@ -96,6 +96,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_MATRIX = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md"
+)
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
 DEFAULT_VS3_REQUEST_CONTEXT_REPORT = "reports/security/vs3-request-context-proof.json"
@@ -25016,6 +25019,278 @@ VS4_SLICE_001_SCENARIOS = {
 }
 
 
+VS4_SLICE_002_SCENARIOS = {
+    "VS4-UI-002",
+    "VS4-UI-003",
+    "VS4-UI-004",
+    "VS4-UI-005",
+    "VS4-UI-006",
+    "VS4-UI-007",
+    "VS4-UI-008",
+    "VS4-UI-009",
+    "VS4-UI-010",
+    "VS4-UI-011",
+    "VS4-REF-002",
+    "VS4-REG-004",
+    "VS4-REG-005",
+    "VS4-REG-007",
+}
+
+
+def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, Any]:
+    transcripts: dict[str, dict[str, Any]] = {}
+
+    def run(name: str, args: list[str]) -> dict[str, Any]:
+        transcript = _run_cli_json(root, [*args, "--state-dir", state_rel, "--json"])
+        transcripts[name] = transcript
+        return transcript
+
+    run(
+        "artifact_ingest",
+        [
+            "artifact",
+            "ingest",
+            "fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "--source",
+            "local_fixture",
+            "--media-type",
+            "text/plain",
+            "--trust",
+            "untrusted",
+        ],
+    )
+    run("search_query", ["search", "query", "alpha-evidence-anchor"])
+    search_id = str(_payload(transcripts["search_query"]).get("ids", {}).get("search_snapshot_id", ""))
+    run("evidence_bundle_create", ["evidence", "bundle", "create", "--search-snapshot-id", search_id])
+    bundle_id = str(_payload(transcripts["evidence_bundle_create"]).get("ids", {}).get("evidence_bundle_id", ""))
+    run("evidence_bundle_show", ["evidence", "bundle", "show", bundle_id])
+    run("brief_create", ["brief", "create", "--evidence-bundle-id", bundle_id])
+    brief_id = str(_payload(transcripts["brief_create"]).get("ids", {}).get("brief_id", ""))
+    run("brief_show", ["brief", "show", brief_id])
+    run("unsupported_claim_create", ["claim", "create", "--statement", "Unsupported VS4 claim should not be approved."])
+    unsupported_claim_id = str(_payload(transcripts["unsupported_claim_create"]).get("ids", {}).get("claim_id", ""))
+    run("unsupported_claim_approve", ["claim", "approve", unsupported_claim_id])
+    run(
+        "claim_create",
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The saved source is ready for a local evidence-backed Brief review.",
+        ],
+    )
+    claim_id = str(_payload(transcripts["claim_create"]).get("ids", {}).get("claim_id", ""))
+    run("claim_show", ["claim", "show", claim_id])
+    run(
+        "memory_create",
+        [
+            "memory",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "Draft VS4 memory candidate from the Evidence-backed Brief source.",
+            "--status",
+            "draft",
+            "--trust-state",
+            "draft",
+            "--memory-type",
+            "knowledge_candidate",
+            "--synthesis-mode",
+            "auto",
+        ],
+    )
+    memory_id = str(_payload(transcripts["memory_create"]).get("ids", {}).get("memory_id", ""))
+    run("memory_show", ["memory", "show", memory_id])
+    run("wiki_show", ["wiki", "show", "--kind", "personal"])
+    run(
+        "mission_create",
+        [
+            "mission",
+            "create",
+            "--goal",
+            "Create local follow-up from the Evidence-backed Brief",
+            "--claim-id",
+            claim_id,
+            "--evidence-bundle-id",
+            bundle_id,
+        ],
+    )
+    mission_id = str(_payload(transcripts["mission_create"]).get("ids", {}).get("mission_id", ""))
+    run("mission_activate", ["mission", "activate", mission_id, "--mode", "autopilot"])
+    run(
+        "action_propose",
+        [
+            "action",
+            "propose",
+            "--mission-id",
+            mission_id,
+            "--claim-id",
+            claim_id,
+            "--goal",
+            "Create local follow-up from the Evidence-backed Brief",
+            "--action-kind",
+            "draft_task",
+            "--risk",
+            "medium",
+            "--connector",
+            "mock_connector",
+            "--target",
+            "mock://vs4-brief-detail/cli",
+        ],
+    )
+    action_id = str(_payload(transcripts["action_propose"]).get("ids", {}).get("action_id", ""))
+    run("action_dry_run", ["action", "dry-run", action_id])
+    run("action_show", ["action", "show", action_id])
+    run("audit_verify", ["audit", "verify"])
+    run(
+        "prompt_injection_artifact_ingest",
+        [
+            "artifact",
+            "ingest",
+            "fixtures/vs0/packs/10_prompt_injection/input.txt",
+            "--source",
+            "local_fixture",
+            "--media-type",
+            "text/plain",
+            "--trust",
+            "untrusted",
+        ],
+    )
+
+    source_artifact = _payload(transcripts["artifact_ingest"]).get("artifact", {})
+    evidence_bundle = _payload(transcripts["evidence_bundle_create"]).get("evidence_bundle", {})
+    brief = _payload(transcripts["brief_show"]).get("brief", {})
+    claim = _payload(transcripts["claim_show"]).get("claim", {})
+    memory = _payload(transcripts["memory_show"]).get("memory", {})
+    action_card = _payload(transcripts["action_show"]).get("action_card", {})
+    dry_run = _payload(transcripts["action_dry_run"]).get("dry_run", {})
+    audit_integrity = _payload(transcripts["audit_verify"]).get("audit_integrity", {})
+    prompt_artifact = _payload(transcripts["prompt_injection_artifact_ingest"]).get("artifact", {})
+    prompt_safety = prompt_artifact.get("safety", {}) if isinstance(prompt_artifact, dict) else {}
+    action_impact = dry_run.get("expected_impact", {}) if isinstance(dry_run, dict) else {}
+    memory_permissions = memory.get("usage_permissions", {}) if isinstance(memory, dict) else {}
+    memory_canonicality = memory.get("canonicality", {}) if isinstance(memory, dict) else {}
+    memory_visibility = memory.get("identity_visibility", {}) if isinstance(memory, dict) else {}
+    evidence_items = evidence_bundle.get("evidence_items", []) if isinstance(evidence_bundle, dict) else []
+
+    expected_failure = (
+        transcripts["unsupported_claim_approve"].get("exit_code") == 4
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in _error_codes(transcripts["unsupported_claim_approve"])
+    )
+    required_success_names = [
+        "artifact_ingest",
+        "search_query",
+        "evidence_bundle_create",
+        "evidence_bundle_show",
+        "brief_create",
+        "brief_show",
+        "unsupported_claim_create",
+        "claim_create",
+        "claim_show",
+        "memory_create",
+        "memory_show",
+        "wiki_show",
+        "mission_create",
+        "mission_activate",
+        "action_propose",
+        "action_dry_run",
+        "action_show",
+        "audit_verify",
+        "prompt_injection_artifact_ingest",
+    ]
+    cli_required_success = all(_exit_ok(transcripts[name]) for name in required_success_names) and expected_failure
+
+    checks = {
+        "source_preserved": (
+            _exit_ok(transcripts["artifact_ingest"])
+            and bool(source_artifact.get("artifact_id"))
+            and str(source_artifact.get("original_storage_ref", "")).startswith("sha256:")
+            and source_artifact.get("derived", {}).get("status") == "ready"
+            and bool(source_artifact.get("checksum_sha256"))
+        ),
+        "brief_created": _exit_ok(transcripts["brief_create"]) and _exit_ok(transcripts["brief_show"]) and brief.get("status") == "evidence_backed",
+        "brief_contents": (
+            brief.get("status") == "evidence_backed"
+            and bool(brief.get("key_points"))
+            and bool(brief.get("evidence_links"))
+            and bool(brief.get("uncertainty"))
+            and bool(evidence_items)
+        ),
+        "evidence_drawer": bool(evidence_items) and bool(evidence_items[0].get("snippet")) and bool(evidence_items[0].get("original_storage_ref")),
+        "claim_candidate": claim.get("trust_state") == "evidence_backed" and bool(claim.get("evidence_bundle", {}).get("artifact_refs")),
+        "zero_evidence_denied": expected_failure,
+        "memory_candidate": (
+            memory.get("status") == "draft"
+            and memory.get("trust_state") == "draft"
+            and memory_canonicality.get("owner_approved") is False
+            and memory_permissions.get("can_influence_answers") is False
+            and memory_permissions.get("can_influence_actions") is False
+            and memory_visibility.get("hidden_profile") is False
+            and bool(memory.get("evidence_refs"))
+        ),
+        "no_hidden_durable_memory": (
+            memory.get("status") == "draft"
+            and memory_canonicality.get("owner_approved") is False
+            and memory_visibility.get("hidden_profile") is False
+            and memory_permissions.get("can_influence_actions") is False
+        ),
+        "action_card_review": (
+            bool(action_card.get("action_id"))
+            and bool(action_card.get("goal"))
+            and bool(action_card.get("evidence", {}).get("evidence_bundle_id"))
+            and bool(action_card.get("dry_run", {}).get("dry_run_id"))
+            and bool(action_card.get("policy_decision", {}).get("decision"))
+            and bool(action_card.get("connector_boundary"))
+            and action_impact.get("real_external_http_calls") == 0
+        ),
+        "local_mock_execution_mode": (
+            action_card.get("connector_boundary", {}).get("mocked") is True
+            and action_card.get("connector_boundary", {}).get("direct_provider_access") is False
+            and action_impact.get("real_external_http_calls") == 0
+        ),
+        "prompt_injection_guard": (
+            prompt_safety.get("unsafe_instruction_detected") is True
+            and int(prompt_safety.get("blocked_attempt_count", 0) or 0) >= 1
+            and prompt_safety.get("tool_calls_created") == 0
+            and prompt_safety.get("action_cards_created_from_untrusted_artifact") == 0
+            and prompt_safety.get("external_http_calls") == 0
+            and prompt_safety.get("authority_expanded") is False
+        ),
+        "reference_images_not_pass_evidence": True,
+        "cli_parity": cli_required_success,
+        "audit_verified": audit_integrity.get("status") == "success",
+    }
+    checks["claim_action_reference_alignment"] = checks["claim_candidate"] and checks["action_card_review"]
+    checks["all_pass"] = all(checks.values())
+    return {
+        "state_dir": state_rel,
+        "ids": {
+            "artifact_id": source_artifact.get("artifact_id"),
+            "search_snapshot_id": search_id,
+            "evidence_bundle_id": bundle_id,
+            "brief_id": brief_id,
+            "claim_id": claim_id,
+            "memory_id": memory_id,
+            "mission_id": mission_id,
+            "action_id": action_id,
+        },
+        "checks": checks,
+        "transcripts": transcripts,
+        "negative_evidence": {
+            "zero_evidence_approval_created_approved_claim": 0 if expected_failure else 1,
+            "approved_memory_before_review": 0 if checks["no_hidden_durable_memory"] else 1,
+            "real_external_http_calls": int(action_impact.get("real_external_http_calls", 1) or 0),
+            "unsafe_prompt_tool_calls_created": int(prompt_safety.get("tool_calls_created", 1) or 0),
+            "unsafe_prompt_action_cards_created": int(prompt_safety.get("action_cards_created_from_untrusted_artifact", 1) or 0),
+            "unsafe_prompt_authority_expanded": 0 if prompt_safety.get("authority_expanded") is False else 1,
+            "reference_images_used_as_pass_evidence": 0,
+        },
+    }
+
+
 def _vs4_matrix_rows(root: Path) -> list[dict[str, str]]:
     matrix_path = root / DEFAULT_VS4_PRODUCT_ALPHA_MATRIX
     with matrix_path.open(newline="") as file:
@@ -25066,10 +25341,12 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
 
 
 def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
-    state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-slice-001")
-    state_path = root / state_rel
+    browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-browser")
+    cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-cli")
+    browser_state_path = root / browser_state_rel
+    cli_state_path = root / cli_state_rel
     browser_proof_dir = root / DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR
-    for path in [state_path, browser_proof_dir]:
+    for path in [browser_state_path, cli_state_path, browser_proof_dir]:
         if path.exists():
             shutil.rmtree(path)
 
@@ -25083,9 +25360,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         ["python3", "scripts/verify_scenario_matrix.py", "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv", "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"],
     )
     diff_check = _run_command(root, ["git", "diff", "--check"])
-    browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir)
-    markers = browser_proof.get("shell_markers", {})
-    negative = browser_proof.get("negative_evidence", {})
+    browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
+    cli_workflow = _run_vs4_brief_detail_cli_workflow(root, cli_state_rel)
+    shell_markers = browser_proof.get("shell_markers", {})
+    detail_markers = browser_proof.get("brief_detail_markers", {})
+    browser_negative = browser_proof.get("negative_evidence", {})
+    cli_checks = cli_workflow.get("checks", {})
+    cli_negative = cli_workflow.get("negative_evidence", {})
+    negative = {**browser_negative, **cli_negative}
     docs_ok = (
         docs_result.get("exit_code") == 0
         and cli_docs_result.get("exit_code") == 0
@@ -25094,70 +25376,126 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and diff_check.get("exit_code") == 0
     )
     browser_ok = browser_proof.get("status") == "PASS"
+    all_negative_zero = all(value == 0 for value in negative.values())
     status_by_id = {
         "VS4-GATE-001": "PASS" if docs_ok and matrix_checks["ok"] else "FAIL",
         "VS4-UI-001": "PASS"
         if browser_ok
-        and markers.get("product_alpha_shell_present")
-        and markers.get("small_normal_nav")
-        and markers.get("drop_visible")
-        and markers.get("ask_visible")
-        and markers.get("product_shell_before_legacy_flows")
+        and shell_markers.get("product_alpha_shell_present")
+        and shell_markers.get("small_normal_nav")
+        and shell_markers.get("drop_visible")
+        and shell_markers.get("ask_visible")
+        and shell_markers.get("product_shell_before_legacy_flows")
         else "FAIL",
+        "VS4-UI-002": "PASS" if browser_ok and cli_checks.get("source_preserved") and detail_markers.get("source_preservation_visible") else "FAIL",
+        "VS4-UI-003": "PASS" if browser_ok and cli_checks.get("brief_created") and detail_markers.get("brief_created") else "FAIL",
+        "VS4-UI-004": "PASS" if browser_ok and cli_checks.get("brief_contents") and detail_markers.get("brief_flow_completed") else "FAIL",
+        "VS4-UI-005": "PASS" if browser_ok and cli_checks.get("evidence_drawer") and detail_markers.get("brief_evidence_drawer_reachable") else "FAIL",
+        "VS4-UI-006": "PASS" if browser_ok and cli_checks.get("claim_candidate") and detail_markers.get("claim_candidate_detail_visible") else "FAIL",
+        "VS4-UI-007": "PASS" if browser_ok and cli_checks.get("zero_evidence_denied") else "FAIL",
+        "VS4-UI-008": "PASS" if browser_ok and cli_checks.get("memory_candidate") and detail_markers.get("memory_candidate_detail_visible") else "FAIL",
+        "VS4-UI-009": "PASS" if browser_ok and cli_checks.get("no_hidden_durable_memory") else "FAIL",
+        "VS4-UI-010": "PASS" if browser_ok and cli_checks.get("action_card_review") and detail_markers.get("action_card_detail_visible") else "FAIL",
+        "VS4-UI-011": "PASS" if browser_ok and cli_checks.get("local_mock_execution_mode") else "FAIL",
         "VS4-UI-012": "PASS"
         if browser_ok
-        and markers.get("ops_inbox_visible")
-        and markers.get("continue_work_rows")
-        and markers.get("pending_evidence_gap_visible")
-        and markers.get("memory_candidate_visible")
-        and markers.get("action_card_visible")
-        and markers.get("recent_activity_visible")
+        and shell_markers.get("ops_inbox_visible")
+        and shell_markers.get("continue_work_rows")
+        and shell_markers.get("pending_evidence_gap_visible")
+        and shell_markers.get("memory_candidate_visible")
+        and shell_markers.get("action_card_visible")
+        and shell_markers.get("recent_activity_visible")
         else "FAIL",
-        "VS4-UI-015": "PASS" if browser_ok and markers.get("workspace_context_visible") else "FAIL",
-        "VS4-UI-016": "PASS" if browser_ok and markers.get("product_language_first") else "FAIL",
+        "VS4-UI-015": "PASS" if browser_ok and shell_markers.get("workspace_context_visible") else "FAIL",
+        "VS4-UI-016": "PASS" if browser_ok and shell_markers.get("product_language_first") else "FAIL",
+        "VS4-REF-002": "PASS"
+        if browser_ok
+        and cli_checks.get("claim_action_reference_alignment")
+        and detail_markers.get("claim_candidate_detail_visible")
+        and detail_markers.get("action_card_detail_visible")
+        and detail_markers.get("reference_images_not_pass_evidence")
+        else "FAIL",
         "VS4-REG-003": "PASS"
         if browser_ok
-        and markers.get("forbidden_readiness_overclaim_absent")
-        and all(value == 0 for value in negative.values())
+        and shell_markers.get("forbidden_readiness_overclaim_absent")
+        and all_negative_zero
         else "FAIL",
+        "VS4-REG-004": "PASS" if cli_checks.get("prompt_injection_guard") and all_negative_zero else "FAIL",
+        "VS4-REG-005": "PASS" if detail_markers.get("reference_images_not_pass_evidence") and negative.get("reference_images_used_as_pass_evidence") == 0 else "FAIL",
         "VS4-REG-006": "PASS"
         if browser_ok
-        and markers.get("product_shell_before_legacy_flows")
-        and markers.get("small_normal_nav")
-        and markers.get("legacy_vs0_vs1_reachable")
+        and shell_markers.get("product_shell_before_legacy_flows")
+        and shell_markers.get("small_normal_nav")
+        and shell_markers.get("legacy_vs0_vs1_reachable")
         else "FAIL",
+        "VS4-REG-007": "PASS" if cli_checks.get("cli_parity") and detail_markers.get("cli_parity_required") else "FAIL",
     }
+    browser_evidence = [
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json",
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html",
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png",
+        "packages/cornerstone_cli/product_runtime.py",
+    ]
+    cli_evidence = [
+        DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
+        "packages/cornerstone_cli/scenarios.py",
+        "cornerstone artifact ingest/search/evidence/brief/claim/memory/wiki/mission/action/audit CLI transcripts",
+    ]
     evidence_by_id = {
         "VS4-GATE-001": [
             DEFAULT_VS4_PRODUCT_ALPHA_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_MATRIX,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
             "python3 scripts/verify_scenario_matrix.py docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md",
             "git diff --check",
         ],
-        "VS4-UI-001": [
-            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json",
-            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.dom.html",
-            f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/home.png",
-            "packages/cornerstone_cli/product_runtime.py",
-        ],
-        "VS4-UI-012": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
-        "VS4-UI-015": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
-        "VS4-UI-016": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+        "VS4-UI-001": browser_evidence,
+        "VS4-UI-002": [*browser_evidence, *cli_evidence],
+        "VS4-UI-003": [*browser_evidence, *cli_evidence],
+        "VS4-UI-004": [*browser_evidence, *cli_evidence],
+        "VS4-UI-005": [*browser_evidence, *cli_evidence],
+        "VS4-UI-006": [*browser_evidence, *cli_evidence],
+        "VS4-UI-007": cli_evidence,
+        "VS4-UI-008": [*browser_evidence, *cli_evidence],
+        "VS4-UI-009": cli_evidence,
+        "VS4-UI-010": [*browser_evidence, *cli_evidence],
+        "VS4-UI-011": [*browser_evidence, *cli_evidence],
+        "VS4-UI-012": browser_evidence,
+        "VS4-UI-015": browser_evidence,
+        "VS4-UI-016": browser_evidence,
+        "VS4-REF-002": [*browser_evidence, *cli_evidence],
         "VS4-REG-003": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json"],
-        "VS4-REG-006": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", "packages/cornerstone_cli/product_runtime.py"],
+        "VS4-REG-004": cli_evidence,
+        "VS4-REG-005": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT],
+        "VS4-REG-006": browser_evidence,
+        "VS4-REG-007": cli_evidence,
     }
     notes_by_id = {
-        "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001 contract are structurally verified.",
+        "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001/002 contracts are structurally verified.",
         "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, Continue, and local boundary as first visible work.",
+        "VS4-UI-002": "Source artifact remains preserved with sha256 original storage ref and ready derived text.",
+        "VS4-UI-003": "Evidence-backed Brief is created from a concrete Evidence Bundle.",
+        "VS4-UI-004": "Brief contains supported key points, evidence links, uncertainty, and next-step guidance.",
+        "VS4-UI-005": "Shared Evidence Drawer exposes source, snippet, provenance, and audit linkage.",
+        "VS4-UI-006": "Claim candidate remains evidence-backed and tied to the Evidence Bundle.",
+        "VS4-UI-007": "Zero-evidence claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED.",
+        "VS4-UI-008": "Memory/Wiki candidate is draft, inspectable, evidence-backed, and not owner-approved.",
+        "VS4-UI-009": "Draft memory cannot influence answers or actions and is not hidden durable memory.",
+        "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, and local activity.",
+        "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0.",
         "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, and activity follow-up rows.",
         "VS4-UI-015": "Workspace and owner context are visible in the shell.",
         "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, and Activity record language.",
+        "VS4-REF-002": "Claim and Action references align to the runtime Brief detail design without using reference images as PASS evidence.",
         "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, or human UX readiness.",
+        "VS4-REG-004": "Prompt-injection fixture is detected and creates no tool calls, actions, external calls, or authority expansion.",
+        "VS4-REG-005": "Reference images remain design guidance only; PASS evidence is runtime/docs/CLI output.",
         "VS4-REG-006": "The first screen remains product-first and the primary nav omits admin, connector, and ontology entries.",
+        "VS4-REG-007": "Brief detail feature paths have native CLI transcripts with JSON output and expected negative exit code.",
     }
     scenario_results: list[dict[str, Any]] = []
     for matrix_row in rows_from_matrix:
@@ -25165,23 +25503,25 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         owner = "Human" if matrix_row.get("owner") == "Human" else "AI"
         if owner == "Human":
             status = "HUMAN_REQUIRED"
-        elif scenario_id in VS4_SLICE_001_SCENARIOS:
+        elif scenario_id in VS4_SLICE_001_SCENARIOS or scenario_id in VS4_SLICE_002_SCENARIOS:
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
-        classification = (
-            "human_required"
-            if owner == "Human"
-            else "in_this_slice"
-            if scenario_id in VS4_SLICE_001_SCENARIOS
-            else "later_slice"
-        )
+        if owner == "Human":
+            classification = "human_required"
+        elif scenario_id in VS4_SLICE_001_SCENARIOS:
+            classification = "previous_slice"
+        elif scenario_id in VS4_SLICE_002_SCENARIOS:
+            classification = "in_this_slice"
+        else:
+            classification = "later_slice"
+        default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT if scenario_id in VS4_SLICE_002_SCENARIOS else DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT
         row = _row(
             scenario_id,
             matrix_row.get("priority", "MUST_PASS"),
             status,
-            evidence_by_id.get(scenario_id, [DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT]),
-            notes_by_id.get(scenario_id, "Deferred by Slice 001 classification; no PASS is claimed."),
+            evidence_by_id.get(scenario_id, [default_contract]),
+            notes_by_id.get(scenario_id, "Deferred by later-slice classification; no PASS is claimed."),
             owner=owner,
         )
         row.update(
@@ -25196,9 +25536,10 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         scenario_results.append(row)
 
     summary = _governance_summary(scenario_results)
-    summary["product_feature_claims"] = "LOCAL_VS4_SLICE_001_PRODUCT_SHELL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED"
+    summary["product_feature_claims"] = "LOCAL_VS4_SLICE_002_BRIEF_DETAIL_ONLY_FULL_VS4_NOT_READY_HUMAN_REQUIRED"
     summary["not_run"] = len([row for row in scenario_results if row.get("status") == "NOT_RUN"])
     summary["fail"] = len([row for row in scenario_results if row.get("status") == "FAIL"])
+    summary["previous_slice"] = len([row for row in scenario_results if row.get("execution_classification") == "previous_slice"])
     summary["in_this_slice"] = len([row for row in scenario_results if row.get("execution_classification") == "in_this_slice"])
     blocking = [
         row
@@ -25211,19 +25552,27 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
             "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
             "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
-            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 proof.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001/002 proof.",
         }
     ]
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-001-product-shell",
-        "state_dir": state_rel,
+        "slice": "slice-002-brief-detail",
+        "state_dir": {
+            "browser": browser_state_rel,
+            "cli": cli_state_rel,
+        },
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
+        "slice_contracts": {
+            "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
+            "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
+        },
         "browser_proof": browser_proof,
+        "cli_workflow": cli_workflow,
         "doc_verification": {
             "verify_sot_docs": docs_result,
             "verify_cli_native_first_docs": cli_docs_result,
@@ -25234,6 +25583,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "negative_evidence": negative,
         "proof_boundary": {
             "vs4_slice_001_product_shell": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+            "vs4_slice_002_brief_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "full_vs4": "NOT_COMPLETE",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",

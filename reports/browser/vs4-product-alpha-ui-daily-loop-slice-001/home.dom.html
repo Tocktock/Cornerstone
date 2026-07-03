@@ -201,6 +201,69 @@
       font-weight: 700;
       color: var(--accent);
     }
+    .brief-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .brief-stack, .brief-rail {
+      display: grid;
+      gap: 12px;
+    }
+    .brief-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 14px;
+    }
+    .brief-block h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .brief-block ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+    .brief-block li {
+      margin: 6px 0;
+    }
+    .trust-ladder {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .trust-step {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fbfcfd;
+      padding: 7px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .trust-step[data-state="active"] {
+      color: var(--safe);
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+    }
+    .review-note {
+      border-left: 4px solid var(--warn);
+      background: #fffbeb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #5f4305;
+    }
+    .danger-note {
+      border-left: 4px solid #b91c1c;
+      background: #fef2f2;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #7f1d1d;
+    }
     section { padding: 22px 28px; border-bottom: 1px solid var(--line); }
     h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
     h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }
@@ -356,7 +419,7 @@
       main { grid-template-columns: 1fr; }
       nav { border-right: 0; border-bottom: 1px solid var(--line); }
       header, section { padding-left: 18px; padding-right: 18px; }
-      .topbar, .hero-grid, .drop-ask-grid, .ops-grid { grid-template-columns: 1fr; }
+      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder { grid-template-columns: 1fr; }
       .workspace-strip { justify-content: flex-start; }
       .work-row { grid-template-columns: 1fr; }
     }
@@ -430,7 +493,7 @@
           <div class="product-panel" data-vs4-ops-inbox="visible">
             <div class="label">Ops Inbox</div>
             <h2>Continue work</h2>
-            <div class="work-list"><article class="work-row" data-vs4-work-kind="brief" data-vs4-work-status="needs-review"><div><span class="label">Brief</span><h3>Evidence-backed Brief</h3><p>Vendor renewal notes are ready for support check, claim draft, memory review, and local action preview.</p></div><a class="text-link" href="#vs4-brief-preview">Continue</a></article>
+            <div class="work-list"><article class="work-row" data-vs4-work-kind="brief" data-vs4-work-status="needs-review"><div><span class="label">Brief</span><h3>Evidence-backed Brief</h3><p>Vendor renewal notes are ready for support check, claim draft, memory review, and local action preview.</p></div><a class="text-link" href="#vs4-brief-detail">Continue</a></article>
 <article class="work-row" data-vs4-work-kind="claim" data-vs4-work-status="draft"><div><span class="label">Claim</span><h3>Claim candidate</h3><p>One claim is waiting for supporting evidence before approval can be requested.</p></div><a class="text-link" href="#claim-builder">Continue</a></article>
 <article class="work-row" data-vs4-work-kind="memory" data-vs4-work-status="needs-review"><div><span class="label">Memory</span><h3>Memory/Wiki candidate</h3><p>A durable knowledge proposal is visible but not saved as approved memory.</p></div><a class="text-link" href="#vs4-memory-candidates">Continue</a></article>
 <article class="work-row" data-vs4-work-kind="action" data-vs4-work-status="local-preview"><div><span class="label">Action</span><h3>Action Card draft</h3><p>A follow-up action is prepared with expected impact, risk, evidence, and no live writeback.</p></div><a class="text-link" href="#action-card">Continue</a></article></div>
@@ -469,6 +532,85 @@
             <div><span class="label">Activity</span><span>Audit detail remains one action away.</span></div>
           </div>
         </details>
+      </section>
+      <section id="vs4-brief-detail" data-surface-name="Brief Detail" data-vs4-brief-detail="visible" data-vs4-reference-images-pass-evidence="false" data-vs4-cli-parity="required" data-vs4-brief-flow-complete="true">
+        <div class="brief-workbench">
+          <div class="brief-stack">
+            <div class="brief-block">
+              <div class="label">Evidence-backed Brief</div>
+              <h2>Brief Detail</h2>
+              <p>The Brief keeps the saved source, support, gaps, claim candidate, memory candidate, action draft, and activity together as one reviewable work item.</p>
+              <div class="status-row">
+                <span class="badge safe" id="vs4-source-state" data-vs4-source-state="saved-searchable">Saved source / Searchable</span>
+                <span class="badge safe" id="vs4-brief-state" data-vs4-brief-state="evidence-backed">Evidence-backed Brief ready</span>
+                <span class="badge warn" id="vs4-claim-approval-state" data-vs4-claim-approval-state="draft">Claim: Draft / Evidence-backed</span>
+                <span class="badge warn" id="vs4-memory-state" data-vs4-memory-approved="false">Memory: Draft / Needs review</span>
+                <span class="badge safe" id="vs4-action-mode">Action mode: local/mock</span>
+              </div>
+              <button id="run-vs4-brief-flow" type="button">Prepare Brief work item</button>
+            </div>
+            <div class="brief-block" data-vs4-brief-summary="visible">
+              <h3>Summary</h3>
+              <p id="vs4-brief-summary-text">Brief for alpha-evidence-anchor</p>
+              <ul>
+                <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">alpha-evidence-anchor.</span></li>
+                <li><strong>Gap / uncertainty:</strong> <span id="vs4-brief-gap">This brief is grounded only in the attached Evidence Bundle.</span></li>
+                <li><strong>Activity:</strong> <span id="vs4-brief-activity">brief:brief_f4bddc8567d60e93 created; audit refs audit:audit_2e8358adcde808b9</span></li>
+              </ul>
+            </div>
+            <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
+              <summary>Shared Evidence Drawer</summary>
+              <div class="detail-grid">
+                <div><span class="label">Source</span><span id="vs4-evidence-source">artifact:art_2735313e0cb92563</span></div>
+                <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">alpha-evidence-anchor.</span></div>
+                <div><span class="label">Why it supports</span><span id="vs4-evidence-rationale">Finding is supported because it comes from the saved source and Evidence Bundle.</span></div>
+                <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">storage=sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be; derived=derived/art_2735313e0cb92563.txt</span></div>
+                <div><span class="label">Related objects</span><span id="vs4-evidence-related">Brief, Claim candidate, Memory candidate, and Action Card.</span></div>
+                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">audit:audit_ced000c0223f58b2, audit:audit_2e8358adcde808b9; audit=success</span></div>
+              </div>
+            </details>
+          </div>
+          <aside class="brief-rail">
+            <div class="brief-block" id="vs4-claim-candidate" data-vs4-claim-candidate="visible">
+              <div class="label">Claim candidate</div>
+              <h3 id="vs4-claim-title">The saved source is ready for a local evidence-backed Brief review.</h3>
+              <div class="trust-ladder" aria-label="Claim trust ladder">
+                <span class="trust-step" data-state="done">Draft</span>
+                <span class="trust-step" id="vs4-trust-evidence-backed" data-state="active">Evidence-backed</span>
+                <span class="trust-step" id="vs4-trust-approved" data-state="pending">Approved</span>
+              </div>
+              <p id="vs4-claim-rationale">Rationale: supported by evidence_bundle:evb_f7eee5dd9f8b6c09 and still scoped to default.</p>
+              <div class="danger-note" id="vs4-zero-evidence-denial">CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.</div>
+            </div>
+            <div class="brief-block" id="vs4-memory-candidate-detail" data-vs4-memory-candidate-detail="visible">
+              <div class="label">Memory/Wiki candidate</div>
+              <h3>Draft / Needs review</h3>
+              <p id="vs4-memory-rationale">Draft candidate from evidence_bundle:evb_f7eee5dd9f8b6c09; not approved durable memory.</p>
+              <div class="detail-grid">
+                <div><span class="label">Trust</span><span id="vs4-memory-trust">draft; owner_approved=false</span></div>
+                <div><span class="label">Freshness</span><span id="vs4-memory-freshness">current; review required before durable use</span></div>
+                <div><span class="label">Owner / workspace</span><span>local-user / default</span></div>
+                <div><span class="label">Controls</span><span>Inspect, correct, forget, export after review.</span></div>
+              </div>
+            </div>
+            <div class="brief-block" id="vs4-action-card-detail" data-vs4-action-card-detail="visible">
+              <div class="label">Action Card draft</div>
+              <h3 id="vs4-action-goal">Create local follow-up from the Evidence-backed Brief</h3>
+              <p id="vs4-action-why">Why: preserve the review next step without external writeback.</p>
+              <div class="detail-grid">
+                <div><span class="label">Evidence</span><span id="vs4-action-evidence">evidence_bundle:evb_f7eee5dd9f8b6c09</span></div>
+                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">brief:brief_f4bddc8567d60e93; claim:claim_a4494ea84f46c293</span></div>
+                <div><span class="label">Proposed change</span><span id="vs4-action-change">would perform draft_task against mock://vs4-brief-detail/browser</span></div>
+                <div><span class="label">Expected impact</span><span id="vs4-action-impact">expected_connector_calls=0; real_external_http_calls=0</span></div>
+                <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
+                <div><span class="label">Approval</span><span id="vs4-action-approval">not_required</span></div>
+                <div><span class="label">Execution mode</span><span id="vs4-action-execution-mode">Draft / Local / Mock; connector=mock_connector</span></div>
+                <div><span class="label">Activity</span><span id="vs4-action-activity">action:action_e8c272d5c35baaf1; dry_run:dryrun_74f68e5a68ccc17f</span></div>
+              </div>
+              <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
+            </div>
+          </aside>
+        </div>
       </section>
       <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
       <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
@@ -698,6 +840,7 @@
         }
       };
     };
+    const vs4Autorun = true;
     const evuxAutorun = false;
     const evuxScope = {
       tenant_id: "local-dev",
@@ -785,6 +928,263 @@
       traceStep(path, { status: response.status, payload });
       return { response, payload };
     }
+    const vs4Trace = [];
+    const vs4State = {
+      completed: false,
+      source: {},
+      search: {},
+      evidence: {},
+      brief: {},
+      claim: {},
+      memory: {
+        status: "draft",
+        trust_state: "draft",
+        owner_approved: false,
+        can_influence_answers: false,
+        can_influence_actions: false
+      },
+      action: {},
+      audit: {},
+      negative_evidence: {
+        zero_evidence_approval_created_approved_claim: 0,
+        approved_memory_before_review: 0,
+        real_external_http_calls: 0,
+        live_external_writeback_claimed: 0
+      }
+    };
+    function traceVs4(name, payload) {
+      vs4Trace.push({ step: name, payload });
+    }
+    async function vs4Api(path, body) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({}, evuxScope, body || {}))
+      });
+      const payload = await response.json();
+      traceVs4(path, { status: response.status, payload });
+      return { response, payload };
+    }
+    async function vs4Get(path) {
+      const response = await fetch(path);
+      const payload = await response.json();
+      traceVs4(path, { status: response.status, payload });
+      return { response, payload };
+    }
+    function vs4Passes() {
+      return Boolean(
+        vs4State.source.artifact_id &&
+        vs4State.source.original_storage_ref &&
+        vs4State.search.search_snapshot_id &&
+        vs4State.evidence.evidence_bundle_id &&
+        vs4State.evidence.snippet &&
+        vs4State.brief.brief_id &&
+        vs4State.brief.status === "evidence_backed" &&
+        vs4State.brief.key_point_count > 0 &&
+        vs4State.brief.evidence_link_count > 0 &&
+        vs4State.brief.gap_count > 0 &&
+        vs4State.claim.claim_id &&
+        vs4State.claim.trust_state === "evidence_backed" &&
+        vs4State.claim.zero_evidence_denied === true &&
+        vs4State.memory.status === "draft" &&
+        vs4State.memory.owner_approved === false &&
+        vs4State.memory.can_influence_answers === false &&
+        vs4State.memory.can_influence_actions === false &&
+        vs4State.action.action_id &&
+        vs4State.action.mode === "Draft / Local / Mock" &&
+        vs4State.action.connector_mocked === true &&
+        vs4State.action.direct_provider_access === false &&
+        vs4State.action.real_external_http_calls === 0 &&
+        vs4State.audit.verification_status === "success" &&
+        Object.values(vs4State.negative_evidence).every((value) => value === 0)
+      );
+    }
+    async function runVs4BriefFlow() {
+      const button = document.getElementById("run-vs4-brief-flow");
+      if (button) button.disabled = true;
+      try {
+        const artifactResponse = await vs4Api("/artifacts", {
+          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
+          source: "local_fixture",
+          media_type: "text/plain",
+          trust: "untrusted"
+        });
+        const artifact = artifactResponse.payload.artifact || {};
+        vs4State.source = {
+          artifact_id: artifact.artifact_id,
+          checksum_sha256: artifact.checksum_sha256,
+          original_storage_ref: artifact.original_storage_ref,
+          derived_status: artifact.derived && artifact.derived.status,
+          provenance: artifact.provenance || {},
+          audit_refs: artifactResponse.payload.audit_refs || []
+        };
+        setText("vs4-source-state", "Saved source / Searchable");
+        document.getElementById("vs4-source-state").dataset.vs4SourceState = "saved-searchable";
+
+        const searchResponse = await vs4Api("/search", { query: "alpha-evidence-anchor" });
+        const snapshot = searchResponse.payload.search_snapshot || {};
+        const firstResult = (snapshot.results || [])[0] || {};
+        vs4State.search = {
+          search_snapshot_id: snapshot.search_snapshot_id,
+          result_count: snapshot.result_count,
+          evidence_refs: firstResult.evidence_refs || []
+        };
+
+        const bundleResponse = await vs4Api("/evidence-bundles", { search_snapshot_id: snapshot.search_snapshot_id });
+        const bundle = bundleResponse.payload.evidence_bundle || {};
+        const firstEvidence = (bundle.evidence_items || [])[0] || {};
+        vs4State.evidence = {
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          search_snapshot_id: bundle.search_snapshot_id,
+          snippet: firstEvidence.snippet || "",
+          original_storage_ref: firstEvidence.original_storage_ref,
+          derived_text_ref: firstEvidence.derived_text_ref,
+          artifact_id: firstEvidence.artifact_id,
+          audit_refs: bundleResponse.payload.audit_refs || []
+        };
+
+        const briefResponse = await vs4Api("/briefs", { evidence_bundle_id: bundle.evidence_bundle_id });
+        const brief = briefResponse.payload.brief || {};
+        vs4State.brief = {
+          brief_id: brief.brief_id,
+          status: brief.status,
+          title: brief.title,
+          key_point_count: (brief.key_points || []).length,
+          evidence_link_count: (brief.evidence_links || []).length,
+          gap_count: (brief.uncertainty || []).length,
+          suggested_outputs: brief.suggested_outputs || [],
+          audit_refs: briefResponse.payload.audit_refs || []
+        };
+        setText("vs4-brief-state", "Evidence-backed Brief ready");
+        document.getElementById("vs4-brief-state").dataset.vs4BriefState = "evidence-backed";
+        setText("vs4-brief-summary-text", brief.title || "Evidence-backed Brief ready.");
+        setText("vs4-supported-finding", (brief.key_points || [])[0] || firstEvidence.snippet || "Supported finding attached.");
+        setText("vs4-brief-gap", (brief.uncertainty || [])[0] || "Add more source material before broad reuse.");
+        setText("vs4-brief-activity", "brief:" + brief.brief_id + " created; audit refs " + asList(briefResponse.payload.audit_refs || []));
+        setText("vs4-evidence-source", "artifact:" + firstEvidence.artifact_id);
+        setText("vs4-evidence-snippet", firstEvidence.snippet || "No snippet.");
+        setText("vs4-evidence-rationale", "Finding is supported because it comes from the saved source and Evidence Bundle.");
+        setText("vs4-evidence-provenance", "storage=" + firstEvidence.original_storage_ref + "; derived=" + firstEvidence.derived_text_ref);
+        setText("vs4-evidence-audit", asList([...(bundleResponse.payload.audit_refs || []), ...(briefResponse.payload.audit_refs || [])]));
+
+        const unsupportedClaim = await vs4Api("/claims", {
+          statement: "Unsupported VS4 claim should not be approved."
+        });
+        const unsupportedRecord = unsupportedClaim.payload.claim || {};
+        const zeroApprove = await vs4Api("/claims/" + unsupportedRecord.claim_id + "/approve", {});
+        const zeroDenied = zeroApprove.response.status === 400 &&
+          (zeroApprove.payload.errors || []).some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
+
+        const claimResponse = await vs4Api("/claims", {
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          statement: "The saved source is ready for a local evidence-backed Brief review."
+        });
+        const claim = claimResponse.payload.claim || {};
+        vs4State.claim = {
+          claim_id: claim.claim_id,
+          trust_state: claim.trust_state,
+          status: claim.status,
+          statement: claim.statement,
+          evidence_bundle_id: claim.evidence_bundle && claim.evidence_bundle.evidence_bundle_id,
+          artifact_refs: claim.evidence_bundle && claim.evidence_bundle.artifact_refs || [],
+          zero_evidence_denied: zeroDenied,
+          unsupported_claim_id: unsupportedRecord.claim_id
+        };
+        vs4State.negative_evidence.zero_evidence_approval_created_approved_claim = zeroDenied ? 0 : 1;
+        setText("vs4-claim-title", claim.statement || "Claim candidate ready.");
+        setText("vs4-claim-rationale", "Rationale: supported by evidence_bundle:" + bundle.evidence_bundle_id + " and still scoped to " + evuxScope.workspace_id + ".");
+        setText("vs4-zero-evidence-denial", "CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.");
+        setText("vs4-claim-approval-state", "Claim: Draft / Evidence-backed");
+
+        vs4State.memory = {
+          status: "draft",
+          trust_state: "draft",
+          owner_approved: false,
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          source_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "artifact:" + firstEvidence.artifact_id],
+          freshness: "current, review required",
+          can_influence_answers: false,
+          can_influence_actions: false,
+          hidden_profile: false
+        };
+        setText("vs4-memory-state", "Memory: Draft / Needs review");
+        setText("vs4-memory-rationale", "Draft candidate from evidence_bundle:" + bundle.evidence_bundle_id + "; not approved durable memory.");
+        setText("vs4-memory-trust", "draft; owner_approved=false");
+        setText("vs4-memory-freshness", "current; review required before durable use");
+
+        const actionResponse = await vs4Api("/actions", {
+          claim_id: claim.claim_id,
+          goal: "Create local follow-up from the Evidence-backed Brief",
+          action_kind: "draft_task",
+          risk: "medium",
+          connector: "mock_connector",
+          target: "mock://vs4-brief-detail/browser"
+        });
+        const action = actionResponse.payload.action_card || {};
+        const dryRun = action.dry_run || {};
+        const impact = dryRun.expected_impact || {};
+        vs4State.action = {
+          action_id: action.action_id,
+          goal: action.goal,
+          evidence_bundle_id: action.evidence && action.evidence.evidence_bundle_id,
+          risk: action.risk,
+          approval_status: action.approval && action.approval.status,
+          policy_decision: action.policy_decision && action.policy_decision.decision,
+          mode: "Draft / Local / Mock",
+          connector_mocked: action.connector_boundary && action.connector_boundary.mocked === true,
+          direct_provider_access: action.connector_boundary ? action.connector_boundary.direct_provider_access : null,
+          real_external_http_calls: impact.real_external_http_calls || 0,
+          expected_connector_calls: impact.expected_connector_calls || 0,
+          dry_run_id: dryRun.dry_run_id
+        };
+        setText("vs4-action-goal", action.goal || "Local follow-up action");
+        setText("vs4-action-why", "Why: preserve the review next step without external writeback.");
+        setText("vs4-action-evidence", "evidence_bundle:" + vs4State.action.evidence_bundle_id);
+        setText("vs4-action-impact-objects", "brief:" + brief.brief_id + "; claim:" + claim.claim_id);
+        setText("vs4-action-change", (dryRun.diff && dryRun.diff.after) || "would create local draft task");
+        setText("vs4-action-impact", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
+        setText("vs4-action-risk", action.risk || "medium");
+        setText("vs4-action-approval", vs4State.action.approval_status || "pending");
+        setText("vs4-action-execution-mode", vs4State.action.mode + "; connector=mock_connector");
+        setText("vs4-action-activity", "action:" + action.action_id + "; dry_run:" + vs4State.action.dry_run_id);
+
+        const auditResponse = await vs4Api("/audit/verify", {});
+        const audit = auditResponse.payload.audit_integrity || {};
+        vs4State.audit = {
+          verification_status: audit.status,
+          event_count: audit.event_count
+        };
+        setText("vs4-evidence-audit", document.getElementById("vs4-evidence-audit").textContent + "; audit=" + audit.status);
+
+        vs4State.completed = vs4Passes();
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
+      } catch (error) {
+        traceVs4("browser_error", { message: String(error) });
+        vs4State.completed = false;
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = "false";
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+    window.__cornerstoneVs4BriefEvidence = function() {
+      return {
+        schema_version: "cs.vs4_brief_ui_state.v0",
+        completed: vs4State.completed,
+        passes: vs4Passes(),
+        state: vs4State,
+        trace: vs4Trace,
+        markers: {
+          brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
+          source_state_visible: Boolean(document.getElementById("vs4-source-state")),
+          shared_evidence_drawer_visible: Boolean(document.querySelector("[data-vs4-brief-evidence-drawer='reachable']")),
+          claim_candidate_visible: Boolean(document.querySelector("[data-vs4-claim-candidate='visible']")),
+          memory_candidate_visible: Boolean(document.querySelector("[data-vs4-memory-candidate-detail='visible']")),
+          action_card_visible: Boolean(document.querySelector("[data-vs4-action-card-detail='visible']")),
+          reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
+          cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
+        }
+      };
+    };
     const vs1Autorun = false;
     const vs1Trace = [];
     const vs1State = {
@@ -1504,8 +1904,12 @@
     document.getElementById("step-approve-run").addEventListener("click", approveStep);
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
+    document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
     document.getElementById("run-evux").addEventListener("click", runEvux);
     document.getElementById("run-vs1-ontology").addEventListener("click", runVs1Ontology);
+    if (vs4Autorun) {
+      window.addEventListener("load", () => setTimeout(() => document.getElementById("run-vs4-brief-flow").click(), 50));
+    }
     if (evuxAutorun) {
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
     }

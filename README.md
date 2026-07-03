@@ -66,6 +66,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 43. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md`
 44. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv`
 45. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md`
+46. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md`
 
 ## Active Authority
 
@@ -117,6 +118,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md` | Frozen VS4 Product Alpha UI Daily Loop contract |
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv` | Machine-readable VS4 matrix: 20 MUST_PASS, 7 REGRESSION_GUARD, 1 HUMAN_REQUIRED row |
 | `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_001_PRODUCT_SHELL.md` | Frozen VS4 Slice 001 Product Alpha Home/Ops Inbox shell implementation contract |
+| `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_002_BRIEF_DETAIL.md` | Frozen VS4 Slice 002 Evidence-backed Brief detail implementation contract |
 | `docs/verification-reports/template.md` | Required report shape for scenario and CLI verification evidence |
 | `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Compatible technical defaults only; not product authority |
 | `docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md` | Verification-centered agent workflow |
@@ -133,7 +135,7 @@ Users should experience one CornerStone product. Internally, the product keeps c
 - VS0 operator acceptance UI gate overlay: 13 task-scoped scenarios; local verifier path `cornerstone scenario verify vs0-operator-acceptance-ui`, 12 AI-verifiable PASS, 1 human-only row accepted by JiYong/Tars, full VS-1 main implementation unblocked.
 - VS2 policy/tenancy/egress overlay: 93 task-scoped scenarios; verifier path `cornerstone scenario verify vs2-policy-tenancy-egress`; current generated status is recorded in `docs/verification-reports/VS2_POLICY_TENANCY_EGRESS_CURRENT_VERIFICATION_REPORT_2026-06-28.md`.
 - ConnectorHub adoption overlay: 47 task-scoped scenarios; verifier path `cornerstone scenario verify connector-contract-adapter`; current generated status is recorded in `reports/scenario/connector-contract-adapter/aggregate-2026-06-23.json` and `docs/verification-reports/CONNECTOR_HUB_ENGINEERING_TRAIL_INDEX_2026-06-24.md`.
-- VS4 Product Alpha UI Daily Loop overlay: 28 task-scoped scenarios; verifier path `cornerstone scenario verify vs4-product-alpha-ui-daily-loop`. Slice 001 selects 7 AI-verifiable rows for the local Product Alpha Home/Ops Inbox shell; full VS4 remains incomplete until all AI rows pass and `VS4-H01` has human acceptance evidence.
+- VS4 Product Alpha UI Daily Loop overlay: 28 task-scoped scenarios; verifier path `cornerstone scenario verify vs4-product-alpha-ui-daily-loop`. Slice 001 selects 7 AI-verifiable rows for the local Product Alpha Home/Ops Inbox shell. Slice 002 adds 14 AI-verifiable rows for the Evidence-backed Brief detail, claim/memory/action review boundaries, prompt-injection guard, reference-boundary guard, and CLI parity. Full VS4 remains incomplete until all AI rows pass and `VS4-H01` has human acceptance evidence.
 - Release rule: no PASS without concrete scenario evidence.
 - CLI-native-first rule: no feature scenario can be marked PASS unless its native `cornerstone ...` CLI path is verified or the item is explicitly classified as a non-feature implementation internal.
 

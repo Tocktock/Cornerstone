@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-001-product-shell")
+        self.assertEqual(payload["slice"], "slice-002-brief-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11421,6 +11421,68 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(value, 0)
         self.assertEqual(payload["proof_boundary"]["full_vs4"], "NOT_COMPLETE")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+
+    def test_vs4_product_alpha_brief_detail_slice_verify(self) -> None:
+        selected = [
+            "VS4-UI-002",
+            "VS4-UI-003",
+            "VS4-UI-004",
+            "VS4-UI-005",
+            "VS4-UI-006",
+            "VS4-UI-007",
+            "VS4-UI-008",
+            "VS4-UI-009",
+            "VS4-UI-010",
+            "VS4-UI-011",
+            "VS4-REF-002",
+            "VS4-REG-004",
+            "VS4-REG-005",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-brief-detail.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-002-brief-detail")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        self.assertTrue(all(payload["browser_proof"]["brief_detail_markers"].values()))
+        self.assertTrue(payload["browser_proof"]["brief_evidence"]["completed"])
+        self.assertTrue(payload["browser_proof"]["brief_evidence"]["passes"])
+
+        checks = payload["cli_workflow"]["checks"]
+        for key in [
+            "source_preserved",
+            "brief_created",
+            "brief_contents",
+            "evidence_drawer",
+            "claim_candidate",
+            "zero_evidence_denied",
+            "memory_candidate",
+            "no_hidden_durable_memory",
+            "action_card_review",
+            "local_mock_execution_mode",
+            "prompt_injection_guard",
+            "reference_images_not_pass_evidence",
+            "cli_parity",
+            "audit_verified",
+        ]:
+            self.assertTrue(checks[key], key)
+        self.assertTrue(checks["all_pass"])
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+        self.assertEqual(payload["proof_boundary"]["full_vs4"], "NOT_COMPLETE")
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
 
     def test_vs0_evux_quickstart_verify(self) -> None:
         output_path = ROOT / "tmp/test-vs0-evux-quickstart.json"
