@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-09
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, frozen VS0 EVUX clean sign-off governance scenarios, local VS0 operator acceptance UI gate evidence, and final VS0 implementation closure for VS1 transition
+**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, frozen VS0 EVUX clean sign-off governance scenarios, local VS0 operator acceptance UI gate evidence, final VS0 implementation closure for VS1 transition, and frozen VS4 Product Alpha UI Daily Loop documentation contract
 
 ## Why This Bundle Exists
 
@@ -55,8 +55,10 @@ This bundle resolves authority:
 30. `docs/verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md` - human acceptance evidence for `VS0-UI-H01`.
 31. `docs/verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` - final VS0 implementation closure report for VS1 transition.
 32. `docs/sot/03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` - implementation defaults where compatible.
-33. Frozen scenario contract for the specific implementation task.
-34. Repository code/docs/tests/logs as implementation evidence.
+33. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md` - Product Alpha UI daily-loop documentation contract.
+34. `docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv` - machine-readable VS4 row inventory.
+35. Frozen scenario contract for the specific implementation task.
+36. Repository code/docs/tests/logs as implementation evidence.
 
 If lower-priority content conflicts with higher-priority content, report the conflict and follow the higher-priority source.
 
@@ -113,6 +115,8 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md` | Current scenario-specific VS2 remediation report: 7 PASS, 79 NOT_VERIFIED, 7 HUMAN_REQUIRED |
 | `../scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md` | Frozen VS3 on-prem security closure and trusted extension/connector substrate contract |
 | `../scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_MATRIX.csv` | Machine-readable VS3 matrix: 42 MUST_PASS, 8 REGRESSION, 7 HUMAN_REQUIRED rows |
+| `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md` | Frozen VS4 Product Alpha UI Daily Loop documentation contract; status-neutral and not implementation evidence |
+| `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv` | Machine-readable VS4 matrix: 20 MUST_PASS, 7 REGRESSION_GUARD, 1 HUMAN_REQUIRED row |
 | `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md` | Final VS0 implementation closure report for VS1 transition |
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
@@ -170,6 +174,8 @@ The VS0 operator acceptance UI gate is `../scenario-contracts/VS0_OPERATOR_ACCEP
 The VS2 policy, tenant isolation, and default egress-deny contract is `../scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md`. It contains 93 `VS2-SEC-*` rows: 70 MUST_PASS, 16 REGRESSION, and 7 HUMAN_REQUIRED. The earlier local deterministic proof report is superseded by `../verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md`. Current scenario-specific evidence is recorded in `reports/security/vs2-local-security-proof.json`, `reports/security/vs2-scenario-specific-evidence.json`, `reports/security/vs2-synthetic-world.json`, and `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`: 7 PASS, 79 NOT_VERIFIED, and 7 HUMAN_REQUIRED. The native verifier is `cornerstone scenario verify vs2-policy-tenancy-egress --json`. The verifier may not claim VS2 readiness until all 70 MUST_PASS and 16 REGRESSION rows pass with scenario-specific evidence; production security, real IdP, production network, live-provider, human UX, and migration/restore readiness remain blocked by H02-H07 evidence.
 
 The VS3 on-prem security and trusted extension/connector substrate contract is `../scenario-contracts/VS3_ONPREM_SECURITY_AND_TRUSTED_EXTENSION_CONTRACT.md`. It contains 57 `VS3-*` rows: 42 MUST_PASS, 8 REGRESSION, and 7 HUMAN_REQUIRED. VS3 starts by reconciling the conflicting VS2 evidence boundary, then carries forward trusted RequestContext, Postgres/RLS, OPA/Rego, default-deny egress, ConnectorHub source safety, Tool SDK/signed registry, Agent Pack activation, operator status, audit, and human-gate evidence. The contract is status-neutral: all AI-verifiable rows start as NOT_RUN, and VS3 may not claim production/on-prem readiness until VS3-H01 through VS3-H07 have dated human/on-prem evidence.
+
+The VS4 Product Alpha UI Daily Loop contract is `../scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md`. It contains 28 `VS4-*` rows: 20 MUST_PASS, 7 REGRESSION_GUARD, and 1 HUMAN_REQUIRED. VS4 is the Product Alpha / Daily Loop documentation contract for turning the verified local evidence/action engine into a daily-use product shell around Drop / Ask, Evidence-backed Briefs, Claims, Memory/Wiki, Action Cards, Ops Inbox, Evidence/Audit, and Learn. The contract is status-neutral and does not update the canonical 206-scenario matrix or claim implementation evidence. VS3-H01 through VS3-H07 remain conditional deferred gates for production/on-prem/security/live-provider/human acceptance claims and do not block local VS4 documentation or implementation planning.
 
 ## Deprecated Product Framing
 
