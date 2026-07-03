@@ -1242,6 +1242,12 @@ def capture_vs4_product_alpha_browser_proof(
     keyboard_focus_markers = (
         keyboard_focus.get("markers", {}) if isinstance(keyboard_focus.get("markers"), dict) else {}
     )
+    ask_readability = (
+        brief_evidence.get("ask_readability", {}) if isinstance(brief_evidence.get("ask_readability"), dict) else {}
+    )
+    ask_readability_markers = (
+        ask_readability.get("markers", {}) if isinstance(ask_readability.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1316,12 +1322,14 @@ def capture_vs4_product_alpha_browser_proof(
     }
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
     keyboard_focus_ok = bool(keyboard_focus_markers) and all(keyboard_focus_markers.values())
+    ask_readability_ok = bool(ask_readability_markers) and all(ask_readability_markers.values())
     status = (
         "PASS"
         if screenshot_exists
         and all(shell_markers.values())
         and all(detail_markers.values())
         and keyboard_focus_ok
+        and ask_readability_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1346,6 +1354,9 @@ def capture_vs4_product_alpha_browser_proof(
         "keyboard_focus_required": True,
         "keyboard_focus": keyboard_focus,
         "keyboard_focus_markers": keyboard_focus_markers,
+        "ask_readability_required": True,
+        "ask_readability": ask_readability,
+        "ask_readability_markers": ask_readability_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1368,6 +1379,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **detail_markers,
                 "keyboard_focus_markers_present": keyboard_focus_ok,
                 **keyboard_focus_markers,
+                "ask_readability_markers_present": ask_readability_ok,
+                **ask_readability_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value

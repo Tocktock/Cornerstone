@@ -446,9 +446,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     nav a {{ color: var(--accent); text-decoration: none; font-weight: 600; }}
     .topbar {{
       display: grid;
-      grid-template-columns: minmax(180px, 260px) minmax(260px, 1fr) auto;
+      grid-template-columns: minmax(180px, 260px) minmax(260px, 1fr) minmax(220px, 360px);
       gap: 16px;
       align-items: center;
+    }}
+    .topbar > * {{
+      min-width: 0;
     }}
     .brand-kicker {{
       margin: 4px 0 0;
@@ -466,6 +469,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       flex-wrap: wrap;
       justify-content: flex-end;
       gap: 8px;
+      min-width: 0;
     }}
     .nav-caption {{
       margin: 0 0 12px;
@@ -610,6 +614,32 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-top: 1px solid var(--line);
       padding-top: 10px;
     }}
+    .ask-work-list {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+    }}
+    .ask-work-chip {{
+      border: 1px solid #c9d8e4;
+      border-radius: 8px;
+      background: #f8fbfd;
+      padding: 8px 10px;
+      color: var(--ink);
+      font-weight: 700;
+    }}
+    .ask-work-chip span {{
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }}
+    .ask-ref-detail summary {{
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+    }}
     .chip-list {{
       display: flex;
       flex-wrap: wrap;
@@ -717,12 +747,14 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     .brief-stack, .brief-rail {{
       display: grid;
       gap: 12px;
+      min-width: 0;
     }}
     .brief-block {{
       border: 1px solid var(--line);
       border-radius: 8px;
       background: #ffffff;
       padding: 14px;
+      min-width: 0;
     }}
     .brief-block h3 {{
       margin: 0 0 8px;
@@ -796,6 +828,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       padding: 5px 8px;
       font-size: 13px;
       font-weight: 600;
+      overflow-wrap: anywhere;
     }}
     .badge.safe {{ color: var(--safe); }}
     .badge.warn {{ color: var(--warn); }}
@@ -866,8 +899,12 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       font: inherit;
       margin: 0 8px 10px 0;
     }}
-    .detail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 12px; }}
-    .detail-grid div {{ border-top: 1px solid var(--line); padding-top: 8px; min-height: 54px; }}
+    .detail-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 12px; min-width: 0; }}
+    .detail-grid div {{ border-top: 1px solid var(--line); padding-top: 8px; min-height: 54px; min-width: 0; }}
+    .detail-grid span:not(.label), .detail-grid code, .brief-block p, .source-preview code {{
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }}
     .label {{ color: var(--muted); font-size: 12px; text-transform: uppercase; font-weight: 700; }}
     code {{ background: #eef3f7; padding: 2px 4px; border-radius: 4px; }}
     button {{
@@ -1037,7 +1074,11 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
                 <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="idle" aria-live="polite">
                   <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="pending">Ask waits for evidence</span>
                   <p id="vs4-ask-answer">Answers become reviewable work with evidence, memory, action, and audit refs.</p>
-                  <code id="vs4-ask-created-refs" data-vs4-created-work-kind="pending">work item not prepared</code>
+                  <div id="vs4-ask-work-list" class="ask-work-list" data-vs4-ask-work-list="pending"></div>
+                  <details id="vs4-ask-ref-detail" class="ask-ref-detail" data-vs4-ask-refs="progressive">
+                    <summary>Evidence refs</summary>
+                    <code id="vs4-ask-created-refs" data-vs4-created-work-kind="pending">work item not prepared</code>
+                  </details>
                 </div>
               </div>
             </div>
@@ -1589,6 +1630,18 @@ Search phrase: alpha-evidence-anchor.</code>
       const node = document.getElementById(id);
       if (node) node.textContent = value;
     }}
+    function setHtml(id, value) {{
+      const node = document.getElementById(id);
+      if (node) node.innerHTML = value;
+    }}
+    function escapeHtml(value) {{
+      return String(value == null ? "" : value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }}
     function setVs1Step(id, text, status) {{
       const node = document.getElementById(id);
       if (!node) return;
@@ -2126,7 +2179,19 @@ Search phrase: alpha-evidence-anchor.</code>
         }};
         setText("vs4-ask-trust-state", "Ask: Evidence-backed work item ready");
         document.getElementById("vs4-ask-trust-state").dataset.vs4AnswerTrustState = answer.label || "evidence_backed";
-        setText("vs4-ask-answer", "Answer uses evidence and created reviewable work: " + createdRefs.join(", "));
+        const createdWork = [
+          ["Evidence-backed Brief", "ready for support check", "brief", vs4State.brief.brief_id],
+          ["Claim candidate", "evidence-backed, not approved", "claim", promotedClaim.claim_id || vs4State.claim.claim_id],
+          ["Memory/Wiki candidate", "draft, needs review", "memory-candidate", vs4State.memory.evidence_bundle_id],
+          ["Action Card draft", "local/mock preview", "action-card", vs4State.action.action_id]
+        ];
+        setText("vs4-ask-answer", "Answer prepared reviewable work with evidence. Open each item before approving a claim, memory, or action.");
+        setHtml("vs4-ask-work-list", createdWork.map(([label, state, kind, ref]) =>
+          "<div class='ask-work-chip' data-vs4-created-work-chip='" + escapeHtml(kind) + "' data-vs4-created-work-ref='" + escapeHtml(ref) + "'>" +
+          escapeHtml(label) + "<span>" + escapeHtml(state) + "</span></div>"
+        ).join(""));
+        document.getElementById("vs4-ask-work-list").dataset.vs4AskWorkList = "ready";
+        document.getElementById("vs4-ask-ref-detail").open = false;
         setText("vs4-ask-created-refs", createdRefs.join(" | "));
         document.getElementById("vs4-ask-created-refs").dataset.vs4CreatedWorkKind = "brief,claim,memory-candidate,action-card";
         document.getElementById("vs4-ask-result").dataset.vs4AskFlow = "ready";
@@ -2313,11 +2378,47 @@ Search phrase: alpha-evidence-anchor.</code>
         markers
       }};
     }}
+    function collectVs4AskReadability() {{
+      const result = document.getElementById("vs4-ask-result");
+      const answer = document.getElementById("vs4-ask-answer");
+      const workList = document.getElementById("vs4-ask-work-list");
+      const refDetail = document.getElementById("vs4-ask-ref-detail");
+      const refsNode = document.getElementById("vs4-ask-created-refs");
+      const chips = Array.from(document.querySelectorAll("[data-vs4-created-work-chip]"));
+      const labels = chips.map((chip) => chip.childNodes[0] ? chip.childNodes[0].textContent.trim() : chip.textContent.trim());
+      const answerText = answer ? answer.textContent || "" : "";
+      const refsText = refsNode ? refsNode.textContent || "" : "";
+      const rawIdPattern = /(brief_|claim_|evb_|action_)/;
+      const requiredLabels = ["Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft"];
+      const requiredKinds = ["brief", "claim", "memory-candidate", "action-card"];
+      const markerSet = {{
+        ask_result_ready: result ? result.dataset.vs4AskFlow === "ready" : false,
+        product_answer_copy: answerText.includes("reviewable work with evidence") && !rawIdPattern.test(answerText),
+        created_work_labels_visible: requiredLabels.every((label) => labels.includes(label)),
+        created_work_kinds_complete: requiredKinds.every((kind) => Boolean(document.querySelector("[data-vs4-created-work-chip='" + kind + "']"))),
+        raw_refs_progressively_disclosed: Boolean(refDetail) && refDetail.tagName.toLowerCase() === "details" && refDetail.open === false,
+        raw_refs_preserved: ["brief:", "claim:", "memory_candidate:", "action:"].every((prefix) => refsText.includes(prefix)) && rawIdPattern.test(refsText),
+        raw_refs_not_primary_answer: !rawIdPattern.test(answerText),
+        ask_not_chatbot_only: vs4State.ask.chatbot_only === false,
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']"),
+        live_writeback_unclaimed: !document.querySelector("[data-vs4-live-provider-claimed='true']")
+      }};
+      return {{
+        schema_version: "cs.vs4_ask_readability_proof.v0",
+        answer_text: answerText,
+        created_work_labels: labels,
+        created_work_kinds: chips.map((chip) => chip.dataset.vs4CreatedWorkChip),
+        refs_detail_open: Boolean(refDetail && refDetail.open),
+        refs_text: refsText,
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
       const responsiveLayout = collectVs4ResponsiveLayout();
       const keyboardFocus = collectVs4KeyboardFocus();
+      const askReadability = collectVs4AskReadability();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2327,6 +2428,7 @@ Search phrase: alpha-evidence-anchor.</code>
         trace: vs4Trace,
         responsive_layout: responsiveLayout,
         keyboard_focus: keyboardFocus,
+        ask_readability: askReadability,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
