@@ -57,7 +57,7 @@ UI_SURFACES = [
     "Brief Detail",
     "Artifact Viewer",
     "Search",
-    "Claim Builder",
+    "Claim candidate",
     "Action Card",
     "Audit Detail",
 ]
@@ -282,7 +282,7 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
         all(row["present"] for row in checks if row["name"] in {name for name, _ in runtime_checks})
         and len(API_ROUTES) >= 15
         and set(UI_SURFACES)
-        == {"Home/Ops Inbox", "Brief Detail", "Artifact Viewer", "Search", "Claim Builder", "Action Card", "Audit Detail"}
+        == {"Home/Ops Inbox", "Brief Detail", "Artifact Viewer", "Search", "Claim candidate", "Action Card", "Audit Detail"}
     )
     production_release_ready = False
     last_runtime_report = _latest_successful_report(root, "vs0-product-runtime")
@@ -789,6 +789,44 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       border-color: #bbf7d0;
       background: #ecfdf5;
     }}
+    .trust-step[data-state="pending"] {{
+      color: var(--muted);
+    }}
+    .decision-layout {{
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 14px;
+      align-items: start;
+    }}
+    .decision-stack {{
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }}
+    .decision-flow {{
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin: 12px 0;
+    }}
+    .decision-step {{
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 9px 10px;
+      min-width: 0;
+    }}
+    .decision-step strong {{
+      display: block;
+      font-size: 13px;
+    }}
+    .decision-step span {{
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }}
     .review-note {{
       border-left: 4px solid var(--warn);
       background: #fffbeb;
@@ -999,7 +1037,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       main {{ grid-template-columns: minmax(0, 1fr); }}
       nav {{ border-right: 0; border-bottom: 1px solid var(--line); }}
       header, section {{ padding-left: 18px; padding-right: 18px; }}
-      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid {{ grid-template-columns: 1fr; }}
+      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid, .decision-layout, .decision-flow {{ grid-template-columns: 1fr; }}
       .workspace-strip {{ justify-content: flex-start; }}
       .work-row {{ grid-template-columns: 1fr; }}
       .state-matrix {{ min-width: 720px; }}
@@ -1417,8 +1455,106 @@ Search phrase: alpha-evidence-anchor.</code>
           <pre id="vs1-ontology-trace" aria-label="VS1 ontology workflow trace">{{}}</pre>
         </details>
       </section>
-      <section id="claim-builder"><h2>Claim Builder</h2><p>Claims stay draft unless backed by an Evidence Bundle and approval evidence.</p></section>
-      <section id="action-card"><h2>Action Card</h2><p>Actions expose dry-run diff, expected impact, policy decision, approval, execution, and mock ConnectorHub boundary.</p></section>
+      <section
+        id="claim-builder"
+        data-vs4-claim-page="visible"
+        data-vs4-claim-approval-without-evidence="blocked"
+        data-vs4-claim-live-provider-claimed="false"
+        data-vs4-human-ux-claimed="false"
+      >
+        <div class="decision-layout">
+          <div class="product-panel">
+            <div class="label">Claims</div>
+            <h2>Review the Claim candidate before approval.</h2>
+            <p id="vs4-claim-page-summary">Claims stay draft until supporting evidence and review state are clear.</p>
+            <div class="trust-ladder" aria-label="Claim page trust ladder">
+              <span class="trust-step" data-vs4-claim-step="draft" data-state="done">Draft</span>
+              <span class="trust-step" data-vs4-claim-step="evidence-backed" data-state="active">Evidence-backed</span>
+              <span class="trust-step" data-vs4-claim-step="approved" data-state="pending">Approved</span>
+            </div>
+            <div class="danger-note" id="vs4-claim-page-zero-denial">Evidence-free approval is blocked until supporting evidence is attached.</div>
+            <details class="evidence-drawer" id="vs4-claim-page-evidence-detail" data-vs4-claim-evidence-detail="reachable">
+              <summary>Claim evidence and activity</summary>
+              <div class="detail-grid">
+                <div><span class="label">Claim</span><span id="vs4-claim-page-id">Claim candidate not prepared.</span></div>
+                <div><span class="label">Evidence</span><span id="vs4-claim-page-evidence">Supporting evidence not attached.</span></div>
+                <div><span class="label">Source</span><span id="vs4-claim-page-source">Original source not prepared.</span></div>
+                <div><span class="label">Trust</span><span id="vs4-claim-page-trust">Draft / Evidence-backed / Approved ladder.</span></div>
+                <div><span class="label">Owner scope</span><span>local-user / default</span></div>
+                <div><span class="label">Activity</span><span id="vs4-claim-page-activity">Audit activity appears after preparation.</span></div>
+              </div>
+            </details>
+          </div>
+          <aside class="decision-stack">
+            <div class="product-panel">
+              <div class="label">Review state</div>
+              <h3 id="vs4-claim-page-title">Draft claim waits for evidence.</h3>
+              <p id="vs4-claim-page-rationale">The Claim page uses the same Evidence-backed Brief state instead of starting a separate workflow.</p>
+              <div class="status-row">
+                <span class="badge warn" id="vs4-claim-page-status">Needs review</span>
+                <span class="badge safe">Evidence required</span>
+                <span class="badge warn">Approval not claimed</span>
+              </div>
+            </div>
+            <div class="product-panel">
+              <div class="label">Boundary</div>
+              <h3>No evidence-free approval</h3>
+              <p>Prompt text, source content, or generated summaries cannot approve a Claim. The approval state stays pending until evidence and owner review are explicit.</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section
+        id="action-card"
+        data-vs4-action-page="visible"
+        data-vs4-action-live-writeback="false"
+        data-vs4-action-execution-mode="local-mock"
+        data-vs4-live-provider-claimed="false"
+        data-vs4-human-ux-claimed="false"
+      >
+        <div class="decision-layout">
+          <div class="product-panel">
+            <div class="label">Actions</div>
+            <h2>Review the Action Card draft before anything executes.</h2>
+            <p id="vs4-action-page-summary">Actions expose goal, why, evidence, impact, risk, approval, execution mode, and activity before any side effect.</p>
+            <div class="decision-flow" aria-label="Action review flow">
+              <div class="decision-step"><strong>Goal</strong><span id="vs4-action-page-goal">Create local follow-up.</span></div>
+              <div class="decision-step"><strong>Why</strong><span id="vs4-action-page-why">Preserve the review next step.</span></div>
+              <div class="decision-step"><strong>Risk</strong><span id="vs4-action-page-risk">medium</span></div>
+              <div class="decision-step"><strong>Mode</strong><span id="vs4-action-page-mode">Draft / Local / Mock</span></div>
+            </div>
+            <div class="detail-grid">
+              <div><span class="label">Evidence</span><span id="vs4-action-page-evidence">Evidence not attached.</span></div>
+              <div><span class="label">Proposed change</span><span id="vs4-action-page-change">Draft a local follow-up task.</span></div>
+              <div><span class="label">Expected impact</span><span id="vs4-action-page-impact">real_external_http_calls=0</span></div>
+              <div><span class="label">Approval</span><span id="vs4-action-page-approval">pending</span></div>
+              <div><span class="label">Dry-run</span><span id="vs4-action-page-dry-run">Dry-run appears after preparation.</span></div>
+              <div><span class="label">Activity</span><span id="vs4-action-page-activity">Audit available after preparation.</span></div>
+            </div>
+          </div>
+          <aside class="decision-stack">
+            <div class="product-panel">
+              <div class="label">Execution boundary</div>
+              <h3>No live external writeback</h3>
+              <p id="vs4-action-page-boundary">Connector access is mocked. Direct provider access and live writeback are not claimed.</p>
+              <div class="status-row">
+                <span class="badge safe">Local preview</span>
+                <span class="badge safe">Mock connector</span>
+                <span class="badge warn">Approval review required</span>
+              </div>
+            </div>
+            <details class="evidence-drawer" id="vs4-action-page-evidence-detail" data-vs4-action-evidence-detail="reachable">
+              <summary>Action evidence and audit</summary>
+              <div class="detail-grid">
+                <div><span class="label">Action Card</span><span id="vs4-action-page-id">Action not prepared.</span></div>
+                <div><span class="label">Claim</span><span id="vs4-action-page-claim">Claim candidate not prepared.</span></div>
+                <div><span class="label">Policy</span><span id="vs4-action-page-policy">Safety check pending.</span></div>
+                <div><span class="label">External calls</span><span id="vs4-action-page-calls">real_external_http_calls=0</span></div>
+              </div>
+            </details>
+          </aside>
+        </div>
+      </section>
       <section id="audit-detail"><h2>Audit Detail</h2><p>Audit events form a local tamper-evident hash chain verified by <code>cornerstone audit verify --json</code>.</p></section>
       <section
         id="vs0-evux-loop"
@@ -1919,7 +2055,9 @@ Search phrase: alpha-evidence-anchor.</code>
           ops_inbox: isVisible("[data-vs4-ops-inbox='visible']"),
           workspace_context: isVisible(".workspace-strip"),
           learn_review: isVisible("[data-vs4-learn-review='visible']"),
-          brief_detail: isVisible("[data-vs4-brief-detail='visible']")
+          brief_detail: isVisible("[data-vs4-brief-detail='visible']"),
+          claim_page: isVisible("[data-vs4-claim-page='visible']"),
+          action_page: isVisible("[data-vs4-action-page='visible']")
         }}
       }};
       layout.mobile_breakpoint_applied = innerWidth <= 760 &&
@@ -2035,6 +2173,16 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-claim-rationale", "Rationale: supported by evidence_bundle:" + bundle.evidence_bundle_id + " and still scoped to " + evuxScope.workspace_id + ".");
         setText("vs4-zero-evidence-denial", "CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.");
         setText("vs4-claim-approval-state", "Claim: Draft / Evidence-backed");
+        setText("vs4-claim-page-title", claim.statement || "Claim candidate ready.");
+        setText("vs4-claim-page-summary", "Claim candidate is evidence-backed but not approved. Review supporting evidence before changing trust state.");
+        setText("vs4-claim-page-rationale", "Supported by evidence_bundle:" + bundle.evidence_bundle_id + "; approval still needs explicit review.");
+        setText("vs4-claim-page-id", "claim:" + claim.claim_id);
+        setText("vs4-claim-page-evidence", "evidence_bundle:" + bundle.evidence_bundle_id);
+        setText("vs4-claim-page-source", "artifact:" + firstEvidence.artifact_id);
+        setText("vs4-claim-page-trust", "Draft -> Evidence-backed -> Approved; current=" + (claim.trust_state || "evidence_backed"));
+        setText("vs4-claim-page-activity", "unsupported_claim:" + unsupportedRecord.claim_id + "; denial=" + (zeroDenied ? "CS_CLAIM_EVIDENCE_REQUIRED" : "missing"));
+        setText("vs4-claim-page-zero-denial", "CS_CLAIM_EVIDENCE_REQUIRED: evidence-free approval stayed blocked.");
+        setText("vs4-claim-page-status", "Evidence-backed / approval pending");
 
         vs4State.memory = {{
           status: "draft",
@@ -2087,6 +2235,21 @@ Search phrase: alpha-evidence-anchor.</code>
         setText("vs4-action-approval", vs4State.action.approval_status || "pending");
         setText("vs4-action-execution-mode", vs4State.action.mode + "; connector=mock_connector");
         setText("vs4-action-activity", "action:" + action.action_id + "; dry_run:" + vs4State.action.dry_run_id);
+        setText("vs4-action-page-goal", action.goal || "Create local follow-up.");
+        setText("vs4-action-page-why", "Preserve review next step without external writeback.");
+        setText("vs4-action-page-risk", action.risk || "medium");
+        setText("vs4-action-page-mode", vs4State.action.mode + "; connector=mock_connector");
+        setText("vs4-action-page-evidence", "evidence_bundle:" + vs4State.action.evidence_bundle_id);
+        setText("vs4-action-page-change", (dryRun.diff && dryRun.diff.after) || "would create local draft task");
+        setText("vs4-action-page-impact", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
+        setText("vs4-action-page-approval", vs4State.action.approval_status || "pending");
+        setText("vs4-action-page-dry-run", "dry_run:" + vs4State.action.dry_run_id);
+        setText("vs4-action-page-activity", "action:" + action.action_id + "; audit pending until verify");
+        setText("vs4-action-page-boundary", "Connector access is mocked; direct_provider_access=false; live writeback is not claimed.");
+        setText("vs4-action-page-id", "action:" + action.action_id);
+        setText("vs4-action-page-claim", "claim:" + claim.claim_id);
+        setText("vs4-action-page-policy", "policy_decision:" + (vs4State.action.policy_decision || "allow"));
+        setText("vs4-action-page-calls", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
 
         const auditResponse = await vs4Api("/audit/verify", {{}});
         const audit = auditResponse.payload.audit_integrity || {{}};
@@ -2413,12 +2576,58 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function collectVs4DecisionPages() {{
+      const claimPage = document.getElementById("claim-builder");
+      const actionPage = document.getElementById("action-card");
+      const claimText = claimPage ? claimPage.textContent || "" : "";
+      const actionText = actionPage ? actionPage.textContent || "" : "";
+      const navTargets = ["claim-builder", "action-card"].every((id) =>
+        Boolean(document.querySelector("#primary-nav a[href='#" + id + "']")) && Boolean(document.getElementById(id))
+      );
+      const claimEvidenceDetail = document.getElementById("vs4-claim-page-evidence-detail");
+      const actionEvidenceDetail = document.getElementById("vs4-action-page-evidence-detail");
+      const markerSet = {{
+        claim_page_visible: Boolean(claimPage && claimPage.dataset.vs4ClaimPage === "visible"),
+        claim_page_product_language: ["Review the Claim candidate", "Draft", "Evidence-backed", "Approved"].every((term) => claimText.includes(term)),
+        claim_trust_ladder_visible: Boolean(document.querySelector("[aria-label='Claim page trust ladder']")) &&
+          ["draft", "evidence-backed", "approved"].every((step) => Boolean(document.querySelector("[data-vs4-claim-step='" + step + "']"))),
+        claim_evidence_visible: Boolean(claimText.includes("evidence_bundle:") && claimText.includes("artifact:")),
+        claim_zero_evidence_block_visible: Boolean(claimText.includes("CS_CLAIM_EVIDENCE_REQUIRED") &&
+          claimPage && claimPage.dataset.vs4ClaimApprovalWithoutEvidence === "blocked"),
+        claim_activity_visible: claimText.includes("unsupported_claim:") && claimText.includes("denial="),
+        action_page_visible: Boolean(actionPage && actionPage.dataset.vs4ActionPage === "visible"),
+        action_page_product_language: ["Review the Action Card draft", "Goal", "Why", "Risk", "Mode"].every((term) => actionText.includes(term)),
+        action_required_fields_visible: ["Evidence", "Proposed change", "Expected impact", "Approval", "Dry-run", "Activity"].every((term) => actionText.includes(term)),
+        action_local_mock_boundary_visible: actionText.includes("Draft / Local / Mock") &&
+          actionText.includes("connector=mock_connector") &&
+          actionText.includes("direct_provider_access=false"),
+        action_no_live_writeback_visible: Boolean(actionText.includes("No live external writeback") &&
+          actionPage && actionPage.dataset.vs4ActionLiveWriteback === "false"),
+        action_evidence_and_policy_visible: actionText.includes("evidence_bundle:") &&
+          actionText.includes("policy_decision:") &&
+          actionText.includes("real_external_http_calls=0"),
+        nav_claims_actions_target_product_pages: navTargets,
+        evidence_details_progressive: Boolean(claimEvidenceDetail && actionEvidenceDetail) &&
+          claimEvidenceDetail.tagName.toLowerCase() === "details" &&
+          actionEvidenceDetail.tagName.toLowerCase() === "details",
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']"),
+        live_writeback_unclaimed: !document.querySelector("[data-vs4-live-provider-claimed='true']") &&
+          (!actionPage || actionPage.dataset.vs4ActionLiveWriteback === "false")
+      }};
+      return {{
+        schema_version: "cs.vs4_decision_pages_proof.v0",
+        claim_page_text: claimText.replace(/\\s+/g, " ").trim().slice(0, 1400),
+        action_page_text: actionText.replace(/\\s+/g, " ").trim().slice(0, 1400),
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
       const responsiveLayout = collectVs4ResponsiveLayout();
       const keyboardFocus = collectVs4KeyboardFocus();
       const askReadability = collectVs4AskReadability();
+      const decisionPages = collectVs4DecisionPages();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2429,6 +2638,7 @@ Search phrase: alpha-evidence-anchor.</code>
         responsive_layout: responsiveLayout,
         keyboard_focus: keyboardFocus,
         ask_readability: askReadability,
+        decision_pages: decisionPages,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -2444,6 +2654,7 @@ Search phrase: alpha-evidence-anchor.</code>
           general_packs_complete: vs4PacksPass(),
           state_coverage_complete: vs4State.state_coverage.complete === true,
           home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
+          claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
         }}

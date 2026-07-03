@@ -118,6 +118,9 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT = (
 DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_008_ASK_RESULT_READABILITY.md"
 )
+DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md"
+)
 DEFAULT_VS4_HUMAN_GATE_PACKAGE_DIR = "reports/human-gates/vs4"
 DEFAULT_VS3_SCENARIO_REPORT = "reports/scenario/vs3-onprem-trusted-extension-2026-06-29.json"
 DEFAULT_VS3_RECONCILIATION_REPORT = "reports/security/vs3-evidence-reconciliation.json"
@@ -25118,6 +25121,18 @@ VS4_SLICE_008_SCENARIOS = {
 }
 
 
+VS4_SLICE_009_SCENARIOS = {
+    "VS4-GATE-001",
+    "VS4-UI-006",
+    "VS4-UI-007",
+    "VS4-UI-010",
+    "VS4-UI-011",
+    "VS4-REF-002",
+    "VS4-REG-003",
+    "VS4-REG-006",
+}
+
+
 VS4_GENERAL_PURPOSE_PACKS = [
     {
         "key": "personal_research",
@@ -25877,6 +25892,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     slice6_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT).is_file()
     slice7_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT).is_file()
     slice8_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT).is_file()
+    slice9_contract_exists = (root / DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT).is_file()
     browser_proof = capture_vs4_product_alpha_browser_proof(root, state_dir=browser_state_path, output_dir=browser_proof_dir)
     mobile_browser_proof = capture_vs4_product_alpha_browser_proof(
         root,
@@ -25897,6 +25913,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     mobile_keyboard_markers = mobile_browser_proof.get("keyboard_focus_markers", {})
     ask_readability_markers = browser_proof.get("ask_readability_markers", {})
     mobile_ask_readability_markers = mobile_browser_proof.get("ask_readability_markers", {})
+    decision_pages_markers = browser_proof.get("decision_pages_markers", {})
+    mobile_decision_pages_markers = mobile_browser_proof.get("decision_pages_markers", {})
     mobile_browser_negative = mobile_browser_proof.get("negative_evidence", {})
     cli_checks = cli_workflow.get("checks", {})
     slice3_checks = slice3_cli_workflow.get("checks", {})
@@ -25918,9 +25936,18 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     mobile_keyboard_ok = bool(mobile_keyboard_markers) and all(mobile_keyboard_markers.values())
     ask_readability_ok = bool(ask_readability_markers) and all(ask_readability_markers.values())
     mobile_ask_readability_ok = bool(mobile_ask_readability_markers) and all(mobile_ask_readability_markers.values())
+    decision_pages_ok = bool(decision_pages_markers) and all(value is True for value in decision_pages_markers.values())
+    mobile_decision_pages_ok = bool(mobile_decision_pages_markers) and all(value is True for value in mobile_decision_pages_markers.values())
     all_negative_zero = all(value == 0 for value in negative.values())
     status_by_id = {
-        "VS4-GATE-001": "PASS" if docs_ok and matrix_checks["ok"] and slice6_contract_exists and slice7_contract_exists and slice8_contract_exists else "FAIL",
+        "VS4-GATE-001": "PASS"
+        if docs_ok
+        and matrix_checks["ok"]
+        and slice6_contract_exists
+        and slice7_contract_exists
+        and slice8_contract_exists
+        and slice9_contract_exists
+        else "FAIL",
         "VS4-UI-001": "PASS"
         if browser_ok
         and mobile_browser_ok
@@ -25965,8 +25992,27 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and keyboard_markers.get("evidence_drawer_keyboard_reachable")
         and mobile_keyboard_markers.get("evidence_drawer_keyboard_reachable")
         else "FAIL",
-        "VS4-UI-006": "PASS" if browser_ok and cli_checks.get("claim_candidate") and detail_markers.get("claim_candidate_detail_visible") else "FAIL",
-        "VS4-UI-007": "PASS" if browser_ok and cli_checks.get("zero_evidence_denied") else "FAIL",
+        "VS4-UI-006": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and cli_checks.get("claim_candidate")
+        and detail_markers.get("claim_candidate_detail_visible")
+        and decision_pages_markers.get("claim_page_visible")
+        and decision_pages_markers.get("claim_page_product_language")
+        and decision_pages_markers.get("claim_trust_ladder_visible")
+        and decision_pages_markers.get("claim_evidence_visible")
+        and mobile_decision_pages_markers.get("claim_page_visible")
+        and mobile_decision_pages_markers.get("claim_page_product_language")
+        and mobile_decision_pages_markers.get("claim_trust_ladder_visible")
+        and mobile_decision_pages_markers.get("claim_evidence_visible")
+        else "FAIL",
+        "VS4-UI-007": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and cli_checks.get("zero_evidence_denied")
+        and decision_pages_markers.get("claim_zero_evidence_block_visible")
+        and mobile_decision_pages_markers.get("claim_zero_evidence_block_visible")
+        else "FAIL",
         "VS4-UI-008": "PASS" if browser_ok and cli_checks.get("memory_candidate") and detail_markers.get("memory_candidate_detail_visible") else "FAIL",
         "VS4-UI-009": "PASS" if browser_ok and cli_checks.get("no_hidden_durable_memory") else "FAIL",
         "VS4-UI-010": "PASS"
@@ -25976,8 +26022,24 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and detail_markers.get("action_card_detail_visible")
         and keyboard_markers.get("action_card_keyboard_reachable")
         and mobile_keyboard_markers.get("action_card_keyboard_reachable")
+        and decision_pages_markers.get("action_page_visible")
+        and decision_pages_markers.get("action_page_product_language")
+        and decision_pages_markers.get("action_required_fields_visible")
+        and decision_pages_markers.get("action_evidence_and_policy_visible")
+        and mobile_decision_pages_markers.get("action_page_visible")
+        and mobile_decision_pages_markers.get("action_page_product_language")
+        and mobile_decision_pages_markers.get("action_required_fields_visible")
+        and mobile_decision_pages_markers.get("action_evidence_and_policy_visible")
         else "FAIL",
-        "VS4-UI-011": "PASS" if browser_ok and cli_checks.get("local_mock_execution_mode") else "FAIL",
+        "VS4-UI-011": "PASS"
+        if browser_ok
+        and mobile_browser_ok
+        and cli_checks.get("local_mock_execution_mode")
+        and decision_pages_markers.get("action_local_mock_boundary_visible")
+        and decision_pages_markers.get("action_no_live_writeback_visible")
+        and mobile_decision_pages_markers.get("action_local_mock_boundary_visible")
+        and mobile_decision_pages_markers.get("action_no_live_writeback_visible")
+        else "FAIL",
         "VS4-UI-012": "PASS"
         if browser_ok
         and mobile_browser_ok
@@ -26068,12 +26130,17 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         else "FAIL",
         "VS4-REF-002": "PASS"
         if browser_ok
+        and mobile_browser_ok
         and cli_checks.get("claim_action_reference_alignment")
         and detail_markers.get("claim_candidate_detail_visible")
         and detail_markers.get("action_card_detail_visible")
         and detail_markers.get("reference_images_not_pass_evidence")
         and keyboard_markers.get("claim_trust_ladder_labelled")
         and keyboard_markers.get("action_card_keyboard_reachable")
+        and decision_pages_markers.get("nav_claims_actions_target_product_pages")
+        and decision_pages_markers.get("evidence_details_progressive")
+        and mobile_decision_pages_markers.get("nav_claims_actions_target_product_pages")
+        and mobile_decision_pages_markers.get("evidence_details_progressive")
         else "FAIL",
         "VS4-REG-001": "PASS" if regression_checks.get("vs0_regression_passed") and negative.get("vs0_regression_failed", 1) == 0 else "FAIL",
         "VS4-REG-002": "PASS" if regression_checks.get("vs1_regression_passed") and negative.get("vs1_regression_failed", 1) == 0 else "FAIL",
@@ -26086,10 +26153,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and keyboard_markers.get("human_ux_acceptance_unclaimed")
         and ask_readability_markers.get("human_acceptance_unclaimed")
         and ask_readability_markers.get("live_writeback_unclaimed")
+        and decision_pages_markers.get("human_acceptance_unclaimed")
+        and decision_pages_markers.get("live_writeback_unclaimed")
         and mobile_keyboard_markers.get("forbidden_readiness_overclaim_absent")
         and mobile_keyboard_markers.get("human_ux_acceptance_unclaimed")
         and mobile_ask_readability_markers.get("human_acceptance_unclaimed")
         and mobile_ask_readability_markers.get("live_writeback_unclaimed")
+        and mobile_decision_pages_markers.get("human_acceptance_unclaimed")
+        and mobile_decision_pages_markers.get("live_writeback_unclaimed")
         and all_negative_zero
         else "FAIL",
         "VS4-REG-004": "PASS" if cli_checks.get("prompt_injection_guard") and all_negative_zero else "FAIL",
@@ -26105,6 +26176,8 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and mobile_keyboard_markers.get("primary_nav_keyboard_reachable")
         and ask_readability_markers.get("raw_refs_progressively_disclosed")
         and mobile_ask_readability_markers.get("raw_refs_progressively_disclosed")
+        and decision_pages_ok
+        and mobile_decision_pages_ok
         and shell_markers.get("legacy_vs0_vs1_reachable")
         and mobile_responsive_markers.get("mobile_breakpoint_applied")
         and mobile_responsive_markers.get("primary_nav_visible")
@@ -26136,6 +26209,12 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
         "packages/cornerstone_cli/product_runtime.py",
     ]
+    decision_pages_evidence = [
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json#decision_pages_markers",
+        f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json#decision_pages_markers",
+        DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
+        "packages/cornerstone_cli/product_runtime.py",
+    ]
     cli_evidence = [
         DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
         "packages/cornerstone_cli/scenarios.py",
@@ -26164,6 +26243,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
             "scripts/verify_sot_docs.sh",
             "scripts/verify_cli_native_first_docs.sh",
             "scripts/verify_design_system_docs.sh",
@@ -26175,12 +26255,12 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-003": [*browser_evidence, *cli_evidence],
         "VS4-UI-004": [*browser_evidence, *mobile_browser_evidence, *cli_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-005": [*browser_evidence, *keyboard_focus_evidence, *cli_evidence],
-        "VS4-UI-006": [*browser_evidence, *cli_evidence],
-        "VS4-UI-007": cli_evidence,
+        "VS4-UI-006": [*browser_evidence, *mobile_browser_evidence, *decision_pages_evidence, *cli_evidence],
+        "VS4-UI-007": [*decision_pages_evidence, *cli_evidence],
         "VS4-UI-008": [*browser_evidence, *cli_evidence],
         "VS4-UI-009": cli_evidence,
-        "VS4-UI-010": [*browser_evidence, *keyboard_focus_evidence, *cli_evidence],
-        "VS4-UI-011": [*browser_evidence, *cli_evidence],
+        "VS4-UI-010": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *decision_pages_evidence, *cli_evidence],
+        "VS4-UI-011": [*browser_evidence, *mobile_browser_evidence, *decision_pages_evidence, *cli_evidence],
         "VS4-UI-012": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *ask_readability_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-UI-013": [*browser_evidence, *keyboard_focus_evidence, *ask_readability_evidence, *slice3_evidence],
         "VS4-UI-014": [*browser_evidence, *slice3_evidence],
@@ -26188,7 +26268,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-016": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *ask_readability_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-STATE-001": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT],
         "VS4-REF-001": [*browser_evidence, *keyboard_focus_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_003_CONTRACT, "docs/design/reference-images/README.md"],
-        "VS4-REF-002": [*browser_evidence, *keyboard_focus_evidence, *cli_evidence],
+        "VS4-REF-002": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *decision_pages_evidence, *cli_evidence],
         "VS4-REG-001": regression_evidence,
         "VS4-REG-002": regression_evidence,
         "VS4-REG-003": [
@@ -26198,25 +26278,26 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
         ],
         "VS4-REG-004": cli_evidence,
         "VS4-REG-005": [f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json", DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT],
-        "VS4-REG-006": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *ask_readability_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
+        "VS4-REG-006": [*browser_evidence, *mobile_browser_evidence, *keyboard_focus_evidence, *ask_readability_evidence, *decision_pages_evidence, DEFAULT_VS4_PRODUCT_ALPHA_SLICE_005_CONTRACT],
         "VS4-REG-007": cli_evidence,
     }
     notes_by_id = {
-        "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001 through Slice 008 contracts are structurally verified.",
+        "VS4-GATE-001": "VS4 parent contract, matrix, and Slice 001 through Slice 009 contracts are structurally verified.",
         "VS4-UI-001": "Home renders the Product Alpha shell with Drop, Ask, readable created-work handoff, Continue, local boundary, product-language status, progressive proof details, skip link, primary nav, and visible focus proof as first visible work.",
         "VS4-UI-002": "Source artifact remains preserved with sha256 original storage ref and ready derived text.",
         "VS4-UI-003": "Evidence-backed Brief is created from a concrete Evidence Bundle.",
         "VS4-UI-004": "Brief contains supported key points, evidence links, uncertainty, next-step guidance, and Learn review candidate state.",
         "VS4-UI-005": "Shared Evidence Drawer exposes source, snippet, provenance, audit linkage, and keyboard-reachable disclosure summaries.",
-        "VS4-UI-006": "Claim candidate remains evidence-backed and tied to the Evidence Bundle.",
-        "VS4-UI-007": "Zero-evidence claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED.",
+        "VS4-UI-006": "Claim candidate remains evidence-backed, tied to the Evidence Bundle, and reviewable from the normal Claims nav page.",
+        "VS4-UI-007": "Zero-evidence claim approval is denied with CS_CLAIM_EVIDENCE_REQUIRED and surfaced on the Claims nav page.",
         "VS4-UI-008": "Memory/Wiki candidate is draft, inspectable, evidence-backed, and not owner-approved.",
         "VS4-UI-009": "Draft memory cannot influence answers or actions and is not hidden durable memory.",
-        "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, local activity, and keyboard-reachable detail.",
-        "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0.",
+        "VS4-UI-010": "Action Card review includes goal, why/evidence, dry-run, policy, risk, approval, local activity, and keyboard-reachable detail from the normal Actions nav page.",
+        "VS4-UI-011": "Action path uses mock ConnectorHub boundary with real_external_http_calls=0 and exposes the no-live-writeback boundary on the Actions nav page.",
         "VS4-UI-012": "Ops Inbox shell shows pending brief, evidence gap, claim, memory, action, Learn, and activity follow-up rows with valid keyboard Continue targets and Ask-created work kind alignment.",
         "VS4-UI-013": "Ask creates a conversation-backed answer and reviewable Brief, Claim, Memory/Wiki candidate, Action Card, evidence, and audit refs from a labeled keyboard-runnable control, with product labels before raw refs.",
         "VS4-UI-014": "Personal Research, Company Policy Review, and Operations Issue packs each produce Brief, Claim, Memory/Wiki candidate, Action Card, and Ops Inbox follow-up refs.",
@@ -26224,13 +26305,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "VS4-UI-016": "Normal-user UI uses Source, Evidence-backed Brief, Claim candidate, Memory/Wiki candidate, Action Card, Learn review, and Activity record language before proof jargon or raw object IDs in normal and focus order.",
         "VS4-STATE-001": "Major Product Alpha surfaces expose empty, loading, ready, partial/degraded, needs-review, permission denied, policy blocked, failed-with-recovery, and audit/log states without a keyboard trap.",
         "VS4-REF-001": "Home, Search, and Artifact surfaces align with reference direction using DOM/browser/source/keyboard evidence; reference images are not PASS evidence.",
-        "VS4-REF-002": "Claim and Action references align to the runtime Brief detail design with labeled trust/action detail, without using reference images as PASS evidence.",
+        "VS4-REF-002": "Claim and Action references align to the runtime Brief detail design with labeled trust/action detail and normal nav destinations, without using reference images as PASS evidence.",
         "VS4-REG-001": "Fresh VS0 operator acceptance UI regression passes on the current tree.",
         "VS4-REG-002": "Fresh VS1 ontology suggest/review/promote regression passes with zero auto-promotion.",
-        "VS4-REG-003": "VS4 shell and browser proof do not claim production, on-prem, final security, live-provider, accessibility certification, or human UX readiness; proof flags and raw refs are progressively disclosed.",
+        "VS4-REG-003": "VS4 shell, Claim page, Action page, and browser proof do not claim production, on-prem, final security, live-provider, accessibility certification, or human UX readiness; proof flags and raw refs are progressively disclosed.",
         "VS4-REG-004": "Prompt-injection fixture is detected and creates no tool calls, actions, external calls, or authority expansion.",
         "VS4-REG-005": "Reference images remain design guidance only; PASS evidence is runtime/docs/CLI output.",
-        "VS4-REG-006": "The first screen remains product-first with readable Ask results, and the keyboard-reachable primary nav omits admin, connector, ontology, and verifier-first entries.",
+        "VS4-REG-006": "The first screen remains product-first with readable Ask results and product-ready Claim/Action nav destinations, while primary nav omits admin, connector, ontology, and verifier-first entries.",
         "VS4-REG-007": "Brief detail feature paths have native CLI transcripts with JSON output and expected negative exit code.",
     }
     scenario_results: list[dict[str, Any]] = []
@@ -26247,13 +26328,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_006_SCENARIOS
             or scenario_id in VS4_SLICE_007_SCENARIOS
             or scenario_id in VS4_SLICE_008_SCENARIOS
+            or scenario_id in VS4_SLICE_009_SCENARIOS
         ):
             status = status_by_id.get(scenario_id, "FAIL")
         else:
             status = "NOT_RUN"
         if owner == "Human":
             classification = "human_required"
-        elif scenario_id in VS4_SLICE_008_SCENARIOS:
+        elif scenario_id in VS4_SLICE_009_SCENARIOS:
             classification = "in_this_slice"
         elif (
             scenario_id in VS4_SLICE_001_SCENARIOS
@@ -26262,11 +26344,14 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             or scenario_id in VS4_SLICE_005_SCENARIOS
             or scenario_id in VS4_SLICE_006_SCENARIOS
             or scenario_id in VS4_SLICE_007_SCENARIOS
+            or scenario_id in VS4_SLICE_008_SCENARIOS
         ):
             classification = "previous_slice"
         else:
             classification = "later_slice"
-        if scenario_id in VS4_SLICE_008_SCENARIOS:
+        if scenario_id in VS4_SLICE_009_SCENARIOS:
+            default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT
+        elif scenario_id in VS4_SLICE_008_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT
         elif scenario_id in VS4_SLICE_007_SCENARIOS:
             default_contract = DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT
@@ -26316,13 +26401,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "why_ai_cannot_verify": "Product-alpha UX acceptance is subjective.",
             "required_human_action": "JiYong/Tars completes the local VS4 walkthrough and records accept or reject.",
             "expected_evidence": "Acceptance note with screenshots/recording, or rejection note with issue list.",
-            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 008 proof.",
+            "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 009 proof.",
         }
     ]
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
-        "slice": "slice-008-ask-result-readability",
+        "slice": "slice-009-claim-action-nav-detail",
         "state_dir": {
             "browser": browser_state_rel,
             "mobile_browser": mobile_browser_state_rel,
@@ -26332,7 +26417,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         "summary": summary,
         "scenario_results": scenario_results,
         "matrix_checks": matrix_checks,
-        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+        "slice_contract": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
         "slice_contracts": {
             "slice_001": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_001_CONTRACT,
             "slice_002": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_002_CONTRACT,
@@ -26342,6 +26427,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "slice_006": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             "slice_007": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT,
             "slice_008": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+            "slice_009": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
         },
         "browser_proof": browser_proof,
         "mobile_browser_proof": mobile_browser_proof,
@@ -26363,6 +26449,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "vs4_slice_006_responsive_mobile": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "vs4_slice_007_keyboard_focus": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "vs4_slice_008_ask_result_readability": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
+            "vs4_slice_009_claim_action_nav_detail": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
             "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
             "production": "NOT_CLAIMED",
             "production_onprem": "NOT_CLAIMED",
@@ -26584,6 +26671,7 @@ def build_vs4_human_gate_package(
             "Open Product Alpha Home and confirm Drop, Ask, Continue, workspace context, and local-mode boundary are understandable.",
             "Run or inspect a Drop / Ask flow into an Evidence-backed Brief and confirm evidence, gaps, and next steps are clear.",
             "Open Claim candidate, Memory/Wiki candidate, and Action Card detail and confirm review/approval states are not misleading.",
+            "Use the Claims and Actions nav items and confirm the destination pages expose review state, evidence, policy, dry-run, local/mock boundary, and no-live-writeback status.",
             "Inspect Ops Inbox follow-up plus Evidence/Audit detail and confirm returning work is understandable.",
             "Open Learn review and confirm outcomes, corrections, rejections, and failures remain owner-scoped review candidates before durable behavior changes.",
             "Confirm product language is understandable without scenario, connector, ontology, or verifier jargon dominating normal use, with proof details progressively disclosed.",
@@ -26632,8 +26720,10 @@ def build_vs4_human_gate_package(
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT, "kind": "slice_contract"},
             {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT, "kind": "slice_contract"},
+            {"path": DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT, "kind": "slice_contract"},
         ],
         "commands_to_run_before_review": [
+            "make verify-vs4-product-alpha-decision-pages",
             "make verify-vs4-product-alpha-ask-readability",
             "make verify-vs4-product-alpha-keyboard-focus",
             "make verify-vs4-product-alpha-responsive-mobile",
@@ -26672,6 +26762,7 @@ def build_vs4_human_gate_package(
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
             report_rel,
             package_rel,
         ],
@@ -26906,6 +26997,7 @@ def validate_vs4_human_gate_review_record(
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_006_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_007_CONTRACT,
             DEFAULT_VS4_PRODUCT_ALPHA_SLICE_008_CONTRACT,
+            DEFAULT_VS4_PRODUCT_ALPHA_SLICE_009_CONTRACT,
         ],
         "audit_refs": [],
     }

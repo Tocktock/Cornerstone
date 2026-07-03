@@ -1248,6 +1248,12 @@ def capture_vs4_product_alpha_browser_proof(
     ask_readability_markers = (
         ask_readability.get("markers", {}) if isinstance(ask_readability.get("markers"), dict) else {}
     )
+    decision_pages = (
+        brief_evidence.get("decision_pages", {}) if isinstance(brief_evidence.get("decision_pages"), dict) else {}
+    )
+    decision_pages_markers = (
+        decision_pages.get("markers", {}) if isinstance(decision_pages.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1323,6 +1329,7 @@ def capture_vs4_product_alpha_browser_proof(
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
     keyboard_focus_ok = bool(keyboard_focus_markers) and all(keyboard_focus_markers.values())
     ask_readability_ok = bool(ask_readability_markers) and all(ask_readability_markers.values())
+    decision_pages_ok = bool(decision_pages_markers) and all(value is True for value in decision_pages_markers.values())
     status = (
         "PASS"
         if screenshot_exists
@@ -1330,6 +1337,7 @@ def capture_vs4_product_alpha_browser_proof(
         and all(detail_markers.values())
         and keyboard_focus_ok
         and ask_readability_ok
+        and decision_pages_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1357,6 +1365,9 @@ def capture_vs4_product_alpha_browser_proof(
         "ask_readability_required": True,
         "ask_readability": ask_readability,
         "ask_readability_markers": ask_readability_markers,
+        "decision_pages_required": True,
+        "decision_pages": decision_pages,
+        "decision_pages_markers": decision_pages_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1381,6 +1392,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **keyboard_focus_markers,
                 "ask_readability_markers_present": ask_readability_ok,
                 **ask_readability_markers,
+                "decision_pages_markers_present": decision_pages_ok,
+                **decision_pages_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value
@@ -1460,7 +1473,7 @@ def collect_release_evidence(
                 "- [ ] Upload or select the fixture Artifact." if is_evux else "- [ ] Confirm Home/Ops Inbox is understandable.",
                 "- [ ] Search uploaded content and inspect the snapshot." if is_evux else "- [ ] Confirm Artifact Viewer makes the original/evidence relationship clear.",
                 "- [ ] Create an Evidence Bundle and evidence-backed Claim." if is_evux else "- [ ] Confirm Search makes scoped evidence discovery clear.",
-                "- [ ] Confirm zero-evidence Claim approval is denied." if is_evux else "- [ ] Confirm Claim Builder makes Draft, Evidence-backed, and Approved states clear.",
+                "- [ ] Confirm zero-evidence Claim approval is denied." if is_evux else "- [ ] Confirm Claim candidate makes Draft, Evidence-backed, and Approved states clear.",
                 "- [ ] Create, dry-run, approve, and execute a local/mock Action Card." if is_evux else "- [ ] Confirm Action Card makes dry-run, policy, risk, approval, and execution boundaries clear.",
                 "- [ ] Inspect the Audit timeline and audit verification status." if is_evux else "- [ ] Confirm Audit Detail makes action/evidence history inspectable.",
                 "- [ ] Confirm the UI does not imply production release, live-provider readiness, or autonomous external writeback.",

@@ -11407,7 +11407,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11450,7 +11450,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11505,7 +11505,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11555,7 +11555,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11594,7 +11594,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11635,7 +11635,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11676,7 +11676,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
-        self.assertEqual(payload["slice"], "slice-008-ask-result-readability")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
         self.assertEqual(payload["status"], "success")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
         self.assertEqual(payload["summary"]["pass"], len(selected))
@@ -11703,6 +11703,56 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(mobile_ask_readability["refs_detail_open"])
         self.assertEqual(payload["proof_boundary"]["vs4_slice_008_ask_result_readability"], "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS")
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_decision_pages_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-006",
+            "VS4-UI-007",
+            "VS4-UI-010",
+            "VS4-UI-011",
+            "VS4-REF-002",
+            "VS4-REG-003",
+            "VS4-REG-006",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-decision-pages.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], "slice-009-claim-action-nav-detail")
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+
+        decision_pages = payload["browser_proof"]["decision_pages"]
+        mobile_decision_pages = payload["mobile_browser_proof"]["decision_pages"]
+        self.assertTrue(all(payload["browser_proof"]["decision_pages_markers"].values()))
+        self.assertTrue(all(payload["mobile_browser_proof"]["decision_pages_markers"].values()))
+        self.assertTrue(decision_pages["markers"]["claim_zero_evidence_block_visible"])
+        self.assertTrue(decision_pages["markers"]["action_local_mock_boundary_visible"])
+        self.assertTrue(decision_pages["markers"]["action_no_live_writeback_visible"])
+        self.assertTrue(decision_pages["markers"]["nav_claims_actions_target_product_pages"])
+        self.assertTrue(mobile_decision_pages["markers"]["nav_claims_actions_target_product_pages"])
+        self.assertIn("Review the Claim candidate", decision_pages["claim_page_text"])
+        self.assertIn("CS_CLAIM_EVIDENCE_REQUIRED", decision_pages["claim_page_text"])
+        self.assertIn("evidence_bundle:", decision_pages["claim_page_text"])
+        self.assertIn("Draft / Local / Mock", decision_pages["action_page_text"])
+        self.assertIn("direct_provider_access=false", decision_pages["action_page_text"])
+        self.assertIn("real_external_http_calls=0", decision_pages["action_page_text"])
+        self.assertIn("policy_decision:", decision_pages["action_page_text"])
+        self.assertEqual(payload["proof_boundary"]["vs4_slice_009_claim_action_nav_detail"], "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS")
+        self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
+        self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -11769,8 +11819,14 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any("mobile proof" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("keyboard/focus proof" in item for item in package_row["review_checklist"]))
         self.assertTrue(any("Ask result" in item for item in package_row["review_checklist"]))
+        self.assertTrue(any("Claims and Actions nav" in item for item in package_row["review_checklist"]))
+        self.assertIn("make verify-vs4-product-alpha-decision-pages", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-readability", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-keyboard-focus", package_row["commands_to_run_before_review"])
+        self.assertIn(
+            "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_009_CLAIM_ACTION_NAV_DETAIL.md",
+            package_row["evidence_refs"],
+        )
         self.assertTrue((ROOT / "reports/human-gates/vs4/VS4-H01.json").exists())
         self.assertTrue((ROOT / template_output).exists())
 
