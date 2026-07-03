@@ -1260,6 +1260,12 @@ def capture_vs4_product_alpha_browser_proof(
     ops_inbox_triage_markers = (
         ops_inbox_triage.get("markers", {}) if isinstance(ops_inbox_triage.get("markers"), dict) else {}
     )
+    human_review_handoff = (
+        brief_evidence.get("human_review_handoff", {}) if isinstance(brief_evidence.get("human_review_handoff"), dict) else {}
+    )
+    human_review_handoff_markers = (
+        human_review_handoff.get("markers", {}) if isinstance(human_review_handoff.get("markers"), dict) else {}
+    )
     browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
     responsive_required = browser_window_size == "390,844"
     shell_markers = {
@@ -1273,6 +1279,9 @@ def capture_vs4_product_alpha_browser_proof(
         "ops_inbox_triage_visible": 'data-vs4-ops-inbox-triage="visible"' in dom
         and bool(ops_inbox_triage_markers)
         and all(value is True for value in ops_inbox_triage_markers.values()),
+        "human_review_handoff_visible": 'data-vs4-human-review-handoff="visible"' in dom
+        and bool(human_review_handoff_markers)
+        and all(value is True for value in human_review_handoff_markers.values()),
         "continue_work_rows": dom.count("data-vs4-work-kind=") >= 4,
         "pending_evidence_gap_visible": "Evidence gap" in dom and "Claim approval waits for supporting evidence" in dom,
         "memory_candidate_visible": "Memory/Wiki candidate" in dom and "durable knowledge proposal" in dom,
@@ -1295,6 +1304,10 @@ def capture_vs4_product_alpha_browser_proof(
         and all(term in proof_details_html for term in raw_proof_terms)
         and "VS4-H01 human UX acceptance required" in proof_details_html,
         "product_language_first": all(marker in dom for marker in ["Source intake", "Evidence-backed Brief", "Claim candidate", "Memory/Wiki candidate", "Action Card draft", "Learning candidate"]),
+        "human_review_product_language": "Product Alpha review" in dom
+        and "Ready for JiYong/Tars walkthrough" in dom
+        and "Review packet" in dom
+        and dom.index("Product Alpha review") < dom.index("reports/human-gates/vs4/review-kit.json"),
         "legacy_vs0_vs1_reachable": "id=\"vs0-evux-loop\"" in dom and "id=\"vs1-ontology-loop\"" in dom,
         "forbidden_readiness_overclaim_absent": all(claim not in dom for claim in forbidden_readiness_claims),
         "human_required_visible": "VS4-H01 human UX acceptance required" in dom,
@@ -1344,6 +1357,9 @@ def capture_vs4_product_alpha_browser_proof(
     ops_inbox_triage_ok = bool(ops_inbox_triage_markers) and all(
         value is True for value in ops_inbox_triage_markers.values()
     )
+    human_review_handoff_ok = bool(human_review_handoff_markers) and all(
+        value is True for value in human_review_handoff_markers.values()
+    )
     status = (
         "PASS"
         if screenshot_exists
@@ -1353,6 +1369,7 @@ def capture_vs4_product_alpha_browser_proof(
         and ask_readability_ok
         and decision_pages_ok
         and ops_inbox_triage_ok
+        and human_review_handoff_ok
         and (not responsive_required or all(responsive_markers.values()))
         else "FAIL"
     )
@@ -1386,6 +1403,9 @@ def capture_vs4_product_alpha_browser_proof(
         "ops_inbox_triage_required": True,
         "ops_inbox_triage": ops_inbox_triage,
         "ops_inbox_triage_markers": ops_inbox_triage_markers,
+        "human_review_handoff_required": True,
+        "human_review_handoff": human_review_handoff,
+        "human_review_handoff_markers": human_review_handoff_markers,
         "responsive_required": responsive_required,
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
@@ -1396,6 +1416,12 @@ def capture_vs4_product_alpha_browser_proof(
             "final_security_claimed": 0 if "vs4-final-security-claimed=\"true\"" not in dom else 1,
             "live_provider_claimed": 0 if "vs4-live-provider-claimed=\"true\"" not in dom else 1,
             "human_ux_acceptance_claimed": 0 if "vs4-human-ux-claimed=\"true\"" not in dom else 1,
+            "human_review_package_claimed_acceptance": 0
+            if 'data-vs4-package-alone-acceptance="true"' not in dom and "Package is acceptance" not in dom
+            else 1,
+            "reference_images_used_as_human_acceptance_evidence": 0
+            if 'data-vs4-reference-images-acceptance-evidence="true"' not in dom
+            else 1,
             "accessibility_certification_claimed": 0 if "WCAG certified" not in dom and "accessibility certified" not in dom else 1,
             "reference_images_used_as_pass_evidence": 0,
         },
@@ -1414,6 +1440,8 @@ def capture_vs4_product_alpha_browser_proof(
                 **decision_pages_markers,
                 "ops_inbox_triage_markers_present": ops_inbox_triage_ok,
                 **ops_inbox_triage_markers,
+                "human_review_handoff_markers_present": human_review_handoff_ok,
+                **human_review_handoff_markers,
                 **(responsive_markers if responsive_required else {}),
             }.items()
             if not value

@@ -289,6 +289,37 @@ VS4_LEARN_REVIEW_ITEMS = [
     ("Failure", "Turn failed or blocked work into a reviewed lesson candidate."),
 ]
 
+VS4_HUMAN_REVIEW_CHECKPOINTS = [
+    ("Drop / Ask", "Confirm source intake and Ask create reviewable work with evidence."),
+    ("Evidence-backed Brief", "Confirm findings, gaps, evidence, and next steps are understandable."),
+    ("Claim candidate", "Confirm trust ladder and evidence-free approval block are clear."),
+    ("Memory/Wiki candidate", "Confirm draft memory remains review-only before durable use."),
+    ("Action Card", "Confirm goal, why, risk, approval, local/mock mode, and denial path are clear."),
+    ("Ops Inbox", "Confirm returning work, evidence gaps, approvals, blocked items, and recovery are understandable."),
+    ("Evidence / Audit", "Confirm source, provenance, safety check, activity, and audit detail are reachable."),
+    ("Learn", "Confirm outcomes, corrections, rejections, and failures remain review candidates."),
+    ("Desktop", "Confirm long policy, safety, evidence, and audit tokens stay contained."),
+    ("Mobile", "Confirm narrow viewport review remains readable without body-level overflow."),
+    ("Keyboard", "Confirm skip link, nav, Continue links, Evidence Drawer, Ask, Claim, and Action are reachable."),
+    ("Unsafe states", "Confirm unsafe Ask text cannot approve memory, approve claims, execute actions, change policy, call providers, or expand authority."),
+]
+
+VS4_HUMAN_REVIEW_ARTIFACTS = [
+    ("Review kit", "reports/human-gates/vs4/review-kit.json"),
+    ("Blank review template", "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json"),
+    ("Scenario report", "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"),
+    ("Desktop browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/browser-proof.json"),
+    ("Mobile browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-006-mobile/browser-proof.json"),
+]
+
+VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-human-review-handoff",
+    "make verify-vs4-product-alpha-human-package",
+    "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
+    "cornerstone human-gate package --scope vs4 --json",
+    "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file <filled-review-record.json> --json",
+]
+
 VS4_REFERENCE_ALIGNMENT = [
     ("Home", "light calm shell, small nav, Drop/Ask/Continue first"),
     ("Search", "prominent search, scoped results, trust and evidence chips"),
@@ -562,6 +593,24 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         "</div>"
         for kind, description in VS4_LEARN_REVIEW_ITEMS
     )
+    human_review_rows = "\n".join(
+        "<div class='review-checkpoint' "
+        f"data-vs4-human-review-checkpoint='{html.escape(label.lower().replace(' / ', '-').replace(' ', '-'))}'>"
+        f"<strong>{html.escape(label)}</strong>"
+        f"<span>{html.escape(description)}</span>"
+        "</div>"
+        for label, description in VS4_HUMAN_REVIEW_CHECKPOINTS
+    )
+    human_review_artifact_rows = "\n".join(
+        "<div><span class='label'>"
+        f"{html.escape(label)}</span><code data-vs4-human-review-artifact='{html.escape(label.lower().replace(' ', '-'))}'>{html.escape(path)}</code></div>"
+        for label, path in VS4_HUMAN_REVIEW_ARTIFACTS
+    )
+    human_review_command_rows = "\n".join(
+        "<li><code data-vs4-human-review-command>"
+        f"{html.escape(command)}</code></li>"
+        for command in VS4_HUMAN_REVIEW_COMMANDS
+    )
     production_ready = str(readiness["production_release_ready"]).lower()
     runtime_ready = str(readiness["vs0_runtime_ready"]).lower()
     autorun_evux_value = "true" if scenario == "vs0-evux" and autorun_evux else "false"
@@ -812,6 +861,28 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
       display: grid;
       gap: 8px;
       margin-top: 12px;
+    }}
+    .review-checklist {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px;
+      margin-top: 14px;
+    }}
+    .review-checkpoint {{
+      min-width: 0;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      color: var(--muted);
+    }}
+    .review-checkpoint strong {{
+      display: block;
+      color: var(--ink);
+      font-size: 13px;
+    }}
+    .review-checkpoint span {{
+      display: block;
+      margin-top: 3px;
+      overflow-wrap: anywhere;
     }}
     .state-chip {{
       display: inline-flex;
@@ -1417,6 +1488,46 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
             <p>Outcomes, corrections, approvals, rejections, and failures can become future evidence only after owner-scoped review.</p>
             <div class="activity-list">{learn_rows}</div>
           </div>
+        </div>
+        <div class="ops-grid">
+          <div
+            class="product-panel"
+            id="vs4-human-review-handoff"
+            data-vs4-human-review-handoff="visible"
+            data-vs4-human-review-status="human-required"
+            data-vs4-human-review-input-only="true"
+            data-vs4-human-ux-claimed="false"
+            data-vs4-package-alone-acceptance="false"
+            data-vs4-reference-images-acceptance-evidence="false"
+            data-vs4-review-workspace="personal-project-default"
+          >
+            <div class="label">Product Alpha review</div>
+            <h2>Ready for JiYong/Tars walkthrough.</h2>
+            <p>Use this handoff to accept or reject the daily loop. The package, template, browser proof, screenshots, and reference images are review input only; they do not accept VS4-H01.</p>
+            <div class="status-row">
+              <span class="badge warn" data-vs4-human-review-badge="human-required">Human review required</span>
+              <span class="badge safe" data-vs4-human-review-badge="review-input-only">Review input only</span>
+              <span class="badge safe" data-vs4-human-review-badge="no-acceptance-collected">No acceptance collected</span>
+              <span class="badge safe" data-vs4-human-review-badge="local-mode">Local mode</span>
+            </div>
+            <div class="review-checklist" data-vs4-human-review-checklist="visible">{human_review_rows}</div>
+          </div>
+          <aside class="product-panel" data-vs4-human-review-package="review-input-only">
+            <div class="label">Review packet</div>
+            <h3>Package is not acceptance.</h3>
+            <p>Record a dated human decision before claiming Product Alpha UX accepted.</p>
+            <div class="detail-grid">
+              <div><span class="label">Scenario</span><span data-vs4-human-review-scenario>VS4-H01 remains HUMAN_REQUIRED</span></div>
+              <div><span class="label">Scope</span><span data-vs4-human-review-scope>local-user / personal / default</span></div>
+              <div><span class="label">Acceptance claim</span><span data-vs4-human-review-claim>not collected</span></div>
+              <div><span class="label">Reference images</span><span data-vs4-human-review-reference-boundary>design input only</span></div>
+            </div>
+            <details class="raw-evidence" data-vs4-human-review-detail="progressive">
+              <summary data-vs4-keyboard-disclosure="human-review">Package paths and commands</summary>
+              <div class="detail-grid">{human_review_artifact_rows}</div>
+              <ol class="command-list">{human_review_command_rows}</ol>
+            </details>
+          </aside>
         </div>
         <div class="ops-grid">
           <div class="product-panel" id="vs4-memory-candidates" data-vs4-memory-shell="visible">
@@ -2977,6 +3088,65 @@ Search phrase: alpha-evidence-anchor.</code>
         markers: markerSet
       }};
     }}
+    function collectVs4HumanReviewHandoff() {{
+      const handoff = document.getElementById("vs4-human-review-handoff");
+      const packagePanel = document.querySelector("[data-vs4-human-review-package='review-input-only']");
+      const handoffText = handoff ? handoff.textContent || "" : "";
+      const packageText = packagePanel ? packagePanel.textContent || "" : "";
+      const checkpoints = Array.from(document.querySelectorAll("[data-vs4-human-review-checkpoint]"));
+      const checkpointKeys = checkpoints.map((node) => node.dataset.vs4HumanReviewCheckpoint || "");
+      const commands = Array.from(document.querySelectorAll("[data-vs4-human-review-command]")).map((node) => node.textContent || "");
+      const artifacts = Array.from(document.querySelectorAll("[data-vs4-human-review-artifact]")).map((node) => node.textContent || "");
+      const detail = document.querySelector("[data-vs4-human-review-detail='progressive']");
+      const requiredCheckpoints = [
+        "drop-ask",
+        "evidence-backed-brief",
+        "claim-candidate",
+        "memory/wiki-candidate",
+        "action-card",
+        "ops-inbox",
+        "evidence-audit",
+        "learn",
+        "desktop",
+        "mobile",
+        "keyboard",
+        "unsafe-states"
+      ];
+      const markerSet = {{
+        handoff_visible: Boolean(handoff && handoff.dataset.vs4HumanReviewHandoff === "visible"),
+        status_human_required_visible: Boolean(handoff && handoff.dataset.vs4HumanReviewStatus === "human-required" && handoffText.includes("Human review required")),
+        review_input_only_visible: Boolean(handoff && handoff.dataset.vs4HumanReviewInputOnly === "true" && handoffText.includes("review input only")),
+        no_acceptance_collected_visible: Boolean(handoffText.includes("No acceptance collected") && packageText.includes("not collected")),
+        vs4_h01_human_required_visible: Boolean(packageText.includes("VS4-H01 remains HUMAN_REQUIRED")),
+        package_alone_not_acceptance: Boolean(packagePanel && packagePanel.textContent.includes("Package is not acceptance") && packagePanel.dataset.vs4HumanReviewPackage === "review-input-only"),
+        reference_images_not_acceptance_evidence: Boolean(handoff && handoff.dataset.vs4ReferenceImagesAcceptanceEvidence === "false" && packageText.includes("design input only")),
+        workspace_scope_visible: Boolean(packageText.includes("local-user / personal / default") && handoff.dataset.vs4ReviewWorkspace === "personal-project-default"),
+        daily_loop_checkpoints_complete: requiredCheckpoints.every((key) => checkpointKeys.includes(key)) && checkpoints.length >= requiredCheckpoints.length,
+        package_paths_visible: artifacts.includes("reports/human-gates/vs4/review-kit.json") &&
+          artifacts.includes("reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json") &&
+          artifacts.includes("reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"),
+        validation_command_visible: commands.some((command) => command.includes("cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01")),
+        scenario_verify_command_visible: commands.some((command) => command.includes("cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json")),
+        make_target_visible: commands.includes("make verify-vs4-product-alpha-human-review-handoff"),
+        details_progressive: Boolean(detail && detail.tagName.toLowerCase() === "details" && detail.open === false),
+        normal_nav_unchanged: Array.from(document.querySelectorAll("#primary-nav a")).map((node) => node.textContent.trim()).join(",") === "Home,Search,Artifacts,Claims,Actions",
+        human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']") &&
+          Boolean(handoff && handoff.dataset.vs4HumanUxClaimed === "false"),
+        forbidden_readiness_overclaim_absent: !document.querySelector("[data-vs4-production-claimed='true']") &&
+          !document.querySelector("[data-vs4-onprem-claimed='true']") &&
+          !document.querySelector("[data-vs4-final-security-claimed='true']") &&
+          !document.querySelector("[data-vs4-live-provider-claimed='true']")
+      }};
+      return {{
+        schema_version: "cs.vs4_human_review_handoff_proof.v0",
+        checkpoint_keys: checkpointKeys,
+        artifact_paths: artifacts,
+        commands,
+        handoff_text: handoffText.replace(/\\s+/g, " ").trim().slice(0, 1400),
+        package_text: packageText.replace(/\\s+/g, " ").trim().slice(0, 1400),
+        markers: markerSet
+      }};
+    }}
     window.__cornerstoneVs4BriefEvidence = function() {{
       collectVs4StateCoverage();
       collectVs4ReferenceAlignment();
@@ -2985,6 +3155,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const askReadability = collectVs4AskReadability();
       const decisionPages = collectVs4DecisionPages();
       const opsInboxTriage = collectVs4OpsInboxTriage();
+      const humanReviewHandoff = collectVs4HumanReviewHandoff();
       return {{
         schema_version: "cs.vs4_brief_ui_state.v0",
         completed: vs4State.completed,
@@ -2997,6 +3168,7 @@ Search phrase: alpha-evidence-anchor.</code>
         ask_readability: askReadability,
         decision_pages: decisionPages,
         ops_inbox_triage: opsInboxTriage,
+        human_review_handoff: humanReviewHandoff,
         markers: {{
           brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
           source_state_visible: Boolean(document.getElementById("vs4-source-state")),
@@ -3013,6 +3185,7 @@ Search phrase: alpha-evidence-anchor.</code>
           state_coverage_complete: vs4State.state_coverage.complete === true,
           home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
           ops_inbox_triage_complete: Object.values(opsInboxTriage.markers).every((value) => value === true),
+          human_review_handoff_complete: Object.values(humanReviewHandoff.markers).every((value) => value === true),
           claim_action_nav_detail_complete: Object.values(decisionPages.markers).every((value) => value === true),
           reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
           cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
