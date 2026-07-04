@@ -46,7 +46,7 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 
 DESKTOP_ROUTES = [
     {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Drop anything, or ask what we know", "Recent items", "Suggested next steps"]},
-    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search the workspace", "What we found", "Suggested follow-ups"]},
+    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search the workspace", "Current search controls", "Search mode: local keyword", "Result receipt", "Open result", "What we found", "Suggested follow-ups"]},
     {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Claim review queue", "Review posture"]},

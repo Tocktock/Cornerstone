@@ -480,6 +480,19 @@ button, input, textarea { font: inherit; }
   border-color: var(--cs-color-primary-100);
   color: var(--cs-color-primary-700);
 }
+.cs-search-context {
+  margin-top: var(--cs-space-4);
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-search-context h2 {
+  margin: 0;
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+  color: var(--cs-color-text-muted);
+}
 .cs-result-list {
   display: grid;
   gap: var(--cs-space-3);
@@ -491,7 +504,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: 42px minmax(0, 1fr);
   gap: var(--cs-space-4);
   align-items: start;
 }
@@ -508,8 +521,34 @@ button, input, textarea { font: inherit; }
 }
 .cs-result-body { display: grid; gap: var(--cs-space-1); }
 .cs-result-body h3 { margin: 0; font-size: 16px; line-height: 1.35; }
+.cs-result-body h3 a { color: var(--cs-color-text-primary); }
+.cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible { color: var(--cs-color-primary-700); outline: none; }
 .cs-result-body p { margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }
 .cs-result-meta { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-result-receipt {
+  margin-top: var(--cs-space-3);
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+}
+.cs-result-receipt-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}
+.cs-result-actions .cs-button { min-height: 34px; padding: var(--cs-space-1) var(--cs-space-3); }
 .cs-right-stat {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1934,7 +1973,7 @@ button, input, textarea { font: inherit; }
 <a class="cs-collection-row" href="/artifacts/art_ede571327ab3ec20?view=html">
   <span class="cs-collection-icon" aria-hidden="true">S</span>
   <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Source</span><span>2026-07-04 20:53 UTC</span></span>
+    <span class="cs-collection-meta"><span>Source</span><span>2026-07-04 21:00 UTC</span></span>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
     <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
   </span>

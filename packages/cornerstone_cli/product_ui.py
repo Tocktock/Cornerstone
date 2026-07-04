@@ -942,6 +942,19 @@ button, input, textarea {{ font: inherit; }}
   border-color: var(--cs-color-primary-100);
   color: var(--cs-color-primary-700);
 }}
+.cs-search-context {{
+  margin-top: var(--cs-space-4);
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-search-context h2 {{
+  margin: 0;
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+  color: var(--cs-color-text-muted);
+}}
 .cs-result-list {{
   display: grid;
   gap: var(--cs-space-3);
@@ -953,7 +966,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: 42px minmax(0, 1fr);
   gap: var(--cs-space-4);
   align-items: start;
 }}
@@ -970,8 +983,34 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-result-body {{ display: grid; gap: var(--cs-space-1); }}
 .cs-result-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
+.cs-result-body h3 a {{ color: var(--cs-color-text-primary); }}
+.cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible {{ color: var(--cs-color-primary-700); outline: none; }}
 .cs-result-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }}
 .cs-result-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-result-receipt {{
+  margin-top: var(--cs-space-3);
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+}}
+.cs-result-receipt-note {{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-result-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}}
+.cs-result-actions .cs-button {{ min-height: 34px; padding: var(--cs-space-1) var(--cs-space-3); }}
 .cs-right-stat {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2746,10 +2785,14 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
           <button class="cs-button" type="submit">Search</button>
         </form>
         <div class="cs-search-tabs" aria-label="Result type counts">{count_tabs}</div>
-        <div class="cs-filter-row" aria-label="Current search filters">
-          <span class="cs-filter-chip">Scope: personal/default</span>
-          <span class="cs-filter-chip">Type: all visible</span>
-          <span class="cs-filter-chip">Sort: keyword match</span>
+        <div class="cs-search-context" aria-label="Current search controls">
+          <h2>Current search controls</h2>
+          <div class="cs-filter-row">
+            <span class="cs-filter-chip">Scope: personal/default</span>
+            <span class="cs-filter-chip">Type: all visible</span>
+            <span class="cs-filter-chip">Sort: keyword match</span>
+            <span class="cs-filter-chip">Search mode: local keyword</span>
+          </div>
         </div>
       </section>
       <div class="cs-result-list">{rows}</div>
@@ -2843,15 +2886,23 @@ def _search_counts(ctx: dict[str, Any], q: str) -> list[tuple[str, int]]:
 
 def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
     return f"""
-<a class="cs-result-row" href="{h(href)}">
+<article class="cs-result-row">
   <span class="cs-result-icon" aria-hidden="true">{h(icon)}</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>{h(kind)}</span><span>{h(date)}</span></span>
-    <h3>{h(title)}</h3>
+    <span class="cs-result-meta"><span>{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
+    <h3><a href="{h(href)}">{h(title)}</a></h3>
     <p>{h(_truncate(detail, 240))}</p>
+    <span class="cs-result-receipt">
+      <span class="cs-result-receipt-note">
+        {_chip(label, state)}
+        <span>Result receipt: local record and visible source context only.</span>
+      </span>
+      <span class="cs-result-actions">
+        <a class="cs-button secondary" href="{h(href)}">Open result</a>
+      </span>
+    </span>
   </span>
-  <span class="cs-row">{_chip(label, state)}</span>
-</a>
+</article>
 """
 
 

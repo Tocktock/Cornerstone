@@ -288,6 +288,11 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("What we found", search_html)
         self.assertIn("Suggested follow-ups", search_html)
         self.assertIn("Receipt coverage", search_html)
+        self.assertIn("Current search controls", search_html)
+        self.assertIn("Search mode: local keyword", search_html)
+        self.assertIn("Keyword match", search_html)
+        self.assertIn("Result receipt", search_html)
+        self.assertIn("Open result", search_html)
         self.assertIn("Sort: keyword match", search_html)
         self.assert_product_surface_is_clean(search_html)
 
