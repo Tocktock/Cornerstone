@@ -4358,8 +4358,72 @@ class LocalRuntimeStore:
                 "shared_artifact_refs": shared_artifact_refs,
             }
         )
+        def _stage_status(kind: str, record: dict[str, Any] | None) -> str:
+            if kind == "inbox":
+                return "ready"
+            if not record:
+                return "not_requested"
+            if kind == "brief":
+                return str(record.get("status") or "evidence_backed")
+            if kind == "claim":
+                return str(record.get("trust_state") or record.get("status") or "draft")
+            if kind == "memory":
+                return str(record.get("trust_state") or record.get("status") or "draft")
+            if kind == "action":
+                execution = record.get("execution") if isinstance(record.get("execution"), dict) else {}
+                return str(execution.get("status") or record.get("status") or "draft")
+            if kind == "learn":
+                return str(record.get("review_state") or record.get("status") or "needs_review")
+            return "ready"
+
+        def _stage_evidence_refs(kind: str, record: dict[str, Any] | None) -> list[str]:
+            if not record:
+                return []
+            refs = list(_ref_values(record))
+            bundle_id = _bundle_id(kind, record)
+            if bundle_id:
+                refs.append(f"evidence_bundle:{bundle_id}")
+            refs.extend(_artifact_refs(kind, record))
+            return list(dict.fromkeys(ref for ref in refs if ref))
+
+        def _stage_audit_refs(record: dict[str, Any] | None) -> list[str]:
+            if not record:
+                return []
+            refs: list[str] = []
+            for key in ("audit_refs", "activity_refs", "approval_audit_refs", "policy_decision_refs"):
+                value = record.get(key)
+                if isinstance(value, list):
+                    refs.extend(str(ref) for ref in value if isinstance(ref, str) and ref)
+            return list(dict.fromkeys(refs))
+
+        def _stage_row(
+            *,
+            stage: str,
+            kind: str,
+            ref: str | None,
+            record: dict[str, Any] | None,
+            description: str,
+            continue_target: str,
+            native_ref: str | None = None,
+        ) -> dict[str, Any]:
+            return {
+                "stage": stage,
+                "visible": True,
+                "ref": ref,
+                "native_ref": native_ref,
+                "status": _stage_status(kind, record),
+                "description": description,
+                "record_refs": [ref for ref in [ref, native_ref] if ref],
+                "evidence_refs": _stage_evidence_refs(kind, record),
+                "audit_refs": _stage_audit_refs(record),
+                "scope": scope,
+                "continue_target": continue_target,
+                "review_required": kind in {"claim", "memory", "action", "learn"},
+            }
+
         learn_ref = f"learn:{lesson_id}" if lesson_id else (f"mission_outcome:{outcome_id}" if outcome_id else None)
         learn_native_ref = f"lesson:{lesson_id}" if lesson_id else None
+        learn_record = records.get("lesson") or records.get("outcome")
         loop_base = {
             "schema_version": "cs.product_loop_view.v0",
             "status": "visible",
@@ -4367,12 +4431,55 @@ class LocalRuntimeStore:
             "loop_validation": validation,
             "item_id": lesson_id or mission_id or action_id or memory_id or claim_id or brief_id or conversation_id,
             "stages": [
-                {"stage": "Inbox", "visible": True, "ref": f"conversation:{conversation_id}" if conversation_id else None},
-                {"stage": "Brief", "visible": True, "ref": f"brief:{brief_id}" if brief_id else None},
-                {"stage": "Claim", "visible": True, "ref": f"claim:{claim_id}" if claim_id else None},
-                {"stage": "Memory/Wiki", "visible": True, "ref": f"memory:{memory_id}" if memory_id else None},
-                {"stage": "Action", "visible": True, "ref": f"action:{action_id}" if action_id else None},
-                {"stage": "Learn", "visible": True, "ref": learn_ref, "native_ref": learn_native_ref},
+                _stage_row(
+                    stage="Inbox",
+                    kind="inbox",
+                    ref=f"conversation:{conversation_id}" if conversation_id else None,
+                    record=records.get("conversation"),
+                    description="Return to the selected work item from Ops Inbox.",
+                    continue_target="#ops-inbox",
+                ),
+                _stage_row(
+                    stage="Brief",
+                    kind="brief",
+                    ref=f"brief:{brief_id}" if brief_id else None,
+                    record=records.get("brief"),
+                    description="Review findings, gaps, and supporting evidence.",
+                    continue_target="#brief-detail",
+                ),
+                _stage_row(
+                    stage="Claim",
+                    kind="claim",
+                    ref=f"claim:{claim_id}" if claim_id else None,
+                    record=records.get("claim"),
+                    description="Keep the claim candidate evidence-backed before approval.",
+                    continue_target="#claim-builder",
+                ),
+                _stage_row(
+                    stage="Memory/Wiki",
+                    kind="memory",
+                    ref=f"memory:{memory_id}" if memory_id else None,
+                    record=records.get("memory"),
+                    description="Review memory or wiki candidate before durable use.",
+                    continue_target="#vs4-memory-candidates",
+                ),
+                _stage_row(
+                    stage="Action",
+                    kind="action",
+                    ref=f"action:{action_id}" if action_id else None,
+                    record=records.get("action"),
+                    description="Preview local/mock action and approval boundary.",
+                    continue_target="#action-card",
+                ),
+                _stage_row(
+                    stage="Learn",
+                    kind="learn",
+                    ref=learn_ref,
+                    native_ref=learn_native_ref,
+                    record=learn_record,
+                    description="Keep outcomes and corrections as review candidates.",
+                    continue_target="#vs4-learn-review",
+                ),
             ],
             "journey": "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn",
             "single_item_progression_visible": True,
@@ -4388,6 +4495,11 @@ class LocalRuntimeStore:
             {"type": "product_loop", "id": loop_id},
             {"visible_stage_count": len([stage for stage in loop["stages"] if stage["visible"]])},
         )
+        loop_audit_ref = f"audit:{event['event_id']}"
+        for stage in loop.get("stages", []):
+            if isinstance(stage, dict):
+                stage["audit_refs"] = list(dict.fromkeys([*stage.get("audit_refs", []), loop_audit_ref]))
+        _write_json(self.product_surface_path(loop_id), loop)
         return {"product_loop": loop, "audit_event": event}
 
     def product_boundary_review(self, scope: dict[str, str]) -> dict[str, Any]:

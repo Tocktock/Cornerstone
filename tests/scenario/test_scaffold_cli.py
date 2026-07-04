@@ -14,11 +14,14 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
-VS4_ACTIVE_SLICE = "slice-024-active-report-package-coherence"
-VS4_ACTIVE_SLICE_CONTRACT = (
+VS4_ACTIVE_SLICE = "slice-025-ops-inbox-journey-timeline"
+VS4_PRIOR_SLICE_024_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
 )
-VS4_ACTIVE_SLICE_SCENARIO_COUNT = 6
+VS4_ACTIVE_SLICE_CONTRACT = (
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_025_OPS_INBOX_JOURNEY_TIMELINE.md"
+)
+VS4_ACTIVE_SLICE_SCENARIO_COUNT = 21
 VS4_RUNTIME_LOOP_COHERENCE_CONTRACT = (
     "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_021_RUNTIME_LOOP_COHERENCE.md"
 )
@@ -33,6 +36,8 @@ VS4_SLICE_022_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-0
 VS4_SLICE_022_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-022-return-to-work-lineage-gate.json"
 VS4_SLICE_024_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"
 VS4_SLICE_024_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence-gate.json"
+VS4_SLICE_025_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json"
+VS4_SLICE_025_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline-gate.json"
 VS4_FULL_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
 VS4_FULL_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
 
@@ -11435,7 +11440,8 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("slice_contracts", {})["slice_021"] = VS4_RUNTIME_LOOP_COHERENCE_CONTRACT
         report.setdefault("slice_contracts", {})["slice_022"] = VS4_RETURN_TO_WORK_LINEAGE_CONTRACT
         report.setdefault("slice_contracts", {})["slice_023"] = VS4_REPORT_PACKAGE_INTEGRITY_CONTRACT
-        report.setdefault("slice_contracts", {})["slice_024"] = VS4_ACTIVE_SLICE_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_024"] = VS4_PRIOR_SLICE_024_CONTRACT
+        report.setdefault("slice_contracts", {})["slice_025"] = VS4_ACTIVE_SLICE_CONTRACT
         report.setdefault("proof_boundary", {})["vs4_slice_016_evidence_audit_detail"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
@@ -11463,6 +11469,9 @@ class ScaffoldCliTests(unittest.TestCase):
         report.setdefault("proof_boundary", {})["vs4_slice_024_active_report_package_coherence"] = (
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
         )
+        report.setdefault("proof_boundary", {})["vs4_slice_025_ops_inbox_journey_timeline"] = (
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
+        )
         report["active_proof"] = {
             "schema_version": "cs.vs4_active_proof.v0",
             "status": "bound",
@@ -11487,13 +11496,14 @@ class ScaffoldCliTests(unittest.TestCase):
             "active_slice_contract": VS4_ACTIVE_SLICE_CONTRACT,
             "full_report_path": VS4_FULL_REPORT,
             "full_gate_report_path": VS4_FULL_GATE_REPORT,
-            "focused_slice_report_path": VS4_SLICE_024_REPORT,
-            "focused_slice_gate_report_path": VS4_SLICE_024_GATE_REPORT,
+            "focused_slice_report_path": VS4_SLICE_025_REPORT,
+            "focused_slice_gate_report_path": VS4_SLICE_025_GATE_REPORT,
             "full_report_reserved_for_h01": True,
             "focused_reports_are_not_h01_package_input": True,
             "paths_distinct": True,
             "slice_023_contract_present": True,
             "slice_024_contract_present": True,
+            "slice_025_contract_present": True,
             "vs4_h01_remains_human_required": True,
             "production_claimed": False,
             "live_provider_claimed": False,
@@ -11530,6 +11540,20 @@ class ScaffoldCliTests(unittest.TestCase):
             "loop_lineage_guard_no_invalid_audit": True,
             "loop_lineage_guard_no_authority_expansion": True,
             "loop_lineage_guard_no_live_writeback": True,
+            "journey_timeline_visible": True,
+            "journey_timeline_stage_count_6": True,
+            "journey_timeline_stage_labels_complete": True,
+            "journey_timeline_stage_refs_visible": True,
+            "journey_timeline_evidence_refs_visible": True,
+            "journey_timeline_audit_refs_visible": True,
+            "journey_timeline_progressive_detail": True,
+            "journey_timeline_product_language_before_refs": True,
+            "loop_recovery_missing_ref_visible": True,
+            "loop_recovery_cross_scope_visible": True,
+            "loop_recovery_lineage_mismatch_visible": True,
+            "loop_recovery_product_language_visible": True,
+            "journey_timeline_no_authority_expansion": True,
+            "journey_timeline_no_live_writeback": True,
         }
         report["browser_proof"].setdefault("ops_inbox_triage_markers", {}).update(loop_markers)
         report["browser_proof"].setdefault("ops_inbox_triage", {}).setdefault("markers", {}).update(loop_markers)
@@ -11610,6 +11634,13 @@ class ScaffoldCliTests(unittest.TestCase):
         report["negative_evidence"]["vs4_loop_invalid_ref_live_writeback"] = 0
         report["negative_evidence"]["vs4_loop_api_parity_failed"] = 0
         report["negative_evidence"]["vs4_loop_product_language_error_missing"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_missing"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_missing_stage_refs"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_missing_evidence_refs"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_missing_audit_refs"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_recovery_missing"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_authority_expanded"] = 0
+        report["negative_evidence"]["vs4_ops_inbox_journey_timeline_live_writeback"] = 0
         report["source_tree"] = git_verification_metadata(ROOT)
         report.setdefault("self_command_transcript", {})["command"] = [
             "cornerstone",
@@ -12123,7 +12154,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["pass"], len(selected))
         self.assertEqual(payload["summary"]["blocking"], 0)
         self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
-        self.assertEqual(payload["summary"]["in_this_slice"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], VS4_ACTIVE_SLICE_SCENARIO_COUNT)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
 
@@ -12381,7 +12412,8 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
         self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
-        self.assertEqual(payload["slice_contracts"]["slice_024"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["slice_contracts"]["slice_024"], VS4_PRIOR_SLICE_024_CONTRACT)
+        self.assertEqual(payload["slice_contracts"]["slice_025"], VS4_ACTIVE_SLICE_CONTRACT)
         self.assertEqual(payload["active_report_package_coherence"]["status"], "bound")
         self.assertEqual(payload["active_report_package_coherence"]["active_slice"], VS4_ACTIVE_SLICE)
         for proof_key in ["browser_proof", "mobile_browser_proof"]:
@@ -12430,6 +12462,137 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(payload["negative_evidence"][key], 0, key)
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
         self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
+        for value in payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
+
+    def test_vs4_product_alpha_ops_inbox_journey_timeline_slice_verify(self) -> None:
+        selected = [
+            "VS4-GATE-001",
+            "VS4-UI-001",
+            "VS4-UI-005",
+            "VS4-UI-006",
+            "VS4-UI-007",
+            "VS4-UI-008",
+            "VS4-UI-009",
+            "VS4-UI-010",
+            "VS4-UI-011",
+            "VS4-UI-012",
+            "VS4-UI-013",
+            "VS4-UI-015",
+            "VS4-UI-016",
+            "VS4-STATE-001",
+            "VS4-REF-001",
+            "VS4-REF-002",
+            "VS4-REG-003",
+            "VS4-REG-004",
+            "VS4-REG-005",
+            "VS4-REG-006",
+            "VS4-REG-007",
+        ]
+        args = ["scenario", "verify", "vs4-product-alpha-ui-daily-loop"]
+        for scenario_id in selected:
+            args.extend(["--scenario", scenario_id])
+        args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-ops-inbox-journey-timeline.json"])
+        result = run_cli(*args)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
+        self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["slice_contract"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["summary"]["scenario_count"], len(selected))
+        self.assertEqual(payload["summary"]["pass"], len(selected))
+        self.assertEqual(payload["summary"]["in_this_slice"], VS4_ACTIVE_SLICE_SCENARIO_COUNT)
+        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["not_run"], 0)
+        self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
+        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        self.assertEqual(payload["slice_contracts"]["slice_024"], VS4_PRIOR_SLICE_024_CONTRACT)
+        self.assertEqual(payload["slice_contracts"]["slice_025"], VS4_ACTIVE_SLICE_CONTRACT)
+        self.assertEqual(
+            payload["proof_boundary"]["vs4_slice_025_ops_inbox_journey_timeline"],
+            "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
+        )
+        self.assertEqual(payload["active_report_package_coherence"]["status"], "bound")
+        self.assertEqual(payload["active_report_package_coherence"]["active_slice"], VS4_ACTIVE_SLICE)
+        self.assertEqual(payload["active_report_package_coherence"]["focused_slice_report_path"], VS4_SLICE_025_REPORT)
+        self.assertEqual(payload["active_report_package_coherence"]["focused_slice_gate_report_path"], VS4_SLICE_025_GATE_REPORT)
+        self.assertTrue(payload["active_report_package_coherence"]["slice_025_contract_present"])
+
+        required_markers = [
+            "journey_timeline_visible",
+            "journey_timeline_stage_count_6",
+            "journey_timeline_stage_labels_complete",
+            "journey_timeline_stage_refs_visible",
+            "journey_timeline_evidence_refs_visible",
+            "journey_timeline_audit_refs_visible",
+            "journey_timeline_progressive_detail",
+            "journey_timeline_product_language_before_refs",
+            "loop_recovery_missing_ref_visible",
+            "loop_recovery_cross_scope_visible",
+            "loop_recovery_lineage_mismatch_visible",
+            "loop_recovery_product_language_visible",
+            "journey_timeline_no_authority_expansion",
+            "journey_timeline_no_live_writeback",
+        ]
+        expected_stage_labels = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
+        for proof_key in ["browser_proof", "mobile_browser_proof"]:
+            self.assertEqual(payload[proof_key]["status"], "PASS")
+            markers = payload[proof_key]["ops_inbox_triage_markers"]
+            for marker in required_markers:
+                self.assertTrue(markers[marker], f"{proof_key}:{marker}")
+            journey = payload[proof_key]["ops_inbox_triage"]["journey_timeline"]
+            self.assertEqual(journey["source"], "runtime-loop-view")
+            self.assertEqual(journey["stage_labels"], expected_stage_labels)
+            self.assertGreaterEqual(len(journey["stage_refs"]), 5)
+            self.assertTrue(any("evidence_bundle:" in refs for refs in journey["evidence_refs"]))
+            self.assertGreaterEqual(len(journey["audit_refs"]), 6)
+            self.assertTrue(all("audit:" in refs for refs in journey["audit_refs"]))
+            self.assertEqual(journey["recovery_state_count"], 3)
+            self.assertIn("Nothing new was approved or sent", journey["recovery_text"])
+            self.assertIn("Workspace scope stayed unchanged", journey["recovery_text"])
+            runtime_projection = payload[proof_key]["ops_inbox_triage"]["runtime_projection"]
+            self.assertTrue(runtime_projection["journey_timeline_visible"])
+            self.assertGreaterEqual(runtime_projection["journey_timeline_stage_count"], 6)
+            self.assertTrue(runtime_projection["journey_timeline_stage_labels_complete"])
+            self.assertGreaterEqual(runtime_projection["journey_timeline_stage_ref_count"], 5)
+            self.assertGreaterEqual(runtime_projection["journey_timeline_evidence_ref_count"], 5)
+            self.assertGreaterEqual(runtime_projection["journey_timeline_audit_ref_count"], 6)
+            self.assertGreaterEqual(runtime_projection["journey_timeline_progressive_detail_count"], 6)
+            self.assertTrue(runtime_projection["journey_timeline_product_language_before_refs"])
+            self.assertTrue(runtime_projection["journey_timeline_recovery"]["visible"])
+            self.assertTrue(runtime_projection["journey_timeline_recovery"]["no_authority_expansion"])
+            self.assertTrue(runtime_projection["journey_timeline_recovery"]["no_live_writeback"])
+
+        checks = payload["cli_workflow"]["checks"]
+        self.assertTrue(checks["ops_inbox_loop_view_cli_parity"])
+        self.assertTrue(checks["loop_lineage_guard_cli_parity"])
+        loop_view = payload["cli_workflow"]["transcripts"]["product_loop_view_selected_action"]["stdout_json"][
+            "product_loop"
+        ]
+        self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
+        self.assertEqual([stage["stage"] for stage in loop_view["stages"]], expected_stage_labels)
+        for stage in loop_view["stages"]:
+            self.assertTrue(stage["visible"], stage["stage"])
+            self.assertIn("status", stage)
+            self.assertTrue(stage["description"], stage["stage"])
+            self.assertTrue(stage["continue_target"].startswith("#"), stage["stage"])
+            self.assertTrue(stage["audit_refs"], stage["stage"])
+            self.assertIsInstance(stage["record_refs"], list)
+            self.assertIsInstance(stage["evidence_refs"], list)
+            self.assertIsInstance(stage["scope"], dict)
+            self.assertIn("review_required", stage)
+        for key in [
+            "vs4_ops_inbox_journey_timeline_missing",
+            "vs4_ops_inbox_journey_timeline_missing_stage_refs",
+            "vs4_ops_inbox_journey_timeline_missing_evidence_refs",
+            "vs4_ops_inbox_journey_timeline_missing_audit_refs",
+            "vs4_ops_inbox_journey_timeline_recovery_missing",
+            "vs4_ops_inbox_journey_timeline_authority_expanded",
+            "vs4_ops_inbox_journey_timeline_live_writeback",
+        ]:
+            self.assertIn(key, payload["negative_evidence"])
+            self.assertEqual(payload["negative_evidence"][key], 0, key)
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -12919,6 +13082,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertNotIn(f"--output {VS4_FULL_REPORT}", active_target)
         self.assertNotIn(f"scenario gate {VS4_FULL_REPORT}", active_target)
 
+        journey_target = target_body("verify-vs4-product-alpha-ops-inbox-journey-timeline")
+        self.assertIn(VS4_SLICE_025_REPORT, journey_target)
+        self.assertIn(f"scenario gate {VS4_SLICE_025_REPORT}", journey_target)
+        self.assertIn(f"--output {VS4_SLICE_025_GATE_REPORT}", journey_target)
+        self.assertNotIn(f"--output {VS4_FULL_REPORT}", journey_target)
+        self.assertNotIn(f"scenario gate {VS4_FULL_REPORT}", journey_target)
+
         package_target = target_body("verify-vs4-product-alpha-human-package")
         self.assertIn(f"--output {VS4_FULL_REPORT}", package_target)
         self.assertIn(f"scenario gate {VS4_FULL_REPORT}", package_target)
@@ -12940,7 +13110,9 @@ class ScaffoldCliTests(unittest.TestCase):
             report["slice"] = VS4_RETURN_TO_WORK_LINEAGE_SLICE
             report["slice_contract"] = VS4_RETURN_TO_WORK_LINEAGE_CONTRACT
             report["slice_contracts"].pop("slice_024", None)
+            report["slice_contracts"].pop("slice_025", None)
             report["proof_boundary"].pop("vs4_slice_024_active_report_package_coherence", None)
+            report["proof_boundary"].pop("vs4_slice_025_ops_inbox_journey_timeline", None)
             report["active_report_package_coherence"]["status"] = "stale_or_incomplete"
             report["active_report_package_coherence"]["active_slice"] = VS4_RETURN_TO_WORK_LINEAGE_SLICE
 
@@ -13106,6 +13278,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertIn("make verify-vs4-product-alpha-action-execution-boundary", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-return-to-work-lineage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-active-report-package-coherence", package_row["commands_to_run_before_review"])
+        self.assertIn("make verify-vs4-product-alpha-ops-inbox-journey-timeline", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-report-package-integrity", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ops-inbox-triage", package_row["commands_to_run_before_review"])
         self.assertIn("make verify-vs4-product-alpha-ask-injection-boundary", package_row["commands_to_run_before_review"])

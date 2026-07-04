@@ -19734,11 +19734,12 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
 VS4_PRODUCT_ALPHA_SCENARIO_SET = "vs4-product-alpha-ui-daily-loop"
 VS4_PRODUCT_ALPHA_MATRIX_PATH = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_MATRIX.csv"
 VS4_HUMAN_REQUIRED_SCENARIO_ID = "VS4-H01"
-VS4_ACTIVE_SLICE = "slice-024-active-report-package-coherence"
-VS4_ACTIVE_SLICE_CONTRACT = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
-VS4_ACTIVE_SLICE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"
-VS4_ACTIVE_SLICE_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence-gate.json"
-VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY = "vs4_slice_024_active_report_package_coherence"
+VS4_ACTIVE_SLICE = "slice-025-ops-inbox-journey-timeline"
+VS4_PRIOR_SLICE_024_CONTRACT = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_024_ACTIVE_REPORT_PACKAGE_COHERENCE.md"
+VS4_ACTIVE_SLICE_CONTRACT = "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_025_OPS_INBOX_JOURNEY_TIMELINE.md"
+VS4_ACTIVE_SLICE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json"
+VS4_ACTIVE_SLICE_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline-gate.json"
+VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY = "vs4_slice_025_ops_inbox_journey_timeline"
 VS4_SLICE_PROOF_BOUNDARY_VALUE = "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
 
 
@@ -19773,6 +19774,7 @@ VS4_REQUIRED_PROOF_BOUNDARY = {
     "vs4_slice_021_runtime_loop_coherence": VS4_SLICE_PROOF_BOUNDARY_VALUE,
     "vs4_slice_022_return_to_work_lineage_guard": VS4_SLICE_PROOF_BOUNDARY_VALUE,
     "vs4_slice_023_report_package_integrity": VS4_SLICE_PROOF_BOUNDARY_VALUE,
+    "vs4_slice_024_active_report_package_coherence": VS4_SLICE_PROOF_BOUNDARY_VALUE,
     VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY: VS4_SLICE_PROOF_BOUNDARY_VALUE,
 }
 VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
@@ -19827,6 +19829,13 @@ VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS = {
     "vs4_loop_invalid_ref_live_writeback",
     "vs4_loop_api_parity_failed",
     "vs4_loop_product_language_error_missing",
+    "vs4_ops_inbox_journey_timeline_missing",
+    "vs4_ops_inbox_journey_timeline_missing_stage_refs",
+    "vs4_ops_inbox_journey_timeline_missing_evidence_refs",
+    "vs4_ops_inbox_journey_timeline_missing_audit_refs",
+    "vs4_ops_inbox_journey_timeline_recovery_missing",
+    "vs4_ops_inbox_journey_timeline_authority_expanded",
+    "vs4_ops_inbox_journey_timeline_live_writeback",
 }
 VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "verified_base_commit",
@@ -20191,7 +20200,8 @@ def _vs4_product_alpha_gate_validation(
         "active_report_package_coherence",
         data.get("slice") == VS4_ACTIVE_SLICE
         and data.get("slice_contract") == VS4_ACTIVE_SLICE_CONTRACT
-        and slice_contracts.get("slice_024") == VS4_ACTIVE_SLICE_CONTRACT
+        and slice_contracts.get("slice_024") == VS4_PRIOR_SLICE_024_CONTRACT
+        and slice_contracts.get("slice_025") == VS4_ACTIVE_SLICE_CONTRACT
         and proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY) == VS4_SLICE_PROOF_BOUNDARY_VALUE
         and active_report_package_coherence.get("status") == "bound"
         and active_report_package_coherence.get("active_slice") == VS4_ACTIVE_SLICE
@@ -20204,6 +20214,7 @@ def _vs4_product_alpha_gate_validation(
         and active_report_package_coherence.get("full_report_reserved_for_h01") is True
         and active_report_package_coherence.get("focused_reports_are_not_h01_package_input") is True
         and active_report_package_coherence.get("paths_distinct") is True
+        and active_report_package_coherence.get("slice_025_contract_present") is True
         and active_report_package_coherence.get("vs4_h01_remains_human_required") is True
         and active_report_package_coherence.get("production_claimed") is False
         and active_report_package_coherence.get("live_provider_claimed") is False
@@ -20212,8 +20223,42 @@ def _vs4_product_alpha_gate_validation(
         report_slice=data.get("slice"),
         report_slice_contract=data.get("slice_contract"),
         slice_024_contract=slice_contracts.get("slice_024"),
+        slice_025_contract=slice_contracts.get("slice_025"),
         proof_boundary_value=proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY),
         active_report_package_coherence=active_report_package_coherence,
+    )
+    journey_timeline_required_markers = [
+        "journey_timeline_visible",
+        "journey_timeline_stage_count_6",
+        "journey_timeline_stage_labels_complete",
+        "journey_timeline_stage_refs_visible",
+        "journey_timeline_evidence_refs_visible",
+        "journey_timeline_audit_refs_visible",
+        "journey_timeline_progressive_detail",
+        "journey_timeline_product_language_before_refs",
+        "loop_recovery_missing_ref_visible",
+        "loop_recovery_cross_scope_visible",
+        "loop_recovery_lineage_mismatch_visible",
+        "loop_recovery_product_language_visible",
+        "journey_timeline_no_authority_expansion",
+        "journey_timeline_no_live_writeback",
+    ]
+    record(
+        "ops_inbox_journey_timeline",
+        proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY) == VS4_SLICE_PROOF_BOUNDARY_VALUE
+        and all(ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
+        and all(mobile_ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
+        and cli_checks.get("ops_inbox_loop_view_cli_parity") is True
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_missing") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_missing_stage_refs") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_missing_evidence_refs") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_missing_audit_refs") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_recovery_missing") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_authority_expanded") == 0
+        and negative_evidence.get("vs4_ops_inbox_journey_timeline_live_writeback") == 0,
+        "VS4 Slice 025 must expose a runtime-backed Ops Inbox Journey Timeline with safe recovery states on desktop and mobile proof.",
+        desktop_markers=ops_markers,
+        mobile_markers=mobile_ops_markers,
     )
     self_command = self_transcript.get("command")
     record(

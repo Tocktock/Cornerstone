@@ -320,12 +320,13 @@ VS4_HUMAN_REVIEW_ARTIFACTS = [
     ("Review kit", "reports/human-gates/vs4/review-kit.json"),
     ("Blank review template", "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json"),
     ("Full scenario report", "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"),
-    ("Active coherence report", "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-024-active-report-package-coherence.json"),
+    ("Active coherence report", "reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json"),
     ("Desktop browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/browser-proof.json"),
     ("Mobile browser proof", "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/browser-proof.json"),
 ]
 
 VS4_HUMAN_REVIEW_COMMANDS = [
+    "make verify-vs4-product-alpha-ops-inbox-journey-timeline",
     "make verify-vs4-product-alpha-active-report-package-coherence",
     "make verify-vs4-product-alpha-report-package-integrity",
     "make verify-vs4-product-alpha-return-to-work-lineage",
@@ -581,6 +582,20 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
         f"<div><span class='label'>Continue</span><a class='text-link' data-vs4-inbox-selected-continue href='{html.escape(selected_item['href'])}'>Open selected work</a></div>"
         "<div><span class='label'>Journey</span><span data-vs4-inbox-selected-journey>Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn</span></div>"
         "</div>"
+        "<section class='journey-timeline' data-vs4-ops-inbox-journey-timeline='waiting' aria-label='Journey Timeline'>"
+        "<div class='timeline-header'>"
+        "<div><span class='label'>Journey Timeline</span><strong data-vs4-journey-timeline-title>Selected work daily loop</strong></div>"
+        "<span class='state-chip review' data-vs4-journey-timeline-source>Waiting for runtime loop-view</span>"
+        "</div>"
+        "<div class='journey-stage-list' data-vs4-journey-stage-list>"
+        "<div class='journey-stage' data-vs4-journey-stage='Inbox'><strong>Inbox</strong><span>Runtime loop-view has not refreshed yet.</span></div>"
+        "</div>"
+        "<div class='journey-recovery' data-vs4-loop-recovery-states='waiting' aria-label='Loop recovery states'>"
+        "<div class='activity-row' data-vs4-loop-recovery-state='missing-ref'><strong>Missing work item</strong><span>Waiting for recovery proof.</span></div>"
+        "<div class='activity-row' data-vs4-loop-recovery-state='cross-scope'><strong>Outside workspace</strong><span>Waiting for recovery proof.</span></div>"
+        "<div class='activity-row' data-vs4-loop-recovery-state='lineage-mismatch'><strong>Different journey</strong><span>Waiting for recovery proof.</span></div>"
+        "</div>"
+        "</section>"
         "<div class='activity-list' data-vs4-inbox-activity='visible'>"
         "<div class='activity-row'><strong>Evidence gap</strong><span>Claim approval waits for supporting evidence.</span></div>"
         "<div class='activity-row'><strong>Memory review</strong><span>Candidate knowledge remains draft until reviewed.</span></div>"
@@ -901,6 +916,78 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
     }}
     .inbox-detail .detail-grid {{
       margin-top: 12px;
+    }}
+    .journey-timeline {{
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      min-width: 0;
+    }}
+    .timeline-header {{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      min-width: 0;
+    }}
+    .timeline-header strong {{
+      display: block;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }}
+    .journey-stage-list {{
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }}
+    .journey-stage {{
+      display: grid;
+      grid-template-columns: minmax(92px, 0.3fr) minmax(0, 1fr);
+      gap: 8px;
+      border-left: 3px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 9px 10px;
+      min-width: 0;
+    }}
+    .journey-stage[data-vs4-journey-stage-status='blocked'] {{
+      border-left-color: #b91c1c;
+      background: #fef2f2;
+    }}
+    .journey-stage[data-vs4-journey-stage-status='needs-review'] {{
+      border-left-color: #b7791f;
+      background: #fffbeb;
+    }}
+    .journey-stage[data-vs4-journey-stage-status='ready'] {{
+      border-left-color: var(--safe);
+      background: #f0fdf4;
+    }}
+    .journey-stage strong {{
+      font-size: 13px;
+      color: var(--ink);
+    }}
+    .journey-stage span,
+    .journey-stage code,
+    .journey-stage summary,
+    .journey-stage details {{
+      min-width: 0;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }}
+    .journey-stage details {{
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .journey-recovery {{
+      display: grid;
+      gap: 8px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      min-width: 0;
     }}
     .text-link {{
       color: var(--accent);
@@ -2517,6 +2604,160 @@ Search phrase: alpha-evidence-anchor.</code>
     function vs4JoinedRefs(value) {{
       return vs4RefList(value).join(" | ");
     }}
+    function vs4StageRefs(stage) {{
+      const refs = [];
+      if (stage && stage.ref) refs.push(String(stage.ref));
+      if (stage && stage.native_ref) refs.push(String(stage.native_ref));
+      return Array.from(new Set([...refs, ...vs4RefList(stage ? stage.record_refs : [])])).filter(Boolean);
+    }}
+    function vs4StageStatus(stage) {{
+      const raw = String((stage || {{}}).status || "").replace(/_/g, "-").toLowerCase();
+      if (!raw || raw === "not-requested") return "needs-review";
+      if (raw.includes("blocked") || raw.includes("denied") || raw.includes("failed")) return "blocked";
+      if (raw.includes("draft") || raw.includes("review") || raw.includes("pending") || raw.includes("required")) return "needs-review";
+      return "ready";
+    }}
+    function vs4StageDescription(stageName, stage) {{
+      const supplied = String((stage || {{}}).description || "");
+      if (supplied) return supplied;
+      const descriptions = {{
+        "Inbox": "Return to the selected work item from Ops Inbox.",
+        "Brief": "Review findings, gaps, and supporting evidence.",
+        "Claim": "Keep the claim candidate evidence-backed before approval.",
+        "Memory/Wiki": "Review memory or wiki candidate before durable use.",
+        "Action": "Preview local/mock action and approval boundary.",
+        "Learn": "Keep outcomes and corrections as review candidates."
+      }};
+      return descriptions[stageName] || "Review the selected work with supporting evidence.";
+    }}
+    function setRecoveryRow(kind, title, summary, detail) {{
+      const row = document.querySelector("[data-vs4-loop-recovery-state='" + kind + "']");
+      if (!row) return false;
+      const strong = row.querySelector("strong");
+      const span = row.querySelector("span");
+      if (strong) strong.textContent = title;
+      if (span) span.textContent = summary + (detail ? " " + detail : "");
+      row.dataset.vs4LoopRecoveryStatus = "blocked-safe";
+      return true;
+    }}
+    function renderVs4LoopRecoveryStates() {{
+      const container = document.querySelector("[data-vs4-loop-recovery-states]");
+      if (!container) return {{visible: false, count: 0, product_language: false}};
+      const recovery = vs4State.loop_recovery_states || {{}};
+      const missing = recovery.missing_ref || {{}};
+      const crossScope = recovery.cross_scope || {{}};
+      const mismatch = recovery.lineage_mismatch || {{}};
+      const missingVisible = setRecoveryRow(
+        "missing-ref",
+        "Missing work item",
+        missing.product_message || "Loop View could not find one requested work item.",
+        "Nothing new was approved or sent."
+      );
+      const crossScopeVisible = setRecoveryRow(
+        "cross-scope",
+        "Outside workspace",
+        crossScope.product_message || "Loop View kept work from another workspace out of this journey.",
+        "Workspace scope stayed unchanged."
+      );
+      const mismatchVisible = setRecoveryRow(
+        "lineage-mismatch",
+        "Different journey",
+        mismatch.product_message || "Loop View did not combine work items from different evidence-backed journeys.",
+        "No new journey or activity record was created."
+      );
+      container.dataset.vs4LoopRecoveryStates = "visible";
+      container.dataset.vs4LoopRecoveryNoAuthorityExpansion = recovery.no_authority_expansion === true ? "true" : "false";
+      container.dataset.vs4LoopRecoveryNoLiveWriteback = recovery.no_live_writeback === true ? "true" : "false";
+      return {{
+        visible: missingVisible && crossScopeVisible && mismatchVisible,
+        count: [missingVisible, crossScopeVisible, mismatchVisible].filter(Boolean).length,
+        product_language: container.textContent.includes("Loop View") &&
+          container.textContent.includes("Nothing new was approved or sent") &&
+          container.textContent.includes("Workspace scope stayed unchanged") &&
+          container.textContent.includes("No new journey or activity record was created"),
+        no_authority_expansion: container.dataset.vs4LoopRecoveryNoAuthorityExpansion === "true",
+        no_live_writeback: container.dataset.vs4LoopRecoveryNoLiveWriteback === "true"
+      }};
+    }}
+    function renderVs4OpsInboxJourneyTimeline(productLoop) {{
+      const timeline = document.querySelector("[data-vs4-ops-inbox-journey-timeline]");
+      const list = document.querySelector("[data-vs4-journey-stage-list]");
+      if (!timeline || !list) return {{visible: false, stage_count: 0}};
+      const expectedStages = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"];
+      const sourceStages = Array.isArray((productLoop || {{}}).stages) ? productLoop.stages : [];
+      const sourceByName = {{}};
+      sourceStages.forEach((stage) => {{
+        if (stage && stage.stage) sourceByName[String(stage.stage)] = stage;
+      }});
+      list.textContent = "";
+      const rendered = expectedStages.map((stageName) => {{
+        const stage = sourceByName[stageName] || {{stage: stageName, visible: true, status: "needs_review"}};
+        const status = vs4StageStatus(stage);
+        const stageRefs = vs4StageRefs(stage);
+        const evidenceRefs = vs4RefList(stage.evidence_refs);
+        const auditRefs = vs4RefList(stage.audit_refs);
+        const row = document.createElement("article");
+        row.className = "journey-stage";
+        row.dataset.vs4JourneyStage = stageName;
+        row.dataset.vs4JourneyStageStatus = status;
+        row.dataset.vs4JourneyStageRef = stageRefs.join(" | ");
+        row.dataset.vs4JourneyEvidenceRefs = evidenceRefs.join(" | ");
+        row.dataset.vs4JourneyAuditRefs = auditRefs.join(" | ");
+
+        const title = document.createElement("strong");
+        title.textContent = stageName;
+        const body = document.createElement("div");
+        const description = document.createElement("span");
+        description.textContent = vs4StageDescription(stageName, stage);
+        body.appendChild(description);
+        const primaryRef = document.createElement("code");
+        primaryRef.textContent = stageRefs.join(" | ") || "ref available after this stage is created";
+        body.appendChild(primaryRef);
+        const detail = document.createElement("details");
+        const summary = document.createElement("summary");
+        summary.textContent = "Evidence and activity refs";
+        const detailText = document.createElement("span");
+        detailText.textContent = "Evidence: " + (evidenceRefs.join(" | ") || "not attached yet") +
+          " / Activity: " + (auditRefs.join(" | ") || "not recorded yet");
+        detail.appendChild(summary);
+        detail.appendChild(detailText);
+        body.appendChild(detail);
+        row.appendChild(title);
+        row.appendChild(body);
+        list.appendChild(row);
+        return {{
+          stage: stageName,
+          status,
+          refs: stageRefs,
+          evidence_refs: evidenceRefs,
+          audit_refs: auditRefs,
+          product_language_before_refs: row.textContent.indexOf(stageName) >= 0 &&
+            row.textContent.indexOf(stageName) < row.textContent.indexOf(primaryRef.textContent || "ref available")
+        }};
+      }});
+      const sourceNode = document.querySelector("[data-vs4-journey-timeline-source]");
+      if (sourceNode) {{
+        sourceNode.textContent = "Runtime loop-view";
+        sourceNode.className = "state-chip ready";
+      }}
+      timeline.dataset.vs4OpsInboxJourneyTimeline = "runtime-loop-view";
+      timeline.dataset.vs4JourneyStageCount = String(rendered.length);
+      timeline.dataset.vs4JourneyStageRefsVisible = String(rendered.filter((stage) => stage.refs.length > 0).length);
+      timeline.dataset.vs4JourneyEvidenceRefsVisible = String(rendered.filter((stage) => stage.evidence_refs.length > 0).length);
+      timeline.dataset.vs4JourneyAuditRefsVisible = String(rendered.filter((stage) => stage.audit_refs.length > 0).length);
+      const recovery = renderVs4LoopRecoveryStates();
+      return {{
+        visible: true,
+        stage_count: rendered.length,
+        stage_labels_complete: expectedStages.every((stageName) => rendered.some((stage) => stage.stage === stageName)),
+        stage_ref_count: rendered.filter((stage) => stage.refs.length > 0).length,
+        evidence_ref_count: rendered.filter((stage) => stage.evidence_refs.length > 0).length,
+        audit_ref_count: rendered.filter((stage) => stage.audit_refs.length > 0).length,
+        progressive_detail_count: list.querySelectorAll("details").length,
+        product_language_before_refs: rendered.every((stage) => stage.product_language_before_refs),
+        recovery
+      }};
+    }}
     function applyVs4RuntimeOpsInbox(missionControl, productLoop) {{
       const control = missionControl || {{}};
       const items = Array.isArray(control.ops_inbox_items) ? control.ops_inbox_items : [];
@@ -2584,6 +2825,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const missingEvidenceRows = items.filter((item) => vs4RefList(item.evidence_refs).length === 0);
       const missingActivityRows = items.filter((item) => vs4RefList(item.activity_refs).length === 0);
       const loopStages = Array.isArray((productLoop || {{}}).stages) ? productLoop.stages : [];
+      const journeyTimelineProof = renderVs4OpsInboxJourneyTimeline(productLoop || {{}});
       const actionApprovalText = [
         document.getElementById("vs4-action-approval")?.textContent || "",
         document.getElementById("vs4-action-page-approval")?.textContent || ""
@@ -2633,6 +2875,15 @@ Search phrase: alpha-evidence-anchor.</code>
         selected_detail_records_visible: requiredPrefixes.some((prefix) => selectedRowsText.includes(prefix)),
         loop_view_journey: (productLoop || {{}}).journey || "",
         loop_view_stage_refs: loopStages.map((stage) => stage.ref).filter(Boolean),
+        journey_timeline_visible: journeyTimelineProof.visible === true,
+        journey_timeline_stage_count: journeyTimelineProof.stage_count || 0,
+        journey_timeline_stage_labels_complete: journeyTimelineProof.stage_labels_complete === true,
+        journey_timeline_stage_ref_count: journeyTimelineProof.stage_ref_count || 0,
+        journey_timeline_evidence_ref_count: journeyTimelineProof.evidence_ref_count || 0,
+        journey_timeline_audit_ref_count: journeyTimelineProof.audit_ref_count || 0,
+        journey_timeline_progressive_detail_count: journeyTimelineProof.progressive_detail_count || 0,
+        journey_timeline_product_language_before_refs: journeyTimelineProof.product_language_before_refs === true,
+        journey_timeline_recovery: journeyTimelineProof.recovery || {{}},
         mission_control_surface_id: control.surface_id || "",
         selected_item_id: selectedDetail.selected_item_id || "",
         live_external_writeback_claimed: selectedDetail.live_external_writeback_claimed === true,
@@ -2654,6 +2905,20 @@ Search phrase: alpha-evidence-anchor.</code>
       vs4State.negative_evidence.vs4_runtime_learn_missing_evidence_refs = learnEvidenceRefs.length > 0 ? 0 : 1;
       vs4State.negative_evidence.vs4_runtime_learn_missing_audit_refs = learnActivityRefs.length > 0 ? 0 : 1;
       vs4State.negative_evidence.vs4_runtime_learn_hidden_durable_change = vs4State.runtime_ops_inbox.learn_candidate_review_only ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_missing =
+        journeyTimelineProof.visible === true && (journeyTimelineProof.stage_count || 0) >= 6 ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_missing_stage_refs =
+        (journeyTimelineProof.stage_ref_count || 0) >= 5 ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_missing_evidence_refs =
+        (journeyTimelineProof.evidence_ref_count || 0) >= 5 ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_missing_audit_refs =
+        (journeyTimelineProof.audit_ref_count || 0) >= 6 ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_recovery_missing =
+        (journeyTimelineProof.recovery || {{}}).visible === true ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_authority_expanded =
+        (journeyTimelineProof.recovery || {{}}).no_authority_expansion === true ? 0 : 1;
+      vs4State.negative_evidence.vs4_ops_inbox_journey_timeline_live_writeback =
+        (journeyTimelineProof.recovery || {{}}).no_live_writeback === true ? 0 : 1;
       return vs4State.runtime_ops_inbox;
     }}
     function collectVs4StateCoverage() {{
@@ -3167,6 +3432,33 @@ Search phrase: alpha-evidence-anchor.</code>
           missing_error_codes: missingCodes,
           cross_scope_error_codes: crossScopeCodes,
           mismatch_error_codes: mismatchCodes
+        }};
+        vs4State.loop_recovery_states = {{
+          missing_ref: {{
+            status: missingLoopResponse.payload.status || "not_found",
+            error_codes: missingCodes,
+            product_message: "Loop View could not find one requested work item.",
+            no_product_loop_created: !Boolean(missingLoopResponse.payload.product_loop || missingLoopResponse.payload.ids?.loop_id),
+            no_audit_created: (missingLoopResponse.payload.audit_refs || []).length === 0
+          }},
+          cross_scope: {{
+            status: crossScopeLoopResponse.payload.status || "scope_denied",
+            error_codes: crossScopeCodes,
+            product_message: "Loop View kept work from another workspace out of this journey.",
+            no_product_loop_created: !Boolean(crossScopeLoopResponse.payload.product_loop || crossScopeLoopResponse.payload.ids?.loop_id),
+            no_audit_created: (crossScopeLoopResponse.payload.audit_refs || []).length === 0
+          }},
+          lineage_mismatch: {{
+            status: mismatchLoopResponse.payload.status || "lineage_mismatch",
+            error_codes: mismatchCodes,
+            product_message: "Loop View did not combine work items from different evidence-backed journeys.",
+            no_product_loop_created: !Boolean(mismatchLoopResponse.payload.product_loop || mismatchLoopResponse.payload.ids?.loop_id),
+            no_audit_created: (mismatchLoopResponse.payload.audit_refs || []).length === 0
+          }},
+          no_authority_expansion: !invalidPayloadExpandedAuthority,
+          no_live_writeback: !invalidPayloadExpandedAuthority,
+          no_invalid_product_loop: !invalidPayloadCreatedLoop,
+          no_invalid_audit: !invalidPayloadCreatedAudit
         }};
         vs4State.negative_evidence.vs4_loop_missing_ref_accepted = vs4State.loop_lineage_guard.api_missing_ref_denied ? 0 : 1;
         vs4State.negative_evidence.vs4_loop_cross_scope_ref_accepted = vs4State.loop_lineage_guard.api_cross_scope_denied ? 0 : 1;
@@ -3777,10 +4069,21 @@ Search phrase: alpha-evidence-anchor.</code>
       const runtimeProjection = vs4State.runtime_ops_inbox || {{}};
       const loopGuard = vs4State.loop_lineage_guard || {{}};
       const selectedRecordsText = document.querySelector("[data-vs4-inbox-selected-records]")?.textContent || "";
+      const journeyTimeline = document.querySelector("[data-vs4-ops-inbox-journey-timeline]");
+      const journeyStages = Array.from(document.querySelectorAll("[data-vs4-journey-stage]"));
+      const journeyStageLabels = journeyStages.map((stage) => stage.dataset.vs4JourneyStage || "");
+      const journeyStageRefs = journeyStages.map((stage) => stage.dataset.vs4JourneyStageRef || "").filter(Boolean);
+      const journeyEvidenceRefs = journeyStages.map((stage) => stage.dataset.vs4JourneyEvidenceRefs || "").filter(Boolean);
+      const journeyAuditRefs = journeyStages.map((stage) => stage.dataset.vs4JourneyAuditRefs || "").filter(Boolean);
+      const journeyDetails = journeyStages.flatMap((stage) => Array.from(stage.querySelectorAll("details")));
+      const recoveryContainer = document.querySelector("[data-vs4-loop-recovery-states]");
+      const recoveryRows = Array.from(document.querySelectorAll("[data-vs4-loop-recovery-state]"));
+      const recoveryText = recoveryContainer ? recoveryContainer.textContent || "" : "";
       const runtimeRows = rows.filter((row) => row.dataset.vs4RuntimeBacked === "true");
       const runtimeRecordRefs = runtimeRows.flatMap((row) => (row.dataset.vs4InboxRuntimeRecordRefs || "").split(" | ").filter(Boolean));
       const requiredRuntimePrefixes = ["brief:", "claim:", "memory:", "action:"];
       const learnRuntimePrefixes = ["learn:", "lesson:", "trajectory:"];
+      const expectedJourneyStages = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"];
       const markerSet = {{
         lanes_visible: lanes.length >= 4,
         lane_counts_visible: lanes.every((lane) => Number(lane.dataset.vs4InboxLaneCount || "0") > 0),
@@ -3812,6 +4115,45 @@ Search phrase: alpha-evidence-anchor.</code>
         workspace_scope_persists_after_selection: selectedText.includes("Personal / Project / default"),
         evidence_audit_refs_persist_after_selection: selectedText.includes("evidence_bundle:") && selectedText.includes("audit:"),
         journey_path_visible: interactionProof.journey_path_visible,
+        journey_timeline_visible: Boolean(journeyTimeline && journeyTimeline.dataset.vs4OpsInboxJourneyTimeline === "runtime-loop-view"),
+        journey_timeline_stage_count_6: journeyStages.length >= 6,
+        journey_timeline_stage_labels_complete: expectedJourneyStages.every((stage) => journeyStageLabels.includes(stage)),
+        journey_timeline_stage_refs_visible: journeyStageRefs.length >= 5 &&
+          ["brief:", "claim:", "memory:", "action:", "learn:"].every((prefix) => journeyStageRefs.some((refs) => refs.includes(prefix))),
+        journey_timeline_evidence_refs_visible: journeyEvidenceRefs.length >= 5 &&
+          journeyEvidenceRefs.some((refs) => refs.includes("evidence_bundle:")),
+        journey_timeline_audit_refs_visible: journeyAuditRefs.length >= 6 &&
+          journeyAuditRefs.every((refs) => refs.includes("audit:")),
+        journey_timeline_progressive_detail: journeyDetails.length >= 6 &&
+          journeyDetails.every((detail) => detail.open === false),
+        journey_timeline_product_language_before_refs: journeyStages.every((stage) => {{
+          const text = stage.textContent || "";
+          const ref = stage.dataset.vs4JourneyStageRef || "";
+          return !ref || text.indexOf(stage.dataset.vs4JourneyStage || "") >= 0 &&
+            text.indexOf(stage.dataset.vs4JourneyStage || "") < text.indexOf(ref.split(" | ")[0]);
+        }}),
+        loop_recovery_missing_ref_visible: recoveryRows.some((row) =>
+          row.dataset.vs4LoopRecoveryState === "missing-ref" &&
+          row.dataset.vs4LoopRecoveryStatus === "blocked-safe" &&
+          (row.textContent || "").includes("Missing work item")
+        ),
+        loop_recovery_cross_scope_visible: recoveryRows.some((row) =>
+          row.dataset.vs4LoopRecoveryState === "cross-scope" &&
+          row.dataset.vs4LoopRecoveryStatus === "blocked-safe" &&
+          (row.textContent || "").includes("Outside workspace")
+        ),
+        loop_recovery_lineage_mismatch_visible: recoveryRows.some((row) =>
+          row.dataset.vs4LoopRecoveryState === "lineage-mismatch" &&
+          row.dataset.vs4LoopRecoveryStatus === "blocked-safe" &&
+          (row.textContent || "").includes("Different journey")
+        ),
+        loop_recovery_product_language_visible: recoveryText.includes("Nothing new was approved or sent") &&
+          recoveryText.includes("Workspace scope stayed unchanged") &&
+          recoveryText.includes("No new journey or activity record was created"),
+        journey_timeline_no_authority_expansion: Boolean(recoveryContainer &&
+          recoveryContainer.dataset.vs4LoopRecoveryNoAuthorityExpansion === "true"),
+        journey_timeline_no_live_writeback: Boolean(recoveryContainer &&
+          recoveryContainer.dataset.vs4LoopRecoveryNoLiveWriteback === "true"),
         no_live_writeback_after_selection: interactionProof.no_live_writeback_after_selection,
         product_language_before_internal_ids: selectedText.indexOf("Selected work") >= 0 &&
           selectedText.indexOf("Selected work") < selectedText.indexOf("evidence_bundle:"),
@@ -3856,6 +4198,15 @@ Search phrase: alpha-evidence-anchor.</code>
         selected_item_id: selected ? selected.dataset.vs4InboxSelectedItemId || "" : "",
         selected_lane: selected ? selected.dataset.vs4InboxSelectedLane || "" : "",
         selected_text: selectedText.replace(/\\s+/g, " ").trim().slice(0, 1200),
+        journey_timeline: {{
+          source: journeyTimeline ? journeyTimeline.dataset.vs4OpsInboxJourneyTimeline || "" : "",
+          stage_labels: journeyStageLabels,
+          stage_refs: journeyStageRefs,
+          evidence_refs: journeyEvidenceRefs,
+          audit_refs: journeyAuditRefs,
+          recovery_state_count: recoveryRows.length,
+          recovery_text: recoveryText.replace(/\\s+/g, " ").trim().slice(0, 900)
+        }},
         runtime_projection: runtimeProjection,
         runtime_record_refs: runtimeRecordRefs,
         interaction_proof: interactionProof,
