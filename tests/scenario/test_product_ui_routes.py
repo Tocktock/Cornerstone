@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import shutil
@@ -16,6 +17,12 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
+
+CAPTURE_SCRIPT = ROOT / "scripts" / "capture_vs4_h01_ui_recovery_screenshots.py"
+_capture_spec = importlib.util.spec_from_file_location("capture_vs4_h01_ui_recovery_screenshots", CAPTURE_SCRIPT)
+assert _capture_spec is not None and _capture_spec.loader is not None
+capture_vs4 = importlib.util.module_from_spec(_capture_spec)
+_capture_spec.loader.exec_module(capture_vs4)
 
 
 PRODUCT_ROUTES = ["/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"]
@@ -119,6 +126,32 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("--cs-state-saved-bg:", html)
                 self.assertIn("--cs-radius-pill:", html)
                 self.assert_product_surface_is_clean(html)
+
+    def test_screenshot_matrix_covers_primary_mobile_routes(self) -> None:
+        ids = {
+            "artifact_id": "art_mobile_matrix",
+            "brief_id": "brief_mobile_matrix",
+            "claim_id": "claim_mobile_matrix",
+            "action_id": "action_mobile_matrix",
+        }
+        specs = capture_vs4.route_specs(ids)
+        mobile_routes = {spec["route"] for spec in specs if spec.get("mobile")}
+
+        for route in [
+            "/",
+            "/search?q=vendor%20renewal",
+            "/artifacts",
+            "/briefs",
+            "/claims",
+            "/actions",
+            "/inbox",
+            "/audit",
+            "/review",
+            "/briefs/brief_mobile_matrix?view=html",
+            "/actions/action_mobile_matrix?view=html",
+        ]:
+            with self.subTest(route=route):
+                self.assertIn(route, mobile_routes)
 
     def test_record_detail_routes_preserve_json_default_and_offer_html(self) -> None:
         artifact_id, _, _ = self.create_source_stack()

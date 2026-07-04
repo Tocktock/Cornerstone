@@ -76,6 +76,11 @@ DETAIL_ROUTES = [
 ]
 
 MOBILE_ROUTE_NAMES = {
+    "actions-desktop",
+    "artifacts-desktop",
+    "audit-desktop",
+    "briefs-desktop",
+    "claims-desktop",
     "home-desktop",
     "brief-detail-desktop",
     "search-desktop",
