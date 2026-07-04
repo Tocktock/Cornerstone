@@ -1335,6 +1335,21 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--cs-space-3);
 }}
+.cs-action-review-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-action-review-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-action-review-card strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
 .cs-action-metric {{
   display: grid;
   gap: var(--cs-space-1);
@@ -1342,6 +1357,26 @@ button, input, textarea {{ font: inherit; }}
   border-radius: var(--cs-radius-md);
   padding: var(--cs-space-3);
   background: var(--cs-color-surface-subtle);
+}}
+.cs-action-object-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cs-space-3);
+}}
+.cs-action-object-icon {{
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
 }}
 .cs-diff-view {{
   border: 1px solid var(--cs-color-border-default);
@@ -1367,6 +1402,14 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--cs-space-3);
   align-items: center;
+}}
+.cs-approval-note {{
+  border: 1px solid var(--cs-state-underReview-border);
+  background: var(--cs-state-underReview-bg);
+  border-radius: var(--cs-radius-md);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
 }}
 .cs-policy-card {{
   border: 1px solid var(--cs-state-underReview-border);
@@ -1403,7 +1446,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1418,7 +1461,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-document-page {{ min-height: auto; }}
@@ -2712,10 +2755,12 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     risk_label = str(impact.get("risk") or action.get("risk") or "review").title()
     target = str(impact.get("target") or "Local preview only.")
     goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
+    approval_status = str(approval.get("status") or "pending")
+    reason = str(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
     return f"""
 <section class="cs-grid-two" data-product-surface="action-detail">
   <div class="cs-stack">
-    <div class="cs-brief-hero">
+    <div class="cs-brief-hero is-stacked">
       <div class="cs-brief-title">
         <div class="cs-kicker">Action preview</div>
         <h1>{h(_action_title(action))}</h1>
@@ -2725,7 +2770,19 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
           <span>No external send yet</span>
         </div>
       </div>
-      <div class="cs-row">{_chip("Preview (dry run)", "searchable")}{_chip(approval_label, "underReview")}{_chip(f"{risk_label} risk", "underReview")}</div>
+      <div class="cs-brief-actions">
+        {_chip("Preview (dry run)", "searchable")}
+        {_chip(approval_label, "underReview")}
+        {_chip(f"{risk_label} risk", "underReview")}
+        <a class="cs-button secondary" href="/claims">Back to claims</a>
+        <a class="cs-button" href="/inbox">Request approval</a>
+      </div>
+    </div>
+    <div class="cs-action-review-strip" aria-label="Action review status">
+      <div class="cs-action-review-card"><span class="cs-meta">Risk level</span><strong>{h(risk_label)}</strong></div>
+      <div class="cs-action-review-card"><span class="cs-meta">Approval</span><strong>{h(approval_label)}</strong></div>
+      <div class="cs-action-review-card"><span class="cs-meta">External calls</span><strong>{h(call_label)}</strong></div>
+      <div class="cs-action-review-card"><span class="cs-meta">Status</span><strong>{h(approval_status)}</strong></div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -2744,22 +2801,43 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip("Will be reviewed", "underReview")}</div>
-      <div class="cs-action-summary">
-        <div class="cs-action-metric"><span class="cs-meta">Object</span><span>{h(target)}</span></div>
-        <div class="cs-action-metric"><span class="cs-meta">External calls</span><span>{h(call_label)}</span></div>
-        <div class="cs-action-metric"><span class="cs-meta">Connector</span><span>{h(connector_label)}</span></div>
+      <div class="cs-action-object-row">
+        <span class="cs-action-object-icon" aria-hidden="true">A</span>
+        <span>
+          <strong>{h(target)}</strong>
+          <span class="cs-meta">{h(connector_label)} / {h(call_label)}</span>
+        </span>
+        {_chip("Will be reviewed", "underReview")}
       </div>
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Proposed changes</h2>{_chip("Diff preview", "searchable")}</div>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Proposed changes</h2>
+          <p class="cs-muted">Preview the before and after state before requesting approval.</p>
+        </div>
+        {_chip("Diff preview", "searchable")}
+      </div>
       {_action_diff_view(diff)}
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>External calls</h2>{_chip("Simulated in local mode", "draft")}</div>
+      <div class="cs-panel-header">
+        <div>
+          <h2>External calls</h2>
+          <p class="cs-muted">Provider writes remain simulated until approval is clear.</p>
+        </div>
+        {_chip("Simulated in local mode", "draft")}
+      </div>
       {_action_external_calls(impact, connector_label, call_label)}
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Policy decision</h2>{_chip(decision_label, "underReview")}</div>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Policy decision</h2>
+          <p class="cs-muted">Policy is visible before approval or execution.</p>
+        </div>
+        {_chip(decision_label, "underReview")}
+      </div>
       <div class="cs-policy-card">
         <strong>{h(decision_label)}</strong>
         <span>{h(str(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk."))}</span>
@@ -2776,12 +2854,20 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       <dl class="cs-detail-grid">
         <dt>Risk level</dt><dd>{h(risk_label)}</dd>
         <dt>Approval</dt><dd>{h(approval_label)}</dd>
-        <dt>Status</dt><dd>{h(str(approval.get("status") or "pending"))}</dd>
+        <dt>Status</dt><dd>{h(approval_status)}</dd>
       </dl>
       <div class="cs-review-box">
         <a class="cs-button" href="/inbox">Request approval</a>
+        <div class="cs-approval-note">
+          <strong>Required reason</strong>
+          <span>{h(reason)}</span>
+        </div>
         <p class="cs-muted">Execution is not shown as the primary action until approval is satisfied.</p>
       </div>
+    </section>
+    <section class="cs-panel flat">
+      <h2 class="cs-section-title">Approval history</h2>
+      <div class="cs-empty">No approvals have been recorded yet.</div>
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Auditability</h2>

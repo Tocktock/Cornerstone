@@ -10,7 +10,7 @@
     "report:reports/scenario/vs4-product-alpha-ui-daily-loop-slice-002-brief-detail.json"
   ],
   "ids": {
-    "git_commit": "42405b1f5"
+    "git_commit": "9b4f29c56"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -192,30 +192,30 @@
         "layout": "omitted_from_gate_output",
         "sha256": "6ac15ecdda0026a183b961ee2470c267946093049eee5a6e27d819a97ed8c7c3"
       },
-      "generated_dirty_snapshot_hash": "5ca47b5e65e220178d3f597e0b469fbbedb6603b276b2c335fe04dc837520aaa",
+      "generated_dirty_snapshot_hash": "448eb9aacf02da8738cf343a93907d12447366569c4d043046f22f40591aa292",
       "generated_dirty_snapshot_path_count": 15,
       "generated_dirty_snapshot_paths_ref": {
         "bytes": 3376,
         "layout": "omitted_from_gate_output",
-        "sha256": "c1e7adc6468c27f7ac0cb7dff018772f2a13627c6ad25ed13440ae2c0ff3b65c"
+        "sha256": "fcd02184d4d11f7e7ef9c32f3bd81bc096cbbd224f63bc546fa8901ed22e3521"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
         "bytes": 16674,
         "layout": "omitted_from_gate_output",
-        "sha256": "756d3414f8f1ab011c981f43ac600506807a37dab820122ca971472c30103f26"
+        "sha256": "61c6277a9158d6f5ce9e566bbc819a44219dacf48e22815a827195d310288e42"
       },
-      "verified_base_commit": "42405b1f5",
-      "verified_base_commit_full": "42405b1f593550b966b63b83868e8ffff5271bf6",
-      "verified_base_tree_hash": "1f3f4e9b3b7f2601b4bb742bf9dc24a0bbc264bd",
+      "verified_base_commit": "9b4f29c56",
+      "verified_base_commit_full": "9b4f29c568409e3cccecf49760ee99cd54970ea1",
+      "verified_base_tree_hash": "30b22af5bafc9e1590f0c0a323fa51179d07df58",
       "verified_source_snapshot_path_count": 37,
       "verified_source_snapshot_paths_ref": {
         "bytes": 7315,
         "layout": "omitted_from_gate_output",
-        "sha256": "2d4c7612806b79baaeb70667190805c63057648ae6b6dc7dfd486a84ee7b1a9a"
+        "sha256": "67d330cbe7546eb4b45d9dea328d1af69591e8f6df9dc596dc0599db0bba95b6"
       },
-      "verified_source_worktree_hash": "86e21f6cf5c3a8624567ce187b7c748dcf420be439dc936decefe7ce044422fd",
+      "verified_source_worktree_hash": "b46bae0e455c27058a8daac1da3c6aa773152189f96fdc3cae17721d406f1814",
       "worktree_dirty_at_verification": true
     },
     "status": "success",
@@ -386,30 +386,30 @@
         "layout": "omitted_from_gate_output",
         "sha256": "6ac15ecdda0026a183b961ee2470c267946093049eee5a6e27d819a97ed8c7c3"
       },
-      "generated_dirty_snapshot_hash": "5ca47b5e65e220178d3f597e0b469fbbedb6603b276b2c335fe04dc837520aaa",
+      "generated_dirty_snapshot_hash": "448eb9aacf02da8738cf343a93907d12447366569c4d043046f22f40591aa292",
       "generated_dirty_snapshot_path_count": 15,
       "generated_dirty_snapshot_paths_ref": {
         "bytes": 3376,
         "layout": "omitted_from_gate_output",
-        "sha256": "c1e7adc6468c27f7ac0cb7dff018772f2a13627c6ad25ed13440ae2c0ff3b65c"
+        "sha256": "fcd02184d4d11f7e7ef9c32f3bd81bc096cbbd224f63bc546fa8901ed22e3521"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
         "bytes": 16674,
         "layout": "omitted_from_gate_output",
-        "sha256": "756d3414f8f1ab011c981f43ac600506807a37dab820122ca971472c30103f26"
+        "sha256": "61c6277a9158d6f5ce9e566bbc819a44219dacf48e22815a827195d310288e42"
       },
-      "verified_base_commit": "42405b1f5",
-      "verified_base_commit_full": "42405b1f593550b966b63b83868e8ffff5271bf6",
-      "verified_base_tree_hash": "1f3f4e9b3b7f2601b4bb742bf9dc24a0bbc264bd",
+      "verified_base_commit": "9b4f29c56",
+      "verified_base_commit_full": "9b4f29c568409e3cccecf49760ee99cd54970ea1",
+      "verified_base_tree_hash": "30b22af5bafc9e1590f0c0a323fa51179d07df58",
       "verified_source_snapshot_path_count": 37,
       "verified_source_snapshot_paths_ref": {
         "bytes": 7315,
         "layout": "omitted_from_gate_output",
-        "sha256": "2d4c7612806b79baaeb70667190805c63057648ae6b6dc7dfd486a84ee7b1a9a"
+        "sha256": "67d330cbe7546eb4b45d9dea328d1af69591e8f6df9dc596dc0599db0bba95b6"
       },
-      "verified_source_worktree_hash": "86e21f6cf5c3a8624567ce187b7c748dcf420be439dc936decefe7ce044422fd",
+      "verified_source_worktree_hash": "b46bae0e455c27058a8daac1da3c6aa773152189f96fdc3cae17721d406f1814",
       "worktree_dirty_at_verification": true
     },
     "status": "passed",

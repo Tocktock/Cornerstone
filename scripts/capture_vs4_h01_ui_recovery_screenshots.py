@@ -65,7 +65,7 @@ DETAIL_ROUTES = [
         "surface": "claim-detail",
         "required": ["Trust ladder", "Supporting evidence", "Review controls"],
     },
-    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Preview", "Approval"]},
+    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Action review status", "Policy decision", "Approval history"]},
 ]
 
 MOBILE_ROUTE_NAMES = {
