@@ -905,6 +905,38 @@ button, input, textarea {{ font: inherit; }}
   line-height: var(--cs-typography-pageTitle-lineHeight);
 }}
 .cs-artifact-actions {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }}
+.cs-artifact-workbench {{
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+}}
+.cs-artifact-breadcrumb {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  align-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-artifact-breadcrumb a {{
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-artifact-title-row {{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-artifact-file-mark {{
+  width: 42px;
+  height: 42px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-600);
+  color: var(--cs-color-text-inverse);
+  font-size: var(--cs-typography-label-fontSize);
+  font-weight: var(--cs-typography-weight-bold);
+}}
 .cs-metadata-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -917,11 +949,109 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-1);
 }}
+.cs-metadata-strip.is-artifact {{
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border-bottom: 1px solid var(--cs-color-border-default);
+  padding-bottom: var(--cs-space-4);
+}}
+.cs-metadata-item strong {{
+  word-break: break-word;
+}}
+.cs-artifact-viewer {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
+  box-shadow: var(--cs-shadow-sm);
+}}
+.cs-artifact-toolbar {{
+  min-height: 48px;
+  border-bottom: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-primary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-2) var(--cs-space-3);
+}}
+.cs-artifact-toolgroup {{
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}}
+.cs-artifact-tool {{
+  min-width: 32px;
+  height: 32px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-primary);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-artifact-page-count {{
+  min-width: 62px;
+  height: 32px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-document-frame {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
   background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-4);
+}}
+.cs-document-frame.has-rail {{
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  min-height: 560px;
+}}
+.cs-artifact-page-rail {{
+  border-right: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  align-content: start;
+  gap: var(--cs-space-3);
+}}
+.cs-artifact-thumb {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-primary);
+  min-height: 96px;
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: var(--cs-space-1);
+  color: var(--cs-color-text-muted);
+  font-size: 10px;
+}}
+.cs-artifact-thumb.is-active {{
+  border-color: var(--cs-color-primary-500);
+  box-shadow: var(--cs-shadow-focus);
+}}
+.cs-artifact-thumb-line {{
+  height: 5px;
+  border-radius: var(--cs-radius-pill);
+  background: var(--cs-color-border-default);
+}}
+.cs-artifact-thumb span {{
+  text-align: center;
+  margin-top: var(--cs-space-1);
+}}
+.cs-artifact-page-area {{
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-4);
+  overflow: auto;
 }}
 .cs-document-page {{
   max-width: 840px;
@@ -951,6 +1081,25 @@ button, input, textarea {{ font: inherit; }}
   background: transparent;
   padding: 0;
   line-height: 1.75;
+}}
+.cs-artifact-panel-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-artifact-side-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-artifact-side-card summary {{
+  cursor: pointer;
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-artifact-side-card[open] summary {{
+  margin-bottom: var(--cs-space-2);
 }}
 .cs-keyword-list {{ display: grid; gap: var(--cs-space-2); }}
 .cs-keyword-row {{
@@ -1733,7 +1882,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1753,6 +1902,10 @@ button, input, textarea {{ font: inherit; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
+  .cs-artifact-toolbar {{ align-items: stretch; flex-direction: column; }}
+  .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
+  .cs-artifact-page-rail {{ display: none; }}
+  .cs-artifact-page-area {{ padding: var(--cs-space-3); }}
   .cs-document-page {{ min-height: auto; }}
   .cs-list-row {{ grid-template-columns: 1fr; }}
   .cs-detail-grid {{ grid-template-columns: 1fr; }}
@@ -2984,49 +3137,75 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
     fingerprint = _fingerprint(artifact.get("checksum_sha256") or artifact.get("original_storage_ref"))
     source_label = _plain_source(source)
+    media_type = str(artifact.get("media_type") or "text/plain")
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    workspace = str(scope.get("workspace_id") or "default")
     keywords = _artifact_keywords(text, title)
     keyword_rows = "".join(
         f'<div class="cs-keyword-row"><span>{h(keyword)}</span>{_chip(str(count), "searchable")}</div>'
         for keyword, count in keywords
     )
+    summary = _truncate(text, 300)
+    thumb_lines = "".join('<span class="cs-artifact-thumb-line"></span>' for _ in range(7))
     ask_query = quote(f"What matters in {title}")
     return f"""
-<section class="cs-grid-two" data-product-surface="artifact-detail">
+<section class="cs-grid-two cs-artifact-workbench" data-product-surface="artifact-detail">
   <div class="cs-stack">
     <div class="cs-artifact-hero">
       <div class="cs-artifact-title">
-        <div class="cs-kicker">Artifact / Original source</div>
-        <h1>{h(title)}</h1>
-        <p class="cs-muted">The original source stays primary. Drafts and decisions should point back here.</p>
+        <div class="cs-artifact-breadcrumb">
+          <a href="/artifacts">Artifacts</a>
+          <span aria-hidden="true">/</span>
+          <span>{h(title)}</span>
+        </div>
+        <div class="cs-artifact-title-row">
+          <span class="cs-artifact-file-mark" aria-hidden="true">TXT</span>
+          <div>
+            <h1>{h(title)}</h1>
+            <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}{_chip("Untrusted until checked", "underReview")}</div>
+          </div>
+        </div>
       </div>
       <div class="cs-artifact-actions">
         <a class="cs-button secondary" href="/search?q={h(ask_query)}">Ask about this source</a>
-        <a class="cs-button secondary" href="#linked-work">View linked work</a>
+        <a class="cs-button secondary" href="#linked-work">View linked evidence</a>
       </div>
     </div>
-    <div class="cs-metadata-strip" aria-label="Source metadata">
+    <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Source</span><strong>{h(source_label)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>{h(_display_date(artifact))}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Media type</span><strong>{h(str(artifact.get("media_type") or "text/plain"))}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Media type</span><strong>{h(media_type)}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>{h(workspace)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
     </div>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Source text</h2>
-          <p class="cs-muted">Readable local preview of the preserved source.</p>
+    <section class="cs-artifact-viewer" aria-label="Original source document viewer">
+      <div class="cs-artifact-toolbar">
+        <div class="cs-artifact-toolgroup">
+          <span class="cs-artifact-tool" aria-hidden="true">T</span>
+          <span class="cs-artifact-tool" aria-hidden="true">S</span>
+          <span class="cs-artifact-page-count">1 / 1</span>
         </div>
-        <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}</div>
+        <div class="cs-artifact-toolgroup">
+          <span class="cs-artifact-tool" aria-hidden="true">-</span>
+          <span class="cs-meta">100%</span>
+          <span class="cs-artifact-tool" aria-hidden="true">+</span>
+          <a class="cs-button ghost" href="#source-text">Source text</a>
+        </div>
       </div>
-      <div class="cs-document-frame">
-        <article class="cs-document-page" aria-label="Original source text preview">
-          <header class="cs-document-heading">
-            <span class="cs-meta">Original source preview</span>
-            <h3>{h(title)}</h3>
-            <span class="cs-meta">{h(source_label)} / {h(_display_date(artifact))}</span>
-          </header>
-          <div class="cs-source-text">{h(text)}</div>
-        </article>
+      <div class="cs-document-frame has-rail">
+        <aside class="cs-artifact-page-rail" aria-label="Original source pages">
+          <div class="cs-artifact-thumb is-active">{thumb_lines}<span>1</span></div>
+        </aside>
+        <div class="cs-artifact-page-area">
+          <article class="cs-document-page" aria-label="Original artifact preview" id="source-text">
+            <header class="cs-document-heading">
+              <span class="cs-meta">Original artifact preview</span>
+              <h3>{h(title)}</h3>
+              <span class="cs-meta">{h(source_label)} / {h(_display_date(artifact))}</span>
+            </header>
+            <div class="cs-source-text">{h(text)}</div>
+          </article>
+        </div>
       </div>
     </section>
   </div>
@@ -3042,8 +3221,8 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Readable preview</h2>
-      <p class="cs-muted">{h(_truncate(text, 260))}</p>
+      <h2 class="cs-section-title">Summary</h2>
+      <p class="cs-muted">{h(summary)}</p>
     </section>
     <section class="cs-panel flat">
       <div class="cs-panel-header"><h2>Extracted keywords</h2>{_chip(str(len(keywords)), "searchable")}</div>

@@ -63,7 +63,7 @@ DESKTOP_ROUTES = [
 ]
 
 DETAIL_ROUTES = [
-    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original source", "Source text", "Source state", "Provenance"]},
+    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
     {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["What we found", "Findings with citations", "Use this brief"]},
     {
         "name": "claim-detail-desktop",

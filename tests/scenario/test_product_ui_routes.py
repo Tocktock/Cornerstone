@@ -138,10 +138,13 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("text/html", html_content_type)
         self.assertIn('data-product-surface="artifact-detail"', html)
         self.assertIn("Original source", html)
+        self.assertIn("Original artifact preview", html)
         self.assertIn("Source text", html)
         self.assertIn("Source metadata", html)
+        self.assertIn("Summary", html)
         self.assertIn("Extracted keywords", html)
         self.assertIn("Linked work", html)
+        self.assertIn("View linked evidence", html)
         self.assertIn("Provenance", html)
         self.assert_product_surface_is_clean(html)
 
