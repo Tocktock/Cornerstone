@@ -14000,12 +14000,21 @@ class ScaffoldCliTests(unittest.TestCase):
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
-    def test_vs5_slice_001_value_plane_safe_brief_ask(self) -> None:
+    def test_vs5_slice_001_ollama_brief_ask(self) -> None:
         with tempfile.TemporaryDirectory() as state_dir:
             source_text = (
                 "VS5 Slice 001 test note: Acme renewal is due on July 31. "
-                "Finance owner is Mina. Anchor phrase: vs5-slice-001-test-anchor."
+                "Finance owner is Mina. The renewal risk is that the approval packet is missing. "
+                "Anchor phrase: vs5-slice-001-test-anchor."
             )
+            model_args = [
+                "--model-provider",
+                "ollama",
+                "--generation-model",
+                "ornith:35b",
+                "--embedding-model",
+                "qwen3-embedding:0.6b",
+            ]
             ingest = run_cli(
                 "artifact",
                 "ingest",
@@ -14038,8 +14047,7 @@ class ScaffoldCliTests(unittest.TestCase):
                 "create",
                 "--evidence-bundle-id",
                 bundle_id,
-                "--model-provider",
-                "local_test",
+                *model_args,
                 "--state-dir",
                 state_dir,
                 "--json",
@@ -14047,14 +14055,25 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(brief_create.returncode, 0, brief_create.stdout + brief_create.stderr)
             brief_payload = json.loads(brief_create.stdout)
             brief = brief_payload["brief"]
-            self.assertEqual(brief["status"], "extractive_fallback")
-            self.assertEqual(brief["output_mode"], "extractive_fallback")
-            self.assertEqual(brief["trust_label"], "extractive_fallback")
-            self.assertNotEqual(brief["trust_label"], "evidence_backed")
-            self.assertFalse(brief["presented_as_fact"])
-            self.assertEqual(brief["model_provider"], "local_test")
-            self.assertEqual(brief["citation_refs"], [])
-            self.assertEqual(brief["citation_check_refs"], [])
+            self.assertEqual(brief["status"], "evidence_backed")
+            self.assertEqual(brief["output_mode"], "ollama_generated")
+            self.assertEqual(brief["trust_label"], "evidence_backed")
+            self.assertTrue(brief["presented_as_fact"])
+            self.assertEqual(brief["model_provider"], "ollama")
+            self.assertEqual(brief["generation_model"], "ornith:35b")
+            self.assertEqual(brief["embedding_model"], "qwen3-embedding:0.6b")
+            self.assertEqual(brief["model_run"]["provider"], "ollama")
+            self.assertEqual(brief["model_run"]["embedding_status"], "embedded")
+            self.assertTrue(brief["citation_refs"])
+            self.assertTrue(all(ref.startswith("evidence_chunk:") for ref in brief["citation_refs"]))
+            self.assertTrue(brief["citation_check_refs"])
+            self.assertTrue(brief["label_check"]["earned_evidence_backed"])
+            self.assertTrue(brief["key_points"])
+            self.assertTrue(brief["key_point_citations"])
+            self.assertTrue(all(row["citation_refs"] for row in brief["key_point_citations"]))
+            self.assertEqual(brief["prompt_boundary"]["evidence_blocks_enter_as"], "quoted_evidence")
+            self.assertFalse(brief["prompt_boundary"]["artifact_instructions_are_authority"])
+            self.assertFalse(brief["prompt_boundary"]["actions_allowed"])
             self.assertTrue(brief["trust_label_reason"])
             self.assertTrue(brief["evidence_refs"])
             self.assertTrue(brief["audit_refs"])
@@ -14078,8 +14097,7 @@ class ScaffoldCliTests(unittest.TestCase):
                 conversation_id,
                 "--question",
                 "What is the Acme renewal due date?",
-                "--model-provider",
-                "local_test",
+                *model_args,
                 "--state-dir",
                 state_dir,
                 "--json",
@@ -14087,15 +14105,65 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(answer_supported.returncode, 0, answer_supported.stdout + answer_supported.stderr)
             supported_payload = json.loads(answer_supported.stdout)
             supported_answer = supported_payload["answer"]
-            self.assertEqual(supported_answer["label"], "template_fallback")
-            self.assertEqual(supported_answer["output_mode"], "template_fallback")
-            self.assertEqual(supported_answer["trust_label"], "template_fallback")
-            self.assertNotEqual(supported_answer["trust_label"], "evidence_backed")
-            self.assertFalse(supported_answer["presented_as_fact"])
+            self.assertEqual(supported_answer["label"], "evidence_backed")
+            self.assertEqual(supported_answer["output_mode"], "ollama_answer")
+            self.assertEqual(supported_answer["trust_label"], "evidence_backed")
+            self.assertTrue(supported_answer["presented_as_fact"])
+            self.assertEqual(supported_answer["model_provider"], "ollama")
+            self.assertEqual(supported_answer["generation_model"], "ornith:35b")
+            self.assertEqual(supported_answer["embedding_model"], "qwen3-embedding:0.6b")
+            self.assertIn("July 31", supported_answer["answer"])
+            self.assertTrue(supported_answer["citation_refs"])
+            self.assertTrue(supported_answer["citation_check_refs"])
+            self.assertTrue(supported_answer["label_check"]["earned_evidence_backed"])
+            self.assertEqual(supported_answer["prompt_boundary"]["evidence_blocks_enter_as"], "quoted_evidence")
+            self.assertFalse(supported_answer["prompt_boundary"]["ask_text_is_authority"])
+            self.assertFalse(supported_answer["prompt_boundary"]["provider_calls_allowed"])
             self.assertGreaterEqual(supported_answer["supporting_result_count"], 1)
             self.assertTrue(supported_answer["evidence_refs"])
             self.assertTrue(supported_answer["audit_refs"])
             self.assertTrue(supported_payload["audit_refs"])
+
+            forced_brief = run_cli(
+                "brief",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                *model_args,
+                "--ollama-url",
+                "http://127.0.0.1:9",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(forced_brief.returncode, 0, forced_brief.stdout + forced_brief.stderr)
+            forced_brief_payload = json.loads(forced_brief.stdout)["brief"]
+            self.assertEqual(forced_brief_payload["status"], "extractive_fallback")
+            self.assertEqual(forced_brief_payload["output_mode"], "extractive_fallback")
+            self.assertEqual(forced_brief_payload["trust_label"], "extractive_fallback")
+            self.assertFalse(forced_brief_payload["presented_as_fact"])
+            self.assertFalse(forced_brief_payload["label_check"]["earned_evidence_backed"])
+
+            forced_answer = run_cli(
+                "conversation",
+                "answer",
+                conversation_id,
+                "--question",
+                "What is the Acme renewal due date?",
+                *model_args,
+                "--ollama-url",
+                "http://127.0.0.1:9",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(forced_answer.returncode, 0, forced_answer.stdout + forced_answer.stderr)
+            forced_answer_payload = json.loads(forced_answer.stdout)["answer"]
+            self.assertEqual(forced_answer_payload["label"], "extractive_fallback")
+            self.assertEqual(forced_answer_payload["output_mode"], "extractive_fallback")
+            self.assertEqual(forced_answer_payload["trust_label"], "extractive_fallback")
+            self.assertFalse(forced_answer_payload["presented_as_fact"])
+            self.assertFalse(forced_answer_payload["label_check"]["earned_evidence_backed"])
 
             answer_insufficient = run_cli(
                 "conversation",
@@ -14116,16 +14184,33 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertFalse(insufficient_answer["presented_as_fact"])
             self.assertEqual(insufficient_answer["supporting_result_count"], 0)
 
-        verify = run_cli("scenario", "verify", "vs5-slice-001", "--json")
+        verify = run_cli(
+            "scenario",
+            "verify",
+            "vs5-slice-001",
+            "--model-provider",
+            "ollama",
+            "--generation-model",
+            "ornith:35b",
+            "--embedding-model",
+            "qwen3-embedding:0.6b",
+            "--json",
+        )
         self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
         verify_payload = json.loads(verify.stdout)
         self.assertEqual(verify_payload["scenario_set"], "vs5-slice-001")
         self.assertEqual(verify_payload["summary"]["blocking"], 0)
+        self.assertEqual(verify_payload["summary"]["pass"], 9)
+        self.assertEqual(verify_payload["summary"]["scenario_count"], 10)
         self.assertEqual(verify_payload["scenario_results"][-1]["status"], "HUMAN_REQUIRED")
-        self.assertEqual(
-            verify_payload["value_plane_evidence"]["cs_val_registry_fold_in"]["status"],
-            "BLOCKED_COMPATIBLE_INTERIM_VERIFIER",
-        )
+        self.assertEqual({row["id"] for row in verify_payload["scenario_results"]}, {"S01", "S02", "S03", "S04", "S05", "S06", "S07", "R01", "R02", "H01"})
+        self.assertEqual(verify_payload["value_plane_evidence"]["brief"]["model_provider"], "ollama")
+        self.assertEqual(verify_payload["value_plane_evidence"]["supported_answer"]["trust_label"], "evidence_backed")
+        self.assertEqual(verify_payload["value_plane_evidence"]["model_down_brief"]["trust_label"], "extractive_fallback")
+        self.assertEqual(verify_payload["value_plane_evidence"]["model_down_answer"]["trust_label"], "extractive_fallback")
+        self.assertEqual(verify_payload["value_plane_evidence"]["adversarial_answer"]["trust_label"], "insufficient_evidence")
+        for value in verify_payload["negative_evidence"].values():
+            self.assertEqual(value, 0)
 
     def test_vs0_product_domain_readiness_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-product-domain-readiness", "--json")

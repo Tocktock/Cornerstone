@@ -143,7 +143,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_scaffold,
 )
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
-from cornerstone_cli.runtime import LocalRuntimeStore
+from cornerstone_cli.runtime import DEFAULT_EMBEDDING_MODEL, DEFAULT_GENERATION_MODEL, LocalRuntimeStore
 from cornerstone_cli.validators import count_unredacted_secrets
 from cornerstone_cli.vs2_security import run_vs2_local_security_proof
 from cornerstone_cli.vs2_production_like import REPORT_PATH as VS2_PRODUCTION_LIKE_REPORT_PATH
@@ -9457,6 +9457,9 @@ def command_brief_create(args: argparse.Namespace) -> int:
         args.evidence_bundle_id,
         requested_scope,
         model_provider=args.model_provider,
+        generation_model=args.generation_model,
+        embedding_model=args.embedding_model,
+        ollama_base_url=args.ollama_url,
     )
     payload = base_response("cornerstone brief create", "success", root)
     payload.update(requested_scope)
@@ -15316,6 +15319,9 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
         args.question,
         requested_scope,
         model_provider=args.model_provider,
+        generation_model=args.generation_model,
+        embedding_model=args.embedding_model,
+        ollama_base_url=args.ollama_url,
     )
     payload = base_response("cornerstone conversation answer", "success", root)
     payload.update(requested_scope)
@@ -19414,7 +19420,13 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     elif args.contract == "vs4-product-alpha-ui-daily-loop":
         report = verify_vs4_product_alpha_ui_daily_loop(root)
     elif args.contract == "vs5-slice-001":
-        report = verify_vs5_slice_001(root)
+        report = verify_vs5_slice_001(
+            root,
+            model_provider=args.model_provider,
+            generation_model=args.generation_model,
+            embedding_model=args.embedding_model,
+            ollama_url=args.ollama_url,
+        )
     elif args.contract == "connector-contract-adapter":
         report = verify_connector_contract_adapter(root)
     elif args.contract == "vs2-policy-tenancy-egress":
@@ -23809,6 +23821,9 @@ def build_parser() -> argparse.ArgumentParser:
     brief_create = brief_sub.add_parser("create", help="Create a deterministic brief from an evidence bundle")
     brief_create.add_argument("--evidence-bundle-id", required=True, help="Evidence bundle ID")
     brief_create.add_argument("--model-provider", default="local_test", help="Model provider to record for generation/fallback metadata")
+    brief_create.add_argument("--generation-model", default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed brief creation")
+    brief_create.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
+    brief_create.add_argument("--ollama-url", help="Ollama base URL for local model-backed brief creation")
     add_state_argument(brief_create)
     add_scope_arguments(brief_create)
     brief_create.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -26242,6 +26257,9 @@ def build_parser() -> argparse.ArgumentParser:
     conversation_answer.add_argument("conversation_id", help="Conversation ID")
     conversation_answer.add_argument("--question", required=True, help="Question to answer")
     conversation_answer.add_argument("--model-provider", default="local_test", help="Model provider to record for answer/fallback metadata")
+    conversation_answer.add_argument("--generation-model", default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed answers")
+    conversation_answer.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
+    conversation_answer.add_argument("--ollama-url", help="Ollama base URL for local model-backed answers")
     add_state_argument(conversation_answer)
     add_scope_arguments(conversation_answer)
     conversation_answer.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -26277,6 +26295,9 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument("--scenario", action="append", help="Optional product scenario ID to require in the fixture corpus")
     verify.add_argument("--corpus", default="fixtures/vs0", help="Fixture corpus path for fixture verification")
     verify.add_argument("--model-provider", default="local_test", help="Deterministic local model provider")
+    verify.add_argument("--generation-model", default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed scenario checks")
+    verify.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed scenario checks")
+    verify.add_argument("--ollama-url", help="Ollama base URL for model-backed scenario checks")
     verify.add_argument(
         "--reuse-vs2-local-proof-report",
         help="Reuse a current-source VS2 local proof report for vs2-policy-tenancy-egress instead of rerunning it.",
