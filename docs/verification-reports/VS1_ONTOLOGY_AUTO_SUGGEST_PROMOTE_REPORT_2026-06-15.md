@@ -8,8 +8,8 @@
 - HUMAN_REQUIRED rows: 3
 - Blocking rows: 0
 - Product claim: LOCAL_VS1_ONTOLOGY_READY_PRODUCTION_NOT_READY_HUMAN_REQUIRED
-- Verified base commit: d145c8d
-- Verified base tree: 52dbaeced44736b754b11cbaec66439aa42528d2
+- Verified base commit: c34334e
+- Verified base tree: 02e7344266f37efb30ba59ce292929980cbc2447
 - Worktree dirty at verification: True
 - Report generated before commit: True
 
@@ -19,11 +19,11 @@
 - Browser proof: reports/browser/vs1-ontology-suggest-promote-2026-06-15/browser-proof.json
 - Browser screenshot: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow.png
 - Browser trace: reports/browser/vs1-ontology-suggest-promote-2026-06-15/workflow-trace.json
-- SuggestionSet: oset_a23f00fdb5dc1e02
-- OntologyChangeSet: ochset_e0c7967164e97847
+- SuggestionSet: oset_2b9513014c987212
+- OntologyChangeSet: ochset_f363b7ed14cd695d
 - Promoted object: obj_1a13e0127536c3de
-- Claim: claim_5e894b63651891d2
-- Action: action_6c23b95edce02ff2
+- Claim: claim_0be502e23767f2cd
+- Action: action_eaa539d21d934a62
 
 ## Scenario Verification
 
