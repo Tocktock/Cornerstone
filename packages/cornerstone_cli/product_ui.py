@@ -1158,6 +1158,17 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-3);
 }}
+.cs-finding-head {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  align-items: flex-start;
+}}
+.cs-finding-index {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-variant-numeric: tabular-nums;
+}}
 .cs-citation-rail {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); }}
 .cs-brief-hero {{
   display: grid;
@@ -1173,6 +1184,32 @@ button, input, textarea {{ font: inherit; }}
   line-height: var(--cs-typography-pageTitle-lineHeight);
 }}
 .cs-brief-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-brief-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--cs-space-2);
+}}
+.cs-brief-hero.is-stacked {{
+  grid-template-columns: 1fr;
+  gap: var(--cs-space-3);
+}}
+.cs-brief-hero.is-stacked .cs-brief-actions {{ justify-content: flex-start; }}
+.cs-brief-fact-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-brief-fact {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-brief-fact strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
 .cs-summary-card {{
   background: color-mix(in srgb, var(--cs-color-primary-50) 48%, var(--cs-color-surface-primary));
   border-color: var(--cs-color-primary-100);
@@ -1182,6 +1219,17 @@ button, input, textarea {{ font: inherit; }}
   font-size: 16px;
   line-height: 1.7;
   color: var(--cs-color-text-primary);
+}}
+.cs-brief-note-grid {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--cs-space-4);
+}}
+.cs-brief-note-list {{
+  margin: 0;
+  padding-left: var(--cs-space-5);
+  display: grid;
+  gap: var(--cs-space-2);
 }}
 .cs-stat-list {{ display: grid; gap: var(--cs-space-3); }}
 .cs-stat-row {{
@@ -1355,7 +1403,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1368,6 +1416,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
+  .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
@@ -2480,49 +2529,69 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     next_rows = "".join(f"<li>{h(item)}</li>" for item in next_steps[:4]) or "<li>Review the visible sources before promoting this draft.</li>"
     provenance = _brief_provenance(brief)
     source_count = len(source_items)
+    mode = _plain_output_mode(str(brief.get("output_mode") or "draft"))
+    finding_count = len(key_points) + len(findings)
     return f"""
 <section class="cs-grid-two" data-product-surface="brief-detail">
   <div class="cs-stack">
-    <div class="cs-brief-hero">
+    <div class="cs-brief-hero is-stacked">
       <div class="cs-brief-title">
         <div class="cs-kicker">Brief</div>
         <h1>{h(_brief_title(brief))}</h1>
-        <p class="cs-muted">Read the answer and its source trail together before using it for a decision.</p>
+        <p class="cs-muted">Read the answer, supporting sources, and limits together before using it for a decision.</p>
         <div class="cs-brief-meta">
           <span>{h(_display_date(brief))}</span>
           <span>{h(str(source_count))} visible source{"s" if source_count != 1 else ""}</span>
+          <span>{h(str(finding_count))} drafted finding{"s" if finding_count != 1 else ""}</span>
         </div>
       </div>
-      <div class="cs-row">{_chip(label, state)}</div>
+      <div class="cs-brief-actions">
+        {_chip(label, state)}
+        <a class="cs-button secondary" href="#citation-trail">Review sources</a>
+        <a class="cs-button secondary" href="/claims">Draft claim</a>
+      </div>
+    </div>
+    <div class="cs-brief-fact-strip" aria-label="Brief status">
+      <div class="cs-brief-fact"><span class="cs-meta">State</span><strong>{h(label)}</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Mode</span><strong>{h(mode)}</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Created</span><strong>{h(_display_date(brief))}</strong></div>
     </div>
     <section class="cs-panel cs-summary-card">
-      <div class="cs-panel-header"><h2>Summary</h2></div>
+      <div class="cs-panel-header">
+        <div>
+          <h2>What we found</h2>
+          <p class="cs-muted">Short answer, kept separate from source support.</p>
+        </div>
+      </div>
       <p>{h(summary or "No summary text was drafted yet.")}</p>
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
-          <h2>Findings</h2>
-          <p class="cs-muted">Each statement should stay close to the source that supports it.</p>
+          <h2>Findings with citations</h2>
+          <p class="cs-muted">Each load-bearing statement stays close to the source that supports it.</p>
         </div>
+        {_chip("Source coverage", "searchable")}
       </div>
       {point_rows}
       {f'<h2 class="cs-section-title">More findings</h2>{finding_rows}' if finding_rows else ''}
     </section>
-    <div class="cs-module-grid">
+    <div class="cs-brief-note-grid">
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Gaps</h2>{_chip("Needs source check", "underReview")}</div>
-        <ul>{gap_rows}</ul>
+        <div class="cs-panel-header"><h2>Limits and gaps</h2>{_chip("Needs source check", "underReview")}</div>
+        <ul class="cs-brief-note-list">{gap_rows}</ul>
       </section>
       <section class="cs-panel">
         <div class="cs-panel-header"><h2>Next steps</h2>{_chip("Draft only", "draft")}</div>
-        <ul>{next_rows}</ul>
+        <ul class="cs-brief-note-list">{next_rows}</ul>
       </section>
     </div>
   </div>
   <aside class="cs-stack">
-    <section class="cs-panel flat">
+    <section class="cs-panel flat" id="citation-trail">
       <h2 class="cs-section-title">Citation trail</h2>
+      <p class="cs-muted">Open a source before promoting a finding.</p>
       {source_list}
     </section>
     <section class="cs-panel flat">
@@ -2530,7 +2599,12 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
       {provenance}
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Decision use</h2>
+      <h2 class="cs-section-title">Use this brief</h2>
+      <div class="cs-review-box">
+        <a class="cs-button" href="/claims">Draft claim from finding</a>
+        <a class="cs-button secondary" href="/actions">Review action previews</a>
+        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+      </div>
       <p class="cs-muted">Use this as a draft until each important statement is matched to a source span.</p>
     </section>
   </aside>
@@ -2851,6 +2925,10 @@ def _statement_rows(record: dict[str, Any], statements: list[str], source_items:
         rows.append(
             f"""
 <li class="cs-finding">
+  <div class="cs-finding-head">
+    <span class="cs-finding-index">Finding {h(index + offset)}</span>
+    {_chip("Needs source check", "underReview") if not chips else _chip("Source linked", "evidenceBacked")}
+  </div>
   <div>{h(statement)}</div>
   <div class="cs-citation-rail" aria-label="Sources for finding {index + offset}">{chips or _chip("Needs source check", "underReview")}</div>
 </li>

@@ -191,6 +191,12 @@ class ProductUiRoutesTest(unittest.TestCase):
 
         brief_html = self.fetch_product_html(f"/briefs/{brief_id}?view=html")
         self.assertIn('data-product-surface="brief-detail"', brief_html)
+        self.assertIn("What we found", brief_html)
+        self.assertIn("Brief status", brief_html)
+        self.assertIn("Source coverage", brief_html)
+        self.assertIn("Findings with citations", brief_html)
+        self.assertIn("Limits and gaps", brief_html)
+        self.assertIn("Use this brief", brief_html)
         self.assertIn("Citation trail", brief_html)
         self.assertIn("Source 1", brief_html)
         self.assertIn("Provenance", brief_html)
