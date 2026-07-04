@@ -2540,6 +2540,23 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-3);
   margin-bottom: var(--cs-space-5);
 }}
+.cs-owner-tabs {{
+  display: flex;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin: var(--cs-space-4) 0 var(--cs-space-5);
+  overflow-x: auto;
+}}
+.cs-owner-tab {{
+  padding: 0 0 var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+  white-space: nowrap;
+}}
+.cs-owner-tab.is-active {{
+  color: var(--cs-color-primary-700);
+  border-bottom: 2px solid var(--cs-color-primary-600);
+}}
 .cs-owner-metric {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2593,9 +2610,13 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-4);
   align-items: start;
 }}
-.cs-connector-list, .cs-admin-stack {{
+.cs-connector-list, .cs-admin-stack, .cs-policy-list {{
   display: grid;
   gap: var(--cs-space-3);
+}}
+.cs-admin-stack {{
+  position: sticky;
+  top: calc(var(--cs-space-4) + 72px);
 }}
 .cs-connector-card {{
   border: 1px solid var(--cs-color-border-default);
@@ -2627,6 +2648,24 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-connector-meta strong {{
   margin-top: var(--cs-space-1);
+}}
+.cs-policy-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-policy-row strong, .cs-policy-row p {{
+  margin: 0;
+}}
+.cs-policy-row p {{
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: 1.5;
 }}
 .cs-admin-note {{
   border: 1px solid var(--cs-state-underReview-border);
@@ -2946,7 +2985,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2968,6 +3007,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-action-actions {{ justify-content: flex-start; }}
   .cs-action-rail {{ position: static; }}
+  .cs-admin-stack {{ position: static; }}
   .cs-claim-progress::before {{ display: none; }}
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
@@ -4365,23 +4405,62 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
       {_chip("External calls locked", "policyBlocked")}
     </div>
   </div>
+  <nav class="cs-owner-tabs" aria-label="Owner review sections">
+    <span class="cs-owner-tab is-active">Sources</span>
+    <span class="cs-owner-tab">Policies</span>
+    <span class="cs-owner-tab">Access roles</span>
+    <span class="cs-owner-tab">Namespace</span>
+  </nav>
   <div class="cs-owner-overview" aria-label="Admin containment">
     {_owner_metric("Source access", f"{len(ctx['artifacts'])} saved", "Local artifacts and pasted sources only.")}
     {_owner_metric("Policies", "Dry-run first", "Actions require policy and approval before execution.")}
     {_owner_metric("Roles", "Owner scoped", "Admin review is tied to the current local owner.")}
-    {_owner_metric("Gate", f"local_scenario_ready={gate}", f"vs0_runtime_ready={runtime}")}
+    {_owner_metric("Structural checks", "Review input", "Runtime and scenario status stay in the owner handoff.")}
   </div>
   <div class="cs-connector-grid">
     <div class="cs-stack">
       <section class="cs-panel">
         <div class="cs-panel-header">
           <div>
-            <h2>Connector sources</h2>
+            <h2>Connected source posture</h2>
             <p class="cs-muted">Each source shows whether it can read, write, or only simulate work in this local workspace.</p>
           </div>
           {_chip("Review before enablement", "underReview")}
         </div>
         <div class="cs-connector-list">{connector_rows}</div>
+      </section>
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Namespace settings</h2>{_chip("Owner scoped", "underReview")}</div>
+        <dl class="cs-detail-grid">
+          <dt>Tenant</dt><dd>{h(scope.get("tenant_id") or "local-dev")}</dd>
+          <dt>Namespace</dt><dd>{h(scope.get("namespace_id") or "personal")}</dd>
+          <dt>Workspace</dt><dd>{h(scope.get("workspace_id") or "default")}</dd>
+          <dt>Owner</dt><dd>{h(scope.get("owner_id") or "local-user")}</dd>
+        </dl>
+      </section>
+    </div>
+    <aside class="cs-admin-stack">
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Policy controls</h2>
+            <p class="cs-muted">These controls describe the local review boundary; they do not enable live providers.</p>
+          </div>
+          {_chip("Contained", "underReview")}
+        </div>
+        <div class="cs-policy-list">{_owner_policy_rows()}</div>
+      </section>
+      <section class="cs-admin-note">
+        <strong>Admin containment</strong>
+        <span>Connector policy, role, and provider settings are intentionally kept behind the owner area. Daily users see only the resulting source, claim, action, inbox, and audit states.</span>
+      </section>
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Access roles</h2>{_chip("Owner controlled", "underReview")}</div>
+        <div class="cs-stat-list">
+          {_owner_role_row("Owner", "Can inspect local gates and approve contained connector setup.")}
+          {_owner_role_row("Workspace user", "Can save sources, ask questions, and review drafts without connector administration.")}
+          {_owner_role_row("External provider", "No direct access from this local review page.")}
+        </div>
       </section>
       <section class="cs-panel">
         <div class="cs-panel-header">
@@ -4393,21 +4472,6 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
         </div>
         <div class="cs-timeline">{activity_rows}</div>
       </section>
-    </div>
-    <aside class="cs-admin-stack">
-      <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Namespace settings</h2></div>
-        <dl class="cs-detail-grid">
-          <dt>Tenant</dt><dd>{h(scope.get("tenant_id") or "local-dev")}</dd>
-          <dt>Namespace</dt><dd>{h(scope.get("namespace_id") or "personal")}</dd>
-          <dt>Workspace</dt><dd>{h(scope.get("workspace_id") or "default")}</dd>
-          <dt>Owner</dt><dd>{h(scope.get("owner_id") or "local-user")}</dd>
-        </dl>
-      </section>
-      <section class="cs-admin-note">
-        <strong>Admin containment</strong>
-        <span>Connector policy, role, and provider settings are intentionally kept behind the owner area. Daily users see only the resulting source, claim, action, inbox, and audit states.</span>
-      </section>
       <section class="cs-panel">
         <div class="cs-panel-header">
           <div>
@@ -4418,15 +4482,7 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
         </div>
         <a class="cs-button secondary" href="/review/reference-images">Open reference gallery</a>
       </section>
-      {_owner_human_review_handoff()}
-      <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Access roles</h2>{_chip("Owner controlled", "underReview")}</div>
-        <div class="cs-stat-list">
-          {_owner_role_row("Owner", "Can inspect local gates and approve contained connector setup.")}
-          {_owner_role_row("Workspace user", "Can save sources, ask questions, and review drafts without connector administration.")}
-          {_owner_role_row("External provider", "No direct access from this local review page.")}
-        </div>
-      </section>
+      {_owner_human_review_handoff(gate, runtime)}
     </aside>
   </div>
 </section>
@@ -4484,7 +4540,7 @@ def _owner_reference_card(image_dir: Path, filename: str, title: str, posture: s
 """
 
 
-def _owner_human_review_handoff() -> str:
+def _owner_human_review_handoff(gate: str, runtime: str) -> str:
     checkpoints = [
         ("drop-ask", "Drop and Ask"),
         ("evidence-backed-brief", "Evidence-backed Brief"),
@@ -4537,6 +4593,7 @@ def _owner_human_review_handoff() -> str:
   <aside class="cs-admin-note" data-vs4-human-review-package="review-input-only">
     <strong>Package is not acceptance.</strong>
     <span>VS4-H01 remains HUMAN_REQUIRED. Scope: local-user / personal / default. Acceptance claim: not collected. Reference images: design input only.</span>
+    <span class="cs-meta">local_scenario_ready={h(gate)}; vs0_runtime_ready={h(runtime)}</span>
     <details data-vs4-human-review-detail="progressive">
       <summary>Review artifacts and commands</summary>
       <ul>{artifact_rows}</ul>
@@ -4625,6 +4682,27 @@ def _owner_connector_activity(ctx: dict[str, Any]) -> str:
 """
         for event in events
     )
+
+
+def _owner_policy_rows() -> str:
+    rows = [
+        ("Default egress", "External paths remain locked unless an owner-scoped policy allows them.", "Allowlist only", "underReview"),
+        ("Approval rules", "Action previews require policy, owner approval, and an audit record before execution.", "Enforced", "evidenceBacked"),
+        ("Sensitive data handling", "Saved sources remain local; derived drafts stay secondary until reviewed.", "Local review", "searchable"),
+    ]
+    return "".join(_owner_policy_row(label, detail, state, chip) for label, detail, state, chip in rows)
+
+
+def _owner_policy_row(label: str, detail: str, state: str, chip: str) -> str:
+    return f"""
+<div class="cs-policy-row">
+  <div>
+    <strong>{h(label)}</strong>
+    <p>{h(detail)}</p>
+  </div>
+  {_chip(state, chip)}
+</div>
+"""
 
 
 def _owner_role_row(label: str, detail: str) -> str:

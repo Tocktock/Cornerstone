@@ -32,9 +32,9 @@
     },
     "chrome_timeout_after_screenshot": false,
     "clean_browser_exit": true,
-    "created_at": "2026-07-04T23:37:00.803471Z",
+    "created_at": "2026-07-04T23:51:25.348165Z",
     "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
-    "dom_sha256": "d239177922b6c9614b1ae2eabf26ee3345f780a7df2fd566667446929573cb2e",
+    "dom_sha256": "7705cb0ae4d26cf0aa3082f5338bb0abb7198cbff6b2e0ff085094aae4683a3c",
     "errors": [],
     "product_markers": {
       "product_shell_present": true,
@@ -76,13 +76,13 @@
       }
     },
     "schema_version": "cs.browser_proof.v0",
-    "screenshot_bytes": 200717,
+    "screenshot_bytes": 200694,
     "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
-    "screenshot_sha256": "20894f184540ce7c058ace692e889b9a25c3d81cc834676af92fc60f061481e9",
+    "screenshot_sha256": "a07ed15d4d12d1d79df9d38221090a3c4f2f2805b823e3ea5d1b87e44bec3143",
     "status": "passed",
     "stderr_tail": {
       "screenshot": [
-        "DevTools listening on ws://127.0.0.1:50917/devtools/browser/af44f1f1-629f-4e11-b712-e67197f22b3f"
+        "DevTools listening on ws://127.0.0.1:53072/devtools/browser/df16ae6a-61b9-4dfb-9442-236757a152ef"
       ]
     },
     "surface_presence": {
@@ -94,7 +94,7 @@
       "Home/Ops Inbox": false,
       "Search": true
     },
-    "url": "http://127.0.0.1:50916/"
+    "url": "http://127.0.0.1:53071/"
   },
   "brief_detail_markers": {
     "action_card_detail_visible": true,
@@ -170,12 +170,12 @@
     "slice_003_passes": true,
     "state": {
       "created_records": {
-        "action_id": "action_f598c2a869a6f629",
+        "action_id": "action_55fe795ed65e8378",
         "artifact_id": "art_085c9696c3b04726",
-        "brief_id": "brief_d99a2704415b8b4c",
-        "claim_id": "claim_e607fbaa0560efd6",
-        "evidence_bundle_id": "evb_9b74ae049a037d11",
-        "search_snapshot_id": "search_97fe37821439dcd4"
+        "brief_id": "brief_357ab1576aa68c15",
+        "claim_id": "claim_5e33f1d22fd0beb2",
+        "evidence_bundle_id": "evb_e783f408abb548e6",
+        "search_snapshot_id": "search_0a1144db40aae360"
       },
       "negative_evidence": {}
     }
@@ -186,7 +186,7 @@
     "name": "Google Chrome",
     "window_size": "1440,1100"
   },
-  "created_at": "2026-07-04T23:37:00.808109Z",
+  "created_at": "2026-07-04T23:51:25.353145Z",
   "decision_pages": {
     "markers": {
       "action_approval_denial_visible": true,
@@ -236,7 +236,7 @@
   "decision_pages_required": true,
   "detail_route": "/briefs/{brief_id}?view=html",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.dom.html",
-  "dom_sha256": "d239177922b6c9614b1ae2eabf26ee3345f780a7df2fd566667446929573cb2e",
+  "dom_sha256": "7705cb0ae4d26cf0aa3082f5338bb0abb7198cbff6b2e0ff085094aae4683a3c",
   "errors": [],
   "evidence_audit_detail": {
     "markers": {
@@ -512,31 +512,31 @@
   "responsive_required": false,
   "route": "/",
   "route_scan": {
-    "base_url": "http://127.0.0.1:50895",
-    "created_at": "2026-07-04T23:36:58.443575Z",
+    "base_url": "http://127.0.0.1:53050",
+    "created_at": "2026-07-04T23:51:23.013651Z",
     "created_records": {
-      "action_id": "action_f598c2a869a6f629",
+      "action_id": "action_55fe795ed65e8378",
       "artifact_id": "art_085c9696c3b04726",
-      "brief_id": "brief_d99a2704415b8b4c",
-      "claim_id": "claim_e607fbaa0560efd6",
-      "evidence_bundle_id": "evb_9b74ae049a037d11",
-      "search_snapshot_id": "search_97fe37821439dcd4"
+      "brief_id": "brief_357ab1576aa68c15",
+      "claim_id": "claim_5e33f1d22fd0beb2",
+      "evidence_bundle_id": "evb_e783f408abb548e6",
+      "search_snapshot_id": "search_0a1144db40aae360"
     },
     "detail_routes": {
       "action_detail": {
-        "body_bytes": 96043,
+        "body_bytes": 97165,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/actions/action_f598c2a869a6f629?view=html",
+        "path": "/actions/action_55fe795ed65e8378?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
         "token_css_present": true
       },
       "artifact_detail": {
-        "body_bytes": 93557,
+        "body_bytes": 94679,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -548,24 +548,24 @@
         "token_css_present": true
       },
       "brief_detail": {
-        "body_bytes": 93001,
+        "body_bytes": 94123,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/briefs/brief_d99a2704415b8b4c?view=html",
+        "path": "/briefs/brief_357ab1576aa68c15?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
         "token_css_present": true
       },
       "claim_detail": {
-        "body_bytes": 94548,
+        "body_bytes": 95670,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/claims/claim_e607fbaa0560efd6?view=html",
+        "path": "/claims/claim_5e33f1d22fd0beb2?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
@@ -596,7 +596,7 @@
     },
     "product_routes": {
       "/": {
-        "body_bytes": 96171,
+        "body_bytes": 97293,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -608,7 +608,7 @@
         "token_css_present": true
       },
       "/actions": {
-        "body_bytes": 88297,
+        "body_bytes": 89419,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -620,7 +620,7 @@
         "token_css_present": true
       },
       "/artifacts": {
-        "body_bytes": 88386,
+        "body_bytes": 89508,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -632,7 +632,7 @@
         "token_css_present": true
       },
       "/audit": {
-        "body_bytes": 103163,
+        "body_bytes": 104285,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -644,7 +644,7 @@
         "token_css_present": true
       },
       "/briefs": {
-        "body_bytes": 88828,
+        "body_bytes": 89950,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -656,7 +656,7 @@
         "token_css_present": true
       },
       "/claims": {
-        "body_bytes": 88624,
+        "body_bytes": 89746,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -668,7 +668,7 @@
         "token_css_present": true
       },
       "/inbox": {
-        "body_bytes": 92492,
+        "body_bytes": 93614,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -680,7 +680,7 @@
         "token_css_present": true
       },
       "/search?q=renewal": {
-        "body_bytes": 93240,
+        "body_bytes": 94362,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -705,9 +705,9 @@
     "thread_errors": []
   },
   "schema_version": "cs.vs4_product_alpha_browser_proof.v1",
-  "screenshot_bytes": 200717,
+  "screenshot_bytes": 200694,
   "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/home.png",
-  "screenshot_sha256": "20894f184540ce7c058ace692e889b9a25c3d81cc834676af92fc60f061481e9",
+  "screenshot_sha256": "a07ed15d4d12d1d79df9d38221090a3c4f2f2805b823e3ea5d1b87e44bec3143",
   "shell_markers": {
     "action_card_visible": true,
     "artifact_reference_visible": true,
@@ -762,7 +762,7 @@
     "unsafe_http_zero_authority_side_effects": true
   },
   "unsafe_http_boundary_required": true,
-  "url": "http://127.0.0.1:50916/",
+  "url": "http://127.0.0.1:53071/",
   "user_drop_ask_source": {
     "markers": {
       "ask_uses_user_question": true,

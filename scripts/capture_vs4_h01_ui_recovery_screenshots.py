@@ -57,7 +57,7 @@ DESKTOP_ROUTES = [
         "name": "owner-admin-desktop",
         "route": "/review",
         "surface": "owner-review",
-        "required": ["Connector governance", "Connector sources", "Namespace settings", "Admin containment", "Recent connector activity"],
+        "required": ["Connector governance", "Connected source posture", "Policy controls", "Access roles", "Namespace settings", "Admin containment", "Recent connector activity"],
         "allow_internal_terms": True,
     },
     {
