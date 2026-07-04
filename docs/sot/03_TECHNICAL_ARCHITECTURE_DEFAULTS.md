@@ -44,7 +44,7 @@ For a new implementation, use these defaults unless a scenario contract or owner
 | Policy | OPA/Rego-compatible policy engine |
 | Audit | Append-only tamper-evident audit events with checkpoint/hash-chain/Merkle direction |
 | Workers | Background job worker for extraction, redaction, chunking, indexing, embeddings, briefs |
-| Model access | Provider-neutral model router with deterministic local/test provider for CI |
+| Model access | Local-first: Ollama `ornith:35b` for generation and `qwen3-embedding:0.6b` for embeddings as the default assumption (verified installed 2026-07-04); deterministic `local_test` provider for CI; provider-neutral router direction preserved; external providers (Claude/GPT/Gemini) optional, future-facing, named per-scenario when assumed |
 | Tool execution | Sandbox/capability-based execution; egress denied by default |
 | Connector access | ConnectorHub-mediated capabilities only |
 

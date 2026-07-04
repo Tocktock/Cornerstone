@@ -1,16 +1,21 @@
 # CornerStone Agent Instructions
 
-**Status:** Root agent instruction for the CornerStone documentation and implementation reset.
+**Status:** Root agent instruction, amended 2026-07-04 by the product-value-first reset (`docs/adr/ADR-0007-product-value-first-reset.md`).
 **Owner:** JiYong / Tars.
 **Canonical spelling:** Use **CornerStone** for product/project text. Use `Cornerstone` only for existing repository or package names that already use that spelling.
+
+## The One-Paragraph Orientation (read this first)
+
+The active product spine is `Drop / Ask -> Evidence-backed Brief -> Decision -> Audit`. The structural substrate (artifacts, evidence, audit, UI/CLI) is verified; the intelligence layer does not exist yet and is the active build (VS5: model-backed, citation-grounded Brief/Ask on local Ollama `ornith:35b` + `qwen3-embedding:0.6b`). Work that does not serve the spine, the active milestone contract, or an explicit user request is out of scope. **Scope freeze:** do not create new scenario contracts, verification report families, trace counters, or CLI command families outside the spine until VS5 closes. Do not expand dormant systems (ConnectorHub, VS2/VS3, brain routing, agents, ontology, autopilot, capsules, packs, memory promotion). Optimizing internal PASS counts is not progress; the success metric is Plane 2 evidence in front of external users.
 
 ## Product Authority
 
 Before non-trivial planning, architecture, migration, or implementation work, read:
 
+0. `docs/adr/ADR-0007-product-value-first-reset.md`, then `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md` **Part 0**, then `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`, then the active milestone contract `docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md` — these take precedence over everything below.
 1. `docs/sot/README.md`
 2. `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md`
-3. `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md`
+3. `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md` (note §2.4: two planes, family activity status)
 4. `docs/scenario-contracts/SCENARIO_MATRIX_FULL.md`
 5. `docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md`
 6. `docs/scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv`
@@ -38,15 +43,9 @@ The product SoT is the product authority. Repository files show implementation r
 
 ## Current Product Definition
 
-CornerStone is an **Evidence-first Operational Intelligence Platform** that becomes the living knowledge and action foundation for a person, team, or organization.
+The user-facing definition: **drop messy input, get a brief you can defend — every load-bearing statement traceable to its source, every decision recorded with an audit trail** ("briefs with receipts"). The long-term loop (Ingest → Understand → Decide → Act → Learn) remains the direction; today only `Ingest → Understand → Decide (brief/decision) → Audit` is active, and **Understand/Decide are the parts currently being made real (VS5)** — as of 2026-07-04 briefs are still extractive echoes and Ask returns a canned deferral. Do not describe or demo current behavior as intelligent, and never let templated output carry `evidence_backed` or `presented_as_fact` labels (CS-VAL-006 is an open FAIL until VS5 fixes it).
 
-It must support the loop:
-
-1. **Ingest** - capture information as immutable artifacts.
-2. **Understand** - extract, search, link, summarize, and map context.
-3. **Decide** - produce evidence-backed briefs, claims, recommendations, and mission plans.
-4. **Act** - execute only through governed Workflow/Action paths.
-5. **Learn** - re-ingest outcomes, corrections, failures, approvals, and lessons.
+Act and Learn are dormant: Action Cards and Memory/Wiki candidates stay visible as review drafts only.
 
 ## One Product, Three Internal Engines
 
@@ -80,14 +79,24 @@ Before changing local scenario verification, fixture corpora, model harnesses, C
 
 `docs/scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md`
 
-Agents must treat local verification as a CornerStone product acceptance surface, not an ad-hoc test folder:
+Agents must treat local verification as a CornerStone product acceptance surface, not an ad-hoc test folder. Verification runs on **two planes** (`docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`):
+
+Plane 1 — structural (deterministic):
 
 - Prefer `cornerstone scenario verify ... --json` as the product-level verification entry point.
-- Use a deterministic `local_test` model provider as the required baseline for local/CI scenario gates.
-- Use Ollama or another local LLM only as a model backend for semantic smoke tests; never use the LLM as the judge of `PASS`.
-- Validate `PASS` through deterministic checks over artifacts, evidence bundles, policy decisions, workflow/action records, audit events, CLI transcripts, and scenario reports.
+- Use the deterministic `local_test` model provider as the required baseline for local/CI scenario gates.
+- Validate structural `PASS` through deterministic checks over artifacts, evidence bundles, policy decisions, workflow/action records, audit events, CLI transcripts, and scenario reports.
 - Capture negative evidence for safety scenarios, including zero unauthorized tool calls, zero unauthorized action cards, zero egress, and zero unredacted secret leaks where prohibited.
 - Mark unavailable, subjective, external-provider, or production-only checks as `HUMAN_REQUIRED` with required evidence instead of `PASS`.
+
+Plane 2 — product value (required for any value claim):
+
+- Model stack for quality runs: local Ollama `ornith:35b` (generation) and `qwen3-embedding:0.6b` (embeddings). Do not assume external providers; name them per-scenario if genuinely needed.
+- Deterministic citation-integrity checks (resolution, span-in-source, echo/boilerplate guards, label audits) own the mechanical part of quality PASS.
+- LLM-as-judge output is **advisory metadata only** — it never flips a row to PASS. Humans own subjective quality PASS with dated rubric records.
+- External-user rows require participants who are not JiYong/Tars; owner walkthroughs or browser proofs cannot satisfy them.
+- Plane 1 evidence alone supports at most `STRUCTURAL_READY`. Never present structural PASS counts as usefulness, understanding, or product value (CS-VAL-010).
+- Plane 2 evidence expires when the model, prompt scheme, or retrieval pipeline changes; re-run the eval corpus before re-claiming.
 
 ## Design System
 
@@ -137,22 +146,15 @@ When something cannot be verified, report it as `NOT_VERIFIED`, `NOT_RUN`, or `H
 
 Run `scripts/verify_sot_docs.sh` after documentation edits that touch SoT, scenario, handoff, design, or contract files. Run `scripts/verify_cli_native_first_docs.sh` after documentation edits that touch CLI-native-first rules or feature parity matrices. Run `scripts/verify_design_system_docs.sh` after documentation edits that touch design-system rules or tokens. Run `scripts/verify_vs0_scaffold_readiness_docs.sh` after documentation edits that touch VS-0 scaffold readiness or implementation gating.
 
-## First Implementation Target
+## Current Implementation Target (2026-07-04)
 
-Start with the VS-0 scaffold contract before feature coding:
+The active milestone is **VS5**: `docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md` — make Brief and Ask model-backed, citation-grounded, honestly labeled, and externally testable. Entry gate: `VS4-H01` owner review. Exit: `VALUE_VERIFIED_EXTERNAL` via the VS5 stranger test. Then VS6 (daily loop), then VS7 (wedge validation).
 
-`docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`
+Sequencing rules:
 
-Before starting scaffold implementation, read:
+- Every VS5 feature is operable through UI/API and a native `cornerstone` CLI path (no new CLI command families; extend `brief`, `conversation`, `search`, `artifact`, `scenario`).
+- Retrieved/ingested content enters prompts as quoted evidence, never as instructions; the injection boundary is MUST_PASS with a real model in the loop (`VS5-ASK-002`).
+- Honest degradation: model-down fallback is labeled `extractive_fallback`, never `evidence_backed`.
+- Verification-apparatus work is a supporting activity capped in service of contract rows, never a deliverable on its own.
 
-`docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`
-
-The current approved next implementation scope is VS-0 scaffold foundation only after preflight and approval. Do not start VS-0 product features from this gate.
-
-Then start VS-0:
-
-`Personal messy input -> immutable artifact -> search -> evidence-backed brief -> draft/evidence-backed claim -> action card dry-run -> approval/execution -> audit`
-
-VS-0 must be operable through the product UI/API and through a native `cornerstone` CLI path. Do not ship a UI/API-only feature and defer CLI to later.
-
-Do not start with a broad repo merge. Build a zero-base CornerStone core, then port working behavior from existing projects through adapters after scenario verification.
+Historical gates (VS-0 scaffold contract `docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md`, readiness report `docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md`) are closed history: read them when touching the substrate they froze; do not treat them as the current target.

@@ -1,6 +1,6 @@
 # CornerStone MUST-PASS Scenario Standard — Canonical Acceptance SoT
 
-**Replacement status:** Active scenario and release-gate authority after product-goal reset.  
+**Replacement status:** Active scenario and release-gate authority after product-goal reset; amended 2026-07-04 by §2.4 (two verification planes, family activity status) per `docs/adr/ADR-0007-product-value-first-reset.md`. Plane 1 (this document) alone supports at most `STRUCTURAL_READY`; product-value claims additionally require `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`.
 **Source file:** `cornerstone_must_pass_scenarios.md` uploaded by JiYong / Tars.  
 **Rule:** No feature, milestone, release, or integration can claim complete without scenario verification evidence.
 
@@ -88,6 +88,28 @@ For each implementation task, the agent must freeze:
 - human-required items.
 
 Then the implementation is complete only when every AI-verifiable scenario is verified with evidence.
+
+### 2.4 Two verification planes and family activity status (added 2026-07-04)
+
+**Binding amendment — decision record `docs/adr/ADR-0007-product-value-first-reset.md`.**
+
+This standard is **Plane 1**: it verifies structure, boundaries, records, and safety behavior deterministically. The 2026-07-04 review proved Plane 1 can be fully green while the product delivers no user value (echo briefs and canned answers passed 27/28 VS4 rows). Therefore:
+
+1. **Plane 1 evidence alone can support at most the verdict `STRUCTURAL_READY`.** No feature, milestone, or release may claim usefulness, understanding, or product value from Plane 1 evidence.
+2. **Plane 2 — the product value plane — is defined in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`** (CS-VAL-001 – CS-VAL-010: grounding, zero fabricated citations, faithfulness, synthesis-beyond-extraction, honest uncertainty, earned trust labels, direct answers, external comprehension, external trust, overclaim guard). Completion claims about the product spine require both planes.
+3. **CS-VAL rows are canonical acceptance authority now.** They are folded into the generated 206-row matrix at the next registry regeneration (a code change scheduled inside VS5); until then `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` is their authoritative home and this section is the binding pointer.
+
+**Scenario family activity status.** All 206 scenarios remain the long-term behavior standard. For planning and release gating, families are classified as follows (reclassification requires a dated ADR):
+
+| Family | Status | Rationale |
+|---|---|---|
+| CS-PROD, CS-ARCH, CS-UND, CS-CLAIM, CS-SEC, CS-REG | **ACTIVE** | On or guarding the spine: Drop / Ask → Brief → Decision → Audit |
+| CS-NS | ACTIVE (data model) / DORMANT (multi-tenant enforcement) | Scoping is substrate; tenancy enforcement waits for real tenants (VS2 dormant) |
+| CS-MEM | PARTIALLY ACTIVE | Simple memory view/edit/delete active; wiki synthesis, sovereignty center, promotion machinery dormant |
+| CS-AUTO | DORMANT (Action Cards remain visible drafts) | No real actions exist; first real action is a VS7 conditional, by user pull |
+| CS-AGENT, CS-BRAIN, CS-LEARN, CS-EXT | **DORMANT** | No capability exists (stubs/fixtures only); reactivation by user-evidence pull (`VS7-DORM-001`) |
+
+Dormant-family scenarios are excluded from active milestone gates and from "full-suite" progress reporting. Their prior structural verifier evidence remains valid as history but must not be presented as capability proof.
 
 ---
 

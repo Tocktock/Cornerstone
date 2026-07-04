@@ -1,14 +1,18 @@
 # CornerStone SoT Bundle
 
-**Date:** 2026-06-09
+**Date:** 2026-07-04
 **Owner:** JiYong / Tars  
-**Status:** Active SoT bundle after V2 full MUST-PASS handoff, design-system contract, VS-0 scaffold gate, local deterministic VS0 product runtime readiness, local VS0 runtime acceptance/hardening evidence, local VS0 evidence-cleanup/interactive-UI-loop evidence, frozen VS0 EVUX clean sign-off governance scenarios, local VS0 operator acceptance UI gate evidence, final VS0 implementation closure for VS1 transition, and frozen VS4 Product Alpha UI Daily Loop documentation contract
+**Status:** Active SoT bundle after the 2026-07-04 product-value-first reset (`docs/adr/ADR-0007-product-value-first-reset.md`). VS0–VS4 structural evidence is history (`STRUCTURAL_READY`); the active milestone is VS5 (citation-grounded Brief); product-value claims require Plane 2 evidence.
 
 ## Why This Bundle Exists
 
-The product goal changed, and the current repository now uses the full V2 AI-agent handoff with the complete MUST-PASS scenario standard embedded and installed.
+The product goal changed, and the current repository now uses the full V2 AI-agent handoff with the complete MUST-PASS scenario standard embedded and installed. The 2026-07-04 reset added the second verification plane and the VS5–VS7 milestone sequence after a product review proved structural gates alone cannot measure product value.
 
 This bundle resolves authority:
+
+- **ADR-0007** (`docs/adr/ADR-0007-product-value-first-reset.md`) records the active spine (`Drop / Ask -> Brief -> Decision -> Audit`), the scope freeze, and the dormancy register.
+- The **Product Value Verification Standard** (`05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`) is the Plane 2 acceptance authority (CS-VAL family, verdict ladder); structural PASS counts alone support at most `STRUCTURAL_READY`.
+- The **VS5 / VS6 / VS7 contracts** (`../scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md`, `VS6_DAILY_LOOP_CONTRACT.md`, `VS7_WEDGE_VALIDATION_CONTRACT.md`) define the active milestone sequence.
 
 - The **Product Goal & Direction** document is product authority.
 - The **MUST-PASS Scenario Standard** is acceptance and release authority.
@@ -22,6 +26,8 @@ This bundle resolves authority:
 - The older technical SoT is no longer product authority; compatible technical defaults are preserved only in `03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`.
 
 ## Authority Order for CornerStone Work
+
+**2026-07-04 precedence amendment:** immediately after `AGENTS.md`, the following take precedence over everything below: `docs/adr/ADR-0007-product-value-first-reset.md` (active spine, scope freeze, dormancy register), `docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md` **Part 0** (binding claim boundary), `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` (Plane 2 acceptance), and the active milestone contract `docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md` (then `VS6_DAILY_LOOP_CONTRACT.md`, `VS7_WEDGE_VALIDATION_CONTRACT.md`). The numbered list below remains the historical authority order for structural work; items covering dormant systems are read as history, not active product authority.
 
 1. System/platform/developer instructions.
 2. Root `AGENTS.md` and repo-local instructions.
@@ -92,8 +98,9 @@ If lower-priority content conflicts with higher-priority content, report the con
 
 | File | Authority |
 |---|---|
-| `01_PRODUCT_GOAL_AND_DIRECTION.md` | What CornerStone is and where it is going |
-| `02_MUST_PASS_SCENARIO_STANDARD.md` | What must pass before a capability/release can claim complete |
+| `01_PRODUCT_GOAL_AND_DIRECTION.md` | What CornerStone is and where it is going (Part 0 is the binding claim boundary) |
+| `02_MUST_PASS_SCENARIO_STANDARD.md` | Plane 1: what must pass structurally before a capability/release can claim `STRUCTURAL_READY` |
+| `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` | Plane 2: what must pass before any product-value claim (CS-VAL, verdict ladder) |
 | `03_TECHNICAL_ARCHITECTURE_DEFAULTS.md` | Safe technical defaults for the zero-base implementation |
 | `04_DOCUMENT_REPLACEMENT_AND_DEPRECATION_PLAN.md` | How to replace/remove conflicting old docs |
 | `sot_manifest.yaml` | Machine-readable SoT bundle index |
@@ -173,55 +180,61 @@ If lower-priority content conflicts with higher-priority content, report the con
 | `../scenario-contracts/SCENARIO_VERIFICATION_REPORT_TEMPLATE.md` | Required report shape for scenario verification |
 | `../verification-reports/template.md` | Required report shape for scaffold, scenario, CLI, and human-required evidence |
 
-## New Product Goal
+## Current Product Direction (2026-07-04)
 
-CornerStone is an **Evidence-first Operational Intelligence Platform**.
+The active spine is **`Drop / Ask -> Evidence-backed Brief -> Decision -> Audit`** — externally: *briefs with receipts*. The long-term ambition (durable evidence, understandable context, governed actions, learning loops, permanent memory) is preserved as labeled future-facing direction in `01_PRODUCT_GOAL_AND_DIRECTION.md`; "Evidence-first Operational Intelligence Platform" is internal category language, not user-facing copy.
 
-It turns fragmented knowledge into:
-
-1. durable evidence;
-2. searchable and understandable context;
-3. briefs, claims, decisions, and mission contracts;
-4. governed actions;
-5. learning loops and permanent wiki memory.
+Current honest state: the structural substrate is verified (`STRUCTURAL_READY`); model-backed understanding does not exist yet and is the VS5 build; four CS-VAL rows are recorded as open FAILs until VS5 evidence flips them; no external user has used the product yet. The next proof point is the VS5 stranger test.
 
 ## Product Non-Negotiables
 
+Active now:
+
 - One product experience, not three visible products.
 - Personal-first adoption with organization expansion through explicit promotion.
-- Permanent wiki / living memory with memory sovereignty.
-- Owner-scoped namespaces for all context.
-- Draft -> Evidence-backed -> Approved trust ladder.
-- Orchestrator-led mission-specific agent team.
-- Replaceable model brains; CornerStone owns durable value.
-- ConnectorHub-mediated provider/action boundary.
+- Owner-scoped namespaces for all context (data model; multi-tenant enforcement dormant until real tenants).
+- Draft -> Evidence-backed -> Approved trust ladder — **labels must be earned by citation-integrity checks (CS-VAL-006); unearned labels are a violation, not a feature.**
 - Archive/evidence foundation before generated memory.
-- Scenario verification before release claims.
+- Scenario verification before release claims — **both planes: structural (Plane 1) and product value (Plane 2); Plane 1 alone supports at most `STRUCTURAL_READY`.**
 - CLI-native-first for every product feature: no verified native `cornerstone ...` command path means no feature PASS.
-- Local verification is deterministic and evidence-based: LLM output alone never proves PASS.
-- Calm workspace design: light-first, evidence-aware, safe-action UI; no dark command-center or admin-first default.
+- Local verification: deterministic validators own structural PASS; LLM judges are advisory only and never flip a row; humans own subjective quality PASS.
+- Local-first model stack: Ollama `ornith:35b` (generation) and `qwen3-embedding:0.6b` (embeddings) are the default assumption; external providers optional and named per-scenario.
+- Calm workspace design: light-first, evidence-aware, safe-action UI; no dark command-center or admin-first default; internal tokens never as user-facing copy.
 
-## First Implementation Target
+Preserved direction, dormant until user-evidence pull (ADR-0007; disposition in VS7):
 
-Before feature coding, `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` must be accepted as the setup-planning gate.
+- Permanent wiki / living memory with memory sovereignty.
+- Orchestrator-led mission-specific agent team.
+- Multi-brain routing/ensembles (the *replaceable brain* principle stands; replaceable never means omittable).
+- ConnectorHub-mediated provider/action boundary (the mediation principle governs any future action path; the hub expansion itself is dormant).
 
-Before scaffold implementation, `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` must be read as historical gate context. The current local deterministic runtime loop is verified through the VS0 Product Runtime Readiness report; production release, live-provider proof, and human usability acceptance remain out of scope.
+## Active Implementation Target and Historical Structural Record
 
-The first implementation target is VS-0:
+The active implementation target after the 2026-07-04 reset is **VS5**:
+
+`Drop / Ask -> citation-grounded Brief -> direct Ask answer -> earned trust labels -> external stranger test`
+
+The frozen contract is `../scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md`; the matrix is `../scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_MATRIX.csv`. VS5 remains blocked from external sessions until `VS4-H01` is recorded, and completion claims require Plane 2 evidence from `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`.
+
+The following VS0-VS4 entries are retained as the historical structural record. They are still useful when touching the substrate they froze, but they are not the current product target.
+
+Before historical VS0 scaffold work, `../scenario-contracts/VS0_SCAFFOLD_CONTRACT.md` and `../verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md` define the closed setup-planning gate. The deterministic runtime loop is verified through the VS0 Product Runtime Readiness report; production release, live-provider proof, and human usability acceptance remain out of scope.
+
+The historical VS0 implementation slice was:
 
 `Personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit`
 
-The full long-term scenario suite remains authoritative, but VS-0 freezes the first slice. Every VS-0 feature must also be operable through the native `cornerstone ...` CLI path and verified with CLI transcript evidence.
+The full long-term scenario suite remains authoritative, but VS0 froze the first structural slice. Every VS0 feature also had to be operable through the native `cornerstone ...` CLI path and verified with CLI transcript evidence.
 
 The task-scoped runtime scenario contract after the completed local deterministic scaffold proof is `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`. It contains 14 `VS0-RT-*` rows for a runnable local product runtime with CLI, API, and minimal UI parity. It does not change the canonical 206-scenario count or mark production readiness PASS.
 
-The current local acceptance task-scoped scenario contract is `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. It contains 9 `VS0-ACC-*` rows for real browser proof, readiness evidence semantics, connector-call wording, quickstart repeatability, release evidence packaging, and overclaim regression guards. The contract is status-neutral; the local deterministic report passes 7 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
+The historical local acceptance task-scoped scenario contract is `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. It contains 9 `VS0-ACC-*` rows for real browser proof, readiness evidence semantics, connector-call wording, quickstart repeatability, release evidence packaging, and overclaim regression guards. The contract is status-neutral; the local deterministic report passes 7 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 
 The current local evidence-cleanup and interactive UI loop scenario contract is `../scenario-contracts/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_CONTRACT.md`. It contains 14 `VS0-EVUX-*` rows for actual UI workflow proof across artifact upload/select, search, evidence bundle, claim, action, mock execution, and audit timeline. The local deterministic report passes 12 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 
-The clean sign-off governance scenario contract is `../scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`. It contains 16 `VS0-GOV-*` rows for EVUX matrix/report consistency, status-neutral contract semantics, dirty-worktree metadata, command transcript evidence, release manifest hashing, final-report wording, post-commit rollup behavior, and overclaim/dependency regression guards. Current verification status is produced by `cornerstone scenario verify vs0-evux-governance` and recorded in `../scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv` plus `../verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md`; 2 human-only rows remain `HUMAN_REQUIRED` and production release remains false.
+The clean sign-off governance scenario contract is `../scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_CONTRACT.md`. It contains 16 `VS0-GOV-*` rows for EVUX matrix/report consistency, status-neutral contract semantics, dirty-worktree metadata, command transcript evidence, release manifest hashing, final-report wording, post-commit rollup behavior, and overclaim/dependency regression guards. Historical verification status is produced by `cornerstone scenario verify vs0-evux-governance` and recorded in `../scenario-contracts/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_MATRIX.csv` plus `../verification-reports/VS0_EVUX_CLEAN_SIGNOFF_GOVERNANCE_REPORT_2026-06-14.md`; 2 human-only rows remain `HUMAN_REQUIRED` and production release remains false.
 
-The VS0 operator acceptance UI gate is `../scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`. It contains 13 `VS0-UI-*` rows for turning the one-click local EVUX proof into an understandable operator flow across Artifact, Search, Evidence, Claim, Action Card, dry-run, approval, mock execution, and Audit. Current local implementation evidence is recorded in `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`, `../../reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`, and `../../reports/browser/vs0-operator-acceptance-ui-2026-06-14/`: 12 AI-verifiable rows pass. Human operator UX acceptance is recorded in `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`, final closure is recorded in `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md`, and full VS-1 main implementation is unblocked. Production release and live-provider readiness remain unclaimed.
+The VS0 operator acceptance UI gate is `../scenario-contracts/VS0_OPERATOR_ACCEPTANCE_UI_GATE_CONTRACT.md`. It contains 13 `VS0-UI-*` rows for turning the one-click local EVUX proof into an understandable operator flow across Artifact, Search, Evidence, Claim, Action Card, dry-run, approval, mock execution, and Audit. Historical local implementation evidence is recorded in `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_REPORT_2026-06-14.md`, `../../reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json`, and `../../reports/browser/vs0-operator-acceptance-ui-2026-06-14/`: 12 AI-verifiable rows pass. Human operator UX acceptance is recorded in `../verification-reports/VS0_OPERATOR_ACCEPTANCE_UI_HUMAN_REVIEW_2026-06-15.md`, final closure is recorded in `../verification-reports/VS0_IMPLEMENTATION_FINAL_REPORT_2026-06-15.md`, and full VS-1 main implementation is unblocked. Production release and live-provider readiness remain unclaimed.
 
 The VS2 policy, tenant isolation, and default egress-deny contract is `../scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md`. It contains 93 `VS2-SEC-*` rows: 70 MUST_PASS, 16 REGRESSION, and 7 HUMAN_REQUIRED. The earlier local deterministic proof report is superseded by `../verification-reports/VS2_POLICY_TENANCY_EGRESS_SCENARIO_SPECIFIC_REMEDIATION_REPORT_2026-06-19.md`. Current scenario-specific evidence is recorded in `reports/security/vs2-local-security-proof.json`, `reports/security/vs2-scenario-specific-evidence.json`, `reports/security/vs2-synthetic-world.json`, and `reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json`: 7 PASS, 79 NOT_VERIFIED, and 7 HUMAN_REQUIRED. The native verifier is `cornerstone scenario verify vs2-policy-tenancy-egress --json`. The verifier may not claim VS2 readiness until all 70 MUST_PASS and 16 REGRESSION rows pass with scenario-specific evidence; production security, real IdP, production network, live-provider, human UX, and migration/restore readiness remain blocked by H02-H07 evidence.
 

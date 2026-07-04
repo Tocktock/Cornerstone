@@ -1,0 +1,9 @@
+scenario_id,priority,scenario,verification_mode,current_evidence_status
+VS7-WEDGE-001,MUST_PASS,Dated wedge decision citing VS6 usage data and user statements,HUMAN_REQUIRED,NOT_RUN
+VS7-PART-001,MUST_PASS,Three design partners with 4+ weeks real recurring use each,HUMAN_REQUIRED_EXTERNAL,NOT_RUN
+VS7-PART-002,MUST_PASS,Willingness-to-pay evidence per partner including documented refusals,HUMAN_REQUIRED_EXTERNAL,NOT_RUN
+VS7-PART-003,MUST_PASS,One partner decision defended externally using the citation trail,HUMAN_REQUIRED_EXTERNAL,NOT_RUN
+VS7-KILL-001,MUST_PASS,Keep/fix/kill executed with dated per-surface records,AUTOMATED+HUMAN_REQUIRED,NOT_RUN
+VS7-COND-001,MUST_PASS_CONDITIONAL,Single pulled capability behind existing boundaries with recorded trigger request,AUTOMATED+HUMAN_REQUIRED,NOT_RUN
+VS7-DORM-001,MUST_PASS,Dormancy disposition recorded per dormant system,HUMAN_REQUIRED,NOT_RUN
+VS7-REG-001,REGRESSION,Plane 1 and Plane 2 hold through VS7 changes,AUTOMATED+HUMAN_REQUIRED,NOT_RUN

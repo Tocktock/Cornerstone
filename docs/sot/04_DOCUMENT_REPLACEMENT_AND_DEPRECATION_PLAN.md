@@ -132,3 +132,29 @@ The implementation should move toward:
 `Ingest -> Understand -> Decide -> Act -> Learn`
 
 with evidence, owner-scoped namespaces, governed autonomy, permanent wiki memory, ConnectorHub-mediated external access, and scenario verification.
+
+## 9. 2026-07-04 Product-Value-First Reset Amendments
+
+Decision record: `docs/adr/ADR-0007-product-value-first-reset.md`. Review basis: live product test + implementation and verification audit.
+
+Replacement map additions:
+
+| Current / old framing | New location / treatment | Reason |
+|---|---|---|
+| README centered on scenario counts, read-order lists, and ConnectorHub trace-counter paragraphs | Rewritten `README.md` centered on spine, honest state, dormancy register, next external proof point | Front door must tell the product truth, not enumerate apparatus |
+| "Evidence-first Operational Intelligence Platform" as primary external framing | Internal category language only; external framing is "briefs with receipts" (`01` Part 0) | Three abstractions; reads as generic platform marketing |
+| Structural PASS counts presented as product progress | Two-plane model; Plane 1 supports at most `STRUCTURAL_READY` (`02` §2.4, `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`) | 27/28 VS4 rows passed while briefs echoed input; counts measured the harness, not value |
+| Present-tense capability language for autonomy/agents/brains/learning/wiki | FUTURE-FACING (dormant) labels in `01` §0.3 + section banners; dormancy register in ADR-0007 | No such capability exists; unlabeled direction reads as claims |
+| VS sequence continuing into breadth (VS2/VS3/ConnectorHub expansion) | VS5 (real brief) → VS6 (daily loop) → VS7 (wedge); VS1/VS2/VS3/ConnectorHub contracts preserved as dormant history | Value before platform; reactivation by user-evidence pull only |
+| Unearned trust labels on templated output | CS-VAL-006 MUST_PASS with recorded open FAIL until VS5 fixes it | Labels that launder unverified output violate the product's own constitution |
+
+New apply checklist (2026-07-04):
+
+- [x] ADR-0007 committed as the direction decision record.
+- [x] `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` installed as Plane 2 acceptance authority (CS-VAL family, verdict ladder).
+- [x] `01` Part 0 (spine, claim boundary, section status map) + dormancy banners installed.
+- [x] `02` §2.4 (two planes, family activity status) installed.
+- [x] VS5/VS6/VS7 contracts + matrices installed.
+- [x] README, SoT README, AGENTS.md, `03` model defaults rewritten to match.
+- [ ] Fold CS-VAL rows into the generated scenario matrix at the next registry regeneration (code change; scheduled inside VS5).
+- [ ] Record `VS4-H01` owner review (entry gate for VS5 external sessions).

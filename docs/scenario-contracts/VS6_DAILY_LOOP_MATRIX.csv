@@ -1,0 +1,14 @@
+scenario_id,priority,scenario,verification_mode,current_evidence_status
+VS6-SRC-001,MUST_PASS,Single read-only source ingests into immutable artifacts with provenance and dedupe,AUTOMATED,NOT_RUN
+VS6-SRC-002,MUST_PASS,Zero writeback to source system with negative evidence,AUTOMATED,NOT_RUN
+VS6-SRC-003,MUST_PASS,Source failure is visible resumable and lossless,AUTOMATED,NOT_RUN
+VS6-LOOP-001,MUST_PASS,Inbox fills itself from new source items,AUTOMATED,NOT_RUN
+VS6-LOOP-002,MUST_PASS,Morning digest with new/pending/stale linking into loop,AUTOMATED+HUMAN_REQUIRED,NOT_RUN
+VS6-LOOP-003,MUST_PASS,Decision with extracted deadline resurfaces before deadline,AUTOMATED,NOT_RUN
+VS6-QUAL-001,MUST_PASS,Retrieval quality within tolerance at 10x store growth,AUTOMATED,NOT_RUN
+VS6-QUAL-002,MUST_PASS,CS-VAL-001..007 hold on connector-ingested content,AUTOMATED+HUMAN_REQUIRED,NOT_RUN
+VS6-EXT-001,MUST_PASS,20 external users activated with first brief under 10 minutes,HUMAN_REQUIRED_EXTERNAL,NOT_RUN
+VS6-EXT-002,MUST_PASS,Week-2 return rate and briefs/user/week measured and reported,HUMAN_REQUIRED_EXTERNAL,NOT_RUN
+VS6-EXT-003,MUST_PASS,Per-surface keep/fix/kill usage report,HUMAN_REQUIRED,NOT_RUN
+VS6-REG-001,REGRESSION,VS5 Plane 2 evidence valid or re-earned after generation-path changes,AUTOMATED+HUMAN_REQUIRED,NOT_RUN
+VS6-REG-002,REGRESSION,Plane 1 structural sets pass under continuous ingest,AUTOMATED,NOT_RUN

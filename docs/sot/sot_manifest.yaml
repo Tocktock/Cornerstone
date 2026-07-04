@@ -1,8 +1,8 @@
-version: "0.7"
-effective_date: "2026-06-09"
+version: "0.8"
+effective_date: "2026-07-04"
 owner: "JiYong / Tars"
 canonical_spelling: "CornerStone"
-status: "active V2 full MUST-PASS handoff"
+status: "active V2 full MUST-PASS handoff, amended by the 2026-07-04 product-value-first reset (ADR-0007): spine Drop/Ask -> Brief -> Decision -> Audit; two verification planes; VS5 active"
 
 product_goal:
   file: "docs/sot/01_PRODUCT_GOAL_AND_DIRECTION.md"
@@ -64,7 +64,8 @@ design_system:
 
 vs0_scaffold:
   contract: "docs/scenario-contracts/VS0_SCAFFOLD_CONTRACT.md"
-  authority: "setup-planning contract before VS-0 scaffold implementation or feature coding"
+  activity: "HISTORICAL structural gate after ADR-0007; read when touching VS0 scaffold substrate, not the current product target"
+  authority: "setup-planning contract before historical VS-0 scaffold implementation or feature coding"
   runtime_targets:
     python: "3.14.x"
     node: "24.x LTS"
@@ -81,8 +82,9 @@ vs0_scaffold:
 
 vs0_scaffold_readiness:
   report: "docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md"
-  authority: "current implementation gate: VS-0 scaffold foundation may proceed only after preflight and approval; VS-0 product features remain blocked"
-  next_implementation_scope: "VS-0 Scaffold Foundation"
+  activity: "HISTORICAL structural gate after ADR-0007; current implementation target is active_milestones.vs5"
+  authority: "historical implementation gate: VS-0 scaffold foundation could proceed only after preflight and approval; VS-0 product features remained blocked at that gate"
+  next_implementation_scope: "HISTORICAL: VS-0 Scaffold Foundation"
   product_feature_implementation: "blocked until scaffold runtime, native CLI paths, and scenario verification exist"
   local_verification_plane_status: "documentation-only until runner, corpus, validators, providers, and CLI commands are implemented"
   verification_command: "scripts/verify_vs0_scaffold_readiness_docs.sh"
@@ -97,11 +99,12 @@ technical_defaults:
     policy: "OPA/Rego-compatible"
     audit: "append-only tamper-evident"
     connector_boundary: "ConnectorHub-mediated"
-    model_access: "provider-neutral router"
+    model_access: "local-first Ollama (ornith:35b generation, qwen3-embedding:0.6b embeddings); local_test for CI; provider-neutral router direction; external providers optional per-scenario"
     local_start: "one-command local/on-prem target"
 
 first_implementation_contract:
   file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md"
+  activity: "HISTORICAL first structural slice; superseded as active target by product_value_first_reset.active_milestones.vs5"
   goal: "personal messy input -> immutable artifact -> search -> evidence-backed brief -> claim -> action card dry-run/approval/execution -> audit"
   scenario_count: 58
   source_package_file: "docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT_STRICT.md"
@@ -216,6 +219,7 @@ vs1_ontology_auto_suggest_promote:
   regression_guard_count: 10
   human_required_count: 3
   status: "scenario contract proposed; AI-verifiable rows remain NOT_VERIFIED until implementation evidence exists"
+  activity: "DORMANT per ADR-0007 (off the spine); reactivation by user-evidence pull (VS7-DORM-001)"
   verifier: "cornerstone scenario verify vs1-ontology-suggest-promote --json --output reports/scenario/vs1-ontology-suggest-promote-YYYY-MM-DD.json"
   gate: "cornerstone scenario gate reports/scenario/vs1-ontology-suggest-promote-YYYY-MM-DD.json --json"
   production_release_rule: "production_release_ready remains false until separate production release and live-provider evidence exists"
@@ -234,6 +238,7 @@ vs2_policy_tenancy_egress:
   regression_count: 16
   human_required_count: 7
   status: "scenario-specific remediation in progress: 7 PASS, 79 NOT_VERIFIED, 7 HUMAN_REQUIRED; no blanket proof PASS allowed"
+  activity: "DORMANT per ADR-0007 (tenancy enforcement waits for real tenants); reactivation by user-evidence pull (VS7-DORM-001)"
   verifier: "cornerstone scenario verify vs2-policy-tenancy-egress --json --output reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json"
   gate: "cornerstone scenario gate reports/scenario/vs2-policy-tenancy-egress-YYYY-MM-DD.json --json"
   approval_gate: "VS2-SEC-H01 approved for local/new-application implementation by JiYong/Tars on 2026-06-19 KST; H02-H07 remain external/human gates"
@@ -249,6 +254,7 @@ vs3_onprem_security_and_trusted_extension:
   regression_count: 8
   human_required_count: 7
   status: "scenario contract frozen; AI-verifiable rows remain NOT_RUN until implementation evidence exists; human/on-prem rows remain HUMAN_REQUIRED"
+  activity: "DORMANT per ADR-0007 (never started; on-prem posture waits for a paying regulated partner); reactivation by user-evidence pull (VS7-DORM-001)"
   verifier: "cornerstone scenario verify vs3-onprem-trusted-extension --json --output reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json"
   gate: "cornerstone scenario gate reports/scenario/vs3-onprem-trusted-extension-YYYY-MM-DD.json --json"
   local_assurance_rule: "VS3-L requires all AI-owned MUST_PASS and REGRESSION rows to PASS with fresh local/dev evidence and no production/live overclaim"
@@ -267,10 +273,66 @@ deprecated:
   - phrase: "freight & logistics as core identity"
     treatment: "replace with general-purpose personal-first + organization expansion; logistics optional solution pack"
 
+product_value_first_reset:
+  adr: "docs/adr/ADR-0007-product-value-first-reset.md"
+  date: "2026-07-04"
+  active_spine: "Drop / Ask -> Evidence-backed Brief -> Decision -> Audit"
+  external_framing: "briefs with receipts"
+  scope_freeze: "no new scenario contracts, report families, trace counters, or CLI command families off the spine until VS5 closes"
+  dormant_systems:
+    - "ConnectorHub expansion (CONNECTOR_HUB_APPLICATION_CONTRACT.md)"
+    - "VS2 policy/tenancy/egress enforcement"
+    - "VS3 on-prem security and trusted extension substrate"
+    - "VS1 ontology suggest/promote"
+    - "brain routing / judge / model ledger"
+    - "agent orchestration / packs"
+    - "autopilot / missions"
+    - "capsules / decision-cards"
+    - "memory promotion machinery (simple view/edit/delete stays active)"
+  reactivation_rule: "dated user-evidence rationale recorded against VS6/VS7 findings (VS7-DORM-001)"
+
+product_value_verification:
+  file: "docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md"
+  authority: "Plane 2 acceptance authority for all product-value claims (CS-VAL-001..010)"
+  verdict_ladder:
+    - "STRUCTURAL_READY (Plane 1 only; strongest claim VS0-VS4 can support)"
+    - "VALUE_VERIFIED_LOCAL (CS-VAL-001..007 on frozen eval corpus with human rubric records)"
+    - "VALUE_VERIFIED_EXTERNAL (CS-VAL-008..009 with external participants)"
+  open_fail_baseline_2026_07_04:
+    - "CS-VAL-004 brief echoes input"
+    - "CS-VAL-005 boilerplate uncertainty"
+    - "CS-VAL-006 unearned trust labels"
+    - "CS-VAL-007 canned non-answer Ask"
+  model_stack:
+    generation: "ollama ornith:35b"
+    embeddings: "ollama qwen3-embedding:0.6b"
+    ci_baseline: "local_test (deterministic)"
+    llm_judge_rule: "advisory only; never flips a row; humans own subjective PASS"
+  matrix_fold_in: "CS-VAL rows fold into the generated 206-row matrix at next registry regeneration (code change scheduled inside VS5)"
+
+active_milestones:
+  vs5:
+    contract: "docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md"
+    matrix: "docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_MATRIX.csv"
+    status: "ACTIVE"
+    goal: "model-backed citation-grounded Brief and Ask; earned trust labels; eval corpus; external stranger test"
+    target_verdict: "VALUE_VERIFIED_EXTERNAL"
+    entry_gate: "VS4-H01 owner review recorded"
+  vs6:
+    contract: "docs/scenario-contracts/VS6_DAILY_LOOP_CONTRACT.md"
+    matrix: "docs/scenario-contracts/VS6_DAILY_LOOP_MATRIX.csv"
+    status: "NEXT (freezes detail at kickoff from VS5 findings)"
+    goal: "one read-only ingest source; self-filling inbox; digest; retrieval at volume; ~20 external users"
+  vs7:
+    contract: "docs/scenario-contracts/VS7_WEDGE_VALIDATION_CONTRACT.md"
+    matrix: "docs/scenario-contracts/VS7_WEDGE_VALIDATION_MATRIX.csv"
+    status: "THEN (freezes detail at kickoff from VS6 evidence)"
+    goal: "wedge decision from data; 3 design partners; willingness-to-pay evidence; keep/kill; dormancy dispositions"
+
 verification:
   command: "scripts/verify_sot_docs.sh"
   cli_native_first_command: "scripts/verify_cli_native_first_docs.sh"
   local_verification_plane_command: "scripts/verify_local_verification_plane_docs.sh"
   design_system_command: "scripts/verify_design_system_docs.sh"
   vs0_scaffold_readiness_command: "scripts/verify_vs0_scaffold_readiness_docs.sh"
-  release_rule: "No PASS without concrete scenario evidence. No CLI, no feature PASS."
+  release_rule: "No PASS without concrete scenario evidence. No CLI, no feature PASS. No product-value claim without Plane 2 evidence; Plane 1 alone supports at most STRUCTURAL_READY."

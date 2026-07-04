@@ -1,9 +1,51 @@
 # CornerStone Product Goal & Direction — Canonical Product SoT
 
-**Replacement status:** Active product authority after product-goal reset.  
+**Replacement status:** Active product authority after product-goal reset, amended by the 2026-07-04 product-value-first reset (`docs/adr/ADR-0007-product-value-first-reset.md`).
 **Source file:** `cornerstone_final_product_goal_direction (1).md` uploaded by JiYong / Tars.  
 **Supersedes:** Product-goal, product-identity, target-user, and product-shape language in the older `project-sot.md` where conflicts exist.  
 **Preserves:** Compatible technical defaults from the older SoT only through `03_TECHNICAL_ARCHITECTURE_DEFAULTS.md`.
+
+---
+
+# Part 0 — Active Product Spine and Claim Boundary (2026-07-04)
+
+This part is binding and takes precedence over any present-tense capability language in the sections below it. The sections below remain the long-term direction; they are **direction, not current claims**.
+
+## 0.1 The active spine
+
+```text
+Drop / Ask -> Evidence-backed Brief -> Decision -> Audit
+```
+
+- **Drop / Ask** — messy input in (paste today; one read-only source in VS6).
+- **Evidence-backed Brief** — model-generated, citation-grounded synthesis of the user's own sources. This is the product's first value moment and the current build focus (VS5).
+- **Decision** — the user-facing promotion of a brief finding the user stands behind (implemented as the claim record). Memory/Wiki candidates and Action Cards remain visible review drafts, outside the active value claim.
+- **Audit** — the traceable history from original input to decision: checksums, evidence links, approvals, tamper-evident ledger.
+
+External positioning language for the spine: **"briefs with receipts."** The phrase "Evidence-first Operational Intelligence Platform" is an internal category description, not user-facing copy.
+
+## 0.2 Claim boundary (evidence-labeled)
+
+- **Verified:** structural substrate — immutable artifacts, hashing/dedupe, trust states, evidence links, hash-chained audit, local runtime UI/CLI parity, deterministic Plane 1 harness (VS0–VS4, `STRUCTURAL_READY`).
+- **Verified absent (open FAILs, 2026-07-04):** model-backed understanding does not exist yet; briefs echo input; Ask returns a canned deferral; templated outputs carry unearned trust labels. Recorded as CS-VAL FAIL baselines in `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`.
+- **Specified (active milestone):** citation-grounded Brief/Ask with earned labels — `docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md`.
+- **Unverified until external humans provide evidence:** usefulness, comprehension, trust, habit, wedge, willingness to pay (VS5–VS7).
+
+No document, report, or roadmap may claim above this boundary. Product-value claims require Plane 2 evidence per `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`.
+
+## 0.3 Section status map
+
+| Sections | Status |
+|---|---|
+| 1–8 (mission, identity, goal, north star, users, engines, first value/journey) | ACTIVE direction — read with Part 0 precedence; the first-value definition in 8.1 is the VS5 target |
+| 9 (conversation-to-structure) | ACTIVE for conversation → brief → decision; **9.3 Mission/Decision Cards and 9.4 Knowledge Capsules are FUTURE-FACING (dormant)** |
+| 10 (trust model) | ACTIVE — with the VS5 correction that trust labels must be earned (CS-VAL-006) |
+| 11 (permanent wiki), 12.5 (product-learning namespace), 13 (memory sovereignty center) | FUTURE-FACING (dormant); simple memory view/edit/delete stays active |
+| 12 (owner-scoped namespaces) | ACTIVE as data-model substrate; multi-tenant enforcement dormant (VS2) |
+| 14 (autonomy), 15 (agent model), 16 (replaceable brain), 17 (LLM-as-judge), 18 (learning/self-improvement), 19 (AAR/scorecard), 20 (solution packs), 21 (extension ecosystem) | FUTURE-FACING (dormant) — no current capability exists; CLI stubs and fixtures only; reactivation by user-evidence pull (VS7 disposition, `VS7-DORM-001`) |
+| 22–32 (source systems, safety, UX surfaces, principles, non-goals, tensions, verdict) | ACTIVE as principles, with Part 0 precedence on any capability claim |
+
+One consequence stated plainly: section 16's "replaceable brain" principle stands, but *replaceable* must never again mean *omittable*. A brain is required for the product to exist; VS5 installs the first one (local Ollama `ornith:35b` for generation, `qwen3-embedding:0.6b` for embeddings, by default).
 
 ---
 
@@ -710,6 +752,8 @@ Memory sovereignty is required because CornerStone claims to understand who the 
 
 ## 14. Autonomous AI Direction
 
+> **Status: FUTURE-FACING (dormant).** No autonomy capability exists. Direction only; see Part 0.3 and ADR-0007. Reactivation requires user-evidence pull (`VS7-DORM-001`).
+
 ### 14.1 Autonomy product stance
 
 CornerStone should become autonomous AI, not only a passive copilot.
@@ -799,6 +843,8 @@ It should escalate:
 ---
 
 ## 15. Agent Model
+
+> **Status: FUTURE-FACING (dormant).** No orchestrator or specialist agents exist; CLI stubs and fixtures only. Direction only; see Part 0.3 and ADR-0007.
 
 ### 15.1 User-facing model
 
@@ -895,6 +941,8 @@ CornerStone is accountable for showing:
 ---
 
 ## 16. Replaceable Brain and Provider-Neutral AI Framework
+
+> **Status: FUTURE-FACING (dormant) as a routing/ensemble framework.** The principle stands, but replaceable never means omittable: the first required brain is installed by VS5 (local Ollama `ornith:35b` + `qwen3-embedding:0.6b`). Multi-brain routing, ensembles, and the Brain Performance Ledger stay dormant. See Part 0.3 and ADR-0007.
 
 ### 16.1 Core principle
 
@@ -1063,6 +1111,8 @@ High-risk unresolved disagreement escalates to humans.
 ---
 
 ## 18. Experience, Learning, and Self-Improvement
+
+> **Status: FUTURE-FACING (dormant).** No learning capability exists beyond record stubs. Direction only; see Part 0.3 and ADR-0007.
 
 ### 18.1 Learning model
 
