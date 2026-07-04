@@ -763,9 +763,9 @@ button, input, textarea {{ font: inherit; }}
   align-content: start;
 }}
 .cs-home-canvas {{
-  padding: var(--cs-space-4);
+  padding: var(--cs-space-5);
   display: grid;
-  gap: var(--cs-space-3);
+  gap: var(--cs-space-5);
 }}
 .cs-home-canvas .cs-panel-header {{ margin-bottom: 0; }}
 .cs-home-canvas p {{ max-width: 62ch; }}
@@ -774,23 +774,27 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-5);
 }}
 .cs-home-source-row {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--cs-space-3);
   align-items: center;
+  justify-content: center;
 }}
 .cs-home-source-note {{
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
+  text-align: center;
 }}
 .cs-drop {{
-  min-height: auto;
+  min-height: 260px;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
-  background: color-mix(in srgb, var(--cs-color-surface-subtle) 70%, var(--cs-color-surface-primary));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-primary-50) 42%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary));
   display: grid;
-  gap: var(--cs-space-2);
-  padding: var(--cs-space-3);
+  gap: var(--cs-space-4);
+  padding: var(--cs-space-5);
+  align-content: center;
 }}
 .cs-drop.is-hot {{ border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }}
 .cs-drop textarea, .cs-field {{
@@ -806,25 +810,25 @@ button, input, textarea {{ font: inherit; }}
 .cs-drop textarea:focus, .cs-field:focus {{ border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }}
 .cs-drop-target {{
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  place-items: center start;
-  text-align: left;
+  gap: var(--cs-space-3);
+  place-items: center;
+  text-align: center;
   padding: 0;
 }}
 .cs-drop-mark {{
-  width: 44px;
-  height: 44px;
-  border-radius: var(--cs-radius-lg);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--cs-radius-pill);
   display: grid;
   place-items: center;
   background: var(--cs-color-primary-50);
   color: var(--cs-color-primary-700);
   font-weight: var(--cs-typography-weight-bold);
   border: 1px solid var(--cs-color-primary-100);
+  font-size: 22px;
 }}
 .cs-drop textarea.cs-drop-input {{
-  min-height: 46px;
+  min-height: 64px;
   background: var(--cs-color-surface-primary);
 }}
 .cs-or-divider {{
@@ -846,10 +850,20 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--cs-space-3);
   box-shadow: var(--cs-shadow-sm);
+}}
+.cs-ask-mark {{
+  width: 34px;
+  height: 34px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
 }}
 .cs-ask-bar .cs-field {{
   border: 0;
@@ -888,6 +902,34 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-home-item h3 {{ margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
 .cs-home-item p {{ margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-activity-list {{
+  display: grid;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}}
+.cs-activity-row {{
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+  min-height: 74px;
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-activity-row:last-child {{ border-bottom: 0; }}
+.cs-activity-icon {{
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-activity-row strong, .cs-activity-row p {{ margin: 0; }}
 .cs-next-step-list {{ display: grid; gap: var(--cs-space-2); }}
 .cs-next-step {{
   display: grid;
@@ -2867,19 +2909,17 @@ def _home(ctx: dict[str, Any]) -> str:
       </div>
       <div class="cs-home-workspace">
         <form class="cs-drop" id="cs-drop-form">
+          <div class="cs-drop-target">
+            <div class="cs-drop-mark" aria-hidden="true">In</div>
+            <div>
+              <strong>Drag and drop files or paste notes here</strong>
+              <p class="cs-muted">Supports local text files and pasted notes. The original source stays preserved.</p>
+            </div>
+          </div>
           <div class="cs-home-source-row">
-            <div class="cs-drop-target">
-              <div class="cs-drop-mark" aria-hidden="true">In</div>
-              <div>
-                <strong>Save a source</strong>
-                <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
-              </div>
-            </div>
-            <div class="cs-row">
-              <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
-              <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
-              <input id="cs-file-input" type="file" hidden>
-            </div>
+            <button class="cs-button secondary" type="button" id="cs-file-button">Browse files</button>
+            <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
+            <input id="cs-file-input" type="file" hidden>
           </div>
           <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
           <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
@@ -2888,6 +2928,7 @@ def _home(ctx: dict[str, Any]) -> str:
         <div class="cs-or-divider">or ask a question</div>
         <form class="cs-stack" id="cs-ask-form">
           <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
+            <span class="cs-ask-mark" aria-hidden="true">?</span>
             <div>
               <strong>Ask the workspace</strong>
               <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
@@ -3105,16 +3146,16 @@ def _recent_activity_block(ctx: dict[str, Any]) -> str:
         event_type = str(event.get("event_type") or "")
         rows.append(
             f"""
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
+<div class="cs-activity-row">
+  <span class="cs-activity-icon" aria-hidden="true">{h(_audit_icon(event_type))}</span>
   <div>
     <strong>{h(_plain_event(event_type))}</strong>
-    <div class="cs-meta">{h(_display_date(event))}</div>
+    <p class="cs-meta">{h(_audit_subject_label(event))} / {h(_display_date(event))}</p>
   </div>
 </div>
 """
         )
-    content = f'<div class="cs-timeline">{"".join(rows)}</div>' if rows else '<div class="cs-empty">Activity appears after you save, search, draft, or review work.</div>'
+    content = f'<div class="cs-activity-list">{"".join(rows)}</div>' if rows else '<div class="cs-empty">Activity appears after you save, search, draft, or review work.</div>'
     return f"""
 <section class="cs-panel flat">
   <div class="cs-panel-header">

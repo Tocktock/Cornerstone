@@ -1505,7 +1505,7 @@ VS4_PRODUCT_LAYOUT_SCRIPT = """
   };
   const firstValue = [
     text.indexOf("Drop anything, or ask what we know"),
-    text.indexOf("Save a source"),
+    text.indexOf("Drag and drop files or paste notes here"),
     text.indexOf("Ask the workspace")
   ];
   const css = window.getComputedStyle(document.documentElement);
@@ -1612,7 +1612,7 @@ def capture_vs4_product_alpha_browser_proof(
         "small_normal_nav": all(f">{label}<" in primary_nav_html for label in nav_labels)
         and "Connectors" not in primary_nav_html
         and "Ontology" not in primary_nav_html,
-        "drop_visible": "Save a source" in dom and 'id="cs-drop-form"' in dom,
+        "drop_visible": "Drag and drop files or paste notes here" in dom and 'id="cs-drop-form"' in dom,
         "ask_visible": "Ask the workspace" in dom and 'id="cs-ask-form"' in dom,
         "ops_inbox_visible": "/inbox" in product_routes and route_markers.get("product_routes_reachable") is True,
         "ops_inbox_triage_visible": "/inbox" in product_routes
