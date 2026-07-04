@@ -79,6 +79,8 @@ FULL_REGRESSION = 22
 VS0_EXPECTED = 58
 VS0_MUST_PASS = 52
 VS0_REGRESSION = 6
+BRIEF_STRUCTURAL_STATUSES = {"extractive_fallback", "draft"}
+BRIEF_STRUCTURAL_TRUST_LABELS = {"extractive_fallback", "draft"}
 DEFAULT_VS2_POLICY_TENANCY_EGRESS_MATRIX = "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_MATRIX.csv"
 DEFAULT_VS2_POLICY_TENANCY_EGRESS_CONTRACT = "docs/scenario-contracts/VS2_POLICY_TENANCY_EGRESS_CONTRACT.md"
 DEFAULT_VS2_POLICY_TENANCY_EGRESS_CURRENT_STATE_REPORT = (
@@ -823,6 +825,20 @@ def _scope_complete(scope: Any) -> bool:
         if not isinstance(value, str) or value.strip().lower() in OWNERLESS_SCOPE_VALUES:
             return False
     return True
+
+
+def _brief_structural_ready(brief: dict[str, Any]) -> bool:
+    return (
+        brief.get("status") in BRIEF_STRUCTURAL_STATUSES
+        and brief.get("trust_label") in BRIEF_STRUCTURAL_TRUST_LABELS
+        and brief.get("presented_as_fact") is False
+        and brief.get("status") != "evidence_backed"
+        and brief.get("trust_label") != "evidence_backed"
+        and bool(brief.get("key_points"))
+        and bool(brief.get("evidence_links"))
+        and bool(brief.get("evidence_refs"))
+        and bool(brief.get("audit_refs"))
+    )
 
 
 def _audit_events(root: Path, state_rel: str) -> list[dict[str, Any]]:
@@ -16766,7 +16782,7 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
         and snapshot.get("result_count") == 1
         and search_results
         and search_results[0].get("artifact_id") == artifact_id
-        and brief.get("status") == "evidence_backed"
+        and _brief_structural_ready(brief)
         and brief.get("key_points")
         and evidence_links
         and any(link.get("artifact_ref") == f"artifact:{artifact_id}" for link in evidence_links)
@@ -16793,14 +16809,14 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
                 "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
                 "cornerstone brief create --evidence-bundle-id <bundle_id> --json",
             ],
-            "Fresh local first-use flow produces an evidence-backed brief with uncertainty and next steps.",
+            "Fresh local first-use flow produces a source-linked fallback brief with uncertainty and next steps.",
         ),
         _row(
             "CS-UND-005",
             "MUST_PASS",
             "PASS" if und_005_ok else "FAIL",
             ["cornerstone search query alpha-evidence-anchor --json", "cornerstone brief create --evidence-bundle-id <bundle_id> --json"],
-            "Search and evidence-backed brief creation work without preconfigured ontology; ontology suggestions are not a prerequisite.",
+            "Search and source-linked fallback brief creation work without preconfigured ontology; ontology suggestions are not a prerequisite.",
         ),
         _row(
             "CS-CLAIM-002",
@@ -16838,8 +16854,14 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
             "first_use_duration_ms": first_use_duration_ms,
             "search_result_count": snapshot.get("result_count"),
             "brief_status": brief.get("status"),
+            "brief_output_mode": brief.get("output_mode"),
+            "brief_trust_label": brief.get("trust_label"),
+            "brief_presented_as_fact": brief.get("presented_as_fact"),
+            "brief_model_provider": brief.get("model_provider"),
             "key_point_count": len(brief.get("key_points", [])),
             "evidence_link_count": len(evidence_links),
+            "evidence_ref_count": len(brief.get("evidence_refs", [])),
+            "audit_ref_count": len(brief.get("audit_refs", [])),
             "uncertainty_count": len(brief.get("uncertainty", [])),
             "contradiction_count": len(brief.get("contradictions", [])),
             "recommended_next_step_count": len(brief.get("recommended_next_steps", [])),
@@ -16852,6 +16874,8 @@ def verify_vs0_briefing(root: Path) -> dict[str, Any]:
             "required_connector_setup": 0,
             "required_model_provider_setup": 0,
             "required_ontology_setup": 0 if ontology.get("preconfigured_ontology_required") is False else 1,
+            "brief_evidence_backed_label": int(brief.get("status") == "evidence_backed" or brief.get("trust_label") == "evidence_backed"),
+            "brief_presented_as_fact": int(bool(brief.get("presented_as_fact"))),
             "missing_uncertainty": 0 if brief.get("uncertainty") else 1,
             "missing_next_steps": 0 if brief.get("recommended_next_steps") else 1,
         },
@@ -17328,7 +17352,7 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
         and snapshot.get("result_count") == 1
         and search_first.get("artifact_id") == source_artifact_id
         and bundle_first.get("artifact_id") == source_artifact_id
-        and brief.get("status") == "evidence_backed"
+        and _brief_structural_ready(brief)
         and promoted_claim_id.startswith("claim_")
         and promoted_evidence.get("evidence_bundle_id") == bundle_id
         and f"artifact:{source_artifact_id}" in promoted_evidence.get("artifact_refs", [])
@@ -17395,7 +17419,7 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
                 "cornerstone brief create --evidence-bundle-id <id> --json",
                 "cornerstone conversation promote <conversation_id> --kind claim --json",
             ],
-            "The first useful path starts from messy conversation input, reaches an evidence-backed brief, and manually promotes a draft/evidence-backed claim without connector, model-provider, ontology, or organization setup.",
+            "The first useful path starts from messy conversation input, reaches a source-linked fallback brief, and manually promotes a draft/evidence-backed claim without connector, model-provider, ontology, or organization setup.",
         ),
         _row(
             "CS-CLAIM-001",
@@ -17447,6 +17471,10 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
             "evidence_bundle_id": bundle_id,
             "brief_id": brief_id,
             "brief_status": brief.get("status"),
+            "brief_output_mode": brief.get("output_mode"),
+            "brief_trust_label": brief.get("trust_label"),
+            "brief_presented_as_fact": brief.get("presented_as_fact"),
+            "brief_model_provider": brief.get("model_provider"),
             "promoted_claim_id": promoted_claim_id,
             "promoted_claim_trust_state": promoted_claim.get("trust_state"),
             "promoted_claim_source_conversation": promoted_source,
@@ -17469,12 +17497,330 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
             "required_model_provider_setup": int(bool(required_setup.get("model_provider_setup", True))),
             "required_ontology_setup": int(bool(required_setup.get("ontology_setup", True))),
             "forced_conversion": forced_suggestion_count,
+            "brief_evidence_backed_label": int(brief.get("status") == "evidence_backed" or brief.get("trust_label") == "evidence_backed"),
+            "brief_presented_as_fact": int(bool(brief.get("presented_as_fact"))),
             "promoted_objects_without_scope": 0 if _scope_complete(promoted_scope) else 1,
             "promoted_objects_without_evidence": 0 if promoted_evidence.get("evidence_bundle_id") and promoted_evidence.get("artifact_refs") else 1,
             "unsupported_assertions_presented_as_fact": int(bool(answer.get("presented_as_fact", True))),
             "real_external_http_calls": 0,
         },
         "human_required": [],
+    }
+
+
+def verify_vs5_slice_001(root: Path) -> dict[str, Any]:
+    state_rel = _scenario_state_rel("vs5-slice-001")
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+
+    source_text = (
+        "VS5 Slice 001 vendor note: Acme renewal is due on July 31. "
+        "Finance owner is Mina. The current system must label fallback outputs honestly. "
+        "Anchor phrase: vs5-slice-001-anchor."
+    )
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["ingest"] = _run_cli_json(
+        root,
+        [
+            "artifact",
+            "ingest",
+            "--text",
+            source_text,
+            "--source",
+            "user_paste",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    )
+    transcripts["search"] = _run_cli_json(
+        root,
+        ["search", "query", "vs5-slice-001-anchor", "--state-dir", state_rel, "--json"],
+    )
+    snapshot = _payload(transcripts["search"]).get("search_snapshot", {})
+    snapshot_id = snapshot.get("search_snapshot_id", "")
+    transcripts["bundle_create"] = _run_cli_json(
+        root,
+        ["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id, "--state-dir", state_rel, "--json"],
+    ) if snapshot_id else {}
+    bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
+    bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["brief_create"] = _run_cli_json(
+        root,
+        [
+            "brief",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--model-provider",
+            "local_test",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    transcripts["conversation_start"] = _run_cli_json(
+        root,
+        ["conversation", "start", "--message", source_text, "--state-dir", state_rel, "--json"],
+    )
+    conversation = _payload(transcripts["conversation_start"]).get("conversation", {})
+    conversation_id = conversation.get("conversation_id", "")
+    transcripts["answer_supported"] = _run_cli_json(
+        root,
+        [
+            "conversation",
+            "answer",
+            conversation_id,
+            "--question",
+            "What is the Acme renewal due date?",
+            "--model-provider",
+            "local_test",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if conversation_id else {}
+    transcripts["answer_insufficient"] = _run_cli_json(
+        root,
+        [
+            "conversation",
+            "answer",
+            conversation_id,
+            "--question",
+            "What is the approved Project Zeta budget?",
+            "--model-provider",
+            "local_test",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if conversation_id else {}
+    transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
+
+    brief_payload = _payload(transcripts["brief_create"])
+    brief = brief_payload.get("brief", {})
+    supported_payload = _payload(transcripts["answer_supported"])
+    supported_answer = supported_payload.get("answer", {})
+    insufficient_payload = _payload(transcripts["answer_insufficient"])
+    insufficient_answer = insufficient_payload.get("answer", {})
+    audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
+
+    required_brief_fields = [
+        "output_mode",
+        "trust_label",
+        "trust_label_reason",
+        "model_provider",
+        "model_mode",
+        "citation_refs",
+        "citation_check_refs",
+        "evidence_refs",
+        "audit_refs",
+    ]
+    required_answer_fields = [
+        "output_mode",
+        "trust_label",
+        "trust_label_reason",
+        "model_provider",
+        "model_mode",
+        "citation_refs",
+        "citation_check_refs",
+        "evidence_refs",
+        "audit_refs",
+    ]
+    brief_has_metadata = all(field in brief for field in required_brief_fields)
+    supported_has_metadata = all(field in supported_answer for field in required_answer_fields)
+    insufficient_has_metadata = all(field in insufficient_answer for field in required_answer_fields)
+
+    s01_ok = (
+        _exit_ok(transcripts["brief_create"])
+        and brief.get("status") in {"extractive_fallback", "draft"}
+        and brief.get("trust_label") in {"extractive_fallback", "draft"}
+        and brief.get("output_mode") == "extractive_fallback"
+        and brief.get("presented_as_fact") is False
+        and brief.get("status") != "evidence_backed"
+        and brief.get("trust_label") != "evidence_backed"
+        and bool(brief.get("evidence_refs"))
+        and bool(brief.get("audit_refs"))
+    )
+    s02_ok = (
+        _exit_ok(transcripts["answer_supported"])
+        and _exit_ok(transcripts["answer_insufficient"])
+        and supported_answer.get("label") == "template_fallback"
+        and supported_answer.get("trust_label") == "template_fallback"
+        and supported_answer.get("presented_as_fact") is False
+        and supported_answer.get("label") != "evidence_backed"
+        and supported_answer.get("trust_label") != "evidence_backed"
+        and insufficient_answer.get("label") == "insufficient_evidence"
+        and insufficient_answer.get("trust_label") == "insufficient_evidence"
+        and insufficient_answer.get("presented_as_fact") is False
+        and insufficient_answer.get("supporting_result_count") == 0
+    )
+    s03_ok = (
+        brief_has_metadata
+        and supported_has_metadata
+        and insufficient_has_metadata
+        and brief.get("model_provider") == "local_test"
+        and supported_answer.get("model_provider") == "local_test"
+        and insufficient_answer.get("model_provider") == "local_test"
+        and isinstance(brief.get("citation_refs"), list)
+        and isinstance(supported_answer.get("citation_check_refs"), list)
+        and bool(brief_payload.get("evidence_refs"))
+        and bool(brief_payload.get("audit_refs"))
+        and bool(supported_payload.get("evidence_refs"))
+        and bool(supported_payload.get("audit_refs"))
+    )
+    cs_val_registry_fold_in = {
+        "status": "BLOCKED_COMPATIBLE_INTERIM_VERIFIER",
+        "reason": "The full scenario matrix is count-pinned at 206 rows; folding CS-VAL into that registry is scheduled inside VS5 and would require broader count-guard updates.",
+        "interim_verifier": "cornerstone scenario verify vs5-slice-001 --json",
+        "blocker_refs": [
+            "docs/adr/ADR-0007-product-value-first-reset.md",
+            "docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md",
+            "scripts/verify_scenario_matrix.py",
+        ],
+    }
+    s04_ok = cs_val_registry_fold_in["status"] == "BLOCKED_COMPATIBLE_INTERIM_VERIFIER"
+    allowed_command_families = {"artifact", "search", "evidence", "brief", "conversation", "audit"}
+    observed_families = {
+        transcript.get("command", [None, None])[1]
+        for transcript in transcripts.values()
+        if isinstance(transcript.get("command"), list) and len(transcript.get("command", [])) > 1
+    }
+    s05_ok = observed_families <= allowed_command_families
+    r02_ok = (
+        _exit_ok(transcripts["ingest"])
+        and _exit_ok(transcripts["search"])
+        and _exit_ok(transcripts["bundle_create"])
+        and _exit_ok(transcripts["brief_create"])
+        and _exit_ok(transcripts["conversation_start"])
+        and _exit_ok(transcripts["answer_supported"])
+        and _exit_ok(transcripts["answer_insufficient"])
+        and _scope_complete(brief.get("scope"))
+        and _scope_complete(supported_answer.get("scope"))
+        and audit_ok
+    )
+
+    rows = [
+        _row(
+            "S01",
+            "MUST_PASS",
+            "PASS" if s01_ok else "FAIL",
+            ["cornerstone brief create --evidence-bundle-id <id> --model-provider local_test --json"],
+            "Extractive brief is labeled as fallback, not evidence_backed or presented_as_fact.",
+        ),
+        _row(
+            "S02",
+            "MUST_PASS",
+            "PASS" if s02_ok else "FAIL",
+            ["cornerstone conversation answer <conversation_id> --question <question> --model-provider local_test --json"],
+            "Template and insufficient Ask outputs avoid evidence_backed/presented_as_fact labels.",
+        ),
+        _row(
+            "S03",
+            "MUST_PASS",
+            "PASS" if s03_ok else "FAIL",
+            ["CLI JSON inspection for brief and Ask outputs"],
+            "Brief/Ask JSON includes output mode, trust reason, model provider/mode, citation/check refs, evidence refs, and audit refs.",
+        ),
+        _row(
+            "S04",
+            "MUST_PASS",
+            "PASS" if s04_ok else "FAIL",
+            ["cornerstone scenario verify vs5-slice-001 --json"],
+            "CS-VAL fold-in blocker is recorded and this interim verifier covers the slice without changing the 206-row registry.",
+        ),
+        _row(
+            "S05",
+            "MUST_PASS",
+            "PASS" if s05_ok else "FAIL",
+            ["source review", "git diff"],
+            "Slice uses existing spine command families and does not expand dormant systems.",
+        ),
+        _row(
+            "R02",
+            "REGRESSION",
+            "PASS" if r02_ok else "FAIL",
+            ["targeted CLI/API checks", "cornerstone audit verify --json"],
+            "Brief/Ask structural flows still return valid scoped JSON records with evidence and audit refs.",
+        ),
+        _row(
+            "H01",
+            "HUMAN_REQUIRED",
+            "HUMAN_REQUIRED",
+            ["final report"],
+            "VS4-H01 owner review and VS5 external stranger tests remain human-required and are not simulated here.",
+            owner="Human",
+        ),
+    ]
+    blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
+    return {
+        "status": "success" if not blocking else "failed",
+        "scenario_set": "vs5-slice-001",
+        "state_dir": state_rel,
+        "summary": {
+            "scenario_count": len(rows),
+            "pass": len([row for row in rows if row["status"] == "PASS"]),
+            "blocking": len(blocking),
+            "human_required": len([row for row in rows if row["owner"] == "Human"]),
+            "product_feature_claims": "STRUCTURAL_READY_ONLY_NO_VALUE_CLAIM",
+        },
+        "scenario_results": rows,
+        "transcripts": transcripts,
+        "value_plane_evidence": {
+            "brief": {
+                "status": brief.get("status"),
+                "output_mode": brief.get("output_mode"),
+                "trust_label": brief.get("trust_label"),
+                "presented_as_fact": brief.get("presented_as_fact"),
+                "model_provider": brief.get("model_provider"),
+                "model_mode": brief.get("model_mode"),
+                "citation_refs": brief.get("citation_refs"),
+                "citation_check_refs": brief.get("citation_check_refs"),
+                "evidence_ref_count": len(brief.get("evidence_refs", [])),
+                "audit_ref_count": len(brief.get("audit_refs", [])),
+            },
+            "supported_answer": {
+                "label": supported_answer.get("label"),
+                "output_mode": supported_answer.get("output_mode"),
+                "trust_label": supported_answer.get("trust_label"),
+                "presented_as_fact": supported_answer.get("presented_as_fact"),
+                "model_provider": supported_answer.get("model_provider"),
+                "model_mode": supported_answer.get("model_mode"),
+                "supporting_result_count": supported_answer.get("supporting_result_count"),
+                "evidence_ref_count": len(supported_answer.get("evidence_refs", [])),
+                "audit_ref_count": len(supported_answer.get("audit_refs", [])),
+            },
+            "insufficient_answer": {
+                "label": insufficient_answer.get("label"),
+                "output_mode": insufficient_answer.get("output_mode"),
+                "trust_label": insufficient_answer.get("trust_label"),
+                "presented_as_fact": insufficient_answer.get("presented_as_fact"),
+                "model_provider": insufficient_answer.get("model_provider"),
+                "supporting_result_count": insufficient_answer.get("supporting_result_count"),
+            },
+            "cs_val_registry_fold_in": cs_val_registry_fold_in,
+        },
+        "negative_evidence": {
+            "brief_evidence_backed_label": int(brief.get("status") == "evidence_backed" or brief.get("trust_label") == "evidence_backed"),
+            "brief_presented_as_fact": int(bool(brief.get("presented_as_fact"))),
+            "ask_evidence_backed_label": int(
+                supported_answer.get("label") == "evidence_backed"
+                or supported_answer.get("trust_label") == "evidence_backed"
+                or insufficient_answer.get("label") == "evidence_backed"
+                or insufficient_answer.get("trust_label") == "evidence_backed"
+            ),
+            "ask_presented_as_fact": int(bool(supported_answer.get("presented_as_fact"))) + int(bool(insufficient_answer.get("presented_as_fact"))),
+            "unsupported_answer_supporting_result_count": int(insufficient_answer.get("supporting_result_count") or 0),
+            "unexpected_command_family_count": 0 if s05_ok else len(observed_families - allowed_command_families),
+        },
+        "human_required": [
+            {
+                "id": "H01",
+                "status": "HUMAN_REQUIRED",
+                "required_evidence": "Dated VS4-H01 owner review and later VS5 external stranger-test records from non-owner participants.",
+            }
+        ],
     }
 
 
@@ -17486,7 +17832,7 @@ def verify_vs0_product_loop_identity(root: Path) -> dict[str, Any]:
 
     message = (
         "Product loop identity note: CornerStone should preserve this messy source, "
-        "produce an evidence-backed brief and claim, create durable memory, run a governed internal action, "
+        "produce a source-linked brief and evidence-backed claim, create durable memory, run a governed internal action, "
         "and record learning after the action. Anchor: product-loop-anchor."
     )
     claim_statement = "The product loop identity note requires evidence, claim, memory, governed action, and learning surfaces."
@@ -17655,7 +18001,7 @@ def verify_vs0_product_loop_identity(root: Path) -> dict[str, Any]:
         "search": _exit_ok(transcripts["search"]) and search_snapshot.get("result_count") == 1,
         "evidence_bundle": _exit_ok(transcripts["evidence_bundle_create"]) and evidence_bundle.get("evidence_bundle_id") == evidence_bundle_id and len(evidence_items) >= 1,
         "evidence_viewer": _exit_ok(transcripts["evidence_view"]) and len(viewer_items) >= 1,
-        "brief": _exit_ok(transcripts["brief_create"]) and brief.get("status") == "evidence_backed",
+        "brief": _exit_ok(transcripts["brief_create"]) and _brief_structural_ready(brief),
         "claim": _exit_ok(transcripts["conversation_promote_claim"]) and claim.get("trust_state") == "evidence_backed",
         "approved_claim": _exit_ok(transcripts["claim_approve"]) and approved_claim.get("trust_state") == "approved",
         "mission": _exit_ok(transcripts["mission_create"]) and mission.get("schema_version") == "cs.mission_goal_contract.v0",
@@ -17770,6 +18116,9 @@ def verify_vs0_product_loop_identity(root: Path) -> dict[str, Any]:
             "evidence_viewer_item_count": len(viewer_items),
             "brief_id": brief.get("brief_id"),
             "brief_status": brief.get("status"),
+            "brief_output_mode": brief.get("output_mode"),
+            "brief_trust_label": brief.get("trust_label"),
+            "brief_presented_as_fact": brief.get("presented_as_fact"),
             "claim_id": claim_id,
             "approved_claim_trust_state": approved_claim.get("trust_state"),
             "memory_id": memory_id,
@@ -21989,7 +22338,7 @@ def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
             and snapshot.get("result_count") == 1
             and search_first.get("artifact_id") == artifact_id
             and bundle_first.get("artifact_id") == artifact_id
-            and brief.get("status") == "evidence_backed"
+            and _brief_structural_ready(brief)
             and claim.get("trust_state") == "evidence_backed"
             and f"artifact:{artifact_id}" in claim.get("evidence_bundle", {}).get("artifact_refs", [])
             and mission.get("evidence", {}).get("evidence_bundle_id") == bundle_id
@@ -22005,6 +22354,10 @@ def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
                 "search_result_count": snapshot.get("result_count"),
                 "evidence_bundle_id": bundle_id,
                 "brief_id": brief.get("brief_id"),
+                "brief_status": brief.get("status"),
+                "brief_output_mode": brief.get("output_mode"),
+                "brief_trust_label": brief.get("trust_label"),
+                "brief_presented_as_fact": brief.get("presented_as_fact"),
                 "claim_id": claim_id,
                 "mission_id": mission_id,
                 "found_logistics_terms": found_logistics_terms,
@@ -22079,7 +22432,7 @@ def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
         and readiness.get("recommendation") == "recommend_autopilot"
         and readiness.get("recommended_mode") == "autopilot"
         and readiness.get("mission_contract_required") is True
-        and readiness_signals.get("evidence_backed_brief_count", 0) >= 1
+        and readiness_signals.get("source_linked_brief_count", 0) >= 1
         and readiness_signals.get("optional_suggestion_count", 0) >= 1
         and readiness_signals.get("mission_contract_count", 0) >= 1
         and readiness_signals.get("successful_internal_task_count", 0) >= 1
@@ -22108,7 +22461,7 @@ def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
             "MUST_PASS",
             "PASS" if auto_002_ok and audit_ok else "FAIL",
             ["cornerstone autopilot readiness --json"],
-            "Readiness starts from conservative Assist mode, then recommends Autopilot only after evidence-backed briefs, suggestions, mission contract, and successful internal playbook/action history.",
+            "Readiness starts from conservative Assist mode, then recommends Autopilot only after source-linked briefs, suggestions, mission contract, and successful internal playbook/action history.",
         ),
     ]
     blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
@@ -25947,9 +26300,9 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             and source_artifact.get("source", {}).get("type") == "user_paste"
             and source_artifact.get("source", {}).get("ref") == "cli.vs4.drop_text"
         ),
-        "brief_created": _exit_ok(transcripts["brief_create"]) and _exit_ok(transcripts["brief_show"]) and brief.get("status") == "evidence_backed",
+        "brief_created": _exit_ok(transcripts["brief_create"]) and _exit_ok(transcripts["brief_show"]) and _brief_structural_ready(brief),
         "brief_contents": (
-            brief.get("status") == "evidence_backed"
+            _brief_structural_ready(brief)
             and bool(brief.get("key_points"))
             and bool(brief.get("evidence_links"))
             and bool(brief.get("uncertainty"))

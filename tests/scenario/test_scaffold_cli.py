@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
@@ -13854,7 +13855,10 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-PROD-004", "CS-UND-005", "CS-CLAIM-002", "CS-SEC-001"})
         evidence = payload["briefing_evidence"]
         self.assertEqual(evidence["search_result_count"], 1)
-        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertEqual(evidence["brief_status"], "extractive_fallback")
+        self.assertEqual(evidence["brief_output_mode"], "extractive_fallback")
+        self.assertEqual(evidence["brief_trust_label"], "extractive_fallback")
+        self.assertFalse(evidence["brief_presented_as_fact"])
         self.assertGreaterEqual(evidence["key_point_count"], 1)
         self.assertGreaterEqual(evidence["evidence_link_count"], 1)
         self.assertGreaterEqual(evidence["uncertainty_count"], 1)
@@ -13970,7 +13974,10 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(evidence["search_result_count"], 1)
         self.assertTrue(evidence["evidence_bundle_id"].startswith("evb_"))
         self.assertTrue(evidence["brief_id"].startswith("brief_"))
-        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertEqual(evidence["brief_status"], "extractive_fallback")
+        self.assertEqual(evidence["brief_output_mode"], "extractive_fallback")
+        self.assertEqual(evidence["brief_trust_label"], "extractive_fallback")
+        self.assertFalse(evidence["brief_presented_as_fact"])
         self.assertTrue(evidence["promoted_claim_id"].startswith("claim_"))
         self.assertEqual(evidence["promoted_claim_trust_state"], "evidence_backed")
         self.assertEqual(evidence["promoted_claim_source_conversation"]["conversation_id"], evidence["conversation_id"])
@@ -13992,6 +13999,133 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertLessEqual(evidence["first_use_duration_ms"], 5000)
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
+
+    def test_vs5_slice_001_value_plane_safe_brief_ask(self) -> None:
+        with tempfile.TemporaryDirectory() as state_dir:
+            source_text = (
+                "VS5 Slice 001 test note: Acme renewal is due on July 31. "
+                "Finance owner is Mina. Anchor phrase: vs5-slice-001-test-anchor."
+            )
+            ingest = run_cli(
+                "artifact",
+                "ingest",
+                "--text",
+                source_text,
+                "--source",
+                "user_paste",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+            search = run_cli("search", "query", "vs5-slice-001-test-anchor", "--state-dir", state_dir, "--json")
+            self.assertEqual(search.returncode, 0, search.stdout + search.stderr)
+            snapshot_id = json.loads(search.stdout)["search_snapshot"]["search_snapshot_id"]
+            bundle_create = run_cli(
+                "evidence",
+                "bundle",
+                "create",
+                "--search-snapshot-id",
+                snapshot_id,
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(bundle_create.returncode, 0, bundle_create.stdout + bundle_create.stderr)
+            bundle_id = json.loads(bundle_create.stdout)["evidence_bundle"]["evidence_bundle_id"]
+            brief_create = run_cli(
+                "brief",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--model-provider",
+                "local_test",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(brief_create.returncode, 0, brief_create.stdout + brief_create.stderr)
+            brief_payload = json.loads(brief_create.stdout)
+            brief = brief_payload["brief"]
+            self.assertEqual(brief["status"], "extractive_fallback")
+            self.assertEqual(brief["output_mode"], "extractive_fallback")
+            self.assertEqual(brief["trust_label"], "extractive_fallback")
+            self.assertNotEqual(brief["trust_label"], "evidence_backed")
+            self.assertFalse(brief["presented_as_fact"])
+            self.assertEqual(brief["model_provider"], "local_test")
+            self.assertEqual(brief["citation_refs"], [])
+            self.assertEqual(brief["citation_check_refs"], [])
+            self.assertTrue(brief["trust_label_reason"])
+            self.assertTrue(brief["evidence_refs"])
+            self.assertTrue(brief["audit_refs"])
+            self.assertTrue(brief_payload["evidence_refs"])
+            self.assertTrue(brief_payload["audit_refs"])
+
+            conversation_start = run_cli(
+                "conversation",
+                "start",
+                "--message",
+                source_text,
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(conversation_start.returncode, 0, conversation_start.stdout + conversation_start.stderr)
+            conversation_id = json.loads(conversation_start.stdout)["conversation"]["conversation_id"]
+            answer_supported = run_cli(
+                "conversation",
+                "answer",
+                conversation_id,
+                "--question",
+                "What is the Acme renewal due date?",
+                "--model-provider",
+                "local_test",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(answer_supported.returncode, 0, answer_supported.stdout + answer_supported.stderr)
+            supported_payload = json.loads(answer_supported.stdout)
+            supported_answer = supported_payload["answer"]
+            self.assertEqual(supported_answer["label"], "template_fallback")
+            self.assertEqual(supported_answer["output_mode"], "template_fallback")
+            self.assertEqual(supported_answer["trust_label"], "template_fallback")
+            self.assertNotEqual(supported_answer["trust_label"], "evidence_backed")
+            self.assertFalse(supported_answer["presented_as_fact"])
+            self.assertGreaterEqual(supported_answer["supporting_result_count"], 1)
+            self.assertTrue(supported_answer["evidence_refs"])
+            self.assertTrue(supported_answer["audit_refs"])
+            self.assertTrue(supported_payload["audit_refs"])
+
+            answer_insufficient = run_cli(
+                "conversation",
+                "answer",
+                conversation_id,
+                "--question",
+                "What is the approved Project Zeta budget?",
+                "--model-provider",
+                "local_test",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(answer_insufficient.returncode, 0, answer_insufficient.stdout + answer_insufficient.stderr)
+            insufficient_answer = json.loads(answer_insufficient.stdout)["answer"]
+            self.assertEqual(insufficient_answer["label"], "insufficient_evidence")
+            self.assertEqual(insufficient_answer["trust_label"], "insufficient_evidence")
+            self.assertFalse(insufficient_answer["presented_as_fact"])
+            self.assertEqual(insufficient_answer["supporting_result_count"], 0)
+
+        verify = run_cli("scenario", "verify", "vs5-slice-001", "--json")
+        self.assertEqual(verify.returncode, 0, verify.stdout + verify.stderr)
+        verify_payload = json.loads(verify.stdout)
+        self.assertEqual(verify_payload["scenario_set"], "vs5-slice-001")
+        self.assertEqual(verify_payload["summary"]["blocking"], 0)
+        self.assertEqual(verify_payload["scenario_results"][-1]["status"], "HUMAN_REQUIRED")
+        self.assertEqual(
+            verify_payload["value_plane_evidence"]["cs_val_registry_fold_in"]["status"],
+            "BLOCKED_COMPATIBLE_INTERIM_VERIFIER",
+        )
 
     def test_vs0_product_domain_readiness_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-product-domain-readiness", "--json")
@@ -14016,7 +14150,9 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(readiness["recommendation"], "recommend_autopilot")
         self.assertEqual(readiness["recommended_mode"], "autopilot")
         self.assertTrue(readiness["mission_contract_required"])
-        self.assertGreaterEqual(readiness["signals"]["evidence_backed_brief_count"], 1)
+        self.assertEqual(readiness["signals"]["evidence_backed_brief_count"], 0)
+        self.assertGreaterEqual(readiness["signals"]["source_linked_brief_count"], 1)
+        self.assertGreaterEqual(readiness["signals"]["structurally_ready_brief_count"], 1)
         self.assertGreaterEqual(readiness["signals"]["optional_suggestion_count"], 1)
         self.assertGreaterEqual(readiness["signals"]["mission_contract_count"], 1)
         self.assertGreaterEqual(readiness["signals"]["successful_internal_task_count"], 1)
@@ -14055,7 +14191,10 @@ class ScaffoldCliTests(unittest.TestCase):
         }
         self.assertEqual(set(evidence["present_surfaces"]), expected_surfaces)
         self.assertEqual(evidence["missing_surfaces"], [])
-        self.assertEqual(evidence["brief_status"], "evidence_backed")
+        self.assertEqual(evidence["brief_status"], "extractive_fallback")
+        self.assertEqual(evidence["brief_output_mode"], "extractive_fallback")
+        self.assertEqual(evidence["brief_trust_label"], "extractive_fallback")
+        self.assertFalse(evidence["brief_presented_as_fact"])
         self.assertEqual(evidence["approved_claim_trust_state"], "approved")
         self.assertEqual(evidence["memory_status"], "owner_approved")
         self.assertEqual(evidence["memory_truth_foundation"], "archive_evidence")

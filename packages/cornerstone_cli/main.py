@@ -106,6 +106,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_operator_acceptance_ui,
     verify_vs1_ontology_suggest_promote,
     verify_vs4_product_alpha_ui_daily_loop,
+    verify_vs5_slice_001,
     verify_vs2_policy_tenancy_egress,
     verify_vs3_onprem_trusted_extension,
     verify_vs0_runtime_acceptance,
@@ -9452,7 +9453,11 @@ def command_brief_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.create_brief_from_evidence_bundle(args.evidence_bundle_id, requested_scope)
+    result = store.create_brief_from_evidence_bundle(
+        args.evidence_bundle_id,
+        requested_scope,
+        model_provider=args.model_provider,
+    )
     payload = base_response("cornerstone brief create", "success", root)
     payload.update(requested_scope)
     if result.get("status") == "not_found":
@@ -9501,6 +9506,10 @@ def command_brief_create(args: argparse.Namespace) -> int:
         }
     )
     payload["brief"] = brief
+    payload["output_mode"] = brief.get("output_mode")
+    payload["trust_label"] = brief.get("trust_label")
+    payload["model_provider"] = brief.get("model_provider")
+    payload["model_mode"] = brief.get("model_mode")
     payload["evidence_refs"].extend(
         [
             f"brief:{brief['brief_id']}",
@@ -15302,7 +15311,12 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.answer_conversation(args.conversation_id, args.question, requested_scope)
+    result = store.answer_conversation(
+        args.conversation_id,
+        args.question,
+        requested_scope,
+        model_provider=args.model_provider,
+    )
     payload = base_response("cornerstone conversation answer", "success", root)
     payload.update(requested_scope)
     if result.get("status") == "not_found":
@@ -15332,6 +15346,10 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
     snapshot = result["search_snapshot"]
     payload["answer"] = answer
     payload["search_snapshot"] = snapshot
+    payload["output_mode"] = answer.get("output_mode")
+    payload["trust_label"] = answer.get("trust_label")
+    payload["model_provider"] = answer.get("model_provider")
+    payload["model_mode"] = answer.get("model_mode")
     payload["ids"].update(
         {
             "conversation_id": args.conversation_id,
@@ -19395,6 +19413,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         report = verify_vs1_ontology_suggest_promote(root)
     elif args.contract == "vs4-product-alpha-ui-daily-loop":
         report = verify_vs4_product_alpha_ui_daily_loop(root)
+    elif args.contract == "vs5-slice-001":
+        report = verify_vs5_slice_001(root)
     elif args.contract == "connector-contract-adapter":
         report = verify_connector_contract_adapter(root)
     elif args.contract == "vs2-policy-tenancy-egress":
@@ -19490,6 +19510,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs0-operator-acceptance-ui",
                     "vs1-ontology-suggest-promote",
                     "vs4-product-alpha-ui-daily-loop",
+                    "vs5-slice-001",
                     "connector-contract-adapter",
                     "vs2-policy-tenancy-egress",
                     "vs3-onprem-trusted-extension",
@@ -23787,6 +23808,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     brief_create = brief_sub.add_parser("create", help="Create a deterministic brief from an evidence bundle")
     brief_create.add_argument("--evidence-bundle-id", required=True, help="Evidence bundle ID")
+    brief_create.add_argument("--model-provider", default="local_test", help="Model provider to record for generation/fallback metadata")
     add_state_argument(brief_create)
     add_scope_arguments(brief_create)
     brief_create.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -26219,6 +26241,7 @@ def build_parser() -> argparse.ArgumentParser:
     conversation_answer = conversation_sub.add_parser("answer", help="Answer a question from workspace evidence")
     conversation_answer.add_argument("conversation_id", help="Conversation ID")
     conversation_answer.add_argument("--question", required=True, help="Question to answer")
+    conversation_answer.add_argument("--model-provider", default="local_test", help="Model provider to record for answer/fallback metadata")
     add_state_argument(conversation_answer)
     add_scope_arguments(conversation_answer)
     conversation_answer.add_argument("--json", action="store_true", help="Emit JSON output")

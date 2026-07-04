@@ -61,6 +61,8 @@ ANSWER_STOP_TERMS = {
     "why",
 }
 
+DEFAULT_MODEL_PROVIDER = "local_test"
+
 STRUCTURE_LABELS = {
     "person": ("object", "person"),
     "organization": ("object", "organization"),
@@ -71,6 +73,37 @@ STRUCTURE_LABELS = {
     "claim": ("fact", "claim"),
     "fact": ("fact", "fact"),
 }
+
+
+def _vs5_value_plane_metadata(
+    *,
+    output_kind: str,
+    model_provider: str | None,
+    output_mode: str,
+    trust_label: str,
+    trust_label_reason: str,
+) -> dict[str, Any]:
+    provider = model_provider or DEFAULT_MODEL_PROVIDER
+    return {
+        "output_mode": output_mode,
+        "trust_label": trust_label,
+        "trust_label_reason": trust_label_reason,
+        "model_provider": provider,
+        "model_mode": f"not_invoked_{output_mode}",
+        "citation_refs": [],
+        "citation_check_refs": [],
+        "value_check_refs": [],
+        "label_check": {
+            "schema_version": "cs.value_label_check.v0",
+            "output_kind": output_kind,
+            "cs_val_rows": ["CS-VAL-006"],
+            "earned_evidence_backed": False,
+            "presented_as_fact_allowed": False,
+            "required_to_earn_evidence_backed": ["CS-VAL-001", "CS-VAL-002"],
+            "reason": trust_label_reason,
+            "check_refs": [],
+        },
+    }
 
 TRUSTED_PACK_SOURCES = {"first_party", "organization_private", "curated_certified"}
 AUTHORIZED_ACTION_APPROVER_ALIASES = {"owner", "authorized_owner", "local-user"}
@@ -3636,6 +3669,15 @@ class LocalRuntimeStore:
         missions = self._mission_records(scope)
         actions = self._action_records(scope)
         evidence_backed_brief_count = sum(1 for brief in briefs if brief.get("status") == "evidence_backed")
+        source_linked_brief_count = sum(
+            1
+            for brief in briefs
+            if brief.get("status") in {"extractive_fallback", "draft"}
+            and brief.get("trust_label") in {None, "extractive_fallback", "draft"}
+            and brief.get("presented_as_fact") is not True
+            and (brief.get("evidence_refs") or brief.get("evidence_links"))
+        )
+        structurally_ready_brief_count = evidence_backed_brief_count + source_linked_brief_count
         optional_suggestion_count = sum(
             1
             for conversation in conversations
@@ -3651,7 +3693,7 @@ class LocalRuntimeStore:
         )
         successful_playbook_count = successful_internal_action_count
         ready = (
-            evidence_backed_brief_count >= 1
+            structurally_ready_brief_count >= 1
             and optional_suggestion_count >= 1
             and active_or_draft_mission_count >= 1
             and successful_internal_action_count >= 1
@@ -3665,7 +3707,7 @@ class LocalRuntimeStore:
             "starts_conservatively": True,
             "progression": [
                 "assist_by_default",
-                "evidence_backed_briefs",
+                "source_linked_briefs",
                 "optional_structure_suggestions",
                 "governed_internal_tasks",
                 "successful_playbook_history",
@@ -3673,6 +3715,8 @@ class LocalRuntimeStore:
             ],
             "signals": {
                 "evidence_backed_brief_count": evidence_backed_brief_count,
+                "source_linked_brief_count": source_linked_brief_count,
+                "structurally_ready_brief_count": structurally_ready_brief_count,
                 "optional_suggestion_count": optional_suggestion_count,
                 "mission_contract_count": active_or_draft_mission_count,
                 "successful_internal_task_count": successful_internal_action_count,
@@ -3682,10 +3726,10 @@ class LocalRuntimeStore:
             "recommended_mode": "autopilot" if ready else "assist",
             "ready": ready,
             "reason": (
-                "Fixture history includes an evidence-backed brief, optional durable-output suggestions, "
+                "Fixture history includes a source-linked brief, optional durable-output suggestions, "
                 "a Mission Goal Contract, and a successful low-risk internal playbook/action run."
                 if ready
-                else "More evidence-backed briefs, suggestions, mission contracts, and successful internal runs are required before recommending Autopilot."
+                else "More source-linked briefs, suggestions, mission contracts, and successful internal runs are required before recommending Autopilot."
             ),
             "mission_contract_required": True,
             "approval_boundary": "Recommendation does not grant authority; a Mission Goal Contract and policy still control execution.",
@@ -8332,7 +8376,13 @@ class LocalRuntimeStore:
         )
         return {"viewer": viewer, "audit_event": event}
 
-    def create_brief_from_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+    def create_brief_from_evidence_bundle(
+        self,
+        bundle_id: str,
+        scope: dict[str, str],
+        *,
+        model_provider: str = DEFAULT_MODEL_PROVIDER,
+    ) -> dict[str, Any]:
         bundle = self.get_evidence_bundle(bundle_id)
         if bundle is None:
             return {"status": "not_found"}
@@ -8359,9 +8409,27 @@ class LocalRuntimeStore:
                 }
             )
 
+        trust_label_reason = (
+            "Current brief path is extractive fallback; citation-integrity checks have not run for this output."
+        )
+        value_plane = _vs5_value_plane_metadata(
+            output_kind="brief",
+            model_provider=model_provider,
+            output_mode="extractive_fallback",
+            trust_label="extractive_fallback",
+            trust_label_reason=trust_label_reason,
+        )
+        evidence_refs = [link["artifact_ref"] for link in evidence_links]
+        evidence_refs.extend(
+            [
+                f"evidence_bundle:{bundle_id}",
+                f"search_snapshot:{bundle.get('search_snapshot_id')}",
+            ]
+        )
         brief_base = {
             "schema_version": "cs.brief.v0",
-            "status": "evidence_backed",
+            "status": "extractive_fallback",
+            "presented_as_fact": False,
             "scope": scope,
             "title": f"Brief for {bundle.get('query')}",
             "evidence_bundle": {
@@ -8372,8 +8440,11 @@ class LocalRuntimeStore:
                 "evidence_item_count": len(evidence_items),
                 "artifact_refs": [link["artifact_ref"] for link in evidence_links],
             },
+            **value_plane,
             "key_points": key_points,
             "evidence_links": evidence_links,
+            "evidence_refs": evidence_refs,
+            "audit_refs": [],
             "uncertainty": [
                 "This brief is grounded only in the attached Evidence Bundle.",
                 "Add more sources before using it as broad organizational truth.",
@@ -8407,8 +8478,17 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": bundle_id,
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 "evidence_item_count": len(evidence_items),
+                "output_mode": brief.get("output_mode"),
+                "trust_label": brief.get("trust_label"),
+                "trust_label_reason": brief.get("trust_label_reason"),
+                "model_provider": brief.get("model_provider"),
+                "model_mode": brief.get("model_mode"),
+                "citation_check_refs": brief.get("citation_check_refs", []),
+                "presented_as_fact": brief.get("presented_as_fact"),
             },
         )
+        brief["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.brief_path(brief_id), brief)
         return {"brief": brief, "audit_event": event}
 
     def show_brief(self, brief_id: str, scope: dict[str, str]) -> dict[str, Any]:
@@ -12127,7 +12207,14 @@ class LocalRuntimeStore:
         )
         return {"claim": claim, "audit_events": [result["audit_event"], event]}
 
-    def answer_conversation(self, conversation_id: str, question: str, scope: dict[str, str]) -> dict[str, Any]:
+    def answer_conversation(
+        self,
+        conversation_id: str,
+        question: str,
+        scope: dict[str, str],
+        *,
+        model_provider: str = DEFAULT_MODEL_PROVIDER,
+    ) -> dict[str, Any]:
         conversation = self.get_conversation(conversation_id)
         if conversation is None:
             return {"status": "not_found", "resource": "conversation"}
@@ -12149,15 +12236,29 @@ class LocalRuntimeStore:
             if isinstance(reason, dict)
         }
         supported_by_meaningful_match = bool(meaningful_question_terms & matched_terms)
-        label = "evidence_backed" if snapshot.get("result_count", 0) > 0 and supported_by_meaningful_match else "insufficient_evidence"
-        presented_as_fact = label == "evidence_backed"
-        if presented_as_fact:
+        has_relevant_evidence = snapshot.get("result_count", 0) > 0 and supported_by_meaningful_match
+        label = "template_fallback" if has_relevant_evidence else "insufficient_evidence"
+        presented_as_fact = False
+        if has_relevant_evidence:
             evidence_refs.extend(
                 ref
                 for result_row in snapshot.get("results", [])
                 for ref in result_row.get("evidence_refs", [])
             )
-        supporting_result_count = snapshot.get("result_count", 0) if presented_as_fact else 0
+        supporting_result_count = snapshot.get("result_count", 0) if has_relevant_evidence else 0
+        trust_label_reason = (
+            "Current Ask path is a template fallback; direct citation-grounded answer checks have not run."
+            if has_relevant_evidence
+            else "No meaningful supporting evidence matched the question."
+        )
+        output_mode = "template_fallback" if has_relevant_evidence else "insufficient_evidence"
+        value_plane = _vs5_value_plane_metadata(
+            output_kind="conversation_answer",
+            model_provider=model_provider,
+            output_mode=output_mode,
+            trust_label=label,
+            trust_label_reason=trust_label_reason,
+        )
         answer_base = {
             "schema_version": "cs.conversation_answer.v0",
             "conversation_id": conversation_id,
@@ -12166,9 +12267,10 @@ class LocalRuntimeStore:
             "label": label,
             "trust_state": label,
             "presented_as_fact": presented_as_fact,
+            **value_plane,
             "answer": (
-                "The available evidence supports an answer; inspect the attached evidence refs."
-                if presented_as_fact
+                "Potentially relevant evidence was found, but this slice has not generated a direct citation-grounded answer. Inspect the attached evidence refs before treating this as fact."
+                if has_relevant_evidence
                 else "Insufficient evidence. Add or attach source evidence before treating this as fact."
             ),
             "search_snapshot_id": snapshot.get("search_snapshot_id"),
@@ -12177,6 +12279,7 @@ class LocalRuntimeStore:
             "meaningful_question_terms": sorted(meaningful_question_terms),
             "matched_terms": sorted(matched_terms),
             "evidence_refs": evidence_refs,
+            "audit_refs": [],
             "unsupported_assertions_labeled": not presented_as_fact,
             "created_at": utc_now(),
         }
@@ -12192,8 +12295,18 @@ class LocalRuntimeStore:
                 "label": label,
                 "search_snapshot_id": snapshot.get("search_snapshot_id"),
                 "search_result_count": snapshot.get("result_count", 0),
+                "supporting_result_count": supporting_result_count,
+                "output_mode": answer.get("output_mode"),
+                "trust_label": answer.get("trust_label"),
+                "trust_label_reason": answer.get("trust_label_reason"),
+                "model_provider": answer.get("model_provider"),
+                "model_mode": answer.get("model_mode"),
+                "citation_check_refs": answer.get("citation_check_refs", []),
+                "presented_as_fact": answer.get("presented_as_fact"),
             },
         )
+        answer["audit_refs"] = [f"audit:{search_result['audit_event']['event_id']}", f"audit:{event['event_id']}"]
+        _write_json(self.answer_path(answer["answer_id"]), answer)
         return {"answer": answer, "search_snapshot": snapshot, "audit_events": [search_result["audit_event"], event]}
 
     def ingest_artifact(
