@@ -393,6 +393,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Back to claims", claim_html)
         self.assertIn("Open inbox", claim_html)
         self.assertIn("Trust ladder", claim_html)
+        self.assertIn("Claim review summary", claim_html)
+        self.assertIn("Claim state", claim_html)
         self.assertIn("Evidence-backed", claim_html)
         self.assertIn("Supporting evidence", claim_html)
         self.assertIn("Review controls", claim_html)

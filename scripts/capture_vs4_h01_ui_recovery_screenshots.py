@@ -95,7 +95,7 @@ DETAIL_ROUTES = [
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Dry-run sequence", "Proposed changes", "Call preview", "Policy checkpoints", "Approval history"]},
 ]

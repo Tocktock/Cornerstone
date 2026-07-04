@@ -1892,6 +1892,10 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-4);
   margin-bottom: var(--cs-space-4);
 }}
+.cs-claim-hero.is-compact {{
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
 .cs-claim-breadcrumb {{
   display: flex;
   flex-wrap: wrap;
@@ -1903,21 +1907,22 @@ button, input, textarea {{ font: inherit; }}
 .cs-claim-breadcrumb a {{ color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); }}
 .cs-claim-titlebar {{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-5);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-3);
   align-items: start;
 }}
 .cs-claim-titlebar h1 {{
   margin: 0;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
+  max-width: 44ch;
+  font-size: 28px;
+  line-height: 1.16;
   text-wrap: balance;
 }}
 .cs-claim-actions {{
   display: flex;
   flex-wrap: wrap;
   gap: var(--cs-space-2);
-  justify-content: flex-end;
+  justify-content: flex-start;
 }}
 .cs-button.is-disabled {{
   cursor: not-allowed;
@@ -1989,6 +1994,24 @@ button, input, textarea {{ font: inherit; }}
 .cs-claim-form-card {{
   display: grid;
   gap: var(--cs-space-4);
+}}
+.cs-claim-review-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-claim-review-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-claim-review-card strong {{
+  font-size: 18px;
+  line-height: 1.25;
 }}
 .cs-claim-field {{
   border: 1px solid var(--cs-color-border-default);
@@ -2573,7 +2596,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -4467,7 +4490,6 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
     has_sources = bool(source_items)
     is_approved = str(claim.get("status") or "").lower() == "approved"
-    review_note = "Evidence attached; request review before approval." if has_sources else "Add evidence before approval."
     approval_note = "Approval stays locked until review is recorded." if has_sources else "Approval stays locked until supporting evidence is attached."
     rationale = str(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before promoting this claim."
     claim_title = _claim_title(claim)
@@ -4488,23 +4510,17 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     ]
     review_class = "is-ready" if has_sources else "is-review"
     return f"""
-{_detail_orientation(
-    parent_href="/claims",
-    parent_label="Claims",
-    current_label=claim_title,
-    summary="Check source support and decision state before approval.",
-    chip_label=label,
-    chip_state=state,
-    actions=[
-        ("Back to claims", "/claims", "secondary"),
-        ("Open inbox", "/inbox", "secondary"),
-    ],
-)}
 <section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail">
   <div class="cs-stack">
-    <div class="cs-claim-hero">
+    <div class="cs-claim-hero is-compact">
       <div class="cs-claim-titlebar">
         <div class="cs-brief-title">
+          <nav class="cs-claim-breadcrumb" aria-label="Detail path">
+            <span class="cs-meta">Detail path</span>
+            <a href="/claims">Claims</a>
+            <span aria-hidden="true">/</span>
+            <span>{h(_truncate(claim_title, 90))}</span>
+          </nav>
           <h1>{h(claim_title)}</h1>
           <div class="cs-brief-meta">
             <span>Claim draft</span>
@@ -4513,6 +4529,8 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </div>
         </div>
         <div class="cs-claim-actions" aria-label="Claim review actions">
+          <a class="cs-button secondary" href="/claims">Back to claims</a>
+          <a class="cs-button secondary" href="/inbox">Open inbox</a>
           <a class="cs-button secondary" href="/claims">Save draft</a>
           <a class="cs-button secondary" href="/inbox">Request review</a>
           <span class="cs-button is-disabled" aria-disabled="true">Promote locked</span>
@@ -4533,6 +4551,12 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           <span>Approved</span>
         </div>
       </div>
+    </div>
+    <div class="cs-claim-review-strip" aria-label="Claim review summary">
+      <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">Review before approval</span></div>
+      <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
+      <div class="cs-claim-review-card"><span class="cs-meta">Confidence</span><strong>{h(confidence_label)}</strong><span class="cs-meta">Derived from support</span></div>
+      <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -4580,16 +4604,6 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </div>
         </div>
       </div>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Trust ladder</h2>
-          <p class="cs-muted">Decision use is blocked until the claim has source support and review.</p>
-        </div>
-      </div>
-      {_claim_trust_ladder(has_sources, is_approved)}
-      <p class="cs-muted">{h(review_note)}</p>
     </section>
     <section class="cs-claim-footrail" aria-label="Claim provenance">
       <div><span class="cs-meta">Claim ID</span><strong>{h(claim_id)}</strong></div>
