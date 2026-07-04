@@ -1449,6 +1449,62 @@ button, input, textarea {{ font: inherit; }}
 .cs-chip-executed {{ background: var(--cs-state-executed-bg); border-color: var(--cs-state-executed-border); color: var(--cs-state-executed-fg); }}
 .cs-chip-failed {{ background: var(--cs-state-failed-bg); border-color: var(--cs-state-failed-border); color: var(--cs-state-failed-fg); }}
 .cs-chip-policyBlocked {{ background: var(--cs-state-policyBlocked-bg); border-color: var(--cs-state-policyBlocked-border); color: var(--cs-state-policyBlocked-fg); }}
+.cs-detail-orientation {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: center;
+}}
+.cs-detail-context {{
+  display: grid;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-detail-path {{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-detail-path a {{
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-detail-path span[aria-hidden="true"] {{ color: var(--cs-color-text-muted); }}
+.cs-detail-summary {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-detail-summary-head {{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+}}
+.cs-detail-current {{
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+  overflow-wrap: anywhere;
+}}
+.cs-detail-summary p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  max-width: 68ch;
+  text-wrap: pretty;
+}}
+.cs-detail-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}}
 .cs-source-text {{
   white-space: pre-wrap;
   word-break: break-word;
@@ -2160,7 +2216,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2175,6 +2231,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
   .cs-empty-actions .cs-button {{ justify-content: center; }}
+  .cs-detail-actions {{ justify-content: flex-start; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-claim-progress::before {{ display: none; }}
@@ -3648,6 +3705,44 @@ def _inbox_row(item: dict[str, str]) -> str:
     return _generic_row(item["kind"], item["title"], item["detail"], item["href"], item["label"], item["state"], item["date"])
 
 
+def _detail_orientation(
+    *,
+    parent_href: str,
+    parent_label: str,
+    current_label: str,
+    summary: str,
+    chip_label: str,
+    chip_state: str,
+    actions: list[tuple[str, str, str]] | None = None,
+) -> str:
+    action_links = "".join(
+        f'<a class="cs-button {h(style)}" href="{h(href)}">{h(label)}</a>'
+        for label, href, style in actions or []
+    )
+    return f"""
+<header class="cs-detail-orientation">
+  <div class="cs-detail-context">
+    <nav class="cs-detail-path" aria-label="Detail path">
+      <span class="cs-meta">Detail path</span>
+      <a href="{h(parent_href)}">{h(parent_label)}</a>
+      <span aria-hidden="true">/</span>
+      <span>{h(current_label)}</span>
+    </nav>
+    <div class="cs-detail-summary">
+      <div class="cs-detail-summary-head">
+        <span class="cs-detail-current">{h(current_label)}</span>
+        {_chip(chip_label, chip_state)}
+      </div>
+      <p>{h(summary)}</p>
+    </div>
+  </div>
+  <div class="cs-detail-actions" aria-label="Detail page actions">
+    {action_links}
+  </div>
+</header>
+"""
+
+
 def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) -> str:
     title = _artifact_title(artifact)
     text = _safe_preview(store, artifact, 5000) or "No readable text preview is available for this source."
@@ -3667,15 +3762,22 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     thumb_lines = "".join('<span class="cs-artifact-thumb-line"></span>' for _ in range(7))
     ask_query = quote(f"What matters in {title}")
     return f"""
+{_detail_orientation(
+    parent_href="/artifacts",
+    parent_label="Saved sources",
+    current_label=title,
+    summary="Original source with linked work and provenance nearby.",
+    chip_label="Source detail",
+    chip_state="searchable",
+    actions=[
+        ("Back to saved sources", "/artifacts", "secondary"),
+        ("Search workspace", "/search", "secondary"),
+    ],
+)}
 <section class="cs-grid-two cs-artifact-workbench" data-product-surface="artifact-detail">
   <div class="cs-stack">
     <div class="cs-artifact-hero">
       <div class="cs-artifact-title">
-        <div class="cs-artifact-breadcrumb">
-          <a href="/artifacts">Artifacts</a>
-          <span aria-hidden="true">/</span>
-          <span>{h(title)}</span>
-        </div>
         <div class="cs-artifact-title-row">
           <span class="cs-artifact-file-mark" aria-hidden="true">TXT</span>
           <div>
@@ -3799,13 +3901,26 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     source_count = len(source_items)
     mode = _plain_output_mode(str(brief.get("output_mode") or "draft"))
     finding_count = len(key_points) + len(findings)
+    brief_title = _brief_title(brief)
     return f"""
+{_detail_orientation(
+    parent_href="/briefs",
+    parent_label="Brief workspace",
+    current_label=brief_title,
+    summary="Review findings, source coverage, and limits before using this brief for a decision.",
+    chip_label=label,
+    chip_state=state,
+    actions=[
+        ("Back to briefs", "/briefs", "secondary"),
+        ("Open audit trail", "/audit", "secondary"),
+    ],
+)}
 <section class="cs-grid-two" data-product-surface="brief-detail">
   <div class="cs-stack">
     <div class="cs-brief-hero is-stacked">
       <div class="cs-brief-title">
         <div class="cs-kicker">Brief</div>
-        <h1>{h(_brief_title(brief))}</h1>
+        <h1>{h(brief_title)}</h1>
         <p class="cs-muted">Read the answer, supporting sources, and limits together before using it for a decision.</p>
         <div class="cs-brief-meta">
           <span>{h(_display_date(brief))}</span>
@@ -3908,14 +4023,21 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     ]
     review_class = "is-ready" if has_sources else "is-review"
     return f"""
+{_detail_orientation(
+    parent_href="/claims",
+    parent_label="Claims",
+    current_label=claim_title,
+    summary="Check source support and decision state before approval.",
+    chip_label=label,
+    chip_state=state,
+    actions=[
+        ("Back to claims", "/claims", "secondary"),
+        ("Open inbox", "/inbox", "secondary"),
+    ],
+)}
 <section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail">
   <div class="cs-stack">
     <div class="cs-claim-hero">
-      <div class="cs-claim-breadcrumb">
-        <a href="/claims">Claims</a>
-        <span aria-hidden="true">/</span>
-        <span>{h(claim_title)}</span>
-      </div>
       <div class="cs-claim-titlebar">
         <div class="cs-brief-title">
           <h1>{h(claim_title)}</h1>
@@ -4089,15 +4211,28 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     risk_label = str(impact.get("risk") or action.get("risk") or "review").title()
     target = str(impact.get("target") or "Local preview only.")
     goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
+    action_title = _action_title(action)
     approval_status = str(approval.get("status") or "pending")
     reason = str(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
     return f"""
+{_detail_orientation(
+    parent_href="/actions",
+    parent_label="Actions",
+    current_label=action_title,
+    summary="Preview impact, policy, and approval history before any external step.",
+    chip_label=label,
+    chip_state=state,
+    actions=[
+        ("Back to actions", "/actions", "secondary"),
+        ("Open audit trail", "/audit", "secondary"),
+    ],
+)}
 <section class="cs-grid-two" data-product-surface="action-detail">
   <div class="cs-stack">
     <div class="cs-brief-hero is-stacked">
       <div class="cs-brief-title">
         <div class="cs-kicker">Action preview</div>
-        <h1>{h(_action_title(action))}</h1>
+        <h1>{h(action_title)}</h1>
         <div class="cs-brief-meta">
           <span>Dry-run first</span>
           <span>{h(_display_date(action))}</span>
@@ -4108,7 +4243,6 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         {_chip("Preview (dry run)", "searchable")}
         {_chip(approval_label, "underReview")}
         {_chip(f"{risk_label} risk", "underReview")}
-        <a class="cs-button secondary" href="/claims">Back to claims</a>
         <a class="cs-button" href="/inbox">Request approval</a>
       </div>
     </div>

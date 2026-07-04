@@ -88,16 +88,16 @@ INTERACTION_ROUTES = [
 ]
 
 DETAIL_ROUTES = [
-    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
-    {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["What we found", "Findings with citations", "Use this brief"]},
+    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Detail path", "Back to saved sources", "Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
+    {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Detail path", "Back to briefs", "Open audit trail", "What we found", "Findings with citations", "Use this brief"]},
     {
         "name": "claim-detail-desktop",
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
     },
-    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Action review status", "Policy decision", "Approval history"]},
+    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Back to actions", "Open audit trail", "Action review status", "Policy decision", "Approval history"]},
 ]
 
 MOBILE_ROUTE_NAMES = {

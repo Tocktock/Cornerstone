@@ -987,6 +987,62 @@ button, input, textarea { font: inherit; }
 .cs-chip-executed { background: var(--cs-state-executed-bg); border-color: var(--cs-state-executed-border); color: var(--cs-state-executed-fg); }
 .cs-chip-failed { background: var(--cs-state-failed-bg); border-color: var(--cs-state-failed-border); color: var(--cs-state-failed-fg); }
 .cs-chip-policyBlocked { background: var(--cs-state-policyBlocked-bg); border-color: var(--cs-state-policyBlocked-border); color: var(--cs-state-policyBlocked-fg); }
+.cs-detail-orientation {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: center;
+}
+.cs-detail-context {
+  display: grid;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}
+.cs-detail-path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-detail-path a {
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-detail-path span[aria-hidden="true"] { color: var(--cs-color-text-muted); }
+.cs-detail-summary {
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-detail-summary-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+}
+.cs-detail-current {
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+  overflow-wrap: anywhere;
+}
+.cs-detail-summary p {
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  max-width: 68ch;
+  text-wrap: pretty;
+}
+.cs-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}
 .cs-source-text {
   white-space: pre-wrap;
   word-break: break-word;
@@ -1698,7 +1754,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -1713,6 +1769,7 @@ button, input, textarea { font: inherit; }
   .cs-suggestion-row { grid-template-columns: 1fr; }
   .cs-empty-actions { flex-direction: column; align-items: stretch; }
   .cs-empty-actions .cs-button { justify-content: center; }
+  .cs-detail-actions { justify-content: flex-start; }
   .cs-brief-actions { justify-content: flex-start; }
   .cs-claim-actions { justify-content: flex-start; }
   .cs-claim-progress::before { display: none; }
@@ -1772,6 +1829,28 @@ button, input, textarea { font: inherit; }
 
       <div class="cs-content">
 
+
+<header class="cs-detail-orientation">
+  <div class="cs-detail-context">
+    <nav class="cs-detail-path" aria-label="Detail path">
+      <span class="cs-meta">Detail path</span>
+      <a href="/actions">Actions</a>
+      <span aria-hidden="true">/</span>
+      <span>Draft a vendor renewal follow-up</span>
+    </nav>
+    <div class="cs-detail-summary">
+      <div class="cs-detail-summary-head">
+        <span class="cs-detail-current">Draft a vendor renewal follow-up</span>
+        <span class="cs-chip cs-chip-underReview">Needs approval</span>
+      </div>
+      <p>Preview impact, policy, and approval history before any external step.</p>
+    </div>
+  </div>
+  <div class="cs-detail-actions" aria-label="Detail page actions">
+    <a class="cs-button secondary" href="/actions">Back to actions</a><a class="cs-button secondary" href="/audit">Open audit trail</a>
+  </div>
+</header>
+
 <section class="cs-grid-two" data-product-surface="action-detail">
   <div class="cs-stack">
     <div class="cs-brief-hero is-stacked">
@@ -1780,7 +1859,7 @@ button, input, textarea { font: inherit; }
         <h1>Draft a vendor renewal follow-up</h1>
         <div class="cs-brief-meta">
           <span>Dry-run first</span>
-          <span>2026-07-04 20:37 UTC</span>
+          <span>2026-07-04 20:47 UTC</span>
           <span>No external send yet</span>
         </div>
       </div>
@@ -1788,7 +1867,6 @@ button, input, textarea { font: inherit; }
         <span class="cs-chip cs-chip-searchable">Preview (dry run)</span>
         <span class="cs-chip cs-chip-underReview">Approval required</span>
         <span class="cs-chip cs-chip-underReview">Medium risk</span>
-        <a class="cs-button secondary" href="/claims">Back to claims</a>
         <a class="cs-button" href="/inbox">Request approval</a>
       </div>
     </div>
@@ -1888,7 +1966,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-04 20:37 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-04 20:47 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>
