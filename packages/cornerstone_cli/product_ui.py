@@ -1139,6 +1139,24 @@ button, input, textarea {{ font: inherit; }}
 .cs-metadata-item strong {{
   word-break: break-word;
 }}
+.cs-artifact-inspection-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-artifact-inspection-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-artifact-inspection-card strong {{
+  font-size: 18px;
+  line-height: 1.25;
+}}
 .cs-artifact-viewer {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1267,6 +1285,27 @@ button, input, textarea {{ font: inherit; }}
   background: transparent;
   padding: 0;
   line-height: 1.75;
+}}
+.cs-artifact-rail {{
+  position: sticky;
+  top: calc(var(--cs-space-4) + 72px);
+}}
+.cs-artifact-rail-tabs {{
+  display: flex;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+  overflow-x: auto;
+}}
+.cs-artifact-rail-tab {{
+  padding: 0 0 var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+  white-space: nowrap;
+}}
+.cs-artifact-rail-tab.is-active {{
+  color: var(--cs-color-primary-700);
+  border-bottom: 2px solid var(--cs-color-primary-600);
 }}
 .cs-artifact-panel-list {{
   display: grid;
@@ -2596,7 +2635,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2621,6 +2660,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-artifact-compact-hero .cs-artifact-title h1 {{ font-size: 26px; }}
   .cs-artifact-compact-hero .cs-artifact-actions {{ padding-top: 0; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
+  .cs-artifact-rail {{ position: static; }}
   .cs-artifact-toolbar {{ align-items: stretch; flex-direction: column; }}
   .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
   .cs-artifact-page-rail {{ display: none; }}
@@ -4255,6 +4295,7 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     summary = _truncate(text, 300)
     thumb_lines = "".join('<span class="cs-artifact-thumb-line"></span>' for _ in range(7))
     ask_query = quote(f"What matters in {title}")
+    linked_count = linked.count("cs-list-row")
     return f"""
 <section class="cs-artifact-workbench" data-product-surface="artifact-detail" aria-label="Source inspection workspace">
   <div class="cs-stack">
@@ -4287,9 +4328,17 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>{h(workspace)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
     </div>
+    <div class="cs-artifact-inspection-strip" aria-label="Artifact inspection summary">
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Trust state</span><strong>Needs review</strong><span class="cs-muted">Source is saved, not evidence-backed.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Original text</strong><span class="cs-muted">Readable saved source remains visible.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked work</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Provenance</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Fingerprint shown before reuse.</span></div>
+    </div>
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
         <div class="cs-artifact-toolgroup">
+          <span class="cs-artifact-tool" aria-label="Toggle page rail">&#9637;</span>
+          <span class="cs-artifact-tool" aria-label="Search within source">&#8981;</span>
           <div class="cs-artifact-toolbar-label">
             <strong>Original source</strong>
             <span class="cs-meta">Text preview from the saved artifact</span>
@@ -4297,6 +4346,9 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         </div>
         <div class="cs-artifact-toolgroup">
           <span class="cs-artifact-page-count">1 text source</span>
+          <span class="cs-artifact-tool" aria-label="Zoom out">&minus;</span>
+          <span class="cs-meta">100%</span>
+          <span class="cs-artifact-tool" aria-label="Zoom in">+</span>
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
       </div>
@@ -4317,7 +4369,11 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       </div>
     </section>
   </div>
-  <aside class="cs-stack">
+  <aside class="cs-stack cs-artifact-rail">
+    <nav class="cs-artifact-rail-tabs" aria-label="Artifact detail tabs">
+      <span class="cs-artifact-rail-tab is-active">Details</span>
+      <span class="cs-artifact-rail-tab">Tags ({len(keywords)})</span>
+    </nav>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
