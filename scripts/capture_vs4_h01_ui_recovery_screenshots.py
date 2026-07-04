@@ -97,7 +97,7 @@ DETAIL_ROUTES = [
         "surface": "claim-detail",
         "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
     },
-    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Dry-run sequence", "Proposed changes", "Call preview", "Policy checkpoints", "Approval history"]},
+    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Action review status", "Dry-run sequence", "Proposed changes", "Call preview", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
 ]
 
 MOBILE_ROUTE_NAMES = {

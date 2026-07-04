@@ -2223,6 +2223,51 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--cs-space-3);
 }}
+.cs-action-workbench {{
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+}}
+.cs-action-hero {{
+  display: grid;
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-action-breadcrumb {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  align-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-action-breadcrumb a {{
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-action-titlebar {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-action-titlebar h1 {{
+  margin: 0;
+  max-width: 44ch;
+  font-size: 30px;
+  line-height: 1.14;
+  text-wrap: balance;
+}}
+.cs-action-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}}
+.cs-action-rail {{
+  position: sticky;
+  top: calc(var(--cs-space-4) + 72px);
+}}
 .cs-action-review-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2656,7 +2701,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2674,6 +2719,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-detail-actions {{ justify-content: flex-start; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
+  .cs-action-actions {{ justify-content: flex-start; }}
+  .cs-action-rail {{ position: static; }}
   .cs-claim-progress::before {{ display: none; }}
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
@@ -4785,28 +4832,29 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     reason = _plain_runtime_text(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
     policy_reason = _plain_runtime_text(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk.")
     return f"""
-{_detail_orientation(
-    parent_href="/actions",
-    parent_label="Actions",
-    current_label=action_title,
-    summary="Preview impact, policy, and approval history before any external step.",
-    chip_label=label,
-    chip_state=state,
-    actions=[
-        ("Back to actions", "/actions", "secondary"),
-        ("Open audit trail", "/audit", "secondary"),
-    ],
-)}
-<section class="cs-grid-two" data-product-surface="action-detail">
+<section class="cs-grid-two cs-action-workbench" data-product-surface="action-detail">
   <div class="cs-stack">
-    <div class="cs-brief-hero is-stacked">
-      <div class="cs-brief-title">
-        <div class="cs-kicker">Action preview</div>
-        <h1>{h(action_title)}</h1>
-        <div class="cs-brief-meta">
-          <span>Dry-run first</span>
-          <span>{h(_display_date(action))}</span>
-          <span>No external send yet</span>
+    <header class="cs-action-hero">
+      <nav class="cs-action-breadcrumb" aria-label="Detail path">
+        <span class="cs-meta">Detail path</span>
+        <a href="/actions">Actions</a>
+        <span aria-hidden="true">/</span>
+        <span>{h(_truncate(action_title, 80))}</span>
+      </nav>
+      <div class="cs-action-titlebar">
+        <div>
+          <div class="cs-kicker">Action preview</div>
+          <h1>{h(action_title)}</h1>
+          <div class="cs-brief-meta">
+            <span>Dry-run first</span>
+            <span>{h(_display_date(action))}</span>
+            <span>No external send yet</span>
+          </div>
+          <p class="cs-muted">Preview impact, policy, and approval history before any external step.</p>
+        </div>
+        <div class="cs-action-actions">
+          <a class="cs-button secondary" href="/actions">Back to actions</a>
+          <a class="cs-button secondary" href="/audit">Open audit trail</a>
         </div>
       </div>
       <div class="cs-brief-actions">
@@ -4815,7 +4863,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         {_chip(f"{risk_label} risk", "underReview")}
         <a class="cs-button" href="/inbox">Request approval</a>
       </div>
-    </div>
+    </header>
     <div class="cs-action-review-strip" aria-label="Action review status">
       <div class="cs-action-review-card"><span class="cs-meta">Risk level</span><strong>{h(risk_label)}</strong></div>
       <div class="cs-action-review-card"><span class="cs-meta">Approval</span><strong>{h(approval_label)}</strong></div>
@@ -4884,11 +4932,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       {_action_policy_checks(bool(source_items), approval_label, call_label)}
     </section>
   </div>
-  <aside class="cs-stack">
-    <section class="cs-panel flat">
-      <h2 class="cs-section-title">Sources</h2>
-      {source_list}
-    </section>
+  <aside class="cs-stack cs-action-rail">
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Risk and approval</h2>
       <dl class="cs-detail-grid">
@@ -4908,6 +4952,10 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Approval history</h2>
       <div class="cs-empty">No approvals have been recorded yet.</div>
+    </section>
+    <section class="cs-panel flat">
+      <h2 class="cs-section-title">Sources</h2>
+      {source_list}
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Auditability</h2>
