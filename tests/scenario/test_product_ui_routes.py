@@ -97,6 +97,13 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Drop anything, or ask what we know", home)
         self.assertIn("Save a source", home)
         self.assertIn("Ask the workspace", home)
+        self.assertIn('id="cs-save-source-button"', home)
+        self.assertIn('id="cs-ask-submit-button"', home)
+        self.assertIn('id="cs-drop-status" data-state="idle"', home)
+        self.assertIn('id="cs-ask-status" data-state="idle"', home)
+        self.assertIn("cs-status is-idle", home)
+        self.assertIn("Paste text before saving.", home)
+        self.assertIn("Enter a question first.", home)
         self.assertIn("Recent items", home)
         self.assertIn("Knowledge states", home)
         self.assertIn("Suggested next steps", home)
@@ -201,6 +208,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         day_zero_mobile_names = {spec["name"] for spec in day_zero_specs if spec.get("mobile")}
         not_found_specs = capture_vs4.not_found_route_specs()
         not_found_names = {spec["name"] for spec in not_found_specs}
+        interaction_specs = capture_vs4.interaction_route_specs()
+        interaction_names = {spec["name"] for spec in interaction_specs}
 
         for route in [
             "/",
@@ -235,6 +244,12 @@ class ProductUiRoutesTest(unittest.TestCase):
         ]:
             with self.subTest(not_found=name):
                 self.assertIn(name, not_found_names)
+        for name in [
+            "home-validation-desktop",
+            "home-validation-mobile",
+        ]:
+            with self.subTest(interaction=name):
+                self.assertIn(name, interaction_names)
 
     def test_record_detail_routes_preserve_json_default_and_offer_html(self) -> None:
         artifact_id, _, _ = self.create_source_stack()

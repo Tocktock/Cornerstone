@@ -1636,12 +1636,50 @@ button, input, textarea { font: inherit; }
   display: grid;
   gap: var(--cs-space-1);
 }
-.cs-toast {
-  min-height: 28px;
+.cs-status {
+  min-height: 34px;
+  border: 1px solid var(--cs-color-border-default);
+  border-left-width: 3px;
+  border-radius: var(--cs-radius-md);
   color: var(--cs-color-text-secondary);
-  border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-1) var(--cs-space-3);
+  padding: var(--cs-space-2) var(--cs-space-3);
+  background: var(--cs-color-surface-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+}
+.cs-status::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--cs-radius-pill);
+  background: currentColor;
+  flex: 0 0 auto;
+}
+.cs-status.is-idle {
+  border-left-color: var(--cs-color-primary-600);
   background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}
+.cs-status.is-loading {
+  border-left-color: var(--cs-state-underReview-fg);
+  background: var(--cs-state-underReview-bg);
+  color: var(--cs-state-underReview-fg);
+}
+.cs-status.is-success {
+  border-left-color: var(--cs-state-evidenceBacked-fg);
+  background: var(--cs-state-evidenceBacked-bg);
+  color: var(--cs-state-evidenceBacked-fg);
+}
+.cs-status.is-error {
+  border-left-color: var(--cs-state-failed-fg);
+  background: var(--cs-state-failed-bg);
+  color: var(--cs-state-failed-fg);
+}
+.cs-button:disabled {
+  cursor: progress;
+  opacity: .72;
+  transform: none;
 }
 @media (max-width: 980px) {
   .cs-shell { grid-template-columns: 1fr; }
@@ -1760,14 +1798,14 @@ button, input, textarea { font: inherit; }
               </div>
             </div>
             <div class="cs-row">
-              <button class="cs-button" type="submit">Save source</button>
+              <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
               <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
               <input id="cs-file-input" type="file" hidden="">
             </div>
           </div>
           <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
           <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
-          <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
+          <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite">Ready for a source.</div>
         </form>
         <div class="cs-or-divider">or ask a question</div>
         <form class="cs-stack" id="cs-ask-form">
@@ -1777,10 +1815,10 @@ button, input, textarea { font: inherit; }
               <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
             </div>
             <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-            <button class="cs-button" type="submit">Ask</button>
+            <button class="cs-button" id="cs-ask-submit-button" type="submit">Ask</button>
           </div>
           <div class="cs-suggestion-row"><button class="cs-button secondary" type="button" data-ask-suggestion="What supports &quot;Brief for vendor renewal&quot;?">What supports "Brief for vendor renewal"?</button><button class="cs-button secondary" type="button" data-ask-suggestion="What changed in the latest saved source?">What changed in the latest saved source?</button><button class="cs-button secondary" type="button" data-ask-suggestion="Which claims still need support?">Which claims still need support?</button></div>
-          <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
+          <div class="cs-status is-idle" id="cs-ask-status" data-state="idle" role="status" aria-live="polite">No answer requested yet.</div>
         </form>
       </div>
     </section>
@@ -1792,22 +1830,22 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
   <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_6b3e9819678bb0ac?view=html">
+<a class="cs-home-item" href="/claims/claim_608afb43b3e7b274?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">C</span>
   <span>
     <p>Claim</p>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-04 20:31 UTC - Review source support</p>
+    <p>2026-07-04 20:38 UTC - Review source support</p>
   </span>
   <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
 </a>
 
-<a class="cs-home-item" href="/actions/action_8f149c9a7306817f?view=html">
+<a class="cs-home-item" href="/actions/action_34a9ca9e4f6e0512?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">A</span>
   <span>
     <p>Action</p>
     <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-04 20:31 UTC - Preview before approval</p>
+    <p>2026-07-04 20:38 UTC - Preview before approval</p>
   </span>
   <span class="cs-chip cs-chip-underReview">Needs approval</span>
 </a>
@@ -1817,17 +1855,17 @@ button, input, textarea { font: inherit; }
   <span>
     <p>Source</p>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-04 20:31 UTC - Original text preserved</p>
+    <p>2026-07-04 20:38 UTC - Original text preserved</p>
   </span>
   <span class="cs-chip cs-chip-searchable">Searchable</span>
 </a>
 
-<a class="cs-home-item" href="/briefs/brief_635d147604644f13?view=html">
+<a class="cs-home-item" href="/briefs/brief_98733a9e7092d1f2?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">B</span>
   <span>
     <p>Brief</p>
     <h3>Brief for vendor renewal</h3>
-    <p>2026-07-04 20:31 UTC - Draft from visible sources</p>
+    <p>2026-07-04 20:38 UTC - Draft from visible sources</p>
   </span>
   <span class="cs-chip cs-chip-draft">Keyword summary</span>
 </a>
@@ -1902,7 +1940,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Source opened</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
 </div>
 
@@ -1910,7 +1948,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
 </div>
 
@@ -1918,7 +1956,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
 </div>
 
@@ -1926,7 +1964,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
 </div>
 
@@ -1934,7 +1972,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
 </div>
 </div>
@@ -1946,11 +1984,11 @@ button, input, textarea { font: inherit; }
     <h2>Latest brief</h2>
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_635d147604644f13?view=html">
+  <a class="cs-list-row" href="/briefs/brief_98733a9e7092d1f2?view=html">
     <div>
       <h3>Brief for vendor renewal</h3>
       <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 20:31 UTC</div>
+      <div class="cs-meta">2026-07-04 20:38 UTC</div>
     </div>
     <span class="cs-meta">Open</span>
   </a>
@@ -1963,32 +2001,32 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_635d147604644f13?view=html">
+<a class="cs-list-row" href="/briefs/brief_98733a9e7092d1f2?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_6b3e9819678bb0ac?view=html">
+<a class="cs-list-row" href="/claims/claim_608afb43b3e7b274?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_8f149c9a7306817f?view=html">
+<a class="cs-list-row" href="/actions/action_34a9ca9e4f6e0512?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+    <div class="cs-meta">2026-07-04 20:38 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>
@@ -2015,11 +2053,25 @@ button, input, textarea { font: inherit; }
   const dropStatus = document.getElementById("cs-drop-status");
   const fileInput = document.getElementById("cs-file-input");
   const fileButton = document.getElementById("cs-file-button");
+  const saveButton = document.getElementById("cs-save-source-button");
   const askForm = document.getElementById("cs-ask-form");
   const askInput = document.getElementById("cs-ask-input");
   const askStatus = document.getElementById("cs-ask-status");
-  function setStatus(node, message) {
-    if (node) node.textContent = message;
+  const askButton = document.getElementById("cs-ask-submit-button");
+  function setStatus(node, message, state) {
+    if (!node) return;
+    const status = state || "idle";
+    node.textContent = message;
+    node.dataset.state = status;
+    node.classList.remove("is-idle", "is-loading", "is-success", "is-error");
+    node.classList.add("is-" + status);
+    node.setAttribute("aria-live", status === "error" ? "assertive" : "polite");
+  }
+  function setBusy(form, button, busy, loadingLabel, defaultLabel) {
+    if (form) form.setAttribute("aria-busy", busy ? "true" : "false");
+    if (!button) return;
+    button.disabled = busy;
+    button.textContent = busy ? loadingLabel : defaultLabel;
   }
   async function postJson(path, body) {
     const response = await fetch(path, {
@@ -2034,25 +2086,32 @@ button, input, textarea { font: inherit; }
     return payload;
   }
   async function saveText(text, sourceRef) {
-    setStatus(dropStatus, "Saving source...");
-    const payload = {};
-    payload.text = text;
-    payload["source" + "_ref"] = sourceRef || "home-paste";
-    const saved = await postJson("/artifacts", payload);
-    const artifact = saved.artifact || {};
-    const id = artifact["artifact" + "_id"];
-    setStatus(dropStatus, "Saved. Opening source...");
-    if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+    setBusy(dropForm, saveButton, true, "Saving", "Save source");
+    setStatus(dropStatus, "Saving source...", "loading");
+    try {
+      const payload = {};
+      payload.text = text;
+      payload["source" + "_ref"] = sourceRef || "home-paste";
+      const saved = await postJson("/artifacts", payload);
+      const artifact = saved.artifact || {};
+      const id = artifact["artifact" + "_id"];
+      setStatus(dropStatus, "Saved. Opening source...", "success");
+      if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+    } catch (error) {
+      setStatus(dropStatus, error.message, "error");
+    } finally {
+      setBusy(dropForm, saveButton, false, "Saving", "Save source");
+    }
   }
   if (dropForm && dropText) {
     dropForm.addEventListener("submit", function (event) {
       event.preventDefault();
       const text = dropText.value.trim();
       if (!text) {
-        setStatus(dropStatus, "Paste text before saving.");
+        setStatus(dropStatus, "Paste text before saving.", "error");
         return;
       }
-      saveText(text, "home-paste").catch(error => setStatus(dropStatus, error.message));
+      saveText(text, "home-paste");
     });
     ["dragenter", "dragover"].forEach(name => dropForm.addEventListener(name, function (event) {
       event.preventDefault();
@@ -2065,7 +2124,7 @@ button, input, textarea { font: inherit; }
       event.preventDefault();
       const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
     });
   }
   if (fileButton && fileInput) {
@@ -2073,7 +2132,7 @@ button, input, textarea { font: inherit; }
     fileInput.addEventListener("change", function () {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
     });
   }
   document.querySelectorAll("[data-ask-suggestion]").forEach(button => {
@@ -2087,11 +2146,12 @@ button, input, textarea { font: inherit; }
       event.preventDefault();
       const question = askInput.value.trim();
       if (!question) {
-        setStatus(askStatus, "Enter a question first.");
+        setStatus(askStatus, "Enter a question first.", "error");
         return;
       }
+      setBusy(askForm, askButton, true, "Checking", "Ask");
       try {
-        setStatus(askStatus, "Checking saved sources...");
+        setStatus(askStatus, "Checking saved sources...", "loading");
         const started = await postJson("/conversations", {message: question});
         const conversation = started.conversation || {};
         const id = conversation["conversation" + "_id"];
@@ -2099,9 +2159,11 @@ button, input, textarea { font: inherit; }
         const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
         const answer = answered.answer || {};
         const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
-        setStatus(askStatus, "Draft answer: " + text);
+        setStatus(askStatus, "Draft answer: " + text, "success");
       } catch (error) {
-        setStatus(askStatus, error.message);
+        setStatus(askStatus, error.message, "error");
+      } finally {
+        setBusy(askForm, askButton, false, "Checking", "Ask");
       }
     });
   }

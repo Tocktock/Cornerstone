@@ -2098,12 +2098,50 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-1);
 }}
-.cs-toast {{
-  min-height: 28px;
+.cs-status {{
+  min-height: 34px;
+  border: 1px solid var(--cs-color-border-default);
+  border-left-width: 3px;
+  border-radius: var(--cs-radius-md);
   color: var(--cs-color-text-secondary);
-  border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-1) var(--cs-space-3);
+  padding: var(--cs-space-2) var(--cs-space-3);
+  background: var(--cs-color-surface-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+}}
+.cs-status::before {{
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--cs-radius-pill);
+  background: currentColor;
+  flex: 0 0 auto;
+}}
+.cs-status.is-idle {{
+  border-left-color: var(--cs-color-primary-600);
   background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}}
+.cs-status.is-loading {{
+  border-left-color: var(--cs-state-underReview-fg);
+  background: var(--cs-state-underReview-bg);
+  color: var(--cs-state-underReview-fg);
+}}
+.cs-status.is-success {{
+  border-left-color: var(--cs-state-evidenceBacked-fg);
+  background: var(--cs-state-evidenceBacked-bg);
+  color: var(--cs-state-evidenceBacked-fg);
+}}
+.cs-status.is-error {{
+  border-left-color: var(--cs-state-failed-fg);
+  background: var(--cs-state-failed-bg);
+  color: var(--cs-state-failed-fg);
+}}
+.cs-button:disabled {{
+  cursor: progress;
+  opacity: .72;
+  transform: none;
 }}
 @media (max-width: 980px) {{
   .cs-shell {{ grid-template-columns: 1fr; }}
@@ -2289,14 +2327,14 @@ def _home(ctx: dict[str, Any]) -> str:
               </div>
             </div>
             <div class="cs-row">
-              <button class="cs-button" type="submit">Save source</button>
+              <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
               <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
               <input id="cs-file-input" type="file" hidden>
             </div>
           </div>
           <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
           <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
-          <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
+          <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite">Ready for a source.</div>
         </form>
         <div class="cs-or-divider">or ask a question</div>
         <form class="cs-stack" id="cs-ask-form">
@@ -2306,10 +2344,10 @@ def _home(ctx: dict[str, Any]) -> str:
               <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
             </div>
             <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-            <button class="cs-button" type="submit">Ask</button>
+            <button class="cs-button" id="cs-ask-submit-button" type="submit">Ask</button>
           </div>
           <div class="cs-suggestion-row">{suggestions}</div>
-          <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
+          <div class="cs-status is-idle" id="cs-ask-status" data-state="idle" role="status" aria-live="polite">No answer requested yet.</div>
         </form>
       </div>
     </section>
@@ -4588,11 +4626,25 @@ def _home_script() -> str:
   const dropStatus = document.getElementById("cs-drop-status");
   const fileInput = document.getElementById("cs-file-input");
   const fileButton = document.getElementById("cs-file-button");
+  const saveButton = document.getElementById("cs-save-source-button");
   const askForm = document.getElementById("cs-ask-form");
   const askInput = document.getElementById("cs-ask-input");
   const askStatus = document.getElementById("cs-ask-status");
-  function setStatus(node, message) {
-    if (node) node.textContent = message;
+  const askButton = document.getElementById("cs-ask-submit-button");
+  function setStatus(node, message, state) {
+    if (!node) return;
+    const status = state || "idle";
+    node.textContent = message;
+    node.dataset.state = status;
+    node.classList.remove("is-idle", "is-loading", "is-success", "is-error");
+    node.classList.add("is-" + status);
+    node.setAttribute("aria-live", status === "error" ? "assertive" : "polite");
+  }
+  function setBusy(form, button, busy, loadingLabel, defaultLabel) {
+    if (form) form.setAttribute("aria-busy", busy ? "true" : "false");
+    if (!button) return;
+    button.disabled = busy;
+    button.textContent = busy ? loadingLabel : defaultLabel;
   }
   async function postJson(path, body) {
     const response = await fetch(path, {
@@ -4607,25 +4659,32 @@ def _home_script() -> str:
     return payload;
   }
   async function saveText(text, sourceRef) {
-    setStatus(dropStatus, "Saving source...");
-    const payload = {};
-    payload.text = text;
-    payload["source" + "_ref"] = sourceRef || "home-paste";
-    const saved = await postJson("/artifacts", payload);
-    const artifact = saved.artifact || {};
-    const id = artifact["artifact" + "_id"];
-    setStatus(dropStatus, "Saved. Opening source...");
-    if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+    setBusy(dropForm, saveButton, true, "Saving", "Save source");
+    setStatus(dropStatus, "Saving source...", "loading");
+    try {
+      const payload = {};
+      payload.text = text;
+      payload["source" + "_ref"] = sourceRef || "home-paste";
+      const saved = await postJson("/artifacts", payload);
+      const artifact = saved.artifact || {};
+      const id = artifact["artifact" + "_id"];
+      setStatus(dropStatus, "Saved. Opening source...", "success");
+      if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+    } catch (error) {
+      setStatus(dropStatus, error.message, "error");
+    } finally {
+      setBusy(dropForm, saveButton, false, "Saving", "Save source");
+    }
   }
   if (dropForm && dropText) {
     dropForm.addEventListener("submit", function (event) {
       event.preventDefault();
       const text = dropText.value.trim();
       if (!text) {
-        setStatus(dropStatus, "Paste text before saving.");
+        setStatus(dropStatus, "Paste text before saving.", "error");
         return;
       }
-      saveText(text, "home-paste").catch(error => setStatus(dropStatus, error.message));
+      saveText(text, "home-paste");
     });
     ["dragenter", "dragover"].forEach(name => dropForm.addEventListener(name, function (event) {
       event.preventDefault();
@@ -4638,7 +4697,7 @@ def _home_script() -> str:
       event.preventDefault();
       const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
     });
   }
   if (fileButton && fileInput) {
@@ -4646,7 +4705,7 @@ def _home_script() -> str:
     fileInput.addEventListener("change", function () {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
     });
   }
   document.querySelectorAll("[data-ask-suggestion]").forEach(button => {
@@ -4660,11 +4719,12 @@ def _home_script() -> str:
       event.preventDefault();
       const question = askInput.value.trim();
       if (!question) {
-        setStatus(askStatus, "Enter a question first.");
+        setStatus(askStatus, "Enter a question first.", "error");
         return;
       }
+      setBusy(askForm, askButton, true, "Checking", "Ask");
       try {
-        setStatus(askStatus, "Checking saved sources...");
+        setStatus(askStatus, "Checking saved sources...", "loading");
         const started = await postJson("/conversations", {message: question});
         const conversation = started.conversation || {};
         const id = conversation["conversation" + "_id"];
@@ -4672,9 +4732,11 @@ def _home_script() -> str:
         const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
         const answer = answered.answer || {};
         const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
-        setStatus(askStatus, "Draft answer: " + text);
+        setStatus(askStatus, "Draft answer: " + text, "success");
       } catch (error) {
-        setStatus(askStatus, error.message);
+        setStatus(askStatus, error.message, "error");
+      } finally {
+        setBusy(askForm, askButton, false, "Checking", "Ask");
       }
     });
   }

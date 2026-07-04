@@ -77,6 +77,16 @@ NOT_FOUND_ROUTES = [
     {"name": "not-found-source-desktop", "route": "/artifacts/missing-source?view=html", "surface": "not-found", "required": ["This source is not available", "Search workspace", "Brief workspace"]},
 ]
 
+INTERACTION_ROUTES = [
+    {
+        "name": "home-validation-desktop",
+        "route": "/",
+        "surface": "home",
+        "required": ["Paste text before saving.", "Enter a question first."],
+        "interaction": "home-validation",
+    },
+]
+
 DETAIL_ROUTES = [
     {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
     {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["What we found", "Findings with citations", "Use this brief"]},
@@ -116,6 +126,10 @@ DAY_ZERO_MOBILE_ROUTE_NAMES = {
 NOT_FOUND_MOBILE_ROUTE_NAMES = {
     "not-found-page-desktop",
     "not-found-source-desktop",
+}
+
+INTERACTION_MOBILE_ROUTE_NAMES = {
+    "home-validation-desktop",
 }
 
 LAYOUT_SCRIPT = """
@@ -161,6 +175,32 @@ LAYOUT_SCRIPT = """
       "--cs-state-saved-bg:",
       "--cs-radius-pill:"
     ].every((token) => html.includes(token)),
+  };
+})()
+"""
+
+HOME_VALIDATION_SCRIPT = """
+(() => {
+  const dropForm = document.querySelector("#cs-drop-form");
+  const askForm = document.querySelector("#cs-ask-form");
+  if (dropForm) {
+    dropForm.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+  }
+  if (askForm) {
+    askForm.dispatchEvent(new Event("submit", {bubbles: true, cancelable: true}));
+  }
+  const dropStatus = document.querySelector("#cs-drop-status");
+  const askStatus = document.querySelector("#cs-ask-status");
+  return {
+    drop_state: dropStatus ? dropStatus.getAttribute("data-state") : "",
+    ask_state: askStatus ? askStatus.getAttribute("data-state") : "",
+    drop_text: dropStatus ? dropStatus.textContent : "",
+    ask_text: askStatus ? askStatus.textContent : "",
+    passed: Boolean(dropStatus && askStatus) &&
+      dropStatus.getAttribute("data-state") === "error" &&
+      askStatus.getAttribute("data-state") === "error" &&
+      dropStatus.textContent.includes("Paste text before saving.") &&
+      askStatus.textContent.includes("Enter a question first.")
   };
 })()
 """
@@ -314,6 +354,18 @@ def not_found_route_specs() -> list[dict[str, Any]]:
     return specs + mobile_specs
 
 
+def interaction_route_specs() -> list[dict[str, Any]]:
+    specs = [dict(spec) for spec in INTERACTION_ROUTES]
+    mobile_specs = []
+    for spec in specs:
+        if spec["name"] in INTERACTION_MOBILE_ROUTE_NAMES:
+            item = dict(spec)
+            item["name"] = item["name"].replace("-desktop", "-mobile")
+            item["mobile"] = True
+            mobile_specs.append(item)
+    return specs + mobile_specs
+
+
 def capture_page(
     *,
     chrome: Path,
@@ -337,6 +389,7 @@ def capture_page(
     error: str | None = None
     exit_code: int | None = None
     layout: dict[str, Any] = {}
+    interaction: dict[str, Any] = {}
     try:
         process = _launch_cdp_chrome(chrome, profile_dir, debug_port, window_size)
         version = None
@@ -373,6 +426,8 @@ def capture_page(
             ):
                 break
             time.sleep(0.1)
+        if spec.get("interaction") == "home-validation":
+            interaction = _runtime_eval(page, HOME_VALIDATION_SCRIPT, timeout=10) or {}
         layout = _runtime_eval(page, LAYOUT_SCRIPT, timeout=10) or {}
         dom = normalize_captured_dom(str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or ""))
         dom_path.write_text(dom)
@@ -416,6 +471,7 @@ def capture_page(
         "mobile_first_value_before_nav": layout.get("mobile_first_value_before_nav") is True,
         "home_drop_ask_ordered": layout.get("home_drop_ask_ordered") is True,
         "home_drop_ask_in_first_viewport": layout.get("home_drop_ask_in_first_viewport") is True,
+        "interaction_passed": not spec.get("interaction") or interaction.get("passed") is True,
         "clean_browser_exit": exit_code == 0,
         "no_capture_error": error is None,
     }
@@ -432,6 +488,7 @@ def capture_page(
         "required_missing": required_missing,
         "forbidden_terms": forbidden,
         "layout": layout,
+        "interaction": interaction,
         "screenshot_path": relative_to_root(ROOT, screenshot_path),
         "screenshot_bytes": screenshot_bytes,
         "screenshot_sha256": sha256_file(screenshot_path) if screenshot_bytes else None,
@@ -458,13 +515,13 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
         "- R1: Home rebuilt around Drop and Ask with real local records, day-zero copy, and internal owner material moved to `/review`.",
         "- R2/R3: Search, Artifacts, Briefs, Claims, Actions, Inbox, Audit, owner connector governance, and record detail routes are represented in the screenshot pack.",
         "- R4: product surfaces are scanned for forbidden internal language and raw runtime labels.",
-        "- R5: desktop, mobile, day-zero, and not-found captures check horizontal overflow and mobile first-value ordering.",
+        "- R5: desktop, mobile, day-zero, not-found, and Home validation captures check horizontal overflow, mobile first-value ordering, and inline interaction states.",
         "- R6: screenshot pack and automated checks exist; owner acceptance remains human-required.",
         "",
         "## Evidence Files",
         "",
         f"- `screenshot-pack-manifest.json`",
-        f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures, including day-zero and not-found states)",
+        f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures, including day-zero, not-found, and Home validation states)",
         "- `dom/` captured HTML for each screenshot route",
         "",
         "## Screenshot Coverage",
@@ -537,6 +594,9 @@ def main() -> int:
             window_size = "390,844" if spec.get("mobile") else "1440,1100"
             pages.append(capture_page(chrome=chrome, base_url=base_url, spec=spec, output_dir=output_dir, window_size=window_size))
         for spec in not_found_route_specs():
+            window_size = "390,844" if spec.get("mobile") else "1440,1100"
+            pages.append(capture_page(chrome=chrome, base_url=base_url, spec=spec, output_dir=output_dir, window_size=window_size))
+        for spec in interaction_route_specs():
             window_size = "390,844" if spec.get("mobile") else "1440,1100"
             pages.append(capture_page(chrome=chrome, base_url=base_url, spec=spec, output_dir=output_dir, window_size=window_size))
         ids = create_fixture_stack(base_url)

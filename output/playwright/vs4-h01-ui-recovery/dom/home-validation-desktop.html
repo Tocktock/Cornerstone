@@ -2,7 +2,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Claims - CornerStone</title>
+  <title>Home - CornerStone</title>
   <style>
 :root {
   --cs-meta-name: CornerStone Design Tokens v0.3;
@@ -1747,7 +1747,7 @@ button, input, textarea { font: inherit; }
 <nav class="cs-nav">
   <div class="cs-nav-group">
     <div class="cs-nav-label">Workspace</div>
-    <a href="/">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims" aria-current="page">Claims</a><a href="/actions">Actions</a>
+    <a href="/" aria-current="page">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims">Claims</a><a href="/actions">Actions</a>
   </div>
   <div class="cs-nav-group">
     <div class="cs-nav-label">Operations</div>
@@ -1765,88 +1765,137 @@ button, input, textarea { font: inherit; }
     <button type="submit">Go</button>
   </form>
   <div class="cs-row">
-    <span class="cs-chip cs-chip-saved">1 saved source</span>
+    <span class="cs-chip cs-chip-saved">0 saved sources</span>
     <span class="cs-chip cs-chip-searchable">Local only</span>
   </div>
 </header>
 
       <div class="cs-content">
 
-<section data-product-surface="claims">
-  <div class="cs-page-head">
-    <div class="cs-kicker">Claims</div>
-    <h1>Claims that need source support</h1>
-    <p>Promote only statements that can be traced back to saved sources.</p>
+<section class="cs-grid-hero cs-home-intro" data-product-surface="home">
+  <div class="cs-stack">
+    <div class="cs-hero cs-page-head">
+      <div class="cs-kicker">Local workspace</div>
+      <h1>Drop anything, or ask what we know</h1>
+      <p>Save messy input, find what is already in the workspace, and shape a brief only when the sources are visible.</p>
+    </div>
+    <section class="cs-panel cs-home-canvas" aria-labelledby="home-workbench-title">
+      <div class="cs-panel-header">
+        <div>
+          <h2 id="home-workbench-title">Start with a source or a question</h2>
+          <p class="cs-muted">CornerStone keeps the original source visible, then lets drafts point back to what supports them.</p>
+        </div>
+        <span class="cs-chip cs-chip-underReview">Untrusted until checked</span>
+      </div>
+      <div class="cs-home-workspace">
+        <form class="cs-drop" id="cs-drop-form">
+          <div class="cs-home-source-row">
+            <div class="cs-drop-target">
+              <div class="cs-drop-mark" aria-hidden="true">In</div>
+              <div>
+                <strong>Save a source</strong>
+                <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+              </div>
+            </div>
+            <div class="cs-row">
+              <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
+              <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
+              <input id="cs-file-input" type="file" hidden="">
+            </div>
+          </div>
+          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
+          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
+          <div class="cs-status is-error" id="cs-drop-status" data-state="error" role="status" aria-live="assertive">Paste text before saving.</div>
+        </form>
+        <div class="cs-or-divider">or ask a question</div>
+        <form class="cs-stack" id="cs-ask-form">
+          <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
+            <div>
+              <strong>Ask the workspace</strong>
+              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+            </div>
+            <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
+            <button class="cs-button" id="cs-ask-submit-button" type="submit">Ask</button>
+          </div>
+          <div class="cs-suggestion-row"><span class="cs-meta">Suggestions appear after sources or briefs exist.</span></div>
+          <div class="cs-status is-error" id="cs-ask-status" data-state="error" role="status" aria-live="assertive">Enter a question first.</div>
+        </form>
+      </div>
+    </section>
+    <div class="cs-module-grid">
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header"><h2>Recent items</h2></div>
+  <div class="cs-empty">Saved sources will appear here. Nothing here yet - save your first source or ask after saving one.</div>
+</section>
+
+      <div class="cs-stack">
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Knowledge states</h2>
+    <span class="cs-meta">Local workspace</span>
   </div>
-  <div class="cs-collection-workbench">
-    <div>
-      <div class="cs-collection-summary" aria-label="Collection summary">
-<div class="cs-collection-stat">
-  <span class="cs-meta">Claims</span>
-  <strong>1</strong>
-</div>
-
-<div class="cs-collection-stat">
-  <span class="cs-meta">With sources</span>
-  <strong>1</strong>
-</div>
-
-<div class="cs-collection-stat">
-  <span class="cs-meta">Approved</span>
-  <strong>0</strong>
-</div>
-</div>
-
-<div class="cs-collection-toolbar">
-  <div>
-    <strong>Claim review queue</strong>
-    <div class="cs-meta">1 visible item</div>
+  <div class="cs-stat-list">
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">S</span>
+      <div><strong>Saved</strong><div class="cs-meta">Original sources preserved</div></div>
+      <span class="cs-chip cs-chip-saved">0</span>
+    </div>
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">Q</span>
+      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
+      <span class="cs-chip cs-chip-searchable">0</span>
+    </div>
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">E</span>
+      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
+      <span class="cs-chip cs-chip-evidenceBacked">0</span>
+    </div>
   </div>
-  <div class="cs-filter-row" style="margin-top: 0;"><span class="cs-filter-chip">Scope: personal/default</span><span class="cs-filter-chip">State: open and approved</span><span class="cs-filter-chip">Sort: needs review first</span></div>
-</div>
+</section>
 
-      <div class="cs-collection-list">
-<a class="cs-collection-row" href="/claims/claim_9dca54743d11a9bd?view=html">
-  <span class="cs-collection-icon" aria-hidden="true">C</span>
-  <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Claim</span><span>2026-07-04 20:37 UTC</span><span>1 source refs</span></span>
-    <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>Review source support before approval.</p>
-  </span>
-  <span class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span><span class="cs-chip cs-chip-underReview">Review required</span></span>
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Suggested next steps</h2>
+    <a class="cs-meta" href="/inbox">Open inbox</a>
+  </div>
+  <div class="cs-next-step-list">
+<a class="cs-next-step" href="/">
+  <span class="cs-stat-icon" aria-hidden="true">S</span>
+  <span><strong>Save your first source</strong><span class="cs-meta">Start with pasted notes or a text file</span></span>
+  <span class="cs-meta">Open</span>
 </a>
 </div>
+</section>
+
+      </div>
     </div>
-    <aside class="cs-stack">
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Review posture</h2>
-        <p class="cs-muted">Claims should move from draft to evidence-backed to approved only when supporting sources are visible.</p>
-        <div class="cs-review-box">
-          <a class="cs-button" href="/inbox">Open review inbox</a>
-          <a class="cs-button secondary" href="/artifacts">Check sources</a>
-        </div>
-      </section>
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Trust ladder</h2>
+  </div>
+  <aside class="cs-stack">
 
-<div class="cs-trust-ladder" aria-label="Claim trust ladder">
-  <div class="cs-trust-step is-active">
-    <strong>Draft</strong>
-    <span class="cs-meta">Editable statement.</span>
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Recent activity</h2>
+    <a class="cs-meta" href="/audit">View audit</a>
   </div>
-  <div class="cs-trust-step is-active">
-    <strong>Evidence-backed</strong>
-    <span class="cs-meta">Supporting source is attached.</span>
-  </div>
-  <div class="cs-trust-step is-locked">
-    <strong>Approved</strong>
-    <span class="cs-meta">Requires review first.</span>
-  </div>
-</div>
+  <div class="cs-empty">Activity appears after you save, search, draft, or review work.</div>
+</section>
 
-      </section>
-    </aside>
-  </div>
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header"><h2>Latest brief</h2></div>
+  <div class="cs-empty">No brief has been drafted from saved sources yet.</div>
+</section>
+
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header"><h2>Needs attention</h2></div>
+  <div class="cs-empty">Nothing is waiting on your decision.</div>
+</section>
+
+  </aside>
 </section>
 
       </div>
