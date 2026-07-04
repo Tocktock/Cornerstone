@@ -325,6 +325,8 @@ def _claim_label(record: dict[str, Any]) -> tuple[str, str]:
         return "Approved", "approved"
     if status in {"policy_blocked", "blocked"}:
         return "Policy blocked", "policyBlocked"
+    if _evidence_refs(record):
+        return "Source support", "evidenceBacked"
     return "Draft", "draft"
 
 
@@ -558,7 +560,10 @@ button, input, textarea {{ font: inherit; }}
   min-height: 38px;
   font-weight: var(--cs-typography-weight-semibold);
   cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }}
+.cs-search button:hover, .cs-button:hover {{ box-shadow: var(--cs-shadow-sm); transform: translateY(-1px); }}
+.cs-search button:active, .cs-button:active {{ transform: translateY(0); }}
 .cs-button.secondary {{
   background: var(--cs-color-surface-primary);
   color: var(--cs-color-text-primary);
@@ -580,7 +585,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-hero h1 {{ font-size: var(--cs-typography-display-fontSize); line-height: var(--cs-typography-display-lineHeight); }}
 .cs-page-head p, .cs-hero p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 760px; }}
-.cs-grid-hero {{ display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr); gap: var(--cs-space-6); align-items: start; }}
+.cs-grid-hero {{ display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .55fr); gap: var(--cs-space-6); align-items: start; }}
 .cs-grid-two {{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: var(--cs-space-6); align-items: start; }}
 .cs-stack {{ display: grid; gap: var(--cs-space-4); }}
 .cs-panel {{
@@ -599,14 +604,25 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-muted {{ color: var(--cs-color-text-muted); }}
 .cs-meta {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); line-height: var(--cs-typography-metadata-lineHeight); }}
-.cs-drop {{
-  min-height: 260px;
-  border: 1px dashed var(--cs-color-border-strong);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
+.cs-home-intro {{
+  min-height: calc(100vh - var(--cs-layout-headerHeight) - (var(--cs-layout-contentGutter) * 2));
+  align-content: start;
+}}
+.cs-home-canvas {{
+  padding: var(--cs-space-5);
   display: grid;
   gap: var(--cs-space-4);
-  padding: var(--cs-space-5);
+}}
+.cs-home-canvas .cs-panel-header {{ margin-bottom: 0; }}
+.cs-home-canvas p {{ max-width: 62ch; }}
+.cs-drop {{
+  min-height: 218px;
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-lg);
+  background: color-mix(in srgb, var(--cs-color-surface-subtle) 70%, var(--cs-color-surface-primary));
+  display: grid;
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-4);
 }}
 .cs-drop.is-hot {{ border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }}
 .cs-drop textarea, .cs-field {{
@@ -620,7 +636,61 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-drop textarea {{ min-height: 130px; resize: vertical; }}
 .cs-drop textarea:focus, .cs-field:focus {{ border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }}
+.cs-drop-target {{
+  display: grid;
+  gap: var(--cs-space-2);
+  place-items: center;
+  text-align: center;
+  padding: var(--cs-space-2);
+}}
+.cs-drop-mark {{
+  width: 44px;
+  height: 44px;
+  border-radius: var(--cs-radius-lg);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+  border: 1px solid var(--cs-color-primary-100);
+}}
+.cs-drop textarea.cs-drop-input {{
+  min-height: 86px;
+  background: var(--cs-color-surface-primary);
+}}
+.cs-or-divider {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--cs-space-3);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-or-divider::before, .cs-or-divider::after {{
+  content: "";
+  height: 1px;
+  background: var(--cs-color-border-default);
+}}
+.cs-ask-bar {{
+  border: 1px solid var(--cs-color-border-focus);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cs-space-3);
+  box-shadow: var(--cs-shadow-sm);
+}}
+.cs-ask-bar .cs-field {{
+  border: 0;
+  padding: var(--cs-space-2);
+  box-shadow: none;
+}}
+.cs-ask-bar .cs-field:focus {{ box-shadow: none; }}
+.cs-suggestion-row {{ display: flex; gap: var(--cs-space-2); flex-wrap: wrap; }}
 .cs-row {{ display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }}
+.cs-module-grid {{ display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: var(--cs-space-4); }}
 .cs-list {{ display: grid; gap: var(--cs-space-3); }}
 .cs-list-row {{
   min-height: var(--cs-layout-listRowHeight);
@@ -636,6 +706,172 @@ button, input, textarea {{ font: inherit; }}
 .cs-list-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
 .cs-list-row h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
 .cs-list-row p {{ margin: 0; color: var(--cs-color-text-secondary); }}
+.cs-list-row.compact {{ padding: var(--cs-space-3); min-height: auto; }}
+.cs-search-workbench {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}}
+.cs-search-hero {{
+  border: 1px solid var(--cs-color-border-focus);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  box-shadow: var(--cs-shadow-sm);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-search-hero input {{
+  min-height: 46px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--cs-color-text-primary);
+  padding: 0 var(--cs-space-2);
+}}
+.cs-search-tabs, .cs-filter-row {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-4);
+}}
+.cs-search-tab, .cs-filter-chip {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-height: 34px;
+  border-radius: var(--cs-radius-md);
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-text-secondary);
+  padding: 0 var(--cs-space-3);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-medium);
+}}
+.cs-search-tab.is-active {{
+  background: var(--cs-color-primary-50);
+  border-color: var(--cs-color-primary-100);
+  color: var(--cs-color-primary-700);
+}}
+.cs-result-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+  margin-top: var(--cs-space-5);
+}}
+.cs-result-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-result-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
+.cs-result-icon {{
+  width: 34px;
+  height: 34px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-result-body {{ display: grid; gap: var(--cs-space-1); }}
+.cs-result-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
+.cs-result-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }}
+.cs-result-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-right-stat {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  padding: var(--cs-space-2) 0;
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-right-stat:last-child {{ border-bottom: 0; }}
+.cs-suggested-query {{
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: start;
+  color: var(--cs-color-text-secondary);
+  padding: var(--cs-space-2) 0;
+}}
+.cs-suggested-query span:first-child {{ color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); }}
+.cs-artifact-hero {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-artifact-title {{ display: grid; gap: var(--cs-space-2); }}
+.cs-artifact-title h1 {{
+  margin: 0;
+  font-size: var(--cs-typography-pageTitle-fontSize);
+  line-height: var(--cs-typography-pageTitle-lineHeight);
+}}
+.cs-artifact-actions {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }}
+.cs-metadata-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-metadata-item {{
+  border-left: 1px solid var(--cs-color-border-default);
+  padding-left: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-document-frame {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-4);
+}}
+.cs-document-page {{
+  max-width: 840px;
+  min-height: 420px;
+  margin: 0 auto;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  box-shadow: var(--cs-shadow-sm);
+  padding: clamp(var(--cs-space-5), 5vw, var(--cs-space-8));
+}}
+.cs-document-heading {{
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-5);
+  padding-bottom: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-document-heading h3 {{
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.35;
+}}
+.cs-document-page .cs-source-text {{
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  line-height: 1.75;
+}}
+.cs-keyword-list {{ display: grid; gap: var(--cs-space-2); }}
+.cs-keyword-row {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cs-space-3);
+}}
 .cs-empty {{
   border: 1px dashed var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -694,6 +930,47 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-3);
 }}
 .cs-citation-rail {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); }}
+.cs-brief-hero {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-brief-title {{ display: grid; gap: var(--cs-space-2); }}
+.cs-brief-title h1 {{
+  margin: 0;
+  font-size: var(--cs-typography-pageTitle-fontSize);
+  line-height: var(--cs-typography-pageTitle-lineHeight);
+}}
+.cs-brief-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-summary-card {{
+  background: color-mix(in srgb, var(--cs-color-primary-50) 48%, var(--cs-color-surface-primary));
+  border-color: var(--cs-color-primary-100);
+}}
+.cs-summary-card p {{
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--cs-color-text-primary);
+}}
+.cs-stat-list {{ display: grid; gap: var(--cs-space-3); }}
+.cs-stat-row {{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--cs-space-3);
+}}
+.cs-stat-icon {{
+  width: 34px;
+  height: 34px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
 .cs-source-card summary {{
   cursor: pointer;
   color: var(--cs-color-text-primary);
@@ -705,6 +982,82 @@ button, input, textarea {{ font: inherit; }}
   margin-top: var(--cs-space-3);
   padding-top: var(--cs-space-3);
 }}
+.cs-trust-ladder {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin: var(--cs-space-4) 0;
+}}
+.cs-trust-step {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-trust-step strong {{ display: flex; align-items: center; gap: var(--cs-space-2); }}
+.cs-trust-step strong::before {{
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: var(--cs-radius-full);
+  border: 2px solid var(--cs-color-border-strong);
+  background: var(--cs-color-surface-primary);
+}}
+.cs-trust-step.is-active {{
+  border-color: var(--cs-state-evidenceBacked-border);
+  background: var(--cs-state-evidenceBacked-bg);
+}}
+.cs-trust-step.is-active strong::before {{ border-color: var(--cs-state-evidenceBacked-fg); background: var(--cs-state-evidenceBacked-fg); }}
+.cs-trust-step.is-locked {{ opacity: .76; }}
+.cs-form-surface {{
+  display: grid;
+  gap: var(--cs-space-4);
+}}
+.cs-field-block {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-field-block p {{ margin: 0; }}
+.cs-evidence-picker {{ display: grid; gap: var(--cs-space-3); }}
+.cs-evidence-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-checkmark {{
+  width: 20px;
+  height: 20px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cs-color-primary-600);
+  background: var(--cs-color-primary-600);
+  color: var(--cs-color-text-inverse);
+  font-size: 12px;
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-review-box {{
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-action-summary {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
 .cs-action-metric {{
   display: grid;
   gap: var(--cs-space-1);
@@ -713,14 +1066,47 @@ button, input, textarea {{ font: inherit; }}
   padding: var(--cs-space-3);
   background: var(--cs-color-surface-subtle);
 }}
+.cs-diff-view {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}}
+.cs-diff-line {{
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-diff-line:last-child {{ border-bottom: 0; }}
+.cs-diff-line.before {{ background: color-mix(in srgb, var(--cs-state-failed-bg) 58%, var(--cs-color-surface-primary)); }}
+.cs-diff-line.after {{ background: color-mix(in srgb, var(--cs-state-evidenceBacked-bg) 62%, var(--cs-color-surface-primary)); }}
+.cs-call-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-policy-card {{
+  border: 1px solid var(--cs-state-underReview-border);
+  background: var(--cs-state-underReview-bg);
+  border-radius: var(--cs-radius-md);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
 .cs-timeline {{ display: grid; gap: var(--cs-space-3); }}
 .cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
 .cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }}
 .cs-toast {{
-  min-height: 44px;
+  min-height: 36px;
   color: var(--cs-color-text-secondary);
   border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2) var(--cs-space-3);
   background: var(--cs-color-primary-50);
 }}
 @media (max-width: 980px) {{
@@ -740,8 +1126,21 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip {{ grid-template-columns: 1fr; }}
+  .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
+  .cs-home-intro {{ min-height: auto; }}
+  .cs-home-canvas {{ padding: var(--cs-space-4); }}
+  .cs-home-canvas > .cs-panel-header p {{ display: none; }}
+  .cs-drop {{ min-height: auto; padding: var(--cs-space-3); }}
+  .cs-drop-target {{ grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }}
+  .cs-drop-target p {{ display: none; }}
+  .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
+  .cs-ask-bar {{ grid-template-columns: 1fr; }}
+  .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row {{ grid-template-columns: 1fr; }}
+  .cs-artifact-actions {{ justify-content: flex-start; }}
+  .cs-document-page {{ min-height: auto; }}
   .cs-list-row {{ grid-template-columns: 1fr; }}
   .cs-detail-grid {{ grid-template-columns: 1fr; }}
 }}
@@ -847,26 +1246,36 @@ def _home(ctx: dict[str, Any]) -> str:
         f'<button class="cs-button secondary" type="button" data-ask-suggestion="{h(item)}">{h(item)}</button>'
         for item in ctx["suggestions"]
     )
+    suggestions = suggestions or '<span class="cs-meta">Suggestions appear after sources or briefs exist.</span>'
     latest_brief = _latest_brief_block(ctx)
     recent = _recent_sources_block(ctx)
+    knowledge = _knowledge_states_block(ctx)
+    activity = _recent_activity_block(ctx)
     return f"""
-<section class="cs-grid-hero" data-product-surface="home">
+<section class="cs-grid-hero cs-home-intro" data-product-surface="home">
   <div class="cs-stack">
     <div class="cs-hero cs-page-head">
       <div class="cs-kicker">Local workspace</div>
       <h1>Drop anything, or ask what we know</h1>
       <p>Save messy input, find what is already in the workspace, and shape a brief only when the sources are visible.</p>
     </div>
-    <section class="cs-panel">
+    <section class="cs-panel cs-home-canvas" aria-labelledby="home-workbench-title">
       <div class="cs-panel-header">
         <div>
-          <h2>Save a source</h2>
-          <p class="cs-muted">Paste text or drop a text file. CornerStone stores the original and a searchable copy.</p>
+          <h2 id="home-workbench-title">Start with a source or a question</h2>
+          <p class="cs-muted">CornerStone keeps the original source visible, then lets drafts point back to what supports them.</p>
         </div>
         {_chip("Untrusted until checked", "underReview")}
       </div>
       <form class="cs-drop" id="cs-drop-form">
-        <textarea id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
+        <div class="cs-drop-target">
+          <div class="cs-drop-mark" aria-hidden="true">In</div>
+          <div>
+            <strong>Save a source</strong>
+            <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+          </div>
+        </div>
+        <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
         <div class="cs-row">
           <button class="cs-button" type="submit">Save source</button>
           <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
@@ -875,28 +1284,28 @@ def _home(ctx: dict[str, Any]) -> str:
         </div>
         <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
       </form>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Ask the workspace</h2>
-          <p class="cs-muted">Answers are drafts. Open the sources before using them for a decision.</p>
-        </div>
-        {_chip("Draft answer", "draft")}
-      </div>
+      <div class="cs-or-divider">or ask a question</div>
       <form class="cs-stack" id="cs-ask-form">
-        <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-        <div class="cs-row">
+        <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
+          <div>
+            <strong>Ask the workspace</strong>
+            <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+          </div>
+          <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
           <button class="cs-button" type="submit">Ask</button>
-          {suggestions}
         </div>
+        <div class="cs-suggestion-row">{suggestions}</div>
         <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
       </form>
     </section>
+    <div class="cs-module-grid">
+      {recent}
+      {knowledge}
+    </div>
   </div>
   <aside class="cs-stack">
     {latest_brief}
-    {recent}
+    {activity}
     {_attention_block(ctx)}
   </aside>
 </section>
@@ -958,6 +1367,64 @@ def _recent_sources_block(ctx: dict[str, Any]) -> str:
 """
 
 
+def _knowledge_states_block(ctx: dict[str, Any]) -> str:
+    source_count = len(ctx["artifacts"])
+    brief_count = len(ctx["briefs"])
+    attention_count = len(ctx["inbox"])
+    return f"""
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Knowledge states</h2>
+    <span class="cs-meta">Local workspace</span>
+  </div>
+  <div class="cs-stat-list">
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">S</span>
+      <div><strong>Saved</strong><div class="cs-meta">Original sources preserved</div></div>
+      {_chip(str(source_count), "saved")}
+    </div>
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">B</span>
+      <div><strong>Briefs</strong><div class="cs-meta">Drafts created from visible sources</div></div>
+      {_chip(str(brief_count), "draft")}
+    </div>
+    <div class="cs-stat-row">
+      <span class="cs-stat-icon">R</span>
+      <div><strong>Review</strong><div class="cs-meta">Items needing a human decision</div></div>
+      {_chip(str(attention_count), "underReview")}
+    </div>
+  </div>
+</section>
+"""
+
+
+def _recent_activity_block(ctx: dict[str, Any]) -> str:
+    rows = []
+    for event in ctx["audit"][:5]:
+        event_type = str(event.get("event_type") or "")
+        rows.append(
+            f"""
+<div class="cs-timeline-item">
+  <span class="cs-dot"></span>
+  <div>
+    <strong>{h(_plain_event(event_type))}</strong>
+    <div class="cs-meta">{h(_display_date(event))}</div>
+  </div>
+</div>
+"""
+        )
+    content = f'<div class="cs-timeline">{"".join(rows)}</div>' if rows else '<div class="cs-empty">Activity appears after you save, search, draft, or review work.</div>'
+    return f"""
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Recent activity</h2>
+    <a class="cs-meta" href="/audit">View audit</a>
+  </div>
+  {content}
+</section>
+"""
+
+
 def _attention_block(ctx: dict[str, Any]) -> str:
     if not ctx["inbox"]:
         return """
@@ -980,24 +1447,38 @@ def _attention_block(ctx: dict[str, Any]) -> str:
 
 def _search_page(ctx: dict[str, Any], q: str) -> str:
     results = _search_records(ctx, q)
-    rows = "".join(results) if results else '<div class="cs-empty">No matching saved source or draft was found.</div>'
+    rows = "".join(results) if results else _search_empty(q)
     counts = _search_counts(ctx, q)
-    count_chips = "".join(_chip(f"{label}: {count}", "searchable" if count else "draft") for label, count in counts)
+    count_tabs = "".join(
+        f'<span class="cs-search-tab{" is-active" if index == 0 else ""}">{h(label)} <strong>{h(count)}</strong></span>'
+        for index, (label, count) in enumerate(counts)
+    )
+    right_rail = _search_right_rail(counts, q)
     return f"""
 <section data-product-surface="search">
   <div class="cs-page-head">
     <div class="cs-kicker">Search</div>
     <h1>Search the workspace</h1>
-    <p>Find saved sources and drafts without changing the audit trail.</p>
+    <p>Keyword search over saved sources and drafts. Open the receipts before using a result for a decision.</p>
   </div>
-  <div class="cs-panel">
-    <form class="cs-search" action="/search" method="get">
-      <input name="q" value="{h(q)}" placeholder="Search saved sources and drafts">
-      <button type="submit">Search</button>
-    </form>
-    <div class="cs-row" style="margin-top: var(--cs-space-4);">{count_chips}</div>
+  <div class="cs-search-workbench">
+    <div>
+      <section class="cs-panel">
+        <form class="cs-search-hero" action="/search" method="get">
+          <input name="q" value="{h(q)}" placeholder="Search saved sources, claims, action drafts, and briefs">
+          <button class="cs-button" type="submit">Search</button>
+        </form>
+        <div class="cs-search-tabs" aria-label="Result type counts">{count_tabs}</div>
+        <div class="cs-filter-row" aria-label="Current search filters">
+          <span class="cs-filter-chip">Scope: personal/default</span>
+          <span class="cs-filter-chip">Type: all visible</span>
+          <span class="cs-filter-chip">Sort: keyword match</span>
+        </div>
+      </section>
+      <div class="cs-result-list">{rows}</div>
+    </div>
+    {right_rail}
   </div>
-  <div class="cs-stack" style="margin-top: var(--cs-space-6);">{rows}</div>
 </section>
 """
 
@@ -1011,19 +1492,40 @@ def _search_records(ctx: dict[str, Any], q: str) -> list[str]:
         text = " ".join([_artifact_title(artifact), str(artifact.get("_preview") or "")]).lower()
         score = _score(text, query)
         if score > 0:
-            rows.append((score, _source_row(artifact)))
+            rows.append(
+                (
+                    score,
+                    _search_result_row(
+                        "Source",
+                        "S",
+                        _artifact_title(artifact),
+                        str(artifact.get("_preview") or "Open to inspect the saved source."),
+                        _detail_href("artifacts", artifact.get("artifact_id")),
+                        "Searchable",
+                        "searchable",
+                        _display_date(artifact),
+                    ),
+                )
+            )
     for brief in ctx["briefs"]:
         text = " ".join([_brief_title(brief), str(brief.get("summary") or ""), " ".join(str(item) for item in brief.get("key_points", []) if isinstance(item, str))]).lower()
         score = _score(text, query)
         if score > 0:
             label, state = _brief_label(brief)
-            rows.append((score, _generic_row("Brief", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
+            rows.append((score, _search_result_row("Brief", "B", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
     for claim in ctx["claims"]:
         text = _claim_title(claim).lower()
         score = _score(text, query)
         if score > 0:
             label, state = _claim_label(claim)
-            rows.append((score, _generic_row("Claim", _claim_title(claim), "Claim draft with linked evidence.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
+            rows.append((score, _search_result_row("Claim", "C", _claim_title(claim), "Claim draft with linked evidence.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
+    for action in ctx["actions"]:
+        dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
+        text = " ".join([_action_title(action), str(dry_run.get("goal") or ""), str(dry_run.get("target") or "")]).lower()
+        score = _score(text, query)
+        if score > 0:
+            label, state = _action_label(action)
+            rows.append((score, _search_result_row("Action", "A", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
     rows.sort(key=lambda item: item[0], reverse=True)
     return [row for _, row in rows[:20]]
 
@@ -1042,17 +1544,87 @@ def _search_counts(ctx: dict[str, Any], q: str) -> list[tuple[str, int]]:
             ("Sources", 0),
             ("Briefs", 0),
             ("Claims", 0),
+            ("Actions", 0),
         ]
     query = q.lower().strip()
     source_count = sum(1 for artifact in ctx["artifacts"] if _score(" ".join([_artifact_title(artifact), str(artifact.get("_preview") or "")]).lower(), query) > 0)
     brief_count = sum(1 for brief in ctx["briefs"] if _score(" ".join([_brief_title(brief), str(brief.get("summary") or ""), " ".join(str(item) for item in brief.get("key_points", []) if isinstance(item, str))]).lower(), query) > 0)
     claim_count = sum(1 for claim in ctx["claims"] if _score(_claim_title(claim).lower(), query) > 0)
+    action_count = sum(
+        1
+        for action in ctx["actions"]
+        if _score(" ".join([_action_title(action), str((action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}).get("goal") or "")]).lower(), query) > 0
+    )
     return [
-        ("All", source_count + brief_count + claim_count),
+        ("All", source_count + brief_count + claim_count + action_count),
         ("Sources", source_count),
         ("Briefs", brief_count),
         ("Claims", claim_count),
+        ("Actions", action_count),
     ]
+
+
+def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
+    return f"""
+<a class="cs-result-row" href="{h(href)}">
+  <span class="cs-result-icon" aria-hidden="true">{h(icon)}</span>
+  <span class="cs-result-body">
+    <span class="cs-result-meta"><span>{h(kind)}</span><span>{h(date)}</span></span>
+    <h3>{h(title)}</h3>
+    <p>{h(_truncate(detail, 240))}</p>
+  </span>
+  <span class="cs-row">{_chip(label, state)}</span>
+</a>
+"""
+
+
+def _search_right_rail(counts: list[tuple[str, int]], q: str) -> str:
+    stat_rows = "".join(
+        f'<div class="cs-right-stat"><span>{h(label)}</span><strong>{h(count)}</strong></div>'
+        for label, count in counts[1:]
+    )
+    suggestions = _search_followups(q, counts)
+    suggestion_rows = "".join(
+        f'<a class="cs-suggested-query" href="/search?q={quote(item)}"><span>?</span><span>{h(item)}</span></a>'
+        for item in suggestions
+    )
+    return f"""
+<aside class="cs-stack">
+  <section class="cs-panel flat">
+    <div class="cs-panel-header"><h2>What we found</h2>{_chip(str(counts[0][1] if counts else 0), "searchable")}</div>
+    {stat_rows or '<div class="cs-empty">Run a search to see available receipt types.</div>'}
+  </section>
+  <section class="cs-panel flat">
+    <h2 class="cs-section-title">Suggested follow-ups</h2>
+    <div class="cs-stack">{suggestion_rows}</div>
+  </section>
+  <section class="cs-panel flat">
+    <h2 class="cs-section-title">Receipt coverage</h2>
+    <p class="cs-muted">Results are local keyword matches. Use the source and provenance panels before treating a draft as supported.</p>
+  </section>
+</aside>
+"""
+
+
+def _search_followups(q: str, counts: list[tuple[str, int]]) -> list[str]:
+    query = q.strip() or "latest source"
+    by_label = {label: count for label, count in counts}
+    items = [
+        f"What sources mention {query}?",
+        f"Which claims depend on {query}?",
+        f"Show action drafts related to {query}",
+    ]
+    if by_label.get("Briefs", 0):
+        items.append(f"Open briefs that summarize {query}")
+    if by_label.get("Sources", 0):
+        items.append(f"Find provenance for {query}")
+    return items[:5]
+
+
+def _search_empty(q: str) -> str:
+    if q.strip():
+        return '<div class="cs-empty">No matching saved source or draft was found. Try fewer terms or save the source first.</div>'
+    return '<div class="cs-empty">Enter a keyword to search saved sources, briefs, claims, and action drafts.</div>'
 
 
 def _artifact_list_page(ctx: dict[str, Any]) -> str:
@@ -1203,34 +1775,81 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     linked = _linked_records(ctx, artifact.get("artifact_id"))
     source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
     fingerprint = _fingerprint(artifact.get("checksum_sha256") or artifact.get("original_storage_ref"))
+    source_label = _plain_source(source)
+    keywords = _artifact_keywords(text, title)
+    keyword_rows = "".join(
+        f'<div class="cs-keyword-row"><span>{h(keyword)}</span>{_chip(str(count), "searchable")}</div>'
+        for keyword, count in keywords
+    )
+    ask_query = quote(f"What matters in {title}")
     return f"""
 <section class="cs-grid-two" data-product-surface="artifact-detail">
   <div class="cs-stack">
-    <div class="cs-page-head">
-      <div class="cs-kicker">Artifact</div>
-      <h1>{h(title)}</h1>
-      <p>Original saved source with searchable text preview.</p>
+    <div class="cs-artifact-hero">
+      <div class="cs-artifact-title">
+        <div class="cs-kicker">Artifact / Original source</div>
+        <h1>{h(title)}</h1>
+        <p class="cs-muted">The original source stays primary. Drafts and decisions should point back here.</p>
+      </div>
+      <div class="cs-artifact-actions">
+        <a class="cs-button secondary" href="/search?q={h(ask_query)}">Ask about this source</a>
+        <a class="cs-button secondary" href="#linked-work">View linked work</a>
+      </div>
+    </div>
+    <div class="cs-metadata-strip" aria-label="Source metadata">
+      <div class="cs-metadata-item"><span class="cs-meta">Source</span><strong>{h(source_label)}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>{h(_display_date(artifact))}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Media type</span><strong>{h(str(artifact.get("media_type") or "text/plain"))}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
-        <h2>Source text</h2>
-        {_chip("Searchable", "searchable")}
+        <div>
+          <h2>Source text</h2>
+          <p class="cs-muted">Readable local preview of the preserved source.</p>
+        </div>
+        <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}</div>
       </div>
-      <div class="cs-source-text">{h(text)}</div>
+      <div class="cs-document-frame">
+        <article class="cs-document-page" aria-label="Original source text preview">
+          <header class="cs-document-heading">
+            <span class="cs-meta">Original source preview</span>
+            <h3>{h(title)}</h3>
+            <span class="cs-meta">{h(source_label)} / {h(_display_date(artifact))}</span>
+          </header>
+          <div class="cs-source-text">{h(text)}</div>
+        </article>
+      </div>
     </section>
   </div>
   <aside class="cs-stack">
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Source state</h2>
-      <div class="cs-row" style="margin-top: var(--cs-space-3);">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
+      <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
       <dl class="cs-detail-grid">
         <dt>Saved</dt><dd>{h(_display_date(artifact))}</dd>
-        <dt>Source</dt><dd>{h(_plain_source(source))}</dd>
+        <dt>Source</dt><dd>{h(source_label)}</dd>
         <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
       </dl>
       <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
     </section>
+    <section class="cs-panel flat">
+      <h2 class="cs-section-title">Readable preview</h2>
+      <p class="cs-muted">{h(_truncate(text, 260))}</p>
+    </section>
+    <section class="cs-panel flat">
+      <div class="cs-panel-header"><h2>Extracted keywords</h2>{_chip(str(len(keywords)), "searchable")}</div>
+      <div class="cs-keyword-list">{keyword_rows or '<div class="cs-empty">No keyword preview is available.</div>'}</div>
+    </section>
     {linked}
+    <section class="cs-panel flat">
+      <h2 class="cs-section-title">Provenance</h2>
+      <dl class="cs-detail-grid">
+        <dt>Ingested from</dt><dd>{h(source_label)}</dd>
+        <dt>Ingested</dt><dd>{h(_display_date(artifact))}</dd>
+        <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
+      </dl>
+    </section>
   </aside>
 </section>
 """
@@ -1252,8 +1871,8 @@ def _linked_records(ctx: dict[str, Any], artifact_id: Any) -> str:
             label, state = _claim_label(claim)
             rows.append(_generic_row("Claim", _claim_title(claim), "Uses this source.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim)))
     if not rows:
-        return '<section class="cs-panel flat"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No briefs or claims are linked to this source yet.</div></section>'
-    return f'<section class="cs-panel flat"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
+        return '<section class="cs-panel flat" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No briefs or claims are linked to this source yet.</div></section>'
+    return f'<section class="cs-panel flat" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
 
 
 def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
@@ -1272,31 +1891,46 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     next_steps = [str(item) for item in brief.get("recommended_next_steps", []) if isinstance(item, str)]
     next_rows = "".join(f"<li>{h(item)}</li>" for item in next_steps[:4]) or "<li>Review the visible sources before promoting this draft.</li>"
     provenance = _brief_provenance(brief)
+    source_count = len(source_items)
     return f"""
 <section class="cs-grid-two" data-product-surface="brief-detail">
   <div class="cs-stack">
-    <div class="cs-page-head">
-      <div class="cs-kicker">Brief</div>
-      <h1>{h(_brief_title(brief))}</h1>
-      <p>This draft is useful only when the source trail below supports the load-bearing statements.</p>
+    <div class="cs-brief-hero">
+      <div class="cs-brief-title">
+        <div class="cs-kicker">Brief</div>
+        <h1>{h(_brief_title(brief))}</h1>
+        <p class="cs-muted">Read the answer and its source trail together before using it for a decision.</p>
+        <div class="cs-brief-meta">
+          <span>{h(_display_date(brief))}</span>
+          <span>{h(str(source_count))} visible source{"s" if source_count != 1 else ""}</span>
+        </div>
+      </div>
+      <div class="cs-row">{_chip(label, state)}</div>
     </div>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Summary</h2>{_chip(label, state)}</div>
+    <section class="cs-panel cs-summary-card">
+      <div class="cs-panel-header"><h2>Summary</h2></div>
       <p>{h(summary or "No summary text was drafted yet.")}</p>
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Findings</h2></div>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Findings</h2>
+          <p class="cs-muted">Each statement should stay close to the source that supports it.</p>
+        </div>
+      </div>
       {point_rows}
       {f'<h2 class="cs-section-title">More findings</h2>{finding_rows}' if finding_rows else ''}
     </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Gaps</h2>{_chip("Needs source check", "underReview")}</div>
-      <ul>{gap_rows}</ul>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Next steps</h2>{_chip("Draft only", "draft")}</div>
-      <ul>{next_rows}</ul>
-    </section>
+    <div class="cs-module-grid">
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Gaps</h2>{_chip("Needs source check", "underReview")}</div>
+        <ul>{gap_rows}</ul>
+      </section>
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Next steps</h2>{_chip("Draft only", "draft")}</div>
+        <ul>{next_rows}</ul>
+      </section>
+    </div>
   </div>
   <aside class="cs-stack">
     <section class="cs-panel flat">
@@ -1319,35 +1953,79 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
 def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     label, state = _claim_label(claim)
     source_items = _source_items(ctx, claim)
-    source_list = _source_links_from_items(source_items)
+    source_list = _evidence_picker_from_items(source_items)
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
-    review_note = "Add source support before approval." if not _evidence_refs(claim) else "Source support is attached; review before sharing."
+    has_sources = bool(source_items)
+    is_approved = str(claim.get("status") or "").lower() == "approved"
+    review_note = "Evidence attached; request review before approval." if has_sources else "Add evidence before approval."
+    approval_note = "Approval stays locked until review is recorded." if has_sources else "Approval stays locked until supporting evidence is attached."
+    rationale = str(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before promoting this claim."
     return f"""
 <section class="cs-grid-two" data-product-surface="claim-detail">
   <div class="cs-stack">
-    <div class="cs-page-head">
-      <div class="cs-kicker">Claim</div>
-      <h1>{h(_claim_title(claim))}</h1>
-      <p>A claim should stay in draft until the supporting sources are easy to inspect.</p>
+    <div class="cs-brief-hero">
+      <div class="cs-brief-title">
+        <div class="cs-kicker">Claim builder</div>
+        <h1>{h(_claim_title(claim))}</h1>
+        <div class="cs-brief-meta">
+          <span>Draft conclusion</span>
+          <span>{h(_display_date(claim))}</span>
+          <span>{h(len(source_items))} source{"s" if len(source_items) != 1 else ""} attached</span>
+        </div>
+      </div>
+      <div class="cs-row">{_chip(label, state)}{_chip("Review required before approval", "underReview")}</div>
     </div>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Statement</h2>{_chip(label, state)}</div>
-      <p>{h(str(claim.get("statement") or ""))}</p>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Trust ladder</h2>
+          <p class="cs-muted">Draft freely, attach evidence, then request review before a decision uses this claim.</p>
+        </div>
+      </div>
+      {_claim_trust_ladder(has_sources, is_approved)}
+      <p class="cs-muted">{h(review_note)}</p>
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Review path</h2>{_chip("Review required before approval", "underReview")}</div>
-      <div class="cs-row">{_chip("Draft", "draft")}{_chip("Source support", "searchable")}{_chip("Approved", "approved")}</div>
-      <p class="cs-muted">{h(review_note)}</p>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Claim draft</h2>
+          <p class="cs-muted">Statement and rationale stay editable until review.</p>
+        </div>
+      </div>
+      <div class="cs-form-surface">
+        <div class="cs-field-block">
+          <span class="cs-meta">Claim statement</span>
+          <p>{h(str(claim.get("statement") or ""))}</p>
+        </div>
+        <div class="cs-field-block">
+          <span class="cs-meta">Rationale</span>
+          <p>{h(rationale)}</p>
+        </div>
+      </div>
     </section>
   </div>
   <aside class="cs-stack">
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Sources</h2>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Supporting evidence</h2>
+          <p class="cs-muted">Only visible local sources are selectable here.</p>
+        </div>
+        {_chip(str(len(source_items)), "searchable")}
+      </div>
       {source_list}
     </section>
     <section class="cs-panel flat">
+      <h2 class="cs-section-title">Review controls</h2>
+      <div class="cs-review-box">
+        <a class="cs-button secondary" href="/claims">Save draft</a>
+        <a class="cs-button" href="/inbox">Request review</a>
+        <p class="cs-muted">{h(approval_note)}</p>
+      </div>
+    </section>
+    <section class="cs-panel flat">
       <h2 class="cs-section-title">Authority</h2>
-      <p class="cs-muted">{h(str(authority.get("blocked_reason") or "Keep this claim as a draft until the source trail is clear."))}</p>
+      <p class="cs-muted">{h(str(authority.get("blocked_reason") or "Owner approval is required before this claim becomes shared truth or drives autonomous action."))}</p>
     </section>
   </aside>
 </section>
@@ -1366,27 +2044,64 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     call_label = "Simulated in local mode" if int(impact.get("real_external_http_calls", 0) or 0) == 0 else "External write planned"
     connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
     connector_label = "Mediated preview" if connector.get("direct_provider_access") is False else "Provider access needs review"
+    approval = action.get("approval") if isinstance(action.get("approval"), dict) else {}
+    approval_required = bool(approval.get("required") or "approval" in decision_label.lower())
+    approval_label = "Approval required" if approval_required else "Approval not required"
+    risk_label = str(impact.get("risk") or action.get("risk") or "review").title()
+    target = str(impact.get("target") or "Local preview only.")
+    goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
     return f"""
 <section class="cs-grid-two" data-product-surface="action-detail">
   <div class="cs-stack">
-    <div class="cs-page-head">
-      <div class="cs-kicker">Action</div>
-      <h1>{h(_action_title(action))}</h1>
-      <p>Preview the change and supporting sources before any external write.</p>
+    <div class="cs-brief-hero">
+      <div class="cs-brief-title">
+        <div class="cs-kicker">Action preview</div>
+        <h1>{h(_action_title(action))}</h1>
+        <div class="cs-brief-meta">
+          <span>Dry-run first</span>
+          <span>{h(_display_date(action))}</span>
+          <span>No external send yet</span>
+        </div>
+      </div>
+      <div class="cs-row">{_chip("Preview (dry run)", "searchable")}{_chip(approval_label, "underReview")}{_chip(f"{risk_label} risk", "underReview")}</div>
     </div>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Preview</h2>{_chip(label, state)}</div>
-      <p><strong>Before:</strong> {h(_plain_runtime_text(diff.get("before") or "No side effect applied."))}</p>
-      <p><strong>After:</strong> {h(_plain_runtime_text(diff.get("after") or "No external write has been performed."))}</p>
+      <div class="cs-panel-header">
+        <div>
+          <h2>Summary</h2>
+          <p class="cs-muted">This is the proposed change, not an execution result.</p>
+        </div>
+        {_chip(label, state)}
+      </div>
+      <p>{h(goal)}</p>
+      <div class="cs-action-summary">
+        <div class="cs-action-metric"><span class="cs-meta">Trigger</span><span>Manual review</span></div>
+        <div class="cs-action-metric"><span class="cs-meta">Target</span><span>{h(target)}</span></div>
+        <div class="cs-action-metric"><span class="cs-meta">Policy</span><span>{h(decision_label)}</span></div>
+      </div>
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Impact</h2></div>
-      <div class="cs-row">
-        <div class="cs-action-metric"><span class="cs-meta">Target</span><span>{h(str(impact.get("target") or "Local preview only."))}</span></div>
+      <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip("Will be reviewed", "underReview")}</div>
+      <div class="cs-action-summary">
+        <div class="cs-action-metric"><span class="cs-meta">Object</span><span>{h(target)}</span></div>
         <div class="cs-action-metric"><span class="cs-meta">External calls</span><span>{h(call_label)}</span></div>
         <div class="cs-action-metric"><span class="cs-meta">Connector</span><span>{h(connector_label)}</span></div>
       </div>
-      <div class="cs-row" style="margin-top: var(--cs-space-3);">{_chip(str(impact.get("risk") or action.get("risk") or "Needs approval").title(), "underReview")}{_chip(decision_label, "underReview")}</div>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><h2>Proposed changes</h2>{_chip("Diff preview", "searchable")}</div>
+      {_action_diff_view(diff)}
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><h2>External calls</h2>{_chip("Simulated in local mode", "draft")}</div>
+      {_action_external_calls(impact, connector_label, call_label)}
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><h2>Policy decision</h2>{_chip(decision_label, "underReview")}</div>
+      <div class="cs-policy-card">
+        <strong>{h(decision_label)}</strong>
+        <span>{h(str(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk."))}</span>
+      </div>
     </section>
   </div>
   <aside class="cs-stack">
@@ -1395,11 +2110,82 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       {source_list}
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Approval</h2>
-      <p class="cs-muted">{h(str(policy.get("reason") or "Preview the action before requesting approval."))}</p>
+      <h2 class="cs-section-title">Risk and approval</h2>
+      <dl class="cs-detail-grid">
+        <dt>Risk level</dt><dd>{h(risk_label)}</dd>
+        <dt>Approval</dt><dd>{h(approval_label)}</dd>
+        <dt>Status</dt><dd>{h(str(approval.get("status") or "pending"))}</dd>
+      </dl>
+      <div class="cs-review-box">
+        <a class="cs-button" href="/inbox">Request approval</a>
+        <p class="cs-muted">Execution is not shown as the primary action until approval is satisfied.</p>
+      </div>
+    </section>
+    <section class="cs-panel flat">
+      <h2 class="cs-section-title">Auditability</h2>
+      <p class="cs-muted">Dry-run, policy, approval, and execution records remain inspectable before this action can become a workflow result.</p>
     </section>
   </aside>
 </section>
+"""
+
+
+def _claim_trust_ladder(has_sources: bool, is_approved: bool) -> str:
+    evidence_class = "is-active" if has_sources or is_approved else "is-locked"
+    approved_class = "is-active" if is_approved else "is-locked"
+    evidence_note = "Supporting source is attached." if has_sources else "Attach at least one source."
+    approved_note = "Decision-ready." if is_approved else "Requires review first."
+    return f"""
+<div class="cs-trust-ladder" aria-label="Claim trust ladder">
+  <div class="cs-trust-step is-active">
+    <strong>Draft</strong>
+    <span class="cs-meta">Editable statement.</span>
+  </div>
+  <div class="cs-trust-step {evidence_class}">
+    <strong>Evidence-backed</strong>
+    <span class="cs-meta">{h(evidence_note)}</span>
+  </div>
+  <div class="cs-trust-step {approved_class}">
+    <strong>Approved</strong>
+    <span class="cs-meta">{h(approved_note)}</span>
+  </div>
+</div>
+"""
+
+
+def _action_diff_view(diff: dict[str, Any]) -> str:
+    before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
+    after = _plain_runtime_text(diff.get("after") or "No external write has been performed.")
+    return f"""
+<div class="cs-diff-view" aria-label="Dry-run diff preview">
+  <div class="cs-diff-line before"><span class="cs-meta">Before</span><span>{h(before)}</span></div>
+  <div class="cs-diff-line after"><span class="cs-meta">After</span><span>{h(after)}</span></div>
+</div>
+<p class="cs-meta">Preview shown. Exact downstream formatting may vary after approval.</p>
+"""
+
+
+def _action_external_calls(impact: dict[str, Any], connector_label: str, call_label: str) -> str:
+    expected = int(impact.get("expected_connector_calls", 0) or 0)
+    target = str(impact.get("target") or "Local preview only.")
+    if expected <= 0:
+        return f"""
+<div class="cs-call-row">
+  <div>
+    <strong>No external connector call planned</strong>
+    <p class="cs-muted">This preview records the policy and audit envelope without a provider send.</p>
+  </div>
+  {_chip(call_label, "draft")}
+</div>
+"""
+    return f"""
+<div class="cs-call-row">
+  <div>
+    <strong>{h(connector_label)}</strong>
+    <p class="cs-muted">Would create or update {h(target)} after approval. Simulated in local mode.</p>
+  </div>
+  {_chip(call_label, "draft")}
+</div>
 """
 
 
@@ -1412,6 +2198,26 @@ def _source_links_from_items(items: list[dict[str, str]]) -> str:
         return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
     rows = "".join(_source_card(item) for item in items[:8])
     return f'<div class="cs-list">{rows}</div>'
+
+
+def _evidence_picker_from_items(items: list[dict[str, str]]) -> str:
+    if not items:
+        return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
+    rows = []
+    for item in items[:6]:
+        rows.append(
+            f"""
+<a class="cs-evidence-row" href="{h(item["href"])}">
+  <span class="cs-checkmark" aria-hidden="true">&#10003;</span>
+  <span>
+    <strong>{h(item["title"])}</strong>
+    <span class="cs-meta">{h(item["label"])} / {h(item["date"])} / {h(item["fingerprint"])}</span>
+    <span class="cs-muted">{h(_truncate(item["snippet"], 120))}</span>
+  </span>
+</a>
+"""
+        )
+    return f'<div class="cs-evidence-picker">{"".join(rows)}</div>'
 
 
 def _source_card(item: dict[str, str]) -> str:
@@ -1567,6 +2373,45 @@ def _plain_source(source: dict[str, Any]) -> str:
     return _truncate(source_ref, 96)
 
 
+def _artifact_keywords(text: str, title: str) -> list[tuple[str, int]]:
+    stop_words = {
+        "about",
+        "after",
+        "again",
+        "also",
+        "before",
+        "being",
+        "brief",
+        "checked",
+        "decision",
+        "draft",
+        "from",
+        "have",
+        "into",
+        "local",
+        "needs",
+        "source",
+        "text",
+        "that",
+        "their",
+        "there",
+        "this",
+        "until",
+        "what",
+        "when",
+        "with",
+        "would",
+        "your",
+    }
+    counts: dict[str, int] = {}
+    for word in re.findall(r"[A-Za-z][A-Za-z0-9-]{3,}", f"{title} {text}".lower()):
+        if word in stop_words:
+            continue
+        counts[word] = counts.get(word, 0) + 1
+    ranked = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    return [(word.replace("-", " ").title(), count) for word, count in ranked[:6]]
+
+
 def _fingerprint(value: Any) -> str:
     text = str(value or "").replace("sha256:", "").strip()
     if not text:
@@ -1607,6 +2452,11 @@ def _evidence_refs(record: dict[str, Any]) -> list[str]:
     evidence = record.get("evidence_bundle")
     if isinstance(evidence, dict):
         artifact_refs = evidence.get("artifact_refs")
+        if isinstance(artifact_refs, list):
+            refs.extend(str(item) for item in artifact_refs)
+    action_evidence = record.get("evidence")
+    if isinstance(action_evidence, dict):
+        artifact_refs = action_evidence.get("artifact_refs")
         if isinstance(artifact_refs, list):
             refs.extend(str(item) for item in artifact_refs)
     dry_run = record.get("dry_run")

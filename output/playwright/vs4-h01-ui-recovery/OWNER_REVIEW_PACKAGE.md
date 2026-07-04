@@ -1,6 +1,6 @@
 # VS4-H01 UI Recovery Owner Review Package
 
-Date: 2026-07-04T15:54:38.870088Z
+Date: 2026-07-04T18:33:18.537815Z
 
 ## Scope
 
@@ -30,14 +30,14 @@ This package covers the current verified recovery slice for the rejected VS4-H01
 - `output/playwright/vs4-h01-ui-recovery/screenshots/inbox-desktop.png`: PASS / `/inbox` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/audit-desktop.png`: PASS / `/audit` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/artifact-detail-desktop.png`: PASS / `/artifacts/art_ede571327ab3ec20?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-desktop.png`: PASS / `/briefs/brief_5acce811723bb253?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/claim-detail-desktop.png`: PASS / `/claims/claim_0aa084aefda27327?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-desktop.png`: PASS / `/actions/action_96abed9439e1622b?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-desktop.png`: PASS / `/briefs/brief_80ce0cc2ea1ab08c?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/claim-detail-desktop.png`: PASS / `/claims/claim_84718e0f00bacea6?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-desktop.png`: PASS / `/actions/action_d1fee2197fe15cb9?view=html` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/home-mobile.png`: PASS / `/` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/search-mobile.png`: PASS / `/search?q=vendor%20renewal` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/inbox-mobile.png`: PASS / `/inbox` / mobile
-- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-mobile.png`: PASS / `/briefs/brief_5acce811723bb253?view=html` / mobile
-- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-mobile.png`: PASS / `/actions/action_96abed9439e1622b?view=html` / mobile
+- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-mobile.png`: PASS / `/briefs/brief_80ce0cc2ea1ab08c?view=html` / mobile
+- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-mobile.png`: PASS / `/actions/action_d1fee2197fe15cb9?view=html` / mobile
 
 ## Checks Run
 

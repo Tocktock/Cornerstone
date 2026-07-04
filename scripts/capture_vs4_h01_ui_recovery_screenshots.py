@@ -46,7 +46,7 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 
 DESKTOP_ROUTES = [
     {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Drop anything, or ask what we know", "Save a source", "Ask the workspace"]},
-    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search the workspace"]},
+    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search the workspace", "What we found", "Suggested follow-ups"]},
     {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief drafts"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support"]},
@@ -56,9 +56,15 @@ DESKTOP_ROUTES = [
 ]
 
 DETAIL_ROUTES = [
-    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Source text", "Source state"]},
+    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original source", "Source text", "Source state", "Provenance"]},
     {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Citation trail", "Provenance"]},
-    {"name": "claim-detail-desktop", "kind": "claims", "id_key": "claim_id", "surface": "claim-detail", "required": ["Review path", "Sources"]},
+    {
+        "name": "claim-detail-desktop",
+        "kind": "claims",
+        "id_key": "claim_id",
+        "surface": "claim-detail",
+        "required": ["Trust ladder", "Supporting evidence", "Review controls"],
+    },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Preview", "Approval"]},
 ]
 
@@ -76,12 +82,18 @@ LAYOUT_SCRIPT = """
   const text = document.body ? document.body.innerText : "";
   const surfaceNode = document.querySelector("[data-product-surface]");
   const hero = document.querySelector("[data-product-surface='home'] h1");
+  const homeSurface = document.querySelector("[data-product-surface='home']");
+  const dropForm = document.querySelector("#cs-drop-form");
+  const askForm = document.querySelector("#cs-ask-form");
   const nav = document.querySelector(".cs-sidebar");
   const rect = (node) => {
     if (!node) return null;
     const r = node.getBoundingClientRect();
     return {top: r.top, left: r.left, width: r.width, height: r.height};
   };
+  const dropRect = rect(dropForm);
+  const askRect = rect(askForm);
+  const isHome = Boolean(homeSurface);
   return {
     title: document.title,
     body_text_length: text.length,
@@ -97,6 +109,10 @@ LAYOUT_SCRIPT = """
       ? window.getComputedStyle(document.querySelector(".cs-shell")).gridTemplateColumns.split(" ").length === 1
       : false,
     mobile_first_value_before_nav: window.innerWidth <= 980 && hero && nav ? rect(hero).top <= rect(nav).top : true,
+    home_drop_ask_ordered: isHome && dropRect && askRect ? dropRect.top < askRect.top : true,
+    home_drop_ask_in_first_viewport: isHome && dropRect && askRect
+      ? dropRect.top < window.innerHeight && askRect.top < window.innerHeight
+      : true,
     token_css_present: [
       "--cs-color-background-app:",
       "--cs-layout-sidebarWidth:",
@@ -332,6 +348,8 @@ def capture_page(
         "required_text_present": not required_missing,
         "forbidden_terms_absent": not forbidden,
         "mobile_first_value_before_nav": layout.get("mobile_first_value_before_nav") is True,
+        "home_drop_ask_ordered": layout.get("home_drop_ask_ordered") is True,
+        "home_drop_ask_in_first_viewport": layout.get("home_drop_ask_in_first_viewport") is True,
         "clean_browser_exit": exit_code == 0,
         "no_capture_error": error is None,
     }
