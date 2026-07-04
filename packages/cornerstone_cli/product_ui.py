@@ -1044,7 +1044,27 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-actions {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }}
 .cs-artifact-workbench {{
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}}
+.cs-artifact-compact-hero {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-artifact-compact-hero .cs-artifact-title h1 {{
+  max-width: 42ch;
+  font-size: 28px;
+  line-height: 1.16;
+  text-wrap: balance;
+}}
+.cs-artifact-compact-hero .cs-artifact-actions {{
+  justify-content: flex-start;
 }}
 .cs-artifact-breadcrumb {{
   display: flex;
@@ -1111,6 +1131,10 @@ button, input, textarea {{ font: inherit; }}
   justify-content: space-between;
   gap: var(--cs-space-3);
   padding: var(--cs-space-2) var(--cs-space-3);
+}}
+.cs-artifact-toolbar-label {{
+  display: grid;
+  gap: 2px;
 }}
 .cs-artifact-toolgroup {{
   display: flex;
@@ -2489,7 +2513,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2511,6 +2535,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
+  .cs-artifact-compact-hero .cs-artifact-title h1 {{ font-size: 26px; }}
+  .cs-artifact-compact-hero .cs-artifact-actions {{ padding-top: 0; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-artifact-toolbar {{ align-items: stretch; flex-direction: column; }}
   .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
@@ -4106,22 +4132,16 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     thumb_lines = "".join('<span class="cs-artifact-thumb-line"></span>' for _ in range(7))
     ask_query = quote(f"What matters in {title}")
     return f"""
-{_detail_orientation(
-    parent_href="/artifacts",
-    parent_label="Saved sources",
-    current_label=title,
-    summary="Original source with linked work and provenance nearby.",
-    chip_label="Source detail",
-    chip_state="searchable",
-    actions=[
-        ("Back to saved sources", "/artifacts", "secondary"),
-        ("Search workspace", "/search", "secondary"),
-    ],
-)}
-<section class="cs-grid-two cs-artifact-workbench" data-product-surface="artifact-detail">
+<section class="cs-artifact-workbench" data-product-surface="artifact-detail" aria-label="Source inspection workspace">
   <div class="cs-stack">
-    <div class="cs-artifact-hero">
+    <header class="cs-artifact-compact-hero">
       <div class="cs-artifact-title">
+        <nav class="cs-artifact-breadcrumb" aria-label="Detail path">
+          <span class="cs-meta">Detail path</span>
+          <a href="/artifacts">Saved sources</a>
+          <span aria-hidden="true">/</span>
+          <span>{h(_truncate(title, 80))}</span>
+        </nav>
         <div class="cs-artifact-title-row">
           <span class="cs-artifact-file-mark" aria-hidden="true">TXT</span>
           <div>
@@ -4131,10 +4151,11 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         </div>
       </div>
       <div class="cs-artifact-actions">
+        <a class="cs-button secondary" href="/artifacts">Back to saved sources</a>
         <a class="cs-button secondary" href="/search?q={h(ask_query)}">Ask about this source</a>
         <a class="cs-button secondary" href="#linked-work">View linked evidence</a>
       </div>
-    </div>
+    </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Source</span><strong>{h(source_label)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>{h(_display_date(artifact))}</strong></div>
@@ -4145,19 +4166,18 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
         <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-tool" aria-hidden="true">T</span>
-          <span class="cs-artifact-tool" aria-hidden="true">S</span>
-          <span class="cs-artifact-page-count">1 / 1</span>
+          <div class="cs-artifact-toolbar-label">
+            <strong>Original source</strong>
+            <span class="cs-meta">Text preview from the saved artifact</span>
+          </div>
         </div>
         <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-tool" aria-hidden="true">-</span>
-          <span class="cs-meta">100%</span>
-          <span class="cs-artifact-tool" aria-hidden="true">+</span>
+          <span class="cs-artifact-page-count">1 text source</span>
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
       </div>
       <div class="cs-document-frame has-rail">
-        <aside class="cs-artifact-page-rail" aria-label="Original source pages">
+        <aside class="cs-artifact-page-rail" aria-label="Original text outline">
           <div class="cs-artifact-thumb is-active">{thumb_lines}<span>1</span></div>
         </aside>
         <div class="cs-artifact-page-area">

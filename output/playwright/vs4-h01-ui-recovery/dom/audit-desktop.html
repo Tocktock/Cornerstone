@@ -582,7 +582,27 @@ button, input, textarea { font: inherit; }
 }
 .cs-artifact-actions { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }
 .cs-artifact-workbench {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}
+.cs-artifact-compact-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-artifact-compact-hero .cs-artifact-title h1 {
+  max-width: 42ch;
+  font-size: 28px;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+.cs-artifact-compact-hero .cs-artifact-actions {
+  justify-content: flex-start;
 }
 .cs-artifact-breadcrumb {
   display: flex;
@@ -649,6 +669,10 @@ button, input, textarea { font: inherit; }
   justify-content: space-between;
   gap: var(--cs-space-3);
   padding: var(--cs-space-2) var(--cs-space-3);
+}
+.cs-artifact-toolbar-label {
+  display: grid;
+  gap: 2px;
 }
 .cs-artifact-toolgroup {
   display: flex;
@@ -2027,7 +2051,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2049,6 +2073,8 @@ button, input, textarea { font: inherit; }
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta { grid-template-columns: 1fr; }
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
+  .cs-artifact-compact-hero .cs-artifact-title h1 { font-size: 26px; }
+  .cs-artifact-compact-hero .cs-artifact-actions { padding-top: 0; }
   .cs-artifact-actions { justify-content: flex-start; }
   .cs-artifact-toolbar { align-items: stretch; flex-direction: column; }
   .cs-document-frame.has-rail { grid-template-columns: 1fr; min-height: auto; }
@@ -2123,8 +2149,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">A</span>
     <div>
       <h2>Action proposed</h2>
-      <p class="cs-muted">Action / action_67d...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Action / action_2ab...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2133,11 +2159,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>1</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_5cc6d8ce2e...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>action:action_67df71a67d98f23c</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_30eb59327c...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>action:action_2abc8006197f7bf4</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>action.card.proposed</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>5cc6d8ce2e892769...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>9dcf838d24f84ea4...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>30eb59327cf3736d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>e0ee938eb93d8305...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>action kind, claim id, decision, dry run id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2150,8 +2176,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">D</span>
     <div>
       <h2>Decision path activated</h2>
-      <p class="cs-muted">Mission / mission_ad...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Mission / mission_41...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2160,11 +2186,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>2</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_9dcf838d24...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_add040303fa1cb70</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_e0ee938eb9...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_419f28be2fd9c0c6</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>mission.activated</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>9dcf838d24f84ea4...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>da4b60e4aa32d065...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>e0ee938eb93d8305...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>c870ea880becb199...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>allowed actions, forbidden actions, mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2178,7 +2204,7 @@ button, input, textarea { font: inherit; }
     <div>
       <h2>Workspace mode recorded</h2>
       <p class="cs-muted">Workspace / 3e548f87d1...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2187,11 +2213,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>3</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_da4b60e4aa...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_c870ea880b...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>workspace:3e548f87d142e49b</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>workspace.mode.set</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>da4b60e4aa32d065...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>941e100bc3a14899...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>c870ea880becb199...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>372b1f614f989bcf...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>autonomous execution allowed, mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2204,8 +2230,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">D</span>
     <div>
       <h2>Decision path prepared</h2>
-      <p class="cs-muted">Mission / mission_ad...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Mission / mission_41...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2214,11 +2240,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>4</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_941e100bc3...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_add040303fa1cb70</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_372b1f614f...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_419f28be2fd9c0c6</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>mission.contract.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>941e100bc3a14899...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>763d058cbf80146d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>372b1f614f989bcf...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>afd17bcaed2bf6e6...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>allowed actions, claim id, evidence bundle id, workspace mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2231,8 +2257,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">C</span>
     <div>
       <h2>Claim drafted</h2>
-      <p class="cs-muted">Claim / claim_4a3d...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Claim / claim_8d81...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2241,11 +2267,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>5</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_763d058cbf...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>claim:claim_4a3d1595fd246022</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_afd17bcaed...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>claim:claim_8d81693cb8f853d5</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>claim.draft.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>763d058cbf80146d...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>1b6cd3391f29eab4...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>afd17bcaed2bf6e6...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>b06a30777dc612a6...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>evidence bundle id, ontology context refs, search snapshot id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2258,8 +2284,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">B</span>
     <div>
       <h2>Brief drafted</h2>
-      <p class="cs-muted">Brief / brief_e7ba...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Brief / brief_4349...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2268,11 +2294,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>6</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_1b6cd3391f...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>brief:brief_e7bae8d104e732a2</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_b06a30777d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>brief:brief_4349704a69e47f6b</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>brief.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>1b6cd3391f29eab4...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>4b413e6175ddccad...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>b06a30777dc612a6...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>421637f7c9cbb41d...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>citation check refs, citation refs, evidence bundle id, evidence item count</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2285,8 +2311,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">E</span>
     <div>
       <h2>Evidence bundle prepared</h2>
-      <p class="cs-muted">Evidence Bundle / evb_d8dc52...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Evidence Bundle / evb_18e51b...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2295,11 +2321,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>7</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_4b413e6175...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>evidence_bundle:evb_d8dc520caf167939</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_421637f7c9...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>evidence_bundle:evb_18e51bbb8eb49b70</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>evidence_bundle.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>4b413e6175ddccad...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>05b8d420f11d5cc2...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>421637f7c9cbb41d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>299fd643b556a283...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>evidence item count, search snapshot id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2312,8 +2338,8 @@ button, input, textarea { font: inherit; }
     <span class="cs-audit-icon" aria-hidden="true">E</span>
     <div>
       <h2>Search saved</h2>
-      <p class="cs-muted">Search Snapshot / search_ffc...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <p class="cs-muted">Search Snapshot / search_9b5...</p>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2322,11 +2348,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>8</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_05b8d420f1...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>search_snapshot:search_ffc93b900971fbc7</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_299fd643b5...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>search_snapshot:search_9b5313f84c99e58e</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>search.snapshot.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>05b8d420f11d5cc2...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>cbae467260e69554...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>299fd643b556a283...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>8682805e5a0e7e8d...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>duration ms, query, result count</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -2340,7 +2366,7 @@ button, input, textarea { font: inherit; }
     <div>
       <h2>Source saved</h2>
       <p class="cs-muted">Artifact / art_ede571...</p>
-      <div class="cs-meta">2026-07-04 21:21 UTC</div>
+      <div class="cs-meta">2026-07-04 21:32 UTC</div>
     </div>
     <span class="cs-chip cs-chip-searchable">Hash chained</span>
   </div>
@@ -2349,10 +2375,10 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>9</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_cbae467260...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_8682805e5a...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>artifact:art_ede571327ab3ec20</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>artifact.ingested</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>cbae467260e69554...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>8682805e5a0e7e8d...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>0000000000000000...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>checksum sha256, derived status, effective trust, original storage ref</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>

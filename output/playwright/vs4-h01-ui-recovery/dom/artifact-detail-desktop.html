@@ -582,7 +582,27 @@ button, input, textarea { font: inherit; }
 }
 .cs-artifact-actions { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }
 .cs-artifact-workbench {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}
+.cs-artifact-compact-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-artifact-compact-hero .cs-artifact-title h1 {
+  max-width: 42ch;
+  font-size: 28px;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+.cs-artifact-compact-hero .cs-artifact-actions {
+  justify-content: flex-start;
 }
 .cs-artifact-breadcrumb {
   display: flex;
@@ -649,6 +669,10 @@ button, input, textarea { font: inherit; }
   justify-content: space-between;
   gap: var(--cs-space-3);
   padding: var(--cs-space-2) var(--cs-space-3);
+}
+.cs-artifact-toolbar-label {
+  display: grid;
+  gap: 2px;
 }
 .cs-artifact-toolgroup {
   display: flex;
@@ -2027,7 +2051,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2049,6 +2073,8 @@ button, input, textarea { font: inherit; }
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta { grid-template-columns: 1fr; }
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
+  .cs-artifact-compact-hero .cs-artifact-title h1 { font-size: 26px; }
+  .cs-artifact-compact-hero .cs-artifact-actions { padding-top: 0; }
   .cs-artifact-actions { justify-content: flex-start; }
   .cs-artifact-toolbar { align-items: stretch; flex-direction: column; }
   .cs-document-frame.has-rail { grid-template-columns: 1fr; min-height: auto; }
@@ -2102,32 +2128,16 @@ button, input, textarea { font: inherit; }
 
       <div class="cs-content">
 
-
-<header class="cs-detail-orientation">
-  <div class="cs-detail-context">
-    <nav class="cs-detail-path" aria-label="Detail path">
-      <span class="cs-meta">Detail path</span>
-      <a href="/artifacts">Saved sources</a>
-      <span aria-hidden="true">/</span>
-      <span>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</span>
-    </nav>
-    <div class="cs-detail-summary">
-      <div class="cs-detail-summary-head">
-        <span class="cs-detail-current">Vendor renewal note: the renewal date is August 1, finance flagged a pr...</span>
-        <span class="cs-chip cs-chip-searchable">Source detail</span>
-      </div>
-      <p>Original source with linked work and provenance nearby.</p>
-    </div>
-  </div>
-  <div class="cs-detail-actions" aria-label="Detail page actions">
-    <a class="cs-button secondary" href="/artifacts">Back to saved sources</a><a class="cs-button secondary" href="/search">Search workspace</a>
-  </div>
-</header>
-
-<section class="cs-grid-two cs-artifact-workbench" data-product-surface="artifact-detail">
+<section class="cs-artifact-workbench" data-product-surface="artifact-detail" aria-label="Source inspection workspace">
   <div class="cs-stack">
-    <div class="cs-artifact-hero">
+    <header class="cs-artifact-compact-hero">
       <div class="cs-artifact-title">
+        <nav class="cs-artifact-breadcrumb" aria-label="Detail path">
+          <span class="cs-meta">Detail path</span>
+          <a href="/artifacts">Saved sources</a>
+          <span aria-hidden="true">/</span>
+          <span>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</span>
+        </nav>
         <div class="cs-artifact-title-row">
           <span class="cs-artifact-file-mark" aria-hidden="true">TXT</span>
           <div>
@@ -2137,13 +2147,14 @@ button, input, textarea { font: inherit; }
         </div>
       </div>
       <div class="cs-artifact-actions">
+        <a class="cs-button secondary" href="/artifacts">Back to saved sources</a>
         <a class="cs-button secondary" href="/search?q=What%20matters%20in%20Vendor%20renewal%20note%3A%20the%20renewal%20date%20is%20August%201%2C%20finance%20flagged%20a%20pr...">Ask about this source</a>
         <a class="cs-button secondary" href="#linked-work">View linked evidence</a>
       </div>
-    </div>
+    </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Source</span><strong>User Paste</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>2026-07-04 21:21 UTC</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>2026-07-04 21:32 UTC</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Media type</span><strong>text/plain</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>default</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
@@ -2151,19 +2162,18 @@ button, input, textarea { font: inherit; }
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
         <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-tool" aria-hidden="true">T</span>
-          <span class="cs-artifact-tool" aria-hidden="true">S</span>
-          <span class="cs-artifact-page-count">1 / 1</span>
+          <div class="cs-artifact-toolbar-label">
+            <strong>Original source</strong>
+            <span class="cs-meta">Text preview from the saved artifact</span>
+          </div>
         </div>
         <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-tool" aria-hidden="true">-</span>
-          <span class="cs-meta">100%</span>
-          <span class="cs-artifact-tool" aria-hidden="true">+</span>
+          <span class="cs-artifact-page-count">1 text source</span>
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
       </div>
       <div class="cs-document-frame has-rail">
-        <aside class="cs-artifact-page-rail" aria-label="Original source pages">
+        <aside class="cs-artifact-page-rail" aria-label="Original text outline">
           <div class="cs-artifact-thumb is-active"><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span class="cs-artifact-thumb-line"></span><span>1</span></div>
         </aside>
         <div class="cs-artifact-page-area">
@@ -2171,7 +2181,7 @@ button, input, textarea { font: inherit; }
             <header class="cs-document-heading">
               <span class="cs-meta">Original artifact preview</span>
               <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-              <span class="cs-meta">User Paste / 2026-07-04 21:21 UTC</span>
+              <span class="cs-meta">User Paste / 2026-07-04 21:32 UTC</span>
             </header>
             <div class="cs-source-text">Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</div>
           </article>
@@ -2184,7 +2194,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row"><span class="cs-chip cs-chip-saved">Saved</span><span class="cs-chip cs-chip-underReview">Untrusted until checked</span></div>
       <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>2026-07-04 21:21 UTC</dd>
+        <dt>Saved</dt><dd>2026-07-04 21:32 UTC</dd>
         <dt>Source</dt><dd>User Paste</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
@@ -2199,22 +2209,22 @@ button, input, textarea { font: inherit; }
       <div class="cs-keyword-list"><div class="cs-keyword-row"><span>Renewal</span><span class="cs-chip cs-chip-searchable">4</span></div><div class="cs-keyword-row"><span>August</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Date</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Finance</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Flagged</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Note</span><span class="cs-chip cs-chip-searchable">2</span></div></div>
     </section>
     <section class="cs-panel flat" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_e7bae8d104e732a2?view=html">
+<a class="cs-list-row" href="/briefs/brief_4349704a69e47f6b?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-04 21:21 UTC</div>
+    <div class="cs-meta">2026-07-04 21:32 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_4a3d1595fd246022?view=html">
+<a class="cs-list-row" href="/claims/claim_8d81693cb8f853d5?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-04 21:21 UTC</div>
+    <div class="cs-meta">2026-07-04 21:32 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
@@ -2223,7 +2233,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>User Paste</dd>
-        <dt>Ingested</dt><dd>2026-07-04 21:21 UTC</dd>
+        <dt>Ingested</dt><dd>2026-07-04 21:32 UTC</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
     </section>

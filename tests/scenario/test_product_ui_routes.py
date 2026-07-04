@@ -268,6 +268,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(html_status, 200)
         self.assertIn("text/html", html_content_type)
         self.assertIn('data-product-surface="artifact-detail"', html)
+        self.assertIn("Source inspection workspace", html)
         self.assertIn("Detail path", html)
         self.assertIn("Saved sources", html)
         self.assertIn("Back to saved sources", html)
