@@ -400,6 +400,26 @@ def _brief_label(record: dict[str, Any]) -> tuple[str, str]:
     return "Draft", "draft"
 
 
+def _brief_source_count(record: dict[str, Any]) -> int:
+    refs = _evidence_refs(record)
+    artifact_refs = {ref for ref in refs if ref.startswith("artifact:")}
+    if artifact_refs:
+        return len(artifact_refs)
+    return len(set(refs))
+
+
+def _brief_summary_text(record: dict[str, Any]) -> str:
+    summary = str(record.get("summary") or "").strip()
+    if summary:
+        return summary
+    key_points = record.get("key_points")
+    if isinstance(key_points, list):
+        for item in key_points:
+            if isinstance(item, str) and item.strip():
+                return item.strip()
+    return "Brief draft"
+
+
 def _claim_label(record: dict[str, Any]) -> tuple[str, str]:
     status = str(record.get("status") or "").lower()
     if status == "approved":
@@ -2750,22 +2770,68 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
 
 
 def _brief_list_page(ctx: dict[str, Any]) -> str:
+    briefs = ctx["briefs"]
     rows = ""
-    for brief in ctx["briefs"]:
+    for brief in briefs:
         label, state = _brief_label(brief)
-        summary = str(brief.get("summary") or "")
-        if not summary and isinstance(brief.get("key_points"), list) and brief["key_points"]:
-            summary = str(brief["key_points"][0])
-        rows += _generic_row("Brief", _brief_title(brief), summary or "Brief draft", _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))
-    rows = rows or '<div class="cs-empty">No briefs yet.</div>'
+        source_count = _brief_source_count(brief)
+        source_label = f"{source_count} source ref{'s' if source_count != 1 else ''}"
+        rows += _collection_row(
+            "B",
+            _brief_title(brief),
+            _brief_summary_text(brief),
+            _detail_href("briefs", brief.get("brief_id")),
+            [("Brief", ""), (_display_date(brief), ""), (source_label, "")],
+            [(label, state), ("Open brief", "searchable")],
+        )
+    rows = rows or '<div class="cs-empty">No brief has been drafted yet. Save a source and ask a question to create one.</div>'
+    with_sources = sum(1 for brief in briefs if _brief_source_count(brief))
+    source_ref_count = sum(_brief_source_count(brief) for brief in briefs)
+    source_note = (
+        "Open the visible sources before using any finding in a decision."
+        if with_sources
+        else "Briefs need saved sources before they can support a decision."
+    )
     return f"""
 <section data-product-surface="briefs">
   <div class="cs-page-head">
     <div class="cs-kicker">Briefs</div>
-    <h1>Brief drafts</h1>
-    <p>Briefs stay in draft until source support is clear enough to defend.</p>
+    <h1>Brief workspace</h1>
+    <p>Review drafted answers, source coverage, and the next safe use before a brief becomes decision material.</p>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-collection-workbench">
+    <div>
+      {_collection_summary([("Briefs", len(briefs)), ("With sources", with_sources), ("Source refs", source_ref_count)])}
+      {_collection_toolbar("Brief queue", len(briefs), ["Scope: personal/default", "State: drafts and source-backed", "Sort: newest first"])}
+      <div class="cs-collection-list">{rows}</div>
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <div class="cs-panel-header"><h2>Source coverage</h2>{_chip(str(source_ref_count), "searchable")}</div>
+        <p class="cs-muted">{h(source_note)}</p>
+        <div class="cs-review-box">
+          <a class="cs-button" href="/artifacts">Review sources</a>
+          <a class="cs-button secondary" href="/search">Search workspace</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Use next</h2>
+        <p class="cs-muted">Move from a brief into a claim or action only after the source support is visible.</p>
+        <div class="cs-review-box">
+          <a class="cs-button secondary" href="/claims">Review claims</a>
+          <a class="cs-button secondary" href="/actions">Review actions</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Brief posture</h2>
+        <dl class="cs-detail-grid">
+          <dt>Drafts</dt><dd>{h(len(briefs))}</dd>
+          <dt>With sources</dt><dd>{h(with_sources)}</dd>
+          <dt>Use</dt><dd>Draft until checked</dd>
+        </dl>
+      </section>
+    </aside>
+  </div>
 </section>
 """
 

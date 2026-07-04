@@ -32,9 +32,9 @@
     },
     "chrome_timeout_after_screenshot": false,
     "clean_browser_exit": true,
-    "created_at": "2026-07-04T19:59:45.340283Z",
+    "created_at": "2026-07-04T20:05:55.967784Z",
     "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
-    "dom_sha256": "7599f534a7a331687c2473e0a14175dc1e14c845087f55fed25be50e9465c586",
+    "dom_sha256": "e9b6e7d9815442a850e2921760f87787d54ffd3a0a50aa518dae99fc2efd1ee6",
     "errors": [],
     "product_markers": {
       "product_shell_present": true,
@@ -82,7 +82,7 @@
     "status": "passed",
     "stderr_tail": {
       "screenshot": [
-        "DevTools listening on ws://127.0.0.1:60273/devtools/browser/7267b91e-bdcc-4523-aa74-11d2b2430342"
+        "DevTools listening on ws://127.0.0.1:60930/devtools/browser/7158623f-60c0-458e-bf34-5da5b799f0c8"
       ]
     },
     "surface_presence": {
@@ -94,7 +94,7 @@
       "Home/Ops Inbox": false,
       "Search": true
     },
-    "url": "http://127.0.0.1:60272/"
+    "url": "http://127.0.0.1:60929/"
   },
   "brief_detail_markers": {
     "action_card_detail_visible": true,
@@ -170,12 +170,12 @@
     "slice_003_passes": true,
     "state": {
       "created_records": {
-        "action_id": "action_283c3e9dbf69d02b",
+        "action_id": "action_435012a0a8b90762",
         "artifact_id": "art_085c9696c3b04726",
-        "brief_id": "brief_345560ba811ba864",
-        "claim_id": "claim_a8281435b4cc690b",
-        "evidence_bundle_id": "evb_f247494370b843c2",
-        "search_snapshot_id": "search_e0fd460b219d7e34"
+        "brief_id": "brief_2c55ad2c93e88b79",
+        "claim_id": "claim_35beb9a78a196ca0",
+        "evidence_bundle_id": "evb_5f506416f9856a7d",
+        "search_snapshot_id": "search_b19ca2ae863bb22b"
       },
       "negative_evidence": {}
     }
@@ -186,7 +186,7 @@
     "name": "Google Chrome",
     "window_size": "390,844"
   },
-  "created_at": "2026-07-04T19:59:45.344428Z",
+  "created_at": "2026-07-04T20:05:55.971300Z",
   "decision_pages": {
     "markers": {
       "action_approval_denial_visible": true,
@@ -236,7 +236,7 @@
   "decision_pages_required": true,
   "detail_route": "/briefs/{brief_id}?view=html",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
-  "dom_sha256": "7599f534a7a331687c2473e0a14175dc1e14c845087f55fed25be50e9465c586",
+  "dom_sha256": "e9b6e7d9815442a850e2921760f87787d54ffd3a0a50aa518dae99fc2efd1ee6",
   "errors": [],
   "evidence_audit_detail": {
     "markers": {
@@ -512,15 +512,15 @@
   "responsive_required": true,
   "route": "/",
   "route_scan": {
-    "base_url": "http://127.0.0.1:60251",
-    "created_at": "2026-07-04T19:59:43.041168Z",
+    "base_url": "http://127.0.0.1:60891",
+    "created_at": "2026-07-04T20:05:53.621706Z",
     "created_records": {
-      "action_id": "action_283c3e9dbf69d02b",
+      "action_id": "action_435012a0a8b90762",
       "artifact_id": "art_085c9696c3b04726",
-      "brief_id": "brief_345560ba811ba864",
-      "claim_id": "claim_a8281435b4cc690b",
-      "evidence_bundle_id": "evb_f247494370b843c2",
-      "search_snapshot_id": "search_e0fd460b219d7e34"
+      "brief_id": "brief_2c55ad2c93e88b79",
+      "claim_id": "claim_35beb9a78a196ca0",
+      "evidence_bundle_id": "evb_5f506416f9856a7d",
+      "search_snapshot_id": "search_b19ca2ae863bb22b"
     },
     "detail_routes": {
       "action_detail": {
@@ -529,7 +529,7 @@
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/actions/action_283c3e9dbf69d02b?view=html",
+        "path": "/actions/action_435012a0a8b90762?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
@@ -553,7 +553,7 @@
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/briefs/brief_345560ba811ba864?view=html",
+        "path": "/briefs/brief_2c55ad2c93e88b79?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
@@ -565,7 +565,7 @@
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/claims/claim_a8281435b4cc690b?view=html",
+        "path": "/claims/claim_35beb9a78a196ca0?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
@@ -644,7 +644,7 @@
         "token_css_present": true
       },
       "/briefs": {
-        "body_bytes": 61350,
+        "body_bytes": 63660,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -762,7 +762,7 @@
     "unsafe_http_zero_authority_side_effects": true
   },
   "unsafe_http_boundary_required": true,
-  "url": "http://127.0.0.1:60272/",
+  "url": "http://127.0.0.1:60929/",
   "user_drop_ask_source": {
     "markers": {
       "ask_uses_user_question": true,

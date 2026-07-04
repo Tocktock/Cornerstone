@@ -209,6 +209,17 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(action_status, 200)
         action_id = json.loads(action_raw)["action_card"]["action_id"]
 
+        briefs_html = self.fetch_product_html("/briefs")
+        self.assertIn('data-product-surface="briefs"', briefs_html)
+        self.assertIn("Brief workspace", briefs_html)
+        self.assertIn("Brief queue", briefs_html)
+        self.assertIn("Source coverage", briefs_html)
+        self.assertIn("Use next", briefs_html)
+        self.assertIn("Brief posture", briefs_html)
+        self.assertIn("Keyword summary", briefs_html)
+        self.assertIn("Open brief", briefs_html)
+        self.assert_product_surface_is_clean(briefs_html)
+
         brief_html = self.fetch_product_html(f"/briefs/{brief_id}?view=html")
         self.assertIn('data-product-surface="brief-detail"', brief_html)
         self.assertIn("What we found", brief_html)
