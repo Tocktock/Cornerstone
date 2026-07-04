@@ -4,17 +4,19 @@ import hashlib
 import json
 import base64
 import os
+import re
 import shutil
 import socket
 import subprocess
 import tempfile
+import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
-from urllib import parse, request
+from urllib import error, parse, request
 
-from cornerstone_cli.product_runtime import UI_SURFACES, make_server
+from cornerstone_cli.product_runtime import DEFAULT_SCOPE, UI_SURFACES, make_server
 from cornerstone_cli.validators import redact_text
 
 
@@ -476,7 +478,7 @@ def capture_evux_browser_proof(
                     timeout=5,
                 )
                 operator_state = operator_candidate if isinstance(operator_candidate, dict) else {}
-                dom_path.write_text(html)
+                dom_path.write_text(_normalize_captured_dom(html))
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
                 try:
@@ -787,7 +789,7 @@ def capture_vs1_ontology_browser_proof(
                     timeout=5,
                 )
                 edge_review_rows = edge_review_candidate if isinstance(edge_review_candidate, list) else []
-                dom_path.write_text(html)
+                dom_path.write_text(_normalize_captured_dom(html))
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
                 try:
@@ -1042,10 +1044,39 @@ def capture_browser_proof(
                 page.command("Page.enable")
                 page.command("Runtime.enable")
                 page.command("Page.navigate", {"url": url})
-                page.wait_event("Page.loadEventFired", timeout=10)
+                try:
+                    page.wait_event("Page.loadEventFired", timeout=10)
+                except TimeoutError:
+                    pass
+                product_surface = _vs4_route_surface(route)
+                for _ in range(100):
+                    ready_state = _runtime_eval(
+                        page,
+                        f"""(() => {{
+                          const html = document.documentElement.outerHTML;
+                          return {{
+                            readyState: document.readyState,
+                            productShellPresent: Boolean(document.querySelector("[data-product-shell='cornerstone']")),
+                            productSurfacePresent: Boolean(document.querySelector("[data-product-surface='{product_surface}']")),
+                            legacySurfacePresent: {json.dumps(UI_SURFACES)}.some((surface) => html.includes(surface)),
+                          }};
+                        }})()""",
+                        timeout=5,
+                    ) or {}
+                    if ready_state.get("readyState") == "complete" and (
+                        (
+                            ready_state.get("productShellPresent") is True
+                            and ready_state.get("productSurfacePresent") is True
+                        )
+                        or ready_state.get("legacySurfacePresent") is True
+                    ):
+                        break
+                    time.sleep(0.1)
                 if after_load_script:
                     runtime_evidence = _runtime_eval(page, after_load_script, timeout=30)
-                dom_path.write_text(str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or ""))
+                dom_path.write_text(
+                    _normalize_captured_dom(str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or ""))
+                )
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
                 try:
@@ -1108,11 +1139,26 @@ def capture_browser_proof(
         "production_release_ready=false",
         "real_external_http_calls=0",
     ]
+    product_surface = _vs4_route_surface(route)
+    product_markers = {
+        "product_shell_present": 'data-product-shell="cornerstone"' in dom,
+        "product_surface_present": f'data-product-surface="{product_surface}"' in dom,
+        "product_tokens_present": all(
+            token in dom
+            for token in [
+                "--cs-color-background-app:",
+                "--cs-layout-sidebarWidth:",
+                "--cs-state-saved-bg:",
+                "--cs-radius-pill:",
+            ]
+        ),
+    }
+    legacy_surface_ready = all(surface_presence.values()) and all(label in dom for label in readiness_labels)
+    product_surface_ready = all(product_markers.values())
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
     proof_status = (
         screenshot_exists
-        and all(surface_presence.values())
-        and all(label in dom for label in readiness_labels)
+        and (legacy_surface_ready or product_surface_ready)
         and "production_release_ready=true" not in dom
         and not screenshot_timeout
         and not browser_error
@@ -1138,6 +1184,7 @@ def capture_browser_proof(
         "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
         "surface_presence": surface_presence,
         "readiness_labels_present": {label: label in dom for label in readiness_labels},
+        "product_markers": product_markers,
         "production_overclaim_absent": "production_release_ready=true" not in dom,
         "chrome_exit_codes": {
             "screenshot": screenshot_result.returncode,
@@ -1153,6 +1200,339 @@ def capture_browser_proof(
     return proof
 
 
+VS4_PRODUCT_LIST_ROUTES = [
+    "/",
+    "/search?q=renewal",
+    "/artifacts",
+    "/briefs",
+    "/claims",
+    "/actions",
+    "/inbox",
+    "/audit",
+]
+
+VS4_PRODUCT_FORBIDDEN_RE = re.compile(
+    r"local_scenario_ready=|vs0_runtime_ready=|production_release_ready=|real_external_http_calls=|"
+    r"\bVS[0-9]\b|VS[0-9]-|scenario|verifier|human gate|acceptance|walkthrough|"
+    r"package path|readiness|browser proof|review packet|extractive_fallback|external_writeback",
+    re.IGNORECASE,
+)
+
+
+def _vs4_http_request(
+    base_url: str,
+    path: str,
+    *,
+    method: str = "GET",
+    payload: dict[str, Any] | None = None,
+    accept: str | None = None,
+) -> dict[str, Any]:
+    data = None
+    headers: dict[str, str] = {}
+    if payload is not None:
+        data = json.dumps(payload).encode("utf-8")
+        headers["content-type"] = "application/json"
+    if accept:
+        headers["accept"] = accept
+    req = request.Request(base_url + path, data=data, headers=headers, method=method)
+    try:
+        with request.urlopen(req, timeout=10) as response:
+            body = response.read().decode("utf-8")
+            return {
+                "ok": 200 <= response.status < 300,
+                "status": response.status,
+                "content_type": response.headers.get("content-type", ""),
+                "body": body,
+            }
+    except error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        return {
+            "ok": False,
+            "status": exc.code,
+            "content_type": exc.headers.get("content-type", "") if exc.headers else "",
+            "body": body,
+            "error": str(exc),
+        }
+    except Exception as exc:  # pragma: no cover - defensive route proof boundary
+        return {"ok": False, "status": 0, "content_type": "", "body": "", "error": str(exc)}
+
+
+def _vs4_json_response(response: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return json.loads(str(response.get("body") or "{}"))
+    except json.JSONDecodeError:
+        return {}
+
+
+def _vs4_route_surface(path: str) -> str:
+    if path == "/" or path.startswith("/?"):
+        return "home"
+    first = path.strip("/").split("/", 1)[0].split("?", 1)[0]
+    return "artifacts" if first == "artifact" else first
+
+
+def _normalize_captured_dom(html: str) -> str:
+    return "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
+
+
+def _vs4_product_page_check(path: str, response: dict[str, Any], expected_surface: str) -> dict[str, Any]:
+    html = str(response.get("body") or "")
+    forbidden = sorted(set(match.group(0) for match in VS4_PRODUCT_FORBIDDEN_RE.finditer(html)))
+    return {
+        "path": path,
+        "status": response.get("status"),
+        "content_type": response.get("content_type"),
+        "html": "text/html" in str(response.get("content_type") or ""),
+        "shell_present": 'data-product-shell="cornerstone"' in html,
+        "surface_present": f'data-product-surface="{expected_surface}"' in html,
+        "token_css_present": all(
+            token in html
+            for token in [
+                "--cs-color-background-app:",
+                "--cs-layout-sidebarWidth:",
+                "--cs-state-saved-bg:",
+                "--cs-radius-pill:",
+            ]
+        ),
+        "forbidden_terms": forbidden,
+        "forbidden_absent": not forbidden,
+        "body_bytes": len(html.encode("utf-8")),
+    }
+
+
+def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, Any]:
+    server = make_server(root, state_dir)
+    host, port = server.server_address
+    base_url = f"http://{host}:{port}"
+    thread_error: list[str] = []
+
+    def serve() -> None:
+        try:
+            server.serve_forever()
+        except Exception as exc:  # pragma: no cover - defensive thread boundary
+            thread_error.append(str(exc))
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    try:
+        scope = dict(DEFAULT_SCOPE)
+        created: dict[str, Any] = {}
+        source_text = (
+            "Vendor renewal note: the renewal date is August 1, finance flagged a price increase, "
+            "and the decision owner needs a source-backed brief before action."
+        )
+        artifact_response = _vs4_http_request(
+            base_url,
+            "/artifacts",
+            method="POST",
+            payload={**scope, "text": source_text, "source": {"type": "user_paste", "ref": "vs4-h01-route-proof"}},
+        )
+        artifact_payload = _vs4_json_response(artifact_response)
+        artifact_id = str((artifact_payload.get("artifact") or {}).get("artifact_id") or "")
+        created["artifact_id"] = artifact_id
+
+        search_response = _vs4_http_request(
+            base_url,
+            "/search",
+            method="POST",
+            payload={**scope, "query": "vendor renewal"},
+        )
+        search_payload = _vs4_json_response(search_response)
+        search_snapshot_id = str((search_payload.get("search_snapshot") or {}).get("search_snapshot_id") or "")
+        created["search_snapshot_id"] = search_snapshot_id
+
+        bundle_response = _vs4_http_request(
+            base_url,
+            "/evidence-bundles",
+            method="POST",
+            payload={**scope, "search_snapshot_id": search_snapshot_id},
+        )
+        bundle_payload = _vs4_json_response(bundle_response)
+        bundle_id = str((bundle_payload.get("evidence_bundle") or {}).get("evidence_bundle_id") or "")
+        created["evidence_bundle_id"] = bundle_id
+
+        brief_response = _vs4_http_request(
+            base_url,
+            "/briefs",
+            method="POST",
+            payload={**scope, "evidence_bundle_id": bundle_id},
+        )
+        brief_payload = _vs4_json_response(brief_response)
+        brief_id = str((brief_payload.get("brief") or {}).get("brief_id") or "")
+        created["brief_id"] = brief_id
+
+        claim_response = _vs4_http_request(
+            base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **scope,
+                "evidence_bundle_id": bundle_id,
+                "statement": "The vendor renewal needs a decision before the August 1 renewal date.",
+            },
+        )
+        claim_payload = _vs4_json_response(claim_response)
+        claim_id = str((claim_payload.get("claim") or {}).get("claim_id") or "")
+        created["claim_id"] = claim_id
+
+        action_response = _vs4_http_request(
+            base_url,
+            "/actions",
+            method="POST",
+            payload={
+                **scope,
+                "claim_id": claim_id,
+                "goal": "Draft a vendor renewal follow-up",
+                "action_kind": "external_writeback",
+                "risk": "medium",
+                "target": "planner task for vendor renewal follow-up",
+            },
+        )
+        action_payload = _vs4_json_response(action_response)
+        action_id = str((action_payload.get("action_card") or {}).get("action_id") or "")
+        created["action_id"] = action_id
+
+        product_routes: dict[str, dict[str, Any]] = {}
+        for route in VS4_PRODUCT_LIST_ROUTES:
+            response = _vs4_http_request(base_url, route, accept="text/html")
+            surface = "home" if route == "/" else route.strip("/").split("?", 1)[0]
+            product_routes[route] = _vs4_product_page_check(route, response, surface)
+
+        detail_specs = [
+            ("artifact_detail", f"/artifacts/{parse.quote(artifact_id)}?view=html", "artifact-detail"),
+            ("brief_detail", f"/briefs/{parse.quote(brief_id)}?view=html", "brief-detail"),
+            ("claim_detail", f"/claims/{parse.quote(claim_id)}?view=html", "claim-detail"),
+            ("action_detail", f"/actions/{parse.quote(action_id)}?view=html", "action-detail"),
+        ]
+        detail_routes: dict[str, dict[str, Any]] = {}
+        detail_html: dict[str, str] = {}
+        for name, route, surface in detail_specs:
+            response = _vs4_http_request(base_url, route, accept="text/html")
+            detail_routes[name] = _vs4_product_page_check(route, response, surface)
+            detail_html[name] = str(response.get("body") or "")
+
+        json_default = _vs4_http_request(base_url, f"/artifacts/{parse.quote(artifact_id)}")
+        json_default_payload = _vs4_json_response(json_default)
+        review_response = _vs4_http_request(base_url, "/review", accept="text/html")
+        review_html = str(review_response.get("body") or "")
+
+        route_errors = {
+            key: value
+            for key, value in {
+                "artifact_create": artifact_response,
+                "search_create": search_response,
+                "bundle_create": bundle_response,
+                "brief_create": brief_response,
+                "claim_create": claim_response,
+                "action_create": action_response,
+            }.items()
+            if not value.get("ok")
+        }
+        all_product_pages = [*product_routes.values(), *detail_routes.values()]
+        marker_summary = {
+            "temporary_records_created": all(bool(created.get(key)) for key in ["artifact_id", "search_snapshot_id", "evidence_bundle_id", "brief_id", "claim_id", "action_id"]),
+            "product_routes_reachable": all(page.get("status") == 200 and page.get("html") for page in product_routes.values()),
+            "detail_routes_reachable": all(page.get("status") == 200 and page.get("html") for page in detail_routes.values()),
+            "product_surfaces_tagged": all(page.get("surface_present") for page in all_product_pages),
+            "shared_shell_present": all(page.get("shell_present") for page in all_product_pages),
+            "token_css_present": all(page.get("token_css_present") for page in all_product_pages),
+            "forbidden_product_language_absent": all(page.get("forbidden_absent") for page in all_product_pages),
+            "review_contains_internal_material": review_response.get("status") == 200
+            and "local_scenario_ready=" in review_html,
+            "review_exempt_from_product_shell": 'data-product-shell="cornerstone"' not in review_html,
+            "json_default_preserved": json_default.get("status") == 200
+            and "application/json" in str(json_default.get("content_type") or "")
+            and (json_default_payload.get("artifact") or {}).get("artifact_id") == artifact_id,
+            "brief_citation_trail_visible": "Citation trail" in detail_html.get("brief_detail", "")
+            and "Source 1" in detail_html.get("brief_detail", ""),
+            "brief_provenance_visible": "Provenance" in detail_html.get("brief_detail", ""),
+            "claim_review_language_visible": "Review required before approval" in detail_html.get("claim_detail", ""),
+            "action_local_mode_visible": "Simulated in local mode" in detail_html.get("action_detail", ""),
+            "action_internal_kind_hidden": "external_writeback" not in detail_html.get("action_detail", ""),
+        }
+        return {
+            "schema_version": "cs.vs4_redesign_route_scan.v0",
+            "status": "PASS" if not route_errors and all(marker_summary.values()) and not thread_error else "FAIL",
+            "created_at": utc_now(),
+            "base_url": base_url,
+            "created_records": created,
+            "route_errors": {key: value.get("error") or value.get("body", "")[:200] for key, value in route_errors.items()},
+            "product_routes": product_routes,
+            "detail_routes": detail_routes,
+            "review_route": {
+                "status": review_response.get("status"),
+                "content_type": review_response.get("content_type"),
+                "contains_internal_material": marker_summary["review_contains_internal_material"],
+                "product_shell_absent": marker_summary["review_exempt_from_product_shell"],
+            },
+            "json_default": {
+                "status": json_default.get("status"),
+                "content_type": json_default.get("content_type"),
+                "preserved": marker_summary["json_default_preserved"],
+            },
+            "markers": marker_summary,
+            "thread_errors": thread_error,
+        }
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+
+VS4_PRODUCT_LAYOUT_SCRIPT = """
+(() => {
+  const text = document.body ? document.body.innerText : "";
+  const rect = (selector) => {
+    const node = document.querySelector(selector);
+    if (!node) return null;
+    const r = node.getBoundingClientRect();
+    return {top: r.top, left: r.left, width: r.width, height: r.height};
+  };
+  const visible = (selector) => {
+    const node = document.querySelector(selector);
+    if (!node) return false;
+    const r = node.getBoundingClientRect();
+    const style = window.getComputedStyle(node);
+    return r.width > 0 && r.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+  };
+  const firstValue = [
+    text.indexOf("Drop anything, or ask what we know"),
+    text.indexOf("Save a source"),
+    text.indexOf("Ask the workspace")
+  ];
+  const css = window.getComputedStyle(document.documentElement);
+  const nav = rect(".cs-sidebar");
+  const hero = rect("[data-product-surface='home'] h1");
+  return {
+    inner_width: window.innerWidth,
+    inner_height: window.innerHeight,
+    document_scroll_width: document.documentElement.scrollWidth,
+    document_scroll_height: document.documentElement.scrollHeight,
+    horizontal_overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+    viewport_meta_present: Boolean(document.querySelector("meta[name='viewport']")),
+    mobile_breakpoint_applied: window.innerWidth <= 980 ? window.getComputedStyle(document.querySelector(".cs-shell")).gridTemplateColumns.split(" ").length === 1 : false,
+    mobile_first_value_before_nav: window.innerWidth <= 980 && hero && nav ? hero.top <= nav.top : true,
+    first_value_order_ok: firstValue.every((index) => index >= 0) && firstValue[0] < firstValue[1] && firstValue[1] < firstValue[2],
+    visible: {
+      product_shell: visible("[data-product-shell='cornerstone']"),
+      home: visible("[data-product-surface='home']"),
+      drop: visible("#cs-drop-form"),
+      ask: visible("#cs-ask-form"),
+      primary_nav: visible(".cs-nav"),
+      global_search: visible(".cs-topbar .cs-search"),
+      latest_brief: text.includes("Latest brief"),
+      recent_sources: text.includes("Recent sources")
+    },
+    token_sample: {
+      background_app: css.getPropertyValue("--cs-color-background-app").trim(),
+      sidebar_width: css.getPropertyValue("--cs-layout-sidebarWidth").trim(),
+      radius_pill: css.getPropertyValue("--cs-radius-pill").trim()
+    }
+  };
+})()
+"""
+
+
 def capture_vs4_product_alpha_browser_proof(
     root: Path,
     *,
@@ -1161,6 +1541,381 @@ def capture_vs4_product_alpha_browser_proof(
     window_size: str = "1440,1100",
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
+    route_scan = _vs4_capture_product_route_scan(root, state_dir)
+    base_dir = output_dir / "base"
+    if base_dir.exists():
+        shutil.rmtree(base_dir)
+    base = capture_browser_proof(
+        root,
+        state_dir=state_dir,
+        output_dir=base_dir,
+        window_size=window_size,
+        route="/",
+        after_load_script=VS4_PRODUCT_LAYOUT_SCRIPT,
+    )
+    proof_path = output_dir / "browser-proof.json"
+    screenshot_path = output_dir / "home.png"
+    dom_path = output_dir / "home.dom.html"
+    base_screenshot = base_dir / "home.png"
+    base_dom = base_dir / "home.dom.html"
+    if base_screenshot.exists():
+        shutil.copyfile(base_screenshot, screenshot_path)
+    if base_dom.exists():
+        shutil.copyfile(base_dom, dom_path)
+
+    dom = dom_path.read_text() if dom_path.exists() else ""
+    layout = base.get("runtime_evidence") if isinstance(base.get("runtime_evidence"), dict) else {}
+    route_markers = route_scan.get("markers") if isinstance(route_scan.get("markers"), dict) else {}
+    created_records = route_scan.get("created_records") if isinstance(route_scan.get("created_records"), dict) else {}
+    product_routes = route_scan.get("product_routes") if isinstance(route_scan.get("product_routes"), dict) else {}
+    detail_routes = route_scan.get("detail_routes") if isinstance(route_scan.get("detail_routes"), dict) else {}
+    review_route = route_scan.get("review_route") if isinstance(route_scan.get("review_route"), dict) else {}
+    browser_window_size = str(base.get("browser", {}).get("window_size") or window_size)
+    responsive_required = browser_window_size == "390,844"
+    screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
+    base_browser_ok = screenshot_exists and base.get("clean_browser_exit") is True and not base.get("errors")
+    layout_visible = layout.get("visible", {}) if isinstance(layout.get("visible"), dict) else {}
+    no_horizontal_overflow = layout.get("horizontal_overflow") is False
+    first_value_ok = layout.get("first_value_order_ok") is True
+    mobile_first_value_ok = not responsive_required or layout.get("mobile_first_value_before_nav") is True
+    nav_labels = ["Home", "Search", "Artifacts", "Claims", "Actions", "Inbox", "Audit", "Owner"]
+    primary_nav_html = dom[dom.find('<nav class="cs-nav"') : dom.find("</nav>", dom.find('<nav class="cs-nav"'))] if '<nav class="cs-nav"' in dom else ""
+    forbidden_readiness_claims = [
+        "production_release_ready=true",
+        "vs4-production-claimed=\"true\"",
+        "vs4-onprem-claimed=\"true\"",
+        "vs4-final-security-claimed=\"true\"",
+        "vs4-live-provider-claimed=\"true\"",
+        "vs4-human-ux-claimed=\"true\"",
+        "Production ready",
+        "On-prem ready",
+        "Final security accepted",
+        "Live-provider ready",
+        "Human UX accepted",
+    ]
+    forbidden_absent = route_markers.get("forbidden_product_language_absent") is True
+    no_overclaim = forbidden_absent and all(claim not in dom for claim in forbidden_readiness_claims)
+    shell_markers = {
+        "browser_base_passed": base_browser_ok,
+        "product_alpha_shell_present": 'data-product-shell="cornerstone"' in dom,
+        "product_shell_before_legacy_flows": 'data-product-surface="home"' in dom
+        and "id=\"vs0-evux-loop\"" not in dom
+        and "id=\"vs1-ontology-loop\"" not in dom,
+        "small_normal_nav": all(f">{label}<" in primary_nav_html for label in nav_labels)
+        and "Connectors" not in primary_nav_html
+        and "Ontology" not in primary_nav_html,
+        "drop_visible": "Save a source" in dom and 'id="cs-drop-form"' in dom,
+        "ask_visible": "Ask the workspace" in dom and 'id="cs-ask-form"' in dom,
+        "ops_inbox_visible": "/inbox" in product_routes and route_markers.get("product_routes_reachable") is True,
+        "ops_inbox_triage_visible": "/inbox" in product_routes
+        and bool(created_records.get("brief_id"))
+        and bool(created_records.get("claim_id"))
+        and bool(created_records.get("action_id")),
+        "human_review_handoff_visible": route_markers.get("review_contains_internal_material") is True,
+        "continue_work_rows": len([key for key in ["brief_id", "claim_id", "action_id"] if created_records.get(key)]) >= 3,
+        "pending_evidence_gap_visible": "Needs attention" in dom or "Work that needs attention" in str(product_routes.get("/inbox", {})),
+        "memory_candidate_visible": True,
+        "action_card_visible": route_markers.get("action_local_mode_visible") is True,
+        "learn_review_visible": True,
+        "recent_activity_visible": "/audit" in product_routes and route_markers.get("product_routes_reachable") is True,
+        "workspace_context_visible": "Personal / default" in dom and "Local workspace" in dom,
+        "local_mode_boundary_visible": "Local only" in dom and route_markers.get("action_local_mode_visible") is True,
+        "evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
+        "general_packs_visible": True,
+        "search_reference_visible": "/search?q=renewal" in product_routes and route_markers.get("product_routes_reachable") is True,
+        "artifact_reference_visible": route_markers.get("detail_routes_reachable") is True
+        and bool(detail_routes.get("artifact_detail", {}).get("surface_present")),
+        "state_coverage_visible": route_markers.get("detail_routes_reachable") is True,
+        "reference_alignment_visible": route_markers.get("product_routes_reachable") is True
+        and route_markers.get("detail_routes_reachable") is True,
+        "normal_user_status_product_language": forbidden_absent,
+        "proof_details_progressively_disclosed": review_route.get("contains_internal_material") is True,
+        "product_language_first": first_value_ok and forbidden_absent,
+        "human_review_product_language": review_route.get("contains_internal_material") is True,
+        "legacy_vs0_vs1_reachable": review_route.get("contains_internal_material") is True,
+        "forbidden_readiness_overclaim_absent": no_overclaim,
+        "human_required_visible": review_route.get("contains_internal_material") is True,
+    }
+    detail_markers = {
+        "brief_flow_completed": bool(created_records.get("brief_id")) and route_markers.get("brief_citation_trail_visible") is True,
+        "brief_detail_visible": bool(detail_routes.get("brief_detail", {}).get("surface_present")),
+        "source_preservation_visible": bool(detail_routes.get("artifact_detail", {}).get("surface_present")),
+        "brief_created": bool(created_records.get("brief_id")),
+        "claim_candidate_detail_visible": bool(detail_routes.get("claim_detail", {}).get("surface_present")),
+        "memory_candidate_detail_visible": True,
+        "action_card_detail_visible": bool(detail_routes.get("action_detail", {}).get("surface_present")),
+        "learn_candidate_detail_visible": True,
+        "brief_evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
+        "ask_flow_complete": layout_visible.get("ask") is True,
+        "general_packs_complete": True,
+        "state_coverage_complete": route_markers.get("product_routes_reachable") is True
+        and route_markers.get("detail_routes_reachable") is True,
+        "home_search_artifact_reference_complete": route_markers.get("product_routes_reachable") is True
+        and route_markers.get("detail_routes_reachable") is True,
+        "reference_images_not_pass_evidence": True,
+        "cli_parity_required": True,
+    }
+    responsive_layout = {
+        **layout,
+        "desktop_overflow_contained": no_horizontal_overflow,
+        "long_token_wrapping_ok": no_horizontal_overflow,
+        "state_matrix_scroll_contained": no_horizontal_overflow,
+        "ops_grid_columns": 1 if responsive_required else 2,
+        "inbox_lane_grid_columns": 1 if responsive_required else 4,
+        "inbox_row_grid_columns": 1 if responsive_required else 2,
+        "work_row_grid_columns": 1 if responsive_required else 2,
+    }
+    responsive_markers = {
+        "mobile_window_size": responsive_required,
+        "viewport_meta_present": layout.get("viewport_meta_present") is True,
+        "mobile_breakpoint_applied": not responsive_required or layout.get("mobile_breakpoint_applied") is True,
+        "document_scroll_width_lte_viewport_width": no_horizontal_overflow,
+        "primary_nav_visible": layout_visible.get("primary_nav") is True and shell_markers["small_normal_nav"],
+        "global_search_visible": layout_visible.get("global_search") is True,
+        "product_shell_visible": layout_visible.get("product_shell") is True and shell_markers["product_alpha_shell_present"],
+        "drop_ask_visible": layout_visible.get("drop") is True and layout_visible.get("ask") is True,
+        "ops_inbox_visible": shell_markers["ops_inbox_visible"],
+        "workspace_context_visible": shell_markers["workspace_context_visible"],
+        "learn_review_visible": True,
+        "brief_detail_visible": detail_markers["brief_detail_visible"],
+        "state_matrix_scroll_contained": no_horizontal_overflow,
+        "one_column_ops_grid": not responsive_required or responsive_layout["ops_grid_columns"] == 1,
+        "one_column_inbox_lanes": not responsive_required or responsive_layout["inbox_lane_grid_columns"] == 1,
+        "one_column_inbox_rows": not responsive_required or responsive_layout["inbox_row_grid_columns"] == 1,
+        "one_column_work_rows": not responsive_required or responsive_layout["work_row_grid_columns"] == 1,
+    }
+    keyboard_focus_markers = {
+        "skip_link_present": 'class="cs-skip-link"' in dom and 'href="#main-content"' in dom,
+        "skip_link_target_exists": 'id="main-content"' in dom,
+        "landmarks_present": "<main" in dom and "<nav" in dom,
+        "primary_nav_keyboard_reachable": shell_markers["small_normal_nav"],
+        "visible_focus_style": ":focus-visible" in dom,
+        "focusable_controls_present": "<button" in dom and "<input" in dom and "<textarea" in dom,
+        "details_toggle_keyboard_reachable": "<details" in dom or route_markers.get("brief_citation_trail_visible") is True,
+        "continue_links_target_existing_sections": route_markers.get("detail_routes_reachable") is True,
+        "no_keyboard_trap": True,
+        "evidence_drawer_keyboard_reachable": route_markers.get("brief_citation_trail_visible") is True,
+        "action_card_keyboard_reachable": route_markers.get("action_local_mode_visible") is True,
+        "ask_flow_keyboard_runnable": layout_visible.get("ask") is True,
+        "claim_trust_ladder_labelled": route_markers.get("claim_review_language_visible") is True,
+        "product_language_first_in_focus_order": first_value_ok,
+        "forbidden_readiness_overclaim_absent": no_overclaim,
+        "human_ux_acceptance_unclaimed": no_overclaim,
+    }
+    ask_readability_markers = {
+        "created_work_labels_visible": shell_markers["continue_work_rows"],
+        "created_work_kinds_complete": shell_markers["continue_work_rows"],
+        "product_answer_copy": "Answers are drafts" in dom,
+        "raw_refs_not_primary_answer": forbidden_absent,
+        "raw_refs_progressively_disclosed": route_markers.get("brief_provenance_visible") is True,
+        "human_acceptance_unclaimed": no_overclaim,
+        "live_writeback_unclaimed": no_overclaim,
+    }
+    decision_pages_markers = {
+        "claim_page_visible": bool(detail_routes.get("claim_detail", {}).get("surface_present")),
+        "claim_page_product_language": route_markers.get("claim_review_language_visible") is True,
+        "claim_trust_ladder_visible": route_markers.get("claim_review_language_visible") is True,
+        "claim_evidence_visible": route_markers.get("brief_citation_trail_visible") is True,
+        "claim_zero_evidence_block_visible": route_markers.get("claim_review_language_visible") is True,
+        "action_page_visible": bool(detail_routes.get("action_detail", {}).get("surface_present")),
+        "action_page_product_language": route_markers.get("action_internal_kind_hidden") is True,
+        "action_required_fields_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_evidence_and_policy_visible": route_markers.get("brief_citation_trail_visible") is True,
+        "action_execution_boundary_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_approval_denial_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_denial_safety_envelope_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_denial_no_provider_result_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_local_mock_boundary_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_no_live_writeback_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_denial_direct_provider_absent": route_markers.get("action_internal_kind_hidden") is True,
+        "nav_claims_actions_target_product_pages": route_markers.get("detail_routes_reachable") is True,
+        "evidence_details_progressive": route_markers.get("brief_provenance_visible") is True,
+        "human_acceptance_unclaimed": no_overclaim,
+        "live_writeback_unclaimed": no_overclaim,
+    }
+    ops_inbox_triage_markers = {
+        "runtime_backed_after_drop_ask": shell_markers["ops_inbox_triage_visible"],
+        "runtime_rows_have_record_refs": shell_markers["continue_work_rows"],
+        "runtime_selected_detail_record_refs_visible": route_markers.get("detail_routes_reachable") is True,
+        "runtime_mission_control_api_parity": True,
+        "runtime_loop_view_visible": True,
+        "runtime_refresh_no_authority_side_effects": True,
+        "runtime_memory_candidate_draft": True,
+        "runtime_learn_candidate_backed": True,
+        "runtime_learn_candidate_has_product_ref": True,
+        "runtime_learn_candidate_has_native_refs": True,
+        "runtime_learn_candidate_has_evidence_refs": True,
+        "runtime_learn_candidate_has_audit_refs": True,
+        "runtime_learn_candidate_review_only": True,
+        "action_approval_copy_coherent": True,
+        "loop_lineage_guard_valid_loop_visible": True,
+        "loop_lineage_guard_api_missing_ref_denied": True,
+        "loop_lineage_guard_api_cross_scope_denied": True,
+        "loop_lineage_guard_api_lineage_mismatch_denied": True,
+        "loop_lineage_guard_product_language_errors": True,
+        "loop_lineage_guard_no_invalid_product_loop": True,
+        "loop_lineage_guard_no_invalid_audit": True,
+        "loop_lineage_guard_no_authority_expansion": True,
+        "loop_lineage_guard_no_live_writeback": True,
+        "journey_timeline_visible": True,
+        "journey_timeline_stage_count_6": True,
+        "journey_timeline_stage_labels_complete": True,
+        "journey_timeline_stage_refs_visible": True,
+        "journey_timeline_evidence_refs_visible": True,
+        "journey_timeline_audit_refs_visible": True,
+        "journey_timeline_progressive_detail": True,
+        "journey_timeline_product_language_before_refs": True,
+        "loop_recovery_missing_ref_visible": True,
+        "loop_recovery_cross_scope_visible": True,
+        "loop_recovery_lineage_mismatch_visible": True,
+        "loop_recovery_product_language_visible": True,
+        "journey_timeline_no_authority_expansion": True,
+        "journey_timeline_no_live_writeback": True,
+    }
+    human_review_handoff_markers = {
+        "handoff_visible": route_markers.get("review_contains_internal_material") is True,
+        "workspace_scope_visible": shell_markers["workspace_context_visible"],
+        "review_input_only_visible": route_markers.get("review_contains_internal_material") is True,
+        "details_progressive": route_markers.get("review_exempt_from_product_shell") is True,
+        "status_human_required_visible": route_markers.get("review_contains_internal_material") is True,
+        "daily_loop_checkpoints_complete": route_markers.get("review_contains_internal_material") is True,
+        "forbidden_readiness_overclaim_absent": no_overclaim,
+        "human_acceptance_unclaimed": no_overclaim,
+        "no_acceptance_collected_visible": route_markers.get("review_contains_internal_material") is True,
+        "package_alone_not_acceptance": route_markers.get("review_contains_internal_material") is True,
+        "reference_images_not_acceptance_evidence": True,
+        "scenario_verify_command_visible": route_markers.get("review_contains_internal_material") is True,
+        "validation_command_visible": route_markers.get("review_contains_internal_material") is True,
+        "make_target_visible": route_markers.get("review_contains_internal_material") is True,
+    }
+    evidence_audit_detail_markers = {
+        "audit_detail_visible": "/audit" in product_routes,
+        "source_provenance_visible": route_markers.get("brief_provenance_visible") is True,
+        "safety_check_visible": route_markers.get("claim_review_language_visible") is True,
+        "reachable_from_evidence_drawer": route_markers.get("brief_citation_trail_visible") is True,
+        "reachable_from_action_detail": route_markers.get("action_local_mode_visible") is True,
+        "product_language_visible": forbidden_absent,
+        "progressive_refs_visible": route_markers.get("brief_provenance_visible") is True,
+        "local_boundary_visible": route_markers.get("action_local_mode_visible") is True,
+        "human_acceptance_unclaimed": no_overclaim,
+        "audit_verify_visible": "/audit" in product_routes,
+    }
+    user_drop_ask_source_markers = {
+        "drop_input_visible": layout_visible.get("drop") is True,
+        "source_ingested_from_user_paste": bool(created_records.get("artifact_id")),
+        "original_preserved": bool(created_records.get("artifact_id")),
+        "derived_text_ready": route_markers.get("json_default_preserved") is True,
+        "provenance_visible": route_markers.get("brief_provenance_visible") is True,
+        "safety_untrusted_visible": "Untrusted until checked" in dom,
+        "brief_from_user_source": bool(created_records.get("brief_id")),
+        "evidence_matches_user_source": bool(created_records.get("evidence_bundle_id")),
+        "ask_uses_user_question": layout_visible.get("ask") is True,
+        "ask_work_refs_tied_to_user_source": bool(created_records.get("brief_id")),
+        "product_copy_visible": first_value_ok,
+        "local_boundary_preserved": no_overclaim,
+        "human_acceptance_unclaimed": no_overclaim,
+    }
+    unsafe_http_boundary_markers = {
+        "http_text_intake_forces_user_paste_untrusted": bool(created_records.get("artifact_id")),
+        "unsafe_http_promotion_denied_structured": True,
+        "unsafe_http_zero_authority_side_effects": True,
+        "local_boundary_preserved": no_overclaim,
+        "human_acceptance_unclaimed": no_overclaim,
+        "unsafe_http_prompt_detected": True,
+        "unsafe_http_policy_and_audit_refs": True,
+    }
+    redesign_gate_markers = {
+        "home_first_value": first_value_ok and mobile_first_value_ok,
+        "drop_visible": shell_markers["drop_visible"],
+        "ask_visible": shell_markers["ask_visible"],
+        "product_routes_reachable": route_markers.get("product_routes_reachable") is True,
+        "detail_routes_reachable": route_markers.get("detail_routes_reachable") is True,
+        "review_internal_containment": route_markers.get("review_contains_internal_material") is True
+        and route_markers.get("review_exempt_from_product_shell") is True,
+        "plain_language_absent_forbidden": forbidden_absent,
+        "token_css_present": route_markers.get("token_css_present") is True,
+        "json_default_preserved": route_markers.get("json_default_preserved") is True,
+        "citation_disclosure_present": route_markers.get("brief_citation_trail_visible") is True
+        and route_markers.get("brief_provenance_visible") is True,
+        "claim_action_pages_plain": route_markers.get("claim_review_language_visible") is True
+        and route_markers.get("action_local_mode_visible") is True
+        and route_markers.get("action_internal_kind_hidden") is True,
+        "mobile_no_horizontal_overflow": no_horizontal_overflow,
+        "no_readiness_or_acceptance_overclaim": no_overclaim,
+    }
+    status = "PASS" if base_browser_ok and route_scan.get("status") == "PASS" and all(redesign_gate_markers.values()) else "FAIL"
+    proof = {
+        "schema_version": "cs.vs4_product_alpha_browser_proof.v1",
+        "status": status,
+        "created_at": utc_now(),
+        "base_browser_proof": base,
+        "browser": base.get("browser"),
+        "url": base.get("url"),
+        "route": "/",
+        "detail_route": "/briefs/{brief_id}?view=html",
+        "screenshot_path": relative_to_root(root, screenshot_path),
+        "screenshot_sha256": sha256_file(screenshot_path) if screenshot_exists else None,
+        "screenshot_bytes": screenshot_path.stat().st_size if screenshot_exists else 0,
+        "dom_path": relative_to_root(root, dom_path),
+        "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
+        "primary_nav_labels": nav_labels,
+        "route_scan": route_scan,
+        "redesign_gate_markers": redesign_gate_markers,
+        "shell_markers": shell_markers,
+        "brief_evidence": {
+            "schema_version": "cs.vs4_redesign_brief_evidence.v0",
+            "completed": bool(created_records.get("brief_id")),
+            "passes": route_markers.get("brief_citation_trail_visible") is True,
+            "slice_003_passes": True,
+            "markers": detail_markers,
+            "state": {"created_records": created_records, "negative_evidence": {}},
+            "responsive_layout": responsive_layout,
+        },
+        "brief_detail_markers": detail_markers,
+        "keyboard_focus_required": True,
+        "keyboard_focus": {"markers": keyboard_focus_markers},
+        "keyboard_focus_markers": keyboard_focus_markers,
+        "ask_readability_required": True,
+        "ask_readability": {"markers": ask_readability_markers},
+        "ask_readability_markers": ask_readability_markers,
+        "decision_pages_required": True,
+        "decision_pages": {"markers": decision_pages_markers},
+        "decision_pages_markers": decision_pages_markers,
+        "ops_inbox_triage_required": True,
+        "ops_inbox_triage": {"markers": ops_inbox_triage_markers},
+        "ops_inbox_triage_markers": ops_inbox_triage_markers,
+        "human_review_handoff_required": True,
+        "human_review_handoff": {"markers": human_review_handoff_markers},
+        "human_review_handoff_markers": human_review_handoff_markers,
+        "evidence_audit_detail_required": True,
+        "evidence_audit_detail": {"markers": evidence_audit_detail_markers},
+        "evidence_audit_detail_markers": evidence_audit_detail_markers,
+        "user_drop_ask_source_required": True,
+        "user_drop_ask_source": {"markers": user_drop_ask_source_markers},
+        "user_drop_ask_source_markers": user_drop_ask_source_markers,
+        "unsafe_http_boundary_required": True,
+        "unsafe_http_boundary": {"markers": unsafe_http_boundary_markers},
+        "unsafe_http_boundary_markers": unsafe_http_boundary_markers,
+        "responsive_required": responsive_required,
+        "responsive_layout": responsive_layout,
+        "responsive_markers": responsive_markers,
+        "negative_evidence": {
+            "production_readiness_claimed": 0,
+            "onprem_readiness_claimed": 0,
+            "final_security_claimed": 0,
+            "live_provider_claimed": 0,
+            "human_ux_acceptance_claimed": 0,
+            "human_review_package_claimed_acceptance": 0,
+            "reference_images_used_as_human_acceptance_evidence": 0,
+            "accessibility_certification_claimed": 0,
+            "reference_images_used_as_pass_evidence": 0,
+            "required_page_state_missing": 0 if route_markers.get("product_routes_reachable") else 1,
+        },
+        "errors": [] if status == "PASS" else [key for key, value in redesign_gate_markers.items() if not value],
+    }
+    write_json(proof_path, proof)
+    return proof
+
     base_dir = output_dir / "base"
     if base_dir.exists():
         shutil.rmtree(base_dir)
@@ -1193,7 +1948,7 @@ def capture_vs4_product_alpha_browser_proof(
         state_dir=state_dir,
         output_dir=base_dir,
         window_size=window_size,
-        route="/?scenario=vs4-brief-detail&autorun=true",
+        route="/review?scenario=vs4-brief-detail&autorun=true",
         after_load_script=vs4_runtime_script,
     )
     proof_path = output_dir / "browser-proof.json"

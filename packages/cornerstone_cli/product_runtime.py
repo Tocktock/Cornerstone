@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlparse
 from datetime import datetime, timezone
 
 from cornerstone_cli import __version__
+from cornerstone_cli.product_ui import PRODUCT_DETAIL_ROUTES, PRODUCT_LIST_ROUTES, render_product_detail, render_product_page
 from cornerstone_cli.runtime import LocalRuntimeStore
 
 
@@ -5241,9 +5242,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def _send_html(self, html_body: str) -> None:
+    def _send_html(self, html_body: str, status_code: int = 200) -> None:
         data = html_body.encode("utf-8")
-        self.send_response(200)
+        self.send_response(status_code)
         self.send_header("content-type", "text/html; charset=utf-8")
         self.send_header("content-length", str(len(data)))
         self.end_headers()
@@ -5260,6 +5261,22 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _path_parts(self) -> list[str]:
         return [part for part in urlparse(self.path).path.split("/") if part]
+
+    def _query(self) -> dict[str, list[str]]:
+        return parse_qs(urlparse(self.path).query)
+
+    def _wants_html(self) -> bool:
+        query = self._query()
+        if (query.get("view") or [""])[-1].lower() == "html":
+            return True
+        if (query.get("format") or [""])[-1].lower() == "html":
+            return True
+        accept = self.headers.get("accept", "")
+        if "text/html" not in accept:
+            return False
+        if "application/json" not in accept:
+            return True
+        return accept.find("text/html") < accept.find("application/json")
 
     def _query_scope(self) -> dict[str, str]:
         query = parse_qs(urlparse(self.path).query)
@@ -5281,12 +5298,28 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         parts = self._path_parts()
+        query = self._query()
         if not parts:
+            if query.get("scenario"):
+                readiness = build_readiness_report(self.root)["readiness"]
+                scenario = query.get("scenario", [None])[-1]
+                autorun = query.get("autorun", ["false"])[-1].lower() in {"1", "true", "yes"}
+                self._send_html(render_home(readiness, scenario=scenario, autorun_evux=autorun))
+                return
+            self._send_html(render_product_page(self.root, self.store, self._query_scope(), "/", query))
+            return
+        if parts == ["review"]:
             readiness = build_readiness_report(self.root)["readiness"]
-            query = parse_qs(urlparse(self.path).query)
             scenario = query.get("scenario", [None])[-1]
             autorun = query.get("autorun", ["false"])[-1].lower() in {"1", "true", "yes"}
             self._send_html(render_home(readiness, scenario=scenario, autorun_evux=autorun))
+            return
+        if len(parts) == 1 and f"/{parts[0]}" in PRODUCT_LIST_ROUTES:
+            self._send_html(render_product_page(self.root, self.store, self._query_scope(), f"/{parts[0]}", query))
+            return
+        if len(parts) == 2 and parts[0] in PRODUCT_DETAIL_ROUTES and self._wants_html():
+            status_code, html_body = render_product_detail(self.root, self.store, self._query_scope(), parts[0], parts[1])
+            self._send_html(html_body, status_code)
             return
         if parts == ["health"]:
             self._send_json(_json_response("success", service="cornerstone-vs0-runtime", real_external_http_calls=0))

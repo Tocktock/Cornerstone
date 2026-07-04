@@ -10,9 +10,9 @@
   },
   "chrome_timeout_after_screenshot": false,
   "clean_browser_exit": true,
-  "created_at": "2026-07-03T08:17:15.047454Z",
+  "created_at": "2026-07-04T15:18:37.895202Z",
   "dom_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
-  "dom_sha256": "d14c7d80565ca747f37499c078911f4507fff912139ac017285edaf08c8584d7",
+  "dom_sha256": "b142a530c07fdd627418d07aa3c57964897fcd63e3c9811bece49ab69f10f91a",
   "errors": [],
   "production_overclaim_absent": true,
   "readiness_labels_present": {
@@ -21,16 +21,16 @@
     "real_external_http_calls=0": true,
     "vs0_runtime_ready=true": true
   },
-  "route": "/",
+  "route": "/review",
   "runtime_evidence": null,
   "schema_version": "cs.browser_proof.v0",
-  "screenshot_bytes": 147216,
+  "screenshot_bytes": 142861,
   "screenshot_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
-  "screenshot_sha256": "ecd36783fbf6c43c127a03746c253be85e9dac4d30778262909adc7155c32b78",
+  "screenshot_sha256": "a161dadb1fbdf44107a64add872d34958b44870c9aaccf0bde1da1d09220bd1d",
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:55950/devtools/browser/bbd9d6d7-1298-415f-aa14-d3e2ab590ea4"
+      "DevTools listening on ws://127.0.0.1:55794/devtools/browser/28562c02-7aff-4a1f-84c5-c859a2df513d"
     ]
   },
   "surface_presence": {
@@ -38,9 +38,9 @@
     "Artifact Viewer": true,
     "Audit Detail": true,
     "Brief Detail": true,
-    "Claim Builder": true,
+    "Claim candidate": true,
     "Home/Ops Inbox": true,
     "Search": true
   },
-  "url": "http://127.0.0.1:55949/"
+  "url": "http://127.0.0.1:55793/review"
 }

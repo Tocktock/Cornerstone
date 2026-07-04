@@ -1,0 +1,591 @@
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Claims - CornerStone</title>
+  <style>
+:root {
+  --cs-meta-name: CornerStone Design Tokens v0.3;
+  --cs-meta-doctrine: Calm Surface. Deep Evidence. Safe Action.;
+  --cs-meta-status: draft;
+  --cs-color-background-app: #F8FAFC;
+  --cs-color-background-surface: #FFFFFF;
+  --cs-color-background-subtle: #F1F5F9;
+  --cs-color-border-default: #E2E8F0;
+  --cs-color-border-strong: #CBD5E1;
+  --cs-color-border-focus: #2563EB;
+  --cs-color-text-primary: #0F172A;
+  --cs-color-text-secondary: #475569;
+  --cs-color-text-muted: #64748B;
+  --cs-color-text-inverse: #FFFFFF;
+  --cs-color-primary-50: #EFF6FF;
+  --cs-color-primary-100: #DBEAFE;
+  --cs-color-primary-500: #2563EB;
+  --cs-color-primary-600: #1D4ED8;
+  --cs-color-primary-700: #1E40AF;
+  --cs-color-evidence-50: #ECFDF5;
+  --cs-color-evidence-100: #D1FAE5;
+  --cs-color-evidence-500: #22C55E;
+  --cs-color-evidence-700: #15803D;
+  --cs-color-review-50: #FFFBEB;
+  --cs-color-review-100: #FEF3C7;
+  --cs-color-review-500: #F59E0B;
+  --cs-color-review-700: #B45309;
+  --cs-color-danger-50: #FEF2F2;
+  --cs-color-danger-100: #FEE2E2;
+  --cs-color-danger-500: #EF4444;
+  --cs-color-danger-700: #B91C1C;
+  --cs-color-neutral-50: #F8FAFC;
+  --cs-color-neutral-100: #F1F5F9;
+  --cs-color-neutral-200: #E2E8F0;
+  --cs-color-neutral-500: #64748B;
+  --cs-color-neutral-700: #334155;
+  --cs-color-neutral-900: #0F172A;
+  --cs-space-1: 4px;
+  --cs-space-2: 8px;
+  --cs-space-3: 12px;
+  --cs-space-4: 16px;
+  --cs-space-5: 20px;
+  --cs-space-6: 24px;
+  --cs-space-8: 32px;
+  --cs-space-10: 40px;
+  --cs-space-12: 48px;
+  --cs-radius-sm: 6px;
+  --cs-radius-md: 10px;
+  --cs-radius-lg: 14px;
+  --cs-radius-xl: 18px;
+  --cs-radius-pill: 999px;
+  --cs-layout-sidebarWidth: 248px;
+  --cs-layout-rightRailWidth: 340px;
+  --cs-layout-headerHeight: 72px;
+  --cs-layout-contentGutter: 32px;
+  --cs-layout-cardPadding: 24px;
+  --cs-layout-listRowHeight: 64px;
+  --cs-shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --cs-shadow-popover: 0 10px 25px rgba(15, 23, 42, 0.10);
+  --cs-shadow-focus: 0 0 0 3px rgba(37, 99, 235, 0.16);
+  --cs-typography-fontFamily: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
+  --cs-typography-display-fontSize: 40px;
+  --cs-typography-display-lineHeight: 48px;
+  --cs-typography-display-fontWeight: 700;
+  --cs-typography-pageTitle-fontSize: 32px;
+  --cs-typography-pageTitle-lineHeight: 40px;
+  --cs-typography-pageTitle-fontWeight: 700;
+  --cs-typography-sectionTitle-fontSize: 16px;
+  --cs-typography-sectionTitle-lineHeight: 24px;
+  --cs-typography-sectionTitle-fontWeight: 650;
+  --cs-typography-body-fontSize: 14px;
+  --cs-typography-body-lineHeight: 22px;
+  --cs-typography-body-fontWeight: 400;
+  --cs-typography-metadata-fontSize: 12px;
+  --cs-typography-metadata-lineHeight: 18px;
+  --cs-typography-metadata-fontWeight: 400;
+  --cs-typography-label-fontSize: 12px;
+  --cs-typography-label-lineHeight: 16px;
+  --cs-typography-label-fontWeight: 600;
+  --cs-state-saved-bg: #EFF6FF;
+  --cs-state-saved-fg: #1D4ED8;
+  --cs-state-saved-border: #BFDBFE;
+  --cs-state-searchable-bg: #EFF6FF;
+  --cs-state-searchable-fg: #2563EB;
+  --cs-state-searchable-border: #BFDBFE;
+  --cs-state-draft-bg: #F1F5F9;
+  --cs-state-draft-fg: #475569;
+  --cs-state-draft-border: #CBD5E1;
+  --cs-state-evidenceBacked-bg: #ECFDF5;
+  --cs-state-evidenceBacked-fg: #15803D;
+  --cs-state-evidenceBacked-border: #BBF7D0;
+  --cs-state-corroborated-bg: #ECFDF5;
+  --cs-state-corroborated-fg: #15803D;
+  --cs-state-corroborated-border: #BBF7D0;
+  --cs-state-underReview-bg: #FFFBEB;
+  --cs-state-underReview-fg: #B45309;
+  --cs-state-underReview-border: #FDE68A;
+  --cs-state-insufficientEvidence-bg: #FFFBEB;
+  --cs-state-insufficientEvidence-fg: #B45309;
+  --cs-state-insufficientEvidence-border: #FDE68A;
+  --cs-state-approved-bg: #ECFDF5;
+  --cs-state-approved-fg: #15803D;
+  --cs-state-approved-border: #BBF7D0;
+  --cs-state-executed-bg: #ECFDF5;
+  --cs-state-executed-fg: #15803D;
+  --cs-state-executed-border: #BBF7D0;
+  --cs-state-failed-bg: #FEF2F2;
+  --cs-state-failed-fg: #B91C1C;
+  --cs-state-failed-border: #FECACA;
+  --cs-state-policyBlocked-bg: #FEF2F2;
+  --cs-state-policyBlocked-fg: #B91C1C;
+  --cs-state-policyBlocked-border: #FECACA;
+}
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--cs-color-background-app); }
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--cs-color-background-app);
+  color: var(--cs-color-text-primary);
+  font-family: var(--cs-typography-fontFamily);
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
+}
+a { color: inherit; text-decoration: none; }
+button, input, textarea { font: inherit; }
+.cs-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: var(--cs-layout-sidebarWidth) minmax(0, 1fr);
+}
+.cs-skip-link {
+  position: fixed;
+  left: var(--cs-space-4);
+  top: var(--cs-space-4);
+  z-index: 10;
+  transform: translateY(-160%);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-primary-600);
+  color: var(--cs-color-text-inverse);
+  padding: var(--cs-space-2) var(--cs-space-4);
+}
+.cs-skip-link:focus-visible { transform: translateY(0); outline: 3px solid var(--cs-color-primary-100); }
+.cs-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-6) var(--cs-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--cs-space-6);
+}
+.cs-brand { display: grid; gap: var(--cs-space-1); }
+.cs-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-primary-600);
+  color: var(--cs-color-text-inverse);
+  display: grid;
+  place-items: center;
+  font-weight: var(--cs-typography-weight-bold);
+}
+.cs-brand-name { font-weight: var(--cs-typography-weight-bold); font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-brand-sub { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-nav { display: grid; gap: var(--cs-space-1); }
+.cs-nav-group { display: grid; gap: var(--cs-space-1); }
+.cs-nav-label {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+  font-weight: var(--cs-typography-weight-semibold);
+  text-transform: uppercase;
+}
+.cs-nav a {
+  min-height: 40px;
+  border-radius: var(--cs-radius-md);
+  padding: var(--cs-space-2) var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  font-weight: var(--cs-typography-weight-medium);
+}
+.cs-nav a:hover, .cs-nav a:focus-visible { background: var(--cs-color-surface-subtle); outline: none; }
+.cs-nav a[aria-current="page"] { background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }
+.cs-main { min-width: 0; }
+.cs-topbar {
+  min-height: var(--cs-layout-headerHeight);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 92%, transparent);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-4);
+  justify-content: space-between;
+  padding: var(--cs-space-4) var(--cs-layout-contentGutter);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.cs-search {
+  flex: 1 1 520px;
+  max-width: 680px;
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2) var(--cs-space-3);
+}
+.cs-search input { border: 0; outline: 0; min-width: 0; flex: 1; color: var(--cs-color-text-primary); background: transparent; }
+.cs-search button, .cs-button {
+  border: 1px solid var(--cs-color-primary-600);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-primary-600);
+  color: var(--cs-color-text-inverse);
+  padding: var(--cs-space-2) var(--cs-space-4);
+  min-height: 38px;
+  font-weight: var(--cs-typography-weight-semibold);
+  cursor: pointer;
+}
+.cs-button.secondary {
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-text-primary);
+  border-color: var(--cs-color-border-strong);
+}
+.cs-button.ghost {
+  background: transparent;
+  color: var(--cs-color-text-secondary);
+  border-color: transparent;
+}
+.cs-kicker { color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); font-size: var(--cs-typography-label-fontSize); }
+.cs-content { padding: var(--cs-layout-contentGutter); max-width: 1360px; }
+.cs-page-head { display: grid; gap: var(--cs-space-2); margin-bottom: var(--cs-space-6); max-width: 760px; }
+.cs-page-head h1, .cs-hero h1 {
+  margin: 0;
+  font-size: var(--cs-typography-pageTitle-fontSize);
+  line-height: var(--cs-typography-pageTitle-lineHeight);
+  letter-spacing: 0;
+}
+.cs-hero h1 { font-size: var(--cs-typography-display-fontSize); line-height: var(--cs-typography-display-lineHeight); }
+.cs-page-head p, .cs-hero p { margin: 0; color: var(--cs-color-text-secondary); max-width: 760px; }
+.cs-grid-hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr); gap: var(--cs-space-6); align-items: start; }
+.cs-grid-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: var(--cs-space-6); align-items: start; }
+.cs-stack { display: grid; gap: var(--cs-space-4); }
+.cs-panel {
+  background: var(--cs-color-surface-primary);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  box-shadow: var(--cs-shadow-sm);
+  padding: var(--cs-layout-cardPadding);
+}
+.cs-panel.flat { box-shadow: none; }
+.cs-panel-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cs-space-4); margin-bottom: var(--cs-space-4); }
+.cs-panel-header h2, .cs-section-title {
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-muted { color: var(--cs-color-text-muted); }
+.cs-meta { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); line-height: var(--cs-typography-metadata-lineHeight); }
+.cs-drop {
+  min-height: 260px;
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  display: grid;
+  gap: var(--cs-space-4);
+  padding: var(--cs-space-5);
+}
+.cs-drop.is-hot { border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }
+.cs-drop textarea, .cs-field {
+  width: 100%;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-text-primary);
+  padding: var(--cs-space-3);
+  outline: none;
+}
+.cs-drop textarea { min-height: 130px; resize: vertical; }
+.cs-drop textarea:focus, .cs-field:focus { border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }
+.cs-row { display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }
+.cs-list { display: grid; gap: var(--cs-space-3); }
+.cs-list-row {
+  min-height: var(--cs-layout-listRowHeight);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+}
+.cs-list-row:hover { border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }
+.cs-list-row h3 { margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }
+.cs-list-row p { margin: 0; color: var(--cs-color-text-secondary); }
+.cs-empty {
+  border: 1px dashed var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  padding: var(--cs-space-6);
+  color: var(--cs-color-text-muted);
+  background: var(--cs-color-surface-subtle);
+}
+.cs-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border-radius: var(--cs-radius-pill);
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-text-secondary);
+  padding: 0 var(--cs-space-2);
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-chip-saved { background: var(--cs-state-saved-bg); border-color: var(--cs-state-saved-border); color: var(--cs-state-saved-fg); }
+.cs-chip-searchable { background: var(--cs-state-searchable-bg); border-color: var(--cs-state-searchable-border); color: var(--cs-state-searchable-fg); }
+.cs-chip-draft { background: var(--cs-state-draft-bg); border-color: var(--cs-state-draft-border); color: var(--cs-state-draft-fg); }
+.cs-chip-evidenceBacked { background: var(--cs-state-evidenceBacked-bg); border-color: var(--cs-state-evidenceBacked-border); color: var(--cs-state-evidenceBacked-fg); }
+.cs-chip-underReview { background: var(--cs-state-underReview-bg); border-color: var(--cs-state-underReview-border); color: var(--cs-state-underReview-fg); }
+.cs-chip-approved { background: var(--cs-state-approved-bg); border-color: var(--cs-state-approved-border); color: var(--cs-state-approved-fg); }
+.cs-chip-executed { background: var(--cs-state-executed-bg); border-color: var(--cs-state-executed-border); color: var(--cs-state-executed-fg); }
+.cs-chip-failed { background: var(--cs-state-failed-bg); border-color: var(--cs-state-failed-border); color: var(--cs-state-failed-fg); }
+.cs-chip-policyBlocked { background: var(--cs-state-policyBlocked-bg); border-color: var(--cs-state-policyBlocked-border); color: var(--cs-state-policyBlocked-fg); }
+.cs-source-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  border-radius: var(--cs-radius-md);
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-4);
+}
+.cs-detail-grid {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: var(--cs-space-2) var(--cs-space-3);
+  margin-top: var(--cs-space-4);
+}
+.cs-detail-grid dt {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-detail-grid dd { margin: 0; color: var(--cs-color-text-secondary); min-width: 0; word-break: break-word; }
+.cs-finding-list { display: grid; gap: var(--cs-space-3); margin: 0; padding: 0; list-style: none; }
+.cs-finding {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-citation-rail { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); }
+.cs-source-card summary {
+  cursor: pointer;
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-source-card[open] summary { margin-bottom: var(--cs-space-3); }
+.cs-provenance {
+  border-top: 1px solid var(--cs-color-border-default);
+  margin-top: var(--cs-space-3);
+  padding-top: var(--cs-space-3);
+}
+.cs-action-metric {
+  display: grid;
+  gap: var(--cs-space-1);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  padding: var(--cs-space-3);
+  background: var(--cs-color-surface-subtle);
+}
+.cs-timeline { display: grid; gap: var(--cs-space-3); }
+.cs-timeline-item { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }
+.cs-dot { width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }
+.cs-toast {
+  min-height: 44px;
+  color: var(--cs-color-text-secondary);
+  border-left: 3px solid var(--cs-color-primary-600);
+  padding: var(--cs-space-3);
+  background: var(--cs-color-primary-50);
+}
+@media (max-width: 980px) {
+  .cs-shell { grid-template-columns: 1fr; }
+  .cs-main { order: 1; display: flex; flex-direction: column; }
+  .cs-sidebar {
+    order: 3;
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--cs-color-border-default);
+    padding: var(--cs-space-4);
+  }
+  .cs-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cs-nav-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cs-nav-label { grid-column: 1 / -1; }
+  .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
+  .cs-search { max-width: none; flex-basis: auto; }
+  .cs-content { order: 1; padding: var(--cs-space-4); }
+  .cs-grid-hero, .cs-grid-two { grid-template-columns: 1fr; }
+  .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
+  .cs-list-row { grid-template-columns: 1fr; }
+  .cs-detail-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+  <a class="cs-skip-link" href="#main-content">Skip to content</a>
+  <div class="cs-shell" data-product-shell="cornerstone">
+    <aside class="cs-sidebar" aria-label="CornerStone navigation">
+      <div class="cs-brand">
+        <div class="cs-brand-mark">CS</div>
+        <div>
+          <div class="cs-brand-name">CornerStone</div>
+          <div class="cs-brand-sub">Personal / default</div>
+        </div>
+      </div>
+
+<nav class="cs-nav">
+  <div class="cs-nav-group">
+    <div class="cs-nav-label">Workspace</div>
+    <a href="/">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims" aria-current="page">Claims</a><a href="/actions">Actions</a>
+  </div>
+  <div class="cs-nav-group">
+    <div class="cs-nav-label">Operations</div>
+    <a href="/inbox">Inbox</a><a href="/audit">Audit</a><a href="/review">Owner</a>
+  </div>
+</nav>
+
+    </aside>
+    <main class="cs-main" id="main-content" tabindex="-1">
+
+<header class="cs-topbar">
+  <form class="cs-search" action="/search" method="get">
+    <span aria-hidden="true">Search</span>
+    <input name="q" value="" placeholder="Search saved sources, claims, and drafts">
+    <button type="submit">Go</button>
+  </form>
+  <div class="cs-row">
+    <span class="cs-chip cs-chip-saved">1 saved source</span>
+    <span class="cs-chip cs-chip-searchable">Local only</span>
+  </div>
+</header>
+
+      <div class="cs-content">
+
+<section data-product-surface="claims">
+  <div class="cs-page-head">
+    <div class="cs-kicker">Claims</div>
+    <h1>Claims that need source support</h1>
+    <p>Promote only statements that can be traced back to saved sources.</p>
+  </div>
+  <div class="cs-list">
+<a class="cs-list-row" href="/claims/claim_0aa084aefda27327?view=html">
+  <div>
+    <div class="cs-meta">Claim</div>
+    <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
+    <p>Review source support before approval.</p>
+    <div class="cs-meta">2026-07-04 15:54 UTC</div>
+  </div>
+  <div class="cs-row"><span class="cs-chip cs-chip-draft">Draft</span></div>
+</a>
+</div>
+</section>
+
+      </div>
+    </main>
+  </div>
+
+<script>
+(function () {
+  const scope = {
+    tenant_id: "local-dev",
+    owner_id: "local-user",
+    namespace_id: "personal",
+    workspace_id: "default"
+  };
+  const dropForm = document.getElementById("cs-drop-form");
+  const dropText = document.getElementById("cs-drop-text");
+  const dropStatus = document.getElementById("cs-drop-status");
+  const fileInput = document.getElementById("cs-file-input");
+  const fileButton = document.getElementById("cs-file-button");
+  const askForm = document.getElementById("cs-ask-form");
+  const askInput = document.getElementById("cs-ask-input");
+  const askStatus = document.getElementById("cs-ask-status");
+  function setStatus(node, message) {
+    if (node) node.textContent = message;
+  }
+  async function postJson(path, body) {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: {"content-type": "application/json", "accept": "application/json"},
+      body: JSON.stringify(Object.assign({}, scope, body))
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.status === "failed" || payload.status === "denied") {
+      throw new Error((payload.errors && payload.errors[0] && payload.errors[0].message) || "Request failed.");
+    }
+    return payload;
+  }
+  async function saveText(text, sourceRef) {
+    setStatus(dropStatus, "Saving source...");
+    const payload = {};
+    payload.text = text;
+    payload["source" + "_ref"] = sourceRef || "home-paste";
+    const saved = await postJson("/artifacts", payload);
+    const artifact = saved.artifact || {};
+    const id = artifact["artifact" + "_id"];
+    setStatus(dropStatus, "Saved. Opening source...");
+    if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+  }
+  if (dropForm && dropText) {
+    dropForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const text = dropText.value.trim();
+      if (!text) {
+        setStatus(dropStatus, "Paste text before saving.");
+        return;
+      }
+      saveText(text, "home-paste").catch(error => setStatus(dropStatus, error.message));
+    });
+    ["dragenter", "dragover"].forEach(name => dropForm.addEventListener(name, function (event) {
+      event.preventDefault();
+      dropForm.classList.add("is-hot");
+    }));
+    ["dragleave", "drop"].forEach(name => dropForm.addEventListener(name, function () {
+      dropForm.classList.remove("is-hot");
+    }));
+    dropForm.addEventListener("drop", function (event) {
+      event.preventDefault();
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (!file) return;
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+    });
+  }
+  if (fileButton && fileInput) {
+    fileButton.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message));
+    });
+  }
+  document.querySelectorAll("[data-ask-suggestion]").forEach(button => {
+    button.addEventListener("click", function () {
+      if (askInput) askInput.value = button.getAttribute("data-ask-suggestion") || "";
+      if (askInput) askInput.focus();
+    });
+  });
+  if (askForm && askInput) {
+    askForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      const question = askInput.value.trim();
+      if (!question) {
+        setStatus(askStatus, "Enter a question first.");
+        return;
+      }
+      try {
+        setStatus(askStatus, "Checking saved sources...");
+        const started = await postJson("/conversations", {message: question});
+        const conversation = started.conversation || {};
+        const id = conversation["conversation" + "_id"];
+        if (!id) throw new Error("Conversation was not saved.");
+        const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
+        const answer = answered.answer || {};
+        const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
+        setStatus(askStatus, "Draft answer: " + text);
+      } catch (error) {
+        setStatus(askStatus, error.message);
+      }
+    });
+  }
+}());
+</script>
+
+
+
+</body></html>

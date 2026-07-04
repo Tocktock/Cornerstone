@@ -11,7 +11,7 @@ Use this checklist to accept or reject the local VS0 runtime from an operator pe
 - [ ] Confirm Home/Ops Inbox is understandable.
 - [ ] Confirm Artifact Viewer makes the original/evidence relationship clear.
 - [ ] Confirm Search makes scoped evidence discovery clear.
-- [ ] Confirm Claim Builder makes Draft, Evidence-backed, and Approved states clear.
+- [ ] Confirm Claim candidate makes Draft, Evidence-backed, and Approved states clear.
 - [ ] Confirm Action Card makes dry-run, policy, risk, approval, and execution boundaries clear.
 - [ ] Confirm Audit Detail makes action/evidence history inspectable.
 - [ ] Confirm the UI does not imply production release, live-provider readiness, or autonomous external writeback.

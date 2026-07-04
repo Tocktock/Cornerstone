@@ -8,14 +8,17 @@
   "chrome_exit_codes": {
     "screenshot": 0
   },
-  "chrome_timeout_after_screenshot": true,
-  "clean_browser_exit": false,
-  "created_at": "2026-07-04T08:16:33.209686Z",
+  "chrome_timeout_after_screenshot": false,
+  "clean_browser_exit": true,
+  "created_at": "2026-07-04T15:53:58.477666Z",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
-  "dom_sha256": null,
-  "errors": [
-    "timed out"
-  ],
+  "dom_sha256": "893c7b18b37a3f36c7f7101fbf9e0458d806fbca1ace6cb6b9a5c00b33881bce",
+  "errors": [],
+  "product_markers": {
+    "product_shell_present": true,
+    "product_surface_present": true,
+    "product_tokens_present": true
+  },
   "production_overclaim_absent": true,
   "readiness_labels_present": {
     "local_scenario_ready=true": false,
@@ -23,18 +26,41 @@
     "real_external_http_calls=0": false,
     "vs0_runtime_ready=true": false
   },
-  "route": "/?scenario=vs4-brief-detail&autorun=true",
-  "runtime_evidence": null,
+  "route": "/",
+  "runtime_evidence": {
+    "document_scroll_height": 1429,
+    "document_scroll_width": 1440,
+    "first_value_order_ok": true,
+    "horizontal_overflow": false,
+    "inner_height": 1013,
+    "inner_width": 1440,
+    "mobile_breakpoint_applied": false,
+    "mobile_first_value_before_nav": true,
+    "token_sample": {
+      "background_app": "#F8FAFC",
+      "radius_pill": "999px",
+      "sidebar_width": "248px"
+    },
+    "viewport_meta_present": true,
+    "visible": {
+      "ask": true,
+      "drop": true,
+      "global_search": true,
+      "home": true,
+      "latest_brief": true,
+      "primary_nav": true,
+      "product_shell": true,
+      "recent_sources": true
+    }
+  },
   "schema_version": "cs.browser_proof.v0",
-  "screenshot_bytes": 0,
+  "screenshot_bytes": 188147,
   "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
-  "screenshot_sha256": null,
-  "status": "failed",
+  "screenshot_sha256": "b818c6ff3b572c2cd4e5f1916f9258cb9fa42483a00258b7ae3d32513daaab5c",
+  "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:58343/devtools/browser/9e4fe1aa-b9c5-41a2-8bb8-dbeab1fcef72",
-      "Trying to load the allocator multiple times. This is *not* supported.",
-      "[90452:8606104:0704/171629.508223:ERROR:google_apis/gcm/engine/registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT"
+      "DevTools listening on ws://127.0.0.1:59308/devtools/browser/2db8307c-5b47-4dbd-8f8a-21cb25b27087"
     ]
   },
   "surface_presence": {
@@ -44,7 +70,7 @@
     "Brief Detail": false,
     "Claim candidate": false,
     "Home/Ops Inbox": false,
-    "Search": false
+    "Search": true
   },
-  "url": "http://127.0.0.1:58342/?scenario=vs4-brief-detail&autorun=true"
+  "url": "http://127.0.0.1:59307/"
 }

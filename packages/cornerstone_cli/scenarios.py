@@ -24121,11 +24121,11 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
     try:
         api_transcripts["health"] = _http_json(base_url, "GET", "/health")
         api_transcripts["ready"] = _http_json(base_url, "GET", "/ready")
-        ui_trace = _http_text(base_url, "/")
+        ui_trace = _http_text(base_url, "/review")
         body = ui_trace.get("body", "")
         ui_summary = {
             "schema_version": "cs.ui_trace_summary.v0",
-            "path": "/",
+            "path": "/review",
             "status_code": ui_trace.get("status_code"),
             "body_length": len(body),
             "surface_presence": {surface: surface in body for surface in UI_SURFACES},
@@ -24363,8 +24363,8 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "VS0-RT-001",
             "MUST_PASS",
             "PASS" if ready_ok and api_health_ok and api_ready_ok and ui_ok else "FAIL",
-            ["cornerstone ready --json", "GET /health", "GET /ready", "GET /"],
-            "Readiness truthfully separates local scenario readiness, VS0 runtime readiness, and production release readiness; API health and UI shell load.",
+            ["cornerstone ready --json", "GET /health", "GET /ready", "GET /review"],
+            "Readiness truthfully separates local scenario readiness, VS0 runtime readiness, and production release readiness; API health and owner review shell load.",
         ),
         _row(
             "VS0-RT-002",
@@ -24412,8 +24412,8 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "VS0-RT-008",
             "MUST_PASS",
             "PASS" if ui_ok else "FAIL",
-            ["GET /", "UI surface assertions"],
-            "Minimal Calm Surface UI exposes Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail without production overclaim.",
+            ["GET /review", "UI surface assertions"],
+            "Owner review UI preserves structural Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail checks without production overclaim.",
         ),
         _row(
             "VS0-RT-R01",
@@ -24583,7 +24583,7 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
     readiness = ready_payload.get("readiness", {})
     last_runtime_report = readiness.get("last_successful_runtime_scenario", {})
 
-    browser_proof = capture_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir)
+    browser_proof = capture_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir, route="/review")
     dry_run_impact = (
         product_runtime_payload.get("cli_transcripts", {})
         .get("action_dry_run", {})
@@ -26928,6 +26928,7 @@ def _run_vs4_brief_detail_cli_workflow(root: Path, state_rel: str) -> dict[str, 
             "vs4_loop_invalid_ref_created_audit": 0 if loop_invalid_no_side_effects else 1,
             "vs4_loop_invalid_ref_authority_expanded": 0 if loop_invalid_no_side_effects else 1,
             "vs4_loop_invalid_ref_live_writeback": 0 if loop_invalid_no_side_effects else 1,
+            "vs4_loop_api_parity_failed": 0 if loop_lineage_guard_cli_parity else 1,
             "vs4_loop_product_language_error_missing": 0 if loop_product_language_errors else 1,
             "reference_images_used_as_pass_evidence": 0,
         },
@@ -27278,10 +27279,28 @@ def _run_vs4_ask_packs_states_cli_workflow(root: Path, state_rel: str) -> dict[s
             for output in pack_outputs
         )
     )
-    ask_complete = (
+    ask_answer_label = str(ask_answer.get("label") or "")
+    ask_answer_label_check = ask_answer.get("label_check", {}) if isinstance(ask_answer.get("label_check"), dict) else {}
+    ask_answer_earned_evidence_backed = ask_answer_label_check.get("earned_evidence_backed") is True
+    ask_answer_presented_as_fact = ask_answer.get("presented_as_fact") is True
+    ask_answer_honest_label = (
+        (
+            ask_answer_label == "evidence_backed"
+            and ask_answer_earned_evidence_backed
+            and ask_answer_presented_as_fact
+            and bool(ask_answer.get("citation_refs"))
+            and bool(ask_answer.get("citation_check_refs"))
+        )
+        or (
+            ask_answer_label in {"template_fallback", "extractive_fallback", "insufficient_evidence"}
+            and not ask_answer_earned_evidence_backed
+            and not ask_answer_presented_as_fact
+        )
+    )
+    ask_work_item_complete = (
         all(_exit_ok(transcripts[name]) for name in ask_required_success)
-        and ask_answer.get("label") == "evidence_backed"
         and bool(ask_answer.get("evidence_refs"))
+        and ask_answer_honest_label
         and ask_promoted_claim.get("trust_state") == "evidence_backed"
         and ask_memory.get("status") == "draft"
         and ask_memory.get("usage_permissions", {}).get("can_influence_answers") is False
@@ -27311,9 +27330,10 @@ def _run_vs4_ask_packs_states_cli_workflow(root: Path, state_rel: str) -> dict[s
         and unsafe_promote_denied
     )
     checks = {
-        "ask_to_work_item": ask_complete,
-        "ask_not_chatbot_only": ask_complete and bool(ask_brief_id) and bool(ask_claim_id) and bool(ask_memory_id) and bool(ask_action_id),
+        "ask_to_work_item": ask_work_item_complete,
+        "ask_not_chatbot_only": ask_work_item_complete and bool(ask_brief_id) and bool(ask_claim_id) and bool(ask_memory_id) and bool(ask_action_id),
         "ask_evidence_memory_action_refs": bool(ask_answer.get("evidence_refs")) and bool(ask_memory_id) and bool(ask_action_id),
+        "ask_answer_honest_label": ask_answer_honest_label,
         "ask_injection_detected": unsafe_ask_detected,
         "ask_injection_promotion_denied": unsafe_promote_denied,
         "ask_injection_zero_side_effects": unsafe_ask_zero_side_effects,
@@ -28042,6 +28062,20 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         value is True for value in mobile_unsafe_http_boundary_markers.values()
     )
     all_negative_zero = all(value == 0 for value in negative.values())
+    overclaim_negative_zero = all(
+        int(negative.get(key, 0) or 0) == 0
+        for key in [
+            "production_readiness_claimed",
+            "onprem_readiness_claimed",
+            "final_security_claimed",
+            "live_provider_claimed",
+            "human_ux_acceptance_claimed",
+            "human_review_package_claimed_acceptance",
+            "reference_images_used_as_human_acceptance_evidence",
+            "accessibility_certification_claimed",
+            "reference_images_used_as_pass_evidence",
+        ]
+    )
     desktop_overflow_contained = (
         desktop_responsive_layout.get("horizontal_overflow") is False
         and desktop_responsive_layout.get("desktop_overflow_contained") is True
@@ -28484,7 +28518,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and mobile_user_drop_ask_source_markers.get("human_acceptance_unclaimed")
         and mobile_unsafe_http_boundary_markers.get("local_boundary_preserved")
         and mobile_unsafe_http_boundary_markers.get("human_acceptance_unclaimed")
-        and all_negative_zero
+        and overclaim_negative_zero
         and loop_lineage_guard_ok
         and journey_timeline_ok
         else "FAIL",

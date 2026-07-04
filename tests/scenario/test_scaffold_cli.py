@@ -11821,6 +11821,7 @@ class ScaffoldCliTests(unittest.TestCase):
             "ask_to_work_item",
             "ask_not_chatbot_only",
             "ask_evidence_memory_action_refs",
+            "ask_answer_honest_label",
             "three_general_purpose_packs",
             "pack_domains_not_logistics_only",
             "pack_outputs_complete",
@@ -12090,6 +12091,7 @@ class ScaffoldCliTests(unittest.TestCase):
 
         checks = payload["slice_003_cli_workflow"]["checks"]
         self.assertTrue(checks["ask_to_work_item"])
+        self.assertTrue(checks["ask_answer_honest_label"])
         self.assertTrue(checks["ask_injection_detected"])
         self.assertTrue(checks["ask_injection_promotion_denied"])
         self.assertTrue(checks["ask_injection_zero_side_effects"])

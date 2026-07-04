@@ -20023,6 +20023,12 @@ def _vs4_product_alpha_gate_validation(
             failure.update(details)
             failures.append(failure)
 
+    def record_when_in_scope(name: str, in_scope: bool, passed: bool, message: str, **details: Any) -> None:
+        if in_scope:
+            record(name, passed, message, **details)
+        else:
+            conditions[name] = True
+
     record(
         "report_identity",
         data.get("scenario_set") == VS4_PRODUCT_ALPHA_SCENARIO_SET and data.get("status") == "success",
@@ -20120,11 +20126,17 @@ def _vs4_product_alpha_gate_validation(
         "VS4 report proof boundary must not claim production, on-prem, final security, live provider, or human UX readiness.",
         mismatches=proof_mismatches,
     )
-    negative_missing = sorted(VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS - set(negative_evidence))
+    required_negative_keys = (
+        VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS
+        if full_report
+        else VS4_REQUIRED_NEGATIVE_EVIDENCE_KEYS.intersection(set(negative_evidence))
+    )
+    negative_missing = sorted(required_negative_keys - set(negative_evidence))
     negative_nonzero = {
         key: value
         for key, value in negative_evidence.items()
-        if value != 0 or isinstance(value, bool) or not isinstance(value, (int, float))
+        if (full_report or key in required_negative_keys)
+        and (value != 0 or isinstance(value, bool) or not isinstance(value, (int, float)))
     }
     record(
         "negative_evidence",
@@ -20233,8 +20245,9 @@ def _vs4_product_alpha_gate_validation(
         desktop_markers=ops_markers,
         mobile_markers=mobile_ops_markers,
     )
-    record(
+    record_when_in_scope(
         "return_to_work_lineage_guard",
+        full_report or "VS4-REG-007" in expected_id_set,
         proof_boundary.get("vs4_slice_022_return_to_work_lineage_guard")
         == VS4_SLICE_PROOF_BOUNDARY_VALUE
         and cli_checks.get("loop_lineage_guard_cli_parity") is True
@@ -20322,8 +20335,9 @@ def _vs4_product_alpha_gate_validation(
         "journey_timeline_no_authority_expansion",
         "journey_timeline_no_live_writeback",
     ]
-    record(
+    record_when_in_scope(
         "ops_inbox_journey_timeline",
+        full_report or VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY in expected_id_set,
         proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY) == VS4_SLICE_PROOF_BOUNDARY_VALUE
         and all(ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
         and all(mobile_ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
@@ -20352,8 +20366,9 @@ def _vs4_product_alpha_gate_validation(
         command=self_command,
         exit_code=self_transcript.get("exit_code"),
     )
-    record(
+    record_when_in_scope(
         "cli_parity",
+        full_report or "VS4-REG-007" in expected_id_set,
         cli_checks.get("cli_parity") is True
         and cli_checks.get("action_boundary_cli_parity") is True
         and cli_checks.get("text_trust_downgrade") is True

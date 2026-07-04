@@ -8,9 +8,9 @@
         "vs0-runtime-acceptance",
         "--json",
         "--output",
-        "reports/scenario/vs0-runtime-acceptance-2026-06-11.json"
+        "tmp/vs0-runtime-acceptance-after-vs4-h01-recovery.json"
       ],
-      "elapsed_seconds": 5.875,
+      "elapsed_seconds": 5.209,
       "exit_code": 0,
       "name": "scenario_verify_vs0_evux",
       "required": true,
@@ -27,10 +27,10 @@
         "cornerstone",
         "scenario",
         "gate",
-        "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+        "tmp/vs0-runtime-acceptance-after-vs4-h01-recovery.json",
         "--json"
       ],
-      "elapsed_seconds": 0.112,
+      "elapsed_seconds": 0.089,
       "exit_code": 0,
       "name": "scenario_gate",
       "required": true,
@@ -42,13 +42,13 @@
         "  \"audit_refs\": [],",
         "  \"blocking\": [],",
         "  \"blocking_count\": 0,",
-        "  \"checked_report\": \"/Users/jiyong/playground/Cornerstone/reports/scenario/vs0-runtime-acceptance-2026-06-11.json\",",
+        "  \"checked_report\": \"/Users/jiyong/playground/Cornerstone/tmp/vs0-runtime-acceptance-after-vs4-h01-recovery.json\",",
         "  \"cli_schema_version\": \"cs.cli.v0\",",
         "  \"command\": \"cornerstone scenario gate\",",
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"afeb99e\"",
+        "    \"git_commit\": \"db33f2027\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -76,7 +76,7 @@
         "vs0-runtime-acceptance",
         "--json"
       ],
-      "elapsed_seconds": 0.114,
+      "elapsed_seconds": 0.092,
       "exit_code": 0,
       "name": "release_evidence_collect",
       "required": true,
@@ -89,7 +89,7 @@
       "timed_out": false
     }
   ],
-  "created_at": "2026-07-03T08:17:15.304489Z",
+  "created_at": "2026-07-04T15:18:38.128885Z",
   "schema_version": "cs.release_command_transcript.v0",
   "scope_name": "vs0-runtime-acceptance",
   "summary": {
