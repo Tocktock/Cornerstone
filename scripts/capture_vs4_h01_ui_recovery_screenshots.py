@@ -62,6 +62,16 @@ DESKTOP_ROUTES = [
     },
 ]
 
+DAY_ZERO_ROUTES = [
+    {"name": "day-zero-search-desktop", "route": "/search", "surface": "search", "required": ["Search starts with saved work", "Save a source", "Open artifacts"]},
+    {"name": "day-zero-artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Start with a source", "Go to Home", "Search workspace"]},
+    {"name": "day-zero-briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Create the first brief", "Save a source", "Open artifacts"]},
+    {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required": ["No claims need review", "Open briefs", "Check sources"]},
+    {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required": ["No action previews yet", "Open claims", "Open briefs"]},
+    {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["No work waiting", "No selected work", "Start from Home"]},
+    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required": ["No activity recorded yet", "Start from Home", "Open artifacts"]},
+]
+
 DETAIL_ROUTES = [
     {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
     {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["What we found", "Findings with citations", "Use this brief"]},
@@ -87,6 +97,15 @@ MOBILE_ROUTE_NAMES = {
     "inbox-desktop",
     "action-detail-desktop",
     "owner-admin-desktop",
+}
+
+DAY_ZERO_MOBILE_ROUTE_NAMES = {
+    "day-zero-artifacts-desktop",
+    "day-zero-briefs-desktop",
+    "day-zero-claims-desktop",
+    "day-zero-actions-desktop",
+    "day-zero-inbox-desktop",
+    "day-zero-audit-desktop",
 }
 
 LAYOUT_SCRIPT = """
@@ -261,6 +280,18 @@ def route_specs(ids: dict[str, str]) -> list[dict[str, Any]]:
     return specs + mobile_specs
 
 
+def day_zero_route_specs() -> list[dict[str, Any]]:
+    specs = [dict(spec) for spec in DAY_ZERO_ROUTES]
+    mobile_specs = []
+    for spec in specs:
+        if spec["name"] in DAY_ZERO_MOBILE_ROUTE_NAMES:
+            item = dict(spec)
+            item["name"] = item["name"].replace("-desktop", "-mobile")
+            item["mobile"] = True
+            mobile_specs.append(item)
+    return specs + mobile_specs
+
+
 def capture_page(
     *,
     chrome: Path,
@@ -405,13 +436,13 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
         "- R1: Home rebuilt around Drop and Ask with real local records, day-zero copy, and internal owner material moved to `/review`.",
         "- R2/R3: Search, Artifacts, Briefs, Claims, Actions, Inbox, Audit, owner connector governance, and record detail routes are represented in the screenshot pack.",
         "- R4: product surfaces are scanned for forbidden internal language and raw runtime labels.",
-        "- R5: desktop and mobile captures check horizontal overflow and mobile first-value ordering.",
+        "- R5: desktop, mobile, and day-zero captures check horizontal overflow and mobile first-value ordering.",
         "- R6: screenshot pack and automated checks exist; owner acceptance remains human-required.",
         "",
         "## Evidence Files",
         "",
         f"- `screenshot-pack-manifest.json`",
-        f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures)",
+        f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures, including day-zero empty states)",
         "- `dom/` captured HTML for each screenshot route",
         "",
         "## Screenshot Coverage",
@@ -479,8 +510,11 @@ def main() -> int:
     thread = threading.Thread(target=serve, daemon=True)
     thread.start()
     try:
-        ids = create_fixture_stack(base_url)
         pages = []
+        for spec in day_zero_route_specs():
+            window_size = "390,844" if spec.get("mobile") else "1440,1100"
+            pages.append(capture_page(chrome=chrome, base_url=base_url, spec=spec, output_dir=output_dir, window_size=window_size))
+        ids = create_fixture_stack(base_url)
         for spec in route_specs(ids):
             window_size = "390,844" if spec.get("mobile") else "1440,1100"
             pages.append(capture_page(chrome=chrome, base_url=base_url, spec=spec, output_dir=output_dir, window_size=window_size))

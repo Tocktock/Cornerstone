@@ -127,6 +127,26 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("--cs-radius-pill:", html)
                 self.assert_product_surface_is_clean(html)
 
+    def test_day_zero_product_routes_offer_composed_empty_states(self) -> None:
+        expected = {
+            "/search": ["Search", "Search starts with saved work", "Save a source", "Open artifacts"],
+            "/artifacts": ["Day zero", "Start with a source", "Go to Home", "Search workspace"],
+            "/briefs": ["Day zero", "Create the first brief", "Save a source", "Open artifacts"],
+            "/claims": ["Day zero", "No claims need review", "Open briefs", "Check sources"],
+            "/actions": ["Day zero", "No action previews yet", "Open claims", "Open briefs"],
+            "/inbox": ["Day zero", "No work waiting", "No selected work", "Start from Home"],
+            "/audit": ["Audit ready", "No activity recorded yet", "Start from Home", "Open artifacts"],
+        }
+
+        for route, phrases in expected.items():
+            with self.subTest(route=route):
+                html = self.fetch_product_html(route)
+                self.assertIn("cs-empty-state", html)
+                self.assertIn("cs-empty-actions", html)
+                for phrase in phrases:
+                    self.assertIn(phrase, html)
+                self.assert_product_surface_is_clean(html)
+
     def test_screenshot_matrix_covers_primary_mobile_routes(self) -> None:
         ids = {
             "artifact_id": "art_mobile_matrix",
@@ -136,6 +156,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         }
         specs = capture_vs4.route_specs(ids)
         mobile_routes = {spec["route"] for spec in specs if spec.get("mobile")}
+        day_zero_specs = capture_vs4.day_zero_route_specs()
+        day_zero_mobile_names = {spec["name"] for spec in day_zero_specs if spec.get("mobile")}
 
         for route in [
             "/",
@@ -152,6 +174,16 @@ class ProductUiRoutesTest(unittest.TestCase):
         ]:
             with self.subTest(route=route):
                 self.assertIn(route, mobile_routes)
+        for name in [
+            "day-zero-artifacts-mobile",
+            "day-zero-briefs-mobile",
+            "day-zero-claims-mobile",
+            "day-zero-actions-mobile",
+            "day-zero-inbox-mobile",
+            "day-zero-audit-mobile",
+        ]:
+            with self.subTest(day_zero=name):
+                self.assertIn(name, day_zero_mobile_names)
 
     def test_record_detail_routes_preserve_json_default_and_offer_html(self) -> None:
         artifact_id, _, _ = self.create_source_stack()

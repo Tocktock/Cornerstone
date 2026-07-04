@@ -10,7 +10,7 @@
     "report:reports/scenario/vs4-product-alpha-ui-daily-loop-slice-001-product-shell.json"
   ],
   "ids": {
-    "git_commit": "7536bdb57"
+    "git_commit": "44374ca49"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -185,37 +185,37 @@
       "slice_025": "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_SLICE_025_OPS_INBOX_JOURNEY_TIMELINE.md"
     },
     "source_tree": {
-      "dirty_path_count": 63,
-      "generated_dirty_path_count": 14,
+      "dirty_path_count": 93,
+      "generated_dirty_path_count": 17,
       "generated_dirty_paths_ref": {
-        "bytes": 1338,
+        "bytes": 1587,
         "layout": "omitted_from_gate_output",
-        "sha256": "ce8e8e6c3b32289c1cbe7c74064d6b1a5b134b117860b51503ff479001e08f51"
+        "sha256": "ab1151a8e62175cc52a150d54c5078af1a80b6d86d8ac8e251c4aec3034a3c64"
       },
-      "generated_dirty_snapshot_hash": "ea13850b608344eeb8aaf3630cb9a29f6aef6036fbcac7de7d4b229c88d5e315",
-      "generated_dirty_snapshot_path_count": 14,
+      "generated_dirty_snapshot_hash": "fd44ecb9f6e80d7f3dbd9704c1d8875d27397493bb7c6a8e6baf94a8f1a28f2f",
+      "generated_dirty_snapshot_path_count": 17,
       "generated_dirty_snapshot_paths_ref": {
-        "bytes": 3160,
+        "bytes": 3800,
         "layout": "omitted_from_gate_output",
-        "sha256": "1a61e74ecdc769ed401457c0f2d45e00d739aa21dbc241feaea05dbd38d2d994"
+        "sha256": "b881d2e187b4f7f816ddf94049f7f79032624bcdc9af0ffbf3a63465cf24a466"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
-        "bytes": 19531,
+        "bytes": 28255,
         "layout": "omitted_from_gate_output",
-        "sha256": "5de93f7d29e72b1b7cd1cca46714bc2228ee601fbb59bcd8f76445497088d2a9"
+        "sha256": "c1f9c2b0dbbb5660bf83aa17997b5ae982afee26a7e6b788cf758e747b66d303"
       },
-      "verified_base_commit": "7536bdb57",
-      "verified_base_commit_full": "7536bdb57ad3091c9af7ecfc0572476dae02ac1b",
-      "verified_base_tree_hash": "203b055ced08bdd8edb83affe03abb6eaca2fbfb",
-      "verified_source_snapshot_path_count": 49,
+      "verified_base_commit": "44374ca49",
+      "verified_base_commit_full": "44374ca49ae696be4b92a583963bdab328df1e5f",
+      "verified_base_tree_hash": "91fe9377006ab91f2f3d5ed1399c2e6417dbb6d5",
+      "verified_source_snapshot_path_count": 76,
       "verified_source_snapshot_paths_ref": {
-        "bytes": 9723,
+        "bytes": 15283,
         "layout": "omitted_from_gate_output",
-        "sha256": "c5fbb1cc7322722a5c7cd1418037680aed14144a7b24c29abb0c2c0b3aec8f1f"
+        "sha256": "293297ad64cce8157252963707b16463c0aa3f01a836bce881081502030577f0"
       },
-      "verified_source_worktree_hash": "39102efaba14dbf8a91e40683c98e5134b77121b54083e393c437945dda0a298",
+      "verified_source_worktree_hash": "1368d8f7207e4b5c9697e056d3bce0d21846d0f210d493ce5fde75307a24f81d",
       "worktree_dirty_at_verification": true
     },
     "status": "success",
@@ -358,37 +358,37 @@
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.vs4_product_alpha_scenario_gate_validation.v0",
     "source_tree": {
-      "dirty_path_count": 63,
-      "generated_dirty_path_count": 14,
+      "dirty_path_count": 93,
+      "generated_dirty_path_count": 17,
       "generated_dirty_paths_ref": {
-        "bytes": 1338,
+        "bytes": 1587,
         "layout": "omitted_from_gate_output",
-        "sha256": "ce8e8e6c3b32289c1cbe7c74064d6b1a5b134b117860b51503ff479001e08f51"
+        "sha256": "ab1151a8e62175cc52a150d54c5078af1a80b6d86d8ac8e251c4aec3034a3c64"
       },
-      "generated_dirty_snapshot_hash": "ea13850b608344eeb8aaf3630cb9a29f6aef6036fbcac7de7d4b229c88d5e315",
-      "generated_dirty_snapshot_path_count": 14,
+      "generated_dirty_snapshot_hash": "fd44ecb9f6e80d7f3dbd9704c1d8875d27397493bb7c6a8e6baf94a8f1a28f2f",
+      "generated_dirty_snapshot_path_count": 17,
       "generated_dirty_snapshot_paths_ref": {
-        "bytes": 3160,
+        "bytes": 3800,
         "layout": "omitted_from_gate_output",
-        "sha256": "1a61e74ecdc769ed401457c0f2d45e00d739aa21dbc241feaea05dbd38d2d994"
+        "sha256": "b881d2e187b4f7f816ddf94049f7f79032624bcdc9af0ffbf3a63465cf24a466"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
-        "bytes": 19531,
+        "bytes": 28255,
         "layout": "omitted_from_gate_output",
-        "sha256": "5de93f7d29e72b1b7cd1cca46714bc2228ee601fbb59bcd8f76445497088d2a9"
+        "sha256": "c1f9c2b0dbbb5660bf83aa17997b5ae982afee26a7e6b788cf758e747b66d303"
       },
-      "verified_base_commit": "7536bdb57",
-      "verified_base_commit_full": "7536bdb57ad3091c9af7ecfc0572476dae02ac1b",
-      "verified_base_tree_hash": "203b055ced08bdd8edb83affe03abb6eaca2fbfb",
-      "verified_source_snapshot_path_count": 49,
+      "verified_base_commit": "44374ca49",
+      "verified_base_commit_full": "44374ca49ae696be4b92a583963bdab328df1e5f",
+      "verified_base_tree_hash": "91fe9377006ab91f2f3d5ed1399c2e6417dbb6d5",
+      "verified_source_snapshot_path_count": 76,
       "verified_source_snapshot_paths_ref": {
-        "bytes": 9723,
+        "bytes": 15283,
         "layout": "omitted_from_gate_output",
-        "sha256": "c5fbb1cc7322722a5c7cd1418037680aed14144a7b24c29abb0c2c0b3aec8f1f"
+        "sha256": "293297ad64cce8157252963707b16463c0aa3f01a836bce881081502030577f0"
       },
-      "verified_source_worktree_hash": "39102efaba14dbf8a91e40683c98e5134b77121b54083e393c437945dda0a298",
+      "verified_source_worktree_hash": "1368d8f7207e4b5c9697e056d3bce0d21846d0f210d493ce5fde75307a24f81d",
       "worktree_dirty_at_verification": true
     },
     "status": "passed",

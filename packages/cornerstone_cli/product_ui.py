@@ -1358,6 +1358,66 @@ button, input, textarea {{ font: inherit; }}
   color: var(--cs-color-text-muted);
   background: var(--cs-color-surface-subtle);
 }}
+.cs-empty-state {{
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
+  padding: var(--cs-space-6);
+  display: grid;
+  gap: var(--cs-space-4);
+  color: var(--cs-color-text-primary);
+}}
+.cs-empty-state-main {{
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-empty-mark {{
+  width: 44px;
+  height: 44px;
+  border-radius: var(--cs-radius-lg);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-empty-copy {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-empty-copy h2 {{
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.3;
+  text-wrap: balance;
+}}
+.cs-empty-copy p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  max-width: 64ch;
+  text-wrap: pretty;
+}}
+.cs-empty-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}}
+.cs-empty-steps {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-empty-step {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 72%, var(--cs-color-surface-subtle));
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
 .cs-chip {{
   display: inline-flex;
   align-items: center;
@@ -2053,7 +2113,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -2066,6 +2126,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
+  .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
+  .cs-empty-actions .cs-button {{ justify-content: center; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-claim-progress::before {{ display: none; }}
@@ -2666,8 +2728,72 @@ def _search_followups(q: str, counts: list[tuple[str, int]]) -> list[str]:
 
 def _search_empty(q: str) -> str:
     if q.strip():
-        return '<div class="cs-empty">No matching saved source or draft was found. Try fewer terms or save the source first.</div>'
-    return '<div class="cs-empty">Enter a keyword to search saved sources, briefs, claims, and action drafts.</div>'
+        return _empty_state(
+            "No match",
+            "Try a broader search",
+            "No saved source, brief, claim, or action draft matched that keyword. Shorter terms usually work better with the local search index.",
+            "Search all sources",
+            "/search",
+            "Save a source",
+            "/",
+            mark="?",
+        )
+    return _empty_state(
+        "Search",
+        "Search starts with saved work",
+        "Enter a keyword to search saved sources, briefs, claims, and action drafts. If the workspace is empty, save a source from Home first.",
+        "Save a source",
+        "/",
+        "Open artifacts",
+        "/artifacts",
+        mark="?",
+    )
+
+
+def _empty_state(
+    kicker: str,
+    title: str,
+    body: str,
+    primary_label: str,
+    primary_href: str,
+    secondary_label: str | None = None,
+    secondary_href: str | None = None,
+    *,
+    mark: str = "+",
+    steps: list[tuple[str, str]] | None = None,
+) -> str:
+    secondary = ""
+    if secondary_label and secondary_href:
+        secondary = f'<a class="cs-button secondary" href="{h(secondary_href)}">{h(secondary_label)}</a>'
+    steps_html = ""
+    if steps:
+        step_rows = "".join(
+            f"""
+  <div class="cs-empty-step">
+    <strong>{h(label)}</strong>
+    <span class="cs-meta">{h(detail)}</span>
+  </div>
+"""
+            for label, detail in steps
+        )
+        steps_html = f'<div class="cs-empty-steps" aria-label="Suggested start path">{step_rows}</div>'
+    return f"""
+<article class="cs-empty-state">
+  <div class="cs-empty-state-main">
+    <span class="cs-empty-mark" aria-hidden="true">{h(mark[:2])}</span>
+    <div class="cs-empty-copy">
+      <div class="cs-kicker">{h(kicker)}</div>
+      <h2>{h(title)}</h2>
+      <p>{h(body)}</p>
+    </div>
+  </div>
+  {steps_html}
+  <div class="cs-empty-actions">
+    <a class="cs-button" href="{h(primary_href)}">{h(primary_label)}</a>
+    {secondary}
+  </div>
+</article>
+"""
 
 
 def _collection_summary(stats: list[tuple[str, int]]) -> str:
@@ -2731,7 +2857,21 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
             [("Searchable", "searchable"), ("Saved", "saved")],
         )
         for artifact in artifacts
-    ) or '<div class="cs-empty">No saved sources yet. Start from Home.</div>'
+    ) or _empty_state(
+        "Day zero",
+        "Start with a source",
+        "Drop a note, paste text, or save a file from Home. Sources stay preserved before any brief, claim, or action uses them.",
+        "Go to Home",
+        "/",
+        "Search workspace",
+        "/search",
+        mark="S",
+        steps=[
+            ("1. Save source", "Keep the original input intact."),
+            ("2. Ask about it", "Draft a brief from saved work."),
+            ("3. Review support", "Use sources before decisions."),
+        ],
+    )
     linked_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"], *ctx["actions"]] for ref in _evidence_refs(record) if ref.startswith("artifact:"))
     return f"""
 <section data-product-surface="artifacts">
@@ -2784,7 +2924,21 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
             [("Brief", ""), (_display_date(brief), ""), (source_label, "")],
             [(label, state), ("Open brief", "searchable")],
         )
-    rows = rows or '<div class="cs-empty">No brief has been drafted yet. Save a source and ask a question to create one.</div>'
+    rows = rows or _empty_state(
+        "Day zero",
+        "Create the first brief",
+        "Save a source, then ask a question to draft a brief with visible source support. Briefs stay draft material until reviewed.",
+        "Save a source",
+        "/",
+        "Open artifacts",
+        "/artifacts",
+        mark="B",
+        steps=[
+            ("1. Drop input", "Start from a real note or file."),
+            ("2. Ask a question", "Use the workspace ask box."),
+            ("3. Check sources", "Open the brief before use."),
+        ],
+    )
     with_sources = sum(1 for brief in briefs if _brief_source_count(brief))
     source_ref_count = sum(_brief_source_count(brief) for brief in briefs)
     source_note = (
@@ -2850,7 +3004,21 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             [("Claim", ""), (_display_date(claim), ""), (f"{source_count} source refs", "")],
             [(label, state), ("Review required", "underReview")],
         )
-    rows = rows or '<div class="cs-empty">No claims yet.</div>'
+    rows = rows or _empty_state(
+        "Day zero",
+        "No claims need review",
+        "Claims appear after a brief finding is promoted or a statement is drafted with source support. Start with a brief before making a decision.",
+        "Open briefs",
+        "/briefs",
+        "Check sources",
+        "/artifacts",
+        mark="C",
+        steps=[
+            ("1. Draft brief", "Summarize saved work first."),
+            ("2. Choose finding", "Promote only useful statements."),
+            ("3. Attach support", "Keep source links visible."),
+        ],
+    )
     supported_count = sum(1 for claim in claims if _evidence_refs(claim))
     approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
     return f"""
@@ -2905,7 +3073,21 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
             [("Action", ""), (_display_date(action), ""), (f"{risk} risk", "")],
             [(label, state), ("Dry-run first", "searchable")],
         )
-    rows = rows or '<div class="cs-empty">No action drafts yet.</div>'
+    rows = rows or _empty_state(
+        "Day zero",
+        "No action previews yet",
+        "Action drafts appear after a supported claim or brief next step is turned into a reviewable preview. Nothing executes from this page.",
+        "Open claims",
+        "/claims",
+        "Open briefs",
+        "/briefs",
+        mark="A",
+        steps=[
+            ("1. Pick supported work", "Use a claim or brief finding."),
+            ("2. Preview impact", "Inspect proposed changes first."),
+            ("3. Review before send", "Approval stays explicit."),
+        ],
+    )
     executed_count = sum(1 for action in actions if str(action.get("status") or "").lower() == "executed")
     return f"""
 <section data-product-surface="actions">
@@ -3016,10 +3198,19 @@ def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
 
 def _inbox_detail_panel(item: dict[str, str] | None) -> str:
     if not item:
-        return """
+        return f"""
 <aside class="cs-panel flat">
   <h2 class="cs-section-title">Selected item</h2>
-  <div class="cs-empty">Save a source, draft a claim, or preview an action to fill this queue.</div>
+  {_empty_state(
+        "Queue empty",
+        "No selected work",
+        "Save a source, draft a claim, or preview an action to create reviewable work.",
+        "Start from Home",
+        "/",
+        "Open briefs",
+        "/briefs",
+        mark="I",
+    )}
 </aside>
 """
     return f"""
@@ -3052,26 +3243,40 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
 
 
 def _inbox_empty() -> str:
-    return '<div class="cs-empty">Nothing is waiting on you. Drafts, claims, and action previews appear here when they need a decision.</div>'
+    return _empty_state(
+        "Day zero",
+        "No work waiting",
+        "When a brief, claim, or action preview needs review, it will appear here with a clear next step.",
+        "Start from Home",
+        "/",
+        "Open audit trail",
+        "/audit",
+        mark="I",
+        steps=[
+            ("1. Save source", "Create the first local record."),
+            ("2. Draft work", "Briefs, claims, and previews can enter review."),
+            ("3. Decide", "Open the item and inspect support."),
+        ],
+    )
 
 
 def _audit_page(ctx: dict[str, Any]) -> str:
     if not ctx["audit"]:
-        rows = """
-<div class="cs-audit-empty">
-  <div>
-    <div class="cs-kicker">Audit ready</div>
-    <h2 class="cs-section-title">No local activity has been recorded yet.</h2>
-    <p class="cs-muted">Save a source, ask a question, draft a brief, or review a decision to start the local activity trail.</p>
-  </div>
-  <div class="cs-audit-empty-steps" aria-label="Audit trail starter steps">
-    <div class="cs-audit-empty-step"><strong>1. Save source</strong><span class="cs-meta">Original input creates the first record.</span></div>
-    <div class="cs-audit-empty-step"><strong>2. Create work</strong><span class="cs-meta">Searches, briefs, claims, and actions add readable events.</span></div>
-    <div class="cs-audit-empty-step"><strong>3. Inspect detail</strong><span class="cs-meta">Raw event detail appears behind each row.</span></div>
-  </div>
-  <a class="cs-button secondary" href="/">Start from Home</a>
-</div>
-"""
+        rows = _empty_state(
+            "Audit ready",
+            "No activity recorded yet",
+            "Save a source, ask a question, draft a brief, or review a decision to start the local activity trail.",
+            "Start from Home",
+            "/",
+            "Open artifacts",
+            "/artifacts",
+            mark="T",
+            steps=[
+                ("1. Save source", "Original input creates the first record."),
+                ("2. Create work", "Searches, briefs, claims, and actions add readable events."),
+                ("3. Inspect detail", "Raw event detail appears behind each row."),
+            ],
+        )
     else:
         rows = "".join(
             f"""
