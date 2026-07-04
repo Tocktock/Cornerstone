@@ -1,12 +1,12 @@
 {
-  "activation_id": "packact_d339ae350720dbfb",
+  "activation_id": "packact_f97241fb6b8adbdf",
   "activation_status": "inactive",
   "behavior_changing_updates_apply_silently": false,
   "can_act": false,
-  "created_at": "2026-06-30T11:19:46.612554Z",
+  "created_at": "2026-07-03T08:21:11.548260Z",
   "granted_capabilities": [],
-  "install_id": "packinst_ede6a574022623a6",
-  "last_revocation_id": "packrevoke_5d97a8977aa21ba2",
+  "install_id": "packinst_d9a424d537a84a25",
+  "last_revocation_id": "packrevoke_d56968607704b049",
   "mission_authority": false,
   "pack_id": "pack_vs3_tool_registry_sample",
   "pinned_version": "1.0.1-security",
@@ -48,16 +48,16 @@
     {
       "from_version": "1.0.0",
       "to_version": "1.1.0",
-      "update_id": "packupd_310ea0f283bbea83"
+      "update_id": "packupd_684681fd7d87aca9"
     },
     {
       "from_version": "1.1.0",
-      "rollback_id": "packroll_449b9cd0180967ba",
+      "rollback_id": "packroll_5a9d8b8a37b7ceb6",
       "to_version": "1.0.0"
     },
     {
       "from_version": "1.0.0",
-      "security_patch_id": "packpatch_a9310bedf2188256",
+      "security_patch_id": "packpatch_034de306aa96873c",
       "to_version": "1.0.1-security"
     }
   ],

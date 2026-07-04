@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_76d27ad5c0c0102d"
+    "audit:audit_f90a14507a657b2b"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -47,7 +47,7 @@
   "expected_behavior": "Operator accepts or rejects whether boundaries, causes, risks, and recovery paths are understandable and not misleading.",
   "expected_evidence": "ACCEPT/REJECT note, screenshots/recording, task outcomes, issue list if rejected.",
   "given": "Human operator uses denial, audit, connector, source-policy, tool registry, activation, and migration/status UX.",
-  "package_digest_sha256": "1cc91a2d8cb9861df4e58129f2ff24e80d928fa43a6cd7811dbfc26c5a06b380",
+  "package_digest_sha256": "50c8274d73520d7edcb309800cb2334f09b317fd42f0431b18b723be342561ec",
   "package_id": "vs3_human_gate_vs3_h06",
   "package_path": "reports/human-gates/vs3/VS3-H06.json",
   "pass_claim_allowed": false,

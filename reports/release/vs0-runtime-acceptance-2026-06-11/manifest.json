@@ -1,44 +1,44 @@
 {
   "artifacts": [
     {
-      "bytes": 332325,
+      "bytes": 334091,
       "path": "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "acceptance_scenario_report",
-      "sha256": "0dce52947cd2c2c98bfc0bd350f30d1274551d16854991a40ce9da2faf245914"
+      "sha256": "83299aba08e35769bf04ff8573fd82002d9c3da323e733c75bed798d5848887e"
     },
     {
-      "bytes": 267845,
+      "bytes": 268762,
       "path": "reports/scenario/vs0-product-runtime-2026-06-11.json",
       "present": true,
       "required": true,
       "role": "product_runtime_scenario_report",
-      "sha256": "295b138e77a5c603fc7b50814da0db8a2e433686beee48a4314c433b3d51c051"
+      "sha256": "783272bbb77f7fcfc3f0bcc35df06110e00e3de2b33d3d1b9d5de0e4401b8a4d"
     },
     {
-      "bytes": 1431,
+      "bytes": 1485,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
       "present": true,
       "required": true,
       "role": "browser_proof_manifest",
-      "sha256": "23566e8afa67838fbba900bc4e961c44ec0d6d42b55c16fae75c21440867da29"
+      "sha256": "ddf34d26e1056546a109ab92afc73201aca229b023fc07fa160bd97ad87757ef"
     },
     {
-      "bytes": 120309,
+      "bytes": 147216,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
       "present": true,
       "required": true,
       "role": "browser_screenshot",
-      "sha256": "643daa67bd6595e441ac9a08e21a717d4a378384ea03882af34701357a88a667"
+      "sha256": "ecd36783fbf6c43c127a03746c253be85e9dac4d30778262909adc7155c32b78"
     },
     {
-      "bytes": 66570,
+      "bytes": 133812,
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
       "present": true,
       "required": true,
       "role": "browser_dom_snapshot",
-      "sha256": "de8e8078949a999af94a822e5368887ba37d0576b4d66e9c7482b6a97f3219f4"
+      "sha256": "d14c7d80565ca747f37499c078911f4507fff912139ac017285edaf08c8584d7"
     },
     {
       "path": "reports/browser/vs0-runtime-acceptance-2026-06-11/workflow-trace.json",
@@ -79,12 +79,12 @@
       "sha256": "89ff9b2b61813579e9cf6522d49159cad531f64f8b5cce16a4667421f8d396f2"
     },
     {
-      "bytes": 60534,
+      "bytes": 62393,
       "path": "README.md",
       "present": true,
       "required": true,
       "role": "operator_quickstart",
-      "sha256": "5cd182cdb4e2de7f334a902a451ac46385d7f13a9e063a8e6ccdd01e5b8ac727"
+      "sha256": "b4df2c876bf4d827f968d380a6137f186ec177224a2c76e64da2aecd26ded797"
     },
     {
       "bytes": 924,
@@ -95,12 +95,12 @@
       "sha256": "988aec2478e8133050e133741b2c714b8730a0c4a94caceaaa2f47fa728d6579"
     },
     {
-      "bytes": 3102,
+      "bytes": 3243,
       "path": "reports/release/vs0-runtime-acceptance-2026-06-11/command-transcript.json",
       "present": true,
       "required": true,
       "role": "command_transcript",
-      "sha256": "5ee421089b57094a40f577ef08908ec80988048e8a4b745e1d89bb1920ecaa00"
+      "sha256": "86a0737268ee4fa9fa6a1b2e475cf2f287ddfe6e7ac1563dc11a4bb9800dd5af"
     },
     {
       "bytes": 479,
@@ -112,7 +112,7 @@
     }
   ],
   "browser_proof": "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json",
-  "created_at": "2026-06-28T18:02:56.347682Z",
+  "created_at": "2026-07-03T08:17:15.305104Z",
   "human_required": [
     {
       "id": "VS0-ACC-H01",
@@ -161,7 +161,7 @@
     "unqualified_external_calls_in_release_report": 0,
     "zero_evidence_claim_approvals": 0
   },
-  "package_id": "releasepkg_9978ea63dbfd4b25",
+  "package_id": "releasepkg_fab2744d9aa6444c",
   "post_commit_rollup": null,
   "product_runtime_report": "reports/scenario/vs0-product-runtime-2026-06-11.json",
   "production_release_ready": false,

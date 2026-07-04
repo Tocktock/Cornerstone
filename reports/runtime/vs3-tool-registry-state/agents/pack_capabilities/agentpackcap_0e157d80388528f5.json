@@ -1,10 +1,10 @@
 {
-  "activation_id": "packact_d339ae350720dbfb",
+  "activation_id": "packact_f97241fb6b8adbdf",
   "capability": "connector.mock.read",
-  "capability_attempt_id": "agentpackcap_3bf8b964dab2d1ca",
+  "capability_attempt_id": "agentpackcap_0e157d80388528f5",
   "capability_used": true,
   "connectorhub_mediated": true,
-  "created_at": "2026-06-30T11:19:46.617013Z",
+  "created_at": "2026-07-03T08:21:11.551850Z",
   "credentials_exposed_to_agent": false,
   "direct_provider_access": false,
   "granted_capabilities": [

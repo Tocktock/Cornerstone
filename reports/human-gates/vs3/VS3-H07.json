@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_11a3578c598a2845"
+    "audit:audit_5a960431056f1b79"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -47,7 +47,7 @@
   "expected_behavior": "Migration, backup, restore, rollback, quarantine, RLS, policy, and audit drill passes under approved data rules.",
   "expected_evidence": "Signed transcript, before/after counts/hashes, restore/rollback result, RLS/policy inventory.",
   "given": "Real or representative production-like data, retention rules, backup tooling, and rollback authority are available.",
-  "package_digest_sha256": "90790b51528b0589eb2167125db1400606e63251ec390cf308e1474aa3073fab",
+  "package_digest_sha256": "04437cf46b157cc6d790d4bf78748f508f6e93399514184a6608dcbccc245316",
   "package_id": "vs3_human_gate_vs3_h07",
   "package_path": "reports/human-gates/vs3/VS3-H07.json",
   "pass_claim_allowed": false,

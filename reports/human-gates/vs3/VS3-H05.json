@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_71aac014fd20dfc5"
+    "audit:audit_8664e5511bc748b2"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -47,7 +47,7 @@
   "expected_behavior": "Low-risk read-only or explicitly approved live provider rehearsal succeeds without secret exposure.",
   "expected_evidence": "Redacted provider transcript, approval, ConnectorHub/CornerStone audit refs, result/evidence refs.",
   "given": "Live ConnectorHub credentials and provider permissions are available.",
-  "package_digest_sha256": "18366ab8b937862051391dba2d57198db0ac1299d32c0421c55c434b1df14210",
+  "package_digest_sha256": "52c4fa614671fe7a8d7c23e2e769e20c6816734f7c6666ffc7878d46686e6a80",
   "package_id": "vs3_human_gate_vs3_h05",
   "package_path": "reports/human-gates/vs3/VS3-H05.json",
   "pass_claim_allowed": false,

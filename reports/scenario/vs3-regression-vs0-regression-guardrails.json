@@ -121,7 +121,7 @@
   "evidence_refs": [],
   "human_required": [],
   "ids": {
-    "git_commit": "d145c8d"
+    "git_commit": "afeb99e"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
@@ -182,14 +182,14 @@
       "--output",
       "reports/scenario/vs3-regression-vs0-regression-guardrails.json"
     ],
-    "elapsed_seconds": 5.794,
-    "ended_at": "2026-06-30T11:19:39.248150Z",
+    "elapsed_seconds": 5.345,
+    "ended_at": "2026-07-03T08:21:04.529996Z",
     "exit_code": 0,
     "name": "scenario_verify_vs0-regression-guardrails",
     "required": true,
     "schema_version": "cs.command_transcript.v0",
     "source": "observed",
-    "started_at": "2026-06-30T11:19:33.454125Z",
+    "started_at": "2026-07-03T08:20:59.184414Z",
     "stderr_tail": [],
     "stdout_tail": [
       "{\"final_verdict\": null, \"json_schema\": \"cs.cli.v0\", \"scenario_set\": \"vs0-regression-guardrails\", \"schema_version\": \"cs.cli.v0\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"pass\": 3, \"product_feature_claims\": \"PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY\", \"scenario_count\": 3}}"

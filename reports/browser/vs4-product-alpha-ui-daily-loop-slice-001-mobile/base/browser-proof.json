@@ -3,16 +3,16 @@
     "executable": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
     "headless": true,
     "name": "Google Chrome",
-    "window_size": "1280,900"
+    "window_size": "390,844"
   },
   "chrome_exit_codes": {
     "screenshot": 0
   },
   "chrome_timeout_after_screenshot": false,
   "clean_browser_exit": true,
-  "created_at": "2026-07-03T08:17:15.047454Z",
-  "dom_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.dom.html",
-  "dom_sha256": "d14c7d80565ca747f37499c078911f4507fff912139ac017285edaf08c8584d7",
+  "created_at": "2026-07-03T07:28:00.003660Z",
+  "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/base/home.dom.html",
+  "dom_sha256": "6421c93d9e56f66bb824f9ab46cb9ec4324e360138ed7463467d8247ebaa71ab",
   "errors": [],
   "production_overclaim_absent": true,
   "readiness_labels_present": {
@@ -22,25 +22,23 @@
     "vs0_runtime_ready=true": true
   },
   "route": "/",
-  "runtime_evidence": null,
   "schema_version": "cs.browser_proof.v0",
-  "screenshot_bytes": 147216,
-  "screenshot_path": "reports/browser/vs0-runtime-acceptance-2026-06-11/home.png",
-  "screenshot_sha256": "ecd36783fbf6c43c127a03746c253be85e9dac4d30778262909adc7155c32b78",
+  "screenshot_bytes": 61608,
+  "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001-mobile/base/home.png",
+  "screenshot_sha256": "440e25c8f284f3c65b0175205c1928e3184e68e62de05bdb8434d43497db2deb",
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:55950/devtools/browser/bbd9d6d7-1298-415f-aa14-d3e2ab590ea4"
+      "DevTools listening on ws://127.0.0.1:53235/devtools/browser/e6904238-4b5a-4088-9bb6-29ff344f96c5"
     ]
   },
   "surface_presence": {
     "Action Card": true,
     "Artifact Viewer": true,
     "Audit Detail": true,
-    "Brief Detail": true,
     "Claim Builder": true,
     "Home/Ops Inbox": true,
     "Search": true
   },
-  "url": "http://127.0.0.1:55949/"
+  "url": "http://127.0.0.1:53234/"
 }

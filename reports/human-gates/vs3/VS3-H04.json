@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_afa8c295b245b3ae"
+    "audit:audit_97807c3d80eaf153"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -46,7 +46,7 @@
   "expected_behavior": "Real topology enforces deny-by-default and approved exceptions outside local harness.",
   "expected_evidence": "Topology diagram, firewall/proxy/network-policy evidence, packet/log transcript, approval.",
   "given": "Target on-prem network, DNS, proxy, firewall, service mesh, and sandbox are available.",
-  "package_digest_sha256": "39a995dc4b25e50b7dd9c350681938336d9671a702c1f56fbc8e649743d0f46a",
+  "package_digest_sha256": "305bbec2fac1e05689e17cb1a01b57576b69d18daadbc05885e6df56af3d3db2",
   "package_id": "vs3_human_gate_vs3_h04",
   "package_path": "reports/human-gates/vs3/VS3-H04.json",
   "pass_claim_allowed": false,

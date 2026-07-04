@@ -10,7 +10,7 @@
         "--output",
         "reports/scenario/vs0-runtime-acceptance-2026-06-11.json"
       ],
-      "elapsed_seconds": 5.357,
+      "elapsed_seconds": 5.875,
       "exit_code": 0,
       "name": "scenario_verify_vs0_evux",
       "required": true,
@@ -18,7 +18,7 @@
       "source": "scenario_report",
       "stderr_tail": [],
       "stdout_tail": [
-        "{\"scenario_set\": \"vs0-runtime-acceptance\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 7, \"product_feature_claims\": \"LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 9}}"
+        "{\"final_verdict\": null, \"json_schema\": \"cs.cli.v0\", \"scenario_set\": \"vs0-runtime-acceptance\", \"schema_version\": \"cs.cli.v0\", \"status\": \"success\", \"summary\": {\"blocking\": 0, \"human_required\": 2, \"pass\": 7, \"product_feature_claims\": \"LOCAL_VS0_RUNTIME_ACCEPTANCE_READY_PRODUCTION_NOT_READY\", \"scenario_count\": 9}}"
       ],
       "timed_out": false
     },
@@ -30,7 +30,7 @@
         "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
         "--json"
       ],
-      "elapsed_seconds": 0.087,
+      "elapsed_seconds": 0.112,
       "exit_code": 0,
       "name": "scenario_gate",
       "required": true,
@@ -48,7 +48,7 @@
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"d145c8d\"",
+        "    \"git_commit\": \"afeb99e\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -56,6 +56,7 @@
         "  \"policy_decision_refs\": [],",
         "  \"product\": \"CornerStone\",",
         "  \"scenario_count\": 9,",
+        "  \"scenario_results_not_list\": [],",
         "  \"schema_version\": \"cs.cli.v0\",",
         "  \"status\": \"success\",",
         "  \"tenant_id\": \"local-dev\",",
@@ -75,7 +76,7 @@
         "vs0-runtime-acceptance",
         "--json"
       ],
-      "elapsed_seconds": 0.09,
+      "elapsed_seconds": 0.114,
       "exit_code": 0,
       "name": "release_evidence_collect",
       "required": true,
@@ -88,7 +89,7 @@
       "timed_out": false
     }
   ],
-  "created_at": "2026-06-28T18:02:56.347043Z",
+  "created_at": "2026-07-03T08:17:15.304489Z",
   "schema_version": "cs.release_command_transcript.v0",
   "scope_name": "vs0-runtime-acceptance",
   "summary": {

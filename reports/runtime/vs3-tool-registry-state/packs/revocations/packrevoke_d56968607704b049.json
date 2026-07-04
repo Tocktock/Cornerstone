@@ -1,7 +1,7 @@
 {
-  "activation_id": "packact_d339ae350720dbfb",
+  "activation_id": "packact_f97241fb6b8adbdf",
   "capabilities_active_after_revoke": [],
-  "created_at": "2026-06-30T11:19:46.617210Z",
+  "created_at": "2026-07-03T08:21:11.552240Z",
   "granted_capabilities_before_revoke": [
     "artifact.read",
     "tool.local.evaluate",
@@ -9,10 +9,10 @@
   ],
   "pack_id": "pack_vs3_tool_registry_sample",
   "policy_decision": {
-    "created_at": "2026-06-30T11:19:46.617203Z",
+    "created_at": "2026-07-03T08:21:11.552230Z",
     "decision": "allow",
     "policy": "agent_pack_activation_revoke",
-    "policy_decision_id": "policy_573039c035b57429",
+    "policy_decision_id": "policy_e989279fdf2f9876",
     "reason": "Agent Pack activation grants are reversible and revocable by the namespace owner.",
     "resolution_path": [
       "Re-activate the pack with explicit grants if the capability is needed again."
@@ -30,7 +30,7 @@
     }
   },
   "reason": "VS3 revoke test",
-  "revocation_id": "packrevoke_5d97a8977aa21ba2",
+  "revocation_id": "packrevoke_d56968607704b049",
   "schema_version": "cs.agent_pack_revocation.v0",
   "scope": {
     "namespace_id": "personal",

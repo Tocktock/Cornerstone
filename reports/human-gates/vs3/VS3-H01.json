@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_1404872f607dda7b"
+    "audit:audit_e0edc4364ce15006"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -44,7 +44,7 @@
   "expected_behavior": "JiYong/Tars or authorized owner approves architecture, dependency scope, migration/rollback plan, and security ownership.",
   "expected_evidence": "Dated APPROVE/REJECT record with scope, exceptions, rollback owner, dependency decision.",
   "given": "VS3 architecture adds or changes authz, tenant isolation, durable migration, OPA, sandbox, registry, signing, or production dependencies.",
-  "package_digest_sha256": "cc0993182e44d257a3bd1be05ddf0299f48046b9f26046ffd41f1418361119ff",
+  "package_digest_sha256": "7718309a032e0efe264eae2c6160849fe598fd878984872c618961f3b828873b",
   "package_id": "vs3_human_gate_vs3_h01",
   "package_path": "reports/human-gates/vs3/VS3-H01.json",
   "pass_claim_allowed": false,

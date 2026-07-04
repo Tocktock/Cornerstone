@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_a765947fa5065408"
+    "audit:audit_08a1e18a4907063a"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -49,7 +49,7 @@
   "expected_behavior": "Independent reviewer validates tenant, policy, connector, tool, extension, and egress bypass resistance.",
   "expected_evidence": "Signed review, test scope/topology, findings, remediation, retest evidence.",
   "given": "Representative production/on-prem topology is ready for adversarial review.",
-  "package_digest_sha256": "9ddad2f7f277fa98cfe4e442e0b66870f5be6434f29f8994c604a93182a9adeb",
+  "package_digest_sha256": "02473ecfe72c1cc85fb210e31f307d1a023bc18b2e5eb6f0e82cf6b6988e3fd8",
   "package_id": "vs3_human_gate_vs3_h02",
   "package_path": "reports/human-gates/vs3/VS3-H02.json",
   "pass_claim_allowed": false,

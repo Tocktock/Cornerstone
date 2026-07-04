@@ -39,6 +39,324 @@
     }
     nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
     nav a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) minmax(260px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+    .brand-kicker {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .global-search {
+      width: 100%;
+      margin: 0;
+      border-radius: 8px;
+      background: #f8fbfd;
+    }
+    .workspace-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .nav-caption {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+    .product-panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+    .product-panel h3, .work-row h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .product-panel p, .work-row p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 76ch;
+    }
+    .drop-ask-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 112px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      color: var(--ink);
+      padding: 10px;
+      font: inherit;
+      margin-top: 8px;
+    }
+    .ask-input {
+      width: 100%;
+      margin: 8px 0 10px;
+    }
+    .subtle-button {
+      background: #ffffff;
+      color: var(--accent);
+      border-color: var(--line);
+    }
+    .work-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .work-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 12px;
+    }
+    .text-link {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .ops-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .state-row, .pack-list, .activity-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .state-chip {
+      display: inline-flex;
+      width: fit-content;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .state-chip.ready {
+      color: #15803d;
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+    }
+    .state-chip.review {
+      color: #92400e;
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+    .state-chip.blocked {
+      color: #991b1b;
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+    .pack-row, .activity-row {
+      display: grid;
+      gap: 3px;
+      border-top: 1px solid var(--line);
+      padding-top: 9px;
+      color: var(--muted);
+    }
+    .pack-row:first-child, .activity-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+    .pack-row strong, .activity-row strong {
+      color: var(--ink);
+      font-size: 13px;
+    }
+    .pack-row code {
+      width: fit-content;
+      background: #eef6f4;
+      border: 1px solid #c8ded9;
+      border-radius: 6px;
+      color: var(--accent);
+      padding: 2px 6px;
+      font-size: 12px;
+    }
+    .ask-result {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+    .chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .evidence-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      border: 1px solid #c9d8e4;
+      border-radius: 999px;
+      background: #f8fbfd;
+      color: var(--ink);
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .search-layout, .artifact-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .result-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .result-row, .source-preview, .reference-rule {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 12px;
+    }
+    .source-preview {
+      min-height: 180px;
+      background: #fbfcfd;
+    }
+    .source-preview code {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+    .state-matrix {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    .state-matrix th, .state-matrix td {
+      border-top: 1px solid var(--line);
+      padding: 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    .state-token {
+      display: inline-flex;
+      border: 1px solid #d6e2dc;
+      border-radius: 999px;
+      background: #f7fbf9;
+      color: #285e61;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .reference-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .reference-rule {
+      display: grid;
+      gap: 4px;
+    }
+    .evidence-drawer {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 14px;
+    }
+    .evidence-drawer summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .brief-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.55fr);
+      gap: 16px;
+      align-items: start;
+    }
+    .brief-stack, .brief-rail {
+      display: grid;
+      gap: 12px;
+    }
+    .brief-block {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 14px;
+    }
+    .brief-block h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .brief-block ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+    .brief-block li {
+      margin: 6px 0;
+    }
+    .trust-ladder {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0;
+    }
+    .trust-step {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fbfcfd;
+      padding: 7px 10px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .trust-step[data-state="active"] {
+      color: var(--safe);
+      border-color: #bbf7d0;
+      background: #ecfdf5;
+    }
+    .review-note {
+      border-left: 4px solid var(--warn);
+      background: #fffbeb;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #5f4305;
+    }
+    .danger-note {
+      border-left: 4px solid #b91c1c;
+      background: #fef2f2;
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #7f1d1d;
+    }
     section { padding: 22px 28px; border-bottom: 1px solid var(--line); }
     h1 { margin: 0; font-size: 24px; letter-spacing: 0; }
     h2 { margin: 0 0 12px; font-size: 18px; letter-spacing: 0; }
@@ -194,38 +512,308 @@
       main { grid-template-columns: 1fr; }
       nav { border-right: 0; border-bottom: 1px solid var(--line); }
       header, section { padding-left: 18px; padding-right: 18px; }
+      .topbar, .hero-grid, .drop-ask-grid, .ops-grid, .brief-workbench, .trust-ladder, .search-layout, .artifact-layout, .reference-grid { grid-template-columns: 1fr; }
+      .workspace-strip { justify-content: flex-start; }
+      .work-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>CornerStone</h1>
+    <div class="topbar">
+      <div>
+        <h1>CornerStone</h1>
+        <p class="brand-kicker">Product Alpha / Daily Loop</p>
+      </div>
+      <input class="global-search" aria-label="Global search" value="" placeholder="Search sources, claims, evidence, and actions">
+      <div class="workspace-strip" aria-label="Workspace context">
+        <span class="badge safe" data-vs4-workspace="personal-project-default">Workspace: Personal / Project / default</span>
+        <span class="badge safe" data-vs4-owner="local-user">Owner: local-user</span>
+      </div>
+    </div>
     <div class="status-row">
+      <span class="badge safe">Local mode: no live writeback</span>
       <span class="badge safe">local_scenario_ready=true</span>
       <span class="badge safe">vs0_runtime_ready=true</span>
       <span class="badge warn">production_release_ready=false</span>
       <span class="badge safe">real_external_http_calls=0</span>
+      <span class="badge warn">VS4-H01 human UX acceptance required</span>
     </div>
   </header>
   <main>
     <nav aria-label="Primary">
-      <ul><li><a href="#home-ops-inbox">Home/Ops Inbox</a></li>
-<li><a href="#artifact-viewer">Artifact Viewer</a></li>
+      <p class="nav-caption">Daily work</p>
+      <ul id="primary-nav" data-vs4-nav="Home,Search,Artifacts,Claims,Actions"><li><a href="#home-ops-inbox">Home</a></li>
 <li><a href="#search">Search</a></li>
-<li><a href="#claim-builder">Claim Builder</a></li>
-<li><a href="#action-card">Action Card</a></li>
-<li><a href="#audit-detail">Audit Detail</a></li></ul>
+<li><a href="#artifact-viewer">Artifacts</a></li>
+<li><a href="#claim-builder">Claims</a></li>
+<li><a href="#action-card">Actions</a></li></ul>
     </nav>
     <div>
-      <section id="home-ops-inbox">
-        <h2>Home/Ops Inbox</h2>
-        <div class="panel-grid">
-          <div class="panel"><div class="label">Loop</div>Artifact ingest -&gt; search -&gt; evidence -&gt; claim -&gt; action -&gt; audit</div>
-          <div class="panel"><div class="label">Boundary</div>Product, Archive, Connector/Action, Policy, and Audit records share one local runtime.</div>
+      <section id="home-ops-inbox" data-surface-name="Home/Ops Inbox" data-vs4-surface="home-ops-inbox" data-vs4-production-claimed="false" data-vs4-onprem-claimed="false" data-vs4-final-security-claimed="false" data-vs4-live-provider-claimed="false" data-vs4-human-ux-claimed="false">
+        <div class="hero-grid">
+          <div class="product-panel">
+            <div class="label">Today</div>
+            <h2>Drop a source, ask a question, or continue evidence-backed work.</h2>
+            <p>CornerStone keeps the original source close, turns useful findings into reviewable work, and keeps every action in local preview until approval and evidence are ready.</p>
+            <div class="drop-ask-grid">
+              <div class="product-panel" data-vs4-drop-zone="visible">
+                <div class="label">Drop</div>
+                <h3>Source intake</h3>
+                <textarea aria-label="Paste source text">Paste notes, meeting text, policy excerpts, issue reports, or research here.</textarea>
+                <button class="subtle-button" type="button">Prepare source</button>
+              </div>
+              <div class="product-panel" data-vs4-ask-box="visible">
+                <div class="label">Ask</div>
+                <h3>Evidence question</h3>
+                <input id="vs4-ask-input" class="ask-input" aria-label="Ask CornerStone" value="What needs review before action?">
+                <button id="run-vs4-ask-flow" type="button">Ask with evidence</button>
+                <div id="vs4-ask-result" class="ask-result" data-vs4-ask-flow="idle">
+                  <span class="badge warn" id="vs4-ask-trust-state" data-vs4-answer-trust-state="pending">Ask waits for evidence</span>
+                  <p id="vs4-ask-answer">Answers become reviewable work with evidence, memory, action, and audit refs.</p>
+                  <code id="vs4-ask-created-refs" data-vs4-created-work-kind="pending">work item not prepared</code>
+                </div>
+              </div>
+            </div>
+          </div>
+          <aside class="product-panel" data-vs4-local-boundary="visible">
+            <div class="label">Boundary</div>
+            <h3>Local Product Alpha</h3>
+            <p>No live external writeback. Production, on-prem, final security, live-provider, and human UX readiness are not claimed.</p>
+            <div class="state-row"><span class="state-chip ready">Saved source</span>
+<span class="state-chip ready">Searchable</span>
+<span class="state-chip ready">Evidence-backed</span>
+<span class="state-chip review">Needs review</span>
+<span class="state-chip blocked">Policy blocked</span></div>
+          </aside>
+        </div>
+        <div class="ops-grid">
+          <div class="product-panel" data-vs4-ops-inbox="visible">
+            <div class="label">Ops Inbox</div>
+            <h2>Continue work</h2>
+            <div class="work-list"><article class="work-row" data-vs4-work-kind="brief" data-vs4-work-status="needs-review"><div><span class="label">Brief</span><h3>Evidence-backed Brief</h3><p>Vendor renewal notes are ready for support check, claim draft, memory review, and local action preview.</p></div><a class="text-link" href="#vs4-brief-detail">Continue</a></article>
+<article class="work-row" data-vs4-work-kind="claim" data-vs4-work-status="draft"><div><span class="label">Claim</span><h3>Claim candidate</h3><p>One claim is waiting for supporting evidence before approval can be requested.</p></div><a class="text-link" href="#claim-builder">Continue</a></article>
+<article class="work-row" data-vs4-work-kind="memory" data-vs4-work-status="needs-review"><div><span class="label">Memory</span><h3>Memory/Wiki candidate</h3><p>A durable knowledge proposal is visible but not saved as approved memory.</p></div><a class="text-link" href="#vs4-memory-candidates">Continue</a></article>
+<article class="work-row" data-vs4-work-kind="action" data-vs4-work-status="local-preview"><div><span class="label">Action</span><h3>Action Card draft</h3><p>A follow-up action is prepared with expected impact, risk, evidence, and no live writeback.</p></div><a class="text-link" href="#action-card">Continue</a></article></div>
+          </div>
+          <aside class="product-panel" data-vs4-right-rail="visible">
+            <div class="label">Workspace context</div>
+            <h3>Personal / Project</h3>
+            <p>Scope stays visible before claims, memory, or actions can become durable.</p>
+            <div class="activity-list">
+              <div class="activity-row"><strong>Evidence gap</strong><span>Claim approval waits for supporting evidence.</span></div>
+              <div class="activity-row"><strong>Memory review</strong><span>Candidate knowledge remains draft until reviewed.</span></div>
+              <div class="activity-row"><strong>Action preview</strong><span>Execution mode is local/mock by default.</span></div>
+              <div class="activity-row"><strong>Activity record</strong><span>Audit detail is available from evidence, claims, and actions.</span></div>
+            </div>
+          </aside>
+        </div>
+        <div class="ops-grid">
+          <div class="product-panel" id="vs4-brief-preview" data-vs4-brief-shell="visible">
+            <div class="label">Evidence-backed Brief</div>
+            <h2>Daily loop preview</h2>
+            <p>Supported findings, gaps, claim candidates, memory candidates, suggested actions, and activity stay together as the central work item.</p>
+          </div>
+          <div class="product-panel" id="vs4-memory-candidates" data-vs4-memory-shell="visible">
+            <div class="label">General-purpose packs</div>
+            <h2>Same loop, different work</h2>
+            <p>Personal research, company policy, and operations issue packs use the same Source, Brief, Claim, Memory/Wiki, Action, and Ops Inbox loop.</p>
+            <button id="run-vs4-packs-flow" class="subtle-button" type="button">Run pack loop</button>
+            <div class="pack-list"><div class="pack-row" data-vs4-pack-row="Personal Research" data-vs4-pack-fixture="fixtures/vs1/ontology/personal_research.txt" data-vs4-pack-query="Walking Desk"><strong>Personal Research</strong><span>Reading notes, source highlights, evidence-backed brief</span><code id="vs4-pack-personal-research-status">waiting</code></div>
+<div class="pack-row" data-vs4-pack-row="Company Policy Review" data-vs4-pack-fixture="fixtures/vs1/ontology/internal_policy.txt" data-vs4-pack-query="Local Action Approval Policy"><strong>Company Policy Review</strong><span>Policy excerpt, claim candidate, safety check</span><code id="vs4-pack-company-policy-review-status">waiting</code></div>
+<div class="pack-row" data-vs4-pack-row="Operations Issue" data-vs4-pack-fixture="fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt" data-vs4-pack-query="learning-failure-anchor"><strong>Operations Issue</strong><span>Incident note, follow-up action, audit-ready activity</span><code id="vs4-pack-operations-issue-status">waiting</code></div></div>
+          </div>
+        </div>
+        <details class="evidence-drawer" id="shared-evidence-drawer" data-vs4-evidence-drawer="reachable">
+          <summary>Supporting evidence and activity</summary>
+          <div class="detail-grid">
+            <div><span class="label">Source</span><span>Original source remains primary.</span></div>
+            <div><span class="label">Support</span><span>Evidence-backed findings require source refs.</span></div>
+            <div><span class="label">Safety check</span><span>Approval and local/mock action state stay attached.</span></div>
+            <div><span class="label">Activity</span><span>Audit detail remains one action away.</span></div>
+          </div>
+        </details>
+      </section>
+      <section id="vs4-brief-detail" data-surface-name="Brief Detail" data-vs4-brief-detail="visible" data-vs4-reference-images-pass-evidence="false" data-vs4-cli-parity="required">
+        <div class="brief-workbench">
+          <div class="brief-stack">
+            <div class="brief-block">
+              <div class="label">Evidence-backed Brief</div>
+              <h2>Brief Detail</h2>
+              <p>The Brief keeps the saved source, support, gaps, claim candidate, memory candidate, action draft, and activity together as one reviewable work item.</p>
+              <div class="status-row">
+                <span class="badge safe" id="vs4-source-state" data-vs4-source-state="pending">Source pending</span>
+                <span class="badge safe" id="vs4-brief-state" data-vs4-brief-state="pending">Brief pending</span>
+                <span class="badge warn" id="vs4-claim-approval-state" data-vs4-claim-approval-state="draft">Claim review pending</span>
+                <span class="badge warn" id="vs4-memory-state" data-vs4-memory-approved="false">Memory needs review</span>
+                <span class="badge safe" id="vs4-action-mode">Action mode: local/mock</span>
+              </div>
+              <button id="run-vs4-brief-flow" type="button">Prepare Brief work item</button>
+            </div>
+            <div class="brief-block" data-vs4-brief-summary="visible">
+              <h3>Summary</h3>
+              <p id="vs4-brief-summary-text">Waiting for preserved source and evidence-backed processing.</p>
+              <ul>
+                <li><strong>Supported finding:</strong> <span id="vs4-supported-finding">Not prepared.</span></li>
+                <li><strong>Gap / uncertainty:</strong> <span id="vs4-brief-gap">Decision scope is not broad enough until more sources are added.</span></li>
+                <li><strong>Activity:</strong> <span id="vs4-brief-activity">No activity yet.</span></li>
+              </ul>
+            </div>
+            <details class="evidence-drawer" id="vs4-brief-evidence-drawer" data-vs4-brief-evidence-drawer="reachable">
+              <summary>Shared Evidence Drawer</summary>
+              <div class="detail-grid">
+                <div><span class="label">Source</span><span id="vs4-evidence-source">Original source not prepared.</span></div>
+                <div><span class="label">Snippet</span><span id="vs4-evidence-snippet">No supporting snippet yet.</span></div>
+                <div><span class="label">Why it supports</span><span id="vs4-evidence-rationale">Support rationale appears after evidence is created.</span></div>
+                <div><span class="label">Provenance</span><span id="vs4-evidence-provenance">Checksum, storage, and derived text refs remain attached.</span></div>
+                <div><span class="label">Related objects</span><span id="vs4-evidence-related">Brief, Claim candidate, Memory candidate, and Action Card.</span></div>
+                <div><span class="label">Audit detail</span><span id="vs4-evidence-audit">Audit refs appear after local processing.</span></div>
+              </div>
+            </details>
+          </div>
+          <aside class="brief-rail">
+            <div class="brief-block" id="vs4-claim-candidate" data-vs4-claim-candidate="visible">
+              <div class="label">Claim candidate</div>
+              <h3 id="vs4-claim-title">Draft claim waits for evidence.</h3>
+              <div class="trust-ladder" aria-label="Claim trust ladder">
+                <span class="trust-step" data-state="done">Draft</span>
+                <span class="trust-step" id="vs4-trust-evidence-backed" data-state="active">Evidence-backed</span>
+                <span class="trust-step" id="vs4-trust-approved" data-state="pending">Approved</span>
+              </div>
+              <p id="vs4-claim-rationale">Rationale and supporting evidence appear after Brief preparation.</p>
+              <div class="danger-note" id="vs4-zero-evidence-denial">Zero-evidence approval is blocked until an Evidence Bundle is attached.</div>
+            </div>
+            <div class="brief-block" id="vs4-memory-candidate-detail" data-vs4-memory-candidate-detail="visible">
+              <div class="label">Memory/Wiki candidate</div>
+              <h3>Draft / Needs review</h3>
+              <p id="vs4-memory-rationale">Candidate knowledge remains source-linked and cannot influence approved memory before review.</p>
+              <div class="detail-grid">
+                <div><span class="label">Trust</span><span id="vs4-memory-trust">draft</span></div>
+                <div><span class="label">Freshness</span><span id="vs4-memory-freshness">current, review required</span></div>
+                <div><span class="label">Owner / workspace</span><span>local-user / default</span></div>
+                <div><span class="label">Controls</span><span>Inspect, correct, forget, export after review.</span></div>
+              </div>
+            </div>
+            <div class="brief-block" id="vs4-action-card-detail" data-vs4-action-card-detail="visible">
+              <div class="label">Action Card draft</div>
+              <h3 id="vs4-action-goal">Review local follow-up.</h3>
+              <p id="vs4-action-why">No action executes until evidence, policy, and approval state are clear.</p>
+              <div class="detail-grid">
+                <div><span class="label">Evidence</span><span id="vs4-action-evidence">Evidence not attached.</span></div>
+                <div><span class="label">Impacted objects</span><span id="vs4-action-impact-objects">Brief and Claim candidate.</span></div>
+                <div><span class="label">Proposed change</span><span id="vs4-action-change">Draft a local follow-up task.</span></div>
+                <div><span class="label">Expected impact</span><span id="vs4-action-impact">real_external_http_calls=0</span></div>
+                <div><span class="label">Risk</span><span id="vs4-action-risk">medium</span></div>
+                <div><span class="label">Approval</span><span id="vs4-action-approval">pending</span></div>
+                <div><span class="label">Execution mode</span><span id="vs4-action-execution-mode">Draft / Local / Mock</span></div>
+                <div><span class="label">Activity</span><span id="vs4-action-activity">Audit available after preparation.</span></div>
+              </div>
+              <div class="review-note">No live external writeback. Dry-run and approval remain local until a governed action path is explicitly approved.</div>
+            </div>
+          </aside>
         </div>
       </section>
-      <section id="artifact-viewer"><h2>Artifact Viewer</h2><p>Immutable artifact records expose checksum, scope, source, derived text, evidence refs, and audit refs.</p></section>
-      <section id="search"><h2>Search</h2><p>Search creates reproducible scoped snapshots that can become Evidence Bundles.</p></section>
+      <section id="artifact-viewer" data-vs4-artifact-reference="original-source-primary" data-vs4-reference-images-pass-evidence="false">
+        <div class="artifact-layout">
+          <div class="product-panel">
+            <div class="label">Artifact Viewer</div>
+            <h2>Original source first</h2>
+            <p>Saved sources stay primary. Derived summaries, search hits, claims, memory candidates, and actions must point back to checksum, provenance, and audit detail.</p>
+            <div class="source-preview" data-vs4-original-source-preview="visible">
+              <strong>Source preview</strong>
+              <code>Project: Alpha research review.
+Decision candidate: Keep original source material before derived summaries.
+Search phrase: alpha-evidence-anchor.</code>
+            </div>
+          </div>
+          <aside class="product-panel">
+            <div class="label">Source record</div>
+            <div class="detail-grid">
+              <div><span class="label">Checksum</span><span>sha256 original storage ref</span></div>
+              <div><span class="label">Scope</span><span>local-user / personal / default</span></div>
+              <div><span class="label">Trust</span><span>untrusted source, preserved before derived use</span></div>
+              <div><span class="label">Evidence</span><span>Evidence Bundle and Brief links required</span></div>
+              <div><span class="label">Audit</span><span>Artifact read and derived-text activity available</span></div>
+            </div>
+            <div class="chip-list">
+              <span class="evidence-chip">Original</span>
+              <span class="evidence-chip">Checksum</span>
+              <span class="evidence-chip">Provenance</span>
+              <span class="evidence-chip">Audit</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section id="search" data-vs4-search-reference="prominent-scoped-evidence" data-vs4-reference-images-pass-evidence="false">
+        <div class="search-layout">
+          <div class="product-panel">
+            <div class="label">Search</div>
+            <h2>Find support before making work durable.</h2>
+            <input aria-label="Search CornerStone evidence" value="alpha-evidence-anchor">
+            <div class="chip-list" aria-label="Search scopes">
+              <span class="evidence-chip">All</span>
+              <span class="evidence-chip">Sources</span>
+              <span class="evidence-chip">Evidence</span>
+              <span class="evidence-chip">Claims</span>
+              <span class="evidence-chip">Actions</span>
+            </div>
+            <div class="result-list" data-vs4-search-results="visible">
+              <article class="result-row">
+                <div class="label">Evidence result</div>
+                <h3>Alpha research review source</h3>
+                <p>Supported result can become an Evidence Bundle, Brief, Claim candidate, Memory/Wiki candidate, or Action Card draft.</p>
+                <div class="chip-list">
+                  <span class="evidence-chip">source preserved</span>
+                  <span class="evidence-chip">evidence ready</span>
+                  <span class="evidence-chip">audit available</span>
+                </div>
+              </article>
+            </div>
+          </div>
+          <aside class="product-panel">
+            <div class="label">What this search can do</div>
+            <div class="activity-list">
+              <div class="activity-row"><strong>Create Brief</strong><span>Use selected support and gaps.</span></div>
+              <div class="activity-row"><strong>Draft Claim</strong><span>Keep trust at Draft / Evidence-backed until approval.</span></div>
+              <div class="activity-row"><strong>Review Memory</strong><span>Candidate stays inspectable before durable memory.</span></div>
+              <div class="activity-row"><strong>Prepare Action</strong><span>Local/mock dry-run first, with audit refs.</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <section id="vs4-state-coverage" data-vs4-state-coverage="visible" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available">
+        <div class="product-panel">
+          <div class="label">Page states</div>
+          <h2>Major surfaces expose recovery and review states.</h2>
+          <table class="state-matrix" aria-label="VS4 Product Alpha page state coverage">
+            <thead>
+              <tr>
+                <th scope="col">Surface</th>
+                <th scope="col">empty</th><th scope="col">loading</th><th scope="col">ready</th><th scope="col">partial degraded</th><th scope="col">needs review</th><th scope="col">permission denied</th><th scope="col">policy blocked</th><th scope="col">failed with recovery</th><th scope="col">audit log available</th>
+              </tr>
+            </thead>
+            <tbody><tr data-vs4-state-surface="Home/Ops Inbox" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Home/Ops Inbox</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Ask Workbench" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Ask Workbench</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Search" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Search</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Artifact Viewer" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Artifact Viewer</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Brief Detail" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Brief Detail</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Claim Detail" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Claim Detail</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Memory/Wiki" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Memory/Wiki</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Action Card" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Action Card</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr>
+<tr data-vs4-state-surface="Evidence/Audit" data-vs4-required-states="empty,loading,ready,partial-degraded,needs-review,permission-denied,policy-blocked,failed-with-recovery,audit-log-available"><th scope="row">Evidence/Audit</th><td><span class="state-token" data-vs4-state="empty">empty</span></td><td><span class="state-token" data-vs4-state="loading">loading</span></td><td><span class="state-token" data-vs4-state="ready">ready</span></td><td><span class="state-token" data-vs4-state="partial-degraded">partial degraded</span></td><td><span class="state-token" data-vs4-state="needs-review">needs review</span></td><td><span class="state-token" data-vs4-state="permission-denied">permission denied</span></td><td><span class="state-token" data-vs4-state="policy-blocked">policy blocked</span></td><td><span class="state-token" data-vs4-state="failed-with-recovery">failed with recovery</span></td><td><span class="state-token" data-vs4-state="audit-log-available">audit log available</span></td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <section id="vs4-reference-alignment" data-vs4-reference-alignment="home-search-artifact" data-vs4-reference-images-pass-evidence="false">
+        <div class="product-panel">
+          <div class="label">Reference alignment</div>
+          <h2>Home, Search, and Artifact follow the Product Alpha direction.</h2>
+          <p>Reference images guide visual direction only. PASS evidence comes from DOM, browser state, CLI/runtime state, and source review.</p>
+          <div class="reference-grid"><article class="reference-rule" data-vs4-reference-surface="Home"><strong>Home</strong><span>light calm shell, small nav, Drop/Ask/Continue first</span></article>
+<article class="reference-rule" data-vs4-reference-surface="Search"><strong>Search</strong><span>prominent search, scoped results, trust and evidence chips</span></article>
+<article class="reference-rule" data-vs4-reference-surface="Artifact Viewer"><strong>Artifact Viewer</strong><span>original source primacy, checksum, provenance, progressive evidence</span></article></div>
+        </div>
+      </section>
       <section id="vs1-ontology-loop" data-vs1-clicked="false" data-vs1-flow-complete="false" data-production-release-claimed="false" data-live-connector-claimed="false" data-human-acceptance-claimed="false">
         <h2>Review Suggested Evidence Map</h2>
         <div class="operator-summary">
@@ -329,7 +917,7 @@
               <div><span class="label">Source</span><code id="ui-artifact-source">local_fixture</code></div>
               <div><span class="label">Derived status</span><code id="ui-artifact-derived-status">ready</code></div>
               <div><span class="label">Evidence refs</span><code id="ui-artifact-evidence-refs">artifact:art_2735313e0cb92563, storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be</code></div>
-              <div><span class="label">Audit refs</span><code id="ui-artifact-audit-refs">audit:audit_d583829041b6573b</code></div>
+              <div><span class="label">Audit refs</span><code id="ui-artifact-audit-refs">audit:audit_7a28bb549b95d0ba</code></div>
             </div>
           </article>
           <article class="step-card" data-operator-step-card="search">
@@ -339,7 +927,7 @@
             <button id="step-search-run" type="button">Search selected artifact</button>
             <div class="detail-grid">
               <div><span class="label">Query</span><code id="ui-search-query">alpha-evidence-anchor</code></div>
-              <div><span class="label">Search Snapshot</span><code id="evux-search-snapshot-id">search_ad3664a3f8eee8bd</code></div>
+              <div><span class="label">Search Snapshot</span><code id="evux-search-snapshot-id">search_79fec2f72bcf2c01</code></div>
               <div><span class="label">Evidence eligibility</span><code id="ui-search-evidence-eligibility">eligible: result has artifact evidence refs</code></div>
               <div><span class="label">Result snippet</span><span id="ui-search-snippet">alpha-evidence-anchor.</span></div>
             </div>
@@ -348,7 +936,7 @@
             <h3>3. Review Evidence</h3>
             <button id="step-evidence-run" type="button">Create Evidence Bundle</button>
             <div class="detail-grid">
-              <div><span class="label">Evidence Bundle</span><code id="evux-evidence-bundle-id">evb_0446b410afdabbf8</code></div>
+              <div><span class="label">Evidence Bundle</span><code id="evux-evidence-bundle-id">evb_ff39f24ffba3cea1</code></div>
               <div><span class="label">Supports Claim</span><span id="ui-evidence-support">alpha-evidence-anchor.</span></div>
               <div><span class="label">Insufficient when</span><span id="ui-evidence-insufficient">Insufficient: no Evidence Bundle, zero artifact refs, empty search result, or unsupported source. Attach eligible evidence before approval.</span></div>
             </div>
@@ -359,10 +947,10 @@
             <input id="claim-statement" value="The Alpha evidence anchor is ready for local VS0 operator acceptance.">
             <button id="step-claim-run" type="button">Create evidence-backed Claim</button>
             <div class="detail-grid">
-              <div><span class="label">Draft zero-evidence Claim</span><code id="ui-claim-draft-state">Draft: claim_5645eb7640128160</code></div>
-              <div><span class="label">Evidence-backed Claim</span><code id="ui-claim-evidence-state">Evidence-backed: claim_cde189f9e6342a8e</code></div>
-              <div><span class="label">Approved Claim</span><code id="ui-claim-approved-state">Approved: claim_cde189f9e6342a8e</code></div>
-              <div><span class="label">Claim ID</span><code id="evux-claim-id">claim_cde189f9e6342a8e</code></div>
+              <div><span class="label">Draft zero-evidence Claim</span><code id="ui-claim-draft-state">Draft: claim_b40d39b2472cc875</code></div>
+              <div><span class="label">Evidence-backed Claim</span><code id="ui-claim-evidence-state">Evidence-backed: claim_9c0c5ff191b2f458</code></div>
+              <div><span class="label">Approved Claim</span><code id="ui-claim-approved-state">Approved: claim_9c0c5ff191b2f458</code></div>
+              <div><span class="label">Claim ID</span><code id="evux-claim-id">claim_9c0c5ff191b2f458</code></div>
               <div><span class="label">Zero-evidence denial cause</span><span id="ui-zero-evidence-cause">CS_CLAIM_EVIDENCE_REQUIRED: Claim approval requires evidence.</span></div>
               <div><span class="label">Resolution guide</span><span id="ui-zero-evidence-resolution">Attach an Evidence Bundle with at least one artifact ref, then request owner approval.</span></div>
             </div>
@@ -371,10 +959,10 @@
             <h3>5. Review Action Card</h3>
             <button id="step-action-run" type="button">Create Action Card</button>
             <div class="detail-grid">
-              <div><span class="label">Action Card</span><code id="evux-action-id">action_deb2a5054cdf5106</code></div>
+              <div><span class="label">Action Card</span><code id="evux-action-id">action_330da2fdfc21ba6a</code></div>
               <div><span class="label">Diff</span><span id="ui-action-diff">no side effect applied -&gt; would perform external_writeback against mock://vs0-operator-ui/browser</span></div>
               <div><span class="label">Expected impact</span><span id="ui-action-impact">expected_connector_calls=1; mock_connector_calls=1; real_external_http_calls=0</span></div>
-              <div><span class="label">Evidence</span><span id="ui-action-evidence">evidence_bundle:evb_0446b410afdabbf8</span></div>
+              <div><span class="label">Evidence</span><span id="ui-action-evidence">evidence_bundle:evb_ff39f24ffba3cea1</span></div>
               <div><span class="label">Policy decision</span><code id="ui-action-policy">requires_approval</code></div>
               <div><span class="label">Risk</span><code id="ui-action-risk">high</code></div>
               <div><span class="label">Approval state</span><code id="ui-action-approval">approved</code></div>
@@ -386,7 +974,7 @@
             <h3>6. Dry-run</h3>
             <button id="step-dry-run" type="button">Run dry-run</button>
             <div class="detail-grid">
-              <div><span class="label">Dry-run ID</span><code id="ui-dry-run-id">dryrun_9d0d04266585a514</code></div>
+              <div><span class="label">Dry-run ID</span><code id="ui-dry-run-id">dryrun_353c5d65bc335d2f</code></div>
               <div><span class="label">Dry-run diff</span><span id="ui-dry-run-diff">no side effect applied -&gt; would perform external_writeback against mock://vs0-operator-ui/browser</span></div>
               <div><span class="label">Expected connector calls</span><code id="ui-dry-run-calls">expected_connector_calls=1; real_external_http_calls=0</code></div>
             </div>
@@ -431,12 +1019,12 @@
         "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
       ],
       "audit_refs": [
-        "audit:audit_d583829041b6573b"
+        "audit:audit_7a28bb549b95d0ba"
       ]
     },
     "search": {
       "query": "alpha-evidence-anchor",
-      "search_snapshot_id": "search_ad3664a3f8eee8bd",
+      "search_snapshot_id": "search_79fec2f72bcf2c01",
       "snippet": "alpha-evidence-anchor.",
       "evidence_eligible": true,
       "evidence_refs": [
@@ -444,31 +1032,31 @@
         "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
       ],
       "audit_refs": [
-        "audit:audit_bb340cf590275274"
+        "audit:audit_873925d7bfac3e8a"
       ]
     },
     "evidence": {
-      "evidence_bundle_id": "evb_0446b410afdabbf8",
-      "search_snapshot_id": "search_ad3664a3f8eee8bd",
+      "evidence_bundle_id": "evb_ff39f24ffba3cea1",
+      "search_snapshot_id": "search_79fec2f72bcf2c01",
       "supports_claim": true,
       "support_snippet": "alpha-evidence-anchor.",
       "insufficient_guidance": "Insufficient: no Evidence Bundle, zero artifact refs, empty search result, or unsupported source. Attach eligible evidence before approval.",
       "audit_refs": [
-        "audit:audit_4087461ea7cfdd73"
+        "audit:audit_cd2e1cae814cd24a"
       ]
     },
     "claims": {
-      "zero_evidence_claim_id": "claim_5645eb7640128160",
+      "zero_evidence_claim_id": "claim_b40d39b2472cc875",
       "zero_evidence_state": "draft",
       "zero_evidence_denied": true,
       "zero_evidence_denial_code": "CS_CLAIM_EVIDENCE_REQUIRED",
-      "evidence_claim_id": "claim_cde189f9e6342a8e",
+      "evidence_claim_id": "claim_9c0c5ff191b2f458",
       "evidence_claim_state": "evidence_backed",
       "approved_claim_state": "approved",
       "resolution_guide": "Attach an Evidence Bundle with at least one artifact ref, then request owner approval."
     },
     "action": {
-      "action_id": "action_deb2a5054cdf5106",
+      "action_id": "action_330da2fdfc21ba6a",
       "diff": {
         "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
         "before": "no side effect applied"
@@ -483,7 +1071,7 @@
         "risk": "high",
         "target": "mock://vs0-operator-ui/browser"
       },
-      "evidence_bundle_id": "evb_0446b410afdabbf8",
+      "evidence_bundle_id": "evb_ff39f24ffba3cea1",
       "policy_decision": "requires_approval",
       "policy_reason": "High-risk or external writeback action requires owner approval before execution.",
       "risk": "high",
@@ -492,7 +1080,7 @@
       "rollback_note": "Mock/local action only: no real external side effect. Compensate by recording a correcting Claim/Action and audit entry."
     },
     "dryRun": {
-      "dry_run_id": "dryrun_9d0d04266585a514",
+      "dry_run_id": "dryrun_353c5d65bc335d2f",
       "diff": {
         "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
         "before": "no side effect applied"
@@ -512,8 +1100,8 @@
       "claim": "approved",
       "action": "approved",
       "audit_refs": [
-        "audit:audit_8a8f199f6207fa76",
-        "audit:audit_bea524927eb975ba"
+        "audit:audit_75eda82dd925089d",
+        "audit:audit_e0658683f2a980da"
       ]
     },
     "execution": {
@@ -522,7 +1110,7 @@
       "real_external_http_calls": 0,
       "side_effect_boundary": "mocked_connector",
       "audit_refs": [
-        "audit:audit_ac1d9cef6bcd51dd"
+        "audit:audit_1b5cbbc59c3e785b"
       ]
     },
     "audit": {}
@@ -550,7 +1138,7 @@
             "original_size_bytes": 239,
             "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
             "provenance": {
-              "created_at": "2026-06-30T11:19:30.164202Z",
+              "created_at": "2026-07-03T08:21:20.150174Z",
               "lineage_from": null,
               "transformations": [
                 "hash_calculated",
@@ -580,14 +1168,14 @@
               "workspace_id": "default"
             },
             "source": {
-              "ingested_at": "2026-06-30T11:19:30.164202Z",
+              "ingested_at": "2026-07-03T08:21:20.150174Z",
               "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
               "type": "local_fixture"
             },
             "trust_state": "untrusted"
           },
           "audit_refs": [
-            "audit:audit_d583829041b6573b"
+            "audit:audit_7a28bb549b95d0ba"
           ],
           "deduplicated": false,
           "errors": [],
@@ -611,11 +1199,11 @@
         "status": 200,
         "payload": {
           "audit_refs": [
-            "audit:audit_bb340cf590275274"
+            "audit:audit_873925d7bfac3e8a"
           ],
           "errors": [],
           "evidence_refs": [
-            "search_snapshot:search_ad3664a3f8eee8bd",
+            "search_snapshot:search_79fec2f72bcf2c01",
             "artifact:art_2735313e0cb92563",
             "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
           ],
@@ -624,8 +1212,8 @@
           "product": "CornerStone",
           "schema_version": "cs.runtime_api.v0",
           "search_snapshot": {
-            "created_at": "2026-06-30T11:19:30.166668Z",
-            "duration_ms": 0.384,
+            "created_at": "2026-07-03T08:21:20.151945Z",
+            "duration_ms": 0.224,
             "filters": {
               "namespace_id": "personal",
               "owner_id": "local-user",
@@ -670,7 +1258,7 @@
               }
             ],
             "schema_version": "cs.search_snapshot.v0",
-            "search_snapshot_id": "search_ad3664a3f8eee8bd"
+            "search_snapshot_id": "search_79fec2f72bcf2c01"
           },
           "status": "success",
           "version": "0.0.0-scaffold"
@@ -683,19 +1271,19 @@
         "status": 200,
         "payload": {
           "audit_refs": [
-            "audit:audit_4087461ea7cfdd73"
+            "audit:audit_cd2e1cae814cd24a"
           ],
           "errors": [],
           "evidence_bundle": {
-            "created_at": "2026-06-30T11:19:30.168046Z",
-            "evidence_bundle_id": "evb_0446b410afdabbf8",
+            "created_at": "2026-07-03T08:21:20.153130Z",
+            "evidence_bundle_id": "evb_ff39f24ffba3cea1",
             "evidence_items": [
               {
                 "artifact_id": "art_2735313e0cb92563",
                 "derived_text_ref": "derived/art_2735313e0cb92563.txt",
                 "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                 "provenance": {
-                  "created_at": "2026-06-30T11:19:30.164202Z",
+                  "created_at": "2026-07-03T08:21:20.150174Z",
                   "lineage_from": null,
                   "transformations": [
                     "hash_calculated",
@@ -703,10 +1291,10 @@
                     "derived_text_created"
                   ]
                 },
-                "search_snapshot_id": "search_ad3664a3f8eee8bd",
+                "search_snapshot_id": "search_79fec2f72bcf2c01",
                 "snippet": "alpha-evidence-anchor.",
                 "source": {
-                  "ingested_at": "2026-06-30T11:19:30.164202Z",
+                  "ingested_at": "2026-07-03T08:21:20.150174Z",
                   "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
                   "type": "local_fixture"
                 }
@@ -763,14 +1351,14 @@
                   "snippet": "alpha-evidence-anchor."
                 }
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "schema_version": "cs.evidence_bundle.v0",
-            "search_snapshot_id": "search_ad3664a3f8eee8bd"
+            "search_snapshot_id": "search_79fec2f72bcf2c01"
           },
           "evidence_refs": [
-            "evidence_bundle:evb_0446b410afdabbf8",
-            "search_snapshot:search_ad3664a3f8eee8bd"
+            "evidence_bundle:evb_ff39f24ffba3cea1",
+            "search_snapshot:search_79fec2f72bcf2c01"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -787,7 +1375,7 @@
         "status": 200,
         "payload": {
           "audit_refs": [
-            "audit:audit_5d9bd404bd95fbb5"
+            "audit:audit_b232cb45d23e67c3"
           ],
           "claim": {
             "authority": {
@@ -796,8 +1384,8 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_5645eb7640128160",
-            "created_at": "2026-06-30T11:19:30.169358Z",
+            "claim_id": "claim_b40d39b2472cc875",
+            "created_at": "2026-07-03T08:21:20.154241Z",
             "evidence_bundle": {
               "artifact_refs": [],
               "evidence_bundle_id": null,
@@ -825,7 +1413,7 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_5645eb7640128160"
+            "claim:claim_b40d39b2472cc875"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -837,12 +1425,12 @@
       }
     },
     {
-      "step": "/claims/claim_5645eb7640128160/approve",
+      "step": "/claims/claim_b40d39b2472cc875/approve",
       "payload": {
         "status": 400,
         "payload": {
           "audit_refs": [
-            "audit:audit_7e08a10e4f205825"
+            "audit:audit_34a91313a50b918d"
           ],
           "claim": {
             "authority": {
@@ -851,8 +1439,8 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_5645eb7640128160",
-            "created_at": "2026-06-30T11:19:30.169358Z",
+            "claim_id": "claim_b40d39b2472cc875",
+            "created_at": "2026-07-03T08:21:20.154241Z",
             "evidence_bundle": {
               "artifact_refs": [],
               "evidence_bundle_id": null,
@@ -900,7 +1488,7 @@
         "status": 200,
         "payload": {
           "audit_refs": [
-            "audit:audit_f947fb7abb9f2c2e"
+            "audit:audit_47fef240b1ef9a85"
           ],
           "claim": {
             "authority": {
@@ -909,13 +1497,13 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_cde189f9e6342a8e",
-            "created_at": "2026-06-30T11:19:30.172728Z",
+            "claim_id": "claim_9c0c5ff191b2f458",
+            "created_at": "2026-07-03T08:21:20.158034Z",
             "evidence_bundle": {
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -925,10 +1513,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_ad3664a3f8eee8bd",
-                "evidence_bundle:evb_0446b410afdabbf8"
+                "search_snapshot:search_79fec2f72bcf2c01",
+                "evidence_bundle:evb_ff39f24ffba3cea1"
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "ontology_context": {
               "can_replace_evidence_bundle": false,
@@ -949,8 +1537,8 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_cde189f9e6342a8e",
-            "evidence_bundle:evb_0446b410afdabbf8",
+            "claim:claim_9c0c5ff191b2f458",
+            "evidence_bundle:evb_ff39f24ffba3cea1",
             "artifact:art_2735313e0cb92563"
           ],
           "mode": "local_vs0_runtime",
@@ -968,14 +1556,14 @@
         "status": 200,
         "payload": {
           "action_card": {
-            "action_id": "action_deb2a5054cdf5106",
+            "action_id": "action_330da2fdfc21ba6a",
             "action_kind": "external_writeback",
             "approval": {
               "approver": null,
               "required": true,
               "status": "pending"
             },
-            "audit_ref": "audit:audit_825e2d4692d152d3",
+            "audit_ref": "audit:audit_13eebe428ea952e4",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -983,16 +1571,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-06-30T11:19:30.174530Z",
+            "created_at": "2026-07-03T08:21:20.160206Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_cde189f9e6342a8e",
-              "created_at": "2026-06-30T11:19:30.174518Z",
+              "claim_id": "claim_9c0c5ff191b2f458",
+              "created_at": "2026-07-03T08:21:20.160192Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_9d0d04266585a514",
+              "dry_run_id": "dryrun_353c5d65bc335d2f",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -1004,17 +1592,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_a2a269adb73435c9",
+              "mission_id": "mission_72d64722d917734e",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-06-30T11:19:30.174515Z",
+                "decided_at": "2026-07-03T08:21:20.160189Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_42675ab1e083a351",
-                "mission_id": "mission_a2a269adb73435c9",
+                "id": "policy_8733466e5c25d3fc",
+                "mission_id": "mission_72d64722d917734e",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -1044,7 +1632,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1054,10 +1642,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_ad3664a3f8eee8bd",
-                "evidence_bundle:evb_0446b410afdabbf8"
+                "search_snapshot:search_79fec2f72bcf2c01",
+                "evidence_bundle:evb_ff39f24ffba3cea1"
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "execution": {
               "can_execute_now": false,
@@ -1065,7 +1653,7 @@
               "status": "pending_approval"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -1076,11 +1664,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1106,18 +1694,18 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_cde189f9e6342a8e"
+            "source_claim_id": "claim_9c0c5ff191b2f458"
           },
           "audit_refs": [
-            "audit:audit_825e2d4692d152d3",
-            "audit:audit_b70e2f32dcb95661",
-            "audit:audit_55a0737bbd16b27f"
+            "audit:audit_13eebe428ea952e4",
+            "audit:audit_4909afcaf1180b77",
+            "audit:audit_0035ed3b789a888c"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_deb2a5054cdf5106",
-            "claim:claim_cde189f9e6342a8e",
-            "mission:mission_a2a269adb73435c9"
+            "action:action_330da2fdfc21ba6a",
+            "claim:claim_9c0c5ff191b2f458",
+            "mission:mission_72d64722d917734e"
           ],
           "mission": {
             "allowed_actions": [
@@ -1148,7 +1736,7 @@
                 "out_of_contract"
               ]
             },
-            "created_at": "2026-06-30T11:19:30.173793Z",
+            "created_at": "2026-07-03T08:21:20.159340Z",
             "escalation_rules": [
               "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
               "Escalate when evidence coverage is insufficient or policy decision is deny."
@@ -1157,8 +1745,8 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "evidence_expectations": [
               "Evidence Bundle with at least one artifact reference.",
@@ -1172,7 +1760,7 @@
               "secret_exfiltration"
             ],
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
             "risk_state": "controlled_policy_required",
             "schema_version": "cs.mission_goal_contract.v0",
@@ -1183,7 +1771,7 @@
               "workspace_id": "default"
             },
             "source_claim": {
-              "claim_id": "claim_cde189f9e6342a8e",
+              "claim_id": "claim_9c0c5ff191b2f458",
               "statement": "The Alpha evidence anchor is ready for local VS0 operator acceptance.",
               "trust_state": "evidence_backed"
             },
@@ -1201,7 +1789,7 @@
           },
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [
-            "policy:policy_42675ab1e083a351"
+            "policy:policy_8733466e5c25d3fc"
           ],
           "policy_decisions": [
             {
@@ -1209,11 +1797,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1278,29 +1866,29 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "updated_at": "2026-06-30T11:19:30.174098Z"
+            "updated_at": "2026-07-03T08:21:20.159734Z"
           }
         }
       }
     },
     {
-      "step": "/actions/action_deb2a5054cdf5106/dry-run",
+      "step": "/actions/action_330da2fdfc21ba6a/dry-run",
       "payload": {
         "status": 200,
         "payload": {
-          "action_id": "action_deb2a5054cdf5106",
+          "action_id": "action_330da2fdfc21ba6a",
           "audit_refs": [
-            "audit:audit_4afba5fea3b0eca0"
+            "audit:audit_e5da1cbfe04eb819"
           ],
           "dry_run": {
             "action_kind": "external_writeback",
-            "claim_id": "claim_cde189f9e6342a8e",
-            "created_at": "2026-06-30T11:19:30.174518Z",
+            "claim_id": "claim_9c0c5ff191b2f458",
+            "created_at": "2026-07-03T08:21:20.160192Z",
             "diff": {
               "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
               "before": "no side effect applied"
             },
-            "dry_run_id": "dryrun_9d0d04266585a514",
+            "dry_run_id": "dryrun_353c5d65bc335d2f",
             "expected_impact": {
               "connector": "mock_connector",
               "expected_connector_calls": 1,
@@ -1312,17 +1900,17 @@
               "target": "mock://vs0-operator-ui/browser"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "policy_decision": {
               "action_kind": "external_writeback",
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1350,12 +1938,12 @@
           },
           "errors": [],
           "evidence_refs": [
-            "action:action_deb2a5054cdf5106",
-            "dry_run:dryrun_9d0d04266585a514"
+            "action:action_330da2fdfc21ba6a",
+            "dry_run:dryrun_353c5d65bc335d2f"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [
-            "policy:policy_42675ab1e083a351"
+            "policy:policy_8733466e5c25d3fc"
           ],
           "policy_decisions": [
             {
@@ -1363,11 +1951,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1394,28 +1982,28 @@
       }
     },
     {
-      "step": "/claims/claim_cde189f9e6342a8e/approve",
+      "step": "/claims/claim_9c0c5ff191b2f458/approve",
       "payload": {
         "status": 200,
         "payload": {
           "audit_refs": [
-            "audit:audit_8a8f199f6207fa76"
+            "audit:audit_75eda82dd925089d"
           ],
           "claim": {
-            "approved_at": "2026-06-30T11:19:30.176621Z",
+            "approved_at": "2026-07-03T08:21:20.162976Z",
             "authority": {
               "blocked_reason": "Autonomous action still requires a governed action or mission path.",
               "can_be_approved": true,
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": true
             },
-            "claim_id": "claim_cde189f9e6342a8e",
-            "created_at": "2026-06-30T11:19:30.172728Z",
+            "claim_id": "claim_9c0c5ff191b2f458",
+            "created_at": "2026-07-03T08:21:20.158034Z",
             "evidence_bundle": {
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1425,10 +2013,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_ad3664a3f8eee8bd",
-                "evidence_bundle:evb_0446b410afdabbf8"
+                "search_snapshot:search_79fec2f72bcf2c01",
+                "evidence_bundle:evb_ff39f24ffba3cea1"
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "ontology_context": {
               "can_replace_evidence_bundle": false,
@@ -1449,7 +2037,7 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_cde189f9e6342a8e"
+            "claim:claim_9c0c5ff191b2f458"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1461,20 +2049,20 @@
       }
     },
     {
-      "step": "/actions/action_deb2a5054cdf5106/approve",
+      "step": "/actions/action_330da2fdfc21ba6a/approve",
       "payload": {
         "status": 200,
         "payload": {
           "action_card": {
-            "action_id": "action_deb2a5054cdf5106",
+            "action_id": "action_330da2fdfc21ba6a",
             "action_kind": "external_writeback",
             "approval": {
-              "approved_at": "2026-06-30T11:19:30.177450Z",
+              "approved_at": "2026-07-03T08:21:20.167923Z",
               "approver": "owner",
               "required": true,
               "status": "approved"
             },
-            "audit_ref": "audit:audit_825e2d4692d152d3",
+            "audit_ref": "audit:audit_13eebe428ea952e4",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -1482,16 +2070,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-06-30T11:19:30.174530Z",
+            "created_at": "2026-07-03T08:21:20.160206Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_cde189f9e6342a8e",
-              "created_at": "2026-06-30T11:19:30.174518Z",
+              "claim_id": "claim_9c0c5ff191b2f458",
+              "created_at": "2026-07-03T08:21:20.160192Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_9d0d04266585a514",
+              "dry_run_id": "dryrun_353c5d65bc335d2f",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -1503,17 +2091,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_a2a269adb73435c9",
+              "mission_id": "mission_72d64722d917734e",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-06-30T11:19:30.174515Z",
+                "decided_at": "2026-07-03T08:21:20.160189Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_42675ab1e083a351",
-                "mission_id": "mission_a2a269adb73435c9",
+                "id": "policy_8733466e5c25d3fc",
+                "mission_id": "mission_72d64722d917734e",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -1543,7 +2131,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1553,10 +2141,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_ad3664a3f8eee8bd",
-                "evidence_bundle:evb_0446b410afdabbf8"
+                "search_snapshot:search_79fec2f72bcf2c01",
+                "evidence_bundle:evb_ff39f24ffba3cea1"
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "execution": {
               "can_execute_now": true,
@@ -1564,7 +2152,7 @@
               "status": "ready_to_execute"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -1575,11 +2163,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1605,14 +2193,14 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_cde189f9e6342a8e"
+            "source_claim_id": "claim_9c0c5ff191b2f458"
           },
           "audit_refs": [
-            "audit:audit_bea524927eb975ba"
+            "audit:audit_e0658683f2a980da"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_deb2a5054cdf5106"
+            "action:action_330da2fdfc21ba6a"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1624,20 +2212,20 @@
       }
     },
     {
-      "step": "/actions/action_deb2a5054cdf5106/execute",
+      "step": "/actions/action_330da2fdfc21ba6a/execute",
       "payload": {
         "status": 200,
         "payload": {
           "action_card": {
-            "action_id": "action_deb2a5054cdf5106",
+            "action_id": "action_330da2fdfc21ba6a",
             "action_kind": "external_writeback",
             "approval": {
-              "approved_at": "2026-06-30T11:19:30.177450Z",
+              "approved_at": "2026-07-03T08:21:20.167923Z",
               "approver": "owner",
               "required": true,
               "status": "approved"
             },
-            "audit_ref": "audit:audit_825e2d4692d152d3",
+            "audit_ref": "audit:audit_13eebe428ea952e4",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -1645,16 +2233,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-06-30T11:19:30.174530Z",
+            "created_at": "2026-07-03T08:21:20.160206Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_cde189f9e6342a8e",
-              "created_at": "2026-06-30T11:19:30.174518Z",
+              "claim_id": "claim_9c0c5ff191b2f458",
+              "created_at": "2026-07-03T08:21:20.160192Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_9d0d04266585a514",
+              "dry_run_id": "dryrun_353c5d65bc335d2f",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -1666,17 +2254,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_a2a269adb73435c9",
+              "mission_id": "mission_72d64722d917734e",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-06-30T11:19:30.174515Z",
+                "decided_at": "2026-07-03T08:21:20.160189Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_42675ab1e083a351",
-                "mission_id": "mission_a2a269adb73435c9",
+                "id": "policy_8733466e5c25d3fc",
+                "mission_id": "mission_72d64722d917734e",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -1706,7 +2294,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_0446b410afdabbf8",
+              "evidence_bundle_id": "evb_ff39f24ffba3cea1",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1716,19 +2304,19 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_ad3664a3f8eee8bd",
-                "evidence_bundle:evb_0446b410afdabbf8"
+                "search_snapshot:search_79fec2f72bcf2c01",
+                "evidence_bundle:evb_ff39f24ffba3cea1"
               ],
-              "search_snapshot_id": "search_ad3664a3f8eee8bd"
+              "search_snapshot_id": "search_79fec2f72bcf2c01"
             },
             "execution": {
               "can_execute_now": false,
               "result": {
-                "action_id": "action_deb2a5054cdf5106",
-                "executed_at": "2026-06-30T11:19:30.178774Z",
+                "action_id": "action_330da2fdfc21ba6a",
+                "executed_at": "2026-07-03T08:21:20.169614Z",
                 "external_http_calls": 0,
                 "message": "Action execution was recorded through the governed Workflow/Action path.",
-                "mission_id": "mission_a2a269adb73435c9",
+                "mission_id": "mission_72d64722d917734e",
                 "mock_connector_calls": 1,
                 "schema_version": "cs.action_result.v0",
                 "side_effect_boundary": "mocked_connector",
@@ -1737,7 +2325,7 @@
               "status": "executed"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -1748,11 +2336,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-06-30T11:19:30.174515Z",
+              "decided_at": "2026-07-03T08:21:20.160189Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_42675ab1e083a351",
-              "mission_id": "mission_a2a269adb73435c9",
+              "id": "policy_8733466e5c25d3fc",
+              "mission_id": "mission_72d64722d917734e",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1778,25 +2366,25 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_cde189f9e6342a8e"
+            "source_claim_id": "claim_9c0c5ff191b2f458"
           },
           "action_result": {
-            "action_id": "action_deb2a5054cdf5106",
-            "executed_at": "2026-06-30T11:19:30.178774Z",
+            "action_id": "action_330da2fdfc21ba6a",
+            "executed_at": "2026-07-03T08:21:20.169614Z",
             "external_http_calls": 0,
             "message": "Action execution was recorded through the governed Workflow/Action path.",
-            "mission_id": "mission_a2a269adb73435c9",
+            "mission_id": "mission_72d64722d917734e",
             "mock_connector_calls": 1,
             "schema_version": "cs.action_result.v0",
             "side_effect_boundary": "mocked_connector",
             "status": "success"
           },
           "audit_refs": [
-            "audit:audit_ac1d9cef6bcd51dd"
+            "audit:audit_1b5cbbc59c3e785b"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_deb2a5054cdf5106"
+            "action:action_330da2fdfc21ba6a"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1820,9 +2408,9 @@
                 "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                 "trust_state": "untrusted"
               },
-              "event_id": "audit_d583829041b6573b",
+              "event_id": "audit_7a28bb549b95d0ba",
               "event_type": "artifact.ingested",
-              "occurred_at": "2026-06-30T11:19:30.164692Z",
+              "occurred_at": "2026-07-03T08:21:20.150484Z",
               "subject": {
                 "id": "art_2735313e0cb92563",
                 "type": "artifact"
@@ -1830,28 +2418,28 @@
             },
             {
               "details": {
-                "duration_ms": 0.384,
+                "duration_ms": 0.224,
                 "query": "alpha-evidence-anchor",
                 "result_count": 1
               },
-              "event_id": "audit_bb340cf590275274",
+              "event_id": "audit_873925d7bfac3e8a",
               "event_type": "search.snapshot.created",
-              "occurred_at": "2026-06-30T11:19:30.166941Z",
+              "occurred_at": "2026-07-03T08:21:20.152105Z",
               "subject": {
-                "id": "search_ad3664a3f8eee8bd",
+                "id": "search_79fec2f72bcf2c01",
                 "type": "search_snapshot"
               }
             },
             {
               "details": {
                 "evidence_item_count": 1,
-                "search_snapshot_id": "search_ad3664a3f8eee8bd"
+                "search_snapshot_id": "search_79fec2f72bcf2c01"
               },
-              "event_id": "audit_4087461ea7cfdd73",
+              "event_id": "audit_cd2e1cae814cd24a",
               "event_type": "evidence_bundle.created",
-              "occurred_at": "2026-06-30T11:19:30.168414Z",
+              "occurred_at": "2026-07-03T08:21:20.153382Z",
               "subject": {
-                "id": "evb_0446b410afdabbf8",
+                "id": "evb_ff39f24ffba3cea1",
                 "type": "evidence_bundle"
               }
             },
@@ -1860,11 +2448,11 @@
                 "evidence_bundle_id": null,
                 "evidence_item_count": 0
               },
-              "event_id": "audit_5d9bd404bd95fbb5",
+              "event_id": "audit_b232cb45d23e67c3",
               "event_type": "claim.draft.created",
-              "occurred_at": "2026-06-30T11:19:30.169553Z",
+              "occurred_at": "2026-07-03T08:21:20.154397Z",
               "subject": {
-                "id": "claim_5645eb7640128160",
+                "id": "claim_b40d39b2472cc875",
                 "type": "claim"
               }
             },
@@ -1873,25 +2461,25 @@
                 "reason": "missing_evidence_bundle",
                 "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
               },
-              "event_id": "audit_7e08a10e4f205825",
+              "event_id": "audit_34a91313a50b918d",
               "event_type": "claim.approval.denied",
-              "occurred_at": "2026-06-30T11:19:30.170327Z",
+              "occurred_at": "2026-07-03T08:21:20.155161Z",
               "subject": {
-                "id": "claim_5645eb7640128160",
+                "id": "claim_b40d39b2472cc875",
                 "type": "claim"
               }
             },
             {
               "details": {
-                "evidence_bundle_id": "evb_0446b410afdabbf8",
+                "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                 "ontology_context_refs": [],
-                "search_snapshot_id": "search_ad3664a3f8eee8bd"
+                "search_snapshot_id": "search_79fec2f72bcf2c01"
               },
-              "event_id": "audit_f947fb7abb9f2c2e",
+              "event_id": "audit_47fef240b1ef9a85",
               "event_type": "claim.draft.created",
-              "occurred_at": "2026-06-30T11:19:30.172903Z",
+              "occurred_at": "2026-07-03T08:21:20.158214Z",
               "subject": {
-                "id": "claim_cde189f9e6342a8e",
+                "id": "claim_9c0c5ff191b2f458",
                 "type": "claim"
               }
             },
@@ -1902,15 +2490,15 @@
                   "draft_task",
                   "refresh_brief"
                 ],
-                "claim_id": "claim_cde189f9e6342a8e",
-                "evidence_bundle_id": "evb_0446b410afdabbf8",
+                "claim_id": "claim_9c0c5ff191b2f458",
+                "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                 "workspace_mode": "assist"
               },
-              "event_id": "audit_8a7e6414ad6e72d0",
+              "event_id": "audit_e41dd9e43d8bc7cf",
               "event_type": "mission.contract.created",
-              "occurred_at": "2026-06-30T11:19:30.173934Z",
+              "occurred_at": "2026-07-03T08:21:20.159548Z",
               "subject": {
-                "id": "mission_a2a269adb73435c9",
+                "id": "mission_72d64722d917734e",
                 "type": "mission"
               }
             },
@@ -1919,9 +2507,9 @@
                 "autonomous_execution_allowed": true,
                 "mode": "autopilot"
               },
-              "event_id": "audit_b70e2f32dcb95661",
+              "event_id": "audit_4909afcaf1180b77",
               "event_type": "workspace.mode.set",
-              "occurred_at": "2026-06-30T11:19:30.174195Z",
+              "occurred_at": "2026-07-03T08:21:20.159845Z",
               "subject": {
                 "id": "3e548f87d142e49b",
                 "type": "workspace"
@@ -1942,42 +2530,42 @@
                 ],
                 "mode": "autopilot"
               },
-              "event_id": "audit_55a0737bbd16b27f",
+              "event_id": "audit_0035ed3b789a888c",
               "event_type": "mission.activated",
-              "occurred_at": "2026-06-30T11:19:30.174331Z",
+              "occurred_at": "2026-07-03T08:21:20.159996Z",
               "subject": {
-                "id": "mission_a2a269adb73435c9",
+                "id": "mission_72d64722d917734e",
                 "type": "mission"
               }
             },
             {
               "details": {
                 "action_kind": "external_writeback",
-                "claim_id": "claim_cde189f9e6342a8e",
+                "claim_id": "claim_9c0c5ff191b2f458",
                 "decision": "requires_approval",
-                "dry_run_id": "dryrun_9d0d04266585a514",
-                "mission_id": "mission_a2a269adb73435c9",
+                "dry_run_id": "dryrun_353c5d65bc335d2f",
+                "mission_id": "mission_72d64722d917734e",
                 "ontology_object_refs": [],
                 "policy": "high_risk_action_requires_approval",
                 "risk": "high"
               },
-              "event_id": "audit_825e2d4692d152d3",
+              "event_id": "audit_13eebe428ea952e4",
               "event_type": "action.card.proposed",
-              "occurred_at": "2026-06-30T11:19:30.174676Z",
+              "occurred_at": "2026-07-03T08:21:20.160370Z",
               "subject": {
-                "id": "action_deb2a5054cdf5106",
+                "id": "action_330da2fdfc21ba6a",
                 "type": "action"
               }
             },
             {
               "details": {
-                "dry_run_id": "dryrun_9d0d04266585a514"
+                "dry_run_id": "dryrun_353c5d65bc335d2f"
               },
-              "event_id": "audit_4afba5fea3b0eca0",
+              "event_id": "audit_e5da1cbfe04eb819",
               "event_type": "action.dry_run.read",
-              "occurred_at": "2026-06-30T11:19:30.175703Z",
+              "occurred_at": "2026-07-03T08:21:20.161825Z",
               "subject": {
-                "id": "action_deb2a5054cdf5106",
+                "id": "action_330da2fdfc21ba6a",
                 "type": "action"
               }
             },
@@ -1986,28 +2574,28 @@
                 "artifact_refs": [
                   "artifact:art_2735313e0cb92563"
                 ],
-                "evidence_bundle_id": "evb_0446b410afdabbf8",
+                "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                 "evidence_item_count": 1
               },
-              "event_id": "audit_8a8f199f6207fa76",
+              "event_id": "audit_75eda82dd925089d",
               "event_type": "claim.approved",
-              "occurred_at": "2026-06-30T11:19:30.176709Z",
+              "occurred_at": "2026-07-03T08:21:20.163142Z",
               "subject": {
-                "id": "claim_cde189f9e6342a8e",
+                "id": "claim_9c0c5ff191b2f458",
                 "type": "claim"
               }
             },
             {
               "details": {
                 "approver": "owner",
-                "mission_id": "mission_a2a269adb73435c9",
+                "mission_id": "mission_72d64722d917734e",
                 "policy": "high_risk_action_requires_approval"
               },
-              "event_id": "audit_bea524927eb975ba",
+              "event_id": "audit_e0658683f2a980da",
               "event_type": "action.approved",
-              "occurred_at": "2026-06-30T11:19:30.177692Z",
+              "occurred_at": "2026-07-03T08:21:20.168188Z",
               "subject": {
-                "id": "action_deb2a5054cdf5106",
+                "id": "action_330da2fdfc21ba6a",
                 "type": "action"
               }
             },
@@ -2015,24 +2603,24 @@
               "details": {
                 "action_kind": "external_writeback",
                 "external_http_calls": 0,
-                "mission_id": "mission_a2a269adb73435c9",
+                "mission_id": "mission_72d64722d917734e",
                 "mock_connector_calls": 1
               },
-              "event_id": "audit_ac1d9cef6bcd51dd",
+              "event_id": "audit_1b5cbbc59c3e785b",
               "event_type": "action.executed",
-              "occurred_at": "2026-06-30T11:19:30.178902Z",
+              "occurred_at": "2026-07-03T08:21:20.169769Z",
               "subject": {
-                "id": "action_deb2a5054cdf5106",
+                "id": "action_330da2fdfc21ba6a",
                 "type": "action"
               }
             }
           ],
           "audit_refs": [
-            "audit:audit_b8645aa1dc27db58"
+            "audit:audit_26d154640d24348a"
           ],
           "errors": [],
           "evidence_refs": [
-            "namespace_audit_export:nsaudit_8720c5c74816b0d0"
+            "namespace_audit_export:nsaudit_f9b00ab026d5fa4f"
           ],
           "mode": "local_vs0_runtime",
           "namespace_audit_export": {
@@ -2046,7 +2634,7 @@
               "model_routing": false,
               "promotions": false
             },
-            "created_at": "2026-06-30T11:19:30.184365Z",
+            "created_at": "2026-07-03T08:21:20.170935Z",
             "event_count": 14,
             "event_type_counts": {
               "action.approved": 1,
@@ -2071,9 +2659,9 @@
                   "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                   "trust_state": "untrusted"
                 },
-                "event_id": "audit_d583829041b6573b",
+                "event_id": "audit_7a28bb549b95d0ba",
                 "event_type": "artifact.ingested",
-                "occurred_at": "2026-06-30T11:19:30.164692Z",
+                "occurred_at": "2026-07-03T08:21:20.150484Z",
                 "subject": {
                   "id": "art_2735313e0cb92563",
                   "type": "artifact"
@@ -2081,28 +2669,28 @@
               },
               {
                 "details": {
-                  "duration_ms": 0.384,
+                  "duration_ms": 0.224,
                   "query": "alpha-evidence-anchor",
                   "result_count": 1
                 },
-                "event_id": "audit_bb340cf590275274",
+                "event_id": "audit_873925d7bfac3e8a",
                 "event_type": "search.snapshot.created",
-                "occurred_at": "2026-06-30T11:19:30.166941Z",
+                "occurred_at": "2026-07-03T08:21:20.152105Z",
                 "subject": {
-                  "id": "search_ad3664a3f8eee8bd",
+                  "id": "search_79fec2f72bcf2c01",
                   "type": "search_snapshot"
                 }
               },
               {
                 "details": {
                   "evidence_item_count": 1,
-                  "search_snapshot_id": "search_ad3664a3f8eee8bd"
+                  "search_snapshot_id": "search_79fec2f72bcf2c01"
                 },
-                "event_id": "audit_4087461ea7cfdd73",
+                "event_id": "audit_cd2e1cae814cd24a",
                 "event_type": "evidence_bundle.created",
-                "occurred_at": "2026-06-30T11:19:30.168414Z",
+                "occurred_at": "2026-07-03T08:21:20.153382Z",
                 "subject": {
-                  "id": "evb_0446b410afdabbf8",
+                  "id": "evb_ff39f24ffba3cea1",
                   "type": "evidence_bundle"
                 }
               },
@@ -2111,11 +2699,11 @@
                   "evidence_bundle_id": null,
                   "evidence_item_count": 0
                 },
-                "event_id": "audit_5d9bd404bd95fbb5",
+                "event_id": "audit_b232cb45d23e67c3",
                 "event_type": "claim.draft.created",
-                "occurred_at": "2026-06-30T11:19:30.169553Z",
+                "occurred_at": "2026-07-03T08:21:20.154397Z",
                 "subject": {
-                  "id": "claim_5645eb7640128160",
+                  "id": "claim_b40d39b2472cc875",
                   "type": "claim"
                 }
               },
@@ -2124,25 +2712,25 @@
                   "reason": "missing_evidence_bundle",
                   "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
                 },
-                "event_id": "audit_7e08a10e4f205825",
+                "event_id": "audit_34a91313a50b918d",
                 "event_type": "claim.approval.denied",
-                "occurred_at": "2026-06-30T11:19:30.170327Z",
+                "occurred_at": "2026-07-03T08:21:20.155161Z",
                 "subject": {
-                  "id": "claim_5645eb7640128160",
+                  "id": "claim_b40d39b2472cc875",
                   "type": "claim"
                 }
               },
               {
                 "details": {
-                  "evidence_bundle_id": "evb_0446b410afdabbf8",
+                  "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                   "ontology_context_refs": [],
-                  "search_snapshot_id": "search_ad3664a3f8eee8bd"
+                  "search_snapshot_id": "search_79fec2f72bcf2c01"
                 },
-                "event_id": "audit_f947fb7abb9f2c2e",
+                "event_id": "audit_47fef240b1ef9a85",
                 "event_type": "claim.draft.created",
-                "occurred_at": "2026-06-30T11:19:30.172903Z",
+                "occurred_at": "2026-07-03T08:21:20.158214Z",
                 "subject": {
-                  "id": "claim_cde189f9e6342a8e",
+                  "id": "claim_9c0c5ff191b2f458",
                   "type": "claim"
                 }
               },
@@ -2153,15 +2741,15 @@
                     "draft_task",
                     "refresh_brief"
                   ],
-                  "claim_id": "claim_cde189f9e6342a8e",
-                  "evidence_bundle_id": "evb_0446b410afdabbf8",
+                  "claim_id": "claim_9c0c5ff191b2f458",
+                  "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                   "workspace_mode": "assist"
                 },
-                "event_id": "audit_8a7e6414ad6e72d0",
+                "event_id": "audit_e41dd9e43d8bc7cf",
                 "event_type": "mission.contract.created",
-                "occurred_at": "2026-06-30T11:19:30.173934Z",
+                "occurred_at": "2026-07-03T08:21:20.159548Z",
                 "subject": {
-                  "id": "mission_a2a269adb73435c9",
+                  "id": "mission_72d64722d917734e",
                   "type": "mission"
                 }
               },
@@ -2170,9 +2758,9 @@
                   "autonomous_execution_allowed": true,
                   "mode": "autopilot"
                 },
-                "event_id": "audit_b70e2f32dcb95661",
+                "event_id": "audit_4909afcaf1180b77",
                 "event_type": "workspace.mode.set",
-                "occurred_at": "2026-06-30T11:19:30.174195Z",
+                "occurred_at": "2026-07-03T08:21:20.159845Z",
                 "subject": {
                   "id": "3e548f87d142e49b",
                   "type": "workspace"
@@ -2193,42 +2781,42 @@
                   ],
                   "mode": "autopilot"
                 },
-                "event_id": "audit_55a0737bbd16b27f",
+                "event_id": "audit_0035ed3b789a888c",
                 "event_type": "mission.activated",
-                "occurred_at": "2026-06-30T11:19:30.174331Z",
+                "occurred_at": "2026-07-03T08:21:20.159996Z",
                 "subject": {
-                  "id": "mission_a2a269adb73435c9",
+                  "id": "mission_72d64722d917734e",
                   "type": "mission"
                 }
               },
               {
                 "details": {
                   "action_kind": "external_writeback",
-                  "claim_id": "claim_cde189f9e6342a8e",
+                  "claim_id": "claim_9c0c5ff191b2f458",
                   "decision": "requires_approval",
-                  "dry_run_id": "dryrun_9d0d04266585a514",
-                  "mission_id": "mission_a2a269adb73435c9",
+                  "dry_run_id": "dryrun_353c5d65bc335d2f",
+                  "mission_id": "mission_72d64722d917734e",
                   "ontology_object_refs": [],
                   "policy": "high_risk_action_requires_approval",
                   "risk": "high"
                 },
-                "event_id": "audit_825e2d4692d152d3",
+                "event_id": "audit_13eebe428ea952e4",
                 "event_type": "action.card.proposed",
-                "occurred_at": "2026-06-30T11:19:30.174676Z",
+                "occurred_at": "2026-07-03T08:21:20.160370Z",
                 "subject": {
-                  "id": "action_deb2a5054cdf5106",
+                  "id": "action_330da2fdfc21ba6a",
                   "type": "action"
                 }
               },
               {
                 "details": {
-                  "dry_run_id": "dryrun_9d0d04266585a514"
+                  "dry_run_id": "dryrun_353c5d65bc335d2f"
                 },
-                "event_id": "audit_4afba5fea3b0eca0",
+                "event_id": "audit_e5da1cbfe04eb819",
                 "event_type": "action.dry_run.read",
-                "occurred_at": "2026-06-30T11:19:30.175703Z",
+                "occurred_at": "2026-07-03T08:21:20.161825Z",
                 "subject": {
-                  "id": "action_deb2a5054cdf5106",
+                  "id": "action_330da2fdfc21ba6a",
                   "type": "action"
                 }
               },
@@ -2237,28 +2825,28 @@
                   "artifact_refs": [
                     "artifact:art_2735313e0cb92563"
                   ],
-                  "evidence_bundle_id": "evb_0446b410afdabbf8",
+                  "evidence_bundle_id": "evb_ff39f24ffba3cea1",
                   "evidence_item_count": 1
                 },
-                "event_id": "audit_8a8f199f6207fa76",
+                "event_id": "audit_75eda82dd925089d",
                 "event_type": "claim.approved",
-                "occurred_at": "2026-06-30T11:19:30.176709Z",
+                "occurred_at": "2026-07-03T08:21:20.163142Z",
                 "subject": {
-                  "id": "claim_cde189f9e6342a8e",
+                  "id": "claim_9c0c5ff191b2f458",
                   "type": "claim"
                 }
               },
               {
                 "details": {
                   "approver": "owner",
-                  "mission_id": "mission_a2a269adb73435c9",
+                  "mission_id": "mission_72d64722d917734e",
                   "policy": "high_risk_action_requires_approval"
                 },
-                "event_id": "audit_bea524927eb975ba",
+                "event_id": "audit_e0658683f2a980da",
                 "event_type": "action.approved",
-                "occurred_at": "2026-06-30T11:19:30.177692Z",
+                "occurred_at": "2026-07-03T08:21:20.168188Z",
                 "subject": {
-                  "id": "action_deb2a5054cdf5106",
+                  "id": "action_330da2fdfc21ba6a",
                   "type": "action"
                 }
               },
@@ -2266,20 +2854,20 @@
                 "details": {
                   "action_kind": "external_writeback",
                   "external_http_calls": 0,
-                  "mission_id": "mission_a2a269adb73435c9",
+                  "mission_id": "mission_72d64722d917734e",
                   "mock_connector_calls": 1
                 },
-                "event_id": "audit_ac1d9cef6bcd51dd",
+                "event_id": "audit_1b5cbbc59c3e785b",
                 "event_type": "action.executed",
-                "occurred_at": "2026-06-30T11:19:30.178902Z",
+                "occurred_at": "2026-07-03T08:21:20.169769Z",
                 "subject": {
-                  "id": "action_deb2a5054cdf5106",
+                  "id": "action_330da2fdfc21ba6a",
                   "type": "action"
                 }
               }
             ],
             "format": "json",
-            "namespace_audit_export_id": "nsaudit_8720c5c74816b0d0",
+            "namespace_audit_export_id": "nsaudit_f9b00ab026d5fa4f",
             "schema_version": "cs.namespace_audit_export.v0",
             "scope": {
               "namespace_id": "personal",
@@ -2325,6 +2913,37 @@
     </div>
   </main>
   <script>
+    window.__cornerstoneVs4ShellEvidence = function() {
+      const shell = document.getElementById("home-ops-inbox");
+      const nav = Array.from(document.querySelectorAll("#primary-nav a")).map((item) => item.textContent || "");
+      return {
+        schema_version: "cs.vs4_product_alpha_shell_state.v0",
+        product_alpha_shell: shell ? shell.dataset.vs4Surface === "home-ops-inbox" : false,
+        nav_items: nav,
+        drop_visible: Boolean(document.querySelector("[data-vs4-drop-zone='visible']")),
+        ask_visible: Boolean(document.querySelector("[data-vs4-ask-box='visible']")),
+        ops_inbox_visible: Boolean(document.querySelector("[data-vs4-ops-inbox='visible']")),
+        continue_work_count: document.querySelectorAll("[data-vs4-work-kind]").length,
+        workspace_visible: Boolean(document.querySelector("[data-vs4-workspace]")),
+        local_boundary_visible: Boolean(document.querySelector("[data-vs4-local-boundary='visible']")),
+        brief_shell_visible: Boolean(document.querySelector("[data-vs4-brief-shell='visible']")),
+        memory_shell_visible: Boolean(document.querySelector("[data-vs4-memory-shell='visible']")),
+        evidence_drawer_reachable: Boolean(document.querySelector("[data-vs4-evidence-drawer='reachable']")),
+        production_claimed: shell ? shell.dataset.vs4ProductionClaimed === "true" : true,
+        onprem_claimed: shell ? shell.dataset.vs4OnpremClaimed === "true" : true,
+        final_security_claimed: shell ? shell.dataset.vs4FinalSecurityClaimed === "true" : true,
+        live_provider_claimed: shell ? shell.dataset.vs4LiveProviderClaimed === "true" : true,
+        human_ux_claimed: shell ? shell.dataset.vs4HumanUxClaimed === "true" : true,
+        product_language_markers: {
+          source: document.body.textContent.includes("Source intake"),
+          evidence_backed_brief: document.body.textContent.includes("Evidence-backed Brief"),
+          memory_candidate: document.body.textContent.includes("Memory/Wiki candidate"),
+          action_card: document.body.textContent.includes("Action Card draft"),
+          activity_record: document.body.textContent.includes("Activity record")
+        }
+      };
+    };
+    const vs4Autorun = false;
     const evuxAutorun = false;
     const evuxScope = {
       tenant_id: "local-dev",
@@ -2412,6 +3031,508 @@
       traceStep(path, { status: response.status, payload });
       return { response, payload };
     }
+    const vs4Trace = [];
+    const vs4GeneralPacks = [{"name": "Personal Research", "description": "Reading notes, source highlights, evidence-backed brief", "fixture": "fixtures/vs1/ontology/personal_research.txt", "query": "Walking Desk"}, {"name": "Company Policy Review", "description": "Policy excerpt, claim candidate, safety check", "fixture": "fixtures/vs1/ontology/internal_policy.txt", "query": "Local Action Approval Policy"}, {"name": "Operations Issue", "description": "Incident note, follow-up action, audit-ready activity", "fixture": "fixtures/vs0/packs/13_learning_experience/failed_mission_note.txt", "query": "learning-failure-anchor"}];
+    const vs4RequiredPageStates = ["empty", "loading", "ready", "partial-degraded", "needs-review", "permission-denied", "policy-blocked", "failed-with-recovery", "audit-log-available"];
+    const vs4StateSurfaces = ["Home/Ops Inbox", "Ask Workbench", "Search", "Artifact Viewer", "Brief Detail", "Claim Detail", "Memory/Wiki", "Action Card", "Evidence/Audit"];
+    const vs4ReferenceAlignment = [["Home", "light calm shell, small nav, Drop/Ask/Continue first"], ["Search", "prominent search, scoped results, trust and evidence chips"], ["Artifact Viewer", "original source primacy, checksum, provenance, progressive evidence"]];
+    const vs4State = {
+      completed: false,
+      ask: {},
+      packs: [],
+      state_coverage: {},
+      reference_alignment: {},
+      source: {},
+      search: {},
+      evidence: {},
+      brief: {},
+      claim: {},
+      memory: {
+        status: "draft",
+        trust_state: "draft",
+        owner_approved: false,
+        can_influence_answers: false,
+        can_influence_actions: false
+      },
+      action: {},
+      audit: {},
+      negative_evidence: {
+        zero_evidence_approval_created_approved_claim: 0,
+        approved_memory_before_review: 0,
+        real_external_http_calls: 0,
+        live_external_writeback_claimed: 0,
+        chatbot_only_ask_output: 0,
+        general_pack_missing_output: 0,
+        required_page_state_missing: 0,
+        home_search_artifact_reference_gap: 0
+      }
+    };
+    function traceVs4(name, payload) {
+      vs4Trace.push({ step: name, payload });
+    }
+    async function vs4Api(path, body) {
+      const response = await fetch(path, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(Object.assign({}, evuxScope, body || {}))
+      });
+      const payload = await response.json();
+      traceVs4(path, { status: response.status, payload });
+      return { response, payload };
+    }
+    async function vs4Get(path) {
+      const response = await fetch(path);
+      const payload = await response.json();
+      traceVs4(path, { status: response.status, payload });
+      return { response, payload };
+    }
+    function vs4Passes() {
+      return Boolean(
+        vs4State.source.artifact_id &&
+        vs4State.source.original_storage_ref &&
+        vs4State.search.search_snapshot_id &&
+        vs4State.evidence.evidence_bundle_id &&
+        vs4State.evidence.snippet &&
+        vs4State.brief.brief_id &&
+        vs4State.brief.status === "evidence_backed" &&
+        vs4State.brief.key_point_count > 0 &&
+        vs4State.brief.evidence_link_count > 0 &&
+        vs4State.brief.gap_count > 0 &&
+        vs4State.claim.claim_id &&
+        vs4State.claim.trust_state === "evidence_backed" &&
+        vs4State.claim.zero_evidence_denied === true &&
+        vs4State.memory.status === "draft" &&
+        vs4State.memory.owner_approved === false &&
+        vs4State.memory.can_influence_answers === false &&
+        vs4State.memory.can_influence_actions === false &&
+        vs4State.action.action_id &&
+        vs4State.action.mode === "Draft / Local / Mock" &&
+        vs4State.action.connector_mocked === true &&
+        vs4State.action.direct_provider_access === false &&
+        vs4State.action.real_external_http_calls === 0 &&
+        vs4State.audit.verification_status === "success" &&
+        Object.values(vs4State.negative_evidence).every((value) => value === 0)
+      );
+    }
+    function vs4AskPasses() {
+      return Boolean(
+        vs4State.ask.conversation_id &&
+        vs4State.ask.answer_id &&
+        vs4State.ask.brief_id &&
+        vs4State.ask.claim_id &&
+        vs4State.ask.memory_candidate_id &&
+        vs4State.ask.action_id &&
+        vs4State.ask.chatbot_only === false &&
+        vs4State.ask.evidence_refs &&
+        vs4State.ask.evidence_refs.length > 0 &&
+        vs4State.ask.audit_refs &&
+        vs4State.ask.audit_refs.length > 0
+      );
+    }
+    function vs4PacksPass() {
+      return vs4State.packs.length === vs4GeneralPacks.length &&
+        vs4State.packs.every((pack) =>
+          pack.brief_id &&
+          pack.claim_id &&
+          pack.memory_candidate_id &&
+          pack.action_id &&
+          pack.ops_followup_id &&
+          pack.real_external_http_calls === 0
+        );
+    }
+    function collectVs4StateCoverage() {
+      const rows = Array.from(document.querySelectorAll("[data-vs4-state-surface]"));
+      const coverage = {
+        required_states: vs4RequiredPageStates,
+        surfaces: {},
+        missing: [],
+        complete: false
+      };
+      rows.forEach((row) => {
+        const surface = row.dataset.vs4StateSurface || "";
+        const states = Array.from(row.querySelectorAll("[data-vs4-state]")).map((node) => node.dataset.vs4State);
+        coverage.surfaces[surface] = states;
+        vs4RequiredPageStates.forEach((state) => {
+          if (!states.includes(state)) coverage.missing.push(surface + ":" + state);
+        });
+      });
+      coverage.complete = vs4StateSurfaces.every((surface) => coverage.surfaces[surface]) && coverage.missing.length === 0;
+      vs4State.state_coverage = coverage;
+      vs4State.negative_evidence.required_page_state_missing = coverage.missing.length;
+      return coverage;
+    }
+    function collectVs4ReferenceAlignment() {
+      const nav = document.getElementById("primary-nav");
+      const navText = nav ? nav.textContent : "";
+      const home = Boolean(document.querySelector("[data-vs4-surface='home-ops-inbox']"));
+      const search = Boolean(document.querySelector("[data-vs4-search-reference='prominent-scoped-evidence']")) &&
+        Boolean(document.querySelector("[data-vs4-search-results='visible']"));
+      const artifact = Boolean(document.querySelector("[data-vs4-artifact-reference='original-source-primary']")) &&
+        Boolean(document.querySelector("[data-vs4-original-source-preview='visible']"));
+      const chips = document.querySelectorAll(".evidence-chip").length >= 8;
+      const referenceRows = Array.from(document.querySelectorAll("[data-vs4-reference-surface]")).map((node) => node.dataset.vs4ReferenceSurface);
+      const alignment = {
+        home,
+        search,
+        artifact,
+        small_nav: ["Home", "Search", "Artifacts", "Claims", "Actions"].every((label) => navText.includes(label)) && !navText.includes("Connectors") && !navText.includes("Ontology"),
+        prominent_global_search: Boolean(document.querySelector(".global-search")),
+        trust_evidence_chips: chips,
+        reference_surfaces: referenceRows,
+        reference_images_used_as_pass_evidence: false,
+        implementation_evidence: ["DOM", "browser runtime state", "local API state"],
+      };
+      alignment.complete = alignment.home && alignment.search && alignment.artifact && alignment.small_nav && alignment.prominent_global_search && alignment.trust_evidence_chips && referenceRows.length === 3;
+      vs4State.reference_alignment = alignment;
+      vs4State.negative_evidence.home_search_artifact_reference_gap = alignment.complete ? 0 : 1;
+      return alignment;
+    }
+    function vs4Slice003Passes() {
+      const coverage = collectVs4StateCoverage();
+      const reference = collectVs4ReferenceAlignment();
+      return vs4AskPasses() &&
+        vs4PacksPass() &&
+        coverage.complete &&
+        reference.complete &&
+        Object.values(vs4State.negative_evidence).every((value) => value === 0);
+    }
+    async function runVs4BriefFlow() {
+      const button = document.getElementById("run-vs4-brief-flow");
+      if (button) button.disabled = true;
+      try {
+        const artifactResponse = await vs4Api("/artifacts", {
+          path: "fixtures/vs0/packs/01_artifact_basic/input.txt",
+          source: "local_fixture",
+          media_type: "text/plain",
+          trust: "untrusted"
+        });
+        const artifact = artifactResponse.payload.artifact || {};
+        vs4State.source = {
+          artifact_id: artifact.artifact_id,
+          checksum_sha256: artifact.checksum_sha256,
+          original_storage_ref: artifact.original_storage_ref,
+          derived_status: artifact.derived && artifact.derived.status,
+          provenance: artifact.provenance || {},
+          audit_refs: artifactResponse.payload.audit_refs || []
+        };
+        setText("vs4-source-state", "Saved source / Searchable");
+        document.getElementById("vs4-source-state").dataset.vs4SourceState = "saved-searchable";
+
+        const searchResponse = await vs4Api("/search", { query: "alpha-evidence-anchor" });
+        const snapshot = searchResponse.payload.search_snapshot || {};
+        const firstResult = (snapshot.results || [])[0] || {};
+        vs4State.search = {
+          search_snapshot_id: snapshot.search_snapshot_id,
+          result_count: snapshot.result_count,
+          evidence_refs: firstResult.evidence_refs || []
+        };
+
+        const bundleResponse = await vs4Api("/evidence-bundles", { search_snapshot_id: snapshot.search_snapshot_id });
+        const bundle = bundleResponse.payload.evidence_bundle || {};
+        const firstEvidence = (bundle.evidence_items || [])[0] || {};
+        vs4State.evidence = {
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          search_snapshot_id: bundle.search_snapshot_id,
+          snippet: firstEvidence.snippet || "",
+          original_storage_ref: firstEvidence.original_storage_ref,
+          derived_text_ref: firstEvidence.derived_text_ref,
+          artifact_id: firstEvidence.artifact_id,
+          audit_refs: bundleResponse.payload.audit_refs || []
+        };
+
+        const briefResponse = await vs4Api("/briefs", { evidence_bundle_id: bundle.evidence_bundle_id });
+        const brief = briefResponse.payload.brief || {};
+        vs4State.brief = {
+          brief_id: brief.brief_id,
+          status: brief.status,
+          title: brief.title,
+          key_point_count: (brief.key_points || []).length,
+          evidence_link_count: (brief.evidence_links || []).length,
+          gap_count: (brief.uncertainty || []).length,
+          suggested_outputs: brief.suggested_outputs || [],
+          audit_refs: briefResponse.payload.audit_refs || []
+        };
+        setText("vs4-brief-state", "Evidence-backed Brief ready");
+        document.getElementById("vs4-brief-state").dataset.vs4BriefState = "evidence-backed";
+        setText("vs4-brief-summary-text", brief.title || "Evidence-backed Brief ready.");
+        setText("vs4-supported-finding", (brief.key_points || [])[0] || firstEvidence.snippet || "Supported finding attached.");
+        setText("vs4-brief-gap", (brief.uncertainty || [])[0] || "Add more source material before broad reuse.");
+        setText("vs4-brief-activity", "brief:" + brief.brief_id + " created; audit refs " + asList(briefResponse.payload.audit_refs || []));
+        setText("vs4-evidence-source", "artifact:" + firstEvidence.artifact_id);
+        setText("vs4-evidence-snippet", firstEvidence.snippet || "No snippet.");
+        setText("vs4-evidence-rationale", "Finding is supported because it comes from the saved source and Evidence Bundle.");
+        setText("vs4-evidence-provenance", "storage=" + firstEvidence.original_storage_ref + "; derived=" + firstEvidence.derived_text_ref);
+        setText("vs4-evidence-audit", asList([...(bundleResponse.payload.audit_refs || []), ...(briefResponse.payload.audit_refs || [])]));
+
+        const unsupportedClaim = await vs4Api("/claims", {
+          statement: "Unsupported VS4 claim should not be approved."
+        });
+        const unsupportedRecord = unsupportedClaim.payload.claim || {};
+        const zeroApprove = await vs4Api("/claims/" + unsupportedRecord.claim_id + "/approve", {});
+        const zeroDenied = zeroApprove.response.status === 400 &&
+          (zeroApprove.payload.errors || []).some((error) => error.code === "CS_CLAIM_EVIDENCE_REQUIRED");
+
+        const claimResponse = await vs4Api("/claims", {
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          statement: "The saved source is ready for a local evidence-backed Brief review."
+        });
+        const claim = claimResponse.payload.claim || {};
+        vs4State.claim = {
+          claim_id: claim.claim_id,
+          trust_state: claim.trust_state,
+          status: claim.status,
+          statement: claim.statement,
+          evidence_bundle_id: claim.evidence_bundle && claim.evidence_bundle.evidence_bundle_id,
+          artifact_refs: claim.evidence_bundle && claim.evidence_bundle.artifact_refs || [],
+          zero_evidence_denied: zeroDenied,
+          unsupported_claim_id: unsupportedRecord.claim_id
+        };
+        vs4State.negative_evidence.zero_evidence_approval_created_approved_claim = zeroDenied ? 0 : 1;
+        setText("vs4-claim-title", claim.statement || "Claim candidate ready.");
+        setText("vs4-claim-rationale", "Rationale: supported by evidence_bundle:" + bundle.evidence_bundle_id + " and still scoped to " + evuxScope.workspace_id + ".");
+        setText("vs4-zero-evidence-denial", "CS_CLAIM_EVIDENCE_REQUIRED: attach an Evidence Bundle before approval.");
+        setText("vs4-claim-approval-state", "Claim: Draft / Evidence-backed");
+
+        vs4State.memory = {
+          status: "draft",
+          trust_state: "draft",
+          owner_approved: false,
+          evidence_bundle_id: bundle.evidence_bundle_id,
+          source_refs: ["evidence_bundle:" + bundle.evidence_bundle_id, "artifact:" + firstEvidence.artifact_id],
+          freshness: "current, review required",
+          can_influence_answers: false,
+          can_influence_actions: false,
+          hidden_profile: false
+        };
+        setText("vs4-memory-state", "Memory: Draft / Needs review");
+        setText("vs4-memory-rationale", "Draft candidate from evidence_bundle:" + bundle.evidence_bundle_id + "; not approved durable memory.");
+        setText("vs4-memory-trust", "draft; owner_approved=false");
+        setText("vs4-memory-freshness", "current; review required before durable use");
+
+        const actionResponse = await vs4Api("/actions", {
+          claim_id: claim.claim_id,
+          goal: "Create local follow-up from the Evidence-backed Brief",
+          action_kind: "draft_task",
+          risk: "medium",
+          connector: "mock_connector",
+          target: "mock://vs4-brief-detail/browser"
+        });
+        const action = actionResponse.payload.action_card || {};
+        const dryRun = action.dry_run || {};
+        const impact = dryRun.expected_impact || {};
+        vs4State.action = {
+          action_id: action.action_id,
+          goal: action.goal,
+          evidence_bundle_id: action.evidence && action.evidence.evidence_bundle_id,
+          risk: action.risk,
+          approval_status: action.approval && action.approval.status,
+          policy_decision: action.policy_decision && action.policy_decision.decision,
+          mode: "Draft / Local / Mock",
+          connector_mocked: action.connector_boundary && action.connector_boundary.mocked === true,
+          direct_provider_access: action.connector_boundary ? action.connector_boundary.direct_provider_access : null,
+          real_external_http_calls: impact.real_external_http_calls || 0,
+          expected_connector_calls: impact.expected_connector_calls || 0,
+          dry_run_id: dryRun.dry_run_id
+        };
+        setText("vs4-action-goal", action.goal || "Local follow-up action");
+        setText("vs4-action-why", "Why: preserve the review next step without external writeback.");
+        setText("vs4-action-evidence", "evidence_bundle:" + vs4State.action.evidence_bundle_id);
+        setText("vs4-action-impact-objects", "brief:" + brief.brief_id + "; claim:" + claim.claim_id);
+        setText("vs4-action-change", (dryRun.diff && dryRun.diff.after) || "would create local draft task");
+        setText("vs4-action-impact", "expected_connector_calls=" + vs4State.action.expected_connector_calls + "; real_external_http_calls=" + vs4State.action.real_external_http_calls);
+        setText("vs4-action-risk", action.risk || "medium");
+        setText("vs4-action-approval", vs4State.action.approval_status || "pending");
+        setText("vs4-action-execution-mode", vs4State.action.mode + "; connector=mock_connector");
+        setText("vs4-action-activity", "action:" + action.action_id + "; dry_run:" + vs4State.action.dry_run_id);
+
+        const auditResponse = await vs4Api("/audit/verify", {});
+        const audit = auditResponse.payload.audit_integrity || {};
+        vs4State.audit = {
+          verification_status: audit.status,
+          event_count: audit.event_count
+        };
+        setText("vs4-evidence-audit", document.getElementById("vs4-evidence-audit").textContent + "; audit=" + audit.status);
+
+        vs4State.completed = vs4Passes();
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = vs4State.completed ? "true" : "false";
+      } catch (error) {
+        traceVs4("browser_error", { message: String(error) });
+        vs4State.completed = false;
+        document.getElementById("vs4-brief-detail").dataset.vs4BriefFlowComplete = "false";
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+    async function runVs4AskFlow() {
+      const button = document.getElementById("run-vs4-ask-flow");
+      if (button) button.disabled = true;
+      try {
+        if (!vs4State.completed) {
+          await runVs4BriefFlow();
+        }
+        const question = (document.getElementById("vs4-ask-input") || { value: "What needs review before action?" }).value;
+        const conversationResponse = await vs4Api("/conversations", {
+          message: question + " Source anchor: alpha-evidence-anchor. Prepare reviewable work, not a chatbot-only answer."
+        });
+        const conversation = conversationResponse.payload.conversation || {};
+        const sourceArtifact = conversationResponse.payload.artifact || {};
+        const answerResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/answers", {
+          question: "What does alpha-evidence-anchor say about review before action?"
+        });
+        const answer = answerResponse.payload.answer || {};
+        const promoteResponse = await vs4Api("/conversations/" + conversation.conversation_id + "/promote", {
+          evidence_bundle_id: vs4State.evidence.evidence_bundle_id,
+          statement: "Ask work item is ready for evidence-backed review before local action."
+        });
+        const promotedClaim = promoteResponse.payload.claim || {};
+        const auditRefs = [
+          ...(conversationResponse.payload.audit_refs || []),
+          ...(answerResponse.payload.audit_refs || []),
+          ...(promoteResponse.payload.audit_refs || []),
+          ...(vs4State.brief.audit_refs || []),
+          ...(vs4State.evidence.audit_refs || [])
+        ];
+        const createdRefs = [
+          "brief:" + vs4State.brief.brief_id,
+          "claim:" + (promotedClaim.claim_id || vs4State.claim.claim_id),
+          "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          "action:" + vs4State.action.action_id
+        ];
+        vs4State.ask = {
+          conversation_id: conversation.conversation_id,
+          answer_id: answer.answer_id,
+          source_artifact_id: sourceArtifact.artifact_id,
+          answer_label: answer.label,
+          evidence_refs: [...(answer.evidence_refs || []), "evidence_bundle:" + vs4State.evidence.evidence_bundle_id],
+          memory_refs: ["memory_candidate:" + vs4State.memory.evidence_bundle_id],
+          brief_id: vs4State.brief.brief_id,
+          claim_id: promotedClaim.claim_id || vs4State.claim.claim_id,
+          memory_candidate_id: "memory_candidate:" + vs4State.memory.evidence_bundle_id,
+          action_id: vs4State.action.action_id,
+          created_work_item_refs: createdRefs,
+          audit_refs: auditRefs,
+          chatbot_only: false
+        };
+        setText("vs4-ask-trust-state", "Ask: Evidence-backed work item ready");
+        document.getElementById("vs4-ask-trust-state").dataset.vs4AnswerTrustState = answer.label || "evidence_backed";
+        setText("vs4-ask-answer", "Answer uses evidence and created reviewable work: " + createdRefs.join(", "));
+        setText("vs4-ask-created-refs", createdRefs.join(" | "));
+        document.getElementById("vs4-ask-created-refs").dataset.vs4CreatedWorkKind = "brief,claim,memory-candidate,action-card";
+        document.getElementById("vs4-ask-result").dataset.vs4AskFlow = "ready";
+        document.getElementById("home-ops-inbox").dataset.vs4AskFlowComplete = "true";
+        vs4State.negative_evidence.chatbot_only_ask_output = 0;
+      } catch (error) {
+        traceVs4("ask_browser_error", { message: String(error) });
+        vs4State.ask = { error: String(error), chatbot_only: true };
+        vs4State.negative_evidence.chatbot_only_ask_output = 1;
+        document.getElementById("vs4-ask-result").dataset.vs4AskFlow = "failed";
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+    async function runVs4PackFlow() {
+      const button = document.getElementById("run-vs4-packs-flow");
+      if (button) button.disabled = true;
+      const packOutputs = [];
+      try {
+        for (const pack of vs4GeneralPacks) {
+          const statusId = "vs4-pack-" + pack.name.toLowerCase().replaceAll(" ", "-") + "-status";
+          setText(statusId, "running");
+          const artifactResponse = await vs4Api("/artifacts", {
+            path: pack.fixture,
+            source: "local_fixture",
+            media_type: "text/plain",
+            trust: "untrusted"
+          });
+          const artifact = artifactResponse.payload.artifact || {};
+          const searchResponse = await vs4Api("/search", { query: pack.query });
+          const snapshot = searchResponse.payload.search_snapshot || {};
+          const bundleResponse = await vs4Api("/evidence-bundles", { search_snapshot_id: snapshot.search_snapshot_id });
+          const bundle = bundleResponse.payload.evidence_bundle || {};
+          const briefResponse = await vs4Api("/briefs", { evidence_bundle_id: bundle.evidence_bundle_id });
+          const brief = briefResponse.payload.brief || {};
+          const claimResponse = await vs4Api("/claims", {
+            evidence_bundle_id: bundle.evidence_bundle_id,
+            statement: pack.name + " has enough source-backed context for local Product Alpha review."
+          });
+          const claim = claimResponse.payload.claim || {};
+          const actionResponse = await vs4Api("/actions", {
+            claim_id: claim.claim_id,
+            goal: "Create local follow-up for " + pack.name,
+            action_kind: "draft_task",
+            risk: "medium",
+            connector: "mock_connector",
+            target: "mock://vs4-pack/" + pack.name.toLowerCase().replaceAll(" ", "-")
+          });
+          const action = actionResponse.payload.action_card || {};
+          const impact = (action.dry_run || {}).expected_impact || {};
+          const output = {
+            name: pack.name,
+            fixture: pack.fixture,
+            query: pack.query,
+            artifact_id: artifact.artifact_id,
+            search_snapshot_id: snapshot.search_snapshot_id,
+            evidence_bundle_id: bundle.evidence_bundle_id,
+            brief_id: brief.brief_id,
+            claim_id: claim.claim_id,
+            memory_candidate_id: "memory_candidate:" + bundle.evidence_bundle_id,
+            action_id: action.action_id,
+            ops_followup_id: "ops_followup:" + action.action_id,
+            evidence_refs: [
+              "artifact:" + artifact.artifact_id,
+              "search_snapshot:" + snapshot.search_snapshot_id,
+              "evidence_bundle:" + bundle.evidence_bundle_id
+            ],
+            audit_refs: [
+              ...(artifactResponse.payload.audit_refs || []),
+              ...(briefResponse.payload.audit_refs || []),
+              ...(claimResponse.payload.audit_refs || []),
+              ...(actionResponse.payload.audit_refs || [])
+            ],
+            real_external_http_calls: impact.real_external_http_calls || 0
+          };
+          packOutputs.push(output);
+          setText(statusId, "ready: " + brief.brief_id + " / " + action.action_id);
+        }
+        vs4State.packs = packOutputs;
+        const missing = packOutputs.filter((pack) => !(pack.brief_id && pack.claim_id && pack.memory_candidate_id && pack.action_id && pack.ops_followup_id)).length;
+        vs4State.negative_evidence.general_pack_missing_output = missing;
+        vs4State.negative_evidence.real_external_http_calls += packOutputs.reduce((sum, pack) => sum + (pack.real_external_http_calls || 0), 0);
+        document.getElementById("vs4-memory-candidates").dataset.vs4PackFlowComplete = missing === 0 ? "true" : "false";
+      } catch (error) {
+        traceVs4("pack_browser_error", { message: String(error) });
+        vs4State.negative_evidence.general_pack_missing_output = 1;
+        document.getElementById("vs4-memory-candidates").dataset.vs4PackFlowComplete = "false";
+      } finally {
+        if (button) button.disabled = false;
+      }
+    }
+    window.__cornerstoneVs4BriefEvidence = function() {
+      collectVs4StateCoverage();
+      collectVs4ReferenceAlignment();
+      return {
+        schema_version: "cs.vs4_brief_ui_state.v0",
+        completed: vs4State.completed,
+        passes: vs4Passes(),
+        slice_003_passes: vs4Slice003Passes(),
+        state: vs4State,
+        trace: vs4Trace,
+        markers: {
+          brief_detail_visible: Boolean(document.querySelector("[data-vs4-brief-detail='visible']")),
+          source_state_visible: Boolean(document.getElementById("vs4-source-state")),
+          shared_evidence_drawer_visible: Boolean(document.querySelector("[data-vs4-brief-evidence-drawer='reachable']")),
+          claim_candidate_visible: Boolean(document.querySelector("[data-vs4-claim-candidate='visible']")),
+          memory_candidate_visible: Boolean(document.querySelector("[data-vs4-memory-candidate-detail='visible']")),
+          action_card_visible: Boolean(document.querySelector("[data-vs4-action-card-detail='visible']")),
+          ask_flow_complete: vs4AskPasses(),
+          general_packs_complete: vs4PacksPass(),
+          state_coverage_complete: vs4State.state_coverage.complete === true,
+          home_search_artifact_reference_complete: vs4State.reference_alignment.complete === true,
+          reference_images_not_pass_evidence: document.getElementById("vs4-brief-detail").dataset.vs4ReferenceImagesPassEvidence === "false",
+          cli_parity_required: document.getElementById("vs4-brief-detail").dataset.vs4CliParity === "required"
+        }
+      };
+    };
     const vs1Autorun = false;
     const vs1Trace = [];
     const vs1State = {
@@ -3131,8 +4252,20 @@
     document.getElementById("step-approve-run").addEventListener("click", approveStep);
     document.getElementById("step-execute-run").addEventListener("click", executeStep);
     document.getElementById("step-audit-run").addEventListener("click", auditStep);
+    document.getElementById("run-vs4-brief-flow").addEventListener("click", runVs4BriefFlow);
+    document.getElementById("run-vs4-ask-flow").addEventListener("click", runVs4AskFlow);
+    document.getElementById("run-vs4-packs-flow").addEventListener("click", runVs4PackFlow);
     document.getElementById("run-evux").addEventListener("click", runEvux);
     document.getElementById("run-vs1-ontology").addEventListener("click", runVs1Ontology);
+    if (vs4Autorun) {
+      window.addEventListener("load", () => setTimeout(async () => {
+        await runVs4BriefFlow();
+        await runVs4AskFlow();
+        await runVs4PackFlow();
+        collectVs4StateCoverage();
+        collectVs4ReferenceAlignment();
+      }, 50));
+    }
     if (evuxAutorun) {
       window.addEventListener("load", () => setTimeout(() => document.getElementById("run-evux").click(), 50));
     }

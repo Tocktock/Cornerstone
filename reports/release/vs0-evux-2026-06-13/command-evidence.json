@@ -6,7 +6,7 @@
     "make verify-local-fast",
     "make verify-vs0-runtime",
     "make verify-vs0-acceptance",
-    "cornerstone scenario gate tmp/scenario/vs0-evux-20051-candidate-report.json --json",
+    "cornerstone scenario gate tmp/scenario/vs0-evux-20100-candidate-report.json --json",
     "cornerstone release evidence collect --scope vs0-evux --json"
   ],
   "replaced_by": "reports/release/vs0-evux-2026-06-13/command-transcript.json",

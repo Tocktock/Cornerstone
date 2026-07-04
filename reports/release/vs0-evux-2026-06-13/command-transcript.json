@@ -10,7 +10,7 @@
         "--output",
         "reports/scenario/vs0-evux-2026-06-13.json"
       ],
-      "elapsed_seconds": 8.845,
+      "elapsed_seconds": 8.482,
       "exit_code": 0,
       "name": "scenario_verify_vs0_evux",
       "required": true,
@@ -30,7 +30,7 @@
         "reports/scenario/vs0-evux-2026-06-13.json",
         "--json"
       ],
-      "elapsed_seconds": 0.116,
+      "elapsed_seconds": 0.1,
       "exit_code": 0,
       "name": "scenario_gate",
       "required": true,
@@ -48,7 +48,7 @@
         "  \"errors\": [],",
         "  \"evidence_refs\": [],",
         "  \"ids\": {",
-        "    \"git_commit\": \"d145c8d\"",
+        "    \"git_commit\": \"afeb99e\"",
         "  },",
         "  \"mode\": \"local_scaffold\",",
         "  \"namespace_id\": \"personal\",",
@@ -84,7 +84,7 @@
       "source": "quickstart_report_summary",
       "stderr_tail": [],
       "stdout_tail": [
-        "{\"status\": \"success\", \"summary\": {\"generated_ids\": {\"action_id\": \"action_a198d8209d7655ff\", \"artifact_id\": \"art_2735313e0cb92563\", \"claim_id\": \"claim_be8489f232b41679\", \"evidence_bundle_id\": \"evb_4808f8ad4487d088\", \"mission_id\": \"mission_86ea8189e762936e\", \"search_snapshot_id\": \"search_22328d29acd7b4d9\", \"zero_evidence_claim_id\": \"claim_360ddab039f77b17\"}, \"negative_evidence\": {\"commands_failed\": 0, \"connector_credentials_exposed\": 0, \"human_usability_claim_without_human_evidence\": 0, \"live_connector_claim_without_human_evidence\": 0, \"mock_connector_calls\": 1, \"production_release_overclaim\": 0, \"real_external_http_calls\": 0, \"zero_evidence_claim_approved\": 0}}}"
+        "{\"status\": \"success\", \"summary\": {\"generated_ids\": {\"action_id\": \"action_b6018eddd0c91768\", \"artifact_id\": \"art_2735313e0cb92563\", \"claim_id\": \"claim_7b0970f64df93d2b\", \"evidence_bundle_id\": \"evb_cc86818f60db49c8\", \"mission_id\": \"mission_ed5cd448b4ff9e54\", \"search_snapshot_id\": \"search_3531c94921253b77\", \"zero_evidence_claim_id\": \"claim_28c9dabf0ea32318\"}, \"negative_evidence\": {\"commands_failed\": 0, \"connector_credentials_exposed\": 0, \"human_usability_claim_without_human_evidence\": 0, \"live_connector_claim_without_human_evidence\": 0, \"mock_connector_calls\": 1, \"production_release_overclaim\": 0, \"real_external_http_calls\": 0, \"zero_evidence_claim_approved\": 0}}}"
       ],
       "timed_out": false
     },
@@ -147,7 +147,7 @@
         "cornerstone",
         "scenario",
         "gate",
-        "tmp/scenario/vs0-evux-20051-candidate-report.json",
+        "tmp/scenario/vs0-evux-20100-candidate-report.json",
         "--json"
       ],
       "elapsed_seconds": 0.0,
@@ -170,7 +170,7 @@
         "vs0-evux",
         "--json"
       ],
-      "elapsed_seconds": 0.121,
+      "elapsed_seconds": 0.104,
       "exit_code": 0,
       "name": "release_evidence_collect",
       "required": true,
@@ -183,7 +183,7 @@
       "timed_out": false
     }
   ],
-  "created_at": "2026-06-30T11:19:31.167385Z",
+  "created_at": "2026-07-03T08:21:21.092434Z",
   "schema_version": "cs.release_command_transcript.v0",
   "scope_name": "vs0-evux",
   "summary": {

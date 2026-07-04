@@ -1,7 +1,7 @@
 {
   "approval_collected": false,
   "audit_refs": [
-    "audit:audit_26bfd4e4979f3f3c"
+    "audit:audit_e2364a60f3af1942"
   ],
   "blank_approval_record": {
     "decision": null,
@@ -46,7 +46,7 @@
   "expected_behavior": "Real user/group/role/attribute/revocation mapping is validated without promoting synthetic fixture proof.",
   "expected_evidence": "Redacted login, mapping, revocation transcript, owner/security approval.",
   "given": "Real OIDC/SSO or enterprise identity provider is selected.",
-  "package_digest_sha256": "bebd32ee81f940089ce45f4cf329b79962ac90fcbd3a2f296880ac1209e41145",
+  "package_digest_sha256": "6fb1ce1cbfd384260ba93684b96689d1459a5ebf6f1c2235ff70f1294820559b",
   "package_id": "vs3_human_gate_vs3_h03",
   "package_path": "reports/human-gates/vs3/VS3-H03.json",
   "pass_claim_allowed": false,
