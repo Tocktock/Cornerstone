@@ -1,0 +1,52 @@
+{
+  "acceptance_note": "REJECT. The current VS4 Product Alpha UI is not acceptable for external-user VS5 entry because it does not follow the attached UI/UX reference direction. This is a full visual hierarchy, information architecture, and human-friendly workflow mismatch, not only a Drop / Ask discoverability issue.",
+  "decision": "REJECT",
+  "evidence_refs": [
+    "user-chat-review:2026-07-04T11:34:23Z:vs4-h01-reject",
+    "reports/human-gates/vs4/VS4-H01.json",
+    "reports/human-gates/vs4/review-kit.json",
+    "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+    "docs/design/reference-images/README.md",
+    "docs/design/reference-images/cornerstone-reference-07-home-upload-ask.png",
+    "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
+    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md"
+  ],
+  "issue_list": [
+    "The current UI is very complicated for the reviewer.",
+    "The attached UI/UX reference images are present in the repository, but the implemented surface is completely different in layout, hierarchy, and product feel.",
+    "The Home surface does not match the intended visual direction: clear workspace shell, prominent upload/drop area, prominent ask box, recent items, knowledge states, suggested next steps, and recent activity.",
+    "The reviewer cannot recognize the intended first actions quickly enough, including Drop and Ask.",
+    "The current surface is not human-friendly enough for external-user review.",
+    "Checklist items 4, 5, 6, and 7 are not accepted because the overall product surface fails the reference-image and human-usability review."
+  ],
+  "misleading_or_unsafe_states": [
+    "The interface risks misleading a first-time user because it presents internal product/scenario complexity instead of the reference-guided human workspace.",
+    "The UI appears to expose implementation complexity before the reviewer can understand the human product task.",
+    "The implemented UI may give false confidence from structural scenario evidence while failing the intended visual and usability direction."
+  ],
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, screenshots, or unredacted private data are included. This record captures only the owner's chat decision and repo-local evidence references.",
+  "reviewed_at": "2026-07-04T11:34:23Z",
+  "reviewer": "JiYong / Tars",
+  "scenario_id": "VS4-H01",
+  "scope": {
+    "namespace_id": "personal",
+    "owner_id": "local-user",
+    "tenant_id": "local-dev",
+    "workspace_id": "default"
+  },
+  "screenshots_or_recording_refs": [
+    "not-provided:user-chat-review-2026-07-04"
+  ],
+  "signature_ref": "user-chat-review:2026-07-04T11:34:23Z:reject-vs4-h01",
+  "task_outcomes": [
+    "Entry-gate decision recorded as REJECT.",
+    "VS5 external-user sessions should not begin from the current VS4 UI.",
+    "Next work should return to UI/UX redesign against the reference images for Product Alpha Home, Ops Inbox, Search, Artifact, Claim, and Action surfaces before retrying VS4-H01."
+  ],
+  "usability_findings": [
+    "The implemented screen does not follow the attached UI/UX reference image direction.",
+    "The visual hierarchy and information architecture feel complicated instead of human-friendly.",
+    "Primary actions such as Drop and Ask are not discoverable enough.",
+    "The current UI appears built around structural verification markers rather than the intended user-facing workspace."
+  ]
+}
