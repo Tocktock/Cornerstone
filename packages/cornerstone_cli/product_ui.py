@@ -923,6 +923,16 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-6);
   align-items: start;
 }}
+.cs-search-command {{
+  display: grid;
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-search-back {{
+  color: var(--cs-color-primary-700);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
 .cs-search-hero {{
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-lg);
@@ -941,6 +951,10 @@ button, input, textarea {{ font: inherit; }}
   background: transparent;
   color: var(--cs-color-text-primary);
   padding: 0 var(--cs-space-2);
+}}
+.cs-search-submit {{
+  min-width: 44px;
+  justify-content: center;
 }}
 .cs-search-tabs, .cs-filter-row {{
   display: flex;
@@ -966,6 +980,14 @@ button, input, textarea {{ font: inherit; }}
   border-color: var(--cs-color-primary-100);
   color: var(--cs-color-primary-700);
 }}
+.cs-search-filterbar {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-top: var(--cs-space-3);
+}}
 .cs-search-context {{
   margin-top: var(--cs-space-4);
   border-top: 1px solid var(--cs-color-border-default);
@@ -982,7 +1004,6 @@ button, input, textarea {{ font: inherit; }}
 .cs-result-list {{
   display: grid;
   gap: var(--cs-space-3);
-  margin-top: var(--cs-space-5);
 }}
 .cs-result-row {{
   border: 1px solid var(--cs-color-border-default);
@@ -990,7 +1011,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr) minmax(150px, auto);
   gap: var(--cs-space-4);
   align-items: start;
 }}
@@ -1012,22 +1033,18 @@ button, input, textarea {{ font: inherit; }}
 .cs-result-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }}
 .cs-result-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
 .cs-result-receipt {{
-  margin-top: var(--cs-space-3);
-  border-top: 1px solid var(--cs-color-border-default);
-  padding-top: var(--cs-space-3);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  justify-items: end;
   gap: var(--cs-space-3);
+  min-width: 0;
 }}
 .cs-result-receipt-note {{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  justify-items: end;
   gap: var(--cs-space-2);
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
+  text-align: right;
 }}
 .cs-result-actions {{
   display: flex;
@@ -1035,6 +1052,10 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-2);
 }}
 .cs-result-actions .cs-button {{ min-height: 34px; padding: var(--cs-space-1) var(--cs-space-3); }}
+.cs-search-rail {{
+  position: sticky;
+  top: calc(var(--cs-space-4) + 72px);
+}}
 .cs-right-stat {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2665,6 +2686,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
   .cs-artifact-page-rail {{ display: none; }}
   .cs-artifact-page-area {{ padding: var(--cs-space-3); }}
+  .cs-search-rail {{ position: static; }}
+  .cs-result-receipt, .cs-result-receipt-note {{ justify-items: start; text-align: left; }}
   .cs-audit-row-main {{ grid-template-columns: auto minmax(0, 1fr); }}
   .cs-audit-row-main .cs-chip {{ justify-self: start; }}
   .cs-document-page {{ min-height: auto; }}
@@ -3080,6 +3103,7 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
     results = _search_records(ctx, q)
     rows = "".join(results) if results else _search_empty(q)
     counts = _search_counts(ctx, q)
+    total = counts[0][1] if counts else 0
     count_tabs = "".join(
         f'<span class="cs-search-tab{" is-active" if index == 0 else ""}">{h(label)} <strong>{h(count)}</strong></span>'
         for index, (label, count) in enumerate(counts)
@@ -3087,29 +3111,39 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
     right_rail = _search_right_rail(counts, q)
     return f"""
 <section data-product-surface="search">
-  <div class="cs-page-head">
-    <div class="cs-kicker">Search</div>
-    <h1>Search the workspace</h1>
-    <p>Keyword search over saved sources and drafts. Open the receipts before using a result for a decision.</p>
-  </div>
   <div class="cs-search-workbench">
     <div>
-      <section class="cs-panel">
+      <section class="cs-panel" aria-label="Search command center">
+        <div class="cs-search-command">
+          <a class="cs-search-back" href="/">&#8592; Search</a>
+          <div>
+            <div class="cs-kicker">Search the workspace</div>
+            <p class="cs-muted">Keyword search over saved sources and drafts. Open the receipts before using a result for a decision.</p>
+          </div>
+        </div>
         <form class="cs-search-hero" action="/search" method="get">
           <input name="q" value="{h(q)}" placeholder="Search saved sources, claims, action drafts, and briefs">
-          <button class="cs-button" type="submit">Search</button>
+          <button class="cs-button cs-search-submit" type="submit" aria-label="Run search">&#8594;</button>
         </form>
-        <div class="cs-search-tabs" aria-label="Result type counts">{count_tabs}</div>
+        <div class="cs-search-tabs" aria-label="Type filters">{count_tabs}</div>
+        <div class="cs-search-filterbar">
+          <div class="cs-filter-row" aria-label="Search filters">
+            <span class="cs-filter-chip">Date: any time</span>
+            <span class="cs-filter-chip">Source: all</span>
+            <span class="cs-filter-chip">More filters</span>
+          </div>
+          <span class="cs-filter-chip">Sort by: keyword match</span>
+        </div>
         <div class="cs-search-context" aria-label="Current search controls">
           <h2>Current search controls</h2>
           <div class="cs-filter-row">
             <span class="cs-filter-chip">Scope: personal/default</span>
             <span class="cs-filter-chip">Type: all visible</span>
-            <span class="cs-filter-chip">Sort: keyword match</span>
             <span class="cs-filter-chip">Search mode: local keyword</span>
           </div>
         </div>
       </section>
+      <p class="cs-meta">{total} results</p>
       <div class="cs-result-list">{rows}</div>
     </div>
     {right_rail}
@@ -3207,14 +3241,14 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
     <span class="cs-result-meta"><span>{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
     <h3><a href="{h(href)}">{h(title)}</a></h3>
     <p>{h(_truncate(detail, 240))}</p>
-    <span class="cs-result-receipt">
-      <span class="cs-result-receipt-note">
-        {_chip(label, state)}
-        <span>Result receipt: local record and visible source context only.</span>
-      </span>
-      <span class="cs-result-actions">
-        <a class="cs-button secondary" href="{h(href)}">Open result</a>
-      </span>
+  </span>
+  <span class="cs-result-receipt">
+    <span class="cs-result-receipt-note">
+      {_chip(label, state)}
+      <span>Result receipt: local record and visible source context only.</span>
+    </span>
+    <span class="cs-result-actions">
+      <a class="cs-button secondary" href="{h(href)}">Open result</a>
     </span>
   </span>
 </article>
@@ -3232,7 +3266,7 @@ def _search_right_rail(counts: list[tuple[str, int]], q: str) -> str:
         for item in suggestions
     )
     return f"""
-<aside class="cs-stack">
+<aside class="cs-stack cs-search-rail">
   <section class="cs-panel flat">
     <div class="cs-panel-header"><h2>What we found</h2>{_chip(str(counts[0][1] if counts else 0), "searchable")}</div>
     {stat_rows or '<div class="cs-empty">Run a search to see available receipt types.</div>'}

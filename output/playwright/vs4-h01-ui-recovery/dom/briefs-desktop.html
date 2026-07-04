@@ -437,6 +437,16 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-6);
   align-items: start;
 }
+.cs-search-command {
+  display: grid;
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-search-back {
+  color: var(--cs-color-primary-700);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-search-hero {
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-lg);
@@ -455,6 +465,10 @@ button, input, textarea { font: inherit; }
   background: transparent;
   color: var(--cs-color-text-primary);
   padding: 0 var(--cs-space-2);
+}
+.cs-search-submit {
+  min-width: 44px;
+  justify-content: center;
 }
 .cs-search-tabs, .cs-filter-row {
   display: flex;
@@ -480,6 +494,14 @@ button, input, textarea { font: inherit; }
   border-color: var(--cs-color-primary-100);
   color: var(--cs-color-primary-700);
 }
+.cs-search-filterbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-top: var(--cs-space-3);
+}
 .cs-search-context {
   margin-top: var(--cs-space-4);
   border-top: 1px solid var(--cs-color-border-default);
@@ -496,7 +518,6 @@ button, input, textarea { font: inherit; }
 .cs-result-list {
   display: grid;
   gap: var(--cs-space-3);
-  margin-top: var(--cs-space-5);
 }
 .cs-result-row {
   border: 1px solid var(--cs-color-border-default);
@@ -504,7 +525,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr) minmax(150px, auto);
   gap: var(--cs-space-4);
   align-items: start;
 }
@@ -526,22 +547,18 @@ button, input, textarea { font: inherit; }
 .cs-result-body p { margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }
 .cs-result-meta { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
 .cs-result-receipt {
-  margin-top: var(--cs-space-3);
-  border-top: 1px solid var(--cs-color-border-default);
-  padding-top: var(--cs-space-3);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  display: grid;
+  justify-items: end;
   gap: var(--cs-space-3);
+  min-width: 0;
 }
 .cs-result-receipt-note {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  justify-items: end;
   gap: var(--cs-space-2);
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
+  text-align: right;
 }
 .cs-result-actions {
   display: flex;
@@ -549,6 +566,10 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-2);
 }
 .cs-result-actions .cs-button { min-height: 34px; padding: var(--cs-space-1) var(--cs-space-3); }
+.cs-search-rail {
+  position: sticky;
+  top: calc(var(--cs-space-4) + 72px);
+}
 .cs-right-stat {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2179,6 +2200,8 @@ button, input, textarea { font: inherit; }
   .cs-document-frame.has-rail { grid-template-columns: 1fr; min-height: auto; }
   .cs-artifact-page-rail { display: none; }
   .cs-artifact-page-area { padding: var(--cs-space-3); }
+  .cs-search-rail { position: static; }
+  .cs-result-receipt, .cs-result-receipt-note { justify-items: start; text-align: left; }
   .cs-audit-row-main { grid-template-columns: auto minmax(0, 1fr); }
   .cs-audit-row-main .cs-chip { justify-self: start; }
   .cs-document-page { min-height: auto; }
@@ -2261,10 +2284,10 @@ button, input, textarea { font: inherit; }
 </div>
 
       <div class="cs-collection-list">
-<a class="cs-collection-row" href="/briefs/brief_280da94dad89dd29?view=html">
+<a class="cs-collection-row" href="/briefs/brief_d6ba3eeeb46b6b7a?view=html">
   <span class="cs-collection-icon" aria-hidden="true">B</span>
   <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Brief</span><span>2026-07-04 21:56 UTC</span><span>1 source ref</span></span>
+    <span class="cs-collection-meta"><span>Brief</span><span>2026-07-04 22:03 UTC</span><span>1 source ref</span></span>
     <h3>Brief for vendor renewal</h3>
     <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
   </span>
