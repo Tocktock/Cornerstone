@@ -582,7 +582,27 @@ button, input, textarea { font: inherit; }
 }
 .cs-artifact-actions { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }
 .cs-artifact-workbench {
+  display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}
+.cs-artifact-compact-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-artifact-compact-hero .cs-artifact-title h1 {
+  max-width: 42ch;
+  font-size: 28px;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+.cs-artifact-compact-hero .cs-artifact-actions {
+  justify-content: flex-start;
 }
 .cs-artifact-breadcrumb {
   display: flex;
@@ -649,6 +669,10 @@ button, input, textarea { font: inherit; }
   justify-content: space-between;
   gap: var(--cs-space-3);
   padding: var(--cs-space-2) var(--cs-space-3);
+}
+.cs-artifact-toolbar-label {
+  display: grid;
+  gap: 2px;
 }
 .cs-artifact-toolgroup {
   display: flex;
@@ -1890,6 +1914,25 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-5);
   align-items: start;
 }
+.cs-audit-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-audit-receipt {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-audit-receipt strong {
+  font-size: 24px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
 .cs-audit-list {
   display: grid;
   gap: var(--cs-space-3);
@@ -1901,6 +1944,10 @@ button, input, textarea { font: inherit; }
   padding: var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-3);
+}
+.cs-audit-row:hover {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: var(--cs-shadow-sm);
 }
 .cs-audit-row-main {
   display: grid;
@@ -1922,6 +1969,19 @@ button, input, textarea { font: inherit; }
   margin: 0;
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-audit-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-audit-row-note {
+  margin: var(--cs-space-2) 0 0;
+  max-width: 64ch;
+  color: var(--cs-color-text-secondary);
 }
 .cs-audit-detail {
   border-top: 1px solid var(--cs-color-border-default);
@@ -2027,7 +2087,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2049,6 +2109,8 @@ button, input, textarea { font: inherit; }
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta { grid-template-columns: 1fr; }
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
+  .cs-artifact-compact-hero .cs-artifact-title h1 { font-size: 26px; }
+  .cs-artifact-compact-hero .cs-artifact-actions { padding-top: 0; }
   .cs-artifact-actions { justify-content: flex-start; }
   .cs-artifact-toolbar { align-items: stretch; flex-direction: column; }
   .cs-document-frame.has-rail { grid-template-columns: 1fr; min-height: auto; }
@@ -2160,22 +2222,22 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
   <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_961d31abca4050d1?view=html">
+<a class="cs-home-item" href="/claims/claim_6a5325b5e8cd732e?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">C</span>
   <span>
     <p>Claim</p>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-04 21:23 UTC - Review source support</p>
+    <p>2026-07-04 21:41 UTC - Review source support</p>
   </span>
   <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
 </a>
 
-<a class="cs-home-item" href="/actions/action_c45f415f5a7cf557?view=html">
+<a class="cs-home-item" href="/actions/action_e3a1b201d5b41e9d?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">A</span>
   <span>
     <p>Action</p>
     <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-04 21:23 UTC - Preview before approval</p>
+    <p>2026-07-04 21:41 UTC - Preview before approval</p>
   </span>
   <span class="cs-chip cs-chip-underReview">Needs approval</span>
 </a>
@@ -2185,17 +2247,17 @@ button, input, textarea { font: inherit; }
   <span>
     <p>Source</p>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-04 21:23 UTC - Original text preserved</p>
+    <p>2026-07-04 21:41 UTC - Original text preserved</p>
   </span>
   <span class="cs-chip cs-chip-searchable">Searchable</span>
 </a>
 
-<a class="cs-home-item" href="/briefs/brief_e345e61a4b8dffb3?view=html">
+<a class="cs-home-item" href="/briefs/brief_b68235e43a8e48f7?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">B</span>
   <span>
     <p>Brief</p>
     <h3>Brief for vendor renewal</h3>
-    <p>2026-07-04 21:23 UTC - Draft from visible sources</p>
+    <p>2026-07-04 21:41 UTC - Draft from visible sources</p>
   </span>
   <span class="cs-chip cs-chip-draft">Keyword summary</span>
 </a>
@@ -2270,7 +2332,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Source opened</strong>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
 </div>
 
@@ -2278,7 +2340,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
 </div>
 
@@ -2286,7 +2348,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
 </div>
 
@@ -2294,7 +2356,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
 </div>
 
@@ -2302,7 +2364,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
 </div>
 </div>
@@ -2314,11 +2376,11 @@ button, input, textarea { font: inherit; }
     <h2>Latest brief</h2>
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_e345e61a4b8dffb3?view=html">
+  <a class="cs-list-row" href="/briefs/brief_b68235e43a8e48f7?view=html">
     <div>
       <h3>Brief for vendor renewal</h3>
       <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 21:23 UTC</div>
+      <div class="cs-meta">2026-07-04 21:41 UTC</div>
     </div>
     <span class="cs-meta">Open</span>
   </a>
@@ -2331,32 +2393,32 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_e345e61a4b8dffb3?view=html">
+<a class="cs-list-row" href="/briefs/brief_b68235e43a8e48f7?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_961d31abca4050d1?view=html">
+<a class="cs-list-row" href="/claims/claim_6a5325b5e8cd732e?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_c45f415f5a7cf557?view=html">
+<a class="cs-list-row" href="/actions/action_e3a1b201d5b41e9d?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 21:23 UTC</div>
+    <div class="cs-meta">2026-07-04 21:41 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>

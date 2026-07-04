@@ -1914,6 +1914,25 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-5);
   align-items: start;
 }
+.cs-audit-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-audit-receipt {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-audit-receipt strong {
+  font-size: 24px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
 .cs-audit-list {
   display: grid;
   gap: var(--cs-space-3);
@@ -1925,6 +1944,10 @@ button, input, textarea { font: inherit; }
   padding: var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-3);
+}
+.cs-audit-row:hover {
+  border-color: var(--cs-color-border-strong);
+  box-shadow: var(--cs-shadow-sm);
 }
 .cs-audit-row-main {
   display: grid;
@@ -1946,6 +1969,19 @@ button, input, textarea { font: inherit; }
   margin: 0;
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-audit-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-audit-row-note {
+  margin: var(--cs-space-2) 0 0;
+  max-width: 64ch;
+  color: var(--cs-color-text-secondary);
 }
 .cs-audit-detail {
   border-top: 1px solid var(--cs-color-border-default);
@@ -2051,7 +2087,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2162,10 +2198,10 @@ button, input, textarea { font: inherit; }
 </div>
 
       <div class="cs-collection-list">
-<a class="cs-collection-row" href="/claims/claim_8d81693cb8f853d5?view=html">
+<a class="cs-collection-row" href="/claims/claim_5b88b2ccdadcda9d?view=html">
   <span class="cs-collection-icon" aria-hidden="true">C</span>
   <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Claim</span><span>2026-07-04 21:32 UTC</span><span>1 source refs</span></span>
+    <span class="cs-collection-meta"><span>Claim</span><span>2026-07-04 21:39 UTC</span><span>1 source refs</span></span>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Review source support before approval.</p>
   </span>

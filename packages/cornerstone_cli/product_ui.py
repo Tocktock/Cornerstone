@@ -372,6 +372,30 @@ def _audit_subject_label(event: dict[str, Any]) -> str:
     return f"{subject_type.title()} / {subject_id}" if subject_id else subject_type.title()
 
 
+def _audit_family(event_type: str) -> str:
+    if event_type.startswith("artifact."):
+        return "Source"
+    if event_type.startswith("search.") or event_type.startswith("evidence_bundle.") or event_type.startswith("brief."):
+        return "Evidence"
+    if event_type.startswith("claim.") or event_type.startswith("mission.") or event_type.startswith("workspace."):
+        return "Decision"
+    if event_type.startswith("action."):
+        return "Action"
+    if event_type.startswith("conversation."):
+        return "Ask"
+    return "Ledger"
+
+
+def _audit_receipt_card(label: str, value: int | str, detail: str) -> str:
+    return f"""
+<div class="cs-audit-receipt">
+  <span class="cs-meta">{h(label)}</span>
+  <strong>{h(str(value))}</strong>
+  <span class="cs-meta">{h(detail)}</span>
+</div>
+"""
+
+
 def _audit_detail(event: dict[str, Any], position: int) -> str:
     subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
     details = event.get("details") if isinstance(event.get("details"), dict) else {}
@@ -2376,6 +2400,25 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-5);
   align-items: start;
 }}
+.cs-audit-summary {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-audit-receipt {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-audit-receipt strong {{
+  font-size: 24px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}}
 .cs-audit-list {{
   display: grid;
   gap: var(--cs-space-3);
@@ -2387,6 +2430,10 @@ button, input, textarea {{ font: inherit; }}
   padding: var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-3);
+}}
+.cs-audit-row:hover {{
+  border-color: var(--cs-color-border-strong);
+  box-shadow: var(--cs-shadow-sm);
 }}
 .cs-audit-row-main {{
   display: grid;
@@ -2408,6 +2455,19 @@ button, input, textarea {{ font: inherit; }}
   margin: 0;
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-audit-row-meta {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-audit-row-note {{
+  margin: var(--cs-space-2) 0 0;
+  max-width: 64ch;
+  color: var(--cs-color-text-secondary);
 }}
 .cs-audit-detail {{
   border-top: 1px solid var(--cs-color-border-default);
@@ -2513,7 +2573,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3735,6 +3795,24 @@ def _inbox_empty() -> str:
 
 
 def _audit_page(ctx: dict[str, Any]) -> str:
+    events = ctx["audit"]
+    event_count = len(events)
+    visible_count = min(event_count, 40)
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    workspace = str(scope.get("workspace_id") or "default")
+    source_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Source")
+    evidence_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Evidence")
+    decision_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Decision")
+    action_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Action")
+    latest_activity = _display_date(events[0]) if events else "No activity yet"
+    receipt_summary = f"""
+<div class="cs-audit-summary" aria-label="Receipt summary">
+  {_audit_receipt_card("Activity receipts", visible_count, f"{event_count} total scoped records")}
+  {_audit_receipt_card("Source receipts", source_count, "Saved or opened sources")}
+  {_audit_receipt_card("Evidence receipts", evidence_count, "Search, evidence, and brief work")}
+  {_audit_receipt_card("Action receipts", action_count, "Preview, approval, or execution records")}
+</div>
+"""
     if not ctx["audit"]:
         rows = _empty_state(
             "Audit ready",
@@ -3759,8 +3837,12 @@ def _audit_page(ctx: dict[str, Any]) -> str:
     <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(event.get("event_type") or "")))}</span>
     <div>
       <h2>{h(_plain_event(str(event.get("event_type") or "")))}</h2>
-      <p class="cs-muted">{h(_audit_subject_label(event))}</p>
-      <div class="cs-meta">{h(_display_date(event))}</div>
+      <p class="cs-audit-row-note">Activity receipt for {h(_audit_subject_label(event))}.</p>
+      <div class="cs-audit-row-meta">
+        <span>{h(_audit_family(str(event.get("event_type") or "")))}</span>
+        <span>{h(_display_date(event))}</span>
+        <span>Ledger position {index}</span>
+      </div>
     </div>
     {_chip("Hash chained", "searchable")}
   </div>
@@ -3770,21 +3852,31 @@ def _audit_page(ctx: dict[str, Any]) -> str:
             for index, event in enumerate(ctx["audit"][:40], start=1)
         )
         rows = f'<div class="cs-audit-list">{rows}</div>'
-    event_count = len(ctx["audit"])
-    visible_count = min(event_count, 40)
     return f"""
 <section data-product-surface="audit">
-  <div class="cs-page-head">
-    <div class="cs-kicker">Audit</div>
-    <h1>Activity trail</h1>
-    <p>Recent local activity is shown in plain language first. Raw event detail stays one click deeper for provenance checks.</p>
-  </div>
+  <header class="cs-brief-hero is-stacked">
+    <div class="cs-brief-title">
+      <div class="cs-kicker">Audit</div>
+      <h1>Activity trail</h1>
+      <p>Recent local activity is shown as readable receipts first. Raw event detail stays one click deeper for provenance checks.</p>
+      <div class="cs-brief-meta">
+        <span>Workspace: {h(workspace)}</span>
+        <span>Latest: {h(latest_activity)}</span>
+        <span>Reading order: newest first</span>
+      </div>
+    </div>
+    <div class="cs-brief-actions">
+      {_chip("Local ledger", "searchable")}
+      {_chip("Raw detail hidden by default", "underReview")}
+    </div>
+  </header>
+  {receipt_summary}
   <div class="cs-audit-workbench">
     <section class="cs-panel flat">
       <div class="cs-panel-header">
         <div>
           <h2>Event stream</h2>
-          <p class="cs-muted">Showing {visible_count} of {event_count} scoped records.</p>
+          <p class="cs-muted">Showing {visible_count} of {event_count} scoped records as activity receipts.</p>
         </div>
         {_chip("Local ledger", "searchable")}
       </div>
@@ -3795,14 +3887,23 @@ def _audit_page(ctx: dict[str, Any]) -> str:
         <h2 class="cs-section-title">Audit posture</h2>
         <dl class="cs-detail-grid">
           <dt>Visible records</dt><dd>{visible_count}</dd>
+          <dt>Decision receipts</dt><dd>{decision_count}</dd>
           <dt>Reading order</dt><dd>Newest first</dd>
           <dt>Disclosure</dt><dd>Raw event detail</dd>
-          <dt>Scope</dt><dd>{h(str((ctx.get("scope") or {}).get("workspace_id") or "default"))}</dd>
+          <dt>Scope</dt><dd>{h(workspace)}</dd>
         </dl>
       </section>
       <section class="cs-panel flat">
-        <h2 class="cs-section-title">What this proves</h2>
-        <p class="cs-muted">The trail records local product activity and keeps hashes, subjects, and event types available without making raw IDs the first reading.</p>
+        <h2 class="cs-section-title">Integrity chain</h2>
+        <p class="cs-muted">Each row keeps its event hash, previous hash, subject, event type, and ledger position behind Raw event detail.</p>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Scope and recovery</h2>
+        <p class="cs-muted">Use Audit to check what happened, then return to the source register or Home to continue the local workflow.</p>
+        <div class="cs-empty-actions">
+          <a class="cs-button secondary" href="/artifacts">Open source register</a>
+          <a class="cs-button ghost" href="/">Back to Home</a>
+        </div>
       </section>
     </aside>
   </div>
