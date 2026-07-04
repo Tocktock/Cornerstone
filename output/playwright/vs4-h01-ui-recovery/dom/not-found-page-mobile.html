@@ -2,7 +2,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Home - CornerStone</title>
+  <title>Page not found - CornerStone</title>
   <style>
 :root {
   --cs-meta-name: CornerStone Design Tokens v0.3;
@@ -1727,275 +1727,64 @@ button, input, textarea { font: inherit; }
     <button type="submit">Go</button>
   </form>
   <div class="cs-row">
-    <span class="cs-chip cs-chip-saved">1 saved source</span>
+    <span class="cs-chip cs-chip-saved">0 saved sources</span>
     <span class="cs-chip cs-chip-searchable">Local only</span>
   </div>
 </header>
 
       <div class="cs-content">
 
-<section class="cs-grid-hero cs-home-intro" data-product-surface="home">
-  <div class="cs-stack">
-    <div class="cs-hero cs-page-head">
-      <div class="cs-kicker">Local workspace</div>
-      <h1>Drop anything, or ask what we know</h1>
-      <p>Save messy input, find what is already in the workspace, and shape a brief only when the sources are visible.</p>
-    </div>
-    <section class="cs-panel cs-home-canvas" aria-labelledby="home-workbench-title">
-      <div class="cs-panel-header">
-        <div>
-          <h2 id="home-workbench-title">Start with a source or a question</h2>
-          <p class="cs-muted">CornerStone keeps the original source visible, then lets drafts point back to what supports them.</p>
-        </div>
-        <span class="cs-chip cs-chip-underReview">Untrusted until checked</span>
-      </div>
-      <div class="cs-home-workspace">
-        <form class="cs-drop" id="cs-drop-form">
-          <div class="cs-home-source-row">
-            <div class="cs-drop-target">
-              <div class="cs-drop-mark" aria-hidden="true">In</div>
-              <div>
-                <strong>Save a source</strong>
-                <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
-              </div>
-            </div>
-            <div class="cs-row">
-              <button class="cs-button" type="submit">Save source</button>
-              <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
-              <input id="cs-file-input" type="file" hidden="">
-            </div>
-          </div>
-          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
-          <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
-        </form>
-        <div class="cs-or-divider">or ask a question</div>
-        <form class="cs-stack" id="cs-ask-form">
-          <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
-            <div>
-              <strong>Ask the workspace</strong>
-              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
-            </div>
-            <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-            <button class="cs-button" type="submit">Ask</button>
-          </div>
-          <div class="cs-suggestion-row"><button class="cs-button secondary" type="button" data-ask-suggestion="What supports &quot;Brief for vendor renewal&quot;?">What supports "Brief for vendor renewal"?</button><button class="cs-button secondary" type="button" data-ask-suggestion="What changed in the latest saved source?">What changed in the latest saved source?</button><button class="cs-button secondary" type="button" data-ask-suggestion="Which claims still need support?">Which claims still need support?</button></div>
-          <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
-        </form>
-      </div>
-    </section>
-    <div class="cs-module-grid">
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Recent items</h2>
-    <a class="cs-meta" href="/artifacts">View sources</a>
-  </div>
-  <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_6b3e9819678bb0ac?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">C</span>
-  <span>
-    <p>Claim</p>
-    <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-04 20:31 UTC - Review source support</p>
-  </span>
-  <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
-</a>
-
-<a class="cs-home-item" href="/actions/action_8f149c9a7306817f?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">A</span>
-  <span>
-    <p>Action</p>
-    <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-04 20:31 UTC - Preview before approval</p>
-  </span>
-  <span class="cs-chip cs-chip-underReview">Needs approval</span>
-</a>
-
-<a class="cs-home-item" href="/artifacts/art_085c9696c3b04726?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">S</span>
-  <span>
-    <p>Source</p>
-    <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-04 20:31 UTC - Original text preserved</p>
-  </span>
-  <span class="cs-chip cs-chip-searchable">Searchable</span>
-</a>
-
-<a class="cs-home-item" href="/briefs/brief_635d147604644f13?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">B</span>
-  <span>
-    <p>Brief</p>
-    <h3>Brief for vendor renewal</h3>
-    <p>2026-07-04 20:31 UTC - Draft from visible sources</p>
-  </span>
-  <span class="cs-chip cs-chip-draft">Keyword summary</span>
-</a>
-</div>
-</section>
-
-      <div class="cs-stack">
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Knowledge states</h2>
-    <span class="cs-meta">Local workspace</span>
-  </div>
-  <div class="cs-stat-list">
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">S</span>
-      <div><strong>Saved</strong><div class="cs-meta">Original sources preserved</div></div>
-      <span class="cs-chip cs-chip-saved">1</span>
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">Q</span>
-      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
-      <span class="cs-chip cs-chip-searchable">1</span>
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">E</span>
-      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
-      <span class="cs-chip cs-chip-evidenceBacked">2</span>
-    </div>
-  </div>
-</section>
-
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Suggested next steps</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
-  </div>
-  <div class="cs-next-step-list">
-<a class="cs-next-step" href="/search">
-  <span class="cs-stat-icon" aria-hidden="true">S</span>
-  <span><strong>Ask about the latest source</strong><span class="cs-meta">Search saved source text</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-
-<a class="cs-next-step" href="/claims">
-  <span class="cs-stat-icon" aria-hidden="true">C</span>
-  <span><strong>Review claims with source support</strong><span class="cs-meta">Check statements before approval</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-
-<a class="cs-next-step" href="/actions">
-  <span class="cs-stat-icon" aria-hidden="true">A</span>
-  <span><strong>Review action previews</strong><span class="cs-meta">Confirm dry-run and approval state</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-</div>
-</section>
-
-      </div>
-    </div>
-  </div>
-  <aside class="cs-stack">
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Recent activity</h2>
-    <a class="cs-meta" href="/audit">View audit</a>
-  </div>
-  <div class="cs-timeline">
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>Source opened</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
-  </div>
-</div>
-
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
-  </div>
-</div>
-
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
-  </div>
-</div>
-
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
-  </div>
-</div>
-
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
-  </div>
-</div>
-</div>
-</section>
-
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Latest brief</h2>
-    <span class="cs-chip cs-chip-draft">Keyword summary</span>
-  </div>
-  <a class="cs-list-row" href="/briefs/brief_635d147604644f13?view=html">
+<section data-product-surface="not-found">
+  <div class="cs-grid-two">
     <div>
-      <h3>Brief for vendor renewal</h3>
-      <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 20:31 UTC</div>
+
+<article class="cs-empty-state">
+  <div class="cs-empty-state-main">
+    <span class="cs-empty-mark" aria-hidden="true">?</span>
+    <div class="cs-empty-copy">
+      <div class="cs-kicker">Not found</div>
+      <h2>We could not find that page</h2>
+      <p>The link may be old, or the page may not exist in this local product workspace. Search saved work or return to Home to continue.</p>
     </div>
-    <span class="cs-meta">Open</span>
-  </a>
-</section>
-
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Needs attention</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
-  <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_635d147604644f13?view=html">
-  <div>
-    <div class="cs-meta">Brief</div>
-    <h3>Brief for vendor renewal</h3>
-    <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+  <div class="cs-empty-steps" aria-label="Suggested start path">
+  <div class="cs-empty-step">
+    <strong>1. Check search</strong>
+    <span class="cs-meta">Look across saved sources, briefs, claims, and actions.</span>
   </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
-</a>
 
-<a class="cs-list-row" href="/claims/claim_6b3e9819678bb0ac?view=html">
-  <div>
-    <div class="cs-meta">Claim</div>
-    <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+  <div class="cs-empty-step">
+    <strong>2. Open a list</strong>
+    <span class="cs-meta">Use the sidebar if you know the work type.</span>
   </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
-</a>
 
-<a class="cs-list-row" href="/actions/action_8f149c9a7306817f?view=html">
-  <div>
-    <div class="cs-meta">Action</div>
-    <h3>Draft a vendor renewal follow-up</h3>
-    <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 20:31 UTC</div>
+  <div class="cs-empty-step">
+    <strong>3. Start again</strong>
+    <span class="cs-meta">Drop or ask from Home if the work is not saved yet.</span>
   </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
-</a>
 </div>
-</section>
+  <div class="cs-empty-actions">
+    <a class="cs-button" href="/search">Search workspace</a>
+    <a class="cs-button secondary" href="/">Return home</a>
+  </div>
+</article>
 
-  </aside>
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Useful places</h2>
+        <div class="cs-review-box">
+          <a class="cs-button secondary" href="/artifacts">Saved sources</a>
+          <a class="cs-button secondary" href="/briefs">Brief workspace</a>
+          <a class="cs-button secondary" href="/inbox">Review inbox</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Why this can happen</h2>
+        <p class="cs-muted">CornerStone keeps each workspace local. A link from another workspace or an old run may not resolve here.</p>
+      </section>
+    </aside>
+  </div>
 </section>
 
       </div>

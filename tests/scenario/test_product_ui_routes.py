@@ -8,6 +8,7 @@ import sys
 import tempfile
 import threading
 import unittest
+import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -59,9 +60,16 @@ def _request(
         data = json.dumps(payload).encode("utf-8")
         request_headers.setdefault("content-type", "application/json")
     request = urllib.request.Request(base_url + path, data=data, headers=request_headers, method=method)
-    with urllib.request.urlopen(request, timeout=10) as response:
-        body = response.read().decode("utf-8")
-        return response.status, response.headers.get("content-type", ""), body
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            body = response.read().decode("utf-8")
+            return response.status, response.headers.get("content-type", ""), body
+    except urllib.error.HTTPError as response:
+        try:
+            body = response.read().decode("utf-8")
+            return response.status, response.headers.get("content-type", ""), body
+        finally:
+            response.close()
 
 
 class ProductUiRoutesTest(unittest.TestCase):
@@ -147,6 +155,39 @@ class ProductUiRoutesTest(unittest.TestCase):
                     self.assertIn(phrase, html)
                 self.assert_product_surface_is_clean(html)
 
+    def test_product_not_found_routes_keep_html_and_json_boundaries(self) -> None:
+        html_status, html_content_type, html = _request(self.base_url, "/missing-product-route", headers={"accept": "text/html"})
+        self.assertEqual(html_status, 404)
+        self.assertIn("text/html", html_content_type)
+        self.assertIn('data-product-surface="not-found"', html)
+        self.assertIn("We could not find that page", html)
+        self.assertIn("Search workspace", html)
+        self.assertIn("Useful places", html)
+        self.assertIn("Saved sources", html)
+        self.assert_product_surface_is_clean(html)
+
+        detail_status, detail_content_type, detail_html = _request(
+            self.base_url,
+            "/artifacts/missing-source?view=html",
+            headers={"accept": "text/html"},
+        )
+        self.assertEqual(detail_status, 404)
+        self.assertIn("text/html", detail_content_type)
+        self.assertIn('data-product-surface="not-found"', detail_html)
+        self.assertIn("This source is not available", detail_html)
+        self.assertIn("Brief workspace", detail_html)
+        self.assert_product_surface_is_clean(detail_html)
+
+        json_status, json_content_type, json_body = _request(self.base_url, "/missing-product-route")
+        self.assertEqual(json_status, 404)
+        self.assertIn("application/json", json_content_type)
+        self.assertEqual(json.loads(json_body)["errors"][0]["code"], "CS_API_NOT_FOUND")
+
+        artifact_status, artifact_content_type, artifact_body = _request(self.base_url, "/artifacts/missing-source")
+        self.assertEqual(artifact_status, 404)
+        self.assertIn("application/json", artifact_content_type)
+        self.assertEqual(json.loads(artifact_body)["errors"][0]["code"], "CS_ARTIFACT_NOT_FOUND")
+
     def test_screenshot_matrix_covers_primary_mobile_routes(self) -> None:
         ids = {
             "artifact_id": "art_mobile_matrix",
@@ -158,6 +199,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         mobile_routes = {spec["route"] for spec in specs if spec.get("mobile")}
         day_zero_specs = capture_vs4.day_zero_route_specs()
         day_zero_mobile_names = {spec["name"] for spec in day_zero_specs if spec.get("mobile")}
+        not_found_specs = capture_vs4.not_found_route_specs()
+        not_found_names = {spec["name"] for spec in not_found_specs}
 
         for route in [
             "/",
@@ -184,6 +227,14 @@ class ProductUiRoutesTest(unittest.TestCase):
         ]:
             with self.subTest(day_zero=name):
                 self.assertIn(name, day_zero_mobile_names)
+        for name in [
+            "not-found-page-desktop",
+            "not-found-page-mobile",
+            "not-found-source-desktop",
+            "not-found-source-mobile",
+        ]:
+            with self.subTest(not_found=name):
+                self.assertIn(name, not_found_names)
 
     def test_record_detail_routes_preserve_json_default_and_offer_html(self) -> None:
         artifact_id, _, _ = self.create_source_stack()

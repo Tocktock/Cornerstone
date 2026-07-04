@@ -14,6 +14,7 @@ from cornerstone_cli.product_ui import (
     PRODUCT_DETAIL_ROUTES,
     PRODUCT_LIST_ROUTES,
     render_owner_review_page,
+    render_product_not_found,
     render_product_detail,
     render_product_page,
 )
@@ -5358,6 +5359,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["audit-events"]:
             self._audit_events()
+            return
+        if self._wants_html():
+            self._send_html(render_product_not_found(self.root, self.store, self._query_scope()), 404)
             return
         self._send_json(_json_response("not_found", errors=[{"code": "CS_API_NOT_FOUND", "message": "Route not found."}]), 404)
 

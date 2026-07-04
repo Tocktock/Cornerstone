@@ -90,6 +90,15 @@ def render_owner_review_page(
     return _page(root, "Owner", "/review", content, ctx, "")
 
 
+def render_product_not_found(
+    root: Path,
+    store: Any,
+    scope: dict[str, str],
+) -> str:
+    ctx = _build_context(store, scope)
+    return _page(root, "Page not found", "/", _not_found("page"), ctx, "")
+
+
 def render_product_detail(
     root: Path,
     store: Any,
@@ -4505,14 +4514,48 @@ def _evidence_refs(record: dict[str, Any]) -> list[str]:
 
 
 def _not_found(label: str) -> str:
+    label_text = label.replace("-", " ")
+    title = "We could not find that page" if label == "page" else f"This {label_text} is not available"
+    body = (
+        "The link may be old, or the page may not exist in this local product workspace. Search saved work or return to Home to continue."
+        if label == "page"
+        else f"The {label_text} may be outside this local workspace, hidden from the product area, or no longer saved. Search the workspace before starting over."
+    )
     return f"""
 <section data-product-surface="not-found">
-  <div class="cs-page-head">
-    <div class="cs-kicker">Not found</div>
-    <h1>This {h(label)} is not available</h1>
-    <p>It may be outside the current local workspace or may have been removed.</p>
+  <div class="cs-grid-two">
+    <div>
+      {_empty_state(
+        "Not found",
+        title,
+        body,
+        "Search workspace",
+        "/search",
+        "Return home",
+        "/",
+        mark="?",
+        steps=[
+            ("1. Check search", "Look across saved sources, briefs, claims, and actions."),
+            ("2. Open a list", "Use the sidebar if you know the work type."),
+            ("3. Start again", "Drop or ask from Home if the work is not saved yet."),
+        ],
+    )}
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Useful places</h2>
+        <div class="cs-review-box">
+          <a class="cs-button secondary" href="/artifacts">Saved sources</a>
+          <a class="cs-button secondary" href="/briefs">Brief workspace</a>
+          <a class="cs-button secondary" href="/inbox">Review inbox</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Why this can happen</h2>
+        <p class="cs-muted">CornerStone keeps each workspace local. A link from another workspace or an old run may not resolve here.</p>
+      </section>
+    </aside>
   </div>
-  <a class="cs-button secondary" href="/">Return home</a>
 </section>
 """
 
