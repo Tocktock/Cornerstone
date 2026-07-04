@@ -79,6 +79,17 @@ def render_product_page(
     return _page(root, title, active, content, ctx, q)
 
 
+def render_owner_review_page(
+    root: Path,
+    store: Any,
+    scope: dict[str, str],
+    readiness: dict[str, Any],
+) -> str:
+    ctx = _build_context(store, scope)
+    content = _owner_review_page(ctx, readiness)
+    return _page(root, "Owner", "/review", content, ctx, "")
+
+
 def render_product_detail(
     root: Path,
     store: Any,
@@ -1350,6 +1361,73 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-1);
 }}
 .cs-action-review-card strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
+.cs-owner-overview {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-owner-metric {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-owner-metric strong {{
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-connector-grid {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-connector-list, .cs-admin-stack {{
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-connector-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-connector-card h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-sectionTitle-fontSize); }}
+.cs-connector-card p {{ margin: 0; color: var(--cs-color-text-secondary); }}
+.cs-connector-meta {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-3);
+}}
+.cs-connector-meta div {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-connector-meta span, .cs-connector-meta strong {{
+  display: block;
+}}
+.cs-connector-meta strong {{
+  margin-top: var(--cs-space-1);
+}}
+.cs-admin-note {{
+  border: 1px solid var(--cs-state-underReview-border);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-state-underReview-bg);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
 .cs-action-metric {{
   display: grid;
   gap: var(--cs-space-1);
@@ -1446,7 +1524,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1461,7 +1539,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-document-page {{ min-height: auto; }}
@@ -2420,6 +2498,245 @@ def _audit_page(ctx: dict[str, Any]) -> str:
   </div>
   <div class="cs-panel">{rows}</div>
 </section>
+"""
+
+
+def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
+    scope = ctx["scope"]
+    connector_rows = _owner_connector_rows(ctx)
+    activity_rows = _owner_connector_activity(ctx)
+    gate = "true" if readiness.get("local_scenario_ready") is True else "false"
+    runtime = "true" if readiness.get("vs0_runtime_ready") is True else "false"
+    return f"""
+<section data-product-surface="owner-review">
+  <div class="cs-brief-hero is-stacked">
+    <div class="cs-brief-title">
+      <div class="cs-kicker">Owner area</div>
+      <h1>Connector governance</h1>
+      <p>Admin controls stay outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
+      <div class="cs-brief-meta">
+        <span>Namespace: {h(scope.get("namespace_id") or "personal")}</span>
+        <span>Workspace: {h(scope.get("workspace_id") or "default")}</span>
+        <span>Owner: {h(scope.get("owner_id") or "local-user")}</span>
+      </div>
+    </div>
+    <div class="cs-brief-actions">
+      {_chip("Admin containment", "underReview")}
+      {_chip("Local only", "searchable")}
+      {_chip("External calls locked", "policyBlocked")}
+    </div>
+  </div>
+  <div class="cs-owner-overview" aria-label="Admin containment">
+    {_owner_metric("Source access", f"{len(ctx['artifacts'])} saved", "Local artifacts and pasted sources only.")}
+    {_owner_metric("Policies", "Dry-run first", "Actions require policy and approval before execution.")}
+    {_owner_metric("Roles", "Owner scoped", "Admin review is tied to the current local owner.")}
+    {_owner_metric("Gate", f"local_scenario_ready={gate}", f"vs0_runtime_ready={runtime}")}
+  </div>
+  <div class="cs-connector-grid">
+    <div class="cs-stack">
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Connector sources</h2>
+            <p class="cs-muted">Each source shows whether it can read, write, or only simulate work in this local workspace.</p>
+          </div>
+          {_chip("Review before enablement", "underReview")}
+        </div>
+        <div class="cs-connector-list">{connector_rows}</div>
+      </section>
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Recent connector activity</h2>
+            <p class="cs-muted">Admin review sees connector-adjacent activity without turning it into a normal user task.</p>
+          </div>
+          {_chip("Audit visible", "searchable")}
+        </div>
+        <div class="cs-timeline">{activity_rows}</div>
+      </section>
+    </div>
+    <aside class="cs-admin-stack">
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Namespace settings</h2></div>
+        <dl class="cs-detail-grid">
+          <dt>Tenant</dt><dd>{h(scope.get("tenant_id") or "local-dev")}</dd>
+          <dt>Namespace</dt><dd>{h(scope.get("namespace_id") or "personal")}</dd>
+          <dt>Workspace</dt><dd>{h(scope.get("workspace_id") or "default")}</dd>
+          <dt>Owner</dt><dd>{h(scope.get("owner_id") or "local-user")}</dd>
+        </dl>
+      </section>
+      <section class="cs-admin-note">
+        <strong>Admin containment</strong>
+        <span>Connector policy, role, and provider settings are intentionally kept behind the owner area. Daily users see only the resulting source, claim, action, inbox, and audit states.</span>
+      </section>
+      {_owner_human_review_handoff()}
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Access roles</h2>{_chip("Owner controlled", "underReview")}</div>
+        <div class="cs-stat-list">
+          {_owner_role_row("Owner", "Can inspect local gates and approve contained connector setup.")}
+          {_owner_role_row("Workspace user", "Can save sources, ask questions, and review drafts without connector administration.")}
+          {_owner_role_row("External provider", "No direct access from this local review page.")}
+        </div>
+      </section>
+    </aside>
+  </div>
+</section>
+"""
+
+
+def _owner_human_review_handoff() -> str:
+    checkpoints = [
+        ("drop-ask", "Drop and Ask"),
+        ("evidence-backed-brief", "Evidence-backed Brief"),
+        ("claim-candidate", "Claim candidate"),
+        ("memory/wiki-candidate", "Memory/Wiki candidate"),
+        ("action-card", "Action Card"),
+        ("ops-inbox", "Ops Inbox"),
+        ("evidence-audit", "Evidence and audit"),
+        ("learn", "Learn review"),
+        ("desktop", "Desktop capture"),
+        ("mobile", "Mobile capture"),
+        ("keyboard", "Keyboard pass"),
+        ("unsafe-states", "Unsafe states"),
+    ]
+    checkpoint_rows = "".join(
+        f'<div class="cs-stat-row" data-vs4-human-review-checkpoint="{h(key)}"><span class="cs-stat-icon">R</span><div><strong>{h(label)}</strong><div class="cs-meta">Review input only.</div></div>{_chip("Input", "searchable")}</div>'
+        for key, label in checkpoints
+    )
+    artifacts = [
+        "reports/human-gates/vs4/review-kit.json",
+        "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
+        "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    ]
+    artifact_rows = "".join(f'<li><code data-vs4-human-review-artifact>{h(path)}</code></li>' for path in artifacts)
+    commands = [
+        "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01",
+        "cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json",
+        "make verify-vs4-product-alpha-human-review-handoff",
+    ]
+    command_rows = "".join(f'<li><code data-vs4-human-review-command>{h(command)}</code></li>' for command in commands)
+    return f"""
+<section
+  class="cs-panel"
+  id="vs4-human-review-handoff"
+  data-vs4-human-review-handoff="visible"
+  data-vs4-human-review-status="human-required"
+  data-vs4-human-review-input-only="true"
+  data-vs4-human-ux-claimed="false"
+  data-vs4-reference-images-acceptance-evidence="false"
+  data-vs4-review-workspace="personal-project-default"
+>
+  <div class="cs-panel-header">
+    <div>
+      <h2>Owner review handoff</h2>
+      <p class="cs-muted">Human review required. This material is review input only. No acceptance collected.</p>
+    </div>
+    {_chip("Human required", "underReview")}
+  </div>
+  <div class="cs-stat-list">{checkpoint_rows}</div>
+  <aside class="cs-admin-note" data-vs4-human-review-package="review-input-only">
+    <strong>Package is not acceptance.</strong>
+    <span>VS4-H01 remains HUMAN_REQUIRED. Scope: local-user / personal / default. Acceptance claim: not collected. Reference images: design input only.</span>
+    <details data-vs4-human-review-detail="progressive">
+      <summary>Review artifacts and commands</summary>
+      <ul>{artifact_rows}</ul>
+      <ul>{command_rows}</ul>
+    </details>
+  </aside>
+</section>
+"""
+
+
+def _owner_metric(label: str, value: str, detail: str) -> str:
+    return f"""
+<div class="cs-owner-metric">
+  <span class="cs-meta">{h(label)}</span>
+  <strong>{h(value)}</strong>
+  <span class="cs-muted">{h(detail)}</span>
+</div>
+"""
+
+
+def _owner_connector_rows(ctx: dict[str, Any]) -> str:
+    artifact_count = len(ctx["artifacts"])
+    action_count = len(ctx["actions"])
+    rows = [
+        {
+            "name": "Local source intake",
+            "body": "Files and pasted text enter as preserved sources before any derived brief, claim, or action can rely on them.",
+            "state": "Enabled",
+            "chip": "saved",
+            "access": "Read local input",
+            "policy": "Preserve original",
+            "activity": f"{artifact_count} saved",
+        },
+        {
+            "name": "Evidence and search index",
+            "body": "Search and evidence bundles are scoped to the current local workspace and keep citations close to each result.",
+            "state": "Enabled",
+            "chip": "searchable",
+            "access": "Read indexed sources",
+            "policy": "Scope matched",
+            "activity": f"{len(ctx['briefs']) + len(ctx['claims'])} linked drafts",
+        },
+        {
+            "name": "External writeback providers",
+            "body": "Writeback-capable connectors stay locked behind dry-run previews, policy decisions, approval, and audit records.",
+            "state": "Locked",
+            "chip": "policyBlocked",
+            "access": "No live write",
+            "policy": "Approval required",
+            "activity": f"{action_count} previews",
+        },
+    ]
+    return "".join(_owner_connector_card(row) for row in rows)
+
+
+def _owner_connector_card(row: dict[str, str]) -> str:
+    return f"""
+<article class="cs-connector-card">
+  <div>
+    <h3>{h(row["name"])}</h3>
+    <p>{h(row["body"])}</p>
+    <div class="cs-connector-meta">
+      <div><span class="cs-meta">Access</span><strong>{h(row["access"])}</strong></div>
+      <div><span class="cs-meta">Policy</span><strong>{h(row["policy"])}</strong></div>
+      <div><span class="cs-meta">Activity</span><strong>{h(row["activity"])}</strong></div>
+    </div>
+  </div>
+  <div class="cs-row">{_chip(row["state"], row["chip"])}</div>
+</article>
+"""
+
+
+def _owner_connector_activity(ctx: dict[str, Any]) -> str:
+    events = ctx["audit"][:5]
+    if not events:
+        return '<div class="cs-empty">Connector activity appears here after sources, searches, drafts, or action previews are recorded.</div>'
+    return "".join(
+        f"""
+<div class="cs-timeline-item">
+  <span class="cs-dot"></span>
+  <div>
+    <strong>{h(_plain_event(str(event.get("event_type") or "")))}</strong>
+    <div class="cs-meta">{h(_display_date(event))}</div>
+  </div>
+</div>
+"""
+        for event in events
+    )
+
+
+def _owner_role_row(label: str, detail: str) -> str:
+    return f"""
+<div class="cs-stat-row">
+  <span class="cs-stat-icon">{h(label[:1])}</span>
+  <div>
+    <strong>{h(label)}</strong>
+    <div class="cs-meta">{h(detail)}</div>
+  </div>
+  {_chip("Scoped", "searchable")}
+</div>
 """
 
 

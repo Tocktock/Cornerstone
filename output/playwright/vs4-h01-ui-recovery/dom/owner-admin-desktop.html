@@ -2,7 +2,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Actions - CornerStone</title>
+  <title>Owner - CornerStone</title>
   <style>
 :root {
   --cs-meta-name: CornerStone Design Tokens v0.3;
@@ -1200,11 +1200,11 @@ button, input, textarea { font: inherit; }
 <nav class="cs-nav">
   <div class="cs-nav-group">
     <div class="cs-nav-label">Workspace</div>
-    <a href="/">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims">Claims</a><a href="/actions" aria-current="page">Actions</a>
+    <a href="/">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims">Claims</a><a href="/actions">Actions</a>
   </div>
   <div class="cs-nav-group">
     <div class="cs-nav-label">Operations</div>
-    <a href="/inbox">Inbox</a><a href="/audit">Audit</a><a href="/review">Owner</a>
+    <a href="/inbox">Inbox</a><a href="/audit">Audit</a><a href="/review" aria-current="page">Owner</a>
   </div>
 </nav>
 
@@ -1225,67 +1225,185 @@ button, input, textarea { font: inherit; }
 
       <div class="cs-content">
 
-<section data-product-surface="actions">
-  <div class="cs-page-head">
-    <div class="cs-kicker">Actions</div>
-    <h1>Action drafts</h1>
-    <p>Every action starts with a preview and stays local until approval is clear.</p>
-  </div>
-  <div class="cs-collection-workbench">
-    <div>
-      <div class="cs-collection-summary" aria-label="Collection summary">
-<div class="cs-collection-stat">
-  <span class="cs-meta">Drafts</span>
-  <strong>1</strong>
-</div>
-
-<div class="cs-collection-stat">
-  <span class="cs-meta">Need approval</span>
-  <strong>1</strong>
-</div>
-
-<div class="cs-collection-stat">
-  <span class="cs-meta">Executed</span>
-  <strong>0</strong>
-</div>
-</div>
-
-<div class="cs-collection-toolbar">
-  <div>
-    <strong>Action preview queue</strong>
-    <div class="cs-meta">1 visible item</div>
-  </div>
-  <div class="cs-filter-row" style="margin-top: 0;"><span class="cs-filter-chip">Scope: personal/default</span><span class="cs-filter-chip">Mode: dry-run first</span><span class="cs-filter-chip">Sort: approval risk first</span></div>
-</div>
-
-      <div class="cs-collection-list">
-<a class="cs-collection-row" href="/actions/action_ea127202f0378df7?view=html">
-  <span class="cs-collection-icon" aria-hidden="true">A</span>
-  <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Action</span><span>2026-07-04 19:24 UTC</span><span>Medium risk</span></span>
-    <h3>Draft a vendor renewal follow-up</h3>
-    <p>Draft a vendor renewal follow-up</p>
-  </span>
-  <span class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span><span class="cs-chip cs-chip-searchable">Dry-run first</span></span>
-</a>
-</div>
+<section data-product-surface="owner-review">
+  <div class="cs-brief-hero is-stacked">
+    <div class="cs-brief-title">
+      <div class="cs-kicker">Owner area</div>
+      <h1>Connector governance</h1>
+      <p>Admin controls stay outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
+      <div class="cs-brief-meta">
+        <span>Namespace: personal</span>
+        <span>Workspace: default</span>
+        <span>Owner: local-user</span>
+      </div>
     </div>
-    <aside class="cs-stack">
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Dry-run posture</h2>
-        <p class="cs-muted">Actions stay as previews until policy, approval, source support, and auditability are clear.</p>
-        <div class="cs-review-box">
-          <a class="cs-button" href="/inbox">Review approvals</a>
-          <a class="cs-button secondary" href="/audit">Open audit trail</a>
+    <div class="cs-brief-actions">
+      <span class="cs-chip cs-chip-underReview">Admin containment</span>
+      <span class="cs-chip cs-chip-searchable">Local only</span>
+      <span class="cs-chip cs-chip-policyBlocked">External calls locked</span>
+    </div>
+  </div>
+  <div class="cs-owner-overview" aria-label="Admin containment">
+
+<div class="cs-owner-metric">
+  <span class="cs-meta">Source access</span>
+  <strong>1 saved</strong>
+  <span class="cs-muted">Local artifacts and pasted sources only.</span>
+</div>
+
+
+<div class="cs-owner-metric">
+  <span class="cs-meta">Policies</span>
+  <strong>Dry-run first</strong>
+  <span class="cs-muted">Actions require policy and approval before execution.</span>
+</div>
+
+
+<div class="cs-owner-metric">
+  <span class="cs-meta">Roles</span>
+  <strong>Owner scoped</strong>
+  <span class="cs-muted">Admin review is tied to the current local owner.</span>
+</div>
+
+
+<div class="cs-owner-metric">
+  <span class="cs-meta">Gate</span>
+  <strong>local_scenario_ready=true</strong>
+  <span class="cs-muted">vs0_runtime_ready=true</span>
+</div>
+
+  </div>
+  <div class="cs-connector-grid">
+    <div class="cs-stack">
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Connector sources</h2>
+            <p class="cs-muted">Each source shows whether it can read, write, or only simulate work in this local workspace.</p>
+          </div>
+          <span class="cs-chip cs-chip-underReview">Review before enablement</span>
         </div>
+        <div class="cs-connector-list">
+<article class="cs-connector-card">
+  <div>
+    <h3>Local source intake</h3>
+    <p>Files and pasted text enter as preserved sources before any derived brief, claim, or action can rely on them.</p>
+    <div class="cs-connector-meta">
+      <div><span class="cs-meta">Access</span><strong>Read local input</strong></div>
+      <div><span class="cs-meta">Policy</span><strong>Preserve original</strong></div>
+      <div><span class="cs-meta">Activity</span><strong>1 saved</strong></div>
+    </div>
+  </div>
+  <div class="cs-row"><span class="cs-chip cs-chip-saved">Enabled</span></div>
+</article>
+
+<article class="cs-connector-card">
+  <div>
+    <h3>Evidence and search index</h3>
+    <p>Search and evidence bundles are scoped to the current local workspace and keep citations close to each result.</p>
+    <div class="cs-connector-meta">
+      <div><span class="cs-meta">Access</span><strong>Read indexed sources</strong></div>
+      <div><span class="cs-meta">Policy</span><strong>Scope matched</strong></div>
+      <div><span class="cs-meta">Activity</span><strong>2 linked drafts</strong></div>
+    </div>
+  </div>
+  <div class="cs-row"><span class="cs-chip cs-chip-searchable">Enabled</span></div>
+</article>
+
+<article class="cs-connector-card">
+  <div>
+    <h3>External writeback providers</h3>
+    <p>Writeback-capable connectors stay locked behind dry-run previews, policy decisions, approval, and audit records.</p>
+    <div class="cs-connector-meta">
+      <div><span class="cs-meta">Access</span><strong>No live write</strong></div>
+      <div><span class="cs-meta">Policy</span><strong>Approval required</strong></div>
+      <div><span class="cs-meta">Activity</span><strong>1 previews</strong></div>
+    </div>
+  </div>
+  <div class="cs-row"><span class="cs-chip cs-chip-policyBlocked">Locked</span></div>
+</article>
+</div>
       </section>
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Action safeguards</h2>
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Recent connector activity</h2>
+            <p class="cs-muted">Admin review sees connector-adjacent activity without turning it into a normal user task.</p>
+          </div>
+          <span class="cs-chip cs-chip-searchable">Audit visible</span>
+        </div>
+        <div class="cs-timeline"><div class="cs-empty">Connector activity appears here after sources, searches, drafts, or action previews are recorded.</div></div>
+      </section>
+    </div>
+    <aside class="cs-admin-stack">
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Namespace settings</h2></div>
         <dl class="cs-detail-grid">
-          <dt>External sends</dt><dd>Hidden until approved</dd>
-          <dt>Policy</dt><dd>Shown before execution</dd>
-          <dt>Evidence</dt><dd>Linked source rail</dd>
+          <dt>Tenant</dt><dd>local-dev</dd>
+          <dt>Namespace</dt><dd>personal</dd>
+          <dt>Workspace</dt><dd>default</dd>
+          <dt>Owner</dt><dd>local-user</dd>
         </dl>
+      </section>
+      <section class="cs-admin-note">
+        <strong>Admin containment</strong>
+        <span>Connector policy, role, and provider settings are intentionally kept behind the owner area. Daily users see only the resulting source, claim, action, inbox, and audit states.</span>
+      </section>
+
+<section class="cs-panel" id="vs4-human-review-handoff" data-vs4-human-review-handoff="visible" data-vs4-human-review-status="human-required" data-vs4-human-review-input-only="true" data-vs4-human-ux-claimed="false" data-vs4-reference-images-acceptance-evidence="false" data-vs4-review-workspace="personal-project-default">
+  <div class="cs-panel-header">
+    <div>
+      <h2>Owner review handoff</h2>
+      <p class="cs-muted">Human review required. This material is review input only. No acceptance collected.</p>
+    </div>
+    <span class="cs-chip cs-chip-underReview">Human required</span>
+  </div>
+  <div class="cs-stat-list"><div class="cs-stat-row" data-vs4-human-review-checkpoint="drop-ask"><span class="cs-stat-icon">R</span><div><strong>Drop and Ask</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="evidence-backed-brief"><span class="cs-stat-icon">R</span><div><strong>Evidence-backed Brief</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="claim-candidate"><span class="cs-stat-icon">R</span><div><strong>Claim candidate</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="memory/wiki-candidate"><span class="cs-stat-icon">R</span><div><strong>Memory/Wiki candidate</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="action-card"><span class="cs-stat-icon">R</span><div><strong>Action Card</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="ops-inbox"><span class="cs-stat-icon">R</span><div><strong>Ops Inbox</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="evidence-audit"><span class="cs-stat-icon">R</span><div><strong>Evidence and audit</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="learn"><span class="cs-stat-icon">R</span><div><strong>Learn review</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="desktop"><span class="cs-stat-icon">R</span><div><strong>Desktop capture</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="mobile"><span class="cs-stat-icon">R</span><div><strong>Mobile capture</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="keyboard"><span class="cs-stat-icon">R</span><div><strong>Keyboard pass</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div><div class="cs-stat-row" data-vs4-human-review-checkpoint="unsafe-states"><span class="cs-stat-icon">R</span><div><strong>Unsafe states</strong><div class="cs-meta">Review input only.</div></div><span class="cs-chip cs-chip-searchable">Input</span></div></div>
+  <aside class="cs-admin-note" data-vs4-human-review-package="review-input-only">
+    <strong>Package is not acceptance.</strong>
+    <span>VS4-H01 remains HUMAN_REQUIRED. Scope: local-user / personal / default. Acceptance claim: not collected. Reference images: design input only.</span>
+    <details data-vs4-human-review-detail="progressive">
+      <summary>Review artifacts and commands</summary>
+      <ul><li><code data-vs4-human-review-artifact="">reports/human-gates/vs4/review-kit.json</code></li><li><code data-vs4-human-review-artifact="">reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json</code></li><li><code data-vs4-human-review-artifact="">reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json</code></li></ul>
+      <ul><li><code data-vs4-human-review-command="">cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01</code></li><li><code data-vs4-human-review-command="">cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json</code></li><li><code data-vs4-human-review-command="">make verify-vs4-product-alpha-human-review-handoff</code></li></ul>
+    </details>
+  </aside>
+</section>
+
+      <section class="cs-panel">
+        <div class="cs-panel-header"><h2>Access roles</h2><span class="cs-chip cs-chip-underReview">Owner controlled</span></div>
+        <div class="cs-stat-list">
+
+<div class="cs-stat-row">
+  <span class="cs-stat-icon">O</span>
+  <div>
+    <strong>Owner</strong>
+    <div class="cs-meta">Can inspect local gates and approve contained connector setup.</div>
+  </div>
+  <span class="cs-chip cs-chip-searchable">Scoped</span>
+</div>
+
+
+<div class="cs-stat-row">
+  <span class="cs-stat-icon">W</span>
+  <div>
+    <strong>Workspace user</strong>
+    <div class="cs-meta">Can save sources, ask questions, and review drafts without connector administration.</div>
+  </div>
+  <span class="cs-chip cs-chip-searchable">Scoped</span>
+</div>
+
+
+<div class="cs-stat-row">
+  <span class="cs-stat-icon">E</span>
+  <div>
+    <strong>External provider</strong>
+    <div class="cs-meta">No direct access from this local review page.</div>
+  </div>
+  <span class="cs-chip cs-chip-searchable">Scoped</span>
+</div>
+
+        </div>
       </section>
     </aside>
   </div>

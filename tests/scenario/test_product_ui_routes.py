@@ -92,6 +92,12 @@ class ProductUiRoutesTest(unittest.TestCase):
         review_status, review_content_type, review = _request(self.base_url, "/review", headers={"accept": "text/html"})
         self.assertEqual(review_status, 200)
         self.assertIn("text/html", review_content_type)
+        self.assertIn('data-product-surface="owner-review"', review)
+        self.assertIn("Connector governance", review)
+        self.assertIn("Connector sources", review)
+        self.assertIn("Namespace settings", review)
+        self.assertIn("Admin containment", review)
+        self.assertIn("Recent connector activity", review)
         self.assertIn("local_scenario_ready=", review)
 
         legacy_status, legacy_content_type, legacy = _request(self.base_url, "/?scenario=vs0-evux", headers={"accept": "text/html"})

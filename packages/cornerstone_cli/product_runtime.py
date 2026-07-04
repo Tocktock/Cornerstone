@@ -10,7 +10,13 @@ from urllib.parse import parse_qs, urlparse
 from datetime import datetime, timezone
 
 from cornerstone_cli import __version__
-from cornerstone_cli.product_ui import PRODUCT_DETAIL_ROUTES, PRODUCT_LIST_ROUTES, render_product_detail, render_product_page
+from cornerstone_cli.product_ui import (
+    PRODUCT_DETAIL_ROUTES,
+    PRODUCT_LIST_ROUTES,
+    render_owner_review_page,
+    render_product_detail,
+    render_product_page,
+)
 from cornerstone_cli.runtime import LocalRuntimeStore
 
 
@@ -5310,9 +5316,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if parts == ["review"]:
             readiness = build_readiness_report(self.root)["readiness"]
-            scenario = query.get("scenario", [None])[-1]
-            autorun = query.get("autorun", ["false"])[-1].lower() in {"1", "true", "yes"}
-            self._send_html(render_home(readiness, scenario=scenario, autorun_evux=autorun))
+            self._send_html(render_owner_review_page(self.root, self.store, self._query_scope(), readiness))
             return
         if len(parts) == 1 and f"/{parts[0]}" in PRODUCT_LIST_ROUTES:
             self._send_html(render_product_page(self.root, self.store, self._query_scope(), f"/{parts[0]}", query))

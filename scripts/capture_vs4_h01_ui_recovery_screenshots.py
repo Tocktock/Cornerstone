@@ -53,6 +53,13 @@ DESKTOP_ROUTES = [
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Action preview queue", "Dry-run posture"]},
     {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Needs review", "Selected item", "Next actions"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail"]},
+    {
+        "name": "owner-admin-desktop",
+        "route": "/review",
+        "surface": "owner-review",
+        "required": ["Connector governance", "Connector sources", "Namespace settings", "Admin containment", "Recent connector activity"],
+        "allow_internal_terms": True,
+    },
 ]
 
 DETAIL_ROUTES = [
@@ -74,6 +81,7 @@ MOBILE_ROUTE_NAMES = {
     "search-desktop",
     "inbox-desktop",
     "action-detail-desktop",
+    "owner-admin-desktop",
 }
 
 LAYOUT_SCRIPT = """
@@ -335,7 +343,7 @@ def capture_page(
         shutil.rmtree(profile_dir, ignore_errors=True)
 
     dom_text = dom_path.read_text() if dom_path.exists() else ""
-    forbidden = sorted(set(match.group(0) for match in FORBIDDEN_PRODUCT_RE.finditer(dom_text)))
+    forbidden = [] if spec.get("allow_internal_terms") else sorted(set(match.group(0) for match in FORBIDDEN_PRODUCT_RE.finditer(dom_text)))
     required_missing = [text for text in spec.get("required", []) if text not in dom_text]
     screenshot_bytes = screenshot_path.stat().st_size if screenshot_path.exists() else 0
     checks = {
@@ -390,7 +398,7 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
         "",
         "- R0: token-to-CSS pipeline, shared server-rendered product shell, reusable render helpers, real HTML routes, and language mapping.",
         "- R1: Home rebuilt around Drop and Ask with real local records, day-zero copy, and internal owner material moved to `/review`.",
-        "- R2/R3: Search, Artifacts, Briefs, Claims, Actions, Inbox, Audit, and record detail routes are represented in the screenshot pack.",
+        "- R2/R3: Search, Artifacts, Briefs, Claims, Actions, Inbox, Audit, owner connector governance, and record detail routes are represented in the screenshot pack.",
         "- R4: product surfaces are scanned for forbidden internal language and raw runtime labels.",
         "- R5: desktop and mobile captures check horizontal overflow and mobile first-value ordering.",
         "- R6: screenshot pack and automated checks exist; owner acceptance remains human-required.",

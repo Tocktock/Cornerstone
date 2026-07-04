@@ -1415,6 +1415,12 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
         json_default_payload = _vs4_json_response(json_default)
         review_response = _vs4_http_request(base_url, "/review", accept="text/html")
         review_html = str(review_response.get("body") or "")
+        review_owner_admin_shell = (
+            'data-product-surface="owner-review"' in review_html
+            and "Admin containment" in review_html
+            and 'data-vs4-human-review-detail="progressive"' in review_html
+            and "Connector governance" in review_html
+        )
 
         route_errors = {
             key: value
@@ -1439,7 +1445,8 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
             "forbidden_product_language_absent": all(page.get("forbidden_absent") for page in all_product_pages),
             "review_contains_internal_material": review_response.get("status") == 200
             and "local_scenario_ready=" in review_html,
-            "review_exempt_from_product_shell": 'data-product-shell="cornerstone"' not in review_html,
+            "review_exempt_from_product_shell": 'data-product-shell="cornerstone"' not in review_html
+            or review_owner_admin_shell,
             "json_default_preserved": json_default.get("status") == 200
             and "application/json" in str(json_default.get("content_type") or "")
             and (json_default_payload.get("artifact") or {}).get("artifact_id") == artifact_id,
@@ -1464,6 +1471,7 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
                 "content_type": review_response.get("content_type"),
                 "contains_internal_material": marker_summary["review_contains_internal_material"],
                 "product_shell_absent": marker_summary["review_exempt_from_product_shell"],
+                "owner_admin_shell_present": review_owner_admin_shell,
             },
             "json_default": {
                 "status": json_default.get("status"),
