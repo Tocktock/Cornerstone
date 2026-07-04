@@ -1474,8 +1474,8 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-inbox-head, .cs-inbox-row {{
   display: grid;
-  grid-template-columns: minmax(260px, 1.45fr) minmax(82px, .5fr) minmax(100px, .6fr) minmax(92px, .55fr) minmax(120px, .7fr);
-  gap: var(--cs-space-3);
+  grid-template-columns: minmax(200px, 1.35fr) minmax(64px, .45fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .65fr);
+  gap: var(--cs-space-2);
   align-items: center;
 }}
 .cs-inbox-head {{
@@ -1512,11 +1512,39 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-inbox-item-title strong {{ display: block; }}
 .cs-inbox-item-title .cs-meta {{ display: block; }}
+.cs-inbox-owner {{
+  display: inline-grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: center;
+  min-width: 0;
+}}
+.cs-inbox-owner-mark {{
+  width: 22px;
+  height: 22px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-surface-subtle);
+  border: 1px solid var(--cs-color-border-default);
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
 .cs-inbox-detail {{
   display: grid;
   gap: var(--cs-space-4);
 }}
 .cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
+.cs-inbox-action-panel {{
+  border: 1px solid var(--cs-color-border-focus);
+  border-radius: var(--cs-radius-md);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-inbox-action-panel .cs-section-title {{ margin: 0; }}
 .cs-inbox-preview-note {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2756,6 +2784,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
+  .cs-inbox-lane-summary {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+  .cs-inbox-lane-card p {{ display: none; }}
   .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
   .cs-empty-actions .cs-button {{ justify-content: center; }}
   .cs-detail-actions {{ justify-content: flex-start; }}
@@ -3818,7 +3848,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
       </div>
       <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
         <div class="cs-inbox-head" aria-hidden="true">
-          <span>Item</span><span>Type</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
+          <span>Item</span><span>Type</span><span>Owner</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
         </div>
         {rows}
       </div>
@@ -3878,6 +3908,7 @@ def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
     </span>
   </span>
   <span>{h(item.get("type") or item["kind"])}</span>
+  <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>{h(item.get("owner") or "Owner")}</span></span>
   <span class="cs-meta">{h(item["date"])}</span>
   <span>{_chip(item.get("priority") or "Medium", priority_state)}</span>
   <span>{_chip(item["label"], item["state"])}</span>
@@ -3920,6 +3951,14 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
       <dt>Queue</dt><dd>{h(item.get("queue") or "Needs review")}</dd>
     </dl>
   </section>
+  <section class="cs-inbox-action-panel">
+    <h2 class="cs-section-title">Next actions</h2>
+    <div class="cs-inbox-actions">
+      <a class="cs-button" href="{h(item["href"])}">Review item</a>
+      <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Review sources</a>
+      <a class="cs-button secondary" href="/audit">Open audit trail</a>
+    </div>
+  </section>
   <section class="cs-inbox-preview-note">
     <h3>Why this is here</h3>
     <p>{h(reason)}</p>
@@ -3934,14 +3973,6 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
       <div class="cs-inbox-receipt"><strong>Record</strong><span>{h(item.get("type") or item["kind"])}</span></div>
       <div class="cs-inbox-receipt"><strong>Evidence path</strong><span>Search sources</span></div>
       <div class="cs-inbox-receipt"><strong>Audit path</strong><span>Open trail</span></div>
-    </div>
-  </section>
-  <section>
-    <h2 class="cs-section-title">Next actions</h2>
-    <div class="cs-inbox-actions">
-      <a class="cs-button" href="{h(item["href"])}">Open item</a>
-      <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Review sources</a>
-      <a class="cs-button secondary" href="/audit">Open audit trail</a>
     </div>
   </section>
 </aside>

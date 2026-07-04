@@ -988,8 +988,8 @@ button, input, textarea { font: inherit; }
 }
 .cs-inbox-head, .cs-inbox-row {
   display: grid;
-  grid-template-columns: minmax(260px, 1.45fr) minmax(82px, .5fr) minmax(100px, .6fr) minmax(92px, .55fr) minmax(120px, .7fr);
-  gap: var(--cs-space-3);
+  grid-template-columns: minmax(200px, 1.35fr) minmax(64px, .45fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .65fr);
+  gap: var(--cs-space-2);
   align-items: center;
 }
 .cs-inbox-head {
@@ -1026,11 +1026,39 @@ button, input, textarea { font: inherit; }
 }
 .cs-inbox-item-title strong { display: block; }
 .cs-inbox-item-title .cs-meta { display: block; }
+.cs-inbox-owner {
+  display: inline-grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: center;
+  min-width: 0;
+}
+.cs-inbox-owner-mark {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-surface-subtle);
+  border: 1px solid var(--cs-color-border-default);
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-inbox-detail {
   display: grid;
   gap: var(--cs-space-4);
 }
 .cs-inbox-detail h2 { margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-inbox-action-panel {
+  border: 1px solid var(--cs-color-border-focus);
+  border-radius: var(--cs-radius-md);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-inbox-action-panel .cs-section-title { margin: 0; }
 .cs-inbox-preview-note {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2270,6 +2298,8 @@ button, input, textarea { font: inherit; }
   .cs-drop textarea.cs-drop-input { min-height: 72px; }
   .cs-ask-bar { grid-template-columns: 1fr; }
   .cs-suggestion-row { grid-template-columns: 1fr; }
+  .cs-inbox-lane-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cs-inbox-lane-card p { display: none; }
   .cs-empty-actions { flex-direction: column; align-items: stretch; }
   .cs-empty-actions .cs-button { justify-content: center; }
   .cs-detail-actions { justify-content: flex-start; }
@@ -2373,10 +2403,10 @@ button, input, textarea { font: inherit; }
 </div>
 
       <div class="cs-collection-list">
-<a class="cs-collection-row" href="/claims/claim_a6f07c787d36ceb5?view=html">
+<a class="cs-collection-row" href="/claims/claim_1d1a3a0449d60a26?view=html">
   <span class="cs-collection-icon" aria-hidden="true">C</span>
   <span class="cs-collection-body">
-    <span class="cs-collection-meta"><span>Claim</span><span>2026-07-04 22:23 UTC</span><span>1 source refs</span></span>
+    <span class="cs-collection-meta"><span>Claim</span><span>2026-07-04 22:35 UTC</span><span>1 source refs</span></span>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Review source support before approval.</p>
   </span>

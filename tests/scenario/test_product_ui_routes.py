@@ -467,12 +467,15 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Needs review", inbox_html)
         self.assertIn("Approval requests", inbox_html)
         self.assertIn("Triage summary", inbox_html)
+        self.assertIn("<span>Owner</span>", inbox_html)
         self.assertIn("Selected item", inbox_html)
         self.assertIn("Why this is here", inbox_html)
         self.assertIn("Safety state", inbox_html)
         self.assertIn("Inbox receipt", inbox_html)
         self.assertIn("Next actions", inbox_html)
+        self.assertIn("Review item", inbox_html)
         self.assertIn("Review sources", inbox_html)
+        self.assertIn("Open audit trail", inbox_html)
         self.assert_product_surface_is_clean(inbox_html)
 
     def create_source_stack(self) -> tuple[str, str, str]:
