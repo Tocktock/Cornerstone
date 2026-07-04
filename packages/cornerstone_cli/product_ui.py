@@ -1202,14 +1202,19 @@ button, input, textarea {{ font: inherit; }}
   padding-bottom: var(--cs-space-4);
   border-bottom: 1px solid var(--cs-color-border-default);
 }}
+.cs-artifact-compact-hero > * {{
+  min-width: 0;
+}}
 .cs-artifact-compact-hero .cs-artifact-title h1 {{
   max-width: 42ch;
   font-size: 28px;
   line-height: 1.16;
   text-wrap: balance;
+  overflow-wrap: anywhere;
 }}
 .cs-artifact-compact-hero .cs-artifact-actions {{
   justify-content: flex-start;
+  max-width: 100%;
 }}
 .cs-artifact-breadcrumb {{
   display: flex;
@@ -1218,10 +1223,17 @@ button, input, textarea {{ font: inherit; }}
   align-items: center;
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
+  min-width: 0;
 }}
 .cs-artifact-breadcrumb a {{
   color: var(--cs-color-primary-700);
   font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-artifact-breadcrumb span:last-child {{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }}
 .cs-artifact-title-row {{
   display: grid;
@@ -1230,8 +1242,8 @@ button, input, textarea {{ font: inherit; }}
   align-items: start;
 }}
 .cs-artifact-file-mark {{
-  width: 42px;
-  height: 42px;
+  width: 46px;
+  height: 46px;
   border-radius: var(--cs-radius-md);
   display: grid;
   place-items: center;
@@ -1256,6 +1268,7 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border-bottom: 1px solid var(--cs-color-border-default);
   padding-bottom: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
 }}
 .cs-metadata-item strong {{
   word-break: break-word;
@@ -1268,8 +1281,8 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-inspection-card {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
@@ -1286,14 +1299,14 @@ button, input, textarea {{ font: inherit; }}
   box-shadow: var(--cs-shadow-sm);
 }}
 .cs-artifact-toolbar {{
-  min-height: 48px;
+  min-height: 58px;
   border-bottom: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-primary);
+  background: linear-gradient(180deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--cs-space-3);
-  padding: var(--cs-space-2) var(--cs-space-3);
+  padding: var(--cs-space-3) var(--cs-space-4);
 }}
 .cs-artifact-toolbar-label {{
   display: grid;
@@ -1318,7 +1331,7 @@ button, input, textarea {{ font: inherit; }}
   font-weight: var(--cs-typography-weight-semibold);
 }}
 .cs-artifact-page-count {{
-  min-width: 62px;
+  min-width: 84px;
   height: 32px;
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-sm);
@@ -1375,12 +1388,12 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-page-area {{
   background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-4);
+  padding: var(--cs-space-5);
   overflow: auto;
 }}
 .cs-document-page {{
   max-width: 840px;
-  min-height: 420px;
+  min-height: 500px;
   margin: 0 auto;
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -1399,6 +1412,14 @@ button, input, textarea {{ font: inherit; }}
   margin: 0;
   font-size: 20px;
   line-height: 1.35;
+}}
+.cs-artifact-source-note {{
+  display: flex;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+  align-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
 }}
 .cs-document-page .cs-source-text {{
   border: 0;
@@ -1434,11 +1455,17 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-side-card {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-radius-lg);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-3);
+}}
+.cs-artifact-side-card h2 {{
+  margin: 0;
+}}
+.cs-artifact-side-card p {{
+  margin: 0;
 }}
 .cs-artifact-side-card summary {{
   cursor: pointer;
@@ -4693,7 +4720,6 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         for keyword, count in keywords
     )
     summary = _truncate(text, 300)
-    thumb_lines = "".join('<span class="cs-artifact-thumb-line"></span>' for _ in range(7))
     ask_query = quote(f"What matters in {title}")
     linked_count = linked.count("cs-list-row")
     return f"""
@@ -4716,52 +4742,50 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         </div>
       </div>
       <div class="cs-artifact-actions">
-        <a class="cs-button secondary" href="/artifacts">Back to saved sources</a>
-        <a class="cs-button secondary" href="/search?q={h(ask_query)}">Ask about this source</a>
+        <a class="cs-button" href="/search?q={h(ask_query)}">Ask about this source</a>
         <a class="cs-button secondary" href="#linked-work">View linked evidence</a>
+        <a class="cs-button ghost" href="/artifacts">Back to saved sources</a>
       </div>
     </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
-      <div class="cs-metadata-item"><span class="cs-meta">Source</span><strong>{h(source_label)}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Saved</span><strong>{h(_display_date(artifact))}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Media type</span><strong>{h(media_type)}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>{h(source_label)}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>{h(_display_date(artifact))}</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>{h(media_type)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>{h(workspace)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
     </div>
     <div class="cs-artifact-inspection-strip" aria-label="Artifact inspection summary">
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Trust state</span><strong>Needs review</strong><span class="cs-muted">Source is saved, not evidence-backed.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Original text</strong><span class="cs-muted">Readable saved source remains visible.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked work</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Provenance</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Fingerprint shown before reuse.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Original preserved</span><strong>Yes</strong><span class="cs-muted">Derived drafts stay secondary.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Plain text preview</strong><span class="cs-muted">No simulated PDF controls.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked drafts</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
+      <div class="cs-artifact-inspection-card"><span class="cs-meta">Fingerprint</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Shown before reuse.</span></div>
     </div>
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
         <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-tool" aria-label="Toggle page rail">&#9637;</span>
-          <span class="cs-artifact-tool" aria-label="Search within source">&#8981;</span>
           <div class="cs-artifact-toolbar-label">
             <strong>Original source</strong>
-            <span class="cs-meta">Text preview from the saved artifact</span>
+            <span class="cs-meta">Plain text preview from the saved artifact</span>
           </div>
         </div>
         <div class="cs-artifact-toolgroup">
           <span class="cs-artifact-page-count">1 text source</span>
-          <span class="cs-artifact-tool" aria-label="Zoom out">&minus;</span>
-          <span class="cs-meta">100%</span>
-          <span class="cs-artifact-tool" aria-label="Zoom in">+</span>
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
       </div>
-      <div class="cs-document-frame has-rail">
-        <aside class="cs-artifact-page-rail" aria-label="Original text outline">
-          <div class="cs-artifact-thumb is-active">{thumb_lines}<span>1</span></div>
-        </aside>
+      <div class="cs-document-frame">
         <div class="cs-artifact-page-area">
           <article class="cs-document-page" aria-label="Original artifact preview" id="source-text">
             <header class="cs-document-heading">
               <span class="cs-meta">Original artifact preview</span>
               <h3>{h(title)}</h3>
-              <span class="cs-meta">{h(source_label)} / {h(_display_date(artifact))}</span>
+              <div class="cs-artifact-source-note">
+                <span>{h(source_label)}</span>
+                <span>/</span>
+                <span>{h(_display_date(artifact))}</span>
+                <span>/</span>
+                <span>Original content primary</span>
+              </div>
             </header>
             <div class="cs-source-text">{h(text)}</div>
           </article>
@@ -4774,7 +4798,7 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <span class="cs-artifact-rail-tab is-active">Details</span>
       <span class="cs-artifact-rail-tab">Tags ({len(keywords)})</span>
     </nav>
-    <section class="cs-panel flat">
+    <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
       <dl class="cs-detail-grid">
@@ -4784,22 +4808,23 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       </dl>
       <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
     </section>
-    <section class="cs-panel flat">
-      <h2 class="cs-section-title">Summary</h2>
+    <section class="cs-artifact-side-card">
+      <h2 class="cs-section-title">Keyword summary</h2>
       <p class="cs-muted">{h(summary)}</p>
     </section>
-    <section class="cs-panel flat">
+    <section class="cs-artifact-side-card">
       <div class="cs-panel-header"><h2>Extracted keywords</h2>{_chip(str(len(keywords)), "searchable")}</div>
       <div class="cs-keyword-list">{keyword_rows or '<div class="cs-empty">No keyword preview is available.</div>'}</div>
     </section>
     {linked}
-    <section class="cs-panel flat">
+    <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>{h(source_label)}</dd>
         <dt>Ingested</dt><dd>{h(_display_date(artifact))}</dd>
         <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
       </dl>
+      <a class="cs-meta" href="/audit">Open audit trail</a>
     </section>
   </aside>
 </section>
@@ -4822,8 +4847,8 @@ def _linked_records(ctx: dict[str, Any], artifact_id: Any) -> str:
             label, state = _claim_label(claim)
             rows.append(_generic_row("Claim", _claim_title(claim), "Uses this source.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim)))
     if not rows:
-        return '<section class="cs-panel flat" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No briefs or claims are linked to this source yet.</div></section>'
-    return f'<section class="cs-panel flat" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
+        return '<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No briefs or claims are linked to this source yet.</div></section>'
+    return f'<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
 
 
 def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
