@@ -89,7 +89,7 @@ INTERACTION_ROUTES = [
 
 DETAIL_ROUTES = [
     {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Detail path", "Back to saved sources", "Original artifact preview", "Source metadata", "Source state", "Summary", "Extracted keywords", "Provenance"]},
-    {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Detail path", "Back to briefs", "Open audit trail", "What we found", "Findings with citations", "Use this brief"]},
+    {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Detail path", "Back to briefs", "Open audit trail", "What we found", "Findings with citations", "Citation disclosure", "Source snippet", "Full provenance", "Audit trail", "Use this brief"]},
     {
         "name": "claim-detail-desktop",
         "kind": "claims",

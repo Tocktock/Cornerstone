@@ -1544,7 +1544,75 @@ button, input, textarea {{ font: inherit; }}
   font-size: var(--cs-typography-metadata-fontSize);
   font-variant-numeric: tabular-nums;
 }}
-.cs-citation-rail {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); }}
+.cs-citation-rail {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-citation-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 82%, var(--cs-color-primary-50));
+  overflow: hidden;
+}}
+.cs-citation-card summary {{
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-3);
+}}
+.cs-citation-card summary::-webkit-details-marker {{ display: none; }}
+.cs-citation-title {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-citation-title strong {{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}}
+.cs-citation-action {{
+  color: var(--cs-color-primary-700);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+  flex: 0 0 auto;
+}}
+.cs-citation-body {{
+  border-top: 1px solid var(--cs-color-border-default);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-citation-snippet {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  text-wrap: pretty;
+}}
+.cs-citation-meta {{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+}}
+.cs-citation-meta div {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-citation-meta strong {{
+  display: block;
+  overflow-wrap: anywhere;
+}}
+.cs-citation-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}}
 .cs-brief-hero {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -2235,7 +2303,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-claim-progress::before {{ display: none; }}
-  .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
+  .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
@@ -4474,21 +4542,62 @@ def _statement_rows(record: dict[str, Any], statements: list[str], source_items:
     rows = []
     for index, statement in enumerate(statements[:8], start=1):
         refs = citation_map.get(statement, [])
-        labels = _citation_labels_for_refs(refs, source_items)
-        chips = "".join(_chip(label, "searchable") for label in labels[:3])
+        citation_cards = _citation_disclosure_for_refs(refs, source_items)
+        source_state = "searchable" if refs else "underReview"
+        source_label = "Source linked" if refs else "Source available"
         rows.append(
             f"""
 <li class="cs-finding">
   <div class="cs-finding-head">
     <span class="cs-finding-index">Finding {h(index + offset)}</span>
-    {_chip("Needs source check", "underReview") if not chips else _chip("Source linked", "evidenceBacked")}
+    {_chip("Needs source check", "underReview") if not citation_cards else _chip(source_label, source_state)}
   </div>
   <div>{h(statement)}</div>
-  <div class="cs-citation-rail" aria-label="Sources for finding {index + offset}">{chips or _chip("Needs source check", "underReview")}</div>
+  <div class="cs-citation-rail" aria-label="Citation disclosure for finding {index + offset}">{citation_cards or _chip("Needs source check", "underReview")}</div>
 </li>
 """
         )
     return f'<ol class="cs-finding-list">{"".join(rows)}</ol>'
+
+
+def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, str]]) -> str:
+    items: list[dict[str, str]] = []
+    for ref in refs:
+        if not ref.startswith("artifact:"):
+            continue
+        item = next((item for item in source_items if item["ref"] == ref), None)
+        if item and item not in items:
+            items.append(item)
+    if not items:
+        items = source_items[:1]
+    cards = []
+    for index, item in enumerate(items[:3], start=1):
+        open_attr = " open" if index == 1 else ""
+        cards.append(
+            f"""
+<details class="cs-citation-card"{open_attr}>
+  <summary>
+    <span class="cs-citation-title">
+      {_chip(item["label"], "searchable")}
+      <strong>{h(item["title"])}</strong>
+    </span>
+    <span class="cs-citation-action">Inspect source</span>
+  </summary>
+  <div class="cs-citation-body">
+    <p class="cs-citation-snippet"><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
+    <div class="cs-citation-meta" aria-label="Full provenance">
+      <div><span class="cs-meta">Saved</span><strong>{h(item["date"])}</strong></div>
+      <div><span class="cs-meta">Fingerprint</span><strong>{h(item["fingerprint"])}</strong></div>
+    </div>
+    <div class="cs-citation-actions">
+      <a class="cs-button secondary" href="{h(item["href"])}">Open source</a>
+      <a class="cs-button ghost" href="/audit">Audit trail</a>
+    </div>
+  </div>
+</details>
+"""
+        )
+    return "".join(cards)
 
 
 def _source_items(ctx: dict[str, Any], record: dict[str, Any]) -> list[dict[str, str]]:
@@ -4541,20 +4650,6 @@ def _source_items_from_refs(
             }
         )
     return items
-
-
-def _citation_labels_for_refs(refs: list[str], source_items: list[dict[str, str]]) -> list[str]:
-    labels: list[str] = []
-    for ref in refs:
-        if ref.startswith("artifact:"):
-            item = next((item for item in source_items if item["ref"] == ref), None)
-            if item:
-                labels.append(item["label"])
-    if labels:
-        return labels
-    if refs:
-        return [item["label"] for item in source_items[:1]]
-    return []
 
 
 def _brief_provenance(brief: dict[str, Any]) -> str:
