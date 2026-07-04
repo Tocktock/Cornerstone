@@ -790,6 +790,42 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-6);
   align-items: start;
 }
+.cs-inbox-lane-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-inbox-lane-card {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-inbox-lane-card.is-active {
+  border-color: var(--cs-color-border-focus);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}
+.cs-inbox-lane-top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  align-items: center;
+}
+.cs-inbox-lane-top strong {
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cs-inbox-lane-card p {
+  margin: 0;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: 1.45;
+}
 .cs-inbox-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -817,6 +853,7 @@ button, input, textarea { font: inherit; }
   flex-wrap: wrap;
   margin-bottom: var(--cs-space-4);
 }
+.cs-inbox-toolbar .cs-filter-row { margin-top: 0; }
 .cs-inbox-table {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -868,6 +905,35 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-4);
 }
 .cs-inbox-detail h2 { margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-inbox-preview-note {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-inbox-preview-note h3 {
+  margin: 0;
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}
+.cs-inbox-preview-note p { margin: 0; color: var(--cs-color-text-secondary); }
+.cs-inbox-receipt-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+}
+.cs-inbox-receipt {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}
+.cs-inbox-receipt strong { font-size: var(--cs-typography-metadata-fontSize); }
+.cs-inbox-receipt span { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
 .cs-inbox-actions { display: grid; gap: var(--cs-space-2); }
 .cs-inbox-actions .cs-button { justify-content: center; text-align: center; }
 .cs-collection-workbench {
@@ -1861,7 +1927,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -1950,8 +2016,49 @@ button, input, textarea { font: inherit; }
         <span class="cs-inbox-tab">Policy blocked <span class="cs-chip cs-chip-policyBlocked">0</span></span>
         <span class="cs-inbox-tab">Failed runs <span class="cs-chip cs-chip-failed">0</span></span>
       </div>
+
+<section class="cs-inbox-lane-summary" aria-label="Triage summary">
+
+<div class="cs-inbox-lane-card is-active">
+  <div class="cs-inbox-lane-top">
+    <span>Needs review</span>
+    <strong>0</strong>
+  </div>
+  <p>Items waiting for owner review before they are used.</p>
+  <span class="cs-chip cs-chip-underReview">0 items</span>
+</div>
+
+<div class="cs-inbox-lane-card">
+  <div class="cs-inbox-lane-top">
+    <span>Approval requests</span>
+    <strong>0</strong>
+  </div>
+  <p>Action previews that need approval before execution.</p>
+  <span class="cs-chip cs-chip-draft">0 items</span>
+</div>
+
+<div class="cs-inbox-lane-card">
+  <div class="cs-inbox-lane-top">
+    <span>Policy blocked</span>
+    <strong>0</strong>
+  </div>
+  <p>Records stopped by policy checks.</p>
+  <span class="cs-chip cs-chip-policyBlocked">0 items</span>
+</div>
+
+<div class="cs-inbox-lane-card">
+  <div class="cs-inbox-lane-top">
+    <span>Failed runs</span>
+    <strong>0</strong>
+  </div>
+  <p>Runs that need recovery or audit review.</p>
+  <span class="cs-chip cs-chip-failed">0 items</span>
+</div>
+
+</section>
+
       <div class="cs-inbox-toolbar">
-        <div class="cs-filter-row" style="margin-top: 0;">
+        <div class="cs-filter-row">
           <span class="cs-filter-chip">Type: all visible</span>
           <span class="cs-filter-chip">Owner: personal/default</span>
           <span class="cs-filter-chip">Priority: open first</span>

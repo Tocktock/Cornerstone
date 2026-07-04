@@ -790,6 +790,42 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-6);
   align-items: start;
 }
+.cs-inbox-lane-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-inbox-lane-card {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-inbox-lane-card.is-active {
+  border-color: var(--cs-color-border-focus);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}
+.cs-inbox-lane-top {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  align-items: center;
+}
+.cs-inbox-lane-top strong {
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cs-inbox-lane-card p {
+  margin: 0;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: 1.45;
+}
 .cs-inbox-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -817,6 +853,7 @@ button, input, textarea { font: inherit; }
   flex-wrap: wrap;
   margin-bottom: var(--cs-space-4);
 }
+.cs-inbox-toolbar .cs-filter-row { margin-top: 0; }
 .cs-inbox-table {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -868,6 +905,35 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-4);
 }
 .cs-inbox-detail h2 { margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-inbox-preview-note {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-inbox-preview-note h3 {
+  margin: 0;
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}
+.cs-inbox-preview-note p { margin: 0; color: var(--cs-color-text-secondary); }
+.cs-inbox-receipt-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+}
+.cs-inbox-receipt {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}
+.cs-inbox-receipt strong { font-size: var(--cs-typography-metadata-fontSize); }
+.cs-inbox-receipt span { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
 .cs-inbox-actions { display: grid; gap: var(--cs-space-2); }
 .cs-inbox-actions .cs-button { justify-content: center; text-align: center; }
 .cs-collection-workbench {
@@ -1861,7 +1927,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -1966,7 +2032,7 @@ button, input, textarea { font: inherit; }
         <h1>Draft a vendor renewal follow-up</h1>
         <div class="cs-brief-meta">
           <span>Dry-run first</span>
-          <span>2026-07-04 21:00 UTC</span>
+          <span>2026-07-04 21:08 UTC</span>
           <span>No external send yet</span>
         </div>
       </div>
@@ -2073,7 +2139,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-04 21:00 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-04 21:08 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>

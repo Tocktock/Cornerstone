@@ -51,7 +51,7 @@ DESKTOP_ROUTES = [
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Claim review queue", "Review posture"]},
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Action preview queue", "Dry-run posture"]},
-    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Needs review", "Selected item", "Next actions"]},
+    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "Why this is here", "Inbox receipt", "Next actions"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail", "Event stream", "Audit posture", "Raw event detail"]},
     {
         "name": "owner-admin-desktop",

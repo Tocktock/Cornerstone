@@ -1252,6 +1252,42 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-6);
   align-items: start;
 }}
+.cs-inbox-lane-summary {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-inbox-lane-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-inbox-lane-card.is-active {{
+  border-color: var(--cs-color-border-focus);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}}
+.cs-inbox-lane-top {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  align-items: center;
+}}
+.cs-inbox-lane-top strong {{
+  font-size: 22px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}}
+.cs-inbox-lane-card p {{
+  margin: 0;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: 1.45;
+}}
 .cs-inbox-tabs {{
   display: flex;
   flex-wrap: wrap;
@@ -1279,6 +1315,7 @@ button, input, textarea {{ font: inherit; }}
   flex-wrap: wrap;
   margin-bottom: var(--cs-space-4);
 }}
+.cs-inbox-toolbar .cs-filter-row {{ margin-top: 0; }}
 .cs-inbox-table {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1330,6 +1367,35 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-4);
 }}
 .cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
+.cs-inbox-preview-note {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-inbox-preview-note h3 {{
+  margin: 0;
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}}
+.cs-inbox-preview-note p {{ margin: 0; color: var(--cs-color-text-secondary); }}
+.cs-inbox-receipt-strip {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+}}
+.cs-inbox-receipt {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}}
+.cs-inbox-receipt strong {{ font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-inbox-receipt span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
 .cs-inbox-actions {{ display: grid; gap: var(--cs-space-2); }}
 .cs-inbox-actions .cs-button {{ justify-content: center; text-align: center; }}
 .cs-collection-workbench {{
@@ -2323,7 +2389,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3353,6 +3419,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     rows = "".join(_inbox_table_row(item, index == 0) for index, item in enumerate(items)) or _inbox_empty()
     detail = _inbox_detail_panel(items[0] if items else None)
     counts = _inbox_counts(items)
+    lane_summary = _inbox_lane_summary(counts)
     return f"""
 <section data-product-surface="inbox">
   <div class="cs-page-head">
@@ -3368,8 +3435,9 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
         <span class="cs-inbox-tab">Policy blocked {_chip(str(counts["policy_blocked"]), "policyBlocked")}</span>
         <span class="cs-inbox-tab">Failed runs {_chip(str(counts["failed"]), "failed")}</span>
       </div>
+      {lane_summary}
       <div class="cs-inbox-toolbar">
-        <div class="cs-filter-row" style="margin-top: 0;">
+        <div class="cs-filter-row">
           <span class="cs-filter-chip">Type: all visible</span>
           <span class="cs-filter-chip">Owner: personal/default</span>
           <span class="cs-filter-chip">Priority: open first</span>
@@ -3397,6 +3465,33 @@ def _inbox_counts(items: list[dict[str, str]]) -> dict[str, int]:
         "policy_blocked": sum(1 for item in items if item.get("state") == "policyBlocked"),
         "failed": sum(1 for item in items if item.get("state") == "failed"),
     }
+
+
+def _inbox_lane_summary(counts: dict[str, int]) -> str:
+    lanes = [
+        ("Needs review", "Items waiting for owner review before they are used.", counts["needs_review"], "underReview", True),
+        ("Approval requests", "Action previews that need approval before execution.", counts["approval_requests"], "draft", False),
+        ("Policy blocked", "Records stopped by policy checks.", counts["policy_blocked"], "policyBlocked", False),
+        ("Failed runs", "Runs that need recovery or audit review.", counts["failed"], "failed", False),
+    ]
+    cards = "".join(
+        f"""
+<div class="cs-inbox-lane-card{" is-active" if active else ""}">
+  <div class="cs-inbox-lane-top">
+    <span>{h(label)}</span>
+    <strong>{h(count)}</strong>
+  </div>
+  <p>{h(description)}</p>
+  {_chip(f"{count} item{'s' if count != 1 else ''}", state)}
+</div>
+"""
+        for label, description, count, state, active in lanes
+    )
+    return f"""
+<section class="cs-inbox-lane-summary" aria-label="Triage summary">
+  {cards}
+</section>
+"""
 
 
 def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
@@ -3436,6 +3531,7 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
     )}
 </aside>
 """
+    reason = _inbox_waiting_reason(item)
     return f"""
 <aside class="cs-panel flat cs-inbox-detail">
   <div>
@@ -3453,6 +3549,22 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
       <dt>Queue</dt><dd>{h(item.get("queue") or "Needs review")}</dd>
     </dl>
   </section>
+  <section class="cs-inbox-preview-note">
+    <h3>Why this is here</h3>
+    <p>{h(reason)}</p>
+  </section>
+  <section class="cs-inbox-preview-note">
+    <h3>Safety state</h3>
+    <p>Opening inbox work stays inside CornerStone. External writes still require the action approval path.</p>
+  </section>
+  <section>
+    <h2 class="cs-section-title">Inbox receipt</h2>
+    <div class="cs-inbox-receipt-strip">
+      <div class="cs-inbox-receipt"><strong>Record</strong><span>{h(item.get("type") or item["kind"])}</span></div>
+      <div class="cs-inbox-receipt"><strong>Evidence path</strong><span>Search sources</span></div>
+      <div class="cs-inbox-receipt"><strong>Audit path</strong><span>Open trail</span></div>
+    </div>
+  </section>
   <section>
     <h2 class="cs-section-title">Next actions</h2>
     <div class="cs-inbox-actions">
@@ -3463,6 +3575,19 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
   </section>
 </aside>
 """
+
+
+def _inbox_waiting_reason(item: dict[str, str]) -> str:
+    kind = item.get("kind") or item.get("type") or "Record"
+    if kind == "Action":
+        return "This action is waiting because the product only previews external impact until the owner opens the approval path."
+    if kind == "Claim":
+        return "This claim is waiting because it still needs source support before it can become a defensible decision."
+    if kind == "Brief":
+        return "This brief is waiting because sources and gaps should be checked before it is used for a decision."
+    if kind == "Memory":
+        return "This knowledge draft is waiting because saved learning stays draft-only until the owner reviews it."
+    return "This item is waiting because it needs owner review before it moves further in the workflow."
 
 
 def _inbox_empty() -> str:
