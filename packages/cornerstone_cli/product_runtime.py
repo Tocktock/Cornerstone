@@ -14,6 +14,7 @@ from cornerstone_cli.product_ui import (
     PRODUCT_DETAIL_ROUTES,
     PRODUCT_LIST_ROUTES,
     render_owner_review_page,
+    render_owner_reference_images_page,
     render_product_not_found,
     render_product_detail,
     render_product_page,
@@ -5257,6 +5258,15 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_png(self, path: Path) -> None:
+        data = path.read_bytes()
+        self.send_response(200)
+        self.send_header("content-type", "image/png")
+        self.send_header("content-length", str(len(data)))
+        self.send_header("cache-control", "no-store")
+        self.end_headers()
+        self.wfile.write(data)
+
     def _body(self) -> dict[str, Any]:
         length = int(self.headers.get("content-length", "0") or "0")
         if length <= 0:
@@ -5318,6 +5328,18 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if parts == ["review"]:
             readiness = build_readiness_report(self.root)["readiness"]
             self._send_html(render_owner_review_page(self.root, self.store, self._query_scope(), readiness))
+            return
+        if parts == ["review", "reference-images"]:
+            self._send_html(render_owner_reference_images_page(self.root, self.store, self._query_scope()))
+            return
+        if len(parts) == 3 and parts[:2] == ["review", "reference-images"]:
+            image_name = parts[2]
+            image_path = (self.root / "docs" / "design" / "reference-images" / image_name).resolve()
+            image_root = (self.root / "docs" / "design" / "reference-images").resolve()
+            if image_path.parent == image_root and image_path.suffix == ".png" and image_path.exists():
+                self._send_png(image_path)
+                return
+            self._send_json(_json_response("not_found", errors=[{"code": "CS_REFERENCE_IMAGE_NOT_FOUND", "message": "Reference image not found."}]), 404)
             return
         if len(parts) == 1 and f"/{parts[0]}" in PRODUCT_LIST_ROUTES:
             self._send_html(render_product_page(self.root, self.store, self._query_scope(), f"/{parts[0]}", query))

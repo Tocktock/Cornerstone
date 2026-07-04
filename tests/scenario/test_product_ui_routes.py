@@ -72,6 +72,20 @@ def _request(
             response.close()
 
 
+def _request_bytes(base_url: str, path: str, *, headers: dict[str, str] | None = None) -> tuple[int, str, bytes]:
+    request = urllib.request.Request(base_url + path, headers=dict(headers or {}), method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            body = response.read()
+            return response.status, response.headers.get("content-type", ""), body
+    except urllib.error.HTTPError as response:
+        try:
+            body = response.read()
+            return response.status, response.headers.get("content-type", ""), body
+        finally:
+            response.close()
+
+
 class ProductUiRoutesTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_root = Path(tempfile.mkdtemp(prefix="cornerstone-product-ui-"))
@@ -125,7 +139,29 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Namespace settings", review)
         self.assertIn("Admin containment", review)
         self.assertIn("Recent connector activity", review)
+        self.assertIn("Open reference gallery", review)
         self.assertIn("local_scenario_ready=", review)
+
+        reference_status, reference_content_type, reference_page = _request(self.base_url, "/review/reference-images", headers={"accept": "text/html"})
+        self.assertEqual(reference_status, 200)
+        self.assertIn("text/html", reference_content_type)
+        self.assertIn('data-product-surface="owner-review"', reference_page)
+        self.assertIn("Reference image gallery", reference_page)
+        self.assertIn("Vendor object detail", reference_page)
+        self.assertIn("Operations inbox", reference_page)
+        self.assertIn("Home workspace", reference_page)
+        self.assertIn("Action dry-run", reference_page)
+        self.assertIn('data-vs4-reference-images-pass-evidence="false"', reference_page)
+        self.assertIn('data-vs4-reference-images-acceptance-evidence="false"', reference_page)
+
+        image_status, image_content_type, image_body = _request_bytes(
+            self.base_url,
+            "/review/reference-images/cornerstone-reference-07-home-upload-ask.png",
+            headers={"accept": "image/png"},
+        )
+        self.assertEqual(image_status, 200)
+        self.assertIn("image/png", image_content_type)
+        self.assertGreater(len(image_body), 1000)
 
         legacy_status, legacy_content_type, legacy = _request(self.base_url, "/?scenario=vs0-evux", headers={"accept": "text/html"})
         self.assertEqual(legacy_status, 200)

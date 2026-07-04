@@ -60,6 +60,13 @@ DESKTOP_ROUTES = [
         "required": ["Connector governance", "Connector sources", "Namespace settings", "Admin containment", "Recent connector activity"],
         "allow_internal_terms": True,
     },
+    {
+        "name": "reference-gallery-desktop",
+        "route": "/review/reference-images",
+        "surface": "owner-review",
+        "required": ["Reference image gallery", "Implementation boundary", "Vendor object detail", "Operations inbox", "Home workspace", "Action dry-run"],
+        "allow_internal_terms": True,
+    },
 ]
 
 DAY_ZERO_ROUTES = [
@@ -112,6 +119,7 @@ MOBILE_ROUTE_NAMES = {
     "inbox-desktop",
     "action-detail-desktop",
     "owner-admin-desktop",
+    "reference-gallery-desktop",
 }
 
 DAY_ZERO_MOBILE_ROUTE_NAMES = {

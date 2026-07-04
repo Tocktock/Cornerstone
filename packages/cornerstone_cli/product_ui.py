@@ -11,6 +11,17 @@ from urllib.parse import quote
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
 PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "actions"}
 
+REFERENCE_IMAGE_ROWS = [
+    ("cornerstone-reference-01-vendor-detail.png", "Vendor object detail", "Dormant direction", "Entity/object explorer structure only; do not add this surface during the VS5 scope freeze."),
+    ("cornerstone-reference-02-operations-inbox.png", "Operations inbox", "Active surface", "Lane tabs, triage table, selected preview, and next actions."),
+    ("cornerstone-reference-03-admin-connectors.png", "Admin connectors", "Owner-only direction", "Connector governance stays contained in the owner area."),
+    ("cornerstone-reference-04-search-results.png", "Search results", "Active surface", "Universal search, scoped filters, result receipts, and suggested follow-ups."),
+    ("cornerstone-reference-05-claim-draft-supporting-evidence.png", "Claim draft", "Active surface", "Claim statement, trust ladder, supporting evidence, and review controls."),
+    ("cornerstone-reference-06-artifact-viewer.png", "Artifact viewer", "Active surface", "Original artifact primary, source metadata, derived keywords, linked work, and provenance."),
+    ("cornerstone-reference-07-home-upload-ask.png", "Home workspace", "Active surface", "Drop zone, ask box, recent items, knowledge states, and next steps."),
+    ("cornerstone-reference-08-action-dry-run-approval.png", "Action dry-run", "Active surface", "Dry-run impact, proposed changes, policy decision, risk, approval, and auditability."),
+]
+
 FORBIDDEN_PRODUCT_ROUTE_TERMS = [
     "scenario",
     "verifier",
@@ -88,6 +99,16 @@ def render_owner_review_page(
     ctx = _build_context(store, scope)
     content = _owner_review_page(ctx, readiness)
     return _page(root, "Owner", "/review", content, ctx, "")
+
+
+def render_owner_reference_images_page(
+    root: Path,
+    store: Any,
+    scope: dict[str, str],
+) -> str:
+    ctx = _build_context(store, scope)
+    content = _owner_reference_images_page(root)
+    return _page(root, "Reference Images", "/review", content, ctx, "")
 
 
 def render_product_not_found(
@@ -2412,6 +2433,41 @@ button, input, textarea {{ font: inherit; }}
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
 }}
+.cs-reference-grid {{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-4);
+}}
+.cs-reference-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
+  display: grid;
+  min-width: 0;
+}}
+.cs-reference-card img {{
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top left;
+  border-bottom: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+}}
+.cs-reference-body {{
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-reference-body h2 {{
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-reference-body p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+}}
 .cs-connector-grid {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
@@ -2771,7 +2827,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -4195,6 +4251,16 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
         <strong>Admin containment</strong>
         <span>Connector policy, role, and provider settings are intentionally kept behind the owner area. Daily users see only the resulting source, claim, action, inbox, and audit states.</span>
       </section>
+      <section class="cs-panel">
+        <div class="cs-panel-header">
+          <div>
+            <h2>Reference images</h2>
+            <p class="cs-muted">Open the benchmark set used for UI direction. These images remain review input only.</p>
+          </div>
+          {_chip("Design input", "searchable")}
+        </div>
+        <a class="cs-button secondary" href="/review/reference-images">Open reference gallery</a>
+      </section>
       {_owner_human_review_handoff()}
       <section class="cs-panel">
         <div class="cs-panel-header"><h2>Access roles</h2>{_chip("Owner controlled", "underReview")}</div>
@@ -4207,6 +4273,57 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
     </aside>
   </div>
 </section>
+"""
+
+
+def _owner_reference_images_page(root: Path) -> str:
+    image_dir = root / "docs" / "design" / "reference-images"
+    cards = "".join(_owner_reference_card(image_dir, filename, title, posture, detail) for filename, title, posture, detail in REFERENCE_IMAGE_ROWS)
+    return f"""
+<section
+  data-product-surface="owner-review"
+  data-vs4-reference-images-pass-evidence="false"
+  data-vs4-reference-images-acceptance-evidence="false"
+>
+  <div class="cs-brief-hero is-stacked">
+    <div class="cs-brief-title">
+      <div class="cs-kicker">Owner area</div>
+      <h1>Reference image gallery</h1>
+      <p>Review the full visual benchmark set beside the current implementation. These files guide layout, hierarchy, and interaction direction; they do not prove scenario PASS or human acceptance.</p>
+    </div>
+    <div class="cs-brief-actions">
+      {_chip("Review input only", "underReview")}
+      {_chip(f"{len(REFERENCE_IMAGE_ROWS)} references", "searchable")}
+      <a class="cs-button secondary" href="/review">Back to Owner</a>
+    </div>
+  </div>
+  <section class="cs-admin-note">
+    <strong>Implementation boundary</strong>
+    <span>Use structure and hierarchy from these images. Do not copy fictional users, organizations, counts, vendors, or unavailable controls into the product.</span>
+  </section>
+  <div class="cs-reference-grid" aria-label="CornerStone UI reference images">
+    {cards}
+  </div>
+</section>
+"""
+
+
+def _owner_reference_card(image_dir: Path, filename: str, title: str, posture: str, detail: str) -> str:
+    file_path = image_dir / filename
+    size_label = "missing"
+    if file_path.exists():
+        size_label = f"{round(file_path.stat().st_size / 1024)} KB"
+    src = f"/review/reference-images/{quote(filename)}"
+    return f"""
+<article class="cs-reference-card" data-vs4-reference-image="{h(filename)}">
+  <img src="{h(src)}" alt="{h(title)} reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row">{_chip(posture, "underReview" if "Dormant" in posture or "Owner" in posture else "searchable")}{_chip(size_label, "draft")}</div>
+    <h2>{h(title)}</h2>
+    <p>{h(detail)}</p>
+    <span class="cs-meta">{h(filename)}</span>
+  </div>
+</article>
 """
 
 

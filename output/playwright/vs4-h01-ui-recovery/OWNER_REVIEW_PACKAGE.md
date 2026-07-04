@@ -1,6 +1,6 @@
 # VS4-H01 UI Recovery Owner Review Package
 
-Date: 2026-07-04T22:35:57.503954Z
+Date: 2026-07-04T22:44:00.045388Z
 
 ## Scope
 
@@ -16,7 +16,7 @@ This package covers the current verified recovery slice for the rejected VS4-H01
 ## Evidence Files
 
 - `screenshot-pack-manifest.json`
-- `screenshots/` (23 desktop, 20 mobile captures, including day-zero, not-found, and Home validation states)
+- `screenshots/` (24 desktop, 21 mobile captures, including day-zero, not-found, and Home validation states)
 - `dom/` captured HTML for each screenshot route
 
 ## Screenshot Coverage
@@ -49,10 +49,11 @@ This package covers the current verified recovery slice for the rejected VS4-H01
 - `output/playwright/vs4-h01-ui-recovery/screenshots/inbox-desktop.png`: PASS / `/inbox` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/audit-desktop.png`: PASS / `/audit` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/owner-admin-desktop.png`: PASS / `/review` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/reference-gallery-desktop.png`: PASS / `/review/reference-images` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/artifact-detail-desktop.png`: PASS / `/artifacts/art_ede571327ab3ec20?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-desktop.png`: PASS / `/briefs/brief_7fa5bdb62d137362?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/claim-detail-desktop.png`: PASS / `/claims/claim_1d1a3a0449d60a26?view=html` / desktop
-- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-desktop.png`: PASS / `/actions/action_acbb26a6ac682623?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-desktop.png`: PASS / `/briefs/brief_db23e54d1e8425df?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/claim-detail-desktop.png`: PASS / `/claims/claim_5b4eb8ae6df71319?view=html` / desktop
+- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-desktop.png`: PASS / `/actions/action_f5f81b4462e28181?view=html` / desktop
 - `output/playwright/vs4-h01-ui-recovery/screenshots/home-mobile.png`: PASS / `/` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/search-mobile.png`: PASS / `/search?q=vendor%20renewal` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/artifacts-mobile.png`: PASS / `/artifacts` / mobile
@@ -62,13 +63,14 @@ This package covers the current verified recovery slice for the rejected VS4-H01
 - `output/playwright/vs4-h01-ui-recovery/screenshots/inbox-mobile.png`: PASS / `/inbox` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/audit-mobile.png`: PASS / `/audit` / mobile
 - `output/playwright/vs4-h01-ui-recovery/screenshots/owner-admin-mobile.png`: PASS / `/review` / mobile
-- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-mobile.png`: PASS / `/briefs/brief_7fa5bdb62d137362?view=html` / mobile
-- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-mobile.png`: PASS / `/actions/action_acbb26a6ac682623?view=html` / mobile
+- `output/playwright/vs4-h01-ui-recovery/screenshots/reference-gallery-mobile.png`: PASS / `/review/reference-images` / mobile
+- `output/playwright/vs4-h01-ui-recovery/screenshots/brief-detail-mobile.png`: PASS / `/briefs/brief_db23e54d1e8425df?view=html` / mobile
+- `output/playwright/vs4-h01-ui-recovery/screenshots/action-detail-mobile.png`: PASS / `/actions/action_f5f81b4462e28181?view=html` / mobile
 
 ## Checks Run
 
 - `python3 scripts/capture_vs4_h01_ui_recovery_screenshots.py --json`
-  - Result: PASS; 43 pass, 0 fail.
+  - Result: PASS; 45 pass, 0 fail.
 
 ## Companion Checks Before Owner Review
 

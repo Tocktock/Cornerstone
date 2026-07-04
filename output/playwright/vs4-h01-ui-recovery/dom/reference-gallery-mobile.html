@@ -2,7 +2,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Home - CornerStone</title>
+  <title>Reference Images - CornerStone</title>
   <style>
 :root {
   --cs-meta-name: CornerStone Design Tokens v0.3;
@@ -2379,11 +2379,11 @@ button, input, textarea { font: inherit; }
 <nav class="cs-nav">
   <div class="cs-nav-group">
     <div class="cs-nav-label">Workspace</div>
-    <a href="/" aria-current="page">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims">Claims</a><a href="/actions">Actions</a>
+    <a href="/">Home</a><a href="/search">Search</a><a href="/artifacts">Artifacts</a><a href="/claims">Claims</a><a href="/actions">Actions</a>
   </div>
   <div class="cs-nav-group">
     <div class="cs-nav-label">Operations</div>
-    <a href="/inbox">Inbox</a><a href="/audit">Audit</a><a href="/review">Owner</a>
+    <a href="/inbox">Inbox</a><a href="/audit">Audit</a><a href="/review" aria-current="page">Owner</a>
   </div>
 </nav>
 
@@ -2404,267 +2404,106 @@ button, input, textarea { font: inherit; }
 
       <div class="cs-content">
 
-<section class="cs-grid-hero cs-home-intro" data-product-surface="home">
-  <div class="cs-stack">
-    <div class="cs-hero cs-page-head">
-      <div class="cs-kicker">Local workspace</div>
-      <h1>Drop anything, or ask what we know</h1>
-      <p>Save messy input, find what is already in the workspace, and shape a brief only when the sources are visible.</p>
+<section data-product-surface="owner-review" data-vs4-reference-images-pass-evidence="false" data-vs4-reference-images-acceptance-evidence="false">
+  <div class="cs-brief-hero is-stacked">
+    <div class="cs-brief-title">
+      <div class="cs-kicker">Owner area</div>
+      <h1>Reference image gallery</h1>
+      <p>Review the full visual benchmark set beside the current implementation. These files guide layout, hierarchy, and interaction direction; they do not prove scenario PASS or human acceptance.</p>
     </div>
-    <section class="cs-panel cs-home-canvas" aria-labelledby="home-workbench-title">
-      <div class="cs-panel-header">
-        <div>
-          <h2 id="home-workbench-title">Start with a source or a question</h2>
-          <p class="cs-muted">CornerStone keeps the original source visible, then lets drafts point back to what supports them.</p>
-        </div>
-        <span class="cs-chip cs-chip-underReview">Untrusted until checked</span>
-      </div>
-      <div class="cs-home-workspace">
-        <form class="cs-drop" id="cs-drop-form">
-          <div class="cs-drop-target">
-            <div class="cs-drop-mark" aria-hidden="true">In</div>
-            <div>
-              <strong>Drag and drop files or paste notes here</strong>
-              <p class="cs-muted">Supports local text files and pasted notes. The original source stays preserved.</p>
-            </div>
-          </div>
-          <div class="cs-home-source-row">
-            <button class="cs-button secondary" type="button" id="cs-file-button">Browse files</button>
-            <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
-            <input id="cs-file-input" type="file" hidden="">
-          </div>
-          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
-          <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite">Ready for a source.</div>
-        </form>
-        <div class="cs-or-divider">or ask a question</div>
-        <form class="cs-stack" id="cs-ask-form">
-          <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
-            <span class="cs-ask-mark" aria-hidden="true">?</span>
-            <div>
-              <strong>Ask the workspace</strong>
-              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
-            </div>
-            <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-            <button class="cs-button" id="cs-ask-submit-button" type="submit">Ask</button>
-          </div>
-          <div class="cs-suggestion-row"><button class="cs-button secondary" type="button" data-ask-suggestion="What supports &quot;Brief for vendor renewal&quot;?">What supports "Brief for vendor renewal"?</button><button class="cs-button secondary" type="button" data-ask-suggestion="What changed in the latest saved source?">What changed in the latest saved source?</button><button class="cs-button secondary" type="button" data-ask-suggestion="Which claims still need support?">Which claims still need support?</button></div>
-          <div class="cs-status is-idle" id="cs-ask-status" data-state="idle" role="status" aria-live="polite">No answer requested yet.</div>
-        </form>
-      </div>
-    </section>
-    <div class="cs-module-grid">
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Recent items</h2>
-    <a class="cs-meta" href="/artifacts">View sources</a>
-  </div>
-  <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_11873eca1e1e0c1e?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">C</span>
-  <span>
-    <p>Claim</p>
-    <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-04 22:44 UTC - Review source support</p>
-  </span>
-  <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
-</a>
-
-<a class="cs-home-item" href="/actions/action_d0f97ac674679b20?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">A</span>
-  <span>
-    <p>Action</p>
-    <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-04 22:44 UTC - Preview before approval</p>
-  </span>
-  <span class="cs-chip cs-chip-underReview">Needs approval</span>
-</a>
-
-<a class="cs-home-item" href="/artifacts/art_085c9696c3b04726?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">S</span>
-  <span>
-    <p>Source</p>
-    <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-04 22:44 UTC - Original text preserved</p>
-  </span>
-  <span class="cs-chip cs-chip-searchable">Searchable</span>
-</a>
-
-<a class="cs-home-item" href="/briefs/brief_aa05098502ca4874?view=html">
-  <span class="cs-home-item-icon" aria-hidden="true">B</span>
-  <span>
-    <p>Brief</p>
-    <h3>Brief for vendor renewal</h3>
-    <p>2026-07-04 22:44 UTC - Draft from visible sources</p>
-  </span>
-  <span class="cs-chip cs-chip-draft">Keyword summary</span>
-</a>
-</div>
-</section>
-
-      <div class="cs-stack">
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Knowledge states</h2>
-    <span class="cs-meta">Local workspace</span>
-  </div>
-  <div class="cs-stat-list">
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">S</span>
-      <div><strong>Saved</strong><div class="cs-meta">Original sources preserved</div></div>
-      <span class="cs-chip cs-chip-saved">1</span>
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">Q</span>
-      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
-      <span class="cs-chip cs-chip-searchable">1</span>
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">E</span>
-      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
-      <span class="cs-chip cs-chip-evidenceBacked">2</span>
+    <div class="cs-brief-actions">
+      <span class="cs-chip cs-chip-underReview">Review input only</span>
+      <span class="cs-chip cs-chip-searchable">8 references</span>
+      <a class="cs-button secondary" href="/review">Back to Owner</a>
     </div>
   </div>
-</section>
+  <section class="cs-admin-note">
+    <strong>Implementation boundary</strong>
+    <span>Use structure and hierarchy from these images. Do not copy fictional users, organizations, counts, vendors, or unavailable controls into the product.</span>
+  </section>
+  <div class="cs-reference-grid" aria-label="CornerStone UI reference images">
 
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Suggested next steps</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-01-vendor-detail.png">
+  <img src="/review/reference-images/cornerstone-reference-01-vendor-detail.png" alt="Vendor object detail reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-underReview">Dormant direction</span><span class="cs-chip cs-chip-draft">1319 KB</span></div>
+    <h2>Vendor object detail</h2>
+    <p>Entity/object explorer structure only; do not add this surface during the VS5 scope freeze.</p>
+    <span class="cs-meta">cornerstone-reference-01-vendor-detail.png</span>
   </div>
-  <div class="cs-next-step-list">
-<a class="cs-next-step" href="/search">
-  <span class="cs-stat-icon" aria-hidden="true">S</span>
-  <span><strong>Ask about the latest source</strong><span class="cs-meta">Search saved source text</span></span>
-  <span class="cs-meta">Open</span>
-</a>
+</article>
 
-<a class="cs-next-step" href="/claims">
-  <span class="cs-stat-icon" aria-hidden="true">C</span>
-  <span><strong>Review claims with source support</strong><span class="cs-meta">Check statements before approval</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-
-<a class="cs-next-step" href="/actions">
-  <span class="cs-stat-icon" aria-hidden="true">A</span>
-  <span><strong>Review action previews</strong><span class="cs-meta">Confirm dry-run and approval state</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-</div>
-</section>
-
-      </div>
-    </div>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-02-operations-inbox.png">
+  <img src="/review/reference-images/cornerstone-reference-02-operations-inbox.png" alt="Operations inbox reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">1069 KB</span></div>
+    <h2>Operations inbox</h2>
+    <p>Lane tabs, triage table, selected preview, and next actions.</p>
+    <span class="cs-meta">cornerstone-reference-02-operations-inbox.png</span>
   </div>
-  <aside class="cs-stack">
+</article>
 
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Recent activity</h2>
-    <a class="cs-meta" href="/audit">View audit</a>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-03-admin-connectors.png">
+  <img src="/review/reference-images/cornerstone-reference-03-admin-connectors.png" alt="Admin connectors reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-underReview">Owner-only direction</span><span class="cs-chip cs-chip-draft">1275 KB</span></div>
+    <h2>Admin connectors</h2>
+    <p>Connector governance stays contained in the owner area.</p>
+    <span class="cs-meta">cornerstone-reference-03-admin-connectors.png</span>
   </div>
-  <div class="cs-activity-list">
-<div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">S</span>
-  <div>
-    <strong>Source opened</strong>
-    <p class="cs-meta">Artifact / art_085c96... / 2026-07-04 22:44 UTC</p>
+</article>
+
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-04-search-results.png">
+  <img src="/review/reference-images/cornerstone-reference-04-search-results.png" alt="Search results reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">1350 KB</span></div>
+    <h2>Search results</h2>
+    <p>Universal search, scoped filters, result receipts, and suggested follow-ups.</p>
+    <span class="cs-meta">cornerstone-reference-04-search-results.png</span>
   </div>
-</div>
+</article>
 
-<div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">A</span>
-  <div>
-    <strong>Action proposed</strong>
-    <p class="cs-meta">Action / action_d0f... / 2026-07-04 22:44 UTC</p>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-05-claim-draft-supporting-evidence.png">
+  <img src="/review/reference-images/cornerstone-reference-05-claim-draft-supporting-evidence.png" alt="Claim draft reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">1250 KB</span></div>
+    <h2>Claim draft</h2>
+    <p>Claim statement, trust ladder, supporting evidence, and review controls.</p>
+    <span class="cs-meta">cornerstone-reference-05-claim-draft-supporting-evidence.png</span>
   </div>
-</div>
+</article>
 
-<div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">D</span>
-  <div>
-    <strong>Decision path activated</strong>
-    <p class="cs-meta">Mission / mission_3f... / 2026-07-04 22:44 UTC</p>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-06-artifact-viewer.png">
+  <img src="/review/reference-images/cornerstone-reference-06-artifact-viewer.png" alt="Artifact viewer reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">984 KB</span></div>
+    <h2>Artifact viewer</h2>
+    <p>Original artifact primary, source metadata, derived keywords, linked work, and provenance.</p>
+    <span class="cs-meta">cornerstone-reference-06-artifact-viewer.png</span>
   </div>
-</div>
+</article>
 
-<div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">D</span>
-  <div>
-    <strong>Workspace mode recorded</strong>
-    <p class="cs-meta">Workspace / 3e548f87d1... / 2026-07-04 22:44 UTC</p>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-07-home-upload-ask.png">
+  <img src="/review/reference-images/cornerstone-reference-07-home-upload-ask.png" alt="Home workspace reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">1036 KB</span></div>
+    <h2>Home workspace</h2>
+    <p>Drop zone, ask box, recent items, knowledge states, and next steps.</p>
+    <span class="cs-meta">cornerstone-reference-07-home-upload-ask.png</span>
   </div>
-</div>
+</article>
 
-<div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">D</span>
-  <div>
-    <strong>Decision path prepared</strong>
-    <p class="cs-meta">Mission / mission_3f... / 2026-07-04 22:44 UTC</p>
+<article class="cs-reference-card" data-vs4-reference-image="cornerstone-reference-08-action-dry-run-approval.png">
+  <img src="/review/reference-images/cornerstone-reference-08-action-dry-run-approval.png" alt="Action dry-run reference screen" loading="lazy">
+  <div class="cs-reference-body">
+    <div class="cs-row"><span class="cs-chip cs-chip-searchable">Active surface</span><span class="cs-chip cs-chip-draft">1168 KB</span></div>
+    <h2>Action dry-run</h2>
+    <p>Dry-run impact, proposed changes, policy decision, risk, approval, and auditability.</p>
+    <span class="cs-meta">cornerstone-reference-08-action-dry-run-approval.png</span>
   </div>
-</div>
-</div>
-</section>
+</article>
 
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Latest brief</h2>
-    <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_aa05098502ca4874?view=html">
-    <div>
-      <h3>Brief for vendor renewal</h3>
-      <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 22:44 UTC</div>
-    </div>
-    <span class="cs-meta">Open</span>
-  </a>
-</section>
-
-
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Needs attention</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
-  </div>
-  <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_aa05098502ca4874?view=html">
-  <div>
-    <div class="cs-meta">Brief</div>
-    <h3>Brief for vendor renewal</h3>
-    <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 22:44 UTC</div>
-  </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
-</a>
-
-<a class="cs-list-row" href="/claims/claim_11873eca1e1e0c1e?view=html">
-  <div>
-    <div class="cs-meta">Claim</div>
-    <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 22:44 UTC</div>
-  </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
-</a>
-
-<a class="cs-list-row" href="/actions/action_d0f97ac674679b20?view=html">
-  <div>
-    <div class="cs-meta">Action</div>
-    <h3>Draft a vendor renewal follow-up</h3>
-    <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 22:44 UTC</div>
-  </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
-</a>
-</div>
-</section>
-
-  </aside>
 </section>
 
       </div>
