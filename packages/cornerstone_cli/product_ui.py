@@ -1299,6 +1299,215 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-trust-step.is-active strong::before {{ border-color: var(--cs-state-evidenceBacked-fg); background: var(--cs-state-evidenceBacked-fg); }}
 .cs-trust-step.is-locked {{ opacity: .76; }}
+.cs-claim-workbench {{
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+}}
+.cs-claim-hero {{
+  display: grid;
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-claim-breadcrumb {{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-claim-breadcrumb a {{ color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); }}
+.cs-claim-titlebar {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-5);
+  align-items: start;
+}}
+.cs-claim-titlebar h1 {{
+  margin: 0;
+  font-size: var(--cs-typography-pageTitle-fontSize);
+  line-height: var(--cs-typography-pageTitle-lineHeight);
+  text-wrap: balance;
+}}
+.cs-claim-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}}
+.cs-button.is-disabled {{
+  cursor: not-allowed;
+  opacity: .68;
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-text-muted);
+  border-color: var(--cs-color-border-default);
+  box-shadow: none;
+}}
+.cs-button.is-disabled:hover {{ transform: none; box-shadow: none; }}
+.cs-claim-progress {{
+  position: relative;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 76%, var(--cs-color-surface-subtle));
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-claim-progress::before {{
+  content: "";
+  position: absolute;
+  left: var(--cs-space-8);
+  right: var(--cs-space-8);
+  top: 31px;
+  border-top: 1px dashed var(--cs-color-border-strong);
+}}
+.cs-claim-progress-step {{
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: var(--cs-space-2);
+  text-align: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-claim-dot {{
+  width: 18px;
+  height: 18px;
+  border-radius: var(--cs-radius-full);
+  border: 2px solid var(--cs-color-border-strong);
+  background: var(--cs-color-surface-primary);
+}}
+.cs-claim-progress-step.is-active {{ color: var(--cs-color-text-primary); font-weight: var(--cs-typography-weight-semibold); }}
+.cs-claim-progress-step.is-active .cs-claim-dot {{
+  border-color: var(--cs-color-primary-600);
+  background: var(--cs-color-primary-600);
+  box-shadow: 0 0 0 4px var(--cs-color-primary-100);
+}}
+.cs-claim-tabs {{
+  display: flex;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+  overflow-x: auto;
+}}
+.cs-claim-tab {{
+  padding: 0 0 var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+  white-space: nowrap;
+}}
+.cs-claim-tab.is-active {{
+  color: var(--cs-color-primary-700);
+  border-bottom: 2px solid var(--cs-color-primary-600);
+}}
+.cs-claim-form-card {{
+  display: grid;
+  gap: var(--cs-space-4);
+}}
+.cs-claim-field {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-claim-field.is-primary {{
+  border-color: var(--cs-color-primary-100);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cs-color-primary-500) 18%, transparent);
+}}
+.cs-claim-field-head {{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-claim-text {{
+  margin: 0;
+  color: var(--cs-color-text-primary);
+  font-size: 15px;
+  line-height: 1.7;
+}}
+.cs-claim-text.is-statement {{
+  font-size: 16px;
+  line-height: 1.75;
+}}
+.cs-claim-field-foot {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  text-align: right;
+}}
+.cs-claim-taxonomy {{
+  display: grid;
+  grid-template-columns: minmax(180px, .42fr) minmax(0, 1fr);
+  gap: var(--cs-space-3);
+}}
+.cs-claim-select, .cs-claim-tags {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  min-height: 42px;
+  padding: var(--cs-space-2) var(--cs-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}}
+.cs-claim-footrail {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-claim-footrail div {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-claim-footrail strong {{
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-claim-control-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-claim-control-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-claim-control-mark {{
+  width: 26px;
+  height: 26px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-text-secondary);
+  border: 1px solid var(--cs-color-border-default);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-claim-control-row.is-ready .cs-claim-control-mark {{
+  background: var(--cs-state-evidenceBacked-bg);
+  color: var(--cs-state-evidenceBacked-fg);
+  border-color: var(--cs-state-evidenceBacked-border);
+}}
+.cs-claim-control-row.is-review .cs-claim-control-mark {{
+  background: var(--cs-state-underReview-bg);
+  color: var(--cs-state-underReview-fg);
+  border-color: var(--cs-state-underReview-border);
+}}
+.cs-claim-control-row strong, .cs-claim-control-row p {{ margin: 0; }}
 .cs-form-surface {{
   display: grid;
   gap: var(--cs-space-4);
@@ -1524,7 +1733,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1538,8 +1747,10 @@ button, input, textarea {{ font: inherit; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
+  .cs-claim-actions {{ justify-content: flex-start; }}
+  .cs-claim-progress::before {{ display: none; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-document-page {{ min-height: auto; }}
@@ -2982,48 +3193,125 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     review_note = "Evidence attached; request review before approval." if has_sources else "Add evidence before approval."
     approval_note = "Approval stays locked until review is recorded." if has_sources else "Approval stays locked until supporting evidence is attached."
     rationale = str(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before promoting this claim."
+    claim_title = _claim_title(claim)
+    claim_statement = str(claim.get("statement") or claim_title)
+    claim_id = str(claim.get("claim_id") or "claim")
+    status_label = str(claim.get("status") or "draft").replace("_", " ").title()
+    confidence_label = "Medium" if has_sources else "Needs evidence"
+    source_label = f"{len(source_items)} source{'s' if len(source_items) != 1 else ''}"
+    first_source = source_items[0] if source_items else {}
+    first_fingerprint = str(first_source.get("fingerprint") or "Not recorded")
+    approved_stage = "is-active" if is_approved else ""
+    evidence_stage = "is-active" if has_sources or is_approved else ""
+    category = "Decision support"
+    tags = [
+        "Evidence review",
+        "Owner approval",
+        "Audit-ready",
+    ]
+    review_class = "is-ready" if has_sources else "is-review"
     return f"""
-<section class="cs-grid-two" data-product-surface="claim-detail">
+<section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail">
   <div class="cs-stack">
-    <div class="cs-brief-hero">
-      <div class="cs-brief-title">
-        <div class="cs-kicker">Claim builder</div>
-        <h1>{h(_claim_title(claim))}</h1>
-        <div class="cs-brief-meta">
-          <span>Draft conclusion</span>
-          <span>{h(_display_date(claim))}</span>
-          <span>{h(len(source_items))} source{"s" if len(source_items) != 1 else ""} attached</span>
+    <div class="cs-claim-hero">
+      <div class="cs-claim-breadcrumb">
+        <a href="/claims">Claims</a>
+        <span aria-hidden="true">/</span>
+        <span>{h(claim_title)}</span>
+      </div>
+      <div class="cs-claim-titlebar">
+        <div class="cs-brief-title">
+          <h1>{h(claim_title)}</h1>
+          <div class="cs-brief-meta">
+            <span>Claim draft</span>
+            <span>Created {h(_display_date(claim))}</span>
+            <span>{h(source_label)} attached</span>
+          </div>
+        </div>
+        <div class="cs-claim-actions" aria-label="Claim review actions">
+          <a class="cs-button secondary" href="/claims">Save draft</a>
+          <a class="cs-button secondary" href="/inbox">Request review</a>
+          <span class="cs-button is-disabled" aria-disabled="true">Promote locked</span>
         </div>
       </div>
       <div class="cs-row">{_chip(label, state)}{_chip("Review required before approval", "underReview")}</div>
+      <div class="cs-claim-progress" aria-label="Trust ladder">
+        <div class="cs-claim-progress-step is-active">
+          <span class="cs-claim-dot" aria-hidden="true"></span>
+          <span>Draft</span>
+        </div>
+        <div class="cs-claim-progress-step {evidence_stage}">
+          <span class="cs-claim-dot" aria-hidden="true"></span>
+          <span>Evidence-backed</span>
+        </div>
+        <div class="cs-claim-progress-step {approved_stage}">
+          <span class="cs-claim-dot" aria-hidden="true"></span>
+          <span>Approved</span>
+        </div>
+      </div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
+          <h2>Claim statement</h2>
+          <p class="cs-muted">Draft freely, attach visible evidence, then request review before a decision uses this claim.</p>
+        </div>
+      </div>
+      <div class="cs-claim-tabs" aria-label="Claim workspace sections">
+        <span class="cs-claim-tab is-active">Claim</span>
+        <span class="cs-claim-tab">Supporting evidence</span>
+        <span class="cs-claim-tab">Counter evidence</span>
+        <span class="cs-claim-tab">Discussion</span>
+      </div>
+      <div class="cs-claim-form-card">
+        <div class="cs-claim-field is-primary">
+          <div class="cs-claim-field-head">
+            <div>
+              <strong>Claim statement</strong>
+              <p class="cs-muted">Provide a clear statement that can be traced to sources.</p>
+            </div>
+            {_chip(confidence_label, "underReview" if has_sources else "insufficientEvidence")}
+          </div>
+          <p class="cs-claim-text is-statement">{h(claim_statement)}</p>
+          <div class="cs-claim-field-foot">{h(str(len(claim_statement)))} / 500</div>
+        </div>
+        <div class="cs-claim-field">
+          <div class="cs-claim-field-head">
+            <div>
+              <strong>Rationale</strong>
+              <p class="cs-muted">Why does this claim matter for the next decision?</p>
+            </div>
+          </div>
+          <p class="cs-claim-text">{h(rationale)}</p>
+          <div class="cs-claim-field-foot">{h(str(len(rationale)))} / 1000</div>
+        </div>
+        <div class="cs-claim-taxonomy">
+          <div class="cs-claim-select">
+            <span class="cs-meta">Claim category</span>
+            <strong>{h(category)}</strong>
+          </div>
+          <div class="cs-claim-tags" aria-label="Claim tags">
+            <span class="cs-meta">Tags</span>
+            {"".join(_chip(tag, "draft") for tag in tags)}
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header">
+        <div>
           <h2>Trust ladder</h2>
-          <p class="cs-muted">Draft freely, attach evidence, then request review before a decision uses this claim.</p>
+          <p class="cs-muted">Decision use is blocked until the claim has source support and review.</p>
         </div>
       </div>
       {_claim_trust_ladder(has_sources, is_approved)}
       <p class="cs-muted">{h(review_note)}</p>
     </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Claim draft</h2>
-          <p class="cs-muted">Statement and rationale stay editable until review.</p>
-        </div>
-      </div>
-      <div class="cs-form-surface">
-        <div class="cs-field-block">
-          <span class="cs-meta">Claim statement</span>
-          <p>{h(str(claim.get("statement") or ""))}</p>
-        </div>
-        <div class="cs-field-block">
-          <span class="cs-meta">Rationale</span>
-          <p>{h(rationale)}</p>
-        </div>
-      </div>
+    <section class="cs-claim-footrail" aria-label="Claim provenance">
+      <div><span class="cs-meta">Claim ID</span><strong>{h(claim_id)}</strong></div>
+      <div><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong></div>
+      <div><span class="cs-meta">Status</span><strong>{h(status_label)}</strong></div>
+      <div><span class="cs-meta">Fingerprint</span><strong>{h(first_fingerprint)}</strong></div>
     </section>
   </div>
   <aside class="cs-stack">
@@ -3042,7 +3330,39 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <div class="cs-review-box">
         <a class="cs-button secondary" href="/claims">Save draft</a>
         <a class="cs-button" href="/inbox">Request review</a>
+        <span class="cs-button is-disabled" aria-disabled="true">Promote to decision locked</span>
         <p class="cs-muted">{h(approval_note)}</p>
+      </div>
+    </section>
+    <section class="cs-panel flat">
+      <div class="cs-panel-header">
+        <div>
+          <h2>Decision gate</h2>
+          <p class="cs-muted">Source support, owner review, and audit records stay separate before promotion.</p>
+        </div>
+      </div>
+      <div class="cs-claim-control-list">
+        <div class="cs-claim-control-row {review_class}">
+          <span class="cs-claim-control-mark" aria-hidden="true">1</span>
+          <div>
+            <strong>Source support</strong>
+            <p class="cs-muted">{h(source_label)} visible in this workspace.</p>
+          </div>
+        </div>
+        <div class="cs-claim-control-row is-review">
+          <span class="cs-claim-control-mark" aria-hidden="true">2</span>
+          <div>
+            <strong>Owner review</strong>
+            <p class="cs-muted">Review required before approval or shared truth.</p>
+          </div>
+        </div>
+        <div class="cs-claim-control-row">
+          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
+          <div>
+            <strong>No autonomous action</strong>
+            <p class="cs-muted">This claim cannot trigger external work from this page.</p>
+          </div>
+        </div>
       </div>
     </section>
     <section class="cs-panel flat">

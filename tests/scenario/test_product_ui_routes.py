@@ -216,6 +216,10 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Evidence-backed", claim_html)
         self.assertIn("Supporting evidence", claim_html)
         self.assertIn("Review controls", claim_html)
+        self.assertIn("Claim statement", claim_html)
+        self.assertIn("Decision gate", claim_html)
+        self.assertIn("Source support", claim_html)
+        self.assertIn("Promote to decision locked", claim_html)
         self.assertIn("Review required before approval", claim_html)
         self.assert_product_surface_is_clean(claim_html)
 

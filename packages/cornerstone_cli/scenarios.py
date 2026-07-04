@@ -27468,7 +27468,7 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
         and vs0.get("status") == "success"
         and vs0.get("summary", {}).get("blocking") == 0
         and {row.get("id") for row in vs0.get("scenario_results", [])} == set(vs0_rows)
-        and str(vs0.get("browser_proof", {}).get("status")).lower() in {"pass", "passed"}
+        and str(vs0.get("browser_proof", {}).get("status")).lower() in {"pass", "passed", "success"}
     )
     vs1_ok = (
         vs1_workflow.get("status") == "success"

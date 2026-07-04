@@ -936,6 +936,215 @@ button, input, textarea { font: inherit; }
 }
 .cs-trust-step.is-active strong::before { border-color: var(--cs-state-evidenceBacked-fg); background: var(--cs-state-evidenceBacked-fg); }
 .cs-trust-step.is-locked { opacity: .76; }
+.cs-claim-workbench {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
+}
+.cs-claim-hero {
+  display: grid;
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-claim-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-claim-breadcrumb a { color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); }
+.cs-claim-titlebar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-5);
+  align-items: start;
+}
+.cs-claim-titlebar h1 {
+  margin: 0;
+  font-size: var(--cs-typography-pageTitle-fontSize);
+  line-height: var(--cs-typography-pageTitle-lineHeight);
+  text-wrap: balance;
+}
+.cs-claim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}
+.cs-button.is-disabled {
+  cursor: not-allowed;
+  opacity: .68;
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-text-muted);
+  border-color: var(--cs-color-border-default);
+  box-shadow: none;
+}
+.cs-button.is-disabled:hover { transform: none; box-shadow: none; }
+.cs-claim-progress {
+  position: relative;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 76%, var(--cs-color-surface-subtle));
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}
+.cs-claim-progress::before {
+  content: "";
+  position: absolute;
+  left: var(--cs-space-8);
+  right: var(--cs-space-8);
+  top: 31px;
+  border-top: 1px dashed var(--cs-color-border-strong);
+}
+.cs-claim-progress-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: var(--cs-space-2);
+  text-align: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-claim-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--cs-radius-full);
+  border: 2px solid var(--cs-color-border-strong);
+  background: var(--cs-color-surface-primary);
+}
+.cs-claim-progress-step.is-active { color: var(--cs-color-text-primary); font-weight: var(--cs-typography-weight-semibold); }
+.cs-claim-progress-step.is-active .cs-claim-dot {
+  border-color: var(--cs-color-primary-600);
+  background: var(--cs-color-primary-600);
+  box-shadow: 0 0 0 4px var(--cs-color-primary-100);
+}
+.cs-claim-tabs {
+  display: flex;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+  overflow-x: auto;
+}
+.cs-claim-tab {
+  padding: 0 0 var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+  white-space: nowrap;
+}
+.cs-claim-tab.is-active {
+  color: var(--cs-color-primary-700);
+  border-bottom: 2px solid var(--cs-color-primary-600);
+}
+.cs-claim-form-card {
+  display: grid;
+  gap: var(--cs-space-4);
+}
+.cs-claim-field {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-claim-field.is-primary {
+  border-color: var(--cs-color-primary-100);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cs-color-primary-500) 18%, transparent);
+}
+.cs-claim-field-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  align-items: center;
+}
+.cs-claim-text {
+  margin: 0;
+  color: var(--cs-color-text-primary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+.cs-claim-text.is-statement {
+  font-size: 16px;
+  line-height: 1.75;
+}
+.cs-claim-field-foot {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  text-align: right;
+}
+.cs-claim-taxonomy {
+  display: grid;
+  grid-template-columns: minmax(180px, .42fr) minmax(0, 1fr);
+  gap: var(--cs-space-3);
+}
+.cs-claim-select, .cs-claim-tags {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  min-height: 42px;
+  padding: var(--cs-space-2) var(--cs-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}
+.cs-claim-footrail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}
+.cs-claim-footrail div {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-claim-footrail strong {
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-claim-control-list {
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-claim-control-row {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-claim-control-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-text-secondary);
+  border: 1px solid var(--cs-color-border-default);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-claim-control-row.is-ready .cs-claim-control-mark {
+  background: var(--cs-state-evidenceBacked-bg);
+  color: var(--cs-state-evidenceBacked-fg);
+  border-color: var(--cs-state-evidenceBacked-border);
+}
+.cs-claim-control-row.is-review .cs-claim-control-mark {
+  background: var(--cs-state-underReview-bg);
+  color: var(--cs-state-underReview-fg);
+  border-color: var(--cs-state-underReview-border);
+}
+.cs-claim-control-row strong, .cs-claim-control-row p { margin: 0; }
 .cs-form-surface {
   display: grid;
   gap: var(--cs-space-4);
@@ -1161,7 +1370,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -1175,8 +1384,10 @@ button, input, textarea { font: inherit; }
   .cs-ask-bar { grid-template-columns: 1fr; }
   .cs-suggestion-row { grid-template-columns: 1fr; }
   .cs-brief-actions { justify-content: flex-start; }
+  .cs-claim-actions { justify-content: flex-start; }
+  .cs-claim-progress::before { display: none; }
   .cs-trust-ladder, .cs-action-summary { grid-template-columns: 1fr; }
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card { grid-template-columns: 1fr; }
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
   .cs-artifact-actions { justify-content: flex-start; }
   .cs-document-page { min-height: auto; }
@@ -1283,22 +1494,22 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
   <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_56517625d06ba838?view=html">
+<a class="cs-home-item" href="/claims/claim_c83b26a92ba48173?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">C</span>
   <span>
     <p>Claim</p>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-04 19:24 UTC - Review source support</p>
+    <p>2026-07-04 19:34 UTC - Review source support</p>
   </span>
   <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
 </a>
 
-<a class="cs-home-item" href="/actions/action_ea127202f0378df7?view=html">
+<a class="cs-home-item" href="/actions/action_23c1a26bd9709496?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">A</span>
   <span>
     <p>Action</p>
     <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-04 19:24 UTC - Preview before approval</p>
+    <p>2026-07-04 19:34 UTC - Preview before approval</p>
   </span>
   <span class="cs-chip cs-chip-underReview">Needs approval</span>
 </a>
@@ -1308,17 +1519,17 @@ button, input, textarea { font: inherit; }
   <span>
     <p>Source</p>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-04 19:24 UTC - Original text preserved</p>
+    <p>2026-07-04 19:34 UTC - Original text preserved</p>
   </span>
   <span class="cs-chip cs-chip-searchable">Searchable</span>
 </a>
 
-<a class="cs-home-item" href="/briefs/brief_42c7b01c0502cd38?view=html">
+<a class="cs-home-item" href="/briefs/brief_10de52018c9154e3?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">B</span>
   <span>
     <p>Brief</p>
     <h3>Brief for vendor renewal</h3>
-    <p>2026-07-04 19:24 UTC - Draft from visible sources</p>
+    <p>2026-07-04 19:34 UTC - Draft from visible sources</p>
   </span>
   <span class="cs-chip cs-chip-draft">Keyword summary</span>
 </a>
@@ -1397,11 +1608,11 @@ button, input, textarea { font: inherit; }
     <h2>Latest brief</h2>
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_42c7b01c0502cd38?view=html">
+  <a class="cs-list-row" href="/briefs/brief_10de52018c9154e3?view=html">
     <div>
       <h3>Brief for vendor renewal</h3>
       <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
-      <div class="cs-meta">2026-07-04 19:24 UTC</div>
+      <div class="cs-meta">2026-07-04 19:34 UTC</div>
     </div>
     <span class="cs-meta">Open</span>
   </a>
@@ -1414,32 +1625,32 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_42c7b01c0502cd38?view=html">
+<a class="cs-list-row" href="/briefs/brief_10de52018c9154e3?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 19:24 UTC</div>
+    <div class="cs-meta">2026-07-04 19:34 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_56517625d06ba838?view=html">
+<a class="cs-list-row" href="/claims/claim_c83b26a92ba48173?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 19:24 UTC</div>
+    <div class="cs-meta">2026-07-04 19:34 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_ea127202f0378df7?view=html">
+<a class="cs-list-row" href="/actions/action_23c1a26bd9709496?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 19:24 UTC</div>
+    <div class="cs-meta">2026-07-04 19:34 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>

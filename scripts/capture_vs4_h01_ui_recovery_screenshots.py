@@ -70,7 +70,7 @@ DETAIL_ROUTES = [
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Trust ladder", "Supporting evidence", "Review controls"],
+        "required": ["Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Action review status", "Policy decision", "Approval history"]},
 ]
