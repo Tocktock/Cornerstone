@@ -102,7 +102,7 @@ DETAIL_ROUTES = [
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support", "Impacted objects", "Related frameworks", "Saved locally"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Action review status", "Dry-run sequence", "Proposed changes", "Call preview", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
 ]
@@ -115,6 +115,7 @@ MOBILE_ROUTE_NAMES = {
     "claims-desktop",
     "home-desktop",
     "brief-detail-desktop",
+    "claim-detail-desktop",
     "search-desktop",
     "inbox-desktop",
     "action-detail-desktop",
