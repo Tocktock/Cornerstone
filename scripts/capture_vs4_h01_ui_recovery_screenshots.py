@@ -47,10 +47,10 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 DESKTOP_ROUTES = [
     {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Drop anything, or ask what we know", "Save a source", "Ask the workspace"]},
     {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search the workspace", "What we found", "Suggested follow-ups"]},
-    {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources"]},
+    {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief drafts"]},
-    {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support"]},
-    {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts"]},
+    {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Claim review queue", "Review posture"]},
+    {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Action preview queue", "Dry-run posture"]},
     {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Needs review", "Selected item", "Next actions"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail"]},
 ]

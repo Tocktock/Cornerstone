@@ -978,6 +978,73 @@ button, input, textarea {{ font: inherit; }}
 .cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
 .cs-inbox-actions {{ display: grid; gap: var(--cs-space-2); }}
 .cs-inbox-actions .cs-button {{ justify-content: center; text-align: center; }}
+.cs-collection-workbench {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}}
+.cs-collection-summary {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-collection-stat {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-collection-stat strong {{
+  font-size: 22px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}}
+.cs-collection-toolbar {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-collection-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-collection-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-collection-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
+.cs-collection-icon {{
+  width: 32px;
+  height: 32px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-collection-body {{ display: grid; gap: var(--cs-space-1); }}
+.cs-collection-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
+.cs-collection-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 82ch; }}
+.cs-collection-meta {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-empty {{
   border: 1px dashed var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1232,7 +1299,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1244,7 +1311,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-document-page {{ min-height: auto; }}
@@ -1734,8 +1801,69 @@ def _search_empty(q: str) -> str:
     return '<div class="cs-empty">Enter a keyword to search saved sources, briefs, claims, and action drafts.</div>'
 
 
+def _collection_summary(stats: list[tuple[str, int]]) -> str:
+    cards = "".join(
+        f"""
+<div class="cs-collection-stat">
+  <span class="cs-meta">{h(label)}</span>
+  <strong>{h(value)}</strong>
+</div>
+"""
+        for label, value in stats
+    )
+    return f'<div class="cs-collection-summary" aria-label="Collection summary">{cards}</div>'
+
+
+def _collection_toolbar(label: str, count: int, filters: list[str]) -> str:
+    chips = "".join(f'<span class="cs-filter-chip">{h(item)}</span>' for item in filters)
+    return f"""
+<div class="cs-collection-toolbar">
+  <div>
+    <strong>{h(label)}</strong>
+    <div class="cs-meta">{h(count)} visible item{"s" if count != 1 else ""}</div>
+  </div>
+  <div class="cs-filter-row" style="margin-top: 0;">{chips}</div>
+</div>
+"""
+
+
+def _collection_row(
+    icon: str,
+    title: str,
+    detail: str,
+    href: str,
+    meta: list[tuple[str, str]],
+    chips: list[tuple[str, str]],
+) -> str:
+    meta_row = "".join(f"<span>{h(label)}</span>" for label, _ in meta)
+    chip_row = "".join(_chip(label, state) for label, state in chips)
+    return f"""
+<a class="cs-collection-row" href="{h(href)}">
+  <span class="cs-collection-icon" aria-hidden="true">{h(icon)}</span>
+  <span class="cs-collection-body">
+    <span class="cs-collection-meta">{meta_row}</span>
+    <h3>{h(title)}</h3>
+    <p>{h(_truncate(detail, 240))}</p>
+  </span>
+  <span class="cs-row">{chip_row}</span>
+</a>
+"""
+
+
 def _artifact_list_page(ctx: dict[str, Any]) -> str:
-    rows = "".join(_source_row(artifact) for artifact in ctx["artifacts"]) or '<div class="cs-empty">No saved sources yet. Start from Home.</div>'
+    artifacts = ctx["artifacts"]
+    rows = "".join(
+        _collection_row(
+            "S",
+            _artifact_title(artifact),
+            str(artifact.get("_preview") or "Open to inspect the saved source."),
+            _detail_href("artifacts", artifact.get("artifact_id")),
+            [("Source", ""), (_display_date(artifact), "")],
+            [("Searchable", "searchable"), ("Saved", "saved")],
+        )
+        for artifact in artifacts
+    ) or '<div class="cs-empty">No saved sources yet. Start from Home.</div>'
+    linked_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"], *ctx["actions"]] for ref in _evidence_refs(record) if ref.startswith("artifact:"))
     return f"""
 <section data-product-surface="artifacts">
   <div class="cs-page-head">
@@ -1743,7 +1871,31 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
     <h1>Saved sources</h1>
     <p>Every source remains preserved before any derived text, brief, claim, or action draft uses it.</p>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-collection-workbench">
+    <div>
+      {_collection_summary([("Saved sources", len(artifacts)), ("Linked refs", linked_count), ("Searchable", len(artifacts))])}
+      {_collection_toolbar("Source register", len(artifacts), ["Scope: personal/default", "Type: all sources", "Sort: newest first"])}
+      <div class="cs-collection-list">{rows}</div>
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Collection summary</h2>
+        <p class="cs-muted">Original sources stay first. Open a source before using derived claims or action drafts.</p>
+        <div class="cs-review-box">
+          <a class="cs-button" href="/">Save another source</a>
+          <a class="cs-button secondary" href="/search">Search sources</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Source posture</h2>
+        <dl class="cs-detail-grid">
+          <dt>Preserved</dt><dd>{h(len(artifacts))}</dd>
+          <dt>Linked uses</dt><dd>{h(linked_count)}</dd>
+          <dt>Trust</dt><dd>Untrusted until checked</dd>
+        </dl>
+      </section>
+    </aside>
+  </div>
 </section>
 """
 
@@ -1770,11 +1922,22 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
 
 
 def _claim_list_page(ctx: dict[str, Any]) -> str:
+    claims = ctx["claims"]
     rows = ""
-    for claim in ctx["claims"]:
+    for claim in claims:
         label, state = _claim_label(claim)
-        rows += _generic_row("Claim", _claim_title(claim), "Review source support before approval.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))
+        source_count = len([ref for ref in _evidence_refs(claim) if ref.startswith("artifact:")])
+        rows += _collection_row(
+            "C",
+            _claim_title(claim),
+            "Review source support before approval.",
+            _detail_href("claims", claim.get("claim_id")),
+            [("Claim", ""), (_display_date(claim), ""), (f"{source_count} source refs", "")],
+            [(label, state), ("Review required", "underReview")],
+        )
     rows = rows or '<div class="cs-empty">No claims yet.</div>'
+    supported_count = sum(1 for claim in claims if _evidence_refs(claim))
+    approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
     return f"""
 <section data-product-surface="claims">
   <div class="cs-page-head">
@@ -1782,19 +1945,53 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
     <h1>Claims that need source support</h1>
     <p>Promote only statements that can be traced back to saved sources.</p>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-collection-workbench">
+    <div>
+      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Approved", approved_count)])}
+      {_collection_toolbar("Claim review queue", len(claims), ["Scope: personal/default", "State: open and approved", "Sort: needs review first"])}
+      <div class="cs-collection-list">{rows}</div>
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Review posture</h2>
+        <p class="cs-muted">Claims should move from draft to evidence-backed to approved only when supporting sources are visible.</p>
+        <div class="cs-review-box">
+          <a class="cs-button" href="/inbox">Open review inbox</a>
+          <a class="cs-button secondary" href="/artifacts">Check sources</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Trust ladder</h2>
+        {_claim_trust_ladder(bool(supported_count), bool(approved_count))}
+      </section>
+    </aside>
+  </div>
 </section>
 """
 
 
 def _action_list_page(ctx: dict[str, Any]) -> str:
+    actions = ctx["actions"]
     rows = ""
-    for action in ctx["actions"]:
+    approval_count = 0
+    for action in actions:
         label, state = _action_label(action)
+        if state == "underReview":
+            approval_count += 1
         dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
         detail = str(dry_run.get("goal") or "Preview before any external write.")
-        rows += _generic_row("Action", _action_title(action), detail, _detail_href("actions", action.get("action_id")), label, state, _display_date(action))
+        impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
+        risk = str(impact.get("risk") or action.get("risk") or "review").title()
+        rows += _collection_row(
+            "A",
+            _action_title(action),
+            detail,
+            _detail_href("actions", action.get("action_id")),
+            [("Action", ""), (_display_date(action), ""), (f"{risk} risk", "")],
+            [(label, state), ("Dry-run first", "searchable")],
+        )
     rows = rows or '<div class="cs-empty">No action drafts yet.</div>'
+    executed_count = sum(1 for action in actions if str(action.get("status") or "").lower() == "executed")
     return f"""
 <section data-product-surface="actions">
   <div class="cs-page-head">
@@ -1802,7 +1999,31 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
     <h1>Action drafts</h1>
     <p>Every action starts with a preview and stays local until approval is clear.</p>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-collection-workbench">
+    <div>
+      {_collection_summary([("Drafts", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
+      {_collection_toolbar("Action preview queue", len(actions), ["Scope: personal/default", "Mode: dry-run first", "Sort: approval risk first"])}
+      <div class="cs-collection-list">{rows}</div>
+    </div>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Dry-run posture</h2>
+        <p class="cs-muted">Actions stay as previews until policy, approval, source support, and auditability are clear.</p>
+        <div class="cs-review-box">
+          <a class="cs-button" href="/inbox">Review approvals</a>
+          <a class="cs-button secondary" href="/audit">Open audit trail</a>
+        </div>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Action safeguards</h2>
+        <dl class="cs-detail-grid">
+          <dt>External sends</dt><dd>Hidden until approved</dd>
+          <dt>Policy</dt><dd>Shown before execution</dd>
+          <dt>Evidence</dt><dd>Linked source rail</dd>
+        </dl>
+      </section>
+    </aside>
+  </div>
 </section>
 """
 

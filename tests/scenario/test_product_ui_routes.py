@@ -217,6 +217,24 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertNotIn("external_writeback", action_html)
         self.assert_product_surface_is_clean(action_html)
 
+        artifacts_html = self.fetch_product_html("/artifacts")
+        self.assertIn("Collection summary", artifacts_html)
+        self.assertIn("Source register", artifacts_html)
+        self.assertIn("Source posture", artifacts_html)
+        self.assert_product_surface_is_clean(artifacts_html)
+
+        claims_html = self.fetch_product_html("/claims")
+        self.assertIn("Claim review queue", claims_html)
+        self.assertIn("Review posture", claims_html)
+        self.assertIn("Trust ladder", claims_html)
+        self.assert_product_surface_is_clean(claims_html)
+
+        actions_html = self.fetch_product_html("/actions")
+        self.assertIn("Action preview queue", actions_html)
+        self.assertIn("Dry-run posture", actions_html)
+        self.assertIn("Action safeguards", actions_html)
+        self.assert_product_surface_is_clean(actions_html)
+
         inbox_html = self.fetch_product_html("/inbox")
         self.assertIn('data-product-surface="inbox"', inbox_html)
         self.assertIn("Needs review", inbox_html)
