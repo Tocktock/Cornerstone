@@ -2,19 +2,19 @@
   "audit_refs": [],
   "blocking": [],
   "blocking_count": 0,
-  "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+  "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json",
   "cli_schema_version": "cs.cli.v0",
   "command": "cornerstone scenario gate",
   "errors": [],
   "evidence_refs": [
-    "report:reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
+    "report:reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json"
   ],
   "ids": {
     "git_commit": "8535120c3"
   },
   "mode": "local_scaffold",
   "namespace_id": "personal",
-  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json",
+  "output_path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline-gate.json",
   "owner_id": "local-user",
   "policy_decision_refs": [],
   "product": "CornerStone",
@@ -50,7 +50,7 @@
     "vs4_slice_024_active_report_package_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
     "vs4_slice_025_ops_inbox_journey_timeline": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
   },
-  "scenario_count": 28,
+  "scenario_count": 21,
   "scenario_gate_conditions": {
     "active_report_package_coherence": true,
     "cli_parity": true,
@@ -88,10 +88,10 @@
     "unsafe_http_boundary_failures": 0
   },
   "scenario_gate_summary": {
-    "actual_scenario_count": 28,
-    "expected_scenario_count": 28,
+    "actual_scenario_count": 21,
+    "expected_scenario_count": 21,
     "failure_count": 0,
-    "full_report": true,
+    "full_report": false,
     "human_ux_acceptance_claim_allowed": false,
     "live_provider_readiness_claim_allowed": false,
     "production_readiness_claim_allowed": false
@@ -120,7 +120,7 @@
       "status": "bound",
       "vs4_h01_remains_human_required": true
     },
-    "path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "path": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json",
     "proof_boundary": {
       "final_security_acceptance": "NOT_CLAIMED",
       "full_vs4": "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED",
@@ -192,19 +192,19 @@
         "layout": "omitted_from_gate_output",
         "sha256": "813f09fbefa7f56de1f2807ab84ec8c4d2cacb6f1b057f063e70b7a0b0f83a48"
       },
-      "generated_dirty_snapshot_hash": "5cef82b4f9a01bf89f9c7b4a3a9f538b437c3bed7adecf82b1d8c5e453cdcbe1",
+      "generated_dirty_snapshot_hash": "042ac10bf1d82c5ab8b71f27d97ea9c062ae8d305784a752c92d093f5df02714",
       "generated_dirty_snapshot_path_count": 105,
       "generated_dirty_snapshot_paths_ref": {
-        "bytes": 20844,
+        "bytes": 20846,
         "layout": "omitted_from_gate_output",
-        "sha256": "9c6fcf6afa76651e4fc863d423a5fc149f0fdb5de3467a00010fa69bd4545219"
+        "sha256": "c4b2975e927487d0699aa5ff9259d27498584ce737e6da7512d80b41cf3f6498"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
-        "bytes": 38164,
+        "bytes": 38166,
         "layout": "omitted_from_gate_output",
-        "sha256": "a246b88b0c5dc8f165a8e4760b7d166c9e46c42df06a6807d0204469140dd7f7"
+        "sha256": "f1ae720b98995b6c8481a2faaaff12e68733af4a8c52488d40d8c85a9677c8c5"
       },
       "verified_base_commit": "8535120c3",
       "verified_base_commit_full": "8535120c3771c1ff752f82bb4a52f35d07830f2f",
@@ -222,13 +222,14 @@
     "summary": {
       "blocking": 0,
       "fail": 0,
-      "human_required": 1,
+      "human_required": 0,
       "in_this_slice": 21,
       "not_run": 0,
-      "pass": 27,
+      "not_verified": 0,
+      "pass": 21,
       "previous_slice": 6,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 28
+      "scenario_count": 21
     }
   },
   "status": "success",
@@ -236,17 +237,18 @@
     "blocking": 0,
     "fail": 0,
     "final_security_acceptance_claim_allowed": false,
-    "human_required": 1,
+    "human_required": 0,
     "human_ux_acceptance_claim_allowed": false,
     "in_this_slice": 21,
     "live_provider_readiness_claim_allowed": false,
     "not_run": 0,
-    "pass": 27,
+    "not_verified": 0,
+    "pass": 21,
     "previous_slice": 6,
     "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
     "production_onprem_readiness_claim_allowed": false,
     "production_readiness_claim_allowed": false,
-    "scenario_count": 28
+    "scenario_count": 21
   },
   "tenant_id": "local-dev",
   "version": "0.0.0-scaffold",
@@ -254,9 +256,6 @@
     "actual_ids": [
       "VS4-GATE-001",
       "VS4-UI-001",
-      "VS4-UI-002",
-      "VS4-UI-003",
-      "VS4-UI-004",
       "VS4-UI-005",
       "VS4-UI-006",
       "VS4-UI-007",
@@ -266,23 +265,19 @@
       "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-014",
       "VS4-UI-015",
       "VS4-UI-016",
       "VS4-STATE-001",
       "VS4-REF-001",
       "VS4-REF-002",
-      "VS4-REG-001",
-      "VS4-REG-002",
       "VS4-REG-003",
       "VS4-REG-004",
       "VS4-REG-005",
       "VS4-REG-006",
-      "VS4-REG-007",
-      "VS4-H01"
+      "VS4-REG-007"
     ],
-    "actual_scenario_count": 28,
-    "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json",
+    "actual_scenario_count": 21,
+    "checked_report": "/Users/jiyong/playground/Cornerstone/reports/scenario/vs4-product-alpha-ui-daily-loop-slice-025-ops-inbox-journey-timeline.json",
     "conditions": {
       "active_report_package_coherence": true,
       "cli_parity": true,
@@ -304,10 +299,15 @@
     "expected_full_scenario_count": 28,
     "expected_ids": [
       "VS4-GATE-001",
+      "VS4-REF-001",
+      "VS4-REF-002",
+      "VS4-REG-003",
+      "VS4-REG-004",
+      "VS4-REG-005",
+      "VS4-REG-006",
+      "VS4-REG-007",
+      "VS4-STATE-001",
       "VS4-UI-001",
-      "VS4-UI-002",
-      "VS4-UI-003",
-      "VS4-UI-004",
       "VS4-UI-005",
       "VS4-UI-006",
       "VS4-UI-007",
@@ -317,25 +317,13 @@
       "VS4-UI-011",
       "VS4-UI-012",
       "VS4-UI-013",
-      "VS4-UI-014",
       "VS4-UI-015",
-      "VS4-UI-016",
-      "VS4-STATE-001",
-      "VS4-REF-001",
-      "VS4-REF-002",
-      "VS4-REG-001",
-      "VS4-REG-002",
-      "VS4-REG-003",
-      "VS4-REG-004",
-      "VS4-REG-005",
-      "VS4-REG-006",
-      "VS4-REG-007",
-      "VS4-H01"
+      "VS4-UI-016"
     ],
-    "expected_scenario_count": 28,
+    "expected_scenario_count": 21,
     "failure_count": 0,
     "failures": [],
-    "full_report": true,
+    "full_report": false,
     "negative_evidence": {
       "active_report_package_coherence_failures": 0,
       "cli_parity_failures": 0,
@@ -386,7 +374,29 @@
       "vs4_slice_024_active_report_package_coherence": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED",
       "vs4_slice_025_ops_inbox_journey_timeline": "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS_WITH_VS4_H01_HUMAN_REQUIRED"
     },
-    "scenario_filter": [],
+    "scenario_filter": [
+      "VS4-GATE-001",
+      "VS4-REF-001",
+      "VS4-REF-002",
+      "VS4-REG-003",
+      "VS4-REG-004",
+      "VS4-REG-005",
+      "VS4-REG-006",
+      "VS4-REG-007",
+      "VS4-STATE-001",
+      "VS4-UI-001",
+      "VS4-UI-005",
+      "VS4-UI-006",
+      "VS4-UI-007",
+      "VS4-UI-008",
+      "VS4-UI-009",
+      "VS4-UI-010",
+      "VS4-UI-011",
+      "VS4-UI-012",
+      "VS4-UI-013",
+      "VS4-UI-015",
+      "VS4-UI-016"
+    ],
     "scenario_set": "vs4-product-alpha-ui-daily-loop",
     "schema_version": "cs.vs4_product_alpha_scenario_gate_validation.v0",
     "source_tree": {
@@ -397,19 +407,19 @@
         "layout": "omitted_from_gate_output",
         "sha256": "813f09fbefa7f56de1f2807ab84ec8c4d2cacb6f1b057f063e70b7a0b0f83a48"
       },
-      "generated_dirty_snapshot_hash": "5cef82b4f9a01bf89f9c7b4a3a9f538b437c3bed7adecf82b1d8c5e453cdcbe1",
+      "generated_dirty_snapshot_hash": "042ac10bf1d82c5ab8b71f27d97ea9c062ae8d305784a752c92d093f5df02714",
       "generated_dirty_snapshot_path_count": 105,
       "generated_dirty_snapshot_paths_ref": {
-        "bytes": 20844,
+        "bytes": 20846,
         "layout": "omitted_from_gate_output",
-        "sha256": "9c6fcf6afa76651e4fc863d423a5fc149f0fdb5de3467a00010fa69bd4545219"
+        "sha256": "c4b2975e927487d0699aa5ff9259d27498584ce737e6da7512d80b41cf3f6498"
       },
       "report_generated_before_commit": true,
       "schema_version": "cs.vs4_gate_source_tree_summary.v0",
       "source_tree_ref": {
-        "bytes": 38164,
+        "bytes": 38166,
         "layout": "omitted_from_gate_output",
-        "sha256": "a246b88b0c5dc8f165a8e4760b7d166c9e46c42df06a6807d0204469140dd7f7"
+        "sha256": "f1ae720b98995b6c8481a2faaaff12e68733af4a8c52488d40d8c85a9677c8c5"
       },
       "verified_base_commit": "8535120c3",
       "verified_base_commit_full": "8535120c3771c1ff752f82bb4a52f35d07830f2f",
@@ -427,13 +437,14 @@
     "summary": {
       "blocking": 0,
       "fail": 0,
-      "human_required": 1,
+      "human_required": 0,
       "in_this_slice": 21,
       "not_run": 0,
-      "pass": 27,
+      "not_verified": 0,
+      "pass": 21,
       "previous_slice": 6,
       "product_feature_claims": "LOCAL_VS4_AI_VERIFIABLE_ROWS_COMPLETE_HUMAN_UX_REQUIRED",
-      "scenario_count": 28
+      "scenario_count": 21
     }
   },
   "workspace_id": "default"

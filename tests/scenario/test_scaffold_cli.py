@@ -12505,6 +12505,21 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["in_this_slice"], VS4_ACTIVE_SLICE_SCENARIO_COUNT)
         self.assertEqual(payload["summary"]["blocking"], 0)
         self.assertEqual(payload["summary"]["not_run"], 0)
+        self.assertEqual(payload["report_compaction"]["schema_version"], "cs.vs4_report_compaction.v0")
+        self.assertTrue(payload["report_compaction"]["regression_transcripts_hashed"])
+        self.assertNotIn("trace", payload["browser_proof"]["brief_evidence"])
+        self.assertIn("trace_ref", payload["browser_proof"]["brief_evidence"])
+        self.assertNotIn("runtime_evidence", payload["browser_proof"]["base_browser_proof"])
+        self.assertIn("runtime_evidence_ref", payload["browser_proof"]["base_browser_proof"])
+        self.assertNotIn(
+            "stdout_json",
+            payload["regression_workflows"]["transcripts"]["vs0_operator_acceptance_ui"],
+        )
+        self.assertEqual(
+            payload["regression_workflows"]["transcripts"]["vs0_operator_acceptance_ui"]["layout"],
+            "omitted_from_scenario_report",
+        )
+        self.assertIn("sha256", payload["regression_workflows"]["transcripts"]["vs0_operator_acceptance_ui"])
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
         self.assertEqual(payload["slice_contracts"]["slice_024"], VS4_PRIOR_SLICE_024_CONTRACT)

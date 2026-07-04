@@ -26845,6 +26845,259 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
     }
 
 
+def _vs4_json_ref(value: Any) -> dict[str, Any]:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return {
+        "layout": "omitted_from_scenario_report",
+        "bytes": len(encoded),
+        "sha256": hashlib.sha256(encoded).hexdigest(),
+    }
+
+
+def _vs4_file_artifact_ref(root: Path, rel_path: str) -> dict[str, Any]:
+    path = root / rel_path
+    artifact = {
+        "path": rel_path,
+        "present": path.is_file(),
+    }
+    if path.is_file():
+        artifact["bytes"] = path.stat().st_size
+        artifact["sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return artifact
+
+
+def _vs4_compact_base_browser_proof(root: Path, proof: dict[str, Any], proof_dir: str) -> dict[str, Any]:
+    base = proof.get("base_browser_proof") if isinstance(proof.get("base_browser_proof"), dict) else {}
+    keep = [
+        "schema_version",
+        "status",
+        "created_at",
+        "browser",
+        "url",
+        "route",
+        "dom_path",
+        "dom_sha256",
+        "screenshot_path",
+        "screenshot_sha256",
+        "screenshot_bytes",
+        "surface_presence",
+        "readiness_labels_present",
+        "production_overclaim_absent",
+        "clean_browser_exit",
+        "chrome_exit_codes",
+        "chrome_timeout_after_screenshot",
+        "stderr_tail",
+        "errors",
+    ]
+    compact = {key: base[key] for key in keep if key in base}
+    runtime_evidence = base.get("runtime_evidence")
+    if runtime_evidence is not None:
+        compact["runtime_evidence_ref"] = _vs4_json_ref(runtime_evidence)
+    compact["full_browser_proof_ref"] = _vs4_file_artifact_ref(root, f"{proof_dir}/browser-proof.json")
+    compact["compacted_payloads"] = ["runtime_evidence"]
+    return compact
+
+
+def _vs4_compact_brief_evidence(brief_evidence: dict[str, Any]) -> dict[str, Any]:
+    keep = [
+        "schema_version",
+        "completed",
+        "passes",
+        "slice_003_passes",
+        "markers",
+    ]
+    compact = {key: brief_evidence[key] for key in keep if key in brief_evidence}
+    for key in [
+        "trace",
+        "state",
+        "ops_inbox_triage",
+        "human_review_handoff",
+        "decision_pages",
+        "evidence_audit_detail",
+        "user_drop_ask_source",
+        "keyboard_focus",
+        "ask_readability",
+        "unsafe_http_boundary",
+        "responsive_layout",
+    ]:
+        value = brief_evidence.get(key)
+        if value is not None:
+            compact[f"{key}_ref"] = _vs4_json_ref(value)
+    compact["compacted_payloads"] = [
+        key
+        for key in [
+            "trace",
+            "state",
+            "ops_inbox_triage",
+            "human_review_handoff",
+            "decision_pages",
+            "evidence_audit_detail",
+            "user_drop_ask_source",
+            "keyboard_focus",
+            "ask_readability",
+            "unsafe_http_boundary",
+            "responsive_layout",
+        ]
+        if key in brief_evidence
+    ]
+    return compact
+
+
+def _vs4_compact_browser_proof(root: Path, proof: dict[str, Any], proof_dir: str) -> dict[str, Any]:
+    keep = [
+        "schema_version",
+        "status",
+        "created_at",
+        "browser",
+        "url",
+        "dom_path",
+        "dom_sha256",
+        "screenshot_path",
+        "screenshot_sha256",
+        "screenshot_bytes",
+        "shell_markers",
+        "brief_detail_markers",
+        "primary_nav_labels",
+        "responsive_required",
+        "responsive_markers",
+        "responsive_layout",
+        "keyboard_focus_required",
+        "keyboard_focus_markers",
+        "keyboard_focus",
+        "ask_readability_required",
+        "ask_readability_markers",
+        "ask_readability",
+        "decision_pages_required",
+        "decision_pages_markers",
+        "decision_pages",
+        "ops_inbox_triage_required",
+        "ops_inbox_triage_markers",
+        "ops_inbox_triage",
+        "human_review_handoff_required",
+        "human_review_handoff_markers",
+        "human_review_handoff",
+        "evidence_audit_detail_required",
+        "evidence_audit_detail_markers",
+        "evidence_audit_detail",
+        "user_drop_ask_source_required",
+        "user_drop_ask_source_markers",
+        "user_drop_ask_source",
+        "unsafe_http_boundary_required",
+        "unsafe_http_boundary_markers",
+        "unsafe_http_boundary",
+        "negative_evidence",
+        "errors",
+        "detail_route",
+    ]
+    compact = {key: proof[key] for key in keep if key in proof}
+    compact["base_browser_proof"] = _vs4_compact_base_browser_proof(root, proof, proof_dir)
+    brief_evidence = proof.get("brief_evidence")
+    if isinstance(brief_evidence, dict):
+        compact["brief_evidence"] = _vs4_compact_brief_evidence(brief_evidence)
+    compact["full_browser_proof_ref"] = _vs4_file_artifact_ref(root, f"{proof_dir}/browser-proof.json")
+    compact["report_compaction"] = {
+        "schema_version": "cs.vs4_report_compaction.v0",
+        "strategy": "inline_markers_with_external_browser_proof_ref",
+        "full_payload_available_at": f"{proof_dir}/browser-proof.json",
+    }
+    return compact
+
+
+def _vs4_stdout_summary(stdout_json: Any) -> dict[str, Any]:
+    if not isinstance(stdout_json, dict):
+        return {"json_object": False}
+    summary = {
+        "json_object": True,
+        "status": stdout_json.get("status"),
+        "scenario_set": stdout_json.get("scenario_set"),
+        "summary": stdout_json.get("summary") if isinstance(stdout_json.get("summary"), dict) else None,
+        "ids": stdout_json.get("ids") if isinstance(stdout_json.get("ids"), dict) else None,
+        "evidence_ref_count": len(stdout_json.get("evidence_refs", []))
+        if isinstance(stdout_json.get("evidence_refs"), list)
+        else 0,
+        "audit_ref_count": len(stdout_json.get("audit_refs", []))
+        if isinstance(stdout_json.get("audit_refs"), list)
+        else 0,
+        "error_codes": [
+            str(error.get("code"))
+            for error in stdout_json.get("errors", [])
+            if isinstance(error, dict) and error.get("code")
+        ],
+    }
+    return {key: value for key, value in summary.items() if value not in (None, [], {})}
+
+
+def _vs4_compact_cli_transcript(transcript: dict[str, Any], *, keep_stdout_json: bool) -> dict[str, Any]:
+    compact = {
+        "schema_version": transcript.get("schema_version", "cs.cli_transcript.v0"),
+        "command": transcript.get("command"),
+        "exit_code": transcript.get("exit_code"),
+        "timed_out": transcript.get("timed_out"),
+        "timeout_seconds": transcript.get("timeout_seconds"),
+        "stderr_redacted": transcript.get("stderr_redacted"),
+        "json_error": transcript.get("json_error"),
+    }
+    stdout_json = transcript.get("stdout_json")
+    if keep_stdout_json:
+        compact["stdout_json"] = stdout_json
+    else:
+        compact["stdout_json_ref"] = _vs4_json_ref(stdout_json)
+        compact["stdout_summary"] = _vs4_stdout_summary(stdout_json)
+    return compact
+
+
+def _vs4_compact_cli_workflow(
+    workflow: dict[str, Any],
+    *,
+    keep_transcript_stdout_json: set[str] | None = None,
+) -> dict[str, Any]:
+    keep_transcript_stdout_json = keep_transcript_stdout_json or set()
+    compact = {
+        key: value
+        for key, value in workflow.items()
+        if key != "transcripts"
+    }
+    transcripts = workflow.get("transcripts")
+    if isinstance(transcripts, dict):
+        compact["transcripts"] = {
+            name: _vs4_compact_cli_transcript(
+                transcript,
+                keep_stdout_json=name in keep_transcript_stdout_json,
+            )
+            for name, transcript in transcripts.items()
+            if isinstance(transcript, dict)
+        }
+        compact["transcript_compaction"] = {
+            "schema_version": "cs.vs4_report_compaction.v0",
+            "strategy": "retain_selected_stdout_json_and_hash_others",
+            "transcript_count": len(transcripts),
+            "stdout_json_retained": sorted(keep_transcript_stdout_json & set(transcripts)),
+            "stdout_json_hashed": sorted(set(transcripts) - keep_transcript_stdout_json),
+        }
+    return compact
+
+
+def _vs4_compact_regression_workflows(workflow: dict[str, Any]) -> dict[str, Any]:
+    compact = {
+        key: value
+        for key, value in workflow.items()
+        if key != "transcripts"
+    }
+    transcripts = workflow.get("transcripts")
+    if isinstance(transcripts, dict):
+        compact["transcripts"] = {
+            name: _vs4_json_ref(transcript)
+            for name, transcript in transcripts.items()
+        }
+        compact["transcript_compaction"] = {
+            "schema_version": "cs.vs4_report_compaction.v0",
+            "strategy": "hash_regression_transcripts_after_checks_are_derived",
+            "transcript_count": len(transcripts),
+            "stdout_json_retained": [],
+        }
+    return compact
+
+
 def _vs4_matrix_rows(root: Path) -> list[dict[str, str]]:
     matrix_path = root / DEFAULT_VS4_PRODUCT_ALPHA_MATRIX
     with matrix_path.open(newline="") as file:
@@ -28148,10 +28401,51 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
             "release_impact": "Blocks product-alpha human UX acceptance claim; does not block local Slice 001 through Slice 025 proof.",
         }
     ]
+    retained_cli_transcripts = {
+        "artifact_ingest",
+        "experience_lesson_propose",
+        "experience_trajectory_record",
+        "product_loop_view_cross_scope_brief",
+        "product_loop_view_mismatched_claim",
+        "product_loop_view_missing_brief",
+        "product_loop_view_selected_action",
+        "product_mission_control",
+        "product_mission_control_action_selected",
+        "product_mission_control_learn_selected",
+        "product_mission_control_memory_selected",
+        "product_mission_control_policy_blocked",
+    }
+    compact_browser_proof = _vs4_compact_browser_proof(
+        root,
+        browser_proof,
+        DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR,
+    )
+    compact_mobile_browser_proof = _vs4_compact_browser_proof(
+        root,
+        mobile_browser_proof,
+        DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR,
+    )
+    compact_cli_workflow = _vs4_compact_cli_workflow(
+        cli_workflow,
+        keep_transcript_stdout_json=retained_cli_transcripts,
+    )
+    compact_slice3_cli_workflow = _vs4_compact_cli_workflow(slice3_cli_workflow)
+    compact_regression_workflows = _vs4_compact_regression_workflows(regression_workflows)
     return {
         "status": "success" if not blocking else "failed",
         "scenario_set": "vs4-product-alpha-ui-daily-loop",
         "slice": DEFAULT_VS4_PRODUCT_ALPHA_ACTIVE_SLICE,
+        "report_compaction": {
+            "schema_version": "cs.vs4_report_compaction.v0",
+            "strategy": "compact_inline_report_with_hashed_external_evidence_refs",
+            "claim_boundary": "Compaction preserves derived PASS conditions, negative-evidence counters, and hashes/paths for omitted proof payloads.",
+            "full_browser_proof_refs": [
+                _vs4_file_artifact_ref(root, f"{DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR}/browser-proof.json"),
+                _vs4_file_artifact_ref(root, f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json"),
+            ],
+            "retained_cli_stdout_json": sorted(retained_cli_transcripts),
+            "regression_transcripts_hashed": True,
+        },
         "state_dir": {
             "browser": browser_state_rel,
             "mobile_browser": mobile_browser_state_rel,
@@ -28191,11 +28485,11 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         },
         "active_proof": active_proof,
         "active_report_package_coherence": active_report_package_coherence,
-        "browser_proof": browser_proof,
-        "mobile_browser_proof": mobile_browser_proof,
-        "cli_workflow": cli_workflow,
-        "slice_003_cli_workflow": slice3_cli_workflow,
-        "regression_workflows": regression_workflows,
+        "browser_proof": compact_browser_proof,
+        "mobile_browser_proof": compact_mobile_browser_proof,
+        "cli_workflow": compact_cli_workflow,
+        "slice_003_cli_workflow": compact_slice3_cli_workflow,
+        "regression_workflows": compact_regression_workflows,
         "source_tree": git_verification_metadata(root),
         "doc_verification": {
             "verify_sot_docs": docs_result,

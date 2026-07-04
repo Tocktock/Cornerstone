@@ -19851,6 +19851,52 @@ VS4_REQUIRED_SOURCE_TREE_FIELDS = {
 }
 
 
+def _vs4_gate_json_ref(value: Any) -> dict[str, Any]:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    return {
+        "layout": "omitted_from_gate_output",
+        "bytes": len(encoded),
+        "sha256": hashlib.sha256(encoded).hexdigest(),
+    }
+
+
+def _vs4_gate_source_tree_summary(source_tree: Any) -> dict[str, Any]:
+    if not isinstance(source_tree, dict):
+        return {}
+    verified_snapshots = source_tree.get("verified_source_snapshot_paths")
+    generated_dirty_paths = source_tree.get("generated_dirty_paths")
+    generated_dirty_snapshots = source_tree.get("generated_dirty_snapshot_paths")
+    dirty_paths = source_tree.get("dirty_paths")
+    summary = {
+        "schema_version": "cs.vs4_gate_source_tree_summary.v0",
+        "verified_base_commit": source_tree.get("verified_base_commit"),
+        "verified_base_commit_full": source_tree.get("verified_base_commit_full"),
+        "verified_base_tree_hash": source_tree.get("verified_base_tree_hash"),
+        "verified_source_worktree_hash": source_tree.get("verified_source_worktree_hash"),
+        "generated_dirty_snapshot_hash": source_tree.get("generated_dirty_snapshot_hash"),
+        "worktree_dirty_at_verification": source_tree.get("worktree_dirty_at_verification"),
+        "report_generated_before_commit": source_tree.get("report_generated_before_commit"),
+        "verified_source_snapshot_path_count": len(verified_snapshots)
+        if isinstance(verified_snapshots, list)
+        else 0,
+        "generated_dirty_path_count": len(generated_dirty_paths)
+        if isinstance(generated_dirty_paths, list)
+        else 0,
+        "generated_dirty_snapshot_path_count": len(generated_dirty_snapshots)
+        if isinstance(generated_dirty_snapshots, list)
+        else 0,
+        "dirty_path_count": len(dirty_paths) if isinstance(dirty_paths, list) else 0,
+        "source_tree_ref": _vs4_gate_json_ref(source_tree),
+    }
+    if isinstance(verified_snapshots, list):
+        summary["verified_source_snapshot_paths_ref"] = _vs4_gate_json_ref(verified_snapshots)
+    if isinstance(generated_dirty_paths, list):
+        summary["generated_dirty_paths_ref"] = _vs4_gate_json_ref(generated_dirty_paths)
+    if isinstance(generated_dirty_snapshots, list):
+        summary["generated_dirty_snapshot_paths_ref"] = _vs4_gate_json_ref(generated_dirty_snapshots)
+    return summary
+
+
 def _scenario_row_id(row: dict[str, Any]) -> str:
     value = row.get("scenario_id") or row.get("id")
     return str(value) if value is not None else ""
@@ -20320,11 +20366,7 @@ def _vs4_product_alpha_gate_validation(
         "negative_evidence": {f"{name}_failures": 0 if passed else 1 for name, passed in conditions.items()},
         "proof_boundary": proof_boundary,
         "summary": summary,
-        "source_tree": {
-            key: source_tree.get(key)
-            for key in sorted(VS4_REQUIRED_SOURCE_TREE_FIELDS)
-            if key in source_tree
-        },
+        "source_tree": _vs4_gate_source_tree_summary(source_tree),
     }
 
 
@@ -22999,7 +23041,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
             "active_report_package_coherence": data.get("active_report_package_coherence"),
             "summary": data.get("summary"),
             "proof_boundary": data.get("proof_boundary"),
-            "source_tree": data.get("source_tree"),
+            "source_tree": _vs4_gate_source_tree_summary(data.get("source_tree")),
         }
         payload["vs4_gate_validation"] = vs4_gate_validation
         payload["scenario_gate_conditions"] = vs4_gate_validation["conditions"]
