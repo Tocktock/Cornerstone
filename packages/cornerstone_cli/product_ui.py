@@ -380,6 +380,11 @@ def _inbox_items(
                 "state": state,
                 "href": _detail_href("briefs", brief.get("brief_id")),
                 "date": _display_date(brief),
+                "queue": "Needs review",
+                "priority": "Medium",
+                "owner": "Owner",
+                "type": "Brief",
+                "icon": "B",
             }
         )
     for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"][:4]:
@@ -393,6 +398,11 @@ def _inbox_items(
                 "state": state,
                 "href": _detail_href("claims", claim.get("claim_id")),
                 "date": _display_date(claim),
+                "queue": "Needs review",
+                "priority": "High" if state == "draft" else "Medium",
+                "owner": "Owner",
+                "type": "Claim",
+                "icon": "C",
             }
         )
     for action in actions[:4]:
@@ -406,6 +416,11 @@ def _inbox_items(
                 "state": state,
                 "href": _detail_href("actions", action.get("action_id")),
                 "date": _display_date(action),
+                "queue": "Approval requests" if state == "underReview" else "Needs review",
+                "priority": "High" if state == "underReview" else "Medium",
+                "owner": "Owner",
+                "type": "Action",
+                "icon": "A",
             }
         )
     for memory in memories[:2]:
@@ -418,6 +433,11 @@ def _inbox_items(
                 "state": "draft",
                 "href": "/inbox",
                 "date": _display_date(memory),
+                "queue": "Needs review",
+                "priority": "Low",
+                "owner": "Owner",
+                "type": "Memory",
+                "icon": "M",
             }
         )
     return _recent(items, limit=8)  # type: ignore[arg-type]
@@ -872,6 +892,92 @@ button, input, textarea {{ font: inherit; }}
   align-items: center;
   gap: var(--cs-space-3);
 }}
+.cs-inbox-workbench {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}}
+.cs-inbox-tabs {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-inbox-tab {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-height: 42px;
+  color: var(--cs-color-text-secondary);
+  border-bottom: 2px solid transparent;
+  font-weight: var(--cs-typography-weight-medium);
+}}
+.cs-inbox-tab.is-active {{
+  color: var(--cs-color-primary-700);
+  border-color: var(--cs-color-primary-600);
+}}
+.cs-inbox-toolbar {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-inbox-table {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
+}}
+.cs-inbox-head, .cs-inbox-row {{
+  display: grid;
+  grid-template-columns: minmax(260px, 1.45fr) minmax(82px, .5fr) minmax(100px, .6fr) minmax(92px, .55fr) minmax(120px, .7fr);
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-inbox-head {{
+  padding: var(--cs-space-3) var(--cs-space-4);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-inbox-row {{
+  padding: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-inbox-row:last-child {{ border-bottom: 0; }}
+.cs-inbox-row:hover {{ background: var(--cs-color-surface-subtle); }}
+.cs-inbox-row.is-selected {{
+  background: var(--cs-color-primary-50);
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}}
+.cs-inbox-item-title {{
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-inbox-icon {{
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-inbox-item-title strong {{ display: block; }}
+.cs-inbox-item-title .cs-meta {{ display: block; }}
+.cs-inbox-detail {{
+  display: grid;
+  gap: var(--cs-space-4);
+}}
+.cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
+.cs-inbox-actions {{ display: grid; gap: var(--cs-space-2); }}
+.cs-inbox-actions .cs-button {{ justify-content: center; text-align: center; }}
 .cs-empty {{
   border: 1px dashed var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1126,7 +1232,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1138,7 +1244,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row {{ grid-template-columns: 1fr; }}
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row {{ grid-template-columns: 1fr; }}
+  .cs-inbox-head {{ display: none; }}
   .cs-artifact-actions {{ justify-content: flex-start; }}
   .cs-document-page {{ min-height: auto; }}
   .cs-list-row {{ grid-template-columns: 1fr; }}
@@ -1701,17 +1808,115 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
 
 
 def _inbox_page(ctx: dict[str, Any]) -> str:
-    rows = "".join(_inbox_row(item) for item in ctx["inbox"]) or '<div class="cs-empty">Nothing is waiting on you.</div>'
+    items = ctx["inbox"]
+    rows = "".join(_inbox_table_row(item, index == 0) for index, item in enumerate(items)) or _inbox_empty()
+    detail = _inbox_detail_panel(items[0] if items else None)
+    counts = _inbox_counts(items)
     return f"""
 <section data-product-surface="inbox">
   <div class="cs-page-head">
-    <div class="cs-kicker">Inbox</div>
+    <div class="cs-kicker">Operations</div>
     <h1>Work that needs attention</h1>
-    <p>Drafts, claims, and action previews appear here when they need a decision.</p>
+    <p>Review drafts, source support, and action previews from one triage queue.</p>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-inbox-workbench">
+    <div>
+      <div class="cs-inbox-tabs" aria-label="Inbox queues">
+        <span class="cs-inbox-tab is-active">Needs review {_chip(str(counts["needs_review"]), "underReview")}</span>
+        <span class="cs-inbox-tab">Approval requests {_chip(str(counts["approval_requests"]), "draft")}</span>
+        <span class="cs-inbox-tab">Policy blocked {_chip(str(counts["policy_blocked"]), "policyBlocked")}</span>
+        <span class="cs-inbox-tab">Failed runs {_chip(str(counts["failed"]), "failed")}</span>
+      </div>
+      <div class="cs-inbox-toolbar">
+        <div class="cs-filter-row" style="margin-top: 0;">
+          <span class="cs-filter-chip">Type: all visible</span>
+          <span class="cs-filter-chip">Owner: personal/default</span>
+          <span class="cs-filter-chip">Priority: open first</span>
+          <span class="cs-filter-chip">Trust/risk: visible labels</span>
+        </div>
+        <span class="cs-meta">{h(len(items))} open item{"s" if len(items) != 1 else ""}</span>
+      </div>
+      <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
+        <div class="cs-inbox-head" aria-hidden="true">
+          <span>Item</span><span>Type</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
+        </div>
+        {rows}
+      </div>
+    </div>
+    {detail}
+  </div>
 </section>
 """
+
+
+def _inbox_counts(items: list[dict[str, str]]) -> dict[str, int]:
+    return {
+        "needs_review": sum(1 for item in items if item.get("queue") == "Needs review"),
+        "approval_requests": sum(1 for item in items if item.get("queue") == "Approval requests"),
+        "policy_blocked": sum(1 for item in items if item.get("state") == "policyBlocked"),
+        "failed": sum(1 for item in items if item.get("state") == "failed"),
+    }
+
+
+def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
+    selected_class = " is-selected" if selected else ""
+    priority_state = "failed" if item.get("priority") == "High" else "underReview" if item.get("priority") == "Medium" else "draft"
+    return f"""
+<a class="cs-inbox-row{selected_class}" href="{h(item["href"])}" role="listitem">
+  <span class="cs-inbox-item-title">
+    <span class="cs-inbox-icon" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>
+    <span>
+      <strong>{h(item["title"])}</strong>
+      <span class="cs-meta">{h(item["detail"])}</span>
+    </span>
+  </span>
+  <span>{h(item.get("type") or item["kind"])}</span>
+  <span class="cs-meta">{h(item["date"])}</span>
+  <span>{_chip(item.get("priority") or "Medium", priority_state)}</span>
+  <span>{_chip(item["label"], item["state"])}</span>
+</a>
+"""
+
+
+def _inbox_detail_panel(item: dict[str, str] | None) -> str:
+    if not item:
+        return """
+<aside class="cs-panel flat">
+  <h2 class="cs-section-title">Selected item</h2>
+  <div class="cs-empty">Save a source, draft a claim, or preview an action to fill this queue.</div>
+</aside>
+"""
+    return f"""
+<aside class="cs-panel flat cs-inbox-detail">
+  <div>
+    <div class="cs-kicker">Selected item</div>
+    <h2>{h(item["title"])}</h2>
+    <p class="cs-muted">{h(item["detail"])}</p>
+  </div>
+  <div class="cs-row">{_chip(item.get("queue") or "Needs review", "underReview")}{_chip(item.get("priority") or "Medium", "underReview")}{_chip(item["label"], item["state"])}</div>
+  <section>
+    <h2 class="cs-section-title">Overview</h2>
+    <dl class="cs-detail-grid">
+      <dt>Type</dt><dd>{h(item.get("type") or item["kind"])}</dd>
+      <dt>Owner</dt><dd>{h(item.get("owner") or "Owner")}</dd>
+      <dt>Updated</dt><dd>{h(item["date"])}</dd>
+      <dt>Queue</dt><dd>{h(item.get("queue") or "Needs review")}</dd>
+    </dl>
+  </section>
+  <section>
+    <h2 class="cs-section-title">Next actions</h2>
+    <div class="cs-inbox-actions">
+      <a class="cs-button" href="{h(item["href"])}">Open item</a>
+      <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Review sources</a>
+      <a class="cs-button secondary" href="/audit">Open audit trail</a>
+    </div>
+  </section>
+</aside>
+"""
+
+
+def _inbox_empty() -> str:
+    return '<div class="cs-empty">Nothing is waiting on you. Drafts, claims, and action previews appear here when they need a decision.</div>'
 
 
 def _audit_page(ctx: dict[str, Any]) -> str:

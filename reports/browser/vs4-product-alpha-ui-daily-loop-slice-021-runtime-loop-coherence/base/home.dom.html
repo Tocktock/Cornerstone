@@ -540,6 +540,92 @@ button, input, textarea { font: inherit; }
   align-items: center;
   gap: var(--cs-space-3);
 }
+.cs-inbox-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}
+.cs-inbox-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-5);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-inbox-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-height: 42px;
+  color: var(--cs-color-text-secondary);
+  border-bottom: 2px solid transparent;
+  font-weight: var(--cs-typography-weight-medium);
+}
+.cs-inbox-tab.is-active {
+  color: var(--cs-color-primary-700);
+  border-color: var(--cs-color-primary-600);
+}
+.cs-inbox-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-4);
+}
+.cs-inbox-table {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
+}
+.cs-inbox-head, .cs-inbox-row {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.45fr) minmax(82px, .5fr) minmax(100px, .6fr) minmax(92px, .55fr) minmax(120px, .7fr);
+  gap: var(--cs-space-3);
+  align-items: center;
+}
+.cs-inbox-head {
+  padding: var(--cs-space-3) var(--cs-space-4);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-inbox-row {
+  padding: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-inbox-row:last-child { border-bottom: 0; }
+.cs-inbox-row:hover { background: var(--cs-color-surface-subtle); }
+.cs-inbox-row.is-selected {
+  background: var(--cs-color-primary-50);
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}
+.cs-inbox-item-title {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-inbox-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}
+.cs-inbox-item-title strong { display: block; }
+.cs-inbox-item-title .cs-meta { display: block; }
+.cs-inbox-detail {
+  display: grid;
+  gap: var(--cs-space-4);
+}
+.cs-inbox-detail h2 { margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-inbox-actions { display: grid; gap: var(--cs-space-2); }
+.cs-inbox-actions .cs-button { justify-content: center; text-align: center; }
 .cs-empty {
   border: 1px dashed var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -794,7 +880,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-metadata-strip, .cs-inbox-workbench { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -806,7 +892,8 @@ button, input, textarea { font: inherit; }
   .cs-drop textarea.cs-drop-input { min-height: 72px; }
   .cs-ask-bar { grid-template-columns: 1fr; }
   .cs-trust-ladder, .cs-action-summary { grid-template-columns: 1fr; }
-  .cs-diff-line, .cs-call-row, .cs-result-row { grid-template-columns: 1fr; }
+  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row { grid-template-columns: 1fr; }
+  .cs-inbox-head { display: none; }
   .cs-artifact-actions { justify-content: flex-start; }
   .cs-document-page { min-height: auto; }
   .cs-list-row { grid-template-columns: 1fr; }
@@ -913,7 +1000,7 @@ button, input, textarea { font: inherit; }
     <div class="cs-meta">Source</div>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
     <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed...</p>
-    <div class="cs-meta">2026-07-04 18:33 UTC</div>
+    <div class="cs-meta">2026-07-04 18:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-searchable">Searchable</span></div>
 </a>
@@ -954,11 +1041,11 @@ button, input, textarea { font: inherit; }
     <h2>Latest brief</h2>
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_d31b82f1e1828031?view=html">
+  <a class="cs-list-row" href="/briefs/brief_f00c7000bdfc57ba?view=html">
     <div>
       <h3>Brief for vendor renewal</h3>
       <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 18:33 UTC</div>
+      <div class="cs-meta">2026-07-04 18:42 UTC</div>
     </div>
     <span class="cs-meta">Open</span>
   </a>
@@ -980,32 +1067,32 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_d31b82f1e1828031?view=html">
+<a class="cs-list-row" href="/briefs/brief_f00c7000bdfc57ba?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 18:33 UTC</div>
+    <div class="cs-meta">2026-07-04 18:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_8c3474b8b5a3d350?view=html">
+<a class="cs-list-row" href="/claims/claim_107d3a7438d8ebc7?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 18:33 UTC</div>
+    <div class="cs-meta">2026-07-04 18:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_303bb93ab44b33b3?view=html">
+<a class="cs-list-row" href="/actions/action_9e6513a11d2c811c?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 18:33 UTC</div>
+    <div class="cs-meta">2026-07-04 18:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>

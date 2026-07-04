@@ -51,7 +51,7 @@ DESKTOP_ROUTES = [
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief drafts"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support"]},
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts"]},
-    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention"]},
+    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Needs review", "Selected item", "Next actions"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail"]},
 ]
 

@@ -217,6 +217,15 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertNotIn("external_writeback", action_html)
         self.assert_product_surface_is_clean(action_html)
 
+        inbox_html = self.fetch_product_html("/inbox")
+        self.assertIn('data-product-surface="inbox"', inbox_html)
+        self.assertIn("Needs review", inbox_html)
+        self.assertIn("Approval requests", inbox_html)
+        self.assertIn("Selected item", inbox_html)
+        self.assertIn("Next actions", inbox_html)
+        self.assertIn("Review sources", inbox_html)
+        self.assert_product_surface_is_clean(inbox_html)
+
     def create_source_stack(self) -> tuple[str, str, str]:
         body = dict(DEFAULT_SCOPE)
         body.update({"text": "Vendor renewal: auto-renewal is August 1 and finance says the annual price increased."})
