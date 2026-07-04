@@ -2107,6 +2107,47 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-1);
 }}
 .cs-action-review-card strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
+.cs-action-route-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-action-route-step {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-action-route-step.is-current {{
+  border-color: var(--cs-color-border-focus);
+  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}}
+.cs-action-route-top {{
+  display: flex;
+  gap: var(--cs-space-2);
+  align-items: center;
+}}
+.cs-action-route-index {{
+  width: 24px;
+  height: 24px;
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  display: grid;
+  place-items: center;
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-action-route-step p {{
+  margin: 0;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: 1.45;
+}}
 .cs-owner-overview {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2208,6 +2249,22 @@ button, input, textarea {{ font: inherit; }}
   overflow: hidden;
   background: var(--cs-color-surface-primary);
 }}
+.cs-action-preview-frame {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-action-preview-meta {{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-diff-line {{
   display: grid;
   grid-template-columns: 84px minmax(0, 1fr);
@@ -2227,6 +2284,22 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-3);
   align-items: center;
 }}
+.cs-call-facts {{
+  margin-top: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+}}
+.cs-call-fact {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}}
+.cs-call-fact strong {{ font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-call-fact span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
 .cs-approval-note {{
   border: 1px solid var(--cs-state-underReview-border);
   background: var(--cs-state-underReview-bg);
@@ -2242,6 +2315,33 @@ button, input, textarea {{ font: inherit; }}
   padding: var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-2);
+}}
+.cs-policy-checks {{
+  display: grid;
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-3);
+}}
+.cs-policy-check {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-policy-check-mark {{
+  width: 24px;
+  height: 24px;
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-state-underReview-bg);
+  color: var(--cs-state-underReview-fg);
+  border: 1px solid var(--cs-state-underReview-border);
+  display: grid;
+  place-items: center;
+  font-weight: var(--cs-typography-weight-bold);
+  font-size: var(--cs-typography-metadata-fontSize);
 }}
 .cs-timeline {{ display: grid; gap: var(--cs-space-3); }}
 .cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
@@ -2389,7 +2489,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -4457,7 +4557,8 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
     action_title = _action_title(action)
     approval_status = str(approval.get("status") or "pending")
-    reason = str(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
+    reason = _plain_runtime_text(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
+    policy_reason = _plain_runtime_text(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk.")
     return f"""
 {_detail_orientation(
     parent_href="/actions",
@@ -4496,6 +4597,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       <div class="cs-action-review-card"><span class="cs-meta">External calls</span><strong>{h(call_label)}</strong></div>
       <div class="cs-action-review-card"><span class="cs-meta">Status</span><strong>{h(approval_status)}</strong></div>
     </div>
+    {_action_route_strip(approval_label, call_label)}
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
@@ -4530,7 +4632,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         </div>
         {_chip("Diff preview", "searchable")}
       </div>
-      {_action_diff_view(diff)}
+      {_action_diff_view(diff, target)}
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -4552,8 +4654,9 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </div>
       <div class="cs-policy-card">
         <strong>{h(decision_label)}</strong>
-        <span>{h(str(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk."))}</span>
+        <span>{h(policy_reason)}</span>
       </div>
+      {_action_policy_checks(bool(source_items), approval_label, call_label)}
     </section>
   </div>
   <aside class="cs-stack">
@@ -4590,6 +4693,33 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
 """
 
 
+def _action_route_strip(approval_label: str, call_label: str) -> str:
+    steps = [
+        ("1", "Dry-run sequence", "Preview the proposed change before any provider write.", "searchable", True),
+        ("2", "Impact review", "Check the affected object and the before/after state.", "underReview", False),
+        ("3", approval_label, "Approval stays explicit before execution can appear.", "underReview", False),
+        ("4", "Audit trail", f"{call_label}; records stay inspectable.", "draft", False),
+    ]
+    cards = "".join(
+        f"""
+<div class="cs-action-route-step{" is-current" if active else ""}">
+  <div class="cs-action-route-top">
+    <span class="cs-action-route-index" aria-hidden="true">{h(index)}</span>
+    <strong>{h(title)}</strong>
+  </div>
+  <p>{h(description)}</p>
+  {_chip(title if index == "1" else index, state)}
+</div>
+"""
+        for index, title, description, state, active in steps
+    )
+    return f"""
+<section class="cs-action-route-strip" aria-label="Dry-run sequence">
+  {cards}
+</section>
+"""
+
+
 def _claim_trust_ladder(has_sources: bool, is_approved: bool) -> str:
     evidence_class = "is-active" if has_sources or is_approved else "is-locked"
     approved_class = "is-active" if is_approved else "is-locked"
@@ -4613,15 +4743,21 @@ def _claim_trust_ladder(has_sources: bool, is_approved: bool) -> str:
 """
 
 
-def _action_diff_view(diff: dict[str, Any]) -> str:
+def _action_diff_view(diff: dict[str, Any], target: str) -> str:
     before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
     after = _plain_runtime_text(diff.get("after") or "No external write has been performed.")
     return f"""
+<div class="cs-action-preview-frame">
+  <div class="cs-action-preview-meta">
+    <span>Target: {h(target)}</span>
+    <span>Before approval: preview only</span>
+  </div>
 <div class="cs-diff-view" aria-label="Dry-run diff preview">
   <div class="cs-diff-line before"><span class="cs-meta">Before</span><span>{h(before)}</span></div>
   <div class="cs-diff-line after"><span class="cs-meta">After</span><span>{h(after)}</span></div>
 </div>
-<p class="cs-meta">Preview shown. Exact downstream formatting may vary after approval.</p>
+  <p class="cs-meta">Preview shown. Exact downstream formatting may vary after approval.</p>
+</div>
 """
 
 
@@ -4637,6 +4773,11 @@ def _action_external_calls(impact: dict[str, Any], connector_label: str, call_la
   </div>
   {_chip(call_label, "draft")}
 </div>
+<div class="cs-call-facts" aria-label="Call preview">
+  <div class="cs-call-fact"><strong>Provider calls</strong><span>0 planned</span></div>
+  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
+  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(call_label)}</span></div>
+</div>
 """
     return f"""
 <div class="cs-call-row">
@@ -4645,6 +4786,39 @@ def _action_external_calls(impact: dict[str, Any], connector_label: str, call_la
     <p class="cs-muted">Would create or update {h(target)} after approval. Simulated in local mode.</p>
   </div>
   {_chip(call_label, "draft")}
+</div>
+<div class="cs-call-facts" aria-label="Call preview">
+  <div class="cs-call-fact"><strong>Provider calls</strong><span>{h(expected)} planned</span></div>
+  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
+  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(call_label)}</span></div>
+</div>
+"""
+
+
+def _action_policy_checks(has_sources: bool, approval_label: str, call_label: str) -> str:
+    source_state = "Source visible" if has_sources else "Source not linked"
+    source_note = "At least one local source is visible near this action." if has_sources else "Open sources before requesting approval."
+    checks = [
+        ("1", source_state, source_note, "searchable" if has_sources else "underReview"),
+        ("2", approval_label, "Request approval before this preview can move further.", "underReview"),
+        ("3", call_label, "External effects are still bounded by the action approval path.", "draft"),
+    ]
+    rows = "".join(
+        f"""
+<div class="cs-policy-check">
+  <span class="cs-policy-check-mark" aria-hidden="true">{h(index)}</span>
+  <div>
+    <strong>{h(title)}</strong>
+    <p class="cs-muted">{h(note)}</p>
+  </div>
+  {_chip(title, state)}
+</div>
+"""
+        for index, title, note, state in checks
+    )
+    return f"""
+<div class="cs-policy-checks" aria-label="Policy checkpoints">
+  {rows}
 </div>
 """
 
@@ -4924,7 +5098,8 @@ def _plain_policy_decision(value: str) -> str:
 def _plain_runtime_text(value: Any) -> str:
     text = str(value or "")
     replacements = {
-        "external_writeback": "external writeback",
+        "external_writeback": "provider write",
+        "external writeback": "provider write",
         "mock_connector": "simulated connector",
         "pending_approval": "pending approval",
         "high_risk_action_requires_approval": "high-risk action requires approval",
