@@ -277,20 +277,34 @@ button, input, textarea { font: inherit; }
   align-content: start;
 }
 .cs-home-canvas {
-  padding: var(--cs-space-5);
+  padding: var(--cs-space-4);
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
 .cs-home-canvas .cs-panel-header { margin-bottom: 0; }
 .cs-home-canvas p { max-width: 62ch; }
+.cs-home-workspace {
+  display: grid;
+  gap: var(--cs-space-5);
+}
+.cs-home-source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}
+.cs-home-source-note {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
 .cs-drop {
-  min-height: 218px;
+  min-height: auto;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
   background: color-mix(in srgb, var(--cs-color-surface-subtle) 70%, var(--cs-color-surface-primary));
   display: grid;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-4);
+  gap: var(--cs-space-2);
+  padding: var(--cs-space-3);
 }
 .cs-drop.is-hot { border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }
 .cs-drop textarea, .cs-field {
@@ -306,10 +320,11 @@ button, input, textarea { font: inherit; }
 .cs-drop textarea:focus, .cs-field:focus { border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }
 .cs-drop-target {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-2);
-  place-items: center;
-  text-align: center;
-  padding: var(--cs-space-2);
+  place-items: center start;
+  text-align: left;
+  padding: 0;
 }
 .cs-drop-mark {
   width: 44px;
@@ -323,7 +338,7 @@ button, input, textarea { font: inherit; }
   border: 1px solid var(--cs-color-primary-100);
 }
 .cs-drop textarea.cs-drop-input {
-  min-height: 86px;
+  min-height: 46px;
   background: var(--cs-color-surface-primary);
 }
 .cs-or-divider {
@@ -356,7 +371,48 @@ button, input, textarea { font: inherit; }
   box-shadow: none;
 }
 .cs-ask-bar .cs-field:focus { box-shadow: none; }
-.cs-suggestion-row { display: flex; gap: var(--cs-space-2); flex-wrap: wrap; }
+.cs-suggestion-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cs-space-2); }
+.cs-suggestion-row .cs-button { min-width: 0; justify-content: center; white-space: normal; }
+.cs-home-item-list {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}
+.cs-home-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  min-height: 72px;
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-home-item:last-child { border-bottom: 0; }
+.cs-home-item:hover { background: var(--cs-color-surface-subtle); }
+.cs-home-item-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-home-item h3 { margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }
+.cs-home-item p { margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-next-step-list { display: grid; gap: var(--cs-space-2); }
+.cs-next-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  padding: var(--cs-space-3);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+}
+.cs-next-step strong { font-size: var(--cs-typography-body-fontSize); }
 .cs-row { display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }
 .cs-module-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: var(--cs-space-4); }
 .cs-list { display: grid; gap: var(--cs-space-3); }
@@ -924,10 +980,10 @@ button, input, textarea { font: inherit; }
 .cs-timeline-item { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }
 .cs-dot { width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }
 .cs-toast {
-  min-height: 36px;
+  min-height: 28px;
   color: var(--cs-color-text-secondary);
   border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-2) var(--cs-space-3);
+  padding: var(--cs-space-1) var(--cs-space-3);
   background: var(--cs-color-primary-50);
 }
 @media (max-width: 980px) {
@@ -953,11 +1009,13 @@ button, input, textarea { font: inherit; }
   .cs-home-intro { min-height: auto; }
   .cs-home-canvas { padding: var(--cs-space-4); }
   .cs-home-canvas > .cs-panel-header p { display: none; }
+  .cs-home-source-row, .cs-home-item, .cs-next-step { grid-template-columns: 1fr; }
   .cs-drop { min-height: auto; padding: var(--cs-space-3); }
   .cs-drop-target { grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }
   .cs-drop-target p { display: none; }
   .cs-drop textarea.cs-drop-input { min-height: 72px; }
   .cs-ask-bar { grid-template-columns: 1fr; }
+  .cs-suggestion-row { grid-template-columns: 1fr; }
   .cs-trust-ladder, .cs-action-summary { grid-template-columns: 1fr; }
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
@@ -1023,57 +1081,92 @@ button, input, textarea { font: inherit; }
         </div>
         <span class="cs-chip cs-chip-underReview">Untrusted until checked</span>
       </div>
-      <form class="cs-drop" id="cs-drop-form">
-        <div class="cs-drop-target">
-          <div class="cs-drop-mark" aria-hidden="true">In</div>
-          <div>
-            <strong>Save a source</strong>
-            <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+      <div class="cs-home-workspace">
+        <form class="cs-drop" id="cs-drop-form">
+          <div class="cs-home-source-row">
+            <div class="cs-drop-target">
+              <div class="cs-drop-mark" aria-hidden="true">In</div>
+              <div>
+                <strong>Save a source</strong>
+                <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+              </div>
+            </div>
+            <div class="cs-row">
+              <button class="cs-button" type="submit">Save source</button>
+              <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
+              <input id="cs-file-input" type="file" hidden="">
+            </div>
           </div>
-        </div>
-        <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-        <div class="cs-row">
-          <button class="cs-button" type="submit">Save source</button>
-          <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
-          <input id="cs-file-input" type="file" hidden="">
-          <span class="cs-meta">Dropped files are read locally by the browser before saving.</span>
-        </div>
-        <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
-      </form>
-      <div class="cs-or-divider">or ask a question</div>
-      <form class="cs-stack" id="cs-ask-form">
-        <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
-          <div>
-            <strong>Ask the workspace</strong>
-            <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
+          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
+          <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
+        </form>
+        <div class="cs-or-divider">or ask a question</div>
+        <form class="cs-stack" id="cs-ask-form">
+          <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
+            <div>
+              <strong>Ask the workspace</strong>
+              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+            </div>
+            <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
+            <button class="cs-button" type="submit">Ask</button>
           </div>
-          <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-          <button class="cs-button" type="submit">Ask</button>
-        </div>
-        <div class="cs-suggestion-row"><button class="cs-button secondary" type="button" data-ask-suggestion="What supports &quot;Brief for vendor renewal&quot;?">What supports "Brief for vendor renewal"?</button><button class="cs-button secondary" type="button" data-ask-suggestion="What changed in the latest saved source?">What changed in the latest saved source?</button><button class="cs-button secondary" type="button" data-ask-suggestion="Which claims still need support?">Which claims still need support?</button></div>
-        <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
-      </form>
+          <div class="cs-suggestion-row"><button class="cs-button secondary" type="button" data-ask-suggestion="What supports &quot;Brief for vendor renewal&quot;?">What supports "Brief for vendor renewal"?</button><button class="cs-button secondary" type="button" data-ask-suggestion="What changed in the latest saved source?">What changed in the latest saved source?</button><button class="cs-button secondary" type="button" data-ask-suggestion="Which claims still need support?">Which claims still need support?</button></div>
+          <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
+        </form>
+      </div>
     </section>
     <div class="cs-module-grid">
 
 <section class="cs-panel flat">
   <div class="cs-panel-header">
-    <h2>Recent sources</h2>
-    <a class="cs-meta" href="/artifacts">View all</a>
+    <h2>Recent items</h2>
+    <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
-  <div class="cs-list">
-<a class="cs-list-row" href="/artifacts/art_085c9696c3b04726?view=html">
-  <div>
-    <div class="cs-meta">Source</div>
+  <div class="cs-home-item-list">
+<a class="cs-home-item" href="/claims/claim_509f41c7767b2140?view=html">
+  <span class="cs-home-item-icon" aria-hidden="true">C</span>
+  <span>
+    <p>Claim</p>
+    <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
+    <p>2026-07-04 19:00 UTC - Review source support</p>
+  </span>
+  <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
+</a>
+
+<a class="cs-home-item" href="/actions/action_51e7bc8f816fc43f?view=html">
+  <span class="cs-home-item-icon" aria-hidden="true">A</span>
+  <span>
+    <p>Action</p>
+    <h3>Draft a vendor renewal follow-up</h3>
+    <p>2026-07-04 19:00 UTC - Preview before approval</p>
+  </span>
+  <span class="cs-chip cs-chip-underReview">Needs approval</span>
+</a>
+
+<a class="cs-home-item" href="/artifacts/art_085c9696c3b04726?view=html">
+  <span class="cs-home-item-icon" aria-hidden="true">S</span>
+  <span>
+    <p>Source</p>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed...</p>
-    <div class="cs-meta">2026-07-04 18:51 UTC</div>
-  </div>
-  <div class="cs-row"><span class="cs-chip cs-chip-searchable">Searchable</span></div>
+    <p>2026-07-04 19:00 UTC - Original text preserved</p>
+  </span>
+  <span class="cs-chip cs-chip-searchable">Searchable</span>
+</a>
+
+<a class="cs-home-item" href="/briefs/brief_824f039392372c18?view=html">
+  <span class="cs-home-item-icon" aria-hidden="true">B</span>
+  <span>
+    <p>Brief</p>
+    <h3>Brief for vendor renewal</h3>
+    <p>2026-07-04 19:00 UTC - Draft from visible sources</p>
+  </span>
+  <span class="cs-chip cs-chip-draft">Keyword summary</span>
 </a>
 </div>
 </section>
 
+      <div class="cs-stack">
 
 <section class="cs-panel flat">
   <div class="cs-panel-header">
@@ -1087,37 +1180,49 @@ button, input, textarea { font: inherit; }
       <span class="cs-chip cs-chip-saved">1</span>
     </div>
     <div class="cs-stat-row">
-      <span class="cs-stat-icon">B</span>
-      <div><strong>Briefs</strong><div class="cs-meta">Drafts created from visible sources</div></div>
-      <span class="cs-chip cs-chip-draft">1</span>
+      <span class="cs-stat-icon">Q</span>
+      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
+      <span class="cs-chip cs-chip-searchable">1</span>
     </div>
     <div class="cs-stat-row">
-      <span class="cs-stat-icon">R</span>
-      <div><strong>Review</strong><div class="cs-meta">Items needing a human decision</div></div>
-      <span class="cs-chip cs-chip-underReview">3</span>
+      <span class="cs-stat-icon">E</span>
+      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
+      <span class="cs-chip cs-chip-evidenceBacked">2</span>
     </div>
   </div>
 </section>
 
-    </div>
-  </div>
-  <aside class="cs-stack">
 
 <section class="cs-panel flat">
   <div class="cs-panel-header">
-    <h2>Latest brief</h2>
-    <span class="cs-chip cs-chip-draft">Keyword summary</span>
+    <h2>Suggested next steps</h2>
+    <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_f6a029d8cac5e35a?view=html">
-    <div>
-      <h3>Brief for vendor renewal</h3>
-      <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-04 18:51 UTC</div>
-    </div>
-    <span class="cs-meta">Open</span>
-  </a>
+  <div class="cs-next-step-list">
+<a class="cs-next-step" href="/search">
+  <span class="cs-stat-icon" aria-hidden="true">S</span>
+  <span><strong>Ask about the latest source</strong><span class="cs-meta">Search saved source text</span></span>
+  <span class="cs-meta">Open</span>
+</a>
+
+<a class="cs-next-step" href="/claims">
+  <span class="cs-stat-icon" aria-hidden="true">C</span>
+  <span><strong>Review claims with source support</strong><span class="cs-meta">Check statements before approval</span></span>
+  <span class="cs-meta">Open</span>
+</a>
+
+<a class="cs-next-step" href="/actions">
+  <span class="cs-stat-icon" aria-hidden="true">A</span>
+  <span><strong>Review action previews</strong><span class="cs-meta">Confirm dry-run and approval state</span></span>
+  <span class="cs-meta">Open</span>
+</a>
+</div>
 </section>
 
+      </div>
+    </div>
+  </div>
+  <aside class="cs-stack">
 
 <section class="cs-panel flat">
   <div class="cs-panel-header">
@@ -1130,36 +1235,52 @@ button, input, textarea { font: inherit; }
 
 <section class="cs-panel flat">
   <div class="cs-panel-header">
+    <h2>Latest brief</h2>
+    <span class="cs-chip cs-chip-draft">Keyword summary</span>
+  </div>
+  <a class="cs-list-row" href="/briefs/brief_824f039392372c18?view=html">
+    <div>
+      <h3>Brief for vendor renewal</h3>
+      <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
+      <div class="cs-meta">2026-07-04 19:00 UTC</div>
+    </div>
+    <span class="cs-meta">Open</span>
+  </a>
+</section>
+
+
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
     <h2>Needs attention</h2>
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_f6a029d8cac5e35a?view=html">
+<a class="cs-list-row" href="/briefs/brief_824f039392372c18?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-04 18:51 UTC</div>
+    <div class="cs-meta">2026-07-04 19:00 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_35039b603d2bb21a?view=html">
+<a class="cs-list-row" href="/claims/claim_509f41c7767b2140?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-04 18:51 UTC</div>
+    <div class="cs-meta">2026-07-04 19:00 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_6bfae6df7e078204?view=html">
+<a class="cs-list-row" href="/actions/action_51e7bc8f816fc43f?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-04 18:51 UTC</div>
+    <div class="cs-meta">2026-07-04 19:00 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>

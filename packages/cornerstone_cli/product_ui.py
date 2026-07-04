@@ -629,20 +629,34 @@ button, input, textarea {{ font: inherit; }}
   align-content: start;
 }}
 .cs-home-canvas {{
-  padding: var(--cs-space-5);
+  padding: var(--cs-space-4);
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }}
 .cs-home-canvas .cs-panel-header {{ margin-bottom: 0; }}
 .cs-home-canvas p {{ max-width: 62ch; }}
+.cs-home-workspace {{
+  display: grid;
+  gap: var(--cs-space-5);
+}}
+.cs-home-source-row {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-home-source-note {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-drop {{
-  min-height: 218px;
+  min-height: auto;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
   background: color-mix(in srgb, var(--cs-color-surface-subtle) 70%, var(--cs-color-surface-primary));
   display: grid;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-4);
+  gap: var(--cs-space-2);
+  padding: var(--cs-space-3);
 }}
 .cs-drop.is-hot {{ border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }}
 .cs-drop textarea, .cs-field {{
@@ -658,10 +672,11 @@ button, input, textarea {{ font: inherit; }}
 .cs-drop textarea:focus, .cs-field:focus {{ border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }}
 .cs-drop-target {{
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-2);
-  place-items: center;
-  text-align: center;
-  padding: var(--cs-space-2);
+  place-items: center start;
+  text-align: left;
+  padding: 0;
 }}
 .cs-drop-mark {{
   width: 44px;
@@ -675,7 +690,7 @@ button, input, textarea {{ font: inherit; }}
   border: 1px solid var(--cs-color-primary-100);
 }}
 .cs-drop textarea.cs-drop-input {{
-  min-height: 86px;
+  min-height: 46px;
   background: var(--cs-color-surface-primary);
 }}
 .cs-or-divider {{
@@ -708,7 +723,48 @@ button, input, textarea {{ font: inherit; }}
   box-shadow: none;
 }}
 .cs-ask-bar .cs-field:focus {{ box-shadow: none; }}
-.cs-suggestion-row {{ display: flex; gap: var(--cs-space-2); flex-wrap: wrap; }}
+.cs-suggestion-row {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cs-space-2); }}
+.cs-suggestion-row .cs-button {{ min-width: 0; justify-content: center; white-space: normal; }}
+.cs-home-item-list {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}}
+.cs-home-item {{
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  min-height: 72px;
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-home-item:last-child {{ border-bottom: 0; }}
+.cs-home-item:hover {{ background: var(--cs-color-surface-subtle); }}
+.cs-home-item-icon {{
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-home-item h3 {{ margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
+.cs-home-item p {{ margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-next-step-list {{ display: grid; gap: var(--cs-space-2); }}
+.cs-next-step {{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  padding: var(--cs-space-3);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+}}
+.cs-next-step strong {{ font-size: var(--cs-typography-body-fontSize); }}
 .cs-row {{ display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }}
 .cs-module-grid {{ display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: var(--cs-space-4); }}
 .cs-list {{ display: grid; gap: var(--cs-space-3); }}
@@ -1276,10 +1332,10 @@ button, input, textarea {{ font: inherit; }}
 .cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
 .cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }}
 .cs-toast {{
-  min-height: 36px;
+  min-height: 28px;
   color: var(--cs-color-text-secondary);
   border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-2) var(--cs-space-3);
+  padding: var(--cs-space-1) var(--cs-space-3);
   background: var(--cs-color-primary-50);
 }}
 @media (max-width: 980px) {{
@@ -1305,11 +1361,13 @@ button, input, textarea {{ font: inherit; }}
   .cs-home-intro {{ min-height: auto; }}
   .cs-home-canvas {{ padding: var(--cs-space-4); }}
   .cs-home-canvas > .cs-panel-header p {{ display: none; }}
+  .cs-home-source-row, .cs-home-item, .cs-next-step {{ grid-template-columns: 1fr; }}
   .cs-drop {{ min-height: auto; padding: var(--cs-space-3); }}
   .cs-drop-target {{ grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }}
   .cs-drop-target p {{ display: none; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
+  .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-trust-ladder, .cs-action-summary {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-head {{ display: none; }}
@@ -1422,8 +1480,9 @@ def _home(ctx: dict[str, Any]) -> str:
     )
     suggestions = suggestions or '<span class="cs-meta">Suggestions appear after sources or briefs exist.</span>'
     latest_brief = _latest_brief_block(ctx)
-    recent = _recent_sources_block(ctx)
+    recent = _recent_items_block(ctx)
     knowledge = _knowledge_states_block(ctx)
+    next_steps = _suggested_next_steps_block(ctx)
     activity = _recent_activity_block(ctx)
     return f"""
 <section class="cs-grid-hero cs-home-intro" data-product-surface="home">
@@ -1441,45 +1500,52 @@ def _home(ctx: dict[str, Any]) -> str:
         </div>
         {_chip("Untrusted until checked", "underReview")}
       </div>
-      <form class="cs-drop" id="cs-drop-form">
-        <div class="cs-drop-target">
-          <div class="cs-drop-mark" aria-hidden="true">In</div>
-          <div>
-            <strong>Save a source</strong>
-            <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+      <div class="cs-home-workspace">
+        <form class="cs-drop" id="cs-drop-form">
+          <div class="cs-home-source-row">
+            <div class="cs-drop-target">
+              <div class="cs-drop-mark" aria-hidden="true">In</div>
+              <div>
+                <strong>Save a source</strong>
+                <p class="cs-muted">Drop a text file, choose a file, or paste notes below.</p>
+              </div>
+            </div>
+            <div class="cs-row">
+              <button class="cs-button" type="submit">Save source</button>
+              <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
+              <input id="cs-file-input" type="file" hidden>
+            </div>
           </div>
-        </div>
-        <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-        <div class="cs-row">
-          <button class="cs-button" type="submit">Save source</button>
-          <button class="cs-button secondary" type="button" id="cs-file-button">Choose file</button>
-          <input id="cs-file-input" type="file" hidden>
-          <span class="cs-meta">Dropped files are read locally by the browser before saving.</span>
-        </div>
-        <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
-      </form>
-      <div class="cs-or-divider">or ask a question</div>
-      <form class="cs-stack" id="cs-ask-form">
-        <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
-          <div>
-            <strong>Ask the workspace</strong>
-            <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
+          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
+          <div class="cs-toast" id="cs-drop-status" role="status">Ready for a source.</div>
+        </form>
+        <div class="cs-or-divider">or ask a question</div>
+        <form class="cs-stack" id="cs-ask-form">
+          <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
+            <div>
+              <strong>Ask the workspace</strong>
+              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+            </div>
+            <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
+            <button class="cs-button" type="submit">Ask</button>
           </div>
-          <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
-          <button class="cs-button" type="submit">Ask</button>
-        </div>
-        <div class="cs-suggestion-row">{suggestions}</div>
-        <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
-      </form>
+          <div class="cs-suggestion-row">{suggestions}</div>
+          <div class="cs-toast" id="cs-ask-status" role="status">No answer requested yet.</div>
+        </form>
+      </div>
     </section>
     <div class="cs-module-grid">
       {recent}
-      {knowledge}
+      <div class="cs-stack">
+        {knowledge}
+        {next_steps}
+      </div>
     </div>
   </div>
   <aside class="cs-stack">
-    {latest_brief}
     {activity}
+    {latest_brief}
     {_attention_block(ctx)}
   </aside>
 </section>
@@ -1518,33 +1584,96 @@ def _latest_brief_block(ctx: dict[str, Any]) -> str:
 """
 
 
-def _recent_sources_block(ctx: dict[str, Any]) -> str:
-    if not ctx["artifacts"]:
+def _recent_items_block(ctx: dict[str, Any]) -> str:
+    items: list[dict[str, Any]] = []
+    for artifact in ctx["artifacts"][:3]:
+        items.append(
+            {
+                "kind": "Source",
+                "icon": "S",
+                "title": _artifact_title(artifact),
+                "detail": f"{_display_date(artifact)} - Original text preserved",
+                "href": _detail_href("artifacts", artifact.get("artifact_id")),
+                "label": "Searchable",
+                "state": "searchable",
+            }
+        )
+    for brief in ctx["briefs"][:2]:
+        label, state = _brief_label(brief)
+        items.append(
+            {
+                "kind": "Brief",
+                "icon": "B",
+                "title": _brief_title(brief),
+                "detail": f"{_display_date(brief)} - Draft from visible sources",
+                "href": _detail_href("briefs", brief.get("brief_id")),
+                "label": label,
+                "state": state,
+            }
+        )
+    for claim in ctx["claims"][:2]:
+        label, state = _claim_label(claim)
+        items.append(
+            {
+                "kind": "Claim",
+                "icon": "C",
+                "title": _claim_title(claim),
+                "detail": f"{_display_date(claim)} - Review source support",
+                "href": _detail_href("claims", claim.get("claim_id")),
+                "label": label,
+                "state": state,
+            }
+        )
+    for action in ctx["actions"][:2]:
+        label, state = _action_label(action)
+        items.append(
+            {
+                "kind": "Action",
+                "icon": "A",
+                "title": _action_title(action),
+                "detail": f"{_display_date(action)} - Preview before approval",
+                "href": _detail_href("actions", action.get("action_id")),
+                "label": label,
+                "state": state,
+            }
+        )
+    items = sorted(items, key=lambda item: str(item.get("detail") or ""), reverse=True)[:4]
+    if not items:
         return """
 <section class="cs-panel flat">
-  <div class="cs-panel-header"><h2>Recent sources</h2></div>
-  <div class="cs-empty">Saved sources will appear here.</div>
+  <div class="cs-panel-header"><h2>Recent items</h2></div>
+  <div class="cs-empty">Saved sources will appear here. Nothing here yet - save your first source or ask after saving one.</div>
 </section>
 """
     rows = "".join(
-        _source_row(artifact, compact=True)
-        for artifact in ctx["artifacts"][:3]
+        f"""
+<a class="cs-home-item" href="{h(str(item["href"]))}">
+  <span class="cs-home-item-icon" aria-hidden="true">{h(str(item["icon"]))}</span>
+  <span>
+    <p>{h(str(item["kind"]))}</p>
+    <h3>{h(str(item["title"]))}</h3>
+    <p>{h(str(item["detail"]))}</p>
+  </span>
+  {_chip(str(item["label"]), str(item["state"]))}
+</a>
+"""
+        for item in items
     )
     return f"""
 <section class="cs-panel flat">
   <div class="cs-panel-header">
-    <h2>Recent sources</h2>
-    <a class="cs-meta" href="/artifacts">View all</a>
+    <h2>Recent items</h2>
+    <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
-  <div class="cs-list">{rows}</div>
+  <div class="cs-home-item-list">{rows}</div>
 </section>
 """
 
 
 def _knowledge_states_block(ctx: dict[str, Any]) -> str:
     source_count = len(ctx["artifacts"])
-    brief_count = len(ctx["briefs"])
-    attention_count = len(ctx["inbox"])
+    searchable_count = len(ctx["artifacts"])
+    supported_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"]] if _evidence_refs(record))
     return f"""
 <section class="cs-panel flat">
   <div class="cs-panel-header">
@@ -1558,16 +1687,49 @@ def _knowledge_states_block(ctx: dict[str, Any]) -> str:
       {_chip(str(source_count), "saved")}
     </div>
     <div class="cs-stat-row">
-      <span class="cs-stat-icon">B</span>
-      <div><strong>Briefs</strong><div class="cs-meta">Drafts created from visible sources</div></div>
-      {_chip(str(brief_count), "draft")}
+      <span class="cs-stat-icon">Q</span>
+      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
+      {_chip(str(searchable_count), "searchable")}
     </div>
     <div class="cs-stat-row">
-      <span class="cs-stat-icon">R</span>
-      <div><strong>Review</strong><div class="cs-meta">Items needing a human decision</div></div>
-      {_chip(str(attention_count), "underReview")}
+      <span class="cs-stat-icon">E</span>
+      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
+      {_chip(str(supported_count), "evidenceBacked")}
     </div>
   </div>
+</section>
+"""
+
+
+def _suggested_next_steps_block(ctx: dict[str, Any]) -> str:
+    steps: list[tuple[str, str, str, str]] = []
+    if ctx["artifacts"]:
+        steps.append(("S", "Ask about the latest source", "/search", "Search saved source text"))
+    else:
+        steps.append(("S", "Save your first source", "/", "Start with pasted notes or a text file"))
+    if ctx["claims"]:
+        steps.append(("C", "Review claims with source support", "/claims", "Check statements before approval"))
+    if ctx["actions"]:
+        steps.append(("A", "Review action previews", "/actions", "Confirm dry-run and approval state"))
+    if ctx["inbox"]:
+        steps.append(("I", "Open work that needs attention", "/inbox", "Triage review and approval items"))
+    rows = "".join(
+        f"""
+<a class="cs-next-step" href="{h(href)}">
+  <span class="cs-stat-icon" aria-hidden="true">{h(icon)}</span>
+  <span><strong>{h(title)}</strong><span class="cs-meta">{h(detail)}</span></span>
+  <span class="cs-meta">Open</span>
+</a>
+"""
+        for icon, title, href, detail in steps[:3]
+    )
+    return f"""
+<section class="cs-panel flat">
+  <div class="cs-panel-header">
+    <h2>Suggested next steps</h2>
+    <a class="cs-meta" href="/inbox">Open inbox</a>
+  </div>
+  <div class="cs-next-step-list">{rows}</div>
 </section>
 """
 

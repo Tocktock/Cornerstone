@@ -277,20 +277,34 @@ button, input, textarea { font: inherit; }
   align-content: start;
 }
 .cs-home-canvas {
-  padding: var(--cs-space-5);
+  padding: var(--cs-space-4);
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
 .cs-home-canvas .cs-panel-header { margin-bottom: 0; }
 .cs-home-canvas p { max-width: 62ch; }
+.cs-home-workspace {
+  display: grid;
+  gap: var(--cs-space-5);
+}
+.cs-home-source-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}
+.cs-home-source-note {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
 .cs-drop {
-  min-height: 218px;
+  min-height: auto;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
   background: color-mix(in srgb, var(--cs-color-surface-subtle) 70%, var(--cs-color-surface-primary));
   display: grid;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-4);
+  gap: var(--cs-space-2);
+  padding: var(--cs-space-3);
 }
 .cs-drop.is-hot { border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }
 .cs-drop textarea, .cs-field {
@@ -306,10 +320,11 @@ button, input, textarea { font: inherit; }
 .cs-drop textarea:focus, .cs-field:focus { border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }
 .cs-drop-target {
   display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-2);
-  place-items: center;
-  text-align: center;
-  padding: var(--cs-space-2);
+  place-items: center start;
+  text-align: left;
+  padding: 0;
 }
 .cs-drop-mark {
   width: 44px;
@@ -323,7 +338,7 @@ button, input, textarea { font: inherit; }
   border: 1px solid var(--cs-color-primary-100);
 }
 .cs-drop textarea.cs-drop-input {
-  min-height: 86px;
+  min-height: 46px;
   background: var(--cs-color-surface-primary);
 }
 .cs-or-divider {
@@ -356,7 +371,48 @@ button, input, textarea { font: inherit; }
   box-shadow: none;
 }
 .cs-ask-bar .cs-field:focus { box-shadow: none; }
-.cs-suggestion-row { display: flex; gap: var(--cs-space-2); flex-wrap: wrap; }
+.cs-suggestion-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cs-space-2); }
+.cs-suggestion-row .cs-button { min-width: 0; justify-content: center; white-space: normal; }
+.cs-home-item-list {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}
+.cs-home-item {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  min-height: 72px;
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-home-item:last-child { border-bottom: 0; }
+.cs-home-item:hover { background: var(--cs-color-surface-subtle); }
+.cs-home-item-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-home-item h3 { margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }
+.cs-home-item p { margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-next-step-list { display: grid; gap: var(--cs-space-2); }
+.cs-next-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  padding: var(--cs-space-3);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+}
+.cs-next-step strong { font-size: var(--cs-typography-body-fontSize); }
 .cs-row { display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }
 .cs-module-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: var(--cs-space-4); }
 .cs-list { display: grid; gap: var(--cs-space-3); }
@@ -924,10 +980,10 @@ button, input, textarea { font: inherit; }
 .cs-timeline-item { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }
 .cs-dot { width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }
 .cs-toast {
-  min-height: 36px;
+  min-height: 28px;
   color: var(--cs-color-text-secondary);
   border-left: 3px solid var(--cs-color-primary-600);
-  padding: var(--cs-space-2) var(--cs-space-3);
+  padding: var(--cs-space-1) var(--cs-space-3);
   background: var(--cs-color-primary-50);
 }
 @media (max-width: 980px) {
@@ -953,11 +1009,13 @@ button, input, textarea { font: inherit; }
   .cs-home-intro { min-height: auto; }
   .cs-home-canvas { padding: var(--cs-space-4); }
   .cs-home-canvas > .cs-panel-header p { display: none; }
+  .cs-home-source-row, .cs-home-item, .cs-next-step { grid-template-columns: 1fr; }
   .cs-drop { min-height: auto; padding: var(--cs-space-3); }
   .cs-drop-target { grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }
   .cs-drop-target p { display: none; }
   .cs-drop textarea.cs-drop-input { min-height: 72px; }
   .cs-ask-bar { grid-template-columns: 1fr; }
+  .cs-suggestion-row { grid-template-columns: 1fr; }
   .cs-trust-ladder, .cs-action-summary { grid-template-columns: 1fr; }
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row { grid-template-columns: 1fr; }
   .cs-inbox-head { display: none; }
@@ -1016,7 +1074,7 @@ button, input, textarea { font: inherit; }
         <h1>Brief for vendor renewal</h1>
         <p class="cs-muted">Read the answer and its source trail together before using it for a decision.</p>
         <div class="cs-brief-meta">
-          <span>2026-07-04 18:49 UTC</span>
+          <span>2026-07-04 18:58 UTC</span>
           <span>1 visible source</span>
         </div>
       </div>
@@ -1068,7 +1126,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-04 18:49 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-04 18:58 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>
@@ -1079,7 +1137,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
 
 <dl class="cs-detail-grid">
-  <dt>Created</dt><dd>2026-07-04 18:49 UTC</dd>
+  <dt>Created</dt><dd>2026-07-04 18:58 UTC</dd>
   <dt>Mode</dt><dd>Keyword summary</dd>
   <dt>Model</dt><dd>No model run recorded</dd>
   <dt>Sources</dt><dd>1</dd>
