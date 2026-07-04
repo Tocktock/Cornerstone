@@ -157,6 +157,17 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Sort: keyword match", search_html)
         self.assert_product_surface_is_clean(search_html)
 
+        audit_html = self.fetch_product_html("/audit")
+        self.assertIn('data-product-surface="audit"', audit_html)
+        self.assertIn("Activity trail", audit_html)
+        self.assertIn("Event stream", audit_html)
+        self.assertIn("Raw event detail", audit_html)
+        self.assertIn("Audit posture", audit_html)
+        self.assertIn("Source saved", audit_html)
+        self.assertIn("Evidence bundle prepared", audit_html)
+        self.assertIn("Hash chained", audit_html)
+        self.assert_product_surface_is_clean(audit_html)
+
     def test_brief_claim_and_action_detail_pages_use_plain_disclosure(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
 

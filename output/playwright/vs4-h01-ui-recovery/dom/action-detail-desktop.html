@@ -1495,6 +1495,87 @@ button, input, textarea { font: inherit; }
 .cs-timeline { display: grid; gap: var(--cs-space-3); }
 .cs-timeline-item { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }
 .cs-dot { width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }
+.cs-audit-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}
+.cs-audit-list {
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-audit-row {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}
+.cs-audit-row-main {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-audit-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}
+.cs-audit-row h2 {
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-audit-detail {
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+}
+.cs-audit-detail summary {
+  cursor: pointer;
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-audit-raw-grid {
+  margin-top: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}
+.cs-audit-raw-item {
+  border-left: 1px solid var(--cs-color-border-default);
+  padding-left: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
+.cs-audit-empty {
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-6);
+  display: grid;
+  gap: var(--cs-space-4);
+}
+.cs-audit-empty-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}
+.cs-audit-empty-step {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}
 .cs-toast {
   min-height: 28px;
   color: var(--cs-color-text-secondary);
@@ -1519,7 +1600,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -1543,6 +1624,8 @@ button, input, textarea { font: inherit; }
   .cs-document-frame.has-rail { grid-template-columns: 1fr; min-height: auto; }
   .cs-artifact-page-rail { display: none; }
   .cs-artifact-page-area { padding: var(--cs-space-3); }
+  .cs-audit-row-main { grid-template-columns: auto minmax(0, 1fr); }
+  .cs-audit-row-main .cs-chip { justify-self: start; }
   .cs-document-page { min-height: auto; }
   .cs-list-row { grid-template-columns: 1fr; }
   .cs-detail-grid { grid-template-columns: 1fr; }
@@ -1597,7 +1680,7 @@ button, input, textarea { font: inherit; }
         <h1>Draft a vendor renewal follow-up</h1>
         <div class="cs-brief-meta">
           <span>Dry-run first</span>
-          <span>2026-07-04 19:49 UTC</span>
+          <span>2026-07-04 19:58 UTC</span>
           <span>No external send yet</span>
         </div>
       </div>
@@ -1705,7 +1788,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-04 19:49 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-04 19:58 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>

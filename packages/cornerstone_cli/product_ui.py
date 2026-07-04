@@ -164,7 +164,7 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
         [
             event
             for event in _safe_records(lambda: store._all_audit_events())
-            if _same_scope(event.get("scope"), scope)
+            if _same_scope(event.get("scope") if isinstance(event.get("scope"), dict) else event, scope)
         ],
         limit=80,
     )
@@ -222,7 +222,7 @@ def _recent(records: list[dict[str, Any]], limit: int | None = None) -> list[dic
 
 
 def _record_time_key(record: dict[str, Any]) -> str:
-    for key in ("updated_at", "created_at", "timestamp", "recorded_at", "decided_at"):
+    for key in ("updated_at", "created_at", "occurred_at", "timestamp", "recorded_at", "decided_at"):
         value = record.get(key)
         if isinstance(value, str) and value:
             return value
@@ -262,6 +262,15 @@ def _truncate(value: str, length: int = 140) -> str:
     return text[: max(0, length - 1)].rstrip() + "..."
 
 
+def _short_ref(value: Any, length: int = 12) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    if len(text) <= length:
+        return text
+    return f"{text[:length]}..."
+
+
 def _artifact_title(record: dict[str, Any] | None) -> str:
     if not record:
         return "Source"
@@ -298,24 +307,85 @@ def _action_title(record: dict[str, Any] | None) -> str:
 def _plain_event(event_type: str) -> str:
     labels = {
         "artifact.ingest": "Source saved",
+        "artifact.ingested": "Source saved",
         "artifact.read": "Source opened",
         "search.run": "Search run",
+        "search.snapshot.created": "Search saved",
+        "search.snapshot.read": "Search opened",
+        "evidence_bundle.created": "Evidence bundle prepared",
         "brief.create": "Brief drafted",
+        "brief.created": "Brief drafted",
         "brief.read": "Brief opened",
         "claim.create": "Claim drafted",
+        "claim.draft.created": "Claim drafted",
         "claim.read": "Claim opened",
         "claim.approve": "Claim approved",
         "action.create": "Action drafted",
+        "action.card.proposed": "Action proposed",
         "action.read": "Action opened",
         "action.dry_run": "Action previewed",
+        "action.dry_run.read": "Action preview opened",
         "action.approve": "Action approved",
         "action.execute": "Action executed",
         "conversation.start": "Ask started",
         "conversation.answer": "Draft answer saved",
+        "mission.contract.created": "Decision path prepared",
+        "mission.activated": "Decision path activated",
+        "workspace.mode.set": "Workspace mode recorded",
     }
     if event_type in labels:
         return labels[event_type]
     return "Recorded activity"
+
+
+def _audit_icon(event_type: str) -> str:
+    if event_type.startswith("artifact."):
+        return "S"
+    if event_type.startswith("search.") or event_type.startswith("evidence_bundle."):
+        return "E"
+    if event_type.startswith("brief."):
+        return "B"
+    if event_type.startswith("claim."):
+        return "C"
+    if event_type.startswith("action."):
+        return "A"
+    if event_type.startswith("mission.") or event_type.startswith("workspace."):
+        return "D"
+    if event_type.startswith("conversation."):
+        return "Q"
+    return "L"
+
+
+def _audit_subject_label(event: dict[str, Any]) -> str:
+    subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+    subject_type = str(subject.get("type") or "record").replace("_", " ")
+    subject_id = _short_ref(subject.get("id"), 10)
+    return f"{subject_type.title()} / {subject_id}" if subject_id else subject_type.title()
+
+
+def _audit_detail(event: dict[str, Any], position: int) -> str:
+    subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+    details = event.get("details") if isinstance(event.get("details"), dict) else {}
+    event_id = _short_ref(event.get("event_id"), 16)
+    event_hash = _short_ref(event.get("event_hash"), 16)
+    previous_hash = _short_ref(event.get("previous_hash"), 16)
+    subject_ref = f"{subject.get('type') or 'record'}:{subject.get('id') or 'unknown'}"
+    detail_keys = ", ".join(str(key).replace("_", " ") for key in sorted(details.keys())[:4]) or "No extra fields"
+    return f"""
+<details class="cs-audit-detail">
+  <summary>Raw event detail</summary>
+  <div class="cs-audit-raw-grid">
+    <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>{position}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>{h(event_id)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>{h(subject_ref)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>{h(str(event.get("event_type") or "recorded"))}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>{h(event_hash)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>{h(previous_hash)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>{h(detail_keys)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>{h(str(event.get("workspace_id") or "default"))}</strong></div>
+  </div>
+</details>
+"""
 
 
 def _brief_label(record: dict[str, Any]) -> tuple[str, str]:
@@ -1858,6 +1928,87 @@ button, input, textarea {{ font: inherit; }}
 .cs-timeline {{ display: grid; gap: var(--cs-space-3); }}
 .cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
 .cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }}
+.cs-audit-workbench {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: var(--cs-space-5);
+  align-items: start;
+}}
+.cs-audit-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-audit-row {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-audit-row-main {{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-audit-icon {{
+  width: 36px;
+  height: 36px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-audit-row h2 {{
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-audit-detail {{
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-3);
+}}
+.cs-audit-detail summary {{
+  cursor: pointer;
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-audit-raw-grid {{
+  margin-top: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-audit-raw-item {{
+  border-left: 1px solid var(--cs-color-border-default);
+  padding-left: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-audit-empty {{
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-6);
+  display: grid;
+  gap: var(--cs-space-4);
+}}
+.cs-audit-empty-steps {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-audit-empty-step {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
 .cs-toast {{
   min-height: 28px;
   color: var(--cs-color-text-secondary);
@@ -1882,7 +2033,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-brief-hero, .cs-search-workbench, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-inbox-workbench, .cs-collection-workbench, .cs-collection-summary, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-review-strip, .cs-audit-workbench, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-connector-grid, .cs-connector-meta, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -1906,6 +2057,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
   .cs-artifact-page-rail {{ display: none; }}
   .cs-artifact-page-area {{ padding: var(--cs-space-3); }}
+  .cs-audit-row-main {{ grid-template-columns: auto minmax(0, 1fr); }}
+  .cs-audit-row-main .cs-chip {{ justify-self: start; }}
   .cs-document-page {{ min-height: auto; }}
   .cs-list-row {{ grid-template-columns: 1fr; }}
   .cs-detail-grid {{ grid-template-columns: 1fr; }}
@@ -2838,29 +2991,76 @@ def _inbox_empty() -> str:
 
 def _audit_page(ctx: dict[str, Any]) -> str:
     if not ctx["audit"]:
-        rows = '<div class="cs-empty">No local activity has been recorded yet.</div>'
+        rows = """
+<div class="cs-audit-empty">
+  <div>
+    <div class="cs-kicker">Audit ready</div>
+    <h2 class="cs-section-title">No local activity has been recorded yet.</h2>
+    <p class="cs-muted">Save a source, ask a question, draft a brief, or review a decision to start the local activity trail.</p>
+  </div>
+  <div class="cs-audit-empty-steps" aria-label="Audit trail starter steps">
+    <div class="cs-audit-empty-step"><strong>1. Save source</strong><span class="cs-meta">Original input creates the first record.</span></div>
+    <div class="cs-audit-empty-step"><strong>2. Create work</strong><span class="cs-meta">Searches, briefs, claims, and actions add readable events.</span></div>
+    <div class="cs-audit-empty-step"><strong>3. Inspect detail</strong><span class="cs-meta">Raw event detail appears behind each row.</span></div>
+  </div>
+  <a class="cs-button secondary" href="/">Start from Home</a>
+</div>
+"""
     else:
         rows = "".join(
             f"""
-<div class="cs-timeline-item">
-  <span class="cs-dot"></span>
-  <div>
-    <strong>{h(_plain_event(str(event.get("event_type") or "")))}</strong>
-    <div class="cs-meta">{h(_display_date(event))}</div>
+<article class="cs-audit-row">
+  <div class="cs-audit-row-main">
+    <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(event.get("event_type") or "")))}</span>
+    <div>
+      <h2>{h(_plain_event(str(event.get("event_type") or "")))}</h2>
+      <p class="cs-muted">{h(_audit_subject_label(event))}</p>
+      <div class="cs-meta">{h(_display_date(event))}</div>
+    </div>
+    {_chip("Hash chained", "searchable")}
   </div>
-</div>
+  {_audit_detail(event, index)}
+</article>
 """
-            for event in ctx["audit"][:40]
+            for index, event in enumerate(ctx["audit"][:40], start=1)
         )
-        rows = f'<div class="cs-timeline">{rows}</div>'
+        rows = f'<div class="cs-audit-list">{rows}</div>'
+    event_count = len(ctx["audit"])
+    visible_count = min(event_count, 40)
     return f"""
 <section data-product-surface="audit">
   <div class="cs-page-head">
     <div class="cs-kicker">Audit</div>
     <h1>Activity trail</h1>
-    <p>Recent local activity is shown in plain language. The full signed ledger remains available through the API.</p>
+    <p>Recent local activity is shown in plain language first. Raw event detail stays one click deeper for provenance checks.</p>
   </div>
-  <div class="cs-panel">{rows}</div>
+  <div class="cs-audit-workbench">
+    <section class="cs-panel flat">
+      <div class="cs-panel-header">
+        <div>
+          <h2>Event stream</h2>
+          <p class="cs-muted">Showing {visible_count} of {event_count} scoped records.</p>
+        </div>
+        {_chip("Local ledger", "searchable")}
+      </div>
+      {rows}
+    </section>
+    <aside class="cs-stack">
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">Audit posture</h2>
+        <dl class="cs-detail-grid">
+          <dt>Visible records</dt><dd>{visible_count}</dd>
+          <dt>Reading order</dt><dd>Newest first</dd>
+          <dt>Disclosure</dt><dd>Raw event detail</dd>
+          <dt>Scope</dt><dd>{h(str((ctx.get("scope") or {}).get("workspace_id") or "default"))}</dd>
+        </dl>
+      </section>
+      <section class="cs-panel flat">
+        <h2 class="cs-section-title">What this proves</h2>
+        <p class="cs-muted">The trail records local product activity and keeps hashes, subjects, and event types available without making raw IDs the first reading.</p>
+      </section>
+    </aside>
+  </div>
 </section>
 """
 

@@ -52,7 +52,7 @@ DESKTOP_ROUTES = [
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Claim review queue", "Review posture"]},
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Action preview queue", "Dry-run posture"]},
     {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Needs review", "Selected item", "Next actions"]},
-    {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail"]},
+    {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Activity trail", "Event stream", "Audit posture", "Raw event detail"]},
     {
         "name": "owner-admin-desktop",
         "route": "/review",
