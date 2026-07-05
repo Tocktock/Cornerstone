@@ -555,6 +555,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Needs review", inbox_html)
         self.assertIn("Approval requests", inbox_html)
         self.assertIn("Triage summary", inbox_html)
+        self.assertIn("open review items across one queue", inbox_html)
+        self.assertIn("Showing 3 open items", inbox_html)
         self.assertIn("<span>Owner</span>", inbox_html)
         self.assertIn("Selected item", inbox_html)
         self.assertIn("Why this is here", inbox_html)

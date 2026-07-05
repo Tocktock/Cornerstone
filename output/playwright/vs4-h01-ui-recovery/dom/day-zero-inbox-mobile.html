@@ -1123,40 +1123,50 @@ button, input, textarea { font: inherit; }
   align-items: start;
 }
 .cs-inbox-lane-summary {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}
-.cs-inbox-lane-card {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}
-.cs-inbox-lane-card.is-active {
-  border-color: var(--cs-color-border-focus);
-  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
-  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
-}
-.cs-inbox-lane-top {
   display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
   align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
 }
-.cs-inbox-lane-top strong {
-  font-size: 22px;
-  line-height: 1;
+.cs-inbox-summary-main {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
+.cs-inbox-summary-main strong {
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-body-fontSize);
   font-variant-numeric: tabular-nums;
 }
-.cs-inbox-lane-card p {
-  margin: 0;
-  color: var(--cs-color-text-muted);
+.cs-inbox-summary-pills {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}
+.cs-inbox-summary-pill {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-full);
+  background: var(--cs-color-surface-primary);
+  padding: 4px var(--cs-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-secondary);
   font-size: var(--cs-typography-metadata-fontSize);
-  line-height: 1.45;
+}
+.cs-inbox-summary-pill.is-active {
+  border-color: var(--cs-color-border-focus);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}
+.cs-inbox-summary-pill strong {
+  color: var(--cs-color-text-primary);
+  font-variant-numeric: tabular-nums;
 }
 .cs-inbox-tabs {
   display: flex;
@@ -2937,8 +2947,7 @@ button, input, textarea { font: inherit; }
   .cs-drop textarea.cs-drop-input { min-height: 72px; }
   .cs-ask-bar { grid-template-columns: 1fr; }
   .cs-suggestion-row { grid-template-columns: 1fr; }
-  .cs-inbox-lane-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .cs-inbox-lane-card p { display: none; }
+  .cs-inbox-lane-summary { align-items: flex-start; }
   .cs-empty-actions { flex-direction: column; align-items: stretch; }
   .cs-empty-actions .cs-button { justify-content: center; }
   .cs-detail-actions { justify-content: flex-start; }
@@ -3098,43 +3107,16 @@ button, input, textarea { font: inherit; }
       </div>
 
 <section class="cs-inbox-lane-summary" aria-label="Triage summary">
+  <span class="cs-inbox-summary-main"><strong>0</strong> open review items across one queue</span>
+  <span class="cs-inbox-summary-pills">
+<span class="cs-inbox-summary-pill is-active">Needs review <strong>0</strong></span>
 
-<div class="cs-inbox-lane-card is-active">
-  <div class="cs-inbox-lane-top">
-    <span>Needs review</span>
-    <strong>0</strong>
-  </div>
-  <p>Items waiting for owner review before they are used.</p>
-  <span class="cs-chip cs-chip-underReview">0 items</span>
-</div>
+<span class="cs-inbox-summary-pill">Approval requests <strong>0</strong></span>
 
-<div class="cs-inbox-lane-card">
-  <div class="cs-inbox-lane-top">
-    <span>Approval requests</span>
-    <strong>0</strong>
-  </div>
-  <p>Action previews that need approval before execution.</p>
-  <span class="cs-chip cs-chip-draft">0 items</span>
-</div>
+<span class="cs-inbox-summary-pill">Policy blocked <strong>0</strong></span>
 
-<div class="cs-inbox-lane-card">
-  <div class="cs-inbox-lane-top">
-    <span>Policy blocked</span>
-    <strong>0</strong>
-  </div>
-  <p>Records stopped by policy checks.</p>
-  <span class="cs-chip cs-chip-policyBlocked">0 items</span>
-</div>
-
-<div class="cs-inbox-lane-card">
-  <div class="cs-inbox-lane-top">
-    <span>Failed runs</span>
-    <strong>0</strong>
-  </div>
-  <p>Runs that need recovery or audit review.</p>
-  <span class="cs-chip cs-chip-failed">0 items</span>
-</div>
-
+<span class="cs-inbox-summary-pill">Failed runs <strong>0</strong></span>
+</span>
 </section>
 
       <div class="cs-inbox-toolbar">
@@ -3144,7 +3126,7 @@ button, input, textarea { font: inherit; }
           <span class="cs-filter-chip">Priority: open first</span>
           <span class="cs-filter-chip">Trust/risk: visible labels</span>
         </div>
-        <span class="cs-meta">0 open items</span>
+        <span class="cs-meta">Showing 0 open items</span>
       </div>
       <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
         <div class="cs-inbox-head" aria-hidden="true">

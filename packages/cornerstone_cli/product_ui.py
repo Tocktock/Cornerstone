@@ -1653,40 +1653,50 @@ button, input, textarea {{ font: inherit; }}
   align-items: start;
 }}
 .cs-inbox-lane-summary {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-inbox-lane-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-inbox-lane-card.is-active {{
-  border-color: var(--cs-color-border-focus);
-  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
-  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
-}}
-.cs-inbox-lane-top {{
   display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
   align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
 }}
-.cs-inbox-lane-top strong {{
-  font-size: 22px;
-  line-height: 1;
+.cs-inbox-summary-main {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-inbox-summary-main strong {{
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-body-fontSize);
   font-variant-numeric: tabular-nums;
 }}
-.cs-inbox-lane-card p {{
-  margin: 0;
-  color: var(--cs-color-text-muted);
+.cs-inbox-summary-pills {{
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}}
+.cs-inbox-summary-pill {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-full);
+  background: var(--cs-color-surface-primary);
+  padding: 4px var(--cs-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-secondary);
   font-size: var(--cs-typography-metadata-fontSize);
-  line-height: 1.45;
+}}
+.cs-inbox-summary-pill.is-active {{
+  border-color: var(--cs-color-border-focus);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}}
+.cs-inbox-summary-pill strong {{
+  color: var(--cs-color-text-primary);
+  font-variant-numeric: tabular-nums;
 }}
 .cs-inbox-tabs {{
   display: flex;
@@ -3467,8 +3477,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
-  .cs-inbox-lane-summary {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
-  .cs-inbox-lane-card p {{ display: none; }}
+  .cs-inbox-lane-summary {{ align-items: flex-start; }}
   .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
   .cs-empty-actions .cs-button {{ justify-content: center; }}
   .cs-detail-actions {{ justify-content: flex-start; }}
@@ -4762,7 +4771,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
           <span class="cs-filter-chip">Priority: open first</span>
           <span class="cs-filter-chip">Trust/risk: visible labels</span>
         </div>
-        <span class="cs-meta">{h(len(items))} open item{"s" if len(items) != 1 else ""}</span>
+        <span class="cs-meta">Showing {h(len(items))} open item{"s" if len(items) != 1 else ""}</span>
       </div>
       <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
         <div class="cs-inbox-head" aria-hidden="true">
@@ -4788,27 +4797,22 @@ def _inbox_counts(items: list[dict[str, str]]) -> dict[str, int]:
 
 def _inbox_lane_summary(counts: dict[str, int]) -> str:
     lanes = [
-        ("Needs review", "Items waiting for owner review before they are used.", counts["needs_review"], "underReview", True),
-        ("Approval requests", "Action previews that need approval before execution.", counts["approval_requests"], "draft", False),
-        ("Policy blocked", "Records stopped by policy checks.", counts["policy_blocked"], "policyBlocked", False),
-        ("Failed runs", "Runs that need recovery or audit review.", counts["failed"], "failed", False),
+        ("Needs review", counts["needs_review"], True),
+        ("Approval requests", counts["approval_requests"], False),
+        ("Policy blocked", counts["policy_blocked"], False),
+        ("Failed runs", counts["failed"], False),
     ]
-    cards = "".join(
+    total = sum(counts.values())
+    pills = "".join(
         f"""
-<div class="cs-inbox-lane-card{" is-active" if active else ""}">
-  <div class="cs-inbox-lane-top">
-    <span>{h(label)}</span>
-    <strong>{h(count)}</strong>
-  </div>
-  <p>{h(description)}</p>
-  {_chip(f"{count} item{'s' if count != 1 else ''}", state)}
-</div>
+<span class="cs-inbox-summary-pill{" is-active" if active else ""}">{h(label)} <strong>{h(count)}</strong></span>
 """
-        for label, description, count, state, active in lanes
+        for label, count, active in lanes
     )
     return f"""
 <section class="cs-inbox-lane-summary" aria-label="Triage summary">
-  {cards}
+  <span class="cs-inbox-summary-main"><strong>{h(total)}</strong> open review items across one queue</span>
+  <span class="cs-inbox-summary-pills">{pills}</span>
 </section>
 """
 

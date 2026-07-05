@@ -51,7 +51,7 @@ DESKTOP_ROUTES = [
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Decision queue", "Brief reading queue", "Review lanes", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Decision queue", "Claim review lanes", "Evidence-backed lane", "Claim review queue", "Review posture"]},
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Decision queue", "Action approval lanes", "Approval lane", "Action preview queue", "Dry-run posture"]},
-    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "Owner", "Next actions", "Review item", "Review sources", "Open audit trail"]},
+    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "open review items across one queue", "Showing 3 open items", "Owner", "Next actions", "Review item", "Review sources", "Open audit trail"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Audit receipt workspace", "Activity trail", "Audit status", "Receipt summary", "Audit lifecycle", "Activity receipts", "Readable receipts", "Event stream", "Audit posture", "Audit integrity checks", "Integrity chain", "Scope and recovery", "Raw event detail"]},
     {
         "name": "owner-admin-desktop",
