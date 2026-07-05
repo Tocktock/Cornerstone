@@ -1673,6 +1673,21 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-3);
 }}
+.cs-artifact-summary-lead {{
+  border: 1px solid var(--cs-color-primary-100);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-primary-50) 42%, var(--cs-color-surface-primary));
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-artifact-summary-lead strong {{
+  color: var(--cs-color-text-primary);
+  line-height: 1.35;
+}}
+.cs-artifact-summary-lead p {{
+  line-height: 1.65;
+}}
 .cs-artifact-side-card {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -5921,7 +5936,7 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         <div class="cs-artifact-toolgroup">
           <div class="cs-artifact-toolbar-label">
             <strong>Original source</strong>
-            <span class="cs-meta">Plain text preview from the saved artifact</span>
+            <span class="cs-meta">Artifact evidence workspace - Plain text preview from the saved artifact</span>
           </div>
         </div>
         <div class="cs-artifact-toolgroup">
@@ -5981,18 +5996,17 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <span class="cs-artifact-rail-tab is-active">Details</span>
       <span class="cs-artifact-rail-tab">Tags ({len(keywords)})</span>
     </nav>
-    <section class="cs-artifact-side-card">
-      <h2 class="cs-section-title">Source state</h2>
-      <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
-      <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>{h(_display_date(artifact))}</dd>
-        <dt>Source</dt><dd>{h(source_label)}</dd>
-        <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
-      </dl>
-      <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
+    <section class="cs-artifact-side-card" aria-label="Source reading summary">
+      <div class="cs-panel-header"><h2>Source reading summary</h2>{_chip("Original primary", "saved")}</div>
+      <div class="cs-artifact-summary-lead">
+        <span class="cs-meta">Original source summary</span>
+        <strong>{h(_truncate(title, 110))}</strong>
+        <p class="cs-muted">{h(summary)}</p>
+      </div>
+      <div class="cs-row">{_chip("Original content primary", "saved")}{_chip(f"{linked_count} linked drafts", "searchable")}</div>
     </section>
     <section class="cs-artifact-side-card" aria-label="Artifact inspection summary">
-      <div class="cs-panel-header"><h2>Artifact inspection summary</h2>{_chip("Original primary", "saved")}</div>
+      <div class="cs-panel-header"><h2>Artifact inspection summary</h2>{_chip("Evidence links", "searchable")}</div>
       <div class="cs-artifact-panel-list">
         <div class="cs-artifact-inspection-card"><span class="cs-meta">Original preserved</span><strong>Yes</strong><span class="cs-muted">Derived drafts stay secondary.</span></div>
         <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Plain text preview</strong><span class="cs-muted">No simulated PDF controls.</span></div>
@@ -6009,6 +6023,16 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <div class="cs-keyword-list">{keyword_rows or '<div class="cs-empty">No keyword preview is available.</div>'}</div>
     </section>
     {linked}
+    <section class="cs-artifact-side-card">
+      <h2 class="cs-section-title">Source state</h2>
+      <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
+      <dl class="cs-detail-grid">
+        <dt>Saved</dt><dd>{h(_display_date(artifact))}</dd>
+        <dt>Source</dt><dd>{h(source_label)}</dd>
+        <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
+      </dl>
+      <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
+    </section>
     <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
