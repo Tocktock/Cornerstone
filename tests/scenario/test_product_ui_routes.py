@@ -333,6 +333,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Original source", html)
         self.assertIn("Original source document viewer", html)
         self.assertIn("Original artifact preview", html)
+        self.assertIn("Text preview controls", html)
+        self.assertIn("1 / 1", html)
         self.assertIn("Source pages", html)
         self.assertIn("Preview rail", html)
         self.assertIn("Source text", html)

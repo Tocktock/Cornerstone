@@ -1352,8 +1352,8 @@ button, input, textarea {{ font: inherit; }}
 .cs-artifact-actions {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }}
 .cs-artifact-workbench {{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 420px);
-  gap: var(--cs-space-5);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
+  gap: var(--cs-space-4);
   align-items: start;
 }}
 .cs-artifact-compact-hero {{
@@ -1368,9 +1368,9 @@ button, input, textarea {{ font: inherit; }}
   min-width: 0;
 }}
 .cs-artifact-compact-hero .cs-artifact-title h1 {{
-  max-width: 42ch;
-  font-size: 25px;
-  line-height: 1.16;
+  max-width: 44ch;
+  font-size: 27px;
+  line-height: 1.12;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }}
@@ -1429,7 +1429,7 @@ button, input, textarea {{ font: inherit; }}
 .cs-metadata-strip.is-artifact {{
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border-bottom: 1px solid var(--cs-color-border-default);
-  padding-bottom: var(--cs-space-3);
+  padding: var(--cs-space-3) 0;
   margin-bottom: 0;
 }}
 .cs-metadata-item strong {{
@@ -1455,21 +1455,21 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-viewer {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
+  border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
   overflow: hidden;
   box-shadow: var(--cs-shadow-sm);
-  margin-top: var(--cs-space-3);
+  margin-top: var(--cs-space-2);
 }}
 .cs-artifact-toolbar {{
-  min-height: 58px;
+  min-height: 48px;
   border-bottom: 1px solid var(--cs-color-border-default);
-  background: linear-gradient(180deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
+  background: var(--cs-color-surface-primary);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-3) var(--cs-space-4);
+  gap: var(--cs-space-2);
+  padding: var(--cs-space-2) var(--cs-space-3);
 }}
 .cs-artifact-toolbar-label {{
   display: grid;
@@ -1493,8 +1493,12 @@ button, input, textarea {{ font: inherit; }}
   font-size: var(--cs-typography-metadata-fontSize);
   font-weight: var(--cs-typography-weight-semibold);
 }}
+.cs-artifact-tool.is-muted {{
+  color: var(--cs-color-text-muted);
+  background: var(--cs-color-surface-subtle);
+}}
 .cs-artifact-page-count {{
-  min-width: 84px;
+  min-width: 72px;
   height: 32px;
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-sm);
@@ -1514,16 +1518,16 @@ button, input, textarea {{ font: inherit; }}
   border-radius: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: 104px minmax(0, 1fr);
-  min-height: 560px;
+  grid-template-columns: 96px minmax(0, 1fr);
+  min-height: 600px;
 }}
 .cs-artifact-page-rail {{
   border-right: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
+  background: color-mix(in srgb, var(--cs-color-surface-subtle) 74%, var(--cs-color-surface-primary));
+  padding: var(--cs-space-3) var(--cs-space-2);
   display: grid;
   align-content: start;
-  gap: var(--cs-space-3);
+  gap: var(--cs-space-2);
 }}
 .cs-artifact-page-rail-label {{
   color: var(--cs-color-text-muted);
@@ -1534,7 +1538,7 @@ button, input, textarea {{ font: inherit; }}
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-sm);
   background: var(--cs-color-surface-primary);
-  min-height: 96px;
+  min-height: 92px;
   padding: var(--cs-space-2);
   display: grid;
   gap: var(--cs-space-1);
@@ -1555,18 +1559,19 @@ button, input, textarea {{ font: inherit; }}
   margin-top: var(--cs-space-1);
 }}
 .cs-artifact-page-area {{
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-5);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-surface-subtle) 72%, var(--cs-color-surface-primary)), var(--cs-color-surface-subtle));
+  padding: var(--cs-space-4);
   overflow: auto;
 }}
 .cs-document-page {{
-  max-width: 840px;
-  min-height: 500px;
+  max-width: 760px;
+  min-height: 540px;
   margin: 0 auto;
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-radius-sm);
   background: var(--cs-color-surface-primary);
-  box-shadow: var(--cs-shadow-sm);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, .08);
   padding: clamp(var(--cs-space-5), 5vw, var(--cs-space-8));
 }}
 .cs-document-heading {{
@@ -5559,6 +5564,12 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
           </div>
         </div>
         <div class="cs-artifact-toolgroup">
+          <span class="cs-artifact-tool is-muted">Pane</span>
+          <span class="cs-artifact-tool is-muted">Find</span>
+          <span class="cs-artifact-page-count">1 / 1</span>
+          <span class="cs-artifact-tool is-muted">-</span>
+          <span class="cs-artifact-tool is-muted">100%</span>
+          <span class="cs-artifact-tool is-muted">+</span>
           <span class="cs-artifact-page-count">1 text source</span>
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
@@ -5588,7 +5599,7 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         <div class="cs-artifact-page-area">
           <article class="cs-document-page" aria-label="Original artifact preview" id="source-text">
             <header class="cs-document-heading">
-              <span class="cs-meta">Original artifact preview</span>
+              <span class="cs-meta">Original artifact preview · Text preview controls</span>
               <h3>{h(title)}</h3>
               <div class="cs-artifact-source-note">
                 <span>{h(source_label)}</span>
