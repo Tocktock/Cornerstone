@@ -372,11 +372,11 @@ button, input, textarea { font: inherit; }
   align-content: start;
 }
 .cs-home-canvas {
-  padding: var(--cs-space-4);
+  padding: var(--cs-space-3) var(--cs-space-4) var(--cs-space-4);
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
-.cs-home-canvas .cs-panel-header { margin-bottom: 0; }
+.cs-home-canvas .cs-panel-header { margin-bottom: 0; flex-wrap: wrap; }
 .cs-home-canvas p { max-width: 62ch; }
 .cs-home-workspace {
   display: grid;
@@ -402,7 +402,7 @@ button, input, textarea { font: inherit; }
   text-align: center;
 }
 .cs-drop {
-  min-height: 196px;
+  min-height: 166px;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
   background:
@@ -444,7 +444,7 @@ button, input, textarea { font: inherit; }
   font-size: 18px;
 }
 .cs-drop textarea.cs-drop-input {
-  min-height: 48px;
+  min-height: 44px;
   background: var(--cs-color-surface-primary);
 }
 .cs-or-divider {
@@ -489,6 +489,32 @@ button, input, textarea { font: inherit; }
 .cs-ask-bar .cs-field:focus { box-shadow: none; }
 .cs-suggestion-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cs-space-2); }
 .cs-suggestion-row .cs-button { min-width: 0; justify-content: center; white-space: normal; }
+.cs-home-loop-inline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--cs-space-2);
+  max-width: 460px;
+}
+.cs-home-loop-inline span {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-pill);
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-text-secondary);
+  padding: var(--cs-space-1) var(--cs-space-2);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
+  font-weight: var(--cs-typography-weight-medium);
+  white-space: nowrap;
+}
+.cs-home-loop-inline span:first-child {
+  border-color: var(--cs-color-primary-100);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}
+.cs-home-loop-inline strong {
+  color: var(--cs-color-text-primary);
+}
 .cs-home-item-list {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -3235,6 +3261,7 @@ button, input, textarea { font: inherit; }
   .cs-home-canvas { padding: var(--cs-space-4); }
   .cs-home-canvas > .cs-panel-header p { display: none; }
   .cs-home-source-row, .cs-home-item, .cs-next-step, .cs-home-paste-row { grid-template-columns: 1fr; }
+  .cs-home-loop-inline { justify-content: flex-start; max-width: none; }
   .cs-drop { min-height: auto; padding: var(--cs-space-3); }
   .cs-drop-target { grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }
   .cs-drop-target p { display: none; }
@@ -3579,7 +3606,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-05 04:10 UTC</div>
+    <div class="cs-meta">2026-07-05 04:21 UTC</div>
   </div>
 </div>
 
@@ -3587,7 +3614,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-05 04:10 UTC</div>
+    <div class="cs-meta">2026-07-05 04:21 UTC</div>
   </div>
 </div>
 
@@ -3595,7 +3622,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-05 04:10 UTC</div>
+    <div class="cs-meta">2026-07-05 04:21 UTC</div>
   </div>
 </div>
 
@@ -3603,7 +3630,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-05 04:10 UTC</div>
+    <div class="cs-meta">2026-07-05 04:21 UTC</div>
   </div>
 </div>
 
@@ -3611,7 +3638,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Claim drafted</strong>
-    <div class="cs-meta">2026-07-05 04:10 UTC</div>
+    <div class="cs-meta">2026-07-05 04:21 UTC</div>
   </div>
 </div>
 </div>
