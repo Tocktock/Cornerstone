@@ -789,9 +789,9 @@ button, input, textarea { font: inherit; }
 .cs-artifact-compact-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
   align-items: start;
-  padding-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-3);
   border-bottom: 1px solid var(--cs-color-border-default);
 }
 .cs-artifact-compact-hero > * {
@@ -799,7 +799,7 @@ button, input, textarea { font: inherit; }
 }
 .cs-artifact-compact-hero .cs-artifact-title h1 {
   max-width: 42ch;
-  font-size: 28px;
+  font-size: 25px;
   line-height: 1.16;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -859,8 +859,8 @@ button, input, textarea { font: inherit; }
 .cs-metadata-strip.is-artifact {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border-bottom: 1px solid var(--cs-color-border-default);
-  padding-bottom: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-3);
+  margin-bottom: 0;
 }
 .cs-metadata-item strong {
   word-break: break-word;
@@ -889,6 +889,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   overflow: hidden;
   box-shadow: var(--cs-shadow-sm);
+  margin-top: var(--cs-space-3);
 }
 .cs-artifact-toolbar {
   min-height: 58px;
@@ -953,6 +954,11 @@ button, input, textarea { font: inherit; }
   display: grid;
   align-content: start;
   gap: var(--cs-space-3);
+}
+.cs-artifact-page-rail-label {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
 }
 .cs-artifact-thumb {
   border: 1px solid var(--cs-color-border-default);
@@ -3228,7 +3234,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-05 00:41 UTC</div>
+    <div class="cs-meta">2026-07-05 01:15 UTC</div>
   </div>
 </div>
 
@@ -3236,7 +3242,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-05 00:41 UTC</div>
+    <div class="cs-meta">2026-07-05 01:15 UTC</div>
   </div>
 </div>
 
@@ -3244,7 +3250,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-05 00:41 UTC</div>
+    <div class="cs-meta">2026-07-05 01:15 UTC</div>
   </div>
 </div>
 
@@ -3252,7 +3258,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-05 00:41 UTC</div>
+    <div class="cs-meta">2026-07-05 01:15 UTC</div>
   </div>
 </div>
 
@@ -3260,7 +3266,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Claim drafted</strong>
-    <div class="cs-meta">2026-07-05 00:41 UTC</div>
+    <div class="cs-meta">2026-07-05 01:15 UTC</div>
   </div>
 </div>
 </div>

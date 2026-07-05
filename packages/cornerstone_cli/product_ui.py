@@ -1319,9 +1319,9 @@ button, input, textarea {{ font: inherit; }}
 .cs-artifact-compact-hero {{
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
   align-items: start;
-  padding-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-3);
   border-bottom: 1px solid var(--cs-color-border-default);
 }}
 .cs-artifact-compact-hero > * {{
@@ -1329,7 +1329,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-artifact-compact-hero .cs-artifact-title h1 {{
   max-width: 42ch;
-  font-size: 28px;
+  font-size: 25px;
   line-height: 1.16;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -1389,8 +1389,8 @@ button, input, textarea {{ font: inherit; }}
 .cs-metadata-strip.is-artifact {{
   grid-template-columns: repeat(5, minmax(0, 1fr));
   border-bottom: 1px solid var(--cs-color-border-default);
-  padding-bottom: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-3);
+  margin-bottom: 0;
 }}
 .cs-metadata-item strong {{
   word-break: break-word;
@@ -1419,6 +1419,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   overflow: hidden;
   box-shadow: var(--cs-shadow-sm);
+  margin-top: var(--cs-space-3);
 }}
 .cs-artifact-toolbar {{
   min-height: 58px;
@@ -1483,6 +1484,11 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   align-content: start;
   gap: var(--cs-space-3);
+}}
+.cs-artifact-page-rail-label {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
 }}
 .cs-artifact-thumb {{
   border: 1px solid var(--cs-color-border-default);
@@ -5480,12 +5486,6 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>{h(workspace)}</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
     </div>
-    <div class="cs-artifact-inspection-strip" aria-label="Artifact inspection summary">
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Original preserved</span><strong>Yes</strong><span class="cs-muted">Derived drafts stay secondary.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Plain text preview</strong><span class="cs-muted">No simulated PDF controls.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked drafts</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
-      <div class="cs-artifact-inspection-card"><span class="cs-meta">Fingerprint</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Shown before reuse.</span></div>
-    </div>
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
         <div class="cs-artifact-toolgroup">
@@ -5499,7 +5499,28 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
           <a class="cs-button ghost" href="#source-text">Source text</a>
         </div>
       </div>
-      <div class="cs-document-frame">
+      <div class="cs-document-frame has-rail">
+        <aside class="cs-artifact-page-rail" aria-label="Source pages">
+          <span class="cs-artifact-page-rail-label">Preview rail</span>
+          <span class="cs-artifact-thumb is-active" aria-current="page">
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span>Source text</span>
+          </span>
+          <span class="cs-artifact-thumb">
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span>Keywords</span>
+          </span>
+          <span class="cs-artifact-thumb">
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span class="cs-artifact-thumb-line"></span>
+            <span>Linked work</span>
+          </span>
+        </aside>
         <div class="cs-artifact-page-area">
           <article class="cs-document-page" aria-label="Original artifact preview" id="source-text">
             <header class="cs-document-heading">
@@ -5533,6 +5554,15 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
       </dl>
       <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
+    </section>
+    <section class="cs-artifact-side-card" aria-label="Artifact inspection summary">
+      <div class="cs-panel-header"><h2>Artifact inspection summary</h2>{_chip("Original primary", "saved")}</div>
+      <div class="cs-artifact-panel-list">
+        <div class="cs-artifact-inspection-card"><span class="cs-meta">Original preserved</span><strong>Yes</strong><span class="cs-muted">Derived drafts stay secondary.</span></div>
+        <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Plain text preview</strong><span class="cs-muted">No simulated PDF controls.</span></div>
+        <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked drafts</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
+        <div class="cs-artifact-inspection-card"><span class="cs-meta">Fingerprint</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Shown before reuse.</span></div>
+      </div>
     </section>
     <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Keyword summary</h2>

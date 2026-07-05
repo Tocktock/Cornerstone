@@ -1,13 +1,13 @@
 {
   "operator_state": {
     "action": {
-      "action_id": "action_02fba320a90494f7",
+      "action_id": "action_815e736edfaa34ba",
       "approval_state": "pending",
       "diff": {
         "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
         "before": "no side effect applied"
       },
-      "evidence_bundle_id": "evb_ba63860d322f227a",
+      "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
       "expected_impact": {
         "connector": "mock_connector",
         "expected_connector_calls": 1,
@@ -27,15 +27,15 @@
     "approvals": {
       "action": "approved",
       "audit_refs": [
-        "audit:audit_d4a9a49467d4711a",
-        "audit:audit_8af5473b0ab841e6"
+        "audit:audit_84c1269c9d5bb5da",
+        "audit:audit_659f1156bf6f1340"
       ],
       "claim": "approved"
     },
     "artifact": {
       "artifact_id": "art_2735313e0cb92563",
       "audit_refs": [
-        "audit:audit_2ee3f9c16e53d838"
+        "audit:audit_7ddccbff5f858db9"
       ],
       "checksum_sha256": "2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
       "derived_status": "ready",
@@ -48,10 +48,10 @@
     "audit": {},
     "claims": {
       "approved_claim_state": "approved",
-      "evidence_claim_id": "claim_9d0307a9402ae57b",
+      "evidence_claim_id": "claim_4ed6b536f13ba76e",
       "evidence_claim_state": "evidence_backed",
       "resolution_guide": "Attach an Evidence Bundle with at least one artifact ref, then request owner approval.",
-      "zero_evidence_claim_id": "claim_e050916069d88990",
+      "zero_evidence_claim_id": "claim_56b5a2166c988d68",
       "zero_evidence_denial_code": "CS_CLAIM_EVIDENCE_REQUIRED",
       "zero_evidence_denied": true,
       "zero_evidence_state": "draft"
@@ -62,7 +62,7 @@
         "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
         "before": "no side effect applied"
       },
-      "dry_run_id": "dryrun_a1f40e60f003c5f3",
+      "dry_run_id": "dryrun_81890007c875ef13",
       "expected_impact": {
         "connector": "mock_connector",
         "expected_connector_calls": 1,
@@ -76,17 +76,17 @@
     },
     "evidence": {
       "audit_refs": [
-        "audit:audit_e2b7c5b929505135"
+        "audit:audit_8efb2703f333bb32"
       ],
-      "evidence_bundle_id": "evb_ba63860d322f227a",
+      "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
       "insufficient_guidance": "Insufficient: no Evidence Bundle, zero artifact refs, empty search result, or unsupported source. Attach eligible evidence before approval.",
-      "search_snapshot_id": "search_2ef24df52992e083",
+      "search_snapshot_id": "search_c729833a35c2199f",
       "support_snippet": "alpha-evidence-anchor.",
       "supports_claim": true
     },
     "execution": {
       "audit_refs": [
-        "audit:audit_3b8d1a3b443ae13f"
+        "audit:audit_e4696fdb74cb03fb"
       ],
       "mock_connector_calls": 1,
       "real_external_http_calls": 0,
@@ -95,7 +95,7 @@
     },
     "search": {
       "audit_refs": [
-        "audit:audit_148716a7de5c0616"
+        "audit:audit_754525f5ea064139"
       ],
       "evidence_eligible": true,
       "evidence_refs": [
@@ -103,7 +103,7 @@
         "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
       ],
       "query": "alpha-evidence-anchor",
-      "search_snapshot_id": "search_2ef24df52992e083",
+      "search_snapshot_id": "search_c729833a35c2199f",
       "snippet": "alpha-evidence-anchor."
     }
   },
@@ -128,7 +128,7 @@
             "original_size_bytes": 239,
             "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
             "provenance": {
-              "created_at": "2026-07-05T01:09:32.055756Z",
+              "created_at": "2026-07-05T01:17:17.991006Z",
               "lineage_from": null,
               "transformations": [
                 "hash_calculated",
@@ -158,14 +158,14 @@
               "workspace_id": "default"
             },
             "source": {
-              "ingested_at": "2026-07-05T01:09:32.055756Z",
+              "ingested_at": "2026-07-05T01:17:17.991006Z",
               "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
               "type": "local_fixture"
             },
             "trust_state": "untrusted"
           },
           "audit_refs": [
-            "audit:audit_2ee3f9c16e53d838"
+            "audit:audit_7ddccbff5f858db9"
           ],
           "deduplicated": false,
           "errors": [],
@@ -189,11 +189,11 @@
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_148716a7de5c0616"
+            "audit:audit_754525f5ea064139"
           ],
           "errors": [],
           "evidence_refs": [
-            "search_snapshot:search_2ef24df52992e083",
+            "search_snapshot:search_c729833a35c2199f",
             "artifact:art_2735313e0cb92563",
             "storage:sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be"
           ],
@@ -202,8 +202,8 @@
           "product": "CornerStone",
           "schema_version": "cs.runtime_api.v0",
           "search_snapshot": {
-            "created_at": "2026-07-05T01:09:32.058695Z",
-            "duration_ms": 0.384,
+            "created_at": "2026-07-05T01:17:17.993529Z",
+            "duration_ms": 0.368,
             "filters": {
               "namespace_id": "personal",
               "owner_id": "local-user",
@@ -248,7 +248,7 @@
               }
             ],
             "schema_version": "cs.search_snapshot.v0",
-            "search_snapshot_id": "search_2ef24df52992e083"
+            "search_snapshot_id": "search_c729833a35c2199f"
           },
           "status": "success",
           "version": "0.0.0-scaffold"
@@ -261,19 +261,19 @@
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_e2b7c5b929505135"
+            "audit:audit_8efb2703f333bb32"
           ],
           "errors": [],
           "evidence_bundle": {
-            "created_at": "2026-07-05T01:09:32.060118Z",
-            "evidence_bundle_id": "evb_ba63860d322f227a",
+            "created_at": "2026-07-05T01:17:17.994855Z",
+            "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
             "evidence_items": [
               {
                 "artifact_id": "art_2735313e0cb92563",
                 "derived_text_ref": "derived/art_2735313e0cb92563.txt",
                 "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                 "provenance": {
-                  "created_at": "2026-07-05T01:09:32.055756Z",
+                  "created_at": "2026-07-05T01:17:17.991006Z",
                   "lineage_from": null,
                   "transformations": [
                     "hash_calculated",
@@ -287,10 +287,10 @@
                   "tenant_id": "local-dev",
                   "workspace_id": "default"
                 },
-                "search_snapshot_id": "search_2ef24df52992e083",
+                "search_snapshot_id": "search_c729833a35c2199f",
                 "snippet": "alpha-evidence-anchor.",
                 "source": {
-                  "ingested_at": "2026-07-05T01:09:32.055756Z",
+                  "ingested_at": "2026-07-05T01:17:17.991006Z",
                   "path": "/Users/jiyong/playground/Cornerstone/fixtures/vs0/packs/01_artifact_basic/input.txt",
                   "type": "local_fixture"
                 }
@@ -347,14 +347,14 @@
                   "snippet": "alpha-evidence-anchor."
                 }
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "schema_version": "cs.evidence_bundle.v0",
-            "search_snapshot_id": "search_2ef24df52992e083"
+            "search_snapshot_id": "search_c729833a35c2199f"
           },
           "evidence_refs": [
-            "evidence_bundle:evb_ba63860d322f227a",
-            "search_snapshot:search_2ef24df52992e083"
+            "evidence_bundle:evb_fb8e1bb1bc8cd552",
+            "search_snapshot:search_c729833a35c2199f"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -371,7 +371,7 @@
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_452f176d66abfd9c"
+            "audit:audit_a33b81bfca64ff16"
           ],
           "claim": {
             "authority": {
@@ -380,8 +380,8 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_e050916069d88990",
-            "created_at": "2026-07-05T01:09:32.061203Z",
+            "claim_id": "claim_56b5a2166c988d68",
+            "created_at": "2026-07-05T01:17:17.995849Z",
             "evidence_bundle": {
               "artifact_refs": [],
               "evidence_bundle_id": null,
@@ -409,7 +409,7 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_e050916069d88990"
+            "claim:claim_56b5a2166c988d68"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -426,7 +426,7 @@
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_abb465f79d39ba07"
+            "audit:audit_fd482a82a5a4df6d"
           ],
           "claim": {
             "authority": {
@@ -435,8 +435,8 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_e050916069d88990",
-            "created_at": "2026-07-05T01:09:32.061203Z",
+            "claim_id": "claim_56b5a2166c988d68",
+            "created_at": "2026-07-05T01:17:17.995849Z",
             "evidence_bundle": {
               "artifact_refs": [],
               "evidence_bundle_id": null,
@@ -478,13 +478,13 @@
         },
         "status": 400
       },
-      "step": "/claims/claim_e050916069d88990/approve"
+      "step": "/claims/claim_56b5a2166c988d68/approve"
     },
     {
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_1adf72f22ae6a3c7"
+            "audit:audit_361a522c8906f61f"
           ],
           "claim": {
             "authority": {
@@ -493,13 +493,13 @@
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": false
             },
-            "claim_id": "claim_9d0307a9402ae57b",
-            "created_at": "2026-07-05T01:09:32.063065Z",
+            "claim_id": "claim_4ed6b536f13ba76e",
+            "created_at": "2026-07-05T01:17:17.997622Z",
             "evidence_bundle": {
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -509,10 +509,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_2ef24df52992e083",
-                "evidence_bundle:evb_ba63860d322f227a"
+                "search_snapshot:search_c729833a35c2199f",
+                "evidence_bundle:evb_fb8e1bb1bc8cd552"
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "ontology_context": {
               "can_replace_evidence_bundle": false,
@@ -533,8 +533,8 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_9d0307a9402ae57b",
-            "evidence_bundle:evb_ba63860d322f227a",
+            "claim:claim_4ed6b536f13ba76e",
+            "evidence_bundle:evb_fb8e1bb1bc8cd552",
             "artifact:art_2735313e0cb92563"
           ],
           "mode": "local_vs0_runtime",
@@ -552,14 +552,14 @@
       "payload": {
         "payload": {
           "action_card": {
-            "action_id": "action_02fba320a90494f7",
+            "action_id": "action_815e736edfaa34ba",
             "action_kind": "external_writeback",
             "approval": {
               "approver": null,
               "required": true,
               "status": "pending"
             },
-            "audit_ref": "audit:audit_691e45217b8309c4",
+            "audit_ref": "audit:audit_a972e8c99e84d49c",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -567,16 +567,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-07-05T01:09:32.066662Z",
+            "created_at": "2026-07-05T01:17:18.001002Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_9d0307a9402ae57b",
-              "created_at": "2026-07-05T01:09:32.066650Z",
+              "claim_id": "claim_4ed6b536f13ba76e",
+              "created_at": "2026-07-05T01:17:18.000989Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_a1f40e60f003c5f3",
+              "dry_run_id": "dryrun_81890007c875ef13",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -588,17 +588,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-07-05T01:09:32.066646Z",
+                "decided_at": "2026-07-05T01:17:18.000986Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_13508a2136329059",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "id": "policy_400f9f4fd44b3a3b",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -628,7 +628,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -638,10 +638,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_2ef24df52992e083",
-                "evidence_bundle:evb_ba63860d322f227a"
+                "search_snapshot:search_c729833a35c2199f",
+                "evidence_bundle:evb_fb8e1bb1bc8cd552"
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "execution": {
               "can_execute_now": false,
@@ -649,7 +649,7 @@
               "status": "pending_approval"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -660,11 +660,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -690,18 +690,18 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_9d0307a9402ae57b"
+            "source_claim_id": "claim_4ed6b536f13ba76e"
           },
           "audit_refs": [
-            "audit:audit_691e45217b8309c4",
-            "audit:audit_91be2246cec76e2f",
-            "audit:audit_42d0efec10603d09"
+            "audit:audit_a972e8c99e84d49c",
+            "audit:audit_141311814255499e",
+            "audit:audit_6c9e0bc943ad859f"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_02fba320a90494f7",
-            "claim:claim_9d0307a9402ae57b",
-            "mission:mission_9b17d0bddbd9b385"
+            "action:action_815e736edfaa34ba",
+            "claim:claim_4ed6b536f13ba76e",
+            "mission:mission_384d86a7fcfcab5d"
           ],
           "mission": {
             "allowed_actions": [
@@ -732,7 +732,7 @@
                 "out_of_contract"
               ]
             },
-            "created_at": "2026-07-05T01:09:32.065834Z",
+            "created_at": "2026-07-05T01:17:18.000153Z",
             "escalation_rules": [
               "Escalate high-risk, destructive, sensitive, cross-namespace, or external writeback actions.",
               "Escalate when evidence coverage is insufficient or policy decision is deny."
@@ -741,8 +741,8 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "evidence_expectations": [
               "Evidence Bundle with at least one artifact reference.",
@@ -756,7 +756,7 @@
               "secret_exfiltration"
             ],
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "review_cadence": "owner review required before high-risk execution; after-action audit after every run",
             "risk_state": "controlled_policy_required",
             "schema_version": "cs.mission_goal_contract.v0",
@@ -767,7 +767,7 @@
               "workspace_id": "default"
             },
             "source_claim": {
-              "claim_id": "claim_9d0307a9402ae57b",
+              "claim_id": "claim_4ed6b536f13ba76e",
               "statement": "The Alpha evidence anchor is ready for local VS0 operator acceptance.",
               "trust_state": "evidence_backed"
             },
@@ -785,7 +785,7 @@
           },
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [
-            "policy:policy_13508a2136329059"
+            "policy:policy_400f9f4fd44b3a3b"
           ],
           "policy_decisions": [
             {
@@ -793,11 +793,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -862,7 +862,7 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "updated_at": "2026-07-05T01:09:32.066184Z"
+            "updated_at": "2026-07-05T01:17:18.000534Z"
           }
         },
         "status": 200
@@ -872,19 +872,19 @@
     {
       "payload": {
         "payload": {
-          "action_id": "action_02fba320a90494f7",
+          "action_id": "action_815e736edfaa34ba",
           "audit_refs": [
-            "audit:audit_eeba766b5e3f3323"
+            "audit:audit_c2c0ebdd61af32a4"
           ],
           "dry_run": {
             "action_kind": "external_writeback",
-            "claim_id": "claim_9d0307a9402ae57b",
-            "created_at": "2026-07-05T01:09:32.066650Z",
+            "claim_id": "claim_4ed6b536f13ba76e",
+            "created_at": "2026-07-05T01:17:18.000989Z",
             "diff": {
               "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
               "before": "no side effect applied"
             },
-            "dry_run_id": "dryrun_a1f40e60f003c5f3",
+            "dry_run_id": "dryrun_81890007c875ef13",
             "expected_impact": {
               "connector": "mock_connector",
               "expected_connector_calls": 1,
@@ -896,17 +896,17 @@
               "target": "mock://vs0-operator-ui/browser"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "policy_decision": {
               "action_kind": "external_writeback",
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -934,12 +934,12 @@
           },
           "errors": [],
           "evidence_refs": [
-            "action:action_02fba320a90494f7",
-            "dry_run:dryrun_a1f40e60f003c5f3"
+            "action:action_815e736edfaa34ba",
+            "dry_run:dryrun_81890007c875ef13"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [
-            "policy:policy_13508a2136329059"
+            "policy:policy_400f9f4fd44b3a3b"
           ],
           "policy_decisions": [
             {
@@ -947,11 +947,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -977,29 +977,29 @@
         },
         "status": 200
       },
-      "step": "/actions/action_02fba320a90494f7/dry-run"
+      "step": "/actions/action_815e736edfaa34ba/dry-run"
     },
     {
       "payload": {
         "payload": {
           "audit_refs": [
-            "audit:audit_d4a9a49467d4711a"
+            "audit:audit_84c1269c9d5bb5da"
           ],
           "claim": {
-            "approved_at": "2026-07-05T01:09:32.068805Z",
+            "approved_at": "2026-07-05T01:17:18.002983Z",
             "authority": {
               "blocked_reason": "Autonomous action still requires a governed action or mission path.",
               "can_be_approved": true,
               "can_drive_autonomous_action": false,
               "can_publish_shared_truth": true
             },
-            "claim_id": "claim_9d0307a9402ae57b",
-            "created_at": "2026-07-05T01:09:32.063065Z",
+            "claim_id": "claim_4ed6b536f13ba76e",
+            "created_at": "2026-07-05T01:17:17.997622Z",
             "evidence_bundle": {
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1009,10 +1009,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_2ef24df52992e083",
-                "evidence_bundle:evb_ba63860d322f227a"
+                "search_snapshot:search_c729833a35c2199f",
+                "evidence_bundle:evb_fb8e1bb1bc8cd552"
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "ontology_context": {
               "can_replace_evidence_bundle": false,
@@ -1033,7 +1033,7 @@
           },
           "errors": [],
           "evidence_refs": [
-            "claim:claim_9d0307a9402ae57b"
+            "claim:claim_4ed6b536f13ba76e"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1044,21 +1044,21 @@
         },
         "status": 200
       },
-      "step": "/claims/claim_9d0307a9402ae57b/approve"
+      "step": "/claims/claim_4ed6b536f13ba76e/approve"
     },
     {
       "payload": {
         "payload": {
           "action_card": {
-            "action_id": "action_02fba320a90494f7",
+            "action_id": "action_815e736edfaa34ba",
             "action_kind": "external_writeback",
             "approval": {
-              "approved_at": "2026-07-05T01:09:32.069592Z",
+              "approved_at": "2026-07-05T01:17:18.003808Z",
               "approver": "owner",
               "required": true,
               "status": "approved"
             },
-            "audit_ref": "audit:audit_691e45217b8309c4",
+            "audit_ref": "audit:audit_a972e8c99e84d49c",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -1066,16 +1066,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-07-05T01:09:32.066662Z",
+            "created_at": "2026-07-05T01:17:18.001002Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_9d0307a9402ae57b",
-              "created_at": "2026-07-05T01:09:32.066650Z",
+              "claim_id": "claim_4ed6b536f13ba76e",
+              "created_at": "2026-07-05T01:17:18.000989Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_a1f40e60f003c5f3",
+              "dry_run_id": "dryrun_81890007c875ef13",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -1087,17 +1087,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-07-05T01:09:32.066646Z",
+                "decided_at": "2026-07-05T01:17:18.000986Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_13508a2136329059",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "id": "policy_400f9f4fd44b3a3b",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -1127,7 +1127,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1137,10 +1137,10 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_2ef24df52992e083",
-                "evidence_bundle:evb_ba63860d322f227a"
+                "search_snapshot:search_c729833a35c2199f",
+                "evidence_bundle:evb_fb8e1bb1bc8cd552"
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "execution": {
               "can_execute_now": true,
@@ -1148,7 +1148,7 @@
               "status": "ready_to_execute"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -1159,11 +1159,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1189,14 +1189,14 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_9d0307a9402ae57b"
+            "source_claim_id": "claim_4ed6b536f13ba76e"
           },
           "audit_refs": [
-            "audit:audit_8af5473b0ab841e6"
+            "audit:audit_659f1156bf6f1340"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_02fba320a90494f7"
+            "action:action_815e736edfaa34ba"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1207,21 +1207,21 @@
         },
         "status": 200
       },
-      "step": "/actions/action_02fba320a90494f7/approve"
+      "step": "/actions/action_815e736edfaa34ba/approve"
     },
     {
       "payload": {
         "payload": {
           "action_card": {
-            "action_id": "action_02fba320a90494f7",
+            "action_id": "action_815e736edfaa34ba",
             "action_kind": "external_writeback",
             "approval": {
-              "approved_at": "2026-07-05T01:09:32.069592Z",
+              "approved_at": "2026-07-05T01:17:18.003808Z",
               "approver": "owner",
               "required": true,
               "status": "approved"
             },
-            "audit_ref": "audit:audit_691e45217b8309c4",
+            "audit_ref": "audit:audit_a972e8c99e84d49c",
             "connector_boundary": {
               "connector": "mock_connector",
               "credentials_exposed_to_agent": false,
@@ -1229,16 +1229,16 @@
               "mediated_by": "ConnectorHub",
               "mocked": true
             },
-            "created_at": "2026-07-05T01:09:32.066662Z",
+            "created_at": "2026-07-05T01:17:18.001002Z",
             "dry_run": {
               "action_kind": "external_writeback",
-              "claim_id": "claim_9d0307a9402ae57b",
-              "created_at": "2026-07-05T01:09:32.066650Z",
+              "claim_id": "claim_4ed6b536f13ba76e",
+              "created_at": "2026-07-05T01:17:18.000989Z",
               "diff": {
                 "after": "would perform external_writeback against mock://vs0-operator-ui/browser",
                 "before": "no side effect applied"
               },
-              "dry_run_id": "dryrun_a1f40e60f003c5f3",
+              "dry_run_id": "dryrun_81890007c875ef13",
               "expected_impact": {
                 "connector": "mock_connector",
                 "expected_connector_calls": 1,
@@ -1250,17 +1250,17 @@
                 "target": "mock://vs0-operator-ui/browser"
               },
               "goal": "Record local operator acceptance status",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy_decision": {
                 "action_kind": "external_writeback",
                 "approval_required": true,
                 "can_execute_now": false,
                 "connector": "mock_connector",
-                "decided_at": "2026-07-05T01:09:32.066646Z",
+                "decided_at": "2026-07-05T01:17:18.000986Z",
                 "decision": "requires_approval",
                 "execution_status": "pending_approval",
-                "id": "policy_13508a2136329059",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "id": "policy_400f9f4fd44b3a3b",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "policy": "high_risk_action_requires_approval",
                 "reason": "High-risk or external writeback action requires owner approval before execution.",
                 "resolution_path": [
@@ -1290,7 +1290,7 @@
               "artifact_refs": [
                 "artifact:art_2735313e0cb92563"
               ],
-              "evidence_bundle_id": "evb_ba63860d322f227a",
+              "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
               "evidence_item_count": 1,
               "filters": {
                 "namespace_id": "personal",
@@ -1300,19 +1300,19 @@
               },
               "query": "alpha-evidence-anchor",
               "result_refs": [
-                "search_snapshot:search_2ef24df52992e083",
-                "evidence_bundle:evb_ba63860d322f227a"
+                "search_snapshot:search_c729833a35c2199f",
+                "evidence_bundle:evb_fb8e1bb1bc8cd552"
               ],
-              "search_snapshot_id": "search_2ef24df52992e083"
+              "search_snapshot_id": "search_c729833a35c2199f"
             },
             "execution": {
               "can_execute_now": false,
               "result": {
-                "action_id": "action_02fba320a90494f7",
-                "executed_at": "2026-07-05T01:09:32.070596Z",
+                "action_id": "action_815e736edfaa34ba",
+                "executed_at": "2026-07-05T01:17:18.004871Z",
                 "external_http_calls": 0,
                 "message": "Action execution was recorded through the governed Workflow/Action path.",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "mock_connector_calls": 1,
                 "schema_version": "cs.action_result.v0",
                 "side_effect_boundary": "mocked_connector",
@@ -1321,7 +1321,7 @@
               "status": "executed"
             },
             "goal": "Record local operator acceptance status",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "ontology_impact": {
               "impact_note": "Ontology context can shape local impact review, but it does not authorize external writeback.",
               "object_refs": [],
@@ -1332,11 +1332,11 @@
               "approval_required": true,
               "can_execute_now": false,
               "connector": "mock_connector",
-              "decided_at": "2026-07-05T01:09:32.066646Z",
+              "decided_at": "2026-07-05T01:17:18.000986Z",
               "decision": "requires_approval",
               "execution_status": "pending_approval",
-              "id": "policy_13508a2136329059",
-              "mission_id": "mission_9b17d0bddbd9b385",
+              "id": "policy_400f9f4fd44b3a3b",
+              "mission_id": "mission_384d86a7fcfcab5d",
               "policy": "high_risk_action_requires_approval",
               "reason": "High-risk or external writeback action requires owner approval before execution.",
               "resolution_path": [
@@ -1362,25 +1362,25 @@
               "tenant_id": "local-dev",
               "workspace_id": "default"
             },
-            "source_claim_id": "claim_9d0307a9402ae57b"
+            "source_claim_id": "claim_4ed6b536f13ba76e"
           },
           "action_result": {
-            "action_id": "action_02fba320a90494f7",
-            "executed_at": "2026-07-05T01:09:32.070596Z",
+            "action_id": "action_815e736edfaa34ba",
+            "executed_at": "2026-07-05T01:17:18.004871Z",
             "external_http_calls": 0,
             "message": "Action execution was recorded through the governed Workflow/Action path.",
-            "mission_id": "mission_9b17d0bddbd9b385",
+            "mission_id": "mission_384d86a7fcfcab5d",
             "mock_connector_calls": 1,
             "schema_version": "cs.action_result.v0",
             "side_effect_boundary": "mocked_connector",
             "status": "success"
           },
           "audit_refs": [
-            "audit:audit_3b8d1a3b443ae13f"
+            "audit:audit_e4696fdb74cb03fb"
           ],
           "errors": [],
           "evidence_refs": [
-            "action:action_02fba320a90494f7"
+            "action:action_815e736edfaa34ba"
           ],
           "mode": "local_vs0_runtime",
           "policy_decision_refs": [],
@@ -1391,7 +1391,7 @@
         },
         "status": 200
       },
-      "step": "/actions/action_02fba320a90494f7/execute"
+      "step": "/actions/action_815e736edfaa34ba/execute"
     },
     {
       "payload": {
@@ -1404,9 +1404,9 @@
                 "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                 "trust_state": "untrusted"
               },
-              "event_id": "audit_2ee3f9c16e53d838",
+              "event_id": "audit_7ddccbff5f858db9",
               "event_type": "artifact.ingested",
-              "occurred_at": "2026-07-05T01:09:32.056088Z",
+              "occurred_at": "2026-07-05T01:17:17.991336Z",
               "subject": {
                 "id": "art_2735313e0cb92563",
                 "type": "artifact"
@@ -1414,28 +1414,28 @@
             },
             {
               "details": {
-                "duration_ms": 0.384,
+                "duration_ms": 0.368,
                 "query": "alpha-evidence-anchor",
                 "result_count": 1
               },
-              "event_id": "audit_148716a7de5c0616",
+              "event_id": "audit_754525f5ea064139",
               "event_type": "search.snapshot.created",
-              "occurred_at": "2026-07-05T01:09:32.058944Z",
+              "occurred_at": "2026-07-05T01:17:17.993762Z",
               "subject": {
-                "id": "search_2ef24df52992e083",
+                "id": "search_c729833a35c2199f",
                 "type": "search_snapshot"
               }
             },
             {
               "details": {
                 "evidence_item_count": 1,
-                "search_snapshot_id": "search_2ef24df52992e083"
+                "search_snapshot_id": "search_c729833a35c2199f"
               },
-              "event_id": "audit_e2b7c5b929505135",
+              "event_id": "audit_8efb2703f333bb32",
               "event_type": "evidence_bundle.created",
-              "occurred_at": "2026-07-05T01:09:32.060354Z",
+              "occurred_at": "2026-07-05T01:17:17.995070Z",
               "subject": {
-                "id": "evb_ba63860d322f227a",
+                "id": "evb_fb8e1bb1bc8cd552",
                 "type": "evidence_bundle"
               }
             },
@@ -1444,11 +1444,11 @@
                 "evidence_bundle_id": null,
                 "evidence_item_count": 0
               },
-              "event_id": "audit_452f176d66abfd9c",
+              "event_id": "audit_a33b81bfca64ff16",
               "event_type": "claim.draft.created",
-              "occurred_at": "2026-07-05T01:09:32.061360Z",
+              "occurred_at": "2026-07-05T01:17:17.995993Z",
               "subject": {
-                "id": "claim_e050916069d88990",
+                "id": "claim_56b5a2166c988d68",
                 "type": "claim"
               }
             },
@@ -1457,25 +1457,25 @@
                 "reason": "missing_evidence_bundle",
                 "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
               },
-              "event_id": "audit_abb465f79d39ba07",
+              "event_id": "audit_fd482a82a5a4df6d",
               "event_type": "claim.approval.denied",
-              "occurred_at": "2026-07-05T01:09:32.062092Z",
+              "occurred_at": "2026-07-05T01:17:17.996817Z",
               "subject": {
-                "id": "claim_e050916069d88990",
+                "id": "claim_56b5a2166c988d68",
                 "type": "claim"
               }
             },
             {
               "details": {
-                "evidence_bundle_id": "evb_ba63860d322f227a",
+                "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                 "ontology_context_refs": [],
-                "search_snapshot_id": "search_2ef24df52992e083"
+                "search_snapshot_id": "search_c729833a35c2199f"
               },
-              "event_id": "audit_1adf72f22ae6a3c7",
+              "event_id": "audit_361a522c8906f61f",
               "event_type": "claim.draft.created",
-              "occurred_at": "2026-07-05T01:09:32.063271Z",
+              "occurred_at": "2026-07-05T01:17:17.997751Z",
               "subject": {
-                "id": "claim_9d0307a9402ae57b",
+                "id": "claim_4ed6b536f13ba76e",
                 "type": "claim"
               }
             },
@@ -1486,15 +1486,15 @@
                   "draft_task",
                   "refresh_brief"
                 ],
-                "claim_id": "claim_9d0307a9402ae57b",
-                "evidence_bundle_id": "evb_ba63860d322f227a",
+                "claim_id": "claim_4ed6b536f13ba76e",
+                "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                 "workspace_mode": "assist"
               },
-              "event_id": "audit_2656264cee812e66",
+              "event_id": "audit_f789f2b348d86e9d",
               "event_type": "mission.contract.created",
-              "occurred_at": "2026-07-05T01:09:32.065994Z",
+              "occurred_at": "2026-07-05T01:17:18.000354Z",
               "subject": {
-                "id": "mission_9b17d0bddbd9b385",
+                "id": "mission_384d86a7fcfcab5d",
                 "type": "mission"
               }
             },
@@ -1503,9 +1503,9 @@
                 "autonomous_execution_allowed": true,
                 "mode": "autopilot"
               },
-              "event_id": "audit_91be2246cec76e2f",
+              "event_id": "audit_141311814255499e",
               "event_type": "workspace.mode.set",
-              "occurred_at": "2026-07-05T01:09:32.066320Z",
+              "occurred_at": "2026-07-05T01:17:18.000651Z",
               "subject": {
                 "id": "3e548f87d142e49b",
                 "type": "workspace"
@@ -1526,42 +1526,42 @@
                 ],
                 "mode": "autopilot"
               },
-              "event_id": "audit_42d0efec10603d09",
+              "event_id": "audit_6c9e0bc943ad859f",
               "event_type": "mission.activated",
-              "occurred_at": "2026-07-05T01:09:32.066467Z",
+              "occurred_at": "2026-07-05T01:17:18.000799Z",
               "subject": {
-                "id": "mission_9b17d0bddbd9b385",
+                "id": "mission_384d86a7fcfcab5d",
                 "type": "mission"
               }
             },
             {
               "details": {
                 "action_kind": "external_writeback",
-                "claim_id": "claim_9d0307a9402ae57b",
+                "claim_id": "claim_4ed6b536f13ba76e",
                 "decision": "requires_approval",
-                "dry_run_id": "dryrun_a1f40e60f003c5f3",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "dry_run_id": "dryrun_81890007c875ef13",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "ontology_object_refs": [],
                 "policy": "high_risk_action_requires_approval",
                 "risk": "high"
               },
-              "event_id": "audit_691e45217b8309c4",
+              "event_id": "audit_a972e8c99e84d49c",
               "event_type": "action.card.proposed",
-              "occurred_at": "2026-07-05T01:09:32.066813Z",
+              "occurred_at": "2026-07-05T01:17:18.001152Z",
               "subject": {
-                "id": "action_02fba320a90494f7",
+                "id": "action_815e736edfaa34ba",
                 "type": "action"
               }
             },
             {
               "details": {
-                "dry_run_id": "dryrun_a1f40e60f003c5f3"
+                "dry_run_id": "dryrun_81890007c875ef13"
               },
-              "event_id": "audit_eeba766b5e3f3323",
+              "event_id": "audit_c2c0ebdd61af32a4",
               "event_type": "action.dry_run.read",
-              "occurred_at": "2026-07-05T01:09:32.067985Z",
+              "occurred_at": "2026-07-05T01:17:18.002201Z",
               "subject": {
-                "id": "action_02fba320a90494f7",
+                "id": "action_815e736edfaa34ba",
                 "type": "action"
               }
             },
@@ -1570,28 +1570,28 @@
                 "artifact_refs": [
                   "artifact:art_2735313e0cb92563"
                 ],
-                "evidence_bundle_id": "evb_ba63860d322f227a",
+                "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                 "evidence_item_count": 1
               },
-              "event_id": "audit_d4a9a49467d4711a",
+              "event_id": "audit_84c1269c9d5bb5da",
               "event_type": "claim.approved",
-              "occurred_at": "2026-07-05T01:09:32.068903Z",
+              "occurred_at": "2026-07-05T01:17:18.003086Z",
               "subject": {
-                "id": "claim_9d0307a9402ae57b",
+                "id": "claim_4ed6b536f13ba76e",
                 "type": "claim"
               }
             },
             {
               "details": {
                 "approver": "owner",
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "policy": "high_risk_action_requires_approval"
               },
-              "event_id": "audit_8af5473b0ab841e6",
+              "event_id": "audit_659f1156bf6f1340",
               "event_type": "action.approved",
-              "occurred_at": "2026-07-05T01:09:32.069728Z",
+              "occurred_at": "2026-07-05T01:17:18.003936Z",
               "subject": {
-                "id": "action_02fba320a90494f7",
+                "id": "action_815e736edfaa34ba",
                 "type": "action"
               }
             },
@@ -1599,24 +1599,24 @@
               "details": {
                 "action_kind": "external_writeback",
                 "external_http_calls": 0,
-                "mission_id": "mission_9b17d0bddbd9b385",
+                "mission_id": "mission_384d86a7fcfcab5d",
                 "mock_connector_calls": 1
               },
-              "event_id": "audit_3b8d1a3b443ae13f",
+              "event_id": "audit_e4696fdb74cb03fb",
               "event_type": "action.executed",
-              "occurred_at": "2026-07-05T01:09:32.070772Z",
+              "occurred_at": "2026-07-05T01:17:18.004995Z",
               "subject": {
-                "id": "action_02fba320a90494f7",
+                "id": "action_815e736edfaa34ba",
                 "type": "action"
               }
             }
           ],
           "audit_refs": [
-            "audit:audit_567e9d8dbbfe1704"
+            "audit:audit_3e5245f80dca2b46"
           ],
           "errors": [],
           "evidence_refs": [
-            "namespace_audit_export:nsaudit_76713106e33b8dc9"
+            "namespace_audit_export:nsaudit_25f3ddfe9e8420a0"
           ],
           "mode": "local_vs0_runtime",
           "namespace_audit_export": {
@@ -1630,7 +1630,7 @@
               "model_routing": false,
               "promotions": false
             },
-            "created_at": "2026-07-05T01:09:32.075997Z",
+            "created_at": "2026-07-05T01:17:18.006054Z",
             "event_count": 14,
             "event_type_counts": {
               "action.approved": 1,
@@ -1655,9 +1655,9 @@
                   "original_storage_ref": "sha256:2735313e0cb92563e418711c9d4e22207e7948c7cccd6365a191e1a91e5728be",
                   "trust_state": "untrusted"
                 },
-                "event_id": "audit_2ee3f9c16e53d838",
+                "event_id": "audit_7ddccbff5f858db9",
                 "event_type": "artifact.ingested",
-                "occurred_at": "2026-07-05T01:09:32.056088Z",
+                "occurred_at": "2026-07-05T01:17:17.991336Z",
                 "subject": {
                   "id": "art_2735313e0cb92563",
                   "type": "artifact"
@@ -1665,28 +1665,28 @@
               },
               {
                 "details": {
-                  "duration_ms": 0.384,
+                  "duration_ms": 0.368,
                   "query": "alpha-evidence-anchor",
                   "result_count": 1
                 },
-                "event_id": "audit_148716a7de5c0616",
+                "event_id": "audit_754525f5ea064139",
                 "event_type": "search.snapshot.created",
-                "occurred_at": "2026-07-05T01:09:32.058944Z",
+                "occurred_at": "2026-07-05T01:17:17.993762Z",
                 "subject": {
-                  "id": "search_2ef24df52992e083",
+                  "id": "search_c729833a35c2199f",
                   "type": "search_snapshot"
                 }
               },
               {
                 "details": {
                   "evidence_item_count": 1,
-                  "search_snapshot_id": "search_2ef24df52992e083"
+                  "search_snapshot_id": "search_c729833a35c2199f"
                 },
-                "event_id": "audit_e2b7c5b929505135",
+                "event_id": "audit_8efb2703f333bb32",
                 "event_type": "evidence_bundle.created",
-                "occurred_at": "2026-07-05T01:09:32.060354Z",
+                "occurred_at": "2026-07-05T01:17:17.995070Z",
                 "subject": {
-                  "id": "evb_ba63860d322f227a",
+                  "id": "evb_fb8e1bb1bc8cd552",
                   "type": "evidence_bundle"
                 }
               },
@@ -1695,11 +1695,11 @@
                   "evidence_bundle_id": null,
                   "evidence_item_count": 0
                 },
-                "event_id": "audit_452f176d66abfd9c",
+                "event_id": "audit_a33b81bfca64ff16",
                 "event_type": "claim.draft.created",
-                "occurred_at": "2026-07-05T01:09:32.061360Z",
+                "occurred_at": "2026-07-05T01:17:17.995993Z",
                 "subject": {
-                  "id": "claim_e050916069d88990",
+                  "id": "claim_56b5a2166c988d68",
                   "type": "claim"
                 }
               },
@@ -1708,25 +1708,25 @@
                   "reason": "missing_evidence_bundle",
                   "required": "Attach an Evidence Bundle with at least one artifact reference before approval."
                 },
-                "event_id": "audit_abb465f79d39ba07",
+                "event_id": "audit_fd482a82a5a4df6d",
                 "event_type": "claim.approval.denied",
-                "occurred_at": "2026-07-05T01:09:32.062092Z",
+                "occurred_at": "2026-07-05T01:17:17.996817Z",
                 "subject": {
-                  "id": "claim_e050916069d88990",
+                  "id": "claim_56b5a2166c988d68",
                   "type": "claim"
                 }
               },
               {
                 "details": {
-                  "evidence_bundle_id": "evb_ba63860d322f227a",
+                  "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                   "ontology_context_refs": [],
-                  "search_snapshot_id": "search_2ef24df52992e083"
+                  "search_snapshot_id": "search_c729833a35c2199f"
                 },
-                "event_id": "audit_1adf72f22ae6a3c7",
+                "event_id": "audit_361a522c8906f61f",
                 "event_type": "claim.draft.created",
-                "occurred_at": "2026-07-05T01:09:32.063271Z",
+                "occurred_at": "2026-07-05T01:17:17.997751Z",
                 "subject": {
-                  "id": "claim_9d0307a9402ae57b",
+                  "id": "claim_4ed6b536f13ba76e",
                   "type": "claim"
                 }
               },
@@ -1737,15 +1737,15 @@
                     "draft_task",
                     "refresh_brief"
                   ],
-                  "claim_id": "claim_9d0307a9402ae57b",
-                  "evidence_bundle_id": "evb_ba63860d322f227a",
+                  "claim_id": "claim_4ed6b536f13ba76e",
+                  "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                   "workspace_mode": "assist"
                 },
-                "event_id": "audit_2656264cee812e66",
+                "event_id": "audit_f789f2b348d86e9d",
                 "event_type": "mission.contract.created",
-                "occurred_at": "2026-07-05T01:09:32.065994Z",
+                "occurred_at": "2026-07-05T01:17:18.000354Z",
                 "subject": {
-                  "id": "mission_9b17d0bddbd9b385",
+                  "id": "mission_384d86a7fcfcab5d",
                   "type": "mission"
                 }
               },
@@ -1754,9 +1754,9 @@
                   "autonomous_execution_allowed": true,
                   "mode": "autopilot"
                 },
-                "event_id": "audit_91be2246cec76e2f",
+                "event_id": "audit_141311814255499e",
                 "event_type": "workspace.mode.set",
-                "occurred_at": "2026-07-05T01:09:32.066320Z",
+                "occurred_at": "2026-07-05T01:17:18.000651Z",
                 "subject": {
                   "id": "3e548f87d142e49b",
                   "type": "workspace"
@@ -1777,42 +1777,42 @@
                   ],
                   "mode": "autopilot"
                 },
-                "event_id": "audit_42d0efec10603d09",
+                "event_id": "audit_6c9e0bc943ad859f",
                 "event_type": "mission.activated",
-                "occurred_at": "2026-07-05T01:09:32.066467Z",
+                "occurred_at": "2026-07-05T01:17:18.000799Z",
                 "subject": {
-                  "id": "mission_9b17d0bddbd9b385",
+                  "id": "mission_384d86a7fcfcab5d",
                   "type": "mission"
                 }
               },
               {
                 "details": {
                   "action_kind": "external_writeback",
-                  "claim_id": "claim_9d0307a9402ae57b",
+                  "claim_id": "claim_4ed6b536f13ba76e",
                   "decision": "requires_approval",
-                  "dry_run_id": "dryrun_a1f40e60f003c5f3",
-                  "mission_id": "mission_9b17d0bddbd9b385",
+                  "dry_run_id": "dryrun_81890007c875ef13",
+                  "mission_id": "mission_384d86a7fcfcab5d",
                   "ontology_object_refs": [],
                   "policy": "high_risk_action_requires_approval",
                   "risk": "high"
                 },
-                "event_id": "audit_691e45217b8309c4",
+                "event_id": "audit_a972e8c99e84d49c",
                 "event_type": "action.card.proposed",
-                "occurred_at": "2026-07-05T01:09:32.066813Z",
+                "occurred_at": "2026-07-05T01:17:18.001152Z",
                 "subject": {
-                  "id": "action_02fba320a90494f7",
+                  "id": "action_815e736edfaa34ba",
                   "type": "action"
                 }
               },
               {
                 "details": {
-                  "dry_run_id": "dryrun_a1f40e60f003c5f3"
+                  "dry_run_id": "dryrun_81890007c875ef13"
                 },
-                "event_id": "audit_eeba766b5e3f3323",
+                "event_id": "audit_c2c0ebdd61af32a4",
                 "event_type": "action.dry_run.read",
-                "occurred_at": "2026-07-05T01:09:32.067985Z",
+                "occurred_at": "2026-07-05T01:17:18.002201Z",
                 "subject": {
-                  "id": "action_02fba320a90494f7",
+                  "id": "action_815e736edfaa34ba",
                   "type": "action"
                 }
               },
@@ -1821,28 +1821,28 @@
                   "artifact_refs": [
                     "artifact:art_2735313e0cb92563"
                   ],
-                  "evidence_bundle_id": "evb_ba63860d322f227a",
+                  "evidence_bundle_id": "evb_fb8e1bb1bc8cd552",
                   "evidence_item_count": 1
                 },
-                "event_id": "audit_d4a9a49467d4711a",
+                "event_id": "audit_84c1269c9d5bb5da",
                 "event_type": "claim.approved",
-                "occurred_at": "2026-07-05T01:09:32.068903Z",
+                "occurred_at": "2026-07-05T01:17:18.003086Z",
                 "subject": {
-                  "id": "claim_9d0307a9402ae57b",
+                  "id": "claim_4ed6b536f13ba76e",
                   "type": "claim"
                 }
               },
               {
                 "details": {
                   "approver": "owner",
-                  "mission_id": "mission_9b17d0bddbd9b385",
+                  "mission_id": "mission_384d86a7fcfcab5d",
                   "policy": "high_risk_action_requires_approval"
                 },
-                "event_id": "audit_8af5473b0ab841e6",
+                "event_id": "audit_659f1156bf6f1340",
                 "event_type": "action.approved",
-                "occurred_at": "2026-07-05T01:09:32.069728Z",
+                "occurred_at": "2026-07-05T01:17:18.003936Z",
                 "subject": {
-                  "id": "action_02fba320a90494f7",
+                  "id": "action_815e736edfaa34ba",
                   "type": "action"
                 }
               },
@@ -1850,20 +1850,20 @@
                 "details": {
                   "action_kind": "external_writeback",
                   "external_http_calls": 0,
-                  "mission_id": "mission_9b17d0bddbd9b385",
+                  "mission_id": "mission_384d86a7fcfcab5d",
                   "mock_connector_calls": 1
                 },
-                "event_id": "audit_3b8d1a3b443ae13f",
+                "event_id": "audit_e4696fdb74cb03fb",
                 "event_type": "action.executed",
-                "occurred_at": "2026-07-05T01:09:32.070772Z",
+                "occurred_at": "2026-07-05T01:17:18.004995Z",
                 "subject": {
-                  "id": "action_02fba320a90494f7",
+                  "id": "action_815e736edfaa34ba",
                   "type": "action"
                 }
               }
             ],
             "format": "json",
-            "namespace_audit_export_id": "nsaudit_76713106e33b8dc9",
+            "namespace_audit_export_id": "nsaudit_25f3ddfe9e8420a0",
             "schema_version": "cs.namespace_audit_export.v0",
             "scope": {
               "namespace_id": "personal",
