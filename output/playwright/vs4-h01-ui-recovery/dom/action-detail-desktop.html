@@ -2058,25 +2058,25 @@ button, input, textarea { font: inherit; }
 }
 .cs-claim-form-card {
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
 .cs-claim-review-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  margin-top: var(--cs-space-3);
 }
 .cs-claim-review-card {
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
 }
 .cs-claim-review-card strong {
-  font-size: 18px;
-  line-height: 1.25;
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
 }
 .cs-claim-field {
   border: 1px solid var(--cs-color-border-default);
@@ -2221,6 +2221,14 @@ button, input, textarea { font: inherit; }
 }
 .cs-field-block p { margin: 0; }
 .cs-evidence-picker { display: grid; gap: var(--cs-space-3); }
+.cs-evidence-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-3);
+}
 .cs-evidence-row {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2230,6 +2238,10 @@ button, input, textarea { font: inherit; }
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-3);
   align-items: start;
+}
+.cs-evidence-row.is-selected {
+  background: color-mix(in srgb, var(--cs-state-underReview-bg) 42%, var(--cs-color-surface-primary));
+  border-color: var(--cs-state-underReview-border);
 }
 .cs-checkmark {
   width: 20px;
@@ -3085,7 +3097,7 @@ button, input, textarea { font: inherit; }
           <h1>Draft a vendor renewal follow-up</h1>
           <div class="cs-brief-meta">
             <span>Dry-run first</span>
-            <span>2026-07-05 01:34 UTC</span>
+            <span>2026-07-05 01:42 UTC</span>
             <span>No external send yet</span>
           </div>
           <p class="cs-muted">Preview impact, policy, and approval history before any external step.</p>
@@ -3302,7 +3314,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-05 01:34 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-05 01:42 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>

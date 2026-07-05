@@ -481,6 +481,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Claim state", claim_html)
         self.assertIn("Evidence-backed", claim_html)
         self.assertIn("Supporting evidence", claim_html)
+        self.assertIn("Evidence picker controls", claim_html)
+        self.assertIn("Sort: source order", claim_html)
         self.assertIn("Impacted objects", claim_html)
         self.assertIn("Related frameworks", claim_html)
         self.assertIn("Saved locally", claim_html)

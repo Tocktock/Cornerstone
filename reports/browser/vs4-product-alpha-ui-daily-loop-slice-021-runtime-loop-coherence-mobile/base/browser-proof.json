@@ -10,9 +10,9 @@
   },
   "chrome_timeout_after_screenshot": false,
   "clean_browser_exit": true,
-  "created_at": "2026-07-05T01:35:49.399214Z",
+  "created_at": "2026-07-05T01:45:09.269830Z",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
-  "dom_sha256": "90a8299cb9f3fd00f0ef32f6c78bb3c3e41ab8a58769acbd576e703da10b36b9",
+  "dom_sha256": "e0d8bda5d69d50f93cde74c0e0bcfe7868c54accb5f0f45209d52a2a12f256c8",
   "errors": [],
   "product_markers": {
     "product_shell_present": true,
@@ -60,7 +60,7 @@
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:50041/devtools/browser/5b0c0d7a-65d0-4002-8a06-697e65e51d5f"
+      "DevTools listening on ws://127.0.0.1:51297/devtools/browser/46b1f28a-6847-4900-a298-9504903666dc"
     ]
   },
   "surface_presence": {
@@ -72,5 +72,5 @@
     "Home/Ops Inbox": false,
     "Search": true
   },
-  "url": "http://127.0.0.1:50040/"
+  "url": "http://127.0.0.1:51296/"
 }

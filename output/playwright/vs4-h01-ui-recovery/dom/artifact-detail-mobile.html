@@ -2058,25 +2058,25 @@ button, input, textarea { font: inherit; }
 }
 .cs-claim-form-card {
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
 .cs-claim-review-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  margin-top: var(--cs-space-3);
 }
 .cs-claim-review-card {
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
 }
 .cs-claim-review-card strong {
-  font-size: 18px;
-  line-height: 1.25;
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
 }
 .cs-claim-field {
   border: 1px solid var(--cs-color-border-default);
@@ -2221,6 +2221,14 @@ button, input, textarea { font: inherit; }
 }
 .cs-field-block p { margin: 0; }
 .cs-evidence-picker { display: grid; gap: var(--cs-space-3); }
+.cs-evidence-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-3);
+}
 .cs-evidence-row {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2230,6 +2238,10 @@ button, input, textarea { font: inherit; }
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-3);
   align-items: start;
+}
+.cs-evidence-row.is-selected {
+  background: color-mix(in srgb, var(--cs-state-underReview-bg) 42%, var(--cs-color-surface-primary));
+  border-color: var(--cs-state-underReview-border);
 }
 .cs-checkmark {
   width: 20px;
@@ -3096,7 +3108,7 @@ button, input, textarea { font: inherit; }
     </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>User Paste</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 01:34 UTC</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 01:42 UTC</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>text/plain</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>default</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
@@ -3144,7 +3156,7 @@ button, input, textarea { font: inherit; }
               <div class="cs-artifact-source-note">
                 <span>User Paste</span>
                 <span>/</span>
-                <span>2026-07-05 01:34 UTC</span>
+                <span>2026-07-05 01:42 UTC</span>
                 <span>/</span>
                 <span>Original content primary</span>
               </div>
@@ -3164,7 +3176,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row"><span class="cs-chip cs-chip-saved">Saved</span><span class="cs-chip cs-chip-underReview">Untrusted until checked</span></div>
       <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>2026-07-05 01:34 UTC</dd>
+        <dt>Saved</dt><dd>2026-07-05 01:42 UTC</dd>
         <dt>Source</dt><dd>User Paste</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
@@ -3188,22 +3200,22 @@ button, input, textarea { font: inherit; }
       <div class="cs-keyword-list"><div class="cs-keyword-row"><span>Renewal</span><span class="cs-chip cs-chip-searchable">4</span></div><div class="cs-keyword-row"><span>August</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Date</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Finance</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Flagged</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Note</span><span class="cs-chip cs-chip-searchable">2</span></div></div>
     </section>
     <section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_7e06f5f4b58b231f?view=html">
+<a class="cs-list-row" href="/briefs/brief_4f72db5f60c6b58b?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 01:34 UTC</div>
+    <div class="cs-meta">2026-07-05 01:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_8c0ddb8676108a54?view=html">
+<a class="cs-list-row" href="/claims/claim_5f605737ea336d2e?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 01:34 UTC</div>
+    <div class="cs-meta">2026-07-05 01:42 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
@@ -3212,7 +3224,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>User Paste</dd>
-        <dt>Ingested</dt><dd>2026-07-05 01:34 UTC</dd>
+        <dt>Ingested</dt><dd>2026-07-05 01:42 UTC</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
       <a class="cs-meta" href="/audit">Open audit trail</a>

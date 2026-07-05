@@ -2588,25 +2588,25 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-claim-form-card {{
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }}
 .cs-claim-review-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  margin-top: var(--cs-space-3);
 }}
 .cs-claim-review-card {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
 }}
 .cs-claim-review-card strong {{
-  font-size: 18px;
-  line-height: 1.25;
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
 }}
 .cs-claim-field {{
   border: 1px solid var(--cs-color-border-default);
@@ -2751,6 +2751,14 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-field-block p {{ margin: 0; }}
 .cs-evidence-picker {{ display: grid; gap: var(--cs-space-3); }}
+.cs-evidence-toolbar {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--cs-space-3);
+}}
 .cs-evidence-row {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
@@ -2760,6 +2768,10 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: auto minmax(0, 1fr);
   gap: var(--cs-space-3);
   align-items: start;
+}}
+.cs-evidence-row.is-selected {{
+  background: color-mix(in srgb, var(--cs-state-underReview-bg) 42%, var(--cs-color-surface-primary));
+  border-color: var(--cs-state-underReview-border);
 }}
 .cs-checkmark {{
   width: 20px;
@@ -5834,12 +5846,6 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         </div>
       </div>
     </div>
-    <div class="cs-claim-review-strip" aria-label="Claim review summary">
-      <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">Review before approval</span></div>
-      <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
-      <div class="cs-claim-review-card"><span class="cs-meta">Confidence</span><strong>{h(confidence_label)}</strong><span class="cs-meta">Derived from support</span></div>
-      <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
-    </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
@@ -5892,6 +5898,12 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         </div>
         <span class="cs-claim-save-note">Saved locally</span>
       </div>
+      <div class="cs-claim-review-strip" aria-label="Claim review summary">
+        <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">Review before approval</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Confidence</span><strong>{h(confidence_label)}</strong><span class="cs-meta">Derived from support</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
+      </div>
     </section>
     <section class="cs-claim-footrail" aria-label="Claim provenance">
       <div><span class="cs-meta">Record</span><strong>Local draft</strong></div>
@@ -5908,6 +5920,10 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           <p class="cs-muted">Only visible local sources are selectable here.</p>
         </div>
         {_chip(str(len(source_items)), "searchable")}
+      </div>
+      <div class="cs-evidence-toolbar" aria-label="Evidence picker controls">
+        <span class="cs-filter-chip">Filters</span>
+        <span class="cs-filter-chip">Sort: source order</span>
       </div>
       {source_list}
     </section>
@@ -6262,10 +6278,11 @@ def _evidence_picker_from_items(items: list[dict[str, str]]) -> str:
     if not items:
         return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
     rows = []
-    for item in items[:6]:
+    for index, item in enumerate(items[:6]):
+        selected_class = " is-selected" if index == 0 else ""
         rows.append(
             f"""
-<a class="cs-evidence-row" href="{h(item["href"])}">
+<a class="cs-evidence-row{selected_class}" href="{h(item["href"])}">
   <span class="cs-checkmark" aria-hidden="true">&#10003;</span>
   <span>
     <strong>{h(item["title"])}</strong>
