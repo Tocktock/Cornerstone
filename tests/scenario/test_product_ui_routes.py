@@ -376,6 +376,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Audit receipt workspace", audit_html)
         self.assertIn("Activity trail", audit_html)
         self.assertIn("Audit status", audit_html)
+        self.assertIn("Latest readable receipt", audit_html)
+        self.assertIn("Read activity receipts", audit_html)
         self.assertIn("Receipt summary", audit_html)
         self.assertIn("Audit lifecycle", audit_html)
         self.assertIn("Activity receipts", audit_html)

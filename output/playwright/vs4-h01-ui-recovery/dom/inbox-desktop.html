@@ -2898,48 +2898,77 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-3);
   margin-bottom: var(--cs-space-4);
 }
-.cs-audit-status-card {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+.cs-audit-overview {
   display: grid;
-  gap: var(--cs-space-1);
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  align-items: stretch;
+}
+.cs-audit-latest {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 44%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
   min-width: 0;
 }
-.cs-audit-status-card strong {
-  overflow-wrap: anywhere;
+.cs-audit-latest h2 {
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-audit-latest-title {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-audit-latest-title p {
+  margin: var(--cs-space-1) 0 0;
+  color: var(--cs-color-text-secondary);
+  text-wrap: pretty;
+}
+.cs-audit-latest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}
+.cs-audit-overview-side {
+  display: grid;
+  gap: var(--cs-space-3);
+  min-width: 0;
 }
 .cs-audit-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  gap: var(--cs-space-2);
 }
 .cs-audit-receipt {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
-  gap: var(--cs-space-1);
+  gap: 2px;
 }
 .cs-audit-receipt strong {
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 .cs-audit-lifecycle {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  gap: var(--cs-space-2);
 }
 .cs-audit-lane {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: color-mix(in srgb, var(--cs-color-surface-primary) 78%, var(--cs-color-surface-subtle));
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
   gap: var(--cs-space-2);
   min-width: 0;
@@ -2964,6 +2993,9 @@ button, input, textarea { font: inherit; }
 .cs-audit-list {
   display: grid;
   gap: var(--cs-space-3);
+}
+.cs-audit-list-panel {
+  scroll-margin-top: 92px;
 }
 .cs-audit-row {
   border: 1px solid var(--cs-color-border-default);
@@ -3143,7 +3175,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -3335,7 +3367,7 @@ button, input, textarea { font: inherit; }
           <span></span><span>Item</span><span>Type</span><span>Owner</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
         </div>
 
-<a class="cs-inbox-row is-selected" href="/briefs/brief_1754b62355c759ba?view=html" role="listitem">
+<a class="cs-inbox-row is-selected" href="/briefs/brief_625959876085fcc7?view=html" role="listitem">
   <span class="cs-inbox-select" aria-hidden="true"></span>
   <span class="cs-inbox-item-title">
     <span class="cs-inbox-icon" aria-hidden="true">B</span>
@@ -3346,12 +3378,12 @@ button, input, textarea { font: inherit; }
   </span>
   <span class="cs-inbox-type-cell"><span class="cs-inbox-type-mark" aria-hidden="true">B</span>Brief</span>
   <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>Owner</span></span>
-  <span class="cs-meta">2026-07-05 03:48 UTC</span>
+  <span class="cs-meta">2026-07-05 03:55 UTC</span>
   <span><span class="cs-chip cs-chip-underReview">Medium</span></span>
   <span><span class="cs-chip cs-chip-draft">Keyword summary</span></span>
 </a>
 
-<a class="cs-inbox-row" href="/claims/claim_56fcf6074bda9e6d?view=html" role="listitem">
+<a class="cs-inbox-row" href="/claims/claim_fdc383835aa25e2d?view=html" role="listitem">
   <span class="cs-inbox-select" aria-hidden="true"></span>
   <span class="cs-inbox-item-title">
     <span class="cs-inbox-icon" aria-hidden="true">C</span>
@@ -3362,12 +3394,12 @@ button, input, textarea { font: inherit; }
   </span>
   <span class="cs-inbox-type-cell"><span class="cs-inbox-type-mark" aria-hidden="true">C</span>Claim</span>
   <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>Owner</span></span>
-  <span class="cs-meta">2026-07-05 03:48 UTC</span>
+  <span class="cs-meta">2026-07-05 03:55 UTC</span>
   <span><span class="cs-chip cs-chip-underReview">Medium</span></span>
   <span><span class="cs-chip cs-chip-searchable">Source support</span></span>
 </a>
 
-<a class="cs-inbox-row" href="/actions/action_23bbd656b1931ce9?view=html" role="listitem">
+<a class="cs-inbox-row" href="/actions/action_c67fde9a9b49c3f3?view=html" role="listitem">
   <span class="cs-inbox-select" aria-hidden="true"></span>
   <span class="cs-inbox-item-title">
     <span class="cs-inbox-icon" aria-hidden="true">A</span>
@@ -3378,7 +3410,7 @@ button, input, textarea { font: inherit; }
   </span>
   <span class="cs-inbox-type-cell"><span class="cs-inbox-type-mark" aria-hidden="true">A</span>Action</span>
   <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>Owner</span></span>
-  <span class="cs-meta">2026-07-05 03:48 UTC</span>
+  <span class="cs-meta">2026-07-05 03:55 UTC</span>
   <span><span class="cs-chip cs-chip-failed">High</span></span>
   <span><span class="cs-chip cs-chip-underReview">Needs approval</span></span>
 </a>
@@ -3403,14 +3435,14 @@ button, input, textarea { font: inherit; }
     <dl class="cs-detail-grid">
       <dt>Type</dt><dd>Brief</dd>
       <dt>Owner</dt><dd>Owner</dd>
-      <dt>Updated</dt><dd>2026-07-05 03:48 UTC</dd>
+      <dt>Updated</dt><dd>2026-07-05 03:55 UTC</dd>
       <dt>Queue</dt><dd>Needs review</dd>
     </dl>
   </section>
   <section class="cs-inbox-action-panel">
     <h2 class="cs-section-title">Next actions</h2>
     <div class="cs-inbox-actions">
-      <a class="cs-button" href="/briefs/brief_1754b62355c759ba?view=html">Review item</a>
+      <a class="cs-button" href="/briefs/brief_625959876085fcc7?view=html">Review item</a>
       <a class="cs-button secondary" href="/search?q=Brief%20for%20vendor%20renewal">Review sources</a>
       <a class="cs-button secondary" href="/audit">Open audit trail</a>
     </div>

@@ -2898,48 +2898,77 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-3);
   margin-bottom: var(--cs-space-4);
 }
-.cs-audit-status-card {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+.cs-audit-overview {
   display: grid;
-  gap: var(--cs-space-1);
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  align-items: stretch;
+}
+.cs-audit-latest {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 44%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
   min-width: 0;
 }
-.cs-audit-status-card strong {
-  overflow-wrap: anywhere;
+.cs-audit-latest h2 {
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}
+.cs-audit-latest-title {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-audit-latest-title p {
+  margin: var(--cs-space-1) 0 0;
+  color: var(--cs-color-text-secondary);
+  text-wrap: pretty;
+}
+.cs-audit-latest-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}
+.cs-audit-overview-side {
+  display: grid;
+  gap: var(--cs-space-3);
+  min-width: 0;
 }
 .cs-audit-summary {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  gap: var(--cs-space-2);
 }
 .cs-audit-receipt {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
-  gap: var(--cs-space-1);
+  gap: 2px;
 }
 .cs-audit-receipt strong {
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 .cs-audit-lifecycle {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  gap: var(--cs-space-2);
 }
 .cs-audit-lane {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: color-mix(in srgb, var(--cs-color-surface-primary) 78%, var(--cs-color-surface-subtle));
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
   gap: var(--cs-space-2);
   min-width: 0;
@@ -2964,6 +2993,9 @@ button, input, textarea { font: inherit; }
 .cs-audit-list {
   display: grid;
   gap: var(--cs-space-3);
+}
+.cs-audit-list-panel {
+  scroll-margin-top: 92px;
 }
 .cs-audit-row {
   border: 1px solid var(--cs-color-border-default);
@@ -3143,7 +3175,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -3338,7 +3370,7 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-source" aria-hidden="true">TXT</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span class="cs-result-type">Source</span><span>2026-07-05 03:48 UTC</span><span>Keyword match</span></span>
+    <span class="cs-result-meta"><span class="cs-result-type">Source</span><span>2026-07-05 03:55 UTC</span><span>Keyword match</span></span>
     <h3><a href="/artifacts/art_ede571327ab3ec20?view=html">Vendor renewal note: the renewal date is August 1, finance flagged a pr...</a></h3>
     <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
   </span>
@@ -3354,15 +3386,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-brief" aria-hidden="true">BRF</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span class="cs-result-type">Brief</span><span>2026-07-05 03:48 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/briefs/brief_1754b62355c759ba?view=html">Brief for vendor renewal</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Brief</span><span>2026-07-05 03:55 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/briefs/brief_625959876085fcc7?view=html">Brief for vendor renewal</a></h3>
     <p>Brief draft</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
     <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/briefs/brief_1754b62355c759ba?view=html">Open receipt</a>
+      <a class="cs-button secondary" href="/briefs/brief_625959876085fcc7?view=html">Open receipt</a>
     </span>
   </span>
 </article>
@@ -3370,15 +3402,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-claim" aria-hidden="true">CLM</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span class="cs-result-type">Claim</span><span>2026-07-05 03:48 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/claims/claim_56fcf6074bda9e6d?view=html">Vendor renewal needs a decision before the August 1 renewal date.</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Claim</span><span>2026-07-05 03:55 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/claims/claim_fdc383835aa25e2d?view=html">Vendor renewal needs a decision before the August 1 renewal date.</a></h3>
     <p>Claim draft with linked evidence.</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-searchable">Source support</span>
     <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/claims/claim_56fcf6074bda9e6d?view=html">Open receipt</a>
+      <a class="cs-button secondary" href="/claims/claim_fdc383835aa25e2d?view=html">Open receipt</a>
     </span>
   </span>
 </article>
@@ -3386,15 +3418,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-action" aria-hidden="true">ACT</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span class="cs-result-type">Action</span><span>2026-07-05 03:48 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/actions/action_23bbd656b1931ce9?view=html">Draft a vendor renewal follow-up</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Action</span><span>2026-07-05 03:55 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/actions/action_c67fde9a9b49c3f3?view=html">Draft a vendor renewal follow-up</a></h3>
     <p>Draft a vendor renewal follow-up</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-underReview">Needs approval</span>
     <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/actions/action_23bbd656b1931ce9?view=html">Open receipt</a>
+      <a class="cs-button secondary" href="/actions/action_c67fde9a9b49c3f3?view=html">Open receipt</a>
     </span>
   </span>
 </article>

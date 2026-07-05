@@ -417,16 +417,6 @@ def _audit_receipt_card(label: str, value: int | str, detail: str) -> str:
 """
 
 
-def _audit_status_card(label: str, value: str, detail: str) -> str:
-    return f"""
-<div class="cs-audit-status-card">
-  <span class="cs-meta">{h(label)}</span>
-  <strong>{h(value)}</strong>
-  <span class="cs-meta">{h(detail)}</span>
-</div>
-"""
-
-
 def _audit_lifecycle_card(title: str, count: int, detail: str, state: str) -> str:
     return f"""
 <div class="cs-audit-lane">
@@ -3477,48 +3467,77 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-3);
   margin-bottom: var(--cs-space-4);
 }}
-.cs-audit-status-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+.cs-audit-overview {{
   display: grid;
-  gap: var(--cs-space-1);
+  grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+  align-items: stretch;
+}}
+.cs-audit-latest {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 44%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
   min-width: 0;
 }}
-.cs-audit-status-card strong {{
-  overflow-wrap: anywhere;
+.cs-audit-latest h2 {{
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-audit-latest-title {{
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-audit-latest-title p {{
+  margin: var(--cs-space-1) 0 0;
+  color: var(--cs-color-text-secondary);
+  text-wrap: pretty;
+}}
+.cs-audit-latest-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+}}
+.cs-audit-overview-side {{
+  display: grid;
+  gap: var(--cs-space-3);
+  min-width: 0;
 }}
 .cs-audit-summary {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  gap: var(--cs-space-2);
 }}
 .cs-audit-receipt {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
-  gap: var(--cs-space-1);
+  gap: 2px;
 }}
 .cs-audit-receipt strong {{
-  font-size: 24px;
+  font-size: 18px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }}
 .cs-audit-lifecycle {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  gap: var(--cs-space-2);
 }}
 .cs-audit-lane {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: color-mix(in srgb, var(--cs-color-surface-primary) 78%, var(--cs-color-surface-subtle));
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
   gap: var(--cs-space-2);
   min-width: 0;
@@ -3543,6 +3562,9 @@ button, input, textarea {{ font: inherit; }}
 .cs-audit-list {{
   display: grid;
   gap: var(--cs-space-3);
+}}
+.cs-audit-list-panel {{
+  scroll-margin-top: 92px;
 }}
 .cs-audit-row {{
   border: 1px solid var(--cs-color-border-default);
@@ -3722,7 +3744,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -5237,14 +5259,14 @@ def _audit_page(ctx: dict[str, Any]) -> str:
     action_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Action")
     latest_activity = _display_date(events[0]) if events else "No activity yet"
     first_activity = _display_date(events[-1]) if events else "No activity yet"
-    audit_status = f"""
-<div class="cs-audit-status-strip" aria-label="Audit status">
-  {_audit_status_card("Latest receipt", latest_activity, "Newest local event")}
-  {_audit_status_card("Scope", workspace, f"Owner: {owner}")}
-  {_audit_status_card("Chain status", "Hash chained" if events else "Ready", "Event hash and previous hash retained")}
-  {_audit_status_card("Disclosure", "Raw detail on demand", "Readable first, raw detail behind each row")}
-</div>
-"""
+    latest_event = events[0] if events else None
+    latest_title = _plain_event(str(latest_event.get("event_type") or "")) if latest_event else "No receipt yet"
+    latest_family = _audit_family(str(latest_event.get("event_type") or "")) if latest_event else "Ledger"
+    latest_note = (
+        f"Readable receipt for {_audit_subject_label(latest_event)}. Raw event detail remains one step below the row."
+        if latest_event
+        else "Save a source or create work to start the local activity trail."
+    )
     receipt_summary = f"""
 <div class="cs-audit-summary" aria-label="Receipt summary">
   {_audit_receipt_card("Activity receipts", visible_count, f"{event_count} total scoped records")}
@@ -5259,6 +5281,34 @@ def _audit_page(ctx: dict[str, Any]) -> str:
   {_audit_lifecycle_card("Evidence bundle prepared", evidence_count, "Search, bundle, and brief receipts show source-backed work.", "evidenceBacked" if evidence_count else "draft")}
   {_audit_lifecycle_card("Decision recorded", decision_count, "Claims, workspace mode, and mission events explain decisions.", "underReview" if decision_count else "draft")}
   {_audit_lifecycle_card("Action proposed", action_count, "Action drafts stay inspectable before execution.", "underReview" if action_count else "draft")}
+</section>
+"""
+    audit_overview = f"""
+<section class="cs-audit-overview" aria-label="Audit status">
+  <article class="cs-audit-latest">
+    <div class="cs-audit-latest-title">
+      <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(latest_event.get("event_type") or "") if latest_event else ""))}</span>
+      <div>
+        <span class="cs-meta">Audit status</span>
+        <h2>Latest readable receipt</h2>
+        <p><strong>{h(latest_title)}</strong> · {h(latest_note)}</p>
+      </div>
+      {_chip(latest_family, "searchable")}
+    </div>
+    <div class="cs-brief-fact-strip">
+      <div class="cs-brief-fact"><span class="cs-meta">Latest receipt</span><strong>{h(latest_activity)}</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Scope</span><strong>{h(workspace)}</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Chain status</span><strong>{"Hash chained" if events else "Ready"}</strong></div>
+    </div>
+    <div class="cs-audit-latest-actions">
+      <a class="cs-button secondary" href="#activity-receipts">Read activity receipts</a>
+      <a class="cs-button secondary" href="/artifacts">Open source register</a>
+    </div>
+  </article>
+  <div class="cs-audit-overview-side">
+    {receipt_summary}
+    {lifecycle}
+  </div>
 </section>
 """
     if not ctx["audit"]:
@@ -5330,11 +5380,9 @@ def _audit_page(ctx: dict[str, Any]) -> str:
       <a class="cs-button secondary" href="/">Back to Home</a>
     </div>
   </header>
-  {audit_status}
-  {receipt_summary}
-  {lifecycle}
+  {audit_overview}
   <div class="cs-audit-workbench">
-    <section class="cs-panel flat">
+    <section class="cs-panel flat cs-audit-list-panel" id="activity-receipts">
       <div class="cs-panel-header">
         <div>
           <h2>Activity receipts</h2>
