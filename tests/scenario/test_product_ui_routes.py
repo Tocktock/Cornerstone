@@ -502,6 +502,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Action preview", action_html)
         self.assertIn("Preview impact, policy, and approval history before any external step.", action_html)
         self.assertIn("Action review status", action_html)
+        self.assertIn("Summary", action_html)
         self.assertIn("Dry-run sequence", action_html)
         self.assertIn("Impacted objects", action_html)
         self.assertIn("Proposed changes", action_html)

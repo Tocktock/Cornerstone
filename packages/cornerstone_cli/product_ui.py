@@ -2789,9 +2789,9 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-action-hero {{
   display: grid;
-  gap: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
-  padding-bottom: var(--cs-space-4);
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-3);
+  padding-bottom: var(--cs-space-3);
   border-bottom: 1px solid var(--cs-color-border-default);
 }}
 .cs-action-breadcrumb {{
@@ -2815,7 +2815,7 @@ button, input, textarea {{ font: inherit; }}
 .cs-action-titlebar h1 {{
   margin: 0;
   max-width: 44ch;
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1.14;
   text-wrap: balance;
 }}
@@ -2833,30 +2833,30 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  margin: var(--cs-space-3) 0 0;
 }}
 .cs-action-review-card {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
 }}
-.cs-action-review-card strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
+.cs-action-review-card strong {{ font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
 .cs-action-route-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  margin-top: var(--cs-space-3);
 }}
 .cs-action-route-step {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-radius-sm);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
-  gap: var(--cs-space-2);
+  gap: var(--cs-space-1);
 }}
 .cs-action-route-step.is-current {{
   border-color: var(--cs-color-border-focus);
@@ -2883,7 +2883,7 @@ button, input, textarea {{ font: inherit; }}
   margin: 0;
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
-  line-height: 1.45;
+  line-height: 1.35;
 }}
 .cs-owner-overview {{
   display: grid;
@@ -6015,13 +6015,6 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <a class="cs-button" href="/inbox">Request approval</a>
       </div>
     </header>
-    <div class="cs-action-review-strip" aria-label="Action review status">
-      <div class="cs-action-review-card"><span class="cs-meta">Risk level</span><strong>{h(risk_label)}</strong></div>
-      <div class="cs-action-review-card"><span class="cs-meta">Approval</span><strong>{h(approval_label)}</strong></div>
-      <div class="cs-action-review-card"><span class="cs-meta">External calls</span><strong>{h(call_label)}</strong></div>
-      <div class="cs-action-review-card"><span class="cs-meta">Status</span><strong>{h(approval_status)}</strong></div>
-    </div>
-    {_action_route_strip(approval_label, call_label)}
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
@@ -6035,6 +6028,12 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <div class="cs-action-metric"><span class="cs-meta">Trigger</span><span>Manual review</span></div>
         <div class="cs-action-metric"><span class="cs-meta">Target</span><span>{h(target)}</span></div>
         <div class="cs-action-metric"><span class="cs-meta">Policy</span><span>{h(decision_label)}</span></div>
+      </div>
+      <div class="cs-action-review-strip" aria-label="Action review status">
+        <div class="cs-action-review-card"><span class="cs-meta">Risk level</span><strong>{h(risk_label)}</strong></div>
+        <div class="cs-action-review-card"><span class="cs-meta">Approval</span><strong>{h(approval_label)}</strong></div>
+        <div class="cs-action-review-card"><span class="cs-meta">External calls</span><strong>{h(call_label)}</strong></div>
+        <div class="cs-action-review-card"><span class="cs-meta">Status</span><strong>{h(approval_status)}</strong></div>
       </div>
     </section>
     <section class="cs-panel">
@@ -6082,6 +6081,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </div>
       {_action_policy_checks(bool(source_items), approval_label, call_label)}
     </section>
+    {_action_route_strip(approval_label, call_label)}
   </div>
   <aside class="cs-stack cs-action-rail">
     <section class="cs-panel flat">
