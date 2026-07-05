@@ -102,7 +102,7 @@ DETAIL_ROUTES = [
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Evidence picker controls", "Sort: source order", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim draft workspace", "Evidence-to-decision path", "Claim review summary", "Claim statement", "Supporting evidence", "Evidence picker controls", "Sort: source order", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Dry-run approval receipt", "Proposed change preview", "External call plan", "Approval gate", "Action review status", "Summary", "Impacted objects", "Dry-run sequence", "Proposed changes", "External calls", "Call preview", "Policy decision", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
 ]

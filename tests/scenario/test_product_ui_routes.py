@@ -547,6 +547,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Back to claims", claim_html)
         self.assertIn("Open inbox", claim_html)
         self.assertIn("Trust ladder", claim_html)
+        self.assertIn("Claim draft workspace", claim_html)
+        self.assertIn("Evidence-to-decision path", claim_html)
         self.assertIn("Claim review summary", claim_html)
         self.assertIn("Claim state", claim_html)
         self.assertIn('data-source-support-attached="true"', claim_html)

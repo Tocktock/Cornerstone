@@ -2745,7 +2745,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-subtle);
   padding: var(--cs-space-3) var(--cs-space-4);
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
 }}
 .cs-claim-progress::before {{
@@ -2778,6 +2778,44 @@ button, input, textarea {{ font: inherit; }}
   border-color: var(--cs-color-primary-600);
   background: var(--cs-color-primary-600);
   box-shadow: 0 0 0 4px var(--cs-color-primary-100);
+}}
+.cs-claim-pathbar {{
+  display: grid;
+  grid-template-columns: minmax(170px, .32fr) minmax(0, 1fr);
+  gap: var(--cs-space-4);
+  align-items: center;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-claim-pathbar-title {{
+  display: grid;
+  gap: var(--cs-space-1);
+  min-width: 0;
+}}
+.cs-claim-pathbar-title strong {{
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
+}}
+.cs-claim-pathbar .cs-claim-progress {{
+  background: transparent;
+  border-radius: 0;
+  padding: var(--cs-space-1) 0;
+}}
+.cs-claim-pathbar .cs-claim-progress::before {{
+  left: 8%;
+  right: 8%;
+  top: 14px;
+}}
+.cs-claim-pathbar .cs-claim-progress-step {{
+  gap: var(--cs-space-1);
+}}
+.cs-claim-pathbar .cs-claim-dot {{
+  width: 14px;
+  height: 14px;
 }}
 .cs-claim-tabs {{
   display: flex;
@@ -3744,7 +3782,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -6218,30 +6256,37 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="cs-row">{_chip(label, state)}{_chip("Review required before approval", "underReview")}</div>
-      <div class="cs-claim-progress" aria-label="Trust ladder">
-        <div class="cs-claim-progress-step is-active">
-          <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Draft</span>
-        </div>
-        <div class="cs-claim-progress-step {source_stage}">
-          <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Source support</span>
-        </div>
-        <div class="cs-claim-progress-step {evidence_stage}">
-          <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Evidence-backed locked</span>
-        </div>
-        <div class="cs-claim-progress-step {approved_stage}">
-          <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Approved</span>
-        </div>
-      </div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
-          <h2>Claim statement</h2>
-          <p class="cs-muted">Draft freely, attach visible evidence, then request review before a decision uses this claim.</p>
+          <h2>Claim draft workspace</h2>
+          <p class="cs-muted">Draft the claim beside its source support, then request review before a decision uses it.</p>
+        </div>
+      </div>
+      <div class="cs-claim-pathbar" aria-label="Evidence-to-decision path">
+        <div class="cs-claim-pathbar-title">
+          <span class="cs-meta">Trust ladder</span>
+          <strong>Evidence-to-decision path</strong>
+          <span class="cs-muted">Promotion stays locked until source and owner review are recorded.</span>
+        </div>
+        <div class="cs-claim-progress" aria-label="Trust ladder">
+          <div class="cs-claim-progress-step is-active">
+            <span class="cs-claim-dot" aria-hidden="true"></span>
+            <span>Draft</span>
+          </div>
+          <div class="cs-claim-progress-step {source_stage}">
+            <span class="cs-claim-dot" aria-hidden="true"></span>
+            <span>Source support</span>
+          </div>
+          <div class="cs-claim-progress-step {evidence_stage}">
+            <span class="cs-claim-dot" aria-hidden="true"></span>
+            <span>Evidence-backed locked</span>
+          </div>
+          <div class="cs-claim-progress-step {approved_stage}">
+            <span class="cs-claim-dot" aria-hidden="true"></span>
+            <span>Approved</span>
+          </div>
         </div>
       </div>
       <div class="cs-claim-tabs" aria-label="Claim workspace sections">
