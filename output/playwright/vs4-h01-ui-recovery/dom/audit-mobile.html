@@ -179,37 +179,11 @@ button, input, textarea { font: inherit; }
 }
 .cs-brand-name { font-weight: var(--cs-typography-weight-bold); font-size: var(--cs-typography-sectionTitle-fontSize); }
 .cs-brand-sub { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
-.cs-product-spine {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}
-.cs-product-spine strong {
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-}
-.cs-product-spine p {
-  margin: 0;
-  color: var(--cs-color-text-secondary);
+.cs-shell-note {
+  color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
   line-height: var(--cs-typography-metadata-lineHeight);
-}
-.cs-spine-steps {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cs-space-1);
-}
-.cs-spine-steps span {
-  min-height: 28px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: 4px 6px;
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
+  max-width: 18ch;
 }
 .cs-nav { display: grid; gap: var(--cs-space-4); }
 .cs-nav-group { display: grid; gap: var(--cs-space-2); }
@@ -291,23 +265,10 @@ button, input, textarea { font: inherit; }
   z-index: 2;
 }
 .cs-command {
-  flex: 1 1 760px;
+  flex: 1 1 auto;
   max-width: 860px;
-  display: grid;
-  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: stretch;
+  min-width: 280px;
 }
-.cs-command-copy {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2) var(--cs-space-3);
-  display: grid;
-  gap: 2px;
-}
-.cs-command-copy strong { font-size: var(--cs-typography-label-fontSize); line-height: var(--cs-typography-label-lineHeight); }
-.cs-command-copy span { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
 .cs-search {
   display: flex;
   align-items: center;
@@ -316,6 +277,12 @@ button, input, textarea { font: inherit; }
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-2) var(--cs-space-3);
+  width: 100%;
+  min-height: 48px;
+}
+.cs-search span[aria-hidden="true"] {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
 }
 .cs-search input { border: 0; outline: 0; min-width: 0; flex: 1; color: var(--cs-color-text-primary); background: transparent; }
 .cs-search button, .cs-button {
@@ -331,6 +298,35 @@ button, input, textarea { font: inherit; }
 }
 .cs-search button:hover, .cs-button:hover { box-shadow: var(--cs-shadow-sm); transform: translateY(-1px); }
 .cs-search button:active, .cs-button:active { transform: translateY(0); }
+.cs-topbar-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}
+.cs-icon-button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-full);
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-text-secondary);
+  display: grid;
+  place-items: center;
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-avatar {
+  min-width: 36px;
+  height: 36px;
+  border-radius: var(--cs-radius-full);
+  background: var(--cs-color-surface-subtle);
+  border: 1px solid var(--cs-color-border-default);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-button.secondary {
   background: var(--cs-color-surface-primary);
   color: var(--cs-color-text-primary);
@@ -2929,9 +2925,9 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-command {
     max-width: none;
-    grid-template-columns: 1fr;
+    min-width: 0;
   }
-  .cs-command-copy { display: none; }
+  .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
   .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
@@ -3037,16 +3033,7 @@ button, input, textarea { font: inherit; }
           <div class="cs-brand-sub">Evidence-first workspace</div>
         </div>
       </div>
-      <section class="cs-product-spine" aria-label="Source-backed decisions">
-        <strong>Source-backed decisions</strong>
-        <p>Drop input, ask, review the brief, then decide with receipts.</p>
-        <div class="cs-spine-steps">
-          <span>Drop and ask</span>
-          <span>Brief</span>
-          <span>Decision</span>
-          <span>Audit</span>
-        </div>
-      </section>
+      <div class="cs-shell-note">Drop, ask, decide, and audit with visible receipts.</div>
 
 <nav class="cs-nav">
   <div class="cs-nav-group">
@@ -3071,21 +3058,19 @@ button, input, textarea { font: inherit; }
     <main class="cs-main" id="main-content" tabindex="-1">
 
 <header class="cs-topbar">
-  <div class="cs-command" aria-label="Workspace command">
-    <div class="cs-command-copy">
-      <strong>Workspace command</strong>
-      <span>Search saved work and open receipts.</span>
-    </div>
+  <div class="cs-command" aria-label="Global search">
     <form class="cs-search" action="/search" method="get">
       <span aria-hidden="true">Search</span>
-      <input name="q" value="" placeholder="Search saved sources, claims, and drafts">
+      <input name="q" value="" placeholder="Search across saved sources, claims, briefs, and action drafts">
       <button type="submit">Go</button>
     </form>
   </div>
-  <div class="cs-row">
+  <div class="cs-topbar-actions" aria-label="Workspace status">
     <span class="cs-chip cs-chip-saved">1 saved source</span>
-    <span class="cs-chip cs-chip-searchable">Local only</span>
+    <span class="cs-chip cs-chip-searchable">Local workspace</span>
     <span class="cs-chip cs-chip-underReview">Receipts required</span>
+    <span class="cs-icon-button" aria-label="Help">?</span>
+    <span class="cs-avatar" aria-label="Owner">JT</span>
   </div>
 </header>
 
@@ -3099,8 +3084,8 @@ button, input, textarea { font: inherit; }
       <p>Follow source, evidence, decision, and action receipts in one inspectable local ledger. The page reads like a product history first; raw event detail stays available for provenance checks.</p>
       <div class="cs-brief-meta">
         <span>Workspace: default</span>
-        <span>Latest: 2026-07-05 01:51 UTC</span>
-        <span>First receipt: 2026-07-05 01:51 UTC</span>
+        <span>Latest: 2026-07-05 01:59 UTC</span>
+        <span>First receipt: 2026-07-05 01:59 UTC</span>
         <span>Reading order: newest first</span>
       </div>
     </div>
@@ -3116,7 +3101,7 @@ button, input, textarea { font: inherit; }
 
 <div class="cs-audit-status-card">
   <span class="cs-meta">Latest receipt</span>
-  <strong>2026-07-05 01:51 UTC</strong>
+  <strong>2026-07-05 01:59 UTC</strong>
   <span class="cs-meta">Newest local event</span>
 </div>
 
@@ -3237,10 +3222,10 @@ button, input, textarea { font: inherit; }
         <h2>Action proposed</h2>
         <span class="cs-audit-row-position">Receipt 1 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Action / action_db9.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Action / action_36c.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Action</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 1</span>
         <span>default</span>
       </div>
@@ -3252,11 +3237,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>1</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_0fbb11ee43...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>action:action_db9e61c258c008a3</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_3dd2dbd025...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>action:action_36c9dfc78b95dbc9</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>action.card.proposed</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>0fbb11ee43a1d0e3...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>ec9a82ef3b34cd6d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>3dd2dbd025025b48...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>0a1abe6d81d1ff6d...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>action kind, claim id, decision, dry run id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3272,10 +3257,10 @@ button, input, textarea { font: inherit; }
         <h2>Decision path activated</h2>
         <span class="cs-audit-row-position">Receipt 2 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Mission / mission_b7.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Mission / mission_dc.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Decision</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 2</span>
         <span>default</span>
       </div>
@@ -3287,11 +3272,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>2</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_ec9a82ef3b...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_b79bd9e6c36b2543</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_0a1abe6d81...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_dc93cc3ce7c3e0ef</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>mission.activated</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>ec9a82ef3b34cd6d...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>107d43e76c2ed7a3...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>0a1abe6d81d1ff6d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>ec3b1e665feb7665...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>allowed actions, forbidden actions, mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3310,7 +3295,7 @@ button, input, textarea { font: inherit; }
       <p class="cs-audit-row-note">Readable receipt for Workspace / 3e548f87d1.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Decision</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 3</span>
         <span>default</span>
       </div>
@@ -3322,11 +3307,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>3</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_107d43e76c...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_ec3b1e665f...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>workspace:3e548f87d142e49b</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>workspace.mode.set</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>107d43e76c2ed7a3...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>553bc8c1518fc9c0...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>ec3b1e665feb7665...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>e033c43b11cbbce9...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>autonomous execution allowed, mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3342,10 +3327,10 @@ button, input, textarea { font: inherit; }
         <h2>Decision path prepared</h2>
         <span class="cs-audit-row-position">Receipt 4 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Mission / mission_b7.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Mission / mission_dc.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Decision</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 4</span>
         <span>default</span>
       </div>
@@ -3357,11 +3342,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>4</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_553bc8c151...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_b79bd9e6c36b2543</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_e033c43b11...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>mission:mission_dc93cc3ce7c3e0ef</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>mission.contract.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>553bc8c1518fc9c0...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>c48efbde9cb36d4d...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>e033c43b11cbbce9...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>ae3048549facd783...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>allowed actions, claim id, evidence bundle id, workspace mode</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3377,10 +3362,10 @@ button, input, textarea { font: inherit; }
         <h2>Claim drafted</h2>
         <span class="cs-audit-row-position">Receipt 5 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Claim / claim_1541.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Claim / claim_8344.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Decision</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 5</span>
         <span>default</span>
       </div>
@@ -3392,11 +3377,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>5</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_c48efbde9c...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>claim:claim_154144ba13fe93b9</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_ae3048549f...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>claim:claim_83440eee8eafe0cc</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>claim.draft.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>c48efbde9cb36d4d...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>5a67f99bb8358a31...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>ae3048549facd783...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>627e932a55fbec7f...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>evidence bundle id, ontology context refs, search snapshot id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3412,10 +3397,10 @@ button, input, textarea { font: inherit; }
         <h2>Brief drafted</h2>
         <span class="cs-audit-row-position">Receipt 6 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Brief / brief_ec47.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Brief / brief_b4b1.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Evidence</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 6</span>
         <span>default</span>
       </div>
@@ -3427,11 +3412,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>6</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_5a67f99bb8...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>brief:brief_ec47f13a56593d6f</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_627e932a55...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>brief:brief_b4b131252f1bbc25</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>brief.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>5a67f99bb8358a31...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>c0ab367d269457c6...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>627e932a55fbec7f...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>8f77b417d905f5e7...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>citation check refs, citation refs, evidence bundle id, evidence item count</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3447,10 +3432,10 @@ button, input, textarea { font: inherit; }
         <h2>Evidence bundle prepared</h2>
         <span class="cs-audit-row-position">Receipt 7 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Evidence Bundle / evb_11b6ad.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Evidence Bundle / evb_c362a0.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Evidence</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 7</span>
         <span>default</span>
       </div>
@@ -3462,11 +3447,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>7</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_c0ab367d26...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>evidence_bundle:evb_11b6ad12cb0ee5dd</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_8f77b417d9...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>evidence_bundle:evb_c362a0936a83f8c3</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>evidence_bundle.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>c0ab367d269457c6...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>6142f5c60fd49edd...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>8f77b417d905f5e7...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>6469ed688fa47401...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>evidence item count, search snapshot id</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3482,10 +3467,10 @@ button, input, textarea { font: inherit; }
         <h2>Search saved</h2>
         <span class="cs-audit-row-position">Receipt 8 of 9</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for Search Snapshot / search_60b.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
+      <p class="cs-audit-row-note">Readable receipt for Search Snapshot / search_be9.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Evidence</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 8</span>
         <span>default</span>
       </div>
@@ -3497,11 +3482,11 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>8</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_6142f5c60f...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>search_snapshot:search_60b4a98ff036df3d</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_6469ed688f...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>search_snapshot:search_be9f63dc6ba07521</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>search.snapshot.created</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>6142f5c60fd49edd...</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>de78e86a2c4adbf6...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>6469ed688fa47401...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>9ce14eb159a9e277...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>duration ms, query, result count</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
   </div>
@@ -3520,7 +3505,7 @@ button, input, textarea { font: inherit; }
       <p class="cs-audit-row-note">Readable receipt for Artifact / art_ede571.... Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>Source</span>
-        <span>2026-07-05 01:51 UTC</span>
+        <span>2026-07-05 01:59 UTC</span>
         <span>Ledger position 9</span>
         <span>default</span>
       </div>
@@ -3532,10 +3517,10 @@ button, input, textarea { font: inherit; }
   <summary>Raw event detail</summary>
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>9</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_de78e86a2c...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>audit_9ce14eb159...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>artifact:art_ede571327ab3ec20</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>artifact.ingested</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>de78e86a2c4adbf6...</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>9ce14eb159a9e277...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>0000000000000000...</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>checksum sha256, derived status, effective trust, original storage ref</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>default</strong></div>
