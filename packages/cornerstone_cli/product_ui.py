@@ -485,6 +485,47 @@ def _brief_source_count(record: dict[str, Any]) -> int:
     return len(set(refs))
 
 
+def _brief_label_state(record: dict[str, Any]) -> tuple[str, str]:
+    label_check = record.get("label_check") if isinstance(record.get("label_check"), dict) else {}
+    if record.get("presented_as_fact") is True and label_check.get("earned_evidence_backed") is True:
+        return "Fact label earned", "evidenceBacked"
+    if label_check:
+        return "Draft label", "underReview"
+    return "Draft label", "draft"
+
+
+def _brief_citation_refs(record: dict[str, Any]) -> list[str]:
+    refs: list[str] = []
+    for key in ("key_point_citations", "recommended_next_step_citations"):
+        rows = record.get(key)
+        if not isinstance(rows, list):
+            continue
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            refs.extend(str(ref) for ref in row.get("citation_refs", []) if isinstance(ref, str))
+    citation_refs = record.get("citation_refs")
+    if isinstance(citation_refs, list):
+        refs.extend(str(ref) for ref in citation_refs if isinstance(ref, str))
+    return list(dict.fromkeys(refs))
+
+
+def _brief_citation_receipt(record: dict[str, Any], source_items: list[dict[str, str]]) -> dict[str, Any]:
+    refs = _brief_citation_refs(record)
+    resolved = [_citation_item_for_ref(ref, source_items, record) for ref in refs]
+    resolved_count = sum(1 for item in resolved if item)
+    check_refs = record.get("citation_check_refs")
+    check_count = len(check_refs) if isinstance(check_refs, list) else 0
+    ref_kinds = sorted({_citation_ref_kind(ref) for ref in refs}) or ["none"]
+    return {
+        "citation_refs_count": len(refs),
+        "resolved_citation_count": resolved_count,
+        "unresolved_citation_count": max(0, len(refs) - resolved_count),
+        "citation_check_refs_count": check_count,
+        "citation_ref_kind": ", ".join(ref_kinds),
+    }
+
+
 def _brief_summary_text(record: dict[str, Any]) -> str:
     summary = str(record.get("summary") or "").strip()
     if summary:
@@ -2399,6 +2440,49 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-1);
 }}
 .cs-brief-fact strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
+.cs-brief-receipt-panel {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 50%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 58%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-brief-receipt-grid {{
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  align-items: stretch;
+}}
+.cs-brief-answer-card, .cs-brief-receipt-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 88%, white);
+  padding: var(--cs-space-3);
+  display: grid;
+  align-content: start;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-brief-answer-card p, .cs-brief-receipt-card p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
+}}
+.cs-brief-answer-card p {{
+  color: var(--cs-color-text-primary);
+  font-size: 16px;
+  line-height: 1.65;
+}}
+.cs-brief-receipt-card strong {{
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+  overflow-wrap: anywhere;
+}}
 .cs-summary-card {{
   background: color-mix(in srgb, var(--cs-color-primary-50) 48%, var(--cs-color-surface-primary));
   border-color: var(--cs-color-primary-100);
@@ -3481,7 +3565,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3504,6 +3588,9 @@ button, input, textarea {{ font: inherit; }}
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     justify-content: stretch;
+  }}
+  .cs-brief-fact-strip {{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }}
   .cs-brief-actions .cs-button {{
     justify-content: center;
@@ -5702,8 +5789,29 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     mode = _plain_output_mode(str(brief.get("output_mode") or "draft"))
     finding_count = len(key_points) + len(findings)
     brief_title = _brief_title(brief)
+    label_state = _brief_label_state(brief)[0]
+    citation_receipt = _brief_citation_receipt(brief, source_items)
+    presented_as_fact = brief.get("presented_as_fact") is True
+    citation_ready = citation_receipt["citation_refs_count"] > 0 and citation_receipt["unresolved_citation_count"] == 0 and citation_receipt["citation_check_refs_count"] > 0
+    receipt_chip = _chip("Checked receipt" if citation_ready else "Source check", "searchable" if citation_ready else "underReview")
+    receipt_note = (
+        "Citation checks and visible source spans agree for the recorded references."
+        if citation_ready
+        else "Unsupported or unresolved citation work remains; use this as a draft until source spans are checked."
+    )
+    summary_text = summary or "No summary text was drafted yet. Use the findings and source snippets below before promoting this brief."
     return f"""
-<section class="cs-brief-workbench" data-product-surface="brief-detail" aria-label="Brief reading workspace">
+<section
+  class="cs-brief-workbench"
+  data-product-surface="brief-detail"
+  data-label-state="{h(label_state)}"
+  data-presented-as-fact="{str(presented_as_fact).lower()}"
+  data-citation-check-refs-count="{h(citation_receipt["citation_check_refs_count"])}"
+  data-resolved-citation-count="{h(citation_receipt["resolved_citation_count"])}"
+  data-unresolved-citation-count="{h(citation_receipt["unresolved_citation_count"])}"
+  data-citation-ref-kind="{h(citation_receipt["citation_ref_kind"])}"
+  aria-label="Brief reading workspace"
+>
   <div class="cs-stack">
     <header class="cs-brief-titlebar">
       <div class="cs-brief-title">
@@ -5736,18 +5844,35 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
       <div class="cs-brief-fact"><span class="cs-meta">Mode</span><strong>{h(mode)}</strong></div>
       <div class="cs-brief-fact"><span class="cs-meta">Created</span><strong>{h(_display_date(brief))}</strong></div>
     </div>
-    <section class="cs-panel flat">
-      <div class="cs-panel-header"><h2>Decision snapshot</h2>{_chip("Draft use", "draft")}</div>
-      <p class="cs-muted">This brief is usable as a reviewed draft only when the summary, findings, sources, and limits are read together.</p>
-    </section>
-    <section class="cs-panel cs-summary-card">
+    <section class="cs-brief-receipt-panel" aria-label="Receipt summary">
       <div class="cs-panel-header">
         <div>
-          <h2>What we found</h2>
-          <p class="cs-muted">Short answer, kept separate from source support.</p>
+          <h2>Receipt summary</h2>
+          <p class="cs-muted">Decision snapshot, source support, and label state stay together before any action.</p>
+        </div>
+        {receipt_chip}
+      </div>
+      <div class="cs-brief-receipt-grid">
+        <div class="cs-brief-answer-card">
+          <span class="cs-meta">What we found</span>
+          <p>{h(summary_text)}</p>
+        </div>
+        <div class="cs-brief-receipt-card">
+          <span class="cs-meta">Decision snapshot</span>
+          <strong>Reviewed draft</strong>
+          <p>This brief should be used only with the findings, sources, and limits visible on this page.</p>
+        </div>
+        <div class="cs-brief-receipt-card">
+          <span class="cs-meta">Citation receipt</span>
+          <strong>{h(citation_receipt["resolved_citation_count"])} / {h(citation_receipt["citation_refs_count"])} resolved</strong>
+          <p>{h(receipt_note)}</p>
+        </div>
+        <div class="cs-brief-receipt-card">
+          <span class="cs-meta">Label state</span>
+          <strong>{h(label_state)}</strong>
+          <p>{h(str(citation_receipt["citation_check_refs_count"]))} citation check ref{"s" if citation_receipt["citation_check_refs_count"] != 1 else ""}; {h(citation_receipt["citation_ref_kind"])} refs.</p>
         </div>
       </div>
-      <p>{h(summary or "No summary text was drafted yet.")}</p>
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -6324,12 +6449,13 @@ def _source_card(item: dict[str, str]) -> str:
     <span class="cs-meta">{h(item["label"])}</span>
     <span>{h(item["title"])}</span>
   </summary>
-  <p>{h(_truncate(item["snippet"], 260))}</p>
+  <p><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
   <div class="cs-row">
-    <a class="cs-button secondary" href="{h(item["href"])}">Open source</a>
+    <a class="cs-button secondary" href="{h(item["href"])}">Inspect source</a>
+    <a class="cs-button ghost" href="/audit">Audit trail</a>
     {_chip("Searchable", "searchable")}
   </div>
-  <div class="cs-provenance">
+  <div class="cs-provenance" aria-label="Full provenance">
     <dl class="cs-detail-grid">
       <dt>Saved</dt><dd>{h(item["date"])}</dd>
       <dt>Fingerprint</dt><dd>{h(item["fingerprint"])}</dd>
@@ -6355,15 +6481,27 @@ def _statement_rows(record: dict[str, Any], statements: list[str], source_items:
     rows = []
     for index, statement in enumerate(statements[:8], start=1):
         refs = citation_map.get(statement, [])
-        citation_cards = _citation_disclosure_for_refs(refs, source_items)
-        source_state = "searchable" if refs else "underReview"
-        source_label = "Source linked" if refs else "Source available"
+        citation_cards = _citation_disclosure_for_refs(refs, source_items, record)
+        resolved_count = sum(1 for ref in refs if _citation_item_for_ref(ref, source_items, record))
+        unresolved_count = max(0, len(refs) - resolved_count)
+        if refs and unresolved_count == 0:
+            source_state = "searchable"
+            source_label = "Source span linked"
+        elif refs and resolved_count:
+            source_state = "underReview"
+            source_label = "Partial source support"
+        elif refs:
+            source_state = "underReview"
+            source_label = "Unresolved source ref"
+        else:
+            source_state = "underReview"
+            source_label = "Needs source check"
         rows.append(
             f"""
 <li class="cs-finding">
   <div class="cs-finding-head">
     <span class="cs-finding-index">Finding {h(index + offset)}</span>
-    {_chip("Needs source check", "underReview") if not citation_cards else _chip(source_label, source_state)}
+    {_chip(source_label, source_state)}
   </div>
   <div>{h(statement)}</div>
   <div class="cs-citation-rail" aria-label="Citation disclosure for finding {index + offset}">{citation_cards or _chip("Needs source check", "underReview")}</div>
@@ -6373,19 +6511,70 @@ def _statement_rows(record: dict[str, Any], statements: list[str], source_items:
     return f'<ol class="cs-finding-list">{"".join(rows)}</ol>'
 
 
-def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, str]]) -> str:
-    items: list[dict[str, str]] = []
-    for ref in refs:
-        if not ref.startswith("artifact:"):
-            continue
+def _citation_ref_kind(ref: str) -> str:
+    if ref.startswith("evidence_chunk:"):
+        return "evidence chunk"
+    if ref.startswith("artifact:"):
+        return "artifact"
+    if ref.startswith("citation_check:"):
+        return "citation check"
+    return "unresolved"
+
+
+def _format_span(span: Any) -> str:
+    if isinstance(span, dict):
+        start = span.get("start")
+        end = span.get("end")
+        if start is not None and end is not None:
+            return f"{start}-{end}"
+    if isinstance(span, (list, tuple)) and len(span) >= 2:
+        return f"{span[0]}-{span[1]}"
+    return "Recorded snippet"
+
+
+def _citation_item_for_ref(ref: str, source_items: list[dict[str, str]], record: dict[str, Any]) -> dict[str, str] | None:
+    if ref.startswith("artifact:"):
         item = next((item for item in source_items if item["ref"] == ref), None)
+        return dict(item) if item else None
+    if not ref.startswith("evidence_chunk:"):
+        return None
+    links = record.get("evidence_links")
+    if not isinstance(links, list):
+        return None
+    for link in links:
+        if not isinstance(link, dict):
+            continue
+        if str(link.get("evidence_chunk_ref") or "") != ref:
+            continue
+        artifact_ref = str(link.get("artifact_ref") or "")
+        base = next((item for item in source_items if item["ref"] == artifact_ref), None)
+        if not base:
+            return None
+        item = dict(base)
+        item["ref"] = ref
+        item["ref_kind"] = "Evidence chunk"
+        item["artifact_ref"] = artifact_ref
+        item["snippet"] = str(link.get("snippet") or base.get("snippet") or "")
+        item["span"] = _format_span(link.get("span"))
+        return item
+    return None
+
+
+def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, str]], record: dict[str, Any] | None = None) -> str:
+    record = record or {}
+    items: list[dict[str, str]] = []
+    unresolved: list[str] = []
+    for ref in refs:
+        item = _citation_item_for_ref(ref, source_items, record)
         if item and item not in items:
             items.append(item)
-    if not items:
-        items = source_items[:1]
+        elif not item:
+            unresolved.append(ref)
     cards = []
     for index, item in enumerate(items[:3], start=1):
         open_attr = " open" if index == 1 else ""
+        ref_kind = item.get("ref_kind") or _citation_ref_kind(item.get("ref", ""))
+        span = item.get("span") or "Whole source"
         cards.append(
             f"""
 <details class="cs-citation-card"{open_attr}>
@@ -6399,6 +6588,8 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
   <div class="cs-citation-body">
     <p class="cs-citation-snippet"><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
     <div class="cs-citation-meta" aria-label="Full provenance">
+      <div><span class="cs-meta">Citation ref</span><strong>{h(ref_kind)}</strong></div>
+      <div><span class="cs-meta">Source span</span><strong>{h(span)}</strong></div>
       <div><span class="cs-meta">Saved</span><strong>{h(item["date"])}</strong></div>
       <div><span class="cs-meta">Fingerprint</span><strong>{h(item["fingerprint"])}</strong></div>
     </div>
@@ -6408,6 +6599,21 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
     </div>
   </div>
 </details>
+"""
+        )
+    for ref in unresolved[:3]:
+        cards.append(
+            f"""
+<div class="cs-citation-card cs-citation-card-unresolved" data-citation-ref-kind="{h(_citation_ref_kind(ref))}">
+  <div class="cs-citation-body">
+    <div class="cs-panel-header"><h3>Unresolved citation ref</h3>{_chip("Needs source check", "underReview")}</div>
+    <p class="cs-citation-snippet">A citation ref was recorded, but this page cannot match it to a visible source span yet.</p>
+    <div class="cs-citation-meta" aria-label="Unresolved citation metadata">
+      <div><span class="cs-meta">Citation ref kind</span><strong>{h(_citation_ref_kind(ref))}</strong></div>
+      <div><span class="cs-meta">Review state</span><strong>Unsupported or unresolved</strong></div>
+    </div>
+  </div>
+</div>
 """
         )
     return "".join(cards)

@@ -17,6 +17,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
+from cornerstone_cli import product_ui
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
 
 CAPTURE_SCRIPT = ROOT / "scripts" / "capture_vs4_h01_ui_recovery_screenshots.py"
@@ -392,6 +393,57 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Hash chained", audit_html)
         self.assert_product_surface_is_clean(audit_html)
 
+    def test_brief_chunk_citation_receipts_do_not_fallback_to_first_source(self) -> None:
+        source_items = [
+            {
+                "ref": "artifact:primary",
+                "label": "Source 1",
+                "title": "Primary source",
+                "snippet": "General source preview.",
+                "href": "/artifacts/primary?view=html",
+                "date": "2026-07-05",
+                "fingerprint": "primary-fingerprint",
+            },
+            {
+                "ref": "artifact:other",
+                "label": "Source 2",
+                "title": "Second unrelated source",
+                "snippet": "This should not be used as a fallback.",
+                "href": "/artifacts/other?view=html",
+                "date": "2026-07-05",
+                "fingerprint": "other-fingerprint",
+            },
+        ]
+        brief = {
+            "presented_as_fact": False,
+            "citation_check_refs": ["citation_check:local"],
+            "evidence_links": [
+                {
+                    "artifact_ref": "artifact:primary",
+                    "evidence_chunk_ref": "evidence_chunk:chunk-1",
+                    "snippet": "Exact source span for the first statement.",
+                    "span": {"start": 10, "end": 52},
+                }
+            ],
+            "key_point_citations": [
+                {"statement": "First statement.", "citation_refs": ["evidence_chunk:chunk-1"]},
+                {"statement": "Second statement.", "citation_refs": ["evidence_chunk:missing"]},
+            ],
+        }
+
+        html = product_ui._statement_rows(brief, ["First statement.", "Second statement."], source_items)
+        receipt = product_ui._brief_citation_receipt(brief, source_items)
+
+        self.assertEqual(receipt["citation_refs_count"], 2)
+        self.assertEqual(receipt["resolved_citation_count"], 1)
+        self.assertEqual(receipt["unresolved_citation_count"], 1)
+        self.assertIn("Evidence chunk", html)
+        self.assertIn("10-52", html)
+        self.assertIn("Exact source span for the first statement.", html)
+        self.assertIn("Unresolved citation ref", html)
+        self.assertIn("Unsupported or unresolved", html)
+        self.assertNotIn("Second unrelated source", html)
+
     def test_brief_claim_and_action_detail_pages_use_plain_disclosure(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
 
@@ -457,7 +509,14 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Brief reading workspace", brief_html)
         self.assertIn("What we found", brief_html)
         self.assertIn("Brief status", brief_html)
+        self.assertIn("Receipt summary", brief_html)
         self.assertIn("Decision snapshot", brief_html)
+        self.assertIn("Citation receipt", brief_html)
+        self.assertIn("Label state", brief_html)
+        self.assertIn('data-presented-as-fact="false"', brief_html)
+        self.assertIn('data-citation-check-refs-count="0"', brief_html)
+        self.assertIn('data-resolved-citation-count="0"', brief_html)
+        self.assertIn('data-unresolved-citation-count="0"', brief_html)
         self.assertIn("Source coverage", brief_html)
         self.assertIn("Findings with citations", brief_html)
         self.assertIn("What this brief cannot confirm", brief_html)
@@ -474,6 +533,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Provenance", brief_html)
         self.assertIn("Keyword summary", brief_html)
         self.assertNotIn("extractive_fallback", brief_html)
+        self.assertNotIn("Evidence-backed", brief_html)
+        self.assertNotIn("decision-ready", brief_html)
         self.assert_product_surface_is_clean(brief_html)
 
         claim_html = self.fetch_product_html(f"/claims/{claim_id}?view=html")

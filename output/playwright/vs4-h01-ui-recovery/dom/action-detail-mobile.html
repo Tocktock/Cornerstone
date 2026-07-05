@@ -1869,6 +1869,49 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-1);
 }
 .cs-brief-fact strong { font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }
+.cs-brief-receipt-panel {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 50%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 58%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-4);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-brief-receipt-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  align-items: stretch;
+}
+.cs-brief-answer-card, .cs-brief-receipt-card {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 88%, white);
+  padding: var(--cs-space-3);
+  display: grid;
+  align-content: start;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}
+.cs-brief-answer-card p, .cs-brief-receipt-card p {
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.cs-brief-answer-card p {
+  color: var(--cs-color-text-primary);
+  font-size: 16px;
+  line-height: 1.65;
+}
+.cs-brief-receipt-card strong {
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+  overflow-wrap: anywhere;
+}
 .cs-summary-card {
   background: color-mix(in srgb, var(--cs-color-primary-50) 48%, var(--cs-color-surface-primary));
   border-color: var(--cs-color-primary-100);
@@ -2951,7 +2994,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2974,6 +3017,9 @@ button, input, textarea { font: inherit; }
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     justify-content: stretch;
+  }
+  .cs-brief-fact-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cs-brief-actions .cs-button {
     justify-content: center;
@@ -3112,7 +3158,7 @@ button, input, textarea { font: inherit; }
           <h1>Draft a vendor renewal follow-up</h1>
           <div class="cs-brief-meta">
             <span>Dry-run first</span>
-            <span>2026-07-05 02:40 UTC</span>
+            <span>2026-07-05 02:58 UTC</span>
             <span>No external send yet</span>
           </div>
           <p class="cs-muted">Preview impact, policy, and approval history before any external step.</p>
@@ -3322,14 +3368,15 @@ button, input, textarea { font: inherit; }
     <span class="cs-meta">Source 1</span>
     <span>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</span>
   </summary>
-  <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
+  <p><strong>Source snippet:</strong> Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
   <div class="cs-row">
-    <a class="cs-button secondary" href="/artifacts/art_ede571327ab3ec20?view=html">Open source</a>
+    <a class="cs-button secondary" href="/artifacts/art_ede571327ab3ec20?view=html">Inspect source</a>
+    <a class="cs-button ghost" href="/audit">Audit trail</a>
     <span class="cs-chip cs-chip-searchable">Searchable</span>
   </div>
-  <div class="cs-provenance">
+  <div class="cs-provenance" aria-label="Full provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-05 02:40 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-05 02:58 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>
