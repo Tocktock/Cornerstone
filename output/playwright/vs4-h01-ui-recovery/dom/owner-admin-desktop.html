@@ -2668,8 +2668,12 @@ button, input, textarea { font: inherit; }
 .cs-owner-overview {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
+  gap: 0;
   margin-bottom: var(--cs-space-5);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
 }
 .cs-owner-tabs {
   display: flex;
@@ -2689,13 +2693,13 @@ button, input, textarea { font: inherit; }
   border-bottom: 2px solid var(--cs-color-primary-600);
 }
 .cs-owner-metric {
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  border-right: 1px solid var(--cs-color-border-default);
+  background: linear-gradient(180deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
+  padding: var(--cs-space-3) var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-1);
 }
+.cs-owner-metric:last-child { border-right: 0; }
 .cs-owner-metric strong {
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
@@ -2741,7 +2745,7 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-4);
   align-items: start;
 }
-.cs-connector-list, .cs-admin-stack, .cs-policy-list {
+.cs-owner-main-stack, .cs-connector-list, .cs-admin-stack, .cs-policy-list {
   display: grid;
   gap: var(--cs-space-3);
 }
@@ -2749,40 +2753,62 @@ button, input, textarea { font: inherit; }
   position: sticky;
   top: calc(var(--cs-space-4) + 72px);
 }
+.cs-connector-table-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
+  gap: var(--cs-space-3);
+  padding: 0 var(--cs-space-3) var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
 .cs-connector-card {
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}
-.cs-connector-card h3 { margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-sectionTitle-fontSize); }
-.cs-connector-card p { margin: 0; color: var(--cs-color-text-secondary); }
-.cs-connector-meta {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-  margin-top: var(--cs-space-3);
-}
-.cs-connector-meta div {
-  border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-2);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}
+.cs-connector-card h3 { margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); }
+.cs-connector-card p { margin: 0; color: var(--cs-color-text-secondary); font-size: var(--cs-typography-metadata-fontSize); line-height: 1.45; }
+.cs-connector-source {
+  display: grid;
+  gap: var(--cs-space-2);
   min-width: 0;
 }
-.cs-connector-meta span, .cs-connector-meta strong {
-  display: block;
+.cs-connector-title {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
 }
-.cs-connector-meta strong {
-  margin-top: var(--cs-space-1);
+.cs-connector-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  display: grid;
+  place-items: center;
+  font-weight: var(--cs-typography-weight-bold);
+  font-size: var(--cs-typography-metadata-fontSize);
+  flex: 0 0 auto;
+}
+.cs-connector-cell {
+  display: grid;
+  gap: var(--cs-space-1);
+  min-width: 0;
+}
+.cs-connector-cell span, .cs-connector-cell strong {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .cs-policy-row {
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-radius-sm);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
@@ -2798,6 +2824,20 @@ button, input, textarea { font: inherit; }
   font-size: var(--cs-typography-metadata-fontSize);
   line-height: 1.5;
 }
+.cs-owner-scope-table {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  overflow: hidden;
+}
+.cs-owner-scope-row {
+  display: grid;
+  grid-template-columns: minmax(150px, .45fr) minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-owner-scope-row:last-child { border-bottom: 0; }
+.cs-owner-scope-row strong, .cs-owner-scope-row span { min-width: 0; word-break: break-word; }
 .cs-admin-note {
   border: 1px solid var(--cs-state-underReview-border);
   border-radius: var(--cs-radius-md);
@@ -3254,7 +3294,10 @@ button, input, textarea { font: inherit; }
   .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-card, .cs-policy-row, .cs-owner-scope-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-owner-metric { border-right: 0; border-bottom: 1px solid var(--cs-color-border-default); }
+  .cs-owner-metric:last-child { border-bottom: 0; }
+  .cs-connector-table-head { display: none; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -3407,9 +3450,9 @@ button, input, textarea { font: inherit; }
 <section data-product-surface="owner-review">
   <div class="cs-brief-hero is-stacked">
     <div class="cs-brief-title">
-      <div class="cs-kicker">Owner area</div>
-      <h1>Connector governance</h1>
-      <p>Admin controls stay outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
+      <div class="cs-kicker">Owner area / Admin connectors</div>
+      <h1>Connector governance console</h1>
+      <p>Connector governance stays outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
       <div class="cs-brief-meta">
         <span>Namespace: personal</span>
         <span>Workspace: default</span>
@@ -3431,35 +3474,35 @@ button, input, textarea { font: inherit; }
   <div class="cs-owner-overview" aria-label="Admin containment">
 
 <div class="cs-owner-metric">
-  <span class="cs-meta">Source access</span>
+  <span class="cs-meta">Connected source posture</span>
   <strong>1 saved</strong>
   <span class="cs-muted">Local artifacts and pasted sources only.</span>
 </div>
 
 
 <div class="cs-owner-metric">
-  <span class="cs-meta">Policies</span>
+  <span class="cs-meta">Policy controls</span>
   <strong>Dry-run first</strong>
   <span class="cs-muted">Actions require policy and approval before execution.</span>
 </div>
 
 
 <div class="cs-owner-metric">
-  <span class="cs-meta">Roles</span>
+  <span class="cs-meta">Access roles</span>
   <strong>Owner scoped</strong>
   <span class="cs-muted">Admin review is tied to the current local owner.</span>
 </div>
 
 
 <div class="cs-owner-metric">
-  <span class="cs-meta">Structural checks</span>
+  <span class="cs-meta">Admin containment</span>
   <strong>Review input</strong>
   <span class="cs-muted">Runtime and scenario status stay in the owner handoff.</span>
 </div>
 
   </div>
   <div class="cs-connector-grid">
-    <div class="cs-stack">
+    <div class="cs-owner-main-stack">
       <section class="cs-panel">
         <div class="cs-panel-header">
           <div>
@@ -3468,55 +3511,103 @@ button, input, textarea { font: inherit; }
           </div>
           <span class="cs-chip cs-chip-underReview">Review before enablement</span>
         </div>
-        <div class="cs-connector-list">
+        <div class="cs-connector-table-head" aria-hidden="true">
+          <span>Source</span>
+          <span>Access</span>
+          <span>Policy</span>
+          <span>Activity / scope</span>
+          <span>Status</span>
+        </div>
+        <div class="cs-connector-list" aria-label="Connected source posture rows">
 <article class="cs-connector-card">
-  <div>
-    <h3>Local source intake</h3>
-    <p>Files and pasted text enter as preserved sources before any derived brief, claim, or action can rely on them.</p>
-    <div class="cs-connector-meta">
-      <div><span class="cs-meta">Access</span><strong>Read local input</strong></div>
-      <div><span class="cs-meta">Policy</span><strong>Preserve original</strong></div>
-      <div><span class="cs-meta">Activity</span><strong>1 saved</strong></div>
+  <div class="cs-connector-source">
+    <div class="cs-connector-title">
+      <span class="cs-connector-icon" aria-hidden="true">L</span>
+      <h3>Local source intake</h3>
     </div>
+    <p>Files and pasted text enter as preserved sources before any derived brief, claim, or action can rely on them.</p>
   </div>
+  <div class="cs-connector-cell"><span class="cs-meta">Access</span><strong>Read local input</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Policy</span><strong>Preserve original</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Scope</span><strong>personal sources</strong><span class="cs-muted">1 saved</span></div>
   <div class="cs-row"><span class="cs-chip cs-chip-saved">Enabled</span></div>
 </article>
 
 <article class="cs-connector-card">
-  <div>
-    <h3>Evidence and search index</h3>
-    <p>Search and evidence bundles are scoped to the current local workspace and keep citations close to each result.</p>
-    <div class="cs-connector-meta">
-      <div><span class="cs-meta">Access</span><strong>Read indexed sources</strong></div>
-      <div><span class="cs-meta">Policy</span><strong>Scope matched</strong></div>
-      <div><span class="cs-meta">Activity</span><strong>2 linked drafts</strong></div>
+  <div class="cs-connector-source">
+    <div class="cs-connector-title">
+      <span class="cs-connector-icon" aria-hidden="true">E</span>
+      <h3>Evidence and search index</h3>
     </div>
+    <p>Search and evidence bundles are scoped to the current local workspace and keep citations close to each result.</p>
   </div>
+  <div class="cs-connector-cell"><span class="cs-meta">Access</span><strong>Read indexed sources</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Policy</span><strong>Scope matched</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Scope</span><strong>workspace index</strong><span class="cs-muted">2 linked drafts</span></div>
   <div class="cs-row"><span class="cs-chip cs-chip-searchable">Enabled</span></div>
 </article>
 
 <article class="cs-connector-card">
-  <div>
-    <h3>External writeback providers</h3>
-    <p>Writeback-capable connectors stay locked behind dry-run previews, policy decisions, approval, and audit records.</p>
-    <div class="cs-connector-meta">
-      <div><span class="cs-meta">Access</span><strong>No live write</strong></div>
-      <div><span class="cs-meta">Policy</span><strong>Approval required</strong></div>
-      <div><span class="cs-meta">Activity</span><strong>1 previews</strong></div>
+  <div class="cs-connector-source">
+    <div class="cs-connector-title">
+      <span class="cs-connector-icon" aria-hidden="true">X</span>
+      <h3>External writeback providers</h3>
     </div>
+    <p>Writeback-capable connectors stay locked behind dry-run previews, policy decisions, approval, and audit records.</p>
   </div>
+  <div class="cs-connector-cell"><span class="cs-meta">Access</span><strong>No live write</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Policy</span><strong>Approval required</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Scope</span><strong>locked providers</strong><span class="cs-muted">1 previews</span></div>
   <div class="cs-row"><span class="cs-chip cs-chip-policyBlocked">Locked</span></div>
 </article>
 </div>
       </section>
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Namespace settings</h2><span class="cs-chip cs-chip-underReview">Owner scoped</span></div>
-        <dl class="cs-detail-grid">
-          <dt>Tenant</dt><dd>local-dev</dd>
-          <dt>Namespace</dt><dd>personal</dd>
-          <dt>Workspace</dt><dd>default</dd>
-          <dt>Owner</dt><dd>local-user</dd>
-        </dl>
+        <div class="cs-panel-header">
+          <div>
+            <h2>Namespace settings</h2>
+            <p class="cs-muted">Scope is explicit so connector posture does not bleed across workspaces.</p>
+          </div>
+          <span class="cs-chip cs-chip-underReview">Owner scoped</span>
+        </div>
+        <div class="cs-owner-scope-table" aria-label="Namespace settings">
+
+<div class="cs-owner-scope-row">
+  <strong>Tenant</strong>
+  <span class="cs-muted">local-dev</span>
+</div>
+
+
+<div class="cs-owner-scope-row">
+  <strong>Namespace ID</strong>
+  <span class="cs-muted">personal</span>
+</div>
+
+
+<div class="cs-owner-scope-row">
+  <strong>Workspace</strong>
+  <span class="cs-muted">default</span>
+</div>
+
+
+<div class="cs-owner-scope-row">
+  <strong>Owner</strong>
+  <span class="cs-muted">local-user</span>
+</div>
+
+
+<div class="cs-owner-scope-row">
+  <strong>Isolation</strong>
+  <span class="cs-muted">Logical isolation, workspace scoped</span>
+</div>
+
+
+<div class="cs-owner-scope-row">
+  <strong>Retention</strong>
+  <span class="cs-muted">Artifacts and audit receipts remain local review input</span>
+</div>
+
+        </div>
       </section>
     </div>
     <aside class="cs-admin-stack">
@@ -3568,7 +3659,7 @@ button, input, textarea { font: inherit; }
     <strong>Owner</strong>
     <div class="cs-meta">Can inspect local gates and approve contained connector setup.</div>
   </div>
-  <span class="cs-chip cs-chip-searchable">Scoped</span>
+  <span class="cs-chip cs-chip-searchable">1</span>
 </div>
 
 
@@ -3578,7 +3669,7 @@ button, input, textarea { font: inherit; }
     <strong>Workspace user</strong>
     <div class="cs-meta">Can save sources, ask questions, and review drafts without connector administration.</div>
   </div>
-  <span class="cs-chip cs-chip-searchable">Scoped</span>
+  <span class="cs-chip cs-chip-searchable">local</span>
 </div>
 
 
@@ -3588,7 +3679,7 @@ button, input, textarea { font: inherit; }
     <strong>External provider</strong>
     <div class="cs-meta">No direct access from this local review page.</div>
   </div>
-  <span class="cs-chip cs-chip-searchable">Scoped</span>
+  <span class="cs-chip cs-chip-searchable">0</span>
 </div>
 
         </div>
@@ -3606,7 +3697,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-05 04:21 UTC</div>
+    <div class="cs-meta">2026-07-05 04:35 UTC</div>
   </div>
 </div>
 
@@ -3614,7 +3705,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-05 04:21 UTC</div>
+    <div class="cs-meta">2026-07-05 04:35 UTC</div>
   </div>
 </div>
 
@@ -3622,7 +3713,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-05 04:21 UTC</div>
+    <div class="cs-meta">2026-07-05 04:35 UTC</div>
   </div>
 </div>
 
@@ -3630,7 +3721,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-05 04:21 UTC</div>
+    <div class="cs-meta">2026-07-05 04:35 UTC</div>
   </div>
 </div>
 
@@ -3638,7 +3729,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Claim drafted</strong>
-    <div class="cs-meta">2026-07-05 04:21 UTC</div>
+    <div class="cs-meta">2026-07-05 04:35 UTC</div>
   </div>
 </div>
 </div>

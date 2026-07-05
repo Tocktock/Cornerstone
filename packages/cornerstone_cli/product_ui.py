@@ -3237,8 +3237,12 @@ button, input, textarea {{ font: inherit; }}
 .cs-owner-overview {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
+  gap: 0;
   margin-bottom: var(--cs-space-5);
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  overflow: hidden;
 }}
 .cs-owner-tabs {{
   display: flex;
@@ -3258,13 +3262,13 @@ button, input, textarea {{ font: inherit; }}
   border-bottom: 2px solid var(--cs-color-primary-600);
 }}
 .cs-owner-metric {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  border-right: 1px solid var(--cs-color-border-default);
+  background: linear-gradient(180deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
+  padding: var(--cs-space-3) var(--cs-space-4);
   display: grid;
   gap: var(--cs-space-1);
 }}
+.cs-owner-metric:last-child {{ border-right: 0; }}
 .cs-owner-metric strong {{
   font-size: var(--cs-typography-sectionTitle-fontSize);
   line-height: var(--cs-typography-sectionTitle-lineHeight);
@@ -3310,7 +3314,7 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-4);
   align-items: start;
 }}
-.cs-connector-list, .cs-admin-stack, .cs-policy-list {{
+.cs-owner-main-stack, .cs-connector-list, .cs-admin-stack, .cs-policy-list {{
   display: grid;
   gap: var(--cs-space-3);
 }}
@@ -3318,40 +3322,62 @@ button, input, textarea {{ font: inherit; }}
   position: sticky;
   top: calc(var(--cs-space-4) + 72px);
 }}
+.cs-connector-table-head {{
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
+  gap: var(--cs-space-3);
+  padding: 0 var(--cs-space-3) var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
 .cs-connector-card {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-connector-card h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-sectionTitle-fontSize); }}
-.cs-connector-card p {{ margin: 0; color: var(--cs-color-text-secondary); }}
-.cs-connector-meta {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-  margin-top: var(--cs-space-3);
-}}
-.cs-connector-meta div {{
-  border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-2);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
+.cs-connector-card h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); }}
+.cs-connector-card p {{ margin: 0; color: var(--cs-color-text-secondary); font-size: var(--cs-typography-metadata-fontSize); line-height: 1.45; }}
+.cs-connector-source {{
+  display: grid;
+  gap: var(--cs-space-2);
   min-width: 0;
 }}
-.cs-connector-meta span, .cs-connector-meta strong {{
-  display: block;
+.cs-connector-title {{
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-2);
 }}
-.cs-connector-meta strong {{
-  margin-top: var(--cs-space-1);
+.cs-connector-icon {{
+  width: 34px;
+  height: 34px;
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  display: grid;
+  place-items: center;
+  font-weight: var(--cs-typography-weight-bold);
+  font-size: var(--cs-typography-metadata-fontSize);
+  flex: 0 0 auto;
+}}
+.cs-connector-cell {{
+  display: grid;
+  gap: var(--cs-space-1);
+  min-width: 0;
+}}
+.cs-connector-cell span, .cs-connector-cell strong {{
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }}
 .cs-policy-row {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-radius-sm);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
@@ -3367,6 +3393,20 @@ button, input, textarea {{ font: inherit; }}
   font-size: var(--cs-typography-metadata-fontSize);
   line-height: 1.5;
 }}
+.cs-owner-scope-table {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  overflow: hidden;
+}}
+.cs-owner-scope-row {{
+  display: grid;
+  grid-template-columns: minmax(150px, .45fr) minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-owner-scope-row:last-child {{ border-bottom: 0; }}
+.cs-owner-scope-row strong, .cs-owner-scope-row span {{ min-width: 0; word-break: break-word; }}
 .cs-admin-note {{
   border: 1px solid var(--cs-state-underReview-border);
   border-radius: var(--cs-radius-md);
@@ -3823,7 +3863,10 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-card, .cs-policy-row, .cs-owner-scope-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-owner-metric {{ border-right: 0; border-bottom: 1px solid var(--cs-color-border-default); }}
+  .cs-owner-metric:last-child {{ border-bottom: 0; }}
+  .cs-connector-table-head {{ display: none; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -5522,9 +5565,9 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
 <section data-product-surface="owner-review">
   <div class="cs-brief-hero is-stacked">
     <div class="cs-brief-title">
-      <div class="cs-kicker">Owner area</div>
-      <h1>Connector governance</h1>
-      <p>Admin controls stay outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
+      <div class="cs-kicker">Owner area / Admin connectors</div>
+      <h1>Connector governance console</h1>
+      <p>Connector governance stays outside the daily workspace. Review source access, policy posture, namespace scope, and recent connector activity before enabling any external path.</p>
       <div class="cs-brief-meta">
         <span>Namespace: {h(scope.get("namespace_id") or "personal")}</span>
         <span>Workspace: {h(scope.get("workspace_id") or "default")}</span>
@@ -5544,13 +5587,13 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
     <span class="cs-owner-tab">Namespace</span>
   </nav>
   <div class="cs-owner-overview" aria-label="Admin containment">
-    {_owner_metric("Source access", f"{len(ctx['artifacts'])} saved", "Local artifacts and pasted sources only.")}
-    {_owner_metric("Policies", "Dry-run first", "Actions require policy and approval before execution.")}
-    {_owner_metric("Roles", "Owner scoped", "Admin review is tied to the current local owner.")}
-    {_owner_metric("Structural checks", "Review input", "Runtime and scenario status stay in the owner handoff.")}
+    {_owner_metric("Connected source posture", f"{len(ctx['artifacts'])} saved", "Local artifacts and pasted sources only.")}
+    {_owner_metric("Policy controls", "Dry-run first", "Actions require policy and approval before execution.")}
+    {_owner_metric("Access roles", "Owner scoped", "Admin review is tied to the current local owner.")}
+    {_owner_metric("Admin containment", "Review input", "Runtime and scenario status stay in the owner handoff.")}
   </div>
   <div class="cs-connector-grid">
-    <div class="cs-stack">
+    <div class="cs-owner-main-stack">
       <section class="cs-panel">
         <div class="cs-panel-header">
           <div>
@@ -5559,16 +5602,31 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
           </div>
           {_chip("Review before enablement", "underReview")}
         </div>
-        <div class="cs-connector-list">{connector_rows}</div>
+        <div class="cs-connector-table-head" aria-hidden="true">
+          <span>Source</span>
+          <span>Access</span>
+          <span>Policy</span>
+          <span>Activity / scope</span>
+          <span>Status</span>
+        </div>
+        <div class="cs-connector-list" aria-label="Connected source posture rows">{connector_rows}</div>
       </section>
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Namespace settings</h2>{_chip("Owner scoped", "underReview")}</div>
-        <dl class="cs-detail-grid">
-          <dt>Tenant</dt><dd>{h(scope.get("tenant_id") or "local-dev")}</dd>
-          <dt>Namespace</dt><dd>{h(scope.get("namespace_id") or "personal")}</dd>
-          <dt>Workspace</dt><dd>{h(scope.get("workspace_id") or "default")}</dd>
-          <dt>Owner</dt><dd>{h(scope.get("owner_id") or "local-user")}</dd>
-        </dl>
+        <div class="cs-panel-header">
+          <div>
+            <h2>Namespace settings</h2>
+            <p class="cs-muted">Scope is explicit so connector posture does not bleed across workspaces.</p>
+          </div>
+          {_chip("Owner scoped", "underReview")}
+        </div>
+        <div class="cs-owner-scope-table" aria-label="Namespace settings">
+          {_owner_scope_row("Tenant", str(scope.get("tenant_id") or "local-dev"))}
+          {_owner_scope_row("Namespace ID", str(scope.get("namespace_id") or "personal"))}
+          {_owner_scope_row("Workspace", str(scope.get("workspace_id") or "default"))}
+          {_owner_scope_row("Owner", str(scope.get("owner_id") or "local-user"))}
+          {_owner_scope_row("Isolation", "Logical isolation, workspace scoped")}
+          {_owner_scope_row("Retention", "Artifacts and audit receipts remain local review input")}
+        </div>
       </section>
     </div>
     <aside class="cs-admin-stack">
@@ -5589,9 +5647,9 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
       <section class="cs-panel">
         <div class="cs-panel-header"><h2>Access roles</h2>{_chip("Owner controlled", "underReview")}</div>
         <div class="cs-stat-list">
-          {_owner_role_row("Owner", "Can inspect local gates and approve contained connector setup.")}
-          {_owner_role_row("Workspace user", "Can save sources, ask questions, and review drafts without connector administration.")}
-          {_owner_role_row("External provider", "No direct access from this local review page.")}
+          {_owner_role_row("Owner", "Can inspect local gates and approve contained connector setup.", "1")}
+          {_owner_role_row("Workspace user", "Can save sources, ask questions, and review drafts without connector administration.", "local")}
+          {_owner_role_row("External provider", "No direct access from this local review page.", "0")}
         </div>
       </section>
       <section class="cs-panel">
@@ -5755,27 +5813,33 @@ def _owner_connector_rows(ctx: dict[str, Any]) -> str:
             "body": "Files and pasted text enter as preserved sources before any derived brief, claim, or action can rely on them.",
             "state": "Enabled",
             "chip": "saved",
+            "mark": "L",
             "access": "Read local input",
             "policy": "Preserve original",
             "activity": f"{artifact_count} saved",
+            "scope": "personal sources",
         },
         {
             "name": "Evidence and search index",
             "body": "Search and evidence bundles are scoped to the current local workspace and keep citations close to each result.",
             "state": "Enabled",
             "chip": "searchable",
+            "mark": "E",
             "access": "Read indexed sources",
             "policy": "Scope matched",
             "activity": f"{len(ctx['briefs']) + len(ctx['claims'])} linked drafts",
+            "scope": "workspace index",
         },
         {
             "name": "External writeback providers",
             "body": "Writeback-capable connectors stay locked behind dry-run previews, policy decisions, approval, and audit records.",
             "state": "Locked",
             "chip": "policyBlocked",
+            "mark": "X",
             "access": "No live write",
             "policy": "Approval required",
             "activity": f"{action_count} previews",
+            "scope": "locked providers",
         },
     ]
     return "".join(_owner_connector_card(row) for row in rows)
@@ -5784,15 +5848,16 @@ def _owner_connector_rows(ctx: dict[str, Any]) -> str:
 def _owner_connector_card(row: dict[str, str]) -> str:
     return f"""
 <article class="cs-connector-card">
-  <div>
-    <h3>{h(row["name"])}</h3>
-    <p>{h(row["body"])}</p>
-    <div class="cs-connector-meta">
-      <div><span class="cs-meta">Access</span><strong>{h(row["access"])}</strong></div>
-      <div><span class="cs-meta">Policy</span><strong>{h(row["policy"])}</strong></div>
-      <div><span class="cs-meta">Activity</span><strong>{h(row["activity"])}</strong></div>
+  <div class="cs-connector-source">
+    <div class="cs-connector-title">
+      <span class="cs-connector-icon" aria-hidden="true">{h(row["mark"])}</span>
+      <h3>{h(row["name"])}</h3>
     </div>
+    <p>{h(row["body"])}</p>
   </div>
+  <div class="cs-connector-cell"><span class="cs-meta">Access</span><strong>{h(row["access"])}</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Policy</span><strong>{h(row["policy"])}</strong></div>
+  <div class="cs-connector-cell"><span class="cs-meta">Scope</span><strong>{h(row["scope"])}</strong><span class="cs-muted">{h(row["activity"])}</span></div>
   <div class="cs-row">{_chip(row["state"], row["chip"])}</div>
 </article>
 """
@@ -5837,7 +5902,16 @@ def _owner_policy_row(label: str, detail: str, state: str, chip: str) -> str:
 """
 
 
-def _owner_role_row(label: str, detail: str) -> str:
+def _owner_scope_row(label: str, value: str) -> str:
+    return f"""
+<div class="cs-owner-scope-row">
+  <strong>{h(label)}</strong>
+  <span class="cs-muted">{h(value)}</span>
+</div>
+"""
+
+
+def _owner_role_row(label: str, detail: str, count: str) -> str:
     return f"""
 <div class="cs-stat-row">
   <span class="cs-stat-icon">{h(label[:1])}</span>
@@ -5845,7 +5919,7 @@ def _owner_role_row(label: str, detail: str) -> str:
     <strong>{h(label)}</strong>
     <div class="cs-meta">{h(detail)}</div>
   </div>
-  {_chip("Scoped", "searchable")}
+  {_chip(count, "searchable")}
 </div>
 """
 
