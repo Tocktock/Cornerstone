@@ -2006,11 +2006,71 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-3);
 }}
 .cs-brief-hero.is-stacked .cs-brief-actions {{ justify-content: flex-start; }}
+.cs-brief-workbench {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}}
+.cs-brief-workbench > *, .cs-brief-workbench .cs-stack, .cs-brief-titlebar, .cs-brief-titlebar > *, .cs-brief-heading-row {{
+  min-width: 0;
+  max-width: 100%;
+}}
+.cs-brief-titlebar {{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-brief-titlebar .cs-brief-actions {{
+  justify-content: flex-start;
+}}
+.cs-brief-breadcrumb {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  align-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  min-width: 0;
+}}
+.cs-brief-breadcrumb a {{
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-brief-breadcrumb span:last-child {{
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}}
+.cs-brief-heading-row {{
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+}}
+.cs-brief-titlebar h1 {{
+  margin: 0;
+  flex: 1 1 24rem;
+  min-width: 0;
+  max-width: 58ch;
+  font-size: 30px;
+  line-height: 1.16;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}}
+.cs-brief-titlebar p {{
+  max-width: 68ch;
+}}
 .cs-brief-fact-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  margin-bottom: var(--cs-space-4);
 }}
 .cs-brief-fact {{
   border: 1px solid var(--cs-color-border-default);
@@ -2985,7 +3045,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3004,6 +3064,21 @@ button, input, textarea {{ font: inherit; }}
   .cs-empty-actions .cs-button {{ justify-content: center; }}
   .cs-detail-actions {{ justify-content: flex-start; }}
   .cs-brief-actions {{ justify-content: flex-start; }}
+  .cs-brief-titlebar h1 {{ font-size: 26px; }}
+  .cs-brief-actions {{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }}
+  .cs-brief-actions .cs-button {{
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-action-actions {{ justify-content: flex-start; }}
   .cs-action-rail {{ position: static; }}
@@ -4950,25 +5025,21 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     finding_count = len(key_points) + len(findings)
     brief_title = _brief_title(brief)
     return f"""
-{_detail_orientation(
-    parent_href="/briefs",
-    parent_label="Brief workspace",
-    current_label=brief_title,
-    summary="Review findings, source coverage, and limits before using this brief for a decision.",
-    chip_label=label,
-    chip_state=state,
-    actions=[
-        ("Back to briefs", "/briefs", "secondary"),
-        ("Open audit trail", "/audit", "secondary"),
-    ],
-)}
-<section class="cs-grid-two" data-product-surface="brief-detail">
+<section class="cs-brief-workbench" data-product-surface="brief-detail" aria-label="Brief reading workspace">
   <div class="cs-stack">
-    <div class="cs-brief-hero is-stacked">
+    <header class="cs-brief-titlebar">
       <div class="cs-brief-title">
-        <div class="cs-kicker">Brief</div>
-        <h1>{h(brief_title)}</h1>
-        <p class="cs-muted">Read the answer, supporting sources, and limits together before using it for a decision.</p>
+        <nav class="cs-brief-breadcrumb" aria-label="Detail path">
+          <span class="cs-meta">Detail path</span>
+          <a href="/briefs">Brief workspace</a>
+          <span aria-hidden="true">/</span>
+          <span>{h(brief_title)}</span>
+        </nav>
+        <div class="cs-brief-heading-row">
+          <h1>{h(brief_title)}</h1>
+          {_chip(label, state)}
+        </div>
+        <p class="cs-muted">Read the answer, citation trail, and uncertainty together before using this brief for a decision.</p>
         <div class="cs-brief-meta">
           <span>{h(_display_date(brief))}</span>
           <span>{h(str(source_count))} visible source{"s" if source_count != 1 else ""}</span>
@@ -4976,17 +5047,21 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="cs-brief-actions">
-        {_chip(label, state)}
+        <a class="cs-button secondary" href="/briefs">Back to briefs</a>
         <a class="cs-button secondary" href="#citation-trail">Review sources</a>
-        <a class="cs-button secondary" href="/claims">Draft claim</a>
+        <a class="cs-button secondary" href="/audit">Open audit trail</a>
       </div>
-    </div>
+    </header>
     <div class="cs-brief-fact-strip" aria-label="Brief status">
       <div class="cs-brief-fact"><span class="cs-meta">State</span><strong>{h(label)}</strong></div>
       <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
       <div class="cs-brief-fact"><span class="cs-meta">Mode</span><strong>{h(mode)}</strong></div>
       <div class="cs-brief-fact"><span class="cs-meta">Created</span><strong>{h(_display_date(brief))}</strong></div>
     </div>
+    <section class="cs-panel flat">
+      <div class="cs-panel-header"><h2>Decision snapshot</h2>{_chip("Draft use", "draft")}</div>
+      <p class="cs-muted">This brief is usable as a reviewed draft only when the summary, findings, sources, and limits are read together.</p>
+    </section>
     <section class="cs-panel cs-summary-card">
       <div class="cs-panel-header">
         <div>
@@ -5009,26 +5084,30 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     </section>
     <div class="cs-brief-note-grid">
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Limits and gaps</h2>{_chip("Needs source check", "underReview")}</div>
+        <div class="cs-panel-header"><h2>What this brief cannot confirm</h2>{_chip("Needs source check", "underReview")}</div>
         <ul class="cs-brief-note-list">{gap_rows}</ul>
       </section>
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Next steps</h2>{_chip("Draft only", "draft")}</div>
+        <div class="cs-panel-header"><h2>Suggested next steps</h2>{_chip("Draft only", "draft")}</div>
         <ul class="cs-brief-note-list">{next_rows}</ul>
       </section>
     </div>
   </div>
   <aside class="cs-stack">
-    <section class="cs-panel flat" id="citation-trail">
-      <h2 class="cs-section-title">Citation trail</h2>
-      <p class="cs-muted">Open a source before promoting a finding.</p>
+    <nav class="cs-artifact-rail-tabs" aria-label="Brief detail tabs">
+      <span class="cs-artifact-rail-tab is-active">Sources</span>
+      <span class="cs-artifact-rail-tab">Provenance</span>
+    </nav>
+    <section class="cs-artifact-side-card" id="citation-trail">
+      <div class="cs-panel-header"><h2>Sources used</h2>{_chip(str(source_count), "searchable")}</div>
+      <p class="cs-muted">Citation trail. Open a source before promoting a finding.</p>
       {source_list}
     </section>
-    <section class="cs-panel flat">
+    <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Provenance</h2>
       {provenance}
     </section>
-    <section class="cs-panel flat">
+    <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Use this brief</h2>
       <div class="cs-review-box">
         <a class="cs-button" href="/claims">Draft claim from finding</a>

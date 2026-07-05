@@ -1499,11 +1499,71 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-3);
 }
 .cs-brief-hero.is-stacked .cs-brief-actions { justify-content: flex-start; }
+.cs-brief-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
+  gap: var(--cs-space-6);
+  align-items: start;
+}
+.cs-brief-workbench > *, .cs-brief-workbench .cs-stack, .cs-brief-titlebar, .cs-brief-titlebar > *, .cs-brief-heading-row {
+  min-width: 0;
+  max-width: 100%;
+}
+.cs-brief-titlebar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: start;
+  padding-bottom: var(--cs-space-4);
+  border-bottom: 1px solid var(--cs-color-border-default);
+  margin-bottom: var(--cs-space-4);
+}
+.cs-brief-titlebar .cs-brief-actions {
+  justify-content: flex-start;
+}
+.cs-brief-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  align-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  min-width: 0;
+}
+.cs-brief-breadcrumb a {
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-brief-breadcrumb span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cs-brief-heading-row {
+  display: flex;
+  align-items: center;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+}
+.cs-brief-titlebar h1 {
+  margin: 0;
+  flex: 1 1 24rem;
+  min-width: 0;
+  max-width: 58ch;
+  font-size: 30px;
+  line-height: 1.16;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+.cs-brief-titlebar p {
+  max-width: 68ch;
+}
 .cs-brief-fact-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
+  margin-bottom: var(--cs-space-4);
 }
 .cs-brief-fact {
   border: 1px solid var(--cs-color-border-default);
@@ -2478,7 +2538,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2497,6 +2557,21 @@ button, input, textarea { font: inherit; }
   .cs-empty-actions .cs-button { justify-content: center; }
   .cs-detail-actions { justify-content: flex-start; }
   .cs-brief-actions { justify-content: flex-start; }
+  .cs-brief-titlebar h1 { font-size: 26px; }
+  .cs-brief-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+  .cs-brief-actions .cs-button {
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-align: center;
+  }
   .cs-claim-actions { justify-content: flex-start; }
   .cs-action-actions { justify-content: flex-start; }
   .cs-action-rail { position: static; }
@@ -2617,7 +2692,7 @@ button, input, textarea { font: inherit; }
     </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>User Paste</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-04 23:50 UTC</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 00:00 UTC</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>text/plain</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>default</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
@@ -2650,7 +2725,7 @@ button, input, textarea { font: inherit; }
               <div class="cs-artifact-source-note">
                 <span>User Paste</span>
                 <span>/</span>
-                <span>2026-07-04 23:50 UTC</span>
+                <span>2026-07-05 00:00 UTC</span>
                 <span>/</span>
                 <span>Original content primary</span>
               </div>
@@ -2670,7 +2745,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row"><span class="cs-chip cs-chip-saved">Saved</span><span class="cs-chip cs-chip-underReview">Untrusted until checked</span></div>
       <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>2026-07-04 23:50 UTC</dd>
+        <dt>Saved</dt><dd>2026-07-05 00:00 UTC</dd>
         <dt>Source</dt><dd>User Paste</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
@@ -2685,22 +2760,22 @@ button, input, textarea { font: inherit; }
       <div class="cs-keyword-list"><div class="cs-keyword-row"><span>Renewal</span><span class="cs-chip cs-chip-searchable">4</span></div><div class="cs-keyword-row"><span>August</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Date</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Finance</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Flagged</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Note</span><span class="cs-chip cs-chip-searchable">2</span></div></div>
     </section>
     <section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_8f8f592d20cfb53b?view=html">
+<a class="cs-list-row" href="/briefs/brief_723f2e01d403ffe4?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-04 23:50 UTC</div>
+    <div class="cs-meta">2026-07-05 00:00 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_d35fcf79825e596b?view=html">
+<a class="cs-list-row" href="/claims/claim_636afa656ba71367?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-04 23:50 UTC</div>
+    <div class="cs-meta">2026-07-05 00:00 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
@@ -2709,7 +2784,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>User Paste</dd>
-        <dt>Ingested</dt><dd>2026-07-04 23:50 UTC</dd>
+        <dt>Ingested</dt><dd>2026-07-05 00:00 UTC</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
       <a class="cs-meta" href="/audit">Open audit trail</a>
