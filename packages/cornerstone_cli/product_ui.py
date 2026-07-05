@@ -1296,7 +1296,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  grid-template-columns: 44px minmax(0, 1fr) minmax(150px, 210px);
   gap: var(--cs-space-3);
   align-items: center;
 }}
@@ -1314,7 +1314,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-result-icon.is-source {{ background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }}
 .cs-result-icon.is-brief {{ background: var(--cs-state-underReview-bg); color: var(--cs-state-underReview-text); }}
-.cs-result-icon.is-claim {{ background: var(--cs-state-evidenceBacked-bg); color: var(--cs-state-evidenceBacked-text); }}
+.cs-result-icon.is-claim {{ background: var(--cs-state-searchable-bg); color: var(--cs-state-searchable-text); }}
 .cs-result-icon.is-action {{ background: var(--cs-state-draft-bg); color: var(--cs-state-draft-text); }}
 .cs-result-body {{ display: grid; gap: var(--cs-space-1); }}
 .cs-result-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
@@ -1322,13 +1322,21 @@ button, input, textarea {{ font: inherit; }}
 .cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible {{ color: var(--cs-color-primary-700); outline: none; }}
 .cs-result-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }}
 .cs-result-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-result-type {{
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
 .cs-result-support {{
-  display: grid;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--cs-space-2);
+  flex-wrap: wrap;
 }}
 .cs-result-support .cs-meta {{
   line-height: 1.35;
+  text-align: right;
+  max-width: 180px;
 }}
 .cs-result-actions {{
   display: flex;
@@ -4309,15 +4317,15 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
 <article class="cs-result-row">
   <span class="cs-result-icon {h(icon_class)}" aria-hidden="true">{h(icon)}</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
+    <span class="cs-result-meta"><span class="cs-result-type">{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
     <h3><a href="{h(href)}">{h(title)}</a></h3>
     <p>{h(_truncate(detail, 240))}</p>
   </span>
   <span class="cs-result-support">
     {_chip(label, state)}
-    <span class="cs-meta">Result receipt: local record and visible source context only.</span>
+    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="{h(href)}">Open result</a>
+      <a class="cs-button secondary" href="{h(href)}">Open receipt</a>
     </span>
   </span>
 </article>

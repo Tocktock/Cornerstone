@@ -717,7 +717,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  grid-template-columns: 44px minmax(0, 1fr) minmax(150px, 210px);
   gap: var(--cs-space-3);
   align-items: center;
 }
@@ -735,7 +735,7 @@ button, input, textarea { font: inherit; }
 }
 .cs-result-icon.is-source { background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }
 .cs-result-icon.is-brief { background: var(--cs-state-underReview-bg); color: var(--cs-state-underReview-text); }
-.cs-result-icon.is-claim { background: var(--cs-state-evidenceBacked-bg); color: var(--cs-state-evidenceBacked-text); }
+.cs-result-icon.is-claim { background: var(--cs-state-searchable-bg); color: var(--cs-state-searchable-text); }
 .cs-result-icon.is-action { background: var(--cs-state-draft-bg); color: var(--cs-state-draft-text); }
 .cs-result-body { display: grid; gap: var(--cs-space-1); }
 .cs-result-body h3 { margin: 0; font-size: 16px; line-height: 1.35; }
@@ -743,13 +743,21 @@ button, input, textarea { font: inherit; }
 .cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible { color: var(--cs-color-primary-700); outline: none; }
 .cs-result-body p { margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }
 .cs-result-meta { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-result-type {
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-result-support {
-  display: grid;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--cs-space-2);
+  flex-wrap: wrap;
 }
 .cs-result-support .cs-meta {
   line-height: 1.35;
+  text-align: right;
+  max-width: 180px;
 }
 .cs-result-actions {
   display: flex;
@@ -3206,7 +3214,7 @@ button, input, textarea { font: inherit; }
           <h1>Draft a vendor renewal follow-up</h1>
           <div class="cs-brief-meta">
             <span>Dry-run first</span>
-            <span>2026-07-05 03:23 UTC</span>
+            <span>2026-07-05 03:29 UTC</span>
             <span>No external send yet</span>
           </div>
           <p class="cs-muted">Preview impact, policy, and approval history before any external step.</p>
@@ -3460,7 +3468,7 @@ button, input, textarea { font: inherit; }
   </div>
   <div class="cs-provenance" aria-label="Full provenance">
     <dl class="cs-detail-grid">
-      <dt>Saved</dt><dd>2026-07-05 03:23 UTC</dd>
+      <dt>Saved</dt><dd>2026-07-05 03:29 UTC</dd>
       <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
     </dl>
   </div>

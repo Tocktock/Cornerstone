@@ -717,7 +717,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  grid-template-columns: 44px minmax(0, 1fr) minmax(150px, 210px);
   gap: var(--cs-space-3);
   align-items: center;
 }
@@ -735,7 +735,7 @@ button, input, textarea { font: inherit; }
 }
 .cs-result-icon.is-source { background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }
 .cs-result-icon.is-brief { background: var(--cs-state-underReview-bg); color: var(--cs-state-underReview-text); }
-.cs-result-icon.is-claim { background: var(--cs-state-evidenceBacked-bg); color: var(--cs-state-evidenceBacked-text); }
+.cs-result-icon.is-claim { background: var(--cs-state-searchable-bg); color: var(--cs-state-searchable-text); }
 .cs-result-icon.is-action { background: var(--cs-state-draft-bg); color: var(--cs-state-draft-text); }
 .cs-result-body { display: grid; gap: var(--cs-space-1); }
 .cs-result-body h3 { margin: 0; font-size: 16px; line-height: 1.35; }
@@ -743,13 +743,21 @@ button, input, textarea { font: inherit; }
 .cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible { color: var(--cs-color-primary-700); outline: none; }
 .cs-result-body p { margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }
 .cs-result-meta { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-result-type {
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-result-support {
-  display: grid;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--cs-space-2);
+  flex-wrap: wrap;
 }
 .cs-result-support .cs-meta {
   line-height: 1.35;
+  text-align: right;
+  max-width: 180px;
 }
 .cs-result-actions {
   display: flex;
@@ -3237,15 +3245,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-source" aria-hidden="true">TXT</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>Source</span><span>2026-07-05 03:23 UTC</span><span>Keyword match</span></span>
+    <span class="cs-result-meta"><span class="cs-result-type">Source</span><span>2026-07-05 03:29 UTC</span><span>Keyword match</span></span>
     <h3><a href="/artifacts/art_ede571327ab3ec20?view=html">Vendor renewal note: the renewal date is August 1, finance flagged a pr...</a></h3>
     <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support, and the decision owner needs a brief before any follow-up.</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-searchable">Searchable</span>
-    <span class="cs-meta">Result receipt: local record and visible source context only.</span>
+    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/artifacts/art_ede571327ab3ec20?view=html">Open result</a>
+      <a class="cs-button secondary" href="/artifacts/art_ede571327ab3ec20?view=html">Open receipt</a>
     </span>
   </span>
 </article>
@@ -3253,15 +3261,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-brief" aria-hidden="true">BRF</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>Brief</span><span>2026-07-05 03:23 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/briefs/brief_4d8008cafd90dcc7?view=html">Brief for vendor renewal</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Brief</span><span>2026-07-05 03:29 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/briefs/brief_91734d8f3687f5a9?view=html">Brief for vendor renewal</a></h3>
     <p>Brief draft</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
-    <span class="cs-meta">Result receipt: local record and visible source context only.</span>
+    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/briefs/brief_4d8008cafd90dcc7?view=html">Open result</a>
+      <a class="cs-button secondary" href="/briefs/brief_91734d8f3687f5a9?view=html">Open receipt</a>
     </span>
   </span>
 </article>
@@ -3269,15 +3277,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-claim" aria-hidden="true">CLM</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>Claim</span><span>2026-07-05 03:23 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/claims/claim_a2f505a747456af1?view=html">Vendor renewal needs a decision before the August 1 renewal date.</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Claim</span><span>2026-07-05 03:29 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/claims/claim_4a40af16dd0676a3?view=html">Vendor renewal needs a decision before the August 1 renewal date.</a></h3>
     <p>Claim draft with linked evidence.</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-searchable">Source support</span>
-    <span class="cs-meta">Result receipt: local record and visible source context only.</span>
+    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/claims/claim_a2f505a747456af1?view=html">Open result</a>
+      <a class="cs-button secondary" href="/claims/claim_4a40af16dd0676a3?view=html">Open receipt</a>
     </span>
   </span>
 </article>
@@ -3285,15 +3293,15 @@ button, input, textarea { font: inherit; }
 <article class="cs-result-row">
   <span class="cs-result-icon is-action" aria-hidden="true">ACT</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span>Action</span><span>2026-07-05 03:23 UTC</span><span>Keyword match</span></span>
-    <h3><a href="/actions/action_1c2ed25b11e515b3?view=html">Draft a vendor renewal follow-up</a></h3>
+    <span class="cs-result-meta"><span class="cs-result-type">Action</span><span>2026-07-05 03:29 UTC</span><span>Keyword match</span></span>
+    <h3><a href="/actions/action_86c1f9308a6ba7e4?view=html">Draft a vendor renewal follow-up</a></h3>
     <p>Draft a vendor renewal follow-up</p>
   </span>
   <span class="cs-result-support">
     <span class="cs-chip cs-chip-underReview">Needs approval</span>
-    <span class="cs-meta">Result receipt: local record and visible source context only.</span>
+    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="/actions/action_1c2ed25b11e515b3?view=html">Open result</a>
+      <a class="cs-button secondary" href="/actions/action_86c1f9308a6ba7e4?view=html">Open receipt</a>
     </span>
   </span>
 </article>

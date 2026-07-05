@@ -10,9 +10,9 @@
   },
   "chrome_timeout_after_screenshot": false,
   "clean_browser_exit": true,
-  "created_at": "2026-07-05T03:24:42.132356Z",
+  "created_at": "2026-07-05T03:30:55.748966Z",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.dom.html",
-  "dom_sha256": "e262fbb5e8737fe86d0a795421722091fcd569e20252af0c79469f1d2adf8cf9",
+  "dom_sha256": "4969bf44a215c423a2c1534b679258fb49bd40663ffc58a571a06b520f27456e",
   "errors": [],
   "product_markers": {
     "product_shell_present": true,
@@ -54,13 +54,13 @@
     }
   },
   "schema_version": "cs.browser_proof.v0",
-  "screenshot_bytes": 231878,
+  "screenshot_bytes": 230976,
   "screenshot_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence/base/home.png",
-  "screenshot_sha256": "dea2cf1618ea76f85fb0001373df7f4869cfb659d446630b3c54c89569bb81f4",
+  "screenshot_sha256": "db15bb19c5a0001ad936308f53472c40e13c3739bfbd37831933dd4634966c54",
   "status": "passed",
   "stderr_tail": {
     "screenshot": [
-      "DevTools listening on ws://127.0.0.1:51990/devtools/browser/544e6abb-c677-45a7-976f-a7a2adf51c82"
+      "DevTools listening on ws://127.0.0.1:53123/devtools/browser/43d62945-d025-49d3-8f89-9c126be57fa3"
     ]
   },
   "surface_presence": {
@@ -72,5 +72,5 @@
     "Home/Ops Inbox": false,
     "Search": true
   },
-  "url": "http://127.0.0.1:51989/"
+  "url": "http://127.0.0.1:53122/"
 }

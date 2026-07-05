@@ -717,7 +717,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  grid-template-columns: 44px minmax(0, 1fr) minmax(150px, 210px);
   gap: var(--cs-space-3);
   align-items: center;
 }
@@ -735,7 +735,7 @@ button, input, textarea { font: inherit; }
 }
 .cs-result-icon.is-source { background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }
 .cs-result-icon.is-brief { background: var(--cs-state-underReview-bg); color: var(--cs-state-underReview-text); }
-.cs-result-icon.is-claim { background: var(--cs-state-evidenceBacked-bg); color: var(--cs-state-evidenceBacked-text); }
+.cs-result-icon.is-claim { background: var(--cs-state-searchable-bg); color: var(--cs-state-searchable-text); }
 .cs-result-icon.is-action { background: var(--cs-state-draft-bg); color: var(--cs-state-draft-text); }
 .cs-result-body { display: grid; gap: var(--cs-space-1); }
 .cs-result-body h3 { margin: 0; font-size: 16px; line-height: 1.35; }
@@ -743,13 +743,21 @@ button, input, textarea { font: inherit; }
 .cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible { color: var(--cs-color-primary-700); outline: none; }
 .cs-result-body p { margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }
 .cs-result-meta { display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
+.cs-result-type {
+  color: var(--cs-color-text-secondary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-result-support {
-  display: grid;
-  justify-items: start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   gap: var(--cs-space-2);
+  flex-wrap: wrap;
 }
 .cs-result-support .cs-meta {
   line-height: 1.35;
+  text-align: right;
+  max-width: 180px;
 }
 .cs-result-actions {
   display: flex;
@@ -3217,7 +3225,7 @@ button, input, textarea { font: inherit; }
     </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>User Paste</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 03:23 UTC</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 03:29 UTC</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>text/plain</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>default</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
@@ -3271,7 +3279,7 @@ button, input, textarea { font: inherit; }
               <div class="cs-artifact-source-note">
                 <span>User Paste</span>
                 <span>/</span>
-                <span>2026-07-05 03:23 UTC</span>
+                <span>2026-07-05 03:29 UTC</span>
                 <span>/</span>
                 <span>Original content primary</span>
               </div>
@@ -3291,7 +3299,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row"><span class="cs-chip cs-chip-saved">Saved</span><span class="cs-chip cs-chip-underReview">Untrusted until checked</span></div>
       <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>2026-07-05 03:23 UTC</dd>
+        <dt>Saved</dt><dd>2026-07-05 03:29 UTC</dd>
         <dt>Source</dt><dd>User Paste</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
@@ -3315,22 +3323,22 @@ button, input, textarea { font: inherit; }
       <div class="cs-keyword-list"><div class="cs-keyword-row"><span>Renewal</span><span class="cs-chip cs-chip-searchable">4</span></div><div class="cs-keyword-row"><span>August</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Date</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Finance</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Flagged</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Note</span><span class="cs-chip cs-chip-searchable">2</span></div></div>
     </section>
     <section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_4d8008cafd90dcc7?view=html">
+<a class="cs-list-row" href="/briefs/brief_91734d8f3687f5a9?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 03:23 UTC</div>
+    <div class="cs-meta">2026-07-05 03:29 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_a2f505a747456af1?view=html">
+<a class="cs-list-row" href="/claims/claim_4a40af16dd0676a3?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 03:23 UTC</div>
+    <div class="cs-meta">2026-07-05 03:29 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-searchable">Source support</span></div>
 </a>
@@ -3339,7 +3347,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>User Paste</dd>
-        <dt>Ingested</dt><dd>2026-07-05 03:23 UTC</dd>
+        <dt>Ingested</dt><dd>2026-07-05 03:29 UTC</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
       <a class="cs-meta" href="/audit">Open audit trail</a>
