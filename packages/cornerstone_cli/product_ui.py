@@ -839,7 +839,7 @@ button, input, textarea {{ font: inherit; }}
   width: 34px;
   height: 34px;
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   background: var(--cs-color-surface-primary);
   color: var(--cs-color-text-secondary);
   display: grid;
@@ -849,7 +849,7 @@ button, input, textarea {{ font: inherit; }}
 .cs-avatar {{
   min-width: 36px;
   height: 36px;
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   background: var(--cs-color-surface-subtle);
   border: 1px solid var(--cs-color-border-default);
   display: grid;
@@ -1676,7 +1676,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-inbox-summary-pill {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   background: var(--cs-color-surface-primary);
   padding: 4px var(--cs-space-2);
   display: inline-flex;
@@ -1949,42 +1949,51 @@ button, input, textarea {{ font: inherit; }}
 .cs-queue-focus {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.92), rgba(247,249,246,.86));
-  padding: var(--cs-space-4);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
   display: grid;
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  gap: var(--cs-space-2);
+  margin-bottom: var(--cs-space-3);
 }}
 .cs-queue-focus-head {{
   display: flex;
   justify-content: space-between;
   gap: var(--cs-space-3);
   flex-wrap: wrap;
-  align-items: start;
+  align-items: center;
 }}
 .cs-queue-focus h2 {{
   margin: 0;
   font-size: 17px;
   line-height: 1.35;
 }}
-.cs-queue-focus p {{ margin: 2px 0 0; color: var(--cs-color-text-secondary); max-width: 76ch; }}
+.cs-queue-focus p {{
+  margin: 2px 0 0;
+  color: var(--cs-color-text-secondary);
+  max-width: 72ch;
+}}
 .cs-queue-lanes {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  padding-top: var(--cs-space-2);
+  border-top: 1px solid var(--cs-color-border-default);
 }}
 .cs-queue-lane {{
   border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
+  border-radius: var(--cs-radius-pill);
+  background: var(--cs-color-surface-subtle);
+  padding: 4px var(--cs-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-secondary);
 }}
 .cs-queue-lane strong {{
-  font-size: 20px;
-  line-height: 1.2;
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-body-fontSize);
   font-variant-numeric: tabular-nums;
 }}
 .cs-queue-lane span {{
@@ -2446,7 +2455,7 @@ button, input, textarea {{ font: inherit; }}
   content: "";
   width: 10px;
   height: 10px;
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   border: 2px solid var(--cs-color-border-strong);
   background: var(--cs-color-surface-primary);
 }}
@@ -2565,7 +2574,7 @@ button, input, textarea {{ font: inherit; }}
 .cs-claim-dot {{
   width: 16px;
   height: 16px;
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   border: 2px solid var(--cs-color-border-strong);
   background: var(--cs-color-surface-primary);
 }}
@@ -2704,7 +2713,7 @@ button, input, textarea {{ font: inherit; }}
   content: "";
   width: 8px;
   height: 8px;
-  border-radius: var(--cs-radius-full);
+  border-radius: var(--cs-radius-pill);
   background: var(--cs-state-evidenceBacked-fg);
 }}
 .cs-claim-control-list {{
@@ -3174,7 +3183,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-timeline {{ display: grid; gap: var(--cs-space-3); }}
 .cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
-.cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-full); background: var(--cs-color-evidence-600); }}
+.cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-pill); background: var(--cs-color-evidence-600); }}
 .cs-audit-workbench {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
@@ -4332,6 +4341,7 @@ def _collection_toolbar(label: str, count: int, filters: list[str]) -> str:
 
 
 def _queue_focus(title: str, detail: str, lanes: list[tuple[str, int | str, str, str]]) -> str:
+    total = sum(int(value) for _, value, _, _ in lanes if isinstance(value, int))
     lane_cards = "".join(
         f"""
 <span class="cs-queue-lane">
@@ -4353,7 +4363,10 @@ def _queue_focus(title: str, detail: str, lanes: list[tuple[str, int | str, str,
     </div>
     <div class="cs-row">{lane_chips}</div>
   </div>
-  <div class="cs-queue-lanes" aria-label="Review lanes">{lane_cards}</div>
+  <div class="cs-queue-lanes" aria-label="Review lanes">
+    <span class="cs-meta"><strong>{h(total)}</strong> visible queue item{"s" if total != 1 else ""}</span>
+    <span class="cs-row">{lane_cards}</span>
+  </div>
 </section>
 """
 
