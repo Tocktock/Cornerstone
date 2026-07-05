@@ -417,6 +417,29 @@ def _audit_receipt_card(label: str, value: int | str, detail: str) -> str:
 """
 
 
+def _audit_status_card(label: str, value: str, detail: str) -> str:
+    return f"""
+<div class="cs-audit-status-card">
+  <span class="cs-meta">{h(label)}</span>
+  <strong>{h(value)}</strong>
+  <span class="cs-meta">{h(detail)}</span>
+</div>
+"""
+
+
+def _audit_lifecycle_card(title: str, count: int, detail: str, state: str) -> str:
+    return f"""
+<div class="cs-audit-lane">
+  <div class="cs-audit-lane-head">
+    <strong>{h(title)}</strong>
+    <span class="cs-audit-lane-count">{h(str(count))}</span>
+  </div>
+  <p>{h(detail)}</p>
+  {_chip("Present" if count else "Waiting", state)}
+</div>
+"""
+
+
 def _audit_detail(event: dict[str, Any], position: int) -> str:
     subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
     details = event.get("details") if isinstance(event.get("details"), dict) else {}
@@ -2872,6 +2895,52 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-5);
   align-items: start;
 }}
+.cs-audit-hero {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
+  padding: var(--cs-space-6);
+  margin-bottom: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--cs-space-5);
+  align-items: end;
+}}
+.cs-audit-hero h1 {{
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.12;
+  text-wrap: balance;
+}}
+.cs-audit-hero p {{
+  max-width: 72ch;
+  text-wrap: pretty;
+}}
+.cs-audit-actions {{
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cs-space-2);
+  justify-content: flex-end;
+}}
+.cs-audit-status-strip {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-audit-status-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+  min-width: 0;
+}}
+.cs-audit-status-card strong {{
+  overflow-wrap: anywhere;
+}}
 .cs-audit-summary {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2890,6 +2959,38 @@ button, input, textarea {{ font: inherit; }}
   font-size: 24px;
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
+}}
+.cs-audit-lifecycle {{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-5);
+}}
+.cs-audit-lane {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 78%, var(--cs-color-surface-subtle));
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-audit-lane-head {{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--cs-space-2);
+}}
+.cs-audit-lane-count {{
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--cs-typography-weight-bold);
+  color: var(--cs-color-primary-700);
+}}
+.cs-audit-lane p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
 }}
 .cs-audit-list {{
   display: grid;
@@ -2912,6 +3013,18 @@ button, input, textarea {{ font: inherit; }}
   grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--cs-space-3);
   align-items: start;
+}}
+.cs-audit-row-top {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+}}
+.cs-audit-row-position {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }}
 .cs-audit-icon {{
   width: 36px;
@@ -2940,6 +3053,17 @@ button, input, textarea {{ font: inherit; }}
   margin: var(--cs-space-2) 0 0;
   max-width: 64ch;
   color: var(--cs-color-text-secondary);
+}}
+.cs-audit-side-list {{
+  display: grid;
+  gap: var(--cs-space-3);
+  margin-top: var(--cs-space-3);
+}}
+.cs-audit-side-item {{
+  border-left: 1px solid var(--cs-color-border-default);
+  padding-left: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
 }}
 .cs-audit-detail {{
   border-top: 1px solid var(--cs-color-border-default);
@@ -3045,7 +3169,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-workbench, .cs-audit-summary, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3082,6 +3206,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-claim-actions {{ justify-content: flex-start; }}
   .cs-action-actions {{ justify-content: flex-start; }}
   .cs-action-rail {{ position: static; }}
+  .cs-audit-actions {{ justify-content: flex-start; }}
   .cs-admin-stack {{ position: static; }}
   .cs-claim-progress::before {{ display: none; }}
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
@@ -3127,6 +3252,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-result-receipt, .cs-result-support {{ justify-items: start; text-align: left; }}
   .cs-audit-row-main {{ grid-template-columns: auto minmax(0, 1fr); }}
   .cs-audit-row-main .cs-chip {{ justify-self: start; }}
+  .cs-audit-row-top {{ align-items: flex-start; flex-direction: column; gap: var(--cs-space-1); }}
   .cs-document-page {{ min-height: auto; }}
   .cs-list-row {{ grid-template-columns: 1fr; }}
   .cs-detail-grid {{ grid-template-columns: 1fr; }}
@@ -4344,11 +4470,21 @@ def _audit_page(ctx: dict[str, Any]) -> str:
     visible_count = min(event_count, 40)
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
     workspace = str(scope.get("workspace_id") or "default")
+    owner = str(scope.get("owner_id") or "local-user")
     source_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Source")
     evidence_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Evidence")
     decision_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Decision")
     action_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Action")
     latest_activity = _display_date(events[0]) if events else "No activity yet"
+    first_activity = _display_date(events[-1]) if events else "No activity yet"
+    audit_status = f"""
+<div class="cs-audit-status-strip" aria-label="Audit status">
+  {_audit_status_card("Latest receipt", latest_activity, "Newest local event")}
+  {_audit_status_card("Scope", workspace, f"Owner: {owner}")}
+  {_audit_status_card("Chain status", "Hash chained" if events else "Ready", "Event hash and previous hash retained")}
+  {_audit_status_card("Disclosure", "Raw detail on demand", "Readable first, raw detail behind each row")}
+</div>
+"""
     receipt_summary = f"""
 <div class="cs-audit-summary" aria-label="Receipt summary">
   {_audit_receipt_card("Activity receipts", visible_count, f"{event_count} total scoped records")}
@@ -4356,6 +4492,14 @@ def _audit_page(ctx: dict[str, Any]) -> str:
   {_audit_receipt_card("Evidence receipts", evidence_count, "Search, evidence, and brief work")}
   {_audit_receipt_card("Action receipts", action_count, "Preview, approval, or execution records")}
 </div>
+"""
+    lifecycle = f"""
+<section class="cs-audit-lifecycle" aria-label="Audit lifecycle">
+  {_audit_lifecycle_card("Source saved", source_count, "Original inputs and source opens start the chain.", "searchable" if source_count else "draft")}
+  {_audit_lifecycle_card("Evidence bundle prepared", evidence_count, "Search, bundle, and brief receipts show source-backed work.", "evidenceBacked" if evidence_count else "draft")}
+  {_audit_lifecycle_card("Decision recorded", decision_count, "Claims, workspace mode, and mission events explain decisions.", "underReview" if decision_count else "draft")}
+  {_audit_lifecycle_card("Action proposed", action_count, "Action drafts stay inspectable before execution.", "underReview" if action_count else "draft")}
+</section>
 """
     if not ctx["audit"]:
         rows = _empty_state(
@@ -4380,12 +4524,16 @@ def _audit_page(ctx: dict[str, Any]) -> str:
   <div class="cs-audit-row-main">
     <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(event.get("event_type") or "")))}</span>
     <div>
-      <h2>{h(_plain_event(str(event.get("event_type") or "")))}</h2>
-      <p class="cs-audit-row-note">Activity receipt for {h(_audit_subject_label(event))}.</p>
+      <div class="cs-audit-row-top">
+        <h2>{h(_plain_event(str(event.get("event_type") or "")))}</h2>
+        <span class="cs-audit-row-position">Receipt {index} of {visible_count}</span>
+      </div>
+      <p class="cs-audit-row-note">Readable receipt for {h(_audit_subject_label(event))}. Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>{h(_audit_family(str(event.get("event_type") or "")))}</span>
         <span>{h(_display_date(event))}</span>
         <span>Ledger position {index}</span>
+        <span>{h(str(event.get("workspace_id") or workspace))}</span>
       </div>
     </div>
     {_chip("Hash chained", "searchable")}
@@ -4398,29 +4546,34 @@ def _audit_page(ctx: dict[str, Any]) -> str:
         rows = f'<div class="cs-audit-list">{rows}</div>'
     return f"""
 <section data-product-surface="audit">
-  <header class="cs-brief-hero is-stacked">
+  <header class="cs-audit-hero" aria-label="Audit receipt workspace">
     <div class="cs-brief-title">
       <div class="cs-kicker">Audit</div>
       <h1>Activity trail</h1>
-      <p>Recent local activity is shown as readable receipts first. Raw event detail stays one click deeper for provenance checks.</p>
+      <p>Follow source, evidence, decision, and action receipts in one inspectable local ledger. The page reads like a product history first; raw event detail stays available for provenance checks.</p>
       <div class="cs-brief-meta">
         <span>Workspace: {h(workspace)}</span>
         <span>Latest: {h(latest_activity)}</span>
+        <span>First receipt: {h(first_activity)}</span>
         <span>Reading order: newest first</span>
       </div>
     </div>
-    <div class="cs-brief-actions">
+    <div class="cs-audit-actions">
       {_chip("Local ledger", "searchable")}
-      {_chip("Raw detail hidden by default", "underReview")}
+      {_chip("Readable receipts", "evidenceBacked")}
+      <a class="cs-button secondary" href="/artifacts">Open source register</a>
+      <a class="cs-button secondary" href="/">Back to Home</a>
     </div>
   </header>
+  {audit_status}
   {receipt_summary}
+  {lifecycle}
   <div class="cs-audit-workbench">
     <section class="cs-panel flat">
       <div class="cs-panel-header">
         <div>
-          <h2>Event stream</h2>
-          <p class="cs-muted">Showing {visible_count} of {event_count} scoped records as activity receipts.</p>
+          <h2>Activity receipts</h2>
+          <p class="cs-muted">Event stream. Showing {visible_count} of {event_count} scoped records as readable receipts.</p>
         </div>
         {_chip("Local ledger", "searchable")}
       </div>
@@ -4440,6 +4593,11 @@ def _audit_page(ctx: dict[str, Any]) -> str:
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Integrity chain</h2>
         <p class="cs-muted">Each row keeps its event hash, previous hash, subject, event type, and ledger position behind Raw event detail.</p>
+        <div class="cs-audit-side-list" aria-label="Audit integrity checks">
+          <div class="cs-audit-side-item"><strong>Hash chained</strong><span class="cs-muted">Event hash and previous hash stay inspectable per receipt.</span></div>
+          <div class="cs-audit-side-item"><strong>Scoped ledger</strong><span class="cs-muted">Receipts are shown for the current local workspace.</span></div>
+          <div class="cs-audit-side-item"><strong>Readable first</strong><span class="cs-muted">Plain labels stay above raw fields.</span></div>
+        </div>
       </section>
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Scope and recovery</h2>
