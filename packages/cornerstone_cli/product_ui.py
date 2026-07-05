@@ -2967,6 +2967,54 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-1);
 }}
 .cs-action-review-card strong {{ font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
+.cs-action-receipt-panel {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 46%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-4);
+}}
+.cs-action-receipt-grid {{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-action-receipt-card {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 90%, white);
+  padding: var(--cs-space-3);
+  display: grid;
+  align-content: start;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-action-receipt-card strong {{
+  color: var(--cs-color-text-primary);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}}
+.cs-action-receipt-card p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
+}}
+.cs-action-mini-diff {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  overflow: hidden;
+  display: grid;
+}}
+.cs-action-mini-diff div {{
+  display: grid;
+  gap: var(--cs-space-1);
+  padding: var(--cs-space-2);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-action-mini-diff div:last-child {{ border-bottom: 0; }}
 .cs-action-route-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3565,7 +3613,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -6132,7 +6180,9 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     source_list = _source_links_from_items(source_items)
     policy = action.get("policy_decision") if isinstance(action.get("policy_decision"), dict) else dry_run.get("policy_decision") if isinstance(dry_run.get("policy_decision"), dict) else {}
     decision_label = _plain_policy_decision(str(policy.get("decision") or ""))
-    call_label = "Simulated in local mode" if int(impact.get("real_external_http_calls", 0) or 0) == 0 else "External write planned"
+    real_external_calls = int(impact.get("real_external_http_calls", 0) or 0)
+    expected_connector_calls = int(impact.get("expected_connector_calls", 0) or 0)
+    call_label = "Simulated in local mode" if real_external_calls == 0 else "Provider send planned"
     connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
     connector_label = "Mediated preview" if connector.get("direct_provider_access") is False else "Provider access needs review"
     approval = action.get("approval") if isinstance(action.get("approval"), dict) else {}
@@ -6146,7 +6196,13 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     reason = _plain_runtime_text(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
     policy_reason = _plain_runtime_text(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk.")
     return f"""
-<section class="cs-grid-two cs-action-workbench" data-product-surface="action-detail">
+<section
+  class="cs-grid-two cs-action-workbench"
+  data-product-surface="action-detail"
+  data-approval-required="{str(approval_required).lower()}"
+  data-real-external-http-calls="{h(real_external_calls)}"
+  data-expected-connector-calls="{h(expected_connector_calls)}"
+>
   <div class="cs-stack">
     <header class="cs-action-hero">
       <nav class="cs-action-breadcrumb" aria-label="Detail path">
@@ -6178,6 +6234,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <a class="cs-button" href="/inbox">Request approval</a>
       </div>
     </header>
+    {_action_approval_receipt(goal, diff, target, decision_label, approval_label, approval_status, risk_label, call_label, expected_connector_calls, real_external_calls, policy_reason)}
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
@@ -6276,6 +6333,64 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       <p class="cs-muted">Dry-run, policy, approval, and execution records remain inspectable before this action can become a workflow result.</p>
     </section>
   </aside>
+</section>
+"""
+
+
+def _action_approval_receipt(
+    goal: str,
+    diff: dict[str, Any],
+    target: str,
+    decision_label: str,
+    approval_label: str,
+    approval_status: str,
+    risk_label: str,
+    call_label: str,
+    expected_connector_calls: int,
+    real_external_calls: int,
+    policy_reason: str,
+) -> str:
+    before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
+    after = _plain_runtime_text(diff.get("after") or "No provider send has been performed.")
+    call_note = (
+        "No provider send has run in this local workspace."
+        if real_external_calls == 0
+        else "A provider send still requires the approval record and audit trail."
+    )
+    return f"""
+<section class="cs-action-receipt-panel" aria-label="Dry-run approval receipt">
+  <div class="cs-panel-header">
+    <div>
+      <h2>Dry-run approval receipt</h2>
+      <p class="cs-muted">Preview only. Impact, proposed change, provider call plan, policy, and approval gate are visible before execution.</p>
+    </div>
+    {_chip("Dry-run", "draft")}
+  </div>
+  <div class="cs-action-receipt-grid">
+    <div class="cs-action-receipt-card">
+      <span class="cs-meta">Proposed change</span>
+      <strong>{h(goal)}</strong>
+      <p>Target: {h(target)}</p>
+    </div>
+    <div class="cs-action-receipt-card">
+      <span class="cs-meta">Proposed change preview</span>
+      <div class="cs-action-mini-diff">
+        <div><span class="cs-meta">Before</span><strong>{h(before)}</strong></div>
+        <div><span class="cs-meta">After</span><strong>{h(after)}</strong></div>
+      </div>
+    </div>
+    <div class="cs-action-receipt-card">
+      <span class="cs-meta">External call plan</span>
+      <strong>{h(expected_connector_calls)} connector call{"s" if expected_connector_calls != 1 else ""}</strong>
+      <p>{h(call_label)}. {h(call_note)}</p>
+    </div>
+    <div class="cs-action-receipt-card">
+      <span class="cs-meta">Approval gate</span>
+      <strong>{h(approval_label)}</strong>
+      <p>{h(risk_label)} risk / {h(approval_status)}. Policy: {h(decision_label)}.</p>
+    </div>
+  </div>
+  <p class="cs-muted">Policy reason: {h(policy_reason)}</p>
 </section>
 """
 

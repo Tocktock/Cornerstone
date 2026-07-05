@@ -2396,6 +2396,54 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-1);
 }
 .cs-action-review-card strong { font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }
+.cs-action-receipt-panel {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 46%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-4);
+}
+.cs-action-receipt-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}
+.cs-action-receipt-card {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 90%, white);
+  padding: var(--cs-space-3);
+  display: grid;
+  align-content: start;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}
+.cs-action-receipt-card strong {
+  color: var(--cs-color-text-primary);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.cs-action-receipt-card p {
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+.cs-action-mini-diff {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  overflow: hidden;
+  display: grid;
+}
+.cs-action-mini-diff div {
+  display: grid;
+  gap: var(--cs-space-1);
+  padding: var(--cs-space-2);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}
+.cs-action-mini-diff div:last-child { border-bottom: 0; }
 .cs-action-route-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -2994,7 +3042,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar-actions { justify-content: flex-start; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -3169,7 +3217,7 @@ button, input, textarea { font: inherit; }
     </header>
     <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
       <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>User Paste</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 02:58 UTC</strong></div>
+      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>2026-07-05 03:15 UTC</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>text/plain</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>default</strong></div>
       <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
@@ -3223,7 +3271,7 @@ button, input, textarea { font: inherit; }
               <div class="cs-artifact-source-note">
                 <span>User Paste</span>
                 <span>/</span>
-                <span>2026-07-05 02:58 UTC</span>
+                <span>2026-07-05 03:15 UTC</span>
                 <span>/</span>
                 <span>Original content primary</span>
               </div>
@@ -3243,7 +3291,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Source state</h2>
       <div class="cs-row"><span class="cs-chip cs-chip-saved">Saved</span><span class="cs-chip cs-chip-underReview">Untrusted until checked</span></div>
       <dl class="cs-detail-grid">
-        <dt>Saved</dt><dd>2026-07-05 02:58 UTC</dd>
+        <dt>Saved</dt><dd>2026-07-05 03:15 UTC</dd>
         <dt>Source</dt><dd>User Paste</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
@@ -3267,22 +3315,22 @@ button, input, textarea { font: inherit; }
       <div class="cs-keyword-list"><div class="cs-keyword-row"><span>Renewal</span><span class="cs-chip cs-chip-searchable">4</span></div><div class="cs-keyword-row"><span>August</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Date</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Finance</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Flagged</span><span class="cs-chip cs-chip-searchable">2</span></div><div class="cs-keyword-row"><span>Note</span><span class="cs-chip cs-chip-searchable">2</span></div></div>
     </section>
     <section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_b844e70b257ea3e4?view=html">
+<a class="cs-list-row" href="/briefs/brief_7f0d6b89a471252b?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 02:58 UTC</div>
+    <div class="cs-meta">2026-07-05 03:15 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_b85753f142894e88?view=html">
+<a class="cs-list-row" href="/claims/claim_7d4b47ce097b3380?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>Vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Uses this source.</p>
-    <div class="cs-meta">2026-07-05 02:58 UTC</div>
+    <div class="cs-meta">2026-07-05 03:15 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
@@ -3291,7 +3339,7 @@ button, input, textarea { font: inherit; }
       <h2 class="cs-section-title">Provenance</h2>
       <dl class="cs-detail-grid">
         <dt>Ingested from</dt><dd>User Paste</dd>
-        <dt>Ingested</dt><dd>2026-07-05 02:58 UTC</dd>
+        <dt>Ingested</dt><dd>2026-07-05 03:15 UTC</dd>
         <dt>Fingerprint</dt><dd>ede571327ab3...</dd>
       </dl>
       <a class="cs-meta" href="/audit">Open audit trail</a>
