@@ -1851,7 +1851,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-subtle);
 }}
 .cs-empty-state {{
-  border: 1px dashed var(--cs-color-border-strong);
+  border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
   background:
     linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
@@ -1859,6 +1859,7 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-4);
   color: var(--cs-color-text-primary);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
 }}
 .cs-empty-state-main {{
   display: grid;
@@ -1909,6 +1910,39 @@ button, input, textarea {{ font: inherit; }}
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
+}}
+.cs-empty-briefing {{
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: var(--cs-space-4);
+  align-items: start;
+}}
+.cs-empty-briefing h3 {{
+  margin: 0 0 var(--cs-space-2);
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}}
+.cs-empty-receipts {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-empty-receipt {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}}
+.cs-empty-receipt strong {{
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
+}}
+.cs-empty-receipt span {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
 }}
 .cs-chip {{
   display: inline-flex;
@@ -3261,7 +3295,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3975,6 +4009,11 @@ def _search_empty(q: str) -> str:
             "Save a source",
             "/",
             mark="?",
+            receipts=[
+                ("Search receipt", "Only local keyword matches are shown."),
+                ("Source path", "Save a source before broadening the query."),
+                ("Decision safety", "No unsupported result is created."),
+            ],
         )
     return _empty_state(
         "Search",
@@ -3985,6 +4024,11 @@ def _search_empty(q: str) -> str:
         "Open artifacts",
         "/artifacts",
         mark="?",
+        receipts=[
+            ("Saved source", "Search begins after Home preserves input."),
+            ("Result receipt", "Matches link back to a local record."),
+            ("Follow-up", "Suggested queries stay inside workspace scope."),
+        ],
     )
 
 
@@ -3999,6 +4043,7 @@ def _empty_state(
     *,
     mark: str = "+",
     steps: list[tuple[str, str]] | None = None,
+    receipts: list[tuple[str, str]] | None = None,
 ) -> str:
     secondary = ""
     if secondary_label and secondary_href:
@@ -4015,6 +4060,29 @@ def _empty_state(
             for label, detail in steps
         )
         steps_html = f'<div class="cs-empty-steps" aria-label="Suggested start path">{step_rows}</div>'
+    receipts_html = ""
+    if receipts:
+        receipt_rows = "".join(
+            f"""
+  <div class="cs-empty-receipt">
+    <strong>{h(label)}</strong>
+    <span>{h(detail)}</span>
+  </div>
+"""
+            for label, detail in receipts
+        )
+        receipts_html = f"""
+  <div class="cs-empty-briefing">
+    <div>
+      <h3>Startup path</h3>
+      {steps_html or '<p class="cs-muted">Start from Home, save work, then open the generated records from the product lists.</p>'}
+    </div>
+    <div>
+      <h3>First receipts</h3>
+      <div class="cs-empty-receipts">{receipt_rows}</div>
+    </div>
+  </div>
+"""
     return f"""
 <article class="cs-empty-state">
   <div class="cs-empty-state-main">
@@ -4025,7 +4093,7 @@ def _empty_state(
       <p>{h(body)}</p>
     </div>
   </div>
-  {steps_html}
+  {receipts_html or steps_html}
   <div class="cs-empty-actions">
     <a class="cs-button" href="{h(primary_href)}">{h(primary_label)}</a>
     {secondary}
@@ -4158,6 +4226,11 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
             ("2. Ask about it", "Draft a brief from saved work."),
             ("3. Review support", "Use sources before decisions."),
         ],
+        receipts=[
+            ("Original source", "Preserved text, date, and local scope."),
+            ("Search receipt", "Source becomes available to keyword search."),
+            ("Linked use", "Briefs and claims can reference this source."),
+        ],
     )
     linked_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"], *ctx["actions"]] for ref in _evidence_refs(record) if ref.startswith("artifact:"))
     return f"""
@@ -4233,6 +4306,11 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
             ("1. Drop input", "Start from a real note or file."),
             ("2. Ask a question", "Use the workspace ask box."),
             ("3. Check sources", "Open the brief before use."),
+        ],
+        receipts=[
+            ("Brief draft", "Answer stays draft until reviewed."),
+            ("Source coverage", "Visible references before decision use."),
+            ("Next use", "Claim or action only after support is checked."),
         ],
     )
     source_note = (
@@ -4322,6 +4400,11 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             ("2. Choose finding", "Promote only useful statements."),
             ("3. Attach support", "Keep source links visible."),
         ],
+        receipts=[
+            ("Claim statement", "One decision-ready statement per row."),
+            ("Trust lane", "Draft, evidence-backed, then approved."),
+            ("Evidence picker", "Support must stay visible before approval."),
+        ],
     )
     return f"""
 <section data-product-surface="claims">
@@ -4395,6 +4478,11 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
             ("1. Pick supported work", "Use a claim or brief finding."),
             ("2. Preview impact", "Inspect proposed changes first."),
             ("3. Review before send", "Approval stays explicit."),
+        ],
+        receipts=[
+            ("Dry-run preview", "Impact appears before any external step."),
+            ("Policy check", "Risk and approval stay visible."),
+            ("Audit link", "Execution remains traceable if approved."),
         ],
     )
     executed_count = sum(1 for action in actions if str(action.get("status") or "").lower() == "executed")
@@ -4628,6 +4716,11 @@ def _inbox_empty() -> str:
             ("2. Draft work", "Briefs, claims, and previews can enter review."),
             ("3. Decide", "Open the item and inspect support."),
         ],
+        receipts=[
+            ("Review item", "Briefs, claims, and actions enter one queue."),
+            ("Owner state", "Priority and risk are visible before action."),
+            ("Next action", "Open the selected work with sources nearby."),
+        ],
     )
 
 
@@ -4682,6 +4775,11 @@ def _audit_page(ctx: dict[str, Any]) -> str:
                 ("1. Save source", "Original input creates the first record."),
                 ("2. Create work", "Searches, briefs, claims, and actions add readable events."),
                 ("3. Inspect detail", "Raw event detail appears behind each row."),
+            ],
+            receipts=[
+                ("Source receipt", "Original input starts the local ledger."),
+                ("Decision receipt", "Claims and reviews explain why work moved."),
+                ("Action receipt", "Previews and approvals stay inspectable."),
             ],
         )
     else:

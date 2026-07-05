@@ -70,13 +70,13 @@ DESKTOP_ROUTES = [
 ]
 
 DAY_ZERO_ROUTES = [
-    {"name": "day-zero-search-desktop", "route": "/search", "surface": "search", "required": ["Search starts with saved work", "Save a source", "Open artifacts"]},
-    {"name": "day-zero-artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Start with a source", "Go to Home", "Search workspace"]},
-    {"name": "day-zero-briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Create the first brief", "Save a source", "Open artifacts"]},
-    {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required": ["No claims need review", "Open briefs", "Check sources"]},
-    {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required": ["No action previews yet", "Open claims", "Open briefs"]},
-    {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["No work waiting", "No selected work", "Start from Home"]},
-    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required": ["No activity recorded yet", "Start from Home", "Open artifacts"]},
+    {"name": "day-zero-search-desktop", "route": "/search", "surface": "search", "required": ["Search starts with saved work", "Save a source", "Open artifacts", "Startup path", "First receipts"]},
+    {"name": "day-zero-artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Start with a source", "Go to Home", "Search workspace", "Startup path", "First receipts"]},
+    {"name": "day-zero-briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Create the first brief", "Save a source", "Open artifacts", "Startup path", "First receipts"]},
+    {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required": ["No claims need review", "Open briefs", "Check sources", "Startup path", "First receipts"]},
+    {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required": ["No action previews yet", "Open claims", "Open briefs", "Startup path", "First receipts"]},
+    {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["No work waiting", "No selected work", "Start from Home", "Startup path", "First receipts"]},
+    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required": ["No activity recorded yet", "Start from Home", "Open artifacts", "Startup path", "First receipts"]},
 ]
 
 NOT_FOUND_ROUTES = [

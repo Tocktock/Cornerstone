@@ -187,13 +187,13 @@ class ProductUiRoutesTest(unittest.TestCase):
 
     def test_day_zero_product_routes_offer_composed_empty_states(self) -> None:
         expected = {
-            "/search": ["Search", "Search starts with saved work", "Save a source", "Open artifacts"],
-            "/artifacts": ["Day zero", "Start with a source", "Go to Home", "Search workspace"],
-            "/briefs": ["Day zero", "Create the first brief", "Save a source", "Open artifacts"],
-            "/claims": ["Day zero", "No claims need review", "Open briefs", "Check sources"],
-            "/actions": ["Day zero", "No action previews yet", "Open claims", "Open briefs"],
-            "/inbox": ["Day zero", "No work waiting", "No selected work", "Start from Home"],
-            "/audit": ["Audit ready", "No activity recorded yet", "Start from Home", "Open artifacts"],
+            "/search": ["Search", "Search starts with saved work", "Save a source", "Open artifacts", "Startup path", "First receipts"],
+            "/artifacts": ["Day zero", "Start with a source", "Go to Home", "Search workspace", "Startup path", "First receipts"],
+            "/briefs": ["Day zero", "Create the first brief", "Save a source", "Open artifacts", "Startup path", "First receipts"],
+            "/claims": ["Day zero", "No claims need review", "Open briefs", "Check sources", "Startup path", "First receipts"],
+            "/actions": ["Day zero", "No action previews yet", "Open claims", "Open briefs", "Startup path", "First receipts"],
+            "/inbox": ["Day zero", "No work waiting", "No selected work", "Start from Home", "Startup path", "First receipts"],
+            "/audit": ["Audit ready", "No activity recorded yet", "Start from Home", "Open artifacts", "Startup path", "First receipts"],
         }
 
         for route, phrases in expected.items():

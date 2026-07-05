@@ -1321,7 +1321,7 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-surface-subtle);
 }
 .cs-empty-state {
-  border: 1px dashed var(--cs-color-border-strong);
+  border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
   background:
     linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
@@ -1329,6 +1329,7 @@ button, input, textarea { font: inherit; }
   display: grid;
   gap: var(--cs-space-4);
   color: var(--cs-color-text-primary);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
 }
 .cs-empty-state-main {
   display: grid;
@@ -1379,6 +1380,39 @@ button, input, textarea { font: inherit; }
   padding: var(--cs-space-3);
   display: grid;
   gap: var(--cs-space-1);
+}
+.cs-empty-briefing {
+  border-top: 1px solid var(--cs-color-border-default);
+  padding-top: var(--cs-space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: var(--cs-space-4);
+  align-items: start;
+}
+.cs-empty-briefing h3 {
+  margin: 0 0 var(--cs-space-2);
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}
+.cs-empty-receipts {
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-empty-receipt {
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+}
+.cs-empty-receipt strong {
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
+}
+.cs-empty-receipt span {
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
 }
 .cs-chip {
   display: inline-flex;
@@ -2731,7 +2765,7 @@ button, input, textarea { font: inherit; }
   .cs-topbar { order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }
   .cs-search { max-width: none; flex-basis: auto; }
   .cs-content { order: 1; padding: var(--cs-space-4); }
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail { grid-template-columns: 1fr; }
   .cs-page-head { margin-bottom: var(--cs-space-4); }
   .cs-hero h1 { font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }
   .cs-home-intro { min-height: auto; }
@@ -2937,7 +2971,11 @@ button, input, textarea { font: inherit; }
       <p>Claims appear after a brief finding is promoted or a statement is drafted with source support. Start with a brief before making a decision.</p>
     </div>
   </div>
-  <div class="cs-empty-steps" aria-label="Suggested start path">
+
+  <div class="cs-empty-briefing">
+    <div>
+      <h3>Startup path</h3>
+      <div class="cs-empty-steps" aria-label="Suggested start path">
   <div class="cs-empty-step">
     <strong>1. Draft brief</strong>
     <span class="cs-meta">Summarize saved work first.</span>
@@ -2953,6 +2991,28 @@ button, input, textarea { font: inherit; }
     <span class="cs-meta">Keep source links visible.</span>
   </div>
 </div>
+    </div>
+    <div>
+      <h3>First receipts</h3>
+      <div class="cs-empty-receipts">
+  <div class="cs-empty-receipt">
+    <strong>Claim statement</strong>
+    <span>One decision-ready statement per row.</span>
+  </div>
+
+  <div class="cs-empty-receipt">
+    <strong>Trust lane</strong>
+    <span>Draft, evidence-backed, then approved.</span>
+  </div>
+
+  <div class="cs-empty-receipt">
+    <strong>Evidence picker</strong>
+    <span>Support must stay visible before approval.</span>
+  </div>
+</div>
+    </div>
+  </div>
+
   <div class="cs-empty-actions">
     <a class="cs-button" href="/briefs">Open briefs</a>
     <a class="cs-button secondary" href="/artifacts">Check sources</a>
