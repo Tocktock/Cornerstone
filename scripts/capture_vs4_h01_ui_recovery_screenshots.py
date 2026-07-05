@@ -49,7 +49,7 @@ DESKTOP_ROUTES = [
     {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search command center", "Search the workspace", "Type filters", "Sort by: keyword match", "Current search controls", "Search mode: local keyword", "Receipt-first results", "Result receipt", "Open result", "What we found", "Suggested follow-ups"]},
     {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Decision queue", "Brief reading queue", "Review lanes", "visible queue item", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
-    {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Decision queue", "Claim review lanes", "visible queue item", "Evidence-backed lane", "Claim review queue", "Review posture"]},
+    {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Decision queue", "Claim review lanes", "visible queue item", "Source-support lane", "Evidence-backed locked", "Claim review queue", "Review posture"]},
     {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Decision queue", "Action approval lanes", "visible queue item", "Approval lane", "Action preview queue", "Dry-run posture"]},
     {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "open review items across one queue", "Showing 3 open items", "Owner", "Next actions", "Review item", "Review sources", "Open audit trail"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Audit receipt workspace", "Activity trail", "Audit status", "Receipt summary", "Audit lifecycle", "Activity receipts", "Readable receipts", "Event stream", "Audit posture", "Audit integrity checks", "Integrity chain", "Scope and recovery", "Raw event detail"]},
@@ -102,7 +102,7 @@ DETAIL_ROUTES = [
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Evidence picker controls", "Sort: source order", "Review controls", "Decision gate", "Source support", "Impacted objects", "Related frameworks", "Saved locally"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim review summary", "Claim statement", "Supporting evidence", "Evidence picker controls", "Sort: source order", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Dry-run approval receipt", "Proposed change preview", "External call plan", "Approval gate", "Action review status", "Summary", "Impacted objects", "Dry-run sequence", "Proposed changes", "External calls", "Call preview", "Policy decision", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
 ]

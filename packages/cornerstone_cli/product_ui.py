@@ -544,9 +544,17 @@ def _claim_label(record: dict[str, Any]) -> tuple[str, str]:
         return "Approved", "approved"
     if status in {"policy_blocked", "blocked"}:
         return "Policy blocked", "policyBlocked"
+    if _claim_evidence_backed_earned(record):
+        return "Evidence-backed", "evidenceBacked"
     if _evidence_refs(record):
-        return "Source support", "evidenceBacked"
+        return "Source support", "searchable"
     return "Draft", "draft"
+
+
+def _claim_evidence_backed_earned(record: dict[str, Any]) -> bool:
+    label_check = record.get("label_check") if isinstance(record.get("label_check"), dict) else {}
+    trust = str(record.get("trust_label") or record.get("status") or "").lower()
+    return trust == "evidence_backed" and label_check.get("earned_evidence_backed") is True
 
 
 def _action_label(record: dict[str, Any]) -> tuple[str, str]:
@@ -4731,6 +4739,7 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
 def _claim_list_page(ctx: dict[str, Any]) -> str:
     claims = ctx["claims"]
     supported_count = sum(1 for claim in claims if _evidence_refs(claim))
+    evidence_backed_count = sum(1 for claim in claims if _claim_evidence_backed_earned(claim))
     approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
     needs_support = max(len(claims) - supported_count, 0)
     rows = ""
@@ -4747,7 +4756,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             footer=[
                 ("Evidence refs", f"{source_count} source refs"),
                 ("Trust lane", label),
-                ("Next review step", "Attach support before approval"),
+                ("Next review step", "Citation checks before evidence-backed"),
             ],
             action_label="Review claim",
         )
@@ -4767,7 +4776,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
         ],
         receipts=[
             ("Claim statement", "One decision-ready statement per row."),
-            ("Trust lane", "Draft, evidence-backed, then approved."),
+            ("Trust lane", "Draft, source support, evidence-backed after checks, then approved."),
             ("Evidence picker", "Support must stay visible before approval."),
         ],
     )
@@ -4780,15 +4789,15 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
   </div>
   <div class="cs-collection-workbench">
     <div>
-      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Approved", approved_count)])}
-      {_queue_focus("Claim review lanes", "Move statements from draft to evidence-backed to approved only when the support and review step are visible.", [("Draft lane", needs_support, "Needs source support", "draft"), ("Evidence-backed lane", supported_count, "Support attached", "searchable"), ("Approved lane", approved_count, "Decision-ready after review", "saved")])}
+      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Evidence-backed", evidence_backed_count), ("Approved", approved_count)])}
+      {_queue_focus("Claim review lanes", "Move statements from draft to source support, then to evidence-backed only after citation checks, then approved.", [("Draft lane", needs_support, "Needs source support", "draft"), ("Source-support lane", supported_count, "Support attached", "searchable"), ("Evidence-backed locked", evidence_backed_count, "Citation checks required", "underReview"), ("Approved lane", approved_count, "Decision-ready after review", "saved")])}
       {_collection_toolbar("Claim review queue", len(claims), ["Scope: personal/default", "State: open and approved", "Sort: needs review first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Review posture</h2>
-        <p class="cs-muted">Claims should move from draft to evidence-backed to approved only when supporting sources are visible.</p>
+        <p class="cs-muted">Claims can show source support before review. The evidence-backed label stays locked until citation checks earn it.</p>
         <div class="cs-review-box">
           <a class="cs-button" href="/inbox">Open review inbox</a>
           <a class="cs-button secondary" href="/artifacts">Check sources</a>
@@ -4796,7 +4805,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
       </section>
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Trust ladder</h2>
-        {_claim_trust_ladder(bool(supported_count), bool(approved_count))}
+        {_claim_trust_ladder(bool(supported_count), bool(evidence_backed_count), bool(approved_count))}
       </section>
     </aside>
   </div>
@@ -5979,6 +5988,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
     has_sources = bool(source_items)
     is_approved = str(claim.get("status") or "").lower() == "approved"
+    evidence_backed_earned = _claim_evidence_backed_earned(claim)
     approval_note = "Approval stays locked until review is recorded." if has_sources else "Approval stays locked until supporting evidence is attached."
     rationale = str(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before promoting this claim."
     claim_title = _claim_title(claim)
@@ -5987,7 +5997,8 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     confidence_label = "Medium" if has_sources else "Needs evidence"
     source_label = f"{len(source_items)} source{'s' if len(source_items) != 1 else ''}"
     approved_stage = "is-active" if is_approved else ""
-    evidence_stage = "is-active" if has_sources or is_approved else ""
+    source_stage = "is-active" if has_sources or is_approved else ""
+    evidence_stage = "is-active" if evidence_backed_earned or is_approved else ""
     category = "Decision support"
     tags = [
         "Evidence review",
@@ -5996,7 +6007,12 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     ]
     review_class = "is-ready" if has_sources else "is-review"
     return f"""
-<section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail">
+<section
+  class="cs-grid-two cs-claim-workbench"
+  data-product-surface="claim-detail"
+  data-source-support-attached="{str(has_sources).lower()}"
+  data-evidence-backed-earned="{str(evidence_backed_earned).lower()}"
+>
   <div class="cs-stack">
     <div class="cs-claim-hero is-compact">
       <div class="cs-claim-titlebar">
@@ -6009,7 +6025,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </nav>
           <div class="cs-claim-heading-row">
             <h1>{h(claim_title)}</h1>
-            {_chip("Draft", "draft" if not has_sources else "searchable")}
+            {_chip("Draft", "draft")}{_chip("Source support", "searchable") if has_sources else ""}
           </div>
           <div class="cs-brief-meta">
             <span>Claim draft</span>
@@ -6031,9 +6047,13 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           <span class="cs-claim-dot" aria-hidden="true"></span>
           <span>Draft</span>
         </div>
+        <div class="cs-claim-progress-step {source_stage}">
+          <span class="cs-claim-dot" aria-hidden="true"></span>
+          <span>Source support</span>
+        </div>
         <div class="cs-claim-progress-step {evidence_stage}">
           <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Evidence-backed</span>
+          <span>Evidence-backed locked</span>
         </div>
         <div class="cs-claim-progress-step {approved_stage}">
           <span class="cs-claim-dot" aria-hidden="true"></span>
@@ -6096,7 +6116,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <div class="cs-claim-review-strip" aria-label="Claim review summary">
         <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">Review before approval</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Confidence</span><strong>{h(confidence_label)}</strong><span class="cs-meta">Derived from support</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Evidence-backed gate</span><strong>{"Earned" if evidence_backed_earned else "Locked"}</strong><span class="cs-meta">Citation checks required</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
       </div>
     </section>
@@ -6149,12 +6169,19 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         <div class="cs-claim-control-row is-review">
           <span class="cs-claim-control-mark" aria-hidden="true">2</span>
           <div>
+            <strong>Citation checks</strong>
+            <p class="cs-muted">Evidence-backed stays locked until checks prove source coverage and citation integrity.</p>
+          </div>
+        </div>
+        <div class="cs-claim-control-row is-review">
+          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
+          <div>
             <strong>Owner review</strong>
             <p class="cs-muted">Review required before approval or shared truth.</p>
           </div>
         </div>
         <div class="cs-claim-control-row">
-          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
+          <span class="cs-claim-control-mark" aria-hidden="true">4</span>
           <div>
             <strong>No autonomous action</strong>
             <p class="cs-muted">This claim cannot trigger external work from this page.</p>
@@ -6422,16 +6449,22 @@ def _action_route_strip(approval_label: str, call_label: str) -> str:
 """
 
 
-def _claim_trust_ladder(has_sources: bool, is_approved: bool) -> str:
-    evidence_class = "is-active" if has_sources or is_approved else "is-locked"
+def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_approved: bool) -> str:
+    source_class = "is-active" if has_sources or is_approved else "is-locked"
+    evidence_class = "is-active" if evidence_backed_earned or is_approved else "is-locked"
     approved_class = "is-active" if is_approved else "is-locked"
-    evidence_note = "Supporting source is attached." if has_sources else "Attach at least one source."
+    source_note = "Supporting source is attached." if has_sources else "Attach at least one source."
+    evidence_note = "Citation checks earned this label." if evidence_backed_earned else "Locked until citation checks pass."
     approved_note = "Decision-ready." if is_approved else "Requires review first."
     return f"""
 <div class="cs-trust-ladder" aria-label="Claim trust ladder">
   <div class="cs-trust-step is-active">
     <strong>Draft</strong>
     <span class="cs-meta">Editable statement.</span>
+  </div>
+  <div class="cs-trust-step {source_class}">
+    <strong>Source support</strong>
+    <span class="cs-meta">{h(source_note)}</span>
   </div>
   <div class="cs-trust-step {evidence_class}">
     <strong>Evidence-backed</strong>

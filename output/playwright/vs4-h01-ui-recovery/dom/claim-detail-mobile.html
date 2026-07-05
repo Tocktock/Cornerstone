@@ -3191,7 +3191,7 @@ button, input, textarea { font: inherit; }
 
       <div class="cs-content">
 
-<section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail">
+<section class="cs-grid-two cs-claim-workbench" data-product-surface="claim-detail" data-source-support-attached="true" data-evidence-backed-earned="false">
   <div class="cs-stack">
     <div class="cs-claim-hero is-compact">
       <div class="cs-claim-titlebar">
@@ -3204,11 +3204,11 @@ button, input, textarea { font: inherit; }
           </nav>
           <div class="cs-claim-heading-row">
             <h1>Vendor renewal needs a decision before the August 1 renewal date.</h1>
-            <span class="cs-chip cs-chip-searchable">Draft</span>
+            <span class="cs-chip cs-chip-draft">Draft</span><span class="cs-chip cs-chip-searchable">Source support</span>
           </div>
           <div class="cs-brief-meta">
             <span>Claim draft</span>
-            <span>Created 2026-07-05 03:15 UTC</span>
+            <span>Created 2026-07-05 03:23 UTC</span>
             <span>1 source attached</span>
           </div>
         </div>
@@ -3220,7 +3220,7 @@ button, input, textarea { font: inherit; }
           <a class="cs-button secondary" href="/inbox">Open inbox</a>
         </div>
       </div>
-      <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span><span class="cs-chip cs-chip-underReview">Review required before approval</span></div>
+      <div class="cs-row"><span class="cs-chip cs-chip-searchable">Source support</span><span class="cs-chip cs-chip-underReview">Review required before approval</span></div>
       <div class="cs-claim-progress" aria-label="Trust ladder">
         <div class="cs-claim-progress-step is-active">
           <span class="cs-claim-dot" aria-hidden="true"></span>
@@ -3228,7 +3228,11 @@ button, input, textarea { font: inherit; }
         </div>
         <div class="cs-claim-progress-step is-active">
           <span class="cs-claim-dot" aria-hidden="true"></span>
-          <span>Evidence-backed</span>
+          <span>Source support</span>
+        </div>
+        <div class="cs-claim-progress-step ">
+          <span class="cs-claim-dot" aria-hidden="true"></span>
+          <span>Evidence-backed locked</span>
         </div>
         <div class="cs-claim-progress-step ">
           <span class="cs-claim-dot" aria-hidden="true"></span>
@@ -3291,7 +3295,7 @@ button, input, textarea { font: inherit; }
       <div class="cs-claim-review-strip" aria-label="Claim review summary">
         <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>Source support</strong><span class="cs-meta">Review before approval</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>1 source</strong><span class="cs-meta">Visible local sources</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Confidence</span><strong>Medium</strong><span class="cs-meta">Derived from support</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Evidence-backed gate</span><strong>Locked</strong><span class="cs-meta">Citation checks required</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
       </div>
     </section>
@@ -3299,7 +3303,7 @@ button, input, textarea { font: inherit; }
       <div><span class="cs-meta">Record</span><strong>Local draft</strong></div>
       <div><span class="cs-meta">Source support</span><strong>1 source</strong></div>
       <div><span class="cs-meta">Status</span><strong>Draft</strong></div>
-      <div><span class="cs-meta">Last activity</span><strong>2026-07-05 03:15 UTC</strong></div>
+      <div><span class="cs-meta">Last activity</span><strong>2026-07-05 03:23 UTC</strong></div>
     </section>
   </div>
   <aside class="cs-stack">
@@ -3320,7 +3324,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-checkmark" aria-hidden="true">✓</span>
   <span>
     <strong>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</strong>
-    <span class="cs-meta">Source 1 / 2026-07-05 03:15 UTC / ede571327ab3...</span>
+    <span class="cs-meta">Source 1 / 2026-07-05 03:23 UTC / ede571327ab3...</span>
     <span class="cs-muted">Vendor renewal note: the renewal date is August 1, finance flagged a price increase, security asked for source support,...</span>
   </span>
 </a>
@@ -3353,12 +3357,19 @@ button, input, textarea { font: inherit; }
         <div class="cs-claim-control-row is-review">
           <span class="cs-claim-control-mark" aria-hidden="true">2</span>
           <div>
+            <strong>Citation checks</strong>
+            <p class="cs-muted">Evidence-backed stays locked until checks prove source coverage and citation integrity.</p>
+          </div>
+        </div>
+        <div class="cs-claim-control-row is-review">
+          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
+          <div>
             <strong>Owner review</strong>
             <p class="cs-muted">Review required before approval or shared truth.</p>
           </div>
         </div>
         <div class="cs-claim-control-row">
-          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
+          <span class="cs-claim-control-mark" aria-hidden="true">4</span>
           <div>
             <strong>No autonomous action</strong>
             <p class="cs-muted">This claim cannot trigger external work from this page.</p>

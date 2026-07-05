@@ -3211,6 +3211,11 @@ button, input, textarea { font: inherit; }
 </div>
 
 <div class="cs-collection-stat">
+  <span class="cs-meta">Evidence-backed</span>
+  <strong>0</strong>
+</div>
+
+<div class="cs-collection-stat">
   <span class="cs-meta">Approved</span>
   <strong>0</strong>
 </div>
@@ -3221,9 +3226,9 @@ button, input, textarea { font: inherit; }
     <div>
       <div class="cs-kicker">Decision queue</div>
       <h2>Claim review lanes</h2>
-      <p>Move statements from draft to evidence-backed to approved only when the support and review step are visible.</p>
+      <p>Move statements from draft to source support, then to evidence-backed only after citation checks, then approved.</p>
     </div>
-    <div class="cs-row"><span class="cs-chip cs-chip-draft">Draft lane</span><span class="cs-chip cs-chip-searchable">Evidence-backed lane</span><span class="cs-chip cs-chip-saved">Approved lane</span></div>
+    <div class="cs-row"><span class="cs-chip cs-chip-draft">Draft lane</span><span class="cs-chip cs-chip-searchable">Source-support lane</span><span class="cs-chip cs-chip-underReview">Evidence-backed locked</span><span class="cs-chip cs-chip-saved">Approved lane</span></div>
   </div>
   <div class="cs-queue-lanes" aria-label="Review lanes">
     <span class="cs-meta"><strong>0</strong> visible queue items</span>
@@ -3235,9 +3240,15 @@ button, input, textarea { font: inherit; }
 </span>
 
 <span class="cs-queue-lane">
-  <span>Evidence-backed lane</span>
+  <span>Source-support lane</span>
   <strong>0</strong>
   <span>Support attached</span>
+</span>
+
+<span class="cs-queue-lane">
+  <span>Evidence-backed locked</span>
+  <strong>0</strong>
+  <span>Citation checks required</span>
 </span>
 
 <span class="cs-queue-lane">
@@ -3299,7 +3310,7 @@ button, input, textarea { font: inherit; }
 
   <div class="cs-empty-receipt">
     <strong>Trust lane</strong>
-    <span>Draft, evidence-backed, then approved.</span>
+    <span>Draft, source support, evidence-backed after checks, then approved.</span>
   </div>
 
   <div class="cs-empty-receipt">
@@ -3320,7 +3331,7 @@ button, input, textarea { font: inherit; }
     <aside class="cs-stack">
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Review posture</h2>
-        <p class="cs-muted">Claims should move from draft to evidence-backed to approved only when supporting sources are visible.</p>
+        <p class="cs-muted">Claims can show source support before review. The evidence-backed label stays locked until citation checks earn it.</p>
         <div class="cs-review-box">
           <a class="cs-button" href="/inbox">Open review inbox</a>
           <a class="cs-button secondary" href="/artifacts">Check sources</a>
@@ -3335,8 +3346,12 @@ button, input, textarea { font: inherit; }
     <span class="cs-meta">Editable statement.</span>
   </div>
   <div class="cs-trust-step is-locked">
-    <strong>Evidence-backed</strong>
+    <strong>Source support</strong>
     <span class="cs-meta">Attach at least one source.</span>
+  </div>
+  <div class="cs-trust-step is-locked">
+    <strong>Evidence-backed</strong>
+    <span class="cs-meta">Locked until citation checks pass.</span>
   </div>
   <div class="cs-trust-step is-locked">
     <strong>Approved</strong>

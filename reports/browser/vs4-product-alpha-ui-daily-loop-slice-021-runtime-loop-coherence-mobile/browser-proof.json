@@ -32,9 +32,9 @@
     },
     "chrome_timeout_after_screenshot": false,
     "clean_browser_exit": true,
-    "created_at": "2026-07-05T03:14:15.218152Z",
+    "created_at": "2026-07-05T03:24:44.608833Z",
     "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/base/home.dom.html",
-    "dom_sha256": "a7e49277720690d1acfbf59e59adaf463f5092fd7d1779c931ffcf606e979581",
+    "dom_sha256": "2528374675847500c98f2b2f9a05dbd28f24e7ac7d33a4c8e306cc8f0e66228f",
     "errors": [],
     "product_markers": {
       "product_shell_present": true,
@@ -82,7 +82,7 @@
     "status": "passed",
     "stderr_tail": {
       "screenshot": [
-        "DevTools listening on ws://127.0.0.1:65411/devtools/browser/ea106bf1-3cb0-438f-9b33-ab73c1e1f4d0"
+        "DevTools listening on ws://127.0.0.1:52031/devtools/browser/ef844010-0c89-4d71-83e3-1817890d0fc1"
       ]
     },
     "surface_presence": {
@@ -94,7 +94,7 @@
       "Home/Ops Inbox": false,
       "Search": true
     },
-    "url": "http://127.0.0.1:65410/"
+    "url": "http://127.0.0.1:52030/"
   },
   "brief_detail_markers": {
     "action_card_detail_visible": true,
@@ -170,12 +170,12 @@
     "slice_003_passes": true,
     "state": {
       "created_records": {
-        "action_id": "action_36ec676cbc824cd0",
+        "action_id": "action_7e3b20d37b4fde8c",
         "artifact_id": "art_085c9696c3b04726",
-        "brief_id": "brief_9c8cf38310123f66",
-        "claim_id": "claim_013283862698db6e",
-        "evidence_bundle_id": "evb_336abe52c901d91f",
-        "search_snapshot_id": "search_1e86a70b339ee890"
+        "brief_id": "brief_587ceb16b2c62417",
+        "claim_id": "claim_d3927c32196a0233",
+        "evidence_bundle_id": "evb_4ef645fef9930083",
+        "search_snapshot_id": "search_bacb01247f19194f"
       },
       "negative_evidence": {}
     }
@@ -186,7 +186,7 @@
     "name": "Google Chrome",
     "window_size": "390,844"
   },
-  "created_at": "2026-07-05T03:14:15.222755Z",
+  "created_at": "2026-07-05T03:24:44.613078Z",
   "decision_pages": {
     "markers": {
       "action_approval_denial_visible": true,
@@ -236,7 +236,7 @@
   "decision_pages_required": true,
   "detail_route": "/briefs/{brief_id}?view=html",
   "dom_path": "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile/home.dom.html",
-  "dom_sha256": "a7e49277720690d1acfbf59e59adaf463f5092fd7d1779c931ffcf606e979581",
+  "dom_sha256": "2528374675847500c98f2b2f9a05dbd28f24e7ac7d33a4c8e306cc8f0e66228f",
   "errors": [],
   "evidence_audit_detail": {
     "markers": {
@@ -513,15 +513,15 @@
   "responsive_required": true,
   "route": "/",
   "route_scan": {
-    "base_url": "http://127.0.0.1:65389",
-    "created_at": "2026-07-05T03:14:12.937836Z",
+    "base_url": "http://127.0.0.1:52009",
+    "created_at": "2026-07-05T03:24:42.302768Z",
     "created_records": {
-      "action_id": "action_36ec676cbc824cd0",
+      "action_id": "action_7e3b20d37b4fde8c",
       "artifact_id": "art_085c9696c3b04726",
-      "brief_id": "brief_9c8cf38310123f66",
-      "claim_id": "claim_013283862698db6e",
-      "evidence_bundle_id": "evb_336abe52c901d91f",
-      "search_snapshot_id": "search_1e86a70b339ee890"
+      "brief_id": "brief_587ceb16b2c62417",
+      "claim_id": "claim_d3927c32196a0233",
+      "evidence_bundle_id": "evb_4ef645fef9930083",
+      "search_snapshot_id": "search_bacb01247f19194f"
     },
     "detail_routes": {
       "action_detail": {
@@ -530,14 +530,14 @@
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/actions/action_36ec676cbc824cd0?view=html",
+        "path": "/actions/action_7e3b20d37b4fde8c?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
         "token_css_present": true
       },
       "artifact_detail": {
-        "body_bytes": 114757,
+        "body_bytes": 114753,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -554,19 +554,19 @@
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/briefs/brief_9c8cf38310123f66?view=html",
+        "path": "/briefs/brief_587ceb16b2c62417?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
         "token_css_present": true
       },
       "claim_detail": {
-        "body_bytes": 114383,
+        "body_bytes": 115045,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
         "html": true,
-        "path": "/claims/claim_013283862698db6e?view=html",
+        "path": "/claims/claim_d3927c32196a0233?view=html",
         "shell_present": true,
         "status": 200,
         "surface_present": true,
@@ -597,7 +597,7 @@
     },
     "product_routes": {
       "/": {
-        "body_bytes": 115909,
+        "body_bytes": 115901,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -657,7 +657,7 @@
         "token_css_present": true
       },
       "/claims": {
-        "body_bytes": 109830,
+        "body_bytes": 110319,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -669,7 +669,7 @@
         "token_css_present": true
       },
       "/inbox": {
-        "body_bytes": 111561,
+        "body_bytes": 111557,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -681,7 +681,7 @@
         "token_css_present": true
       },
       "/search?q=renewal": {
-        "body_bytes": 113286,
+        "body_bytes": 113282,
         "content_type": "text/html; charset=utf-8",
         "forbidden_absent": true,
         "forbidden_terms": [],
@@ -763,7 +763,7 @@
     "unsafe_http_zero_authority_side_effects": true
   },
   "unsafe_http_boundary_required": true,
-  "url": "http://127.0.0.1:65410/",
+  "url": "http://127.0.0.1:52030/",
   "user_drop_ask_source": {
     "markers": {
       "ask_uses_user_question": true,
