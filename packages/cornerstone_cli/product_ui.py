@@ -1726,11 +1726,16 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-4);
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-columns: 38px minmax(0, 1fr) minmax(176px, auto);
   gap: var(--cs-space-4);
   align-items: start;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }}
-.cs-collection-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
+.cs-collection-row:hover {{
+  border-color: var(--cs-color-border-strong);
+  box-shadow: var(--cs-shadow-sm);
+  transform: translateY(-1px);
+}}
 .cs-collection-icon {{
   width: 32px;
   height: 32px;
@@ -1741,13 +1746,100 @@ button, input, textarea {{ font: inherit; }}
   color: var(--cs-color-primary-700);
   font-weight: var(--cs-typography-weight-bold);
 }}
-.cs-collection-body {{ display: grid; gap: var(--cs-space-1); }}
+.cs-collection-body {{ display: grid; gap: var(--cs-space-2); }}
 .cs-collection-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
 .cs-collection-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 82ch; }}
 .cs-collection-meta {{
   display: flex;
   flex-wrap: wrap;
   gap: var(--cs-space-2);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-collection-actions {{
+  display: grid;
+  gap: var(--cs-space-3);
+  justify-items: end;
+  align-content: start;
+}}
+.cs-collection-actions .cs-row {{ justify-content: flex-end; }}
+.cs-collection-cta {{
+  min-height: 32px;
+  border-radius: var(--cs-radius-sm);
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  padding: 6px 10px;
+  color: var(--cs-color-text-primary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-collection-footrail {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-2);
+  margin-top: var(--cs-space-1);
+}}
+.cs-collection-stage {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-2);
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}}
+.cs-collection-stage strong {{
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
+  color: var(--cs-color-text-primary);
+}}
+.cs-collection-stage span {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  overflow-wrap: anywhere;
+}}
+.cs-queue-focus {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.92), rgba(247,249,246,.86));
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+  margin-bottom: var(--cs-space-4);
+}}
+.cs-queue-focus-head {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  align-items: start;
+}}
+.cs-queue-focus h2 {{
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.35;
+}}
+.cs-queue-focus p {{ margin: 2px 0 0; color: var(--cs-color-text-secondary); max-width: 76ch; }}
+.cs-queue-lanes {{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--cs-space-3);
+}}
+.cs-queue-lane {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-1);
+}}
+.cs-queue-lane strong {{
+  font-size: 20px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}}
+.cs-queue-lane span {{
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
 }}
@@ -3169,7 +3261,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -3211,6 +3303,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-claim-progress::before {{ display: none; }}
   .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
   .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
+  .cs-collection-actions {{ justify-items: start; }}
+  .cs-collection-actions .cs-row {{ justify-content: flex-start; }}
   .cs-inbox-head {{ display: none; }}
   .cs-artifact-compact-hero .cs-artifact-title h1 {{ font-size: 26px; }}
   .cs-artifact-compact-hero .cs-artifact-actions {{ padding-top: 0; }}
@@ -3966,6 +4060,33 @@ def _collection_toolbar(label: str, count: int, filters: list[str]) -> str:
 """
 
 
+def _queue_focus(title: str, detail: str, lanes: list[tuple[str, int | str, str, str]]) -> str:
+    lane_cards = "".join(
+        f"""
+<span class="cs-queue-lane">
+  <span>{h(label)}</span>
+  <strong>{h(value)}</strong>
+  <span>{h(note)}</span>
+</span>
+"""
+        for label, value, note, _ in lanes
+    )
+    lane_chips = "".join(_chip(label, state) for label, _, _, state in lanes)
+    return f"""
+<section class="cs-queue-focus" aria-label="Decision queue">
+  <div class="cs-queue-focus-head">
+    <div>
+      <div class="cs-kicker">Decision queue</div>
+      <h2>{h(title)}</h2>
+      <p>{h(detail)}</p>
+    </div>
+    <div class="cs-row">{lane_chips}</div>
+  </div>
+  <div class="cs-queue-lanes" aria-label="Review lanes">{lane_cards}</div>
+</section>
+"""
+
+
 def _collection_row(
     icon: str,
     title: str,
@@ -3973,9 +4094,27 @@ def _collection_row(
     href: str,
     meta: list[tuple[str, str]],
     chips: list[tuple[str, str]],
+    *,
+    footer: list[tuple[str, str]] | None = None,
+    action_label: str = "Open",
 ) -> str:
     meta_row = "".join(f"<span>{h(label)}</span>" for label, _ in meta)
     chip_row = "".join(_chip(label, state) for label, state in chips)
+    footer_row = ""
+    if footer:
+        footer_row = (
+            '<span class="cs-collection-footrail">'
+            + "".join(
+                f"""
+<span class="cs-collection-stage">
+  <strong>{h(label)}</strong>
+  <span>{h(value)}</span>
+</span>
+"""
+                for label, value in footer
+            )
+            + "</span>"
+        )
     return f"""
 <a class="cs-collection-row" href="{h(href)}">
   <span class="cs-collection-icon" aria-hidden="true">{h(icon)}</span>
@@ -3983,8 +4122,12 @@ def _collection_row(
     <span class="cs-collection-meta">{meta_row}</span>
     <h3>{h(title)}</h3>
     <p>{h(_truncate(detail, 240))}</p>
+    {footer_row}
   </span>
-  <span class="cs-row">{chip_row}</span>
+  <span class="cs-collection-actions">
+    <span class="cs-row">{chip_row}</span>
+    <span class="cs-collection-cta">{h(action_label)}</span>
+  </span>
 </a>
 """
 
@@ -4055,6 +4198,9 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
 
 def _brief_list_page(ctx: dict[str, Any]) -> str:
     briefs = ctx["briefs"]
+    with_sources = sum(1 for brief in briefs if _brief_source_count(brief))
+    source_ref_count = sum(_brief_source_count(brief) for brief in briefs)
+    needs_sources = max(len(briefs) - with_sources, 0)
     rows = ""
     for brief in briefs:
         label, state = _brief_label(brief)
@@ -4067,6 +4213,12 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
             _detail_href("briefs", brief.get("brief_id")),
             [("Brief", ""), (_display_date(brief), ""), (source_label, "")],
             [(label, state), ("Open brief", "searchable")],
+            footer=[
+                ("Source refs", source_label),
+                ("State", label),
+                ("Next review step", "Read before claim or action"),
+            ],
+            action_label="Open brief",
         )
     rows = rows or _empty_state(
         "Day zero",
@@ -4083,8 +4235,6 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
             ("3. Check sources", "Open the brief before use."),
         ],
     )
-    with_sources = sum(1 for brief in briefs if _brief_source_count(brief))
-    source_ref_count = sum(_brief_source_count(brief) for brief in briefs)
     source_note = (
         "Open the visible sources before using any finding in a decision."
         if with_sources
@@ -4100,6 +4250,7 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Briefs", len(briefs)), ("With sources", with_sources), ("Source refs", source_ref_count)])}
+      {_queue_focus("Brief reading queue", "Review lanes keep drafted answers, source coverage, and next use visible before a brief becomes decision material.", [("Ready to read", with_sources, "Source links visible", "searchable"), ("Needs source check", needs_sources, "Do not use in decisions yet", "draft"), ("Can feed decision", with_sources, "Review before claim or action", "saved")])}
       {_collection_toolbar("Brief queue", len(briefs), ["Scope: personal/default", "State: drafts and source-backed", "Sort: newest first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
@@ -4136,6 +4287,9 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
 
 def _claim_list_page(ctx: dict[str, Any]) -> str:
     claims = ctx["claims"]
+    supported_count = sum(1 for claim in claims if _evidence_refs(claim))
+    approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
+    needs_support = max(len(claims) - supported_count, 0)
     rows = ""
     for claim in claims:
         label, state = _claim_label(claim)
@@ -4147,6 +4301,12 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             _detail_href("claims", claim.get("claim_id")),
             [("Claim", ""), (_display_date(claim), ""), (f"{source_count} source refs", "")],
             [(label, state), ("Review required", "underReview")],
+            footer=[
+                ("Evidence refs", f"{source_count} source refs"),
+                ("Trust lane", label),
+                ("Next review step", "Attach support before approval"),
+            ],
+            action_label="Review claim",
         )
     rows = rows or _empty_state(
         "Day zero",
@@ -4163,8 +4323,6 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             ("3. Attach support", "Keep source links visible."),
         ],
     )
-    supported_count = sum(1 for claim in claims if _evidence_refs(claim))
-    approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
     return f"""
 <section data-product-surface="claims">
   <div class="cs-page-head">
@@ -4175,6 +4333,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Approved", approved_count)])}
+      {_queue_focus("Claim review lanes", "Move statements from draft to evidence-backed to approved only when the support and review step are visible.", [("Draft lane", needs_support, "Needs source support", "draft"), ("Evidence-backed lane", supported_count, "Support attached", "searchable"), ("Approved lane", approved_count, "Decision-ready after review", "saved")])}
       {_collection_toolbar("Claim review queue", len(claims), ["Scope: personal/default", "State: open and approved", "Sort: needs review first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
@@ -4216,6 +4375,12 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
             _detail_href("actions", action.get("action_id")),
             [("Action", ""), (_display_date(action), ""), (f"{risk} risk", "")],
             [(label, state), ("Dry-run first", "searchable")],
+            footer=[
+                ("Dry-run", "Preview before send"),
+                ("Risk", f"{risk} risk"),
+                ("Next review step", "Check policy and approval"),
+            ],
+            action_label="Open preview",
         )
     rows = rows or _empty_state(
         "Day zero",
@@ -4233,6 +4398,7 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
         ],
     )
     executed_count = sum(1 for action in actions if str(action.get("status") or "").lower() == "executed")
+    preview_count = max(len(actions) - executed_count, 0)
     return f"""
 <section data-product-surface="actions">
   <div class="cs-page-head">
@@ -4243,6 +4409,7 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Drafts", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
+      {_queue_focus("Action approval lanes", "Dry-run, risk, policy, and approval stay in the queue before any external step is available.", [("Preview lane", preview_count, "Inspect impact first", "searchable"), ("Approval lane", approval_count, "Owner review required", "underReview"), ("Executed lane", executed_count, "Audit after send", "saved")])}
       {_collection_toolbar("Action preview queue", len(actions), ["Scope: personal/default", "Mode: dry-run first", "Sort: approval risk first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
