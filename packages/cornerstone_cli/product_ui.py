@@ -1104,8 +1104,8 @@ button, input, textarea {{ font: inherit; }}
 .cs-list-row.compact {{ padding: var(--cs-space-3); min-height: auto; }}
 .cs-search-workbench {{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: var(--cs-space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  gap: var(--cs-space-5);
   align-items: start;
 }}
 .cs-search-main {{
@@ -1115,13 +1115,12 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-search-canvas {{
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }}
 .cs-search-command {{
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: end;
+  gap: var(--cs-space-2);
+  align-items: start;
 }}
 .cs-search-back {{
   color: var(--cs-color-primary-700);
@@ -1132,17 +1131,25 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-2);
 }}
+.cs-search-titleline {{
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+}}
 .cs-search-copy h1 {{
   margin: 0;
-  max-width: 18ch;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
+  max-width: 34ch;
+  font-size: 26px;
+  line-height: 1.18;
+  text-wrap: balance;
 }}
 .cs-search-mode {{
-  justify-self: end;
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--cs-space-2);
-  min-width: 210px;
+  flex-wrap: wrap;
 }}
 .cs-search-hero {{
   border: 1px solid var(--cs-color-border-focus);
@@ -1151,9 +1158,19 @@ button, input, textarea {{ font: inherit; }}
   box-shadow: var(--cs-shadow-focus);
   padding: var(--cs-space-2);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--cs-space-2);
   align-items: center;
+}}
+.cs-search-lens {{
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
 }}
 .cs-search-hero input {{
   min-height: 50px;
@@ -1173,7 +1190,6 @@ button, input, textarea {{ font: inherit; }}
   display: flex;
   flex-wrap: wrap;
   gap: var(--cs-space-2);
-  margin-top: var(--cs-space-4);
 }}
 .cs-search-tab, .cs-filter-chip {{
   display: inline-flex;
@@ -1214,25 +1230,34 @@ button, input, textarea {{ font: inherit; }}
   display: grid;
   gap: var(--cs-space-2);
 }}
+.cs-result-list-header {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-result-row {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) minmax(150px, 220px) auto;
-  gap: var(--cs-space-4);
+  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  gap: var(--cs-space-3);
   align-items: center;
 }}
 .cs-result-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
 .cs-result-icon {{
   width: 34px;
-  height: 34px;
-  border-radius: var(--cs-radius-md);
+  min-height: 38px;
+  border-radius: var(--cs-radius-sm);
   display: grid;
   place-items: center;
   background: var(--cs-color-primary-50);
   color: var(--cs-color-primary-700);
+  font-size: 11px;
   font-weight: var(--cs-typography-weight-bold);
 }}
 .cs-result-icon.is-source {{ background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }}
@@ -1253,11 +1278,6 @@ button, input, textarea {{ font: inherit; }}
 .cs-result-support .cs-meta {{
   line-height: 1.35;
 }}
-.cs-result-receipt {{
-  display: grid;
-  justify-items: end;
-  min-width: 0;
-}}
 .cs-result-actions {{
   display: flex;
   flex-wrap: wrap;
@@ -1277,6 +1297,23 @@ button, input, textarea {{ font: inherit; }}
   border-bottom: 1px solid var(--cs-color-border-default);
 }}
 .cs-right-stat:last-child {{ border-bottom: 0; }}
+.cs-right-stat-label {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}}
+.cs-right-stat-icon {{
+  width: 24px;
+  height: 24px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-size: 10px;
+  font-weight: var(--cs-typography-weight-bold);
+}}
 .cs-suggested-query {{
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
@@ -3459,7 +3496,8 @@ button, input, textarea {{ font: inherit; }}
   .cs-artifact-page-rail {{ display: none; }}
   .cs-artifact-page-area {{ padding: var(--cs-space-3); }}
   .cs-search-rail {{ position: static; }}
-  .cs-search-mode {{ justify-self: start; min-width: 0; width: 100%; }}
+  .cs-search-titleline {{ align-items: start; flex-direction: column; }}
+  .cs-search-mode {{ min-width: 0; width: 100%; }}
   .cs-claim-breadcrumb {{
     display: grid;
     grid-template-columns: auto auto minmax(0, 1fr);
@@ -3487,7 +3525,7 @@ button, input, textarea {{ font: inherit; }}
     text-align: center;
   }}
   .cs-claim-actions .is-disabled {{ grid-column: auto; }}
-  .cs-result-receipt, .cs-result-support {{ justify-items: start; text-align: left; }}
+  .cs-result-support {{ justify-items: start; text-align: left; }}
   .cs-audit-row-main {{ grid-template-columns: auto minmax(0, 1fr); }}
   .cs-audit-row-main .cs-chip {{ justify-self: start; }}
   .cs-audit-row-top {{ align-items: flex-start; flex-direction: column; gap: var(--cs-space-1); }}
@@ -3963,18 +4001,20 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
         <div class="cs-search-command">
           <div class="cs-search-copy">
             <a class="cs-search-back" href="/">&#8592; Search</a>
-            <div class="cs-kicker">Search command center</div>
-            <h1>Search the workspace</h1>
+            <div class="cs-search-titleline">
+              <div>
+                <div class="cs-kicker">Search command center</div>
+                <h1>Search the workspace</h1>
+              </div>
+              <span class="cs-filter-chip">Current search controls</span>
+            </div>
             <p class="cs-muted">Keyword search over saved sources and drafts. Open the receipts before using a result for a decision.</p>
-          </div>
-          <div class="cs-search-mode" aria-label="Current search controls">
-            <h2 class="cs-section-title">Current search controls</h2>
-            <span class="cs-filter-chip">Search mode: local keyword</span>
           </div>
         </div>
         <form class="cs-search-hero" action="/search" method="get">
+          <span class="cs-search-lens" aria-hidden="true">Search</span>
           <input name="q" value="{h(q)}" placeholder="Search saved sources, claims, action drafts, and briefs">
-          <button class="cs-button cs-search-submit" type="submit" aria-label="Run search">&#8594;</button>
+          <button class="cs-button cs-search-submit" type="submit" aria-label="Run search">Go</button>
         </form>
         <div class="cs-search-tabs" aria-label="Type filters">{count_tabs}</div>
         <div class="cs-search-filterbar">
@@ -3985,16 +4025,19 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
           </div>
           <span class="cs-filter-chip">Sort by: keyword match</span>
         </div>
-        <div class="cs-search-context">
+        <div class="cs-search-mode" aria-label="Current search controls">
           <div class="cs-filter-row">
+            <span class="cs-filter-chip">Search mode: local keyword</span>
             <span class="cs-filter-chip">Scope: personal/default</span>
             <span class="cs-filter-chip">Type: all visible</span>
             <span class="cs-filter-chip">Result receipt required</span>
           </div>
         </div>
       </section>
-      <p class="cs-meta">{total} results</p>
-      <div class="cs-result-list">{rows}</div>
+      <div class="cs-result-list">
+        <div class="cs-result-list-header"><span>{total} results</span><span>Receipt-first results</span></div>
+        {rows}
+      </div>
     </div>
     {right_rail}
   </div>
@@ -4016,7 +4059,7 @@ def _search_records(ctx: dict[str, Any], q: str) -> list[str]:
                     score,
                     _search_result_row(
                         "Source",
-                        "S",
+                        "TXT",
                         _artifact_title(artifact),
                         str(artifact.get("_preview") or "Open to inspect the saved source."),
                         _detail_href("artifacts", artifact.get("artifact_id")),
@@ -4031,20 +4074,20 @@ def _search_records(ctx: dict[str, Any], q: str) -> list[str]:
         score = _score(text, query)
         if score > 0:
             label, state = _brief_label(brief)
-            rows.append((score, _search_result_row("Brief", "B", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
+            rows.append((score, _search_result_row("Brief", "BRF", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
     for claim in ctx["claims"]:
         text = _claim_title(claim).lower()
         score = _score(text, query)
         if score > 0:
             label, state = _claim_label(claim)
-            rows.append((score, _search_result_row("Claim", "C", _claim_title(claim), "Claim draft with linked evidence.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
+            rows.append((score, _search_result_row("Claim", "CLM", _claim_title(claim), "Claim draft with linked evidence.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
     for action in ctx["actions"]:
         dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
         text = " ".join([_action_title(action), str(dry_run.get("goal") or ""), str(dry_run.get("target") or "")]).lower()
         score = _score(text, query)
         if score > 0:
             label, state = _action_label(action)
-            rows.append((score, _search_result_row("Action", "A", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
+            rows.append((score, _search_result_row("Action", "ACT", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
     rows.sort(key=lambda item: item[0], reverse=True)
     return [row for _, row in rows[:20]]
 
@@ -4101,8 +4144,6 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
   <span class="cs-result-support">
     {_chip(label, state)}
     <span class="cs-meta">Result receipt: local record and visible source context only.</span>
-  </span>
-  <span class="cs-result-receipt">
     <span class="cs-result-actions">
       <a class="cs-button secondary" href="{h(href)}">Open result</a>
     </span>
@@ -4113,7 +4154,7 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
 
 def _search_right_rail(counts: list[tuple[str, int]], q: str) -> str:
     stat_rows = "".join(
-        f'<div class="cs-right-stat"><span>{h(label)}</span><strong>{h(count)}</strong></div>'
+        f'<div class="cs-right-stat"><span class="cs-right-stat-label"><span class="cs-right-stat-icon" aria-hidden="true">{h(label[:1])}</span><span>{h(label)}</span></span><strong>{h(count)}</strong></div>'
         for label, count in counts[1:]
     )
     suggestions = _search_followups(q, counts)

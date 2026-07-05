@@ -574,8 +574,8 @@ button, input, textarea { font: inherit; }
 .cs-list-row.compact { padding: var(--cs-space-3); min-height: auto; }
 .cs-search-workbench {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: var(--cs-space-6);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  gap: var(--cs-space-5);
   align-items: start;
 }
 .cs-search-main {
@@ -585,13 +585,12 @@ button, input, textarea { font: inherit; }
 }
 .cs-search-canvas {
   display: grid;
-  gap: var(--cs-space-4);
+  gap: var(--cs-space-3);
 }
 .cs-search-command {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: end;
+  gap: var(--cs-space-2);
+  align-items: start;
 }
 .cs-search-back {
   color: var(--cs-color-primary-700);
@@ -602,17 +601,25 @@ button, input, textarea { font: inherit; }
   display: grid;
   gap: var(--cs-space-2);
 }
+.cs-search-titleline {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+}
 .cs-search-copy h1 {
   margin: 0;
-  max-width: 18ch;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
+  max-width: 34ch;
+  font-size: 26px;
+  line-height: 1.18;
+  text-wrap: balance;
 }
 .cs-search-mode {
-  justify-self: end;
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--cs-space-2);
-  min-width: 210px;
+  flex-wrap: wrap;
 }
 .cs-search-hero {
   border: 1px solid var(--cs-color-border-focus);
@@ -621,9 +628,19 @@ button, input, textarea { font: inherit; }
   box-shadow: var(--cs-shadow-focus);
   padding: var(--cs-space-2);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: var(--cs-space-2);
   align-items: center;
+}
+.cs-search-lens {
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
 }
 .cs-search-hero input {
   min-height: 50px;
@@ -643,7 +660,6 @@ button, input, textarea { font: inherit; }
   display: flex;
   flex-wrap: wrap;
   gap: var(--cs-space-2);
-  margin-top: var(--cs-space-4);
 }
 .cs-search-tab, .cs-filter-chip {
   display: inline-flex;
@@ -684,25 +700,34 @@ button, input, textarea { font: inherit; }
   display: grid;
   gap: var(--cs-space-2);
 }
+.cs-result-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
 .cs-result-row {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
   padding: var(--cs-space-3);
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) minmax(150px, 220px) auto;
-  gap: var(--cs-space-4);
+  grid-template-columns: 40px minmax(0, 1fr) minmax(170px, 240px);
+  gap: var(--cs-space-3);
   align-items: center;
 }
 .cs-result-row:hover { border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }
 .cs-result-icon {
   width: 34px;
-  height: 34px;
-  border-radius: var(--cs-radius-md);
+  min-height: 38px;
+  border-radius: var(--cs-radius-sm);
   display: grid;
   place-items: center;
   background: var(--cs-color-primary-50);
   color: var(--cs-color-primary-700);
+  font-size: 11px;
   font-weight: var(--cs-typography-weight-bold);
 }
 .cs-result-icon.is-source { background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }
@@ -723,11 +748,6 @@ button, input, textarea { font: inherit; }
 .cs-result-support .cs-meta {
   line-height: 1.35;
 }
-.cs-result-receipt {
-  display: grid;
-  justify-items: end;
-  min-width: 0;
-}
 .cs-result-actions {
   display: flex;
   flex-wrap: wrap;
@@ -747,6 +767,23 @@ button, input, textarea { font: inherit; }
   border-bottom: 1px solid var(--cs-color-border-default);
 }
 .cs-right-stat:last-child { border-bottom: 0; }
+.cs-right-stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-width: 0;
+}
+.cs-right-stat-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  font-size: 10px;
+  font-weight: var(--cs-typography-weight-bold);
+}
 .cs-suggested-query {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr);
@@ -2929,7 +2966,8 @@ button, input, textarea { font: inherit; }
   .cs-artifact-page-rail { display: none; }
   .cs-artifact-page-area { padding: var(--cs-space-3); }
   .cs-search-rail { position: static; }
-  .cs-search-mode { justify-self: start; min-width: 0; width: 100%; }
+  .cs-search-titleline { align-items: start; flex-direction: column; }
+  .cs-search-mode { min-width: 0; width: 100%; }
   .cs-claim-breadcrumb {
     display: grid;
     grid-template-columns: auto auto minmax(0, 1fr);
@@ -2957,7 +2995,7 @@ button, input, textarea { font: inherit; }
     text-align: center;
   }
   .cs-claim-actions .is-disabled { grid-column: auto; }
-  .cs-result-receipt, .cs-result-support { justify-items: start; text-align: left; }
+  .cs-result-support { justify-items: start; text-align: left; }
   .cs-audit-row-main { grid-template-columns: auto minmax(0, 1fr); }
   .cs-audit-row-main .cs-chip { justify-self: start; }
   .cs-audit-row-top { align-items: flex-start; flex-direction: column; gap: var(--cs-space-1); }
@@ -3234,7 +3272,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-05 01:15 UTC</div>
+    <div class="cs-meta">2026-07-05 01:25 UTC</div>
   </div>
 </div>
 
@@ -3242,7 +3280,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-05 01:15 UTC</div>
+    <div class="cs-meta">2026-07-05 01:25 UTC</div>
   </div>
 </div>
 
@@ -3250,7 +3288,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-05 01:15 UTC</div>
+    <div class="cs-meta">2026-07-05 01:25 UTC</div>
   </div>
 </div>
 
@@ -3258,7 +3296,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-05 01:15 UTC</div>
+    <div class="cs-meta">2026-07-05 01:25 UTC</div>
   </div>
 </div>
 
@@ -3266,7 +3304,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Claim drafted</strong>
-    <div class="cs-meta">2026-07-05 01:15 UTC</div>
+    <div class="cs-meta">2026-07-05 01:25 UTC</div>
   </div>
 </div>
 </div>

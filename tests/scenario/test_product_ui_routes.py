@@ -360,6 +360,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Current search controls", search_html)
         self.assertIn("Search mode: local keyword", search_html)
         self.assertIn("Keyword match", search_html)
+        self.assertIn("Receipt-first results", search_html)
         self.assertIn("Result receipt", search_html)
         self.assertIn("Open result", search_html)
         self.assertIn("Sort by: keyword match", search_html)
