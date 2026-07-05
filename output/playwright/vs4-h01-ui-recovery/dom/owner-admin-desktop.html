@@ -1205,13 +1205,28 @@ button, input, textarea { font: inherit; }
   border-color: var(--cs-color-primary-600);
 }
 .cs-inbox-toolbar {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--cs-space-3);
-  flex-wrap: wrap;
+  align-items: center;
   margin-bottom: var(--cs-space-4);
 }
 .cs-inbox-toolbar .cs-filter-row { margin-top: 0; }
+.cs-inbox-filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-height: 34px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: 0 var(--cs-space-3);
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}
+.cs-inbox-filter-label span {
+  color: var(--cs-color-primary-700);
+}
 .cs-inbox-table {
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1220,7 +1235,7 @@ button, input, textarea { font: inherit; }
 }
 .cs-inbox-head, .cs-inbox-row {
   display: grid;
-  grid-template-columns: minmax(200px, 1.35fr) minmax(64px, .45fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .65fr);
+  grid-template-columns: 28px minmax(210px, 1.45fr) minmax(82px, .55fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .68fr);
   gap: var(--cs-space-2);
   align-items: center;
 }
@@ -1240,6 +1255,21 @@ button, input, textarea { font: inherit; }
   background: var(--cs-color-primary-50);
   box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
 }
+.cs-inbox-select {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-xs);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-surface-primary);
+  font-size: 11px;
+  font-weight: var(--cs-typography-weight-bold);
+}
+.cs-inbox-row.is-selected .cs-inbox-select {
+  border-color: var(--cs-color-primary-600);
+  background: var(--cs-color-primary-600);
+}
 .cs-inbox-item-title {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
@@ -1258,6 +1288,24 @@ button, input, textarea { font: inherit; }
 }
 .cs-inbox-item-title strong { display: block; }
 .cs-inbox-item-title .cs-meta { display: block; }
+.cs-inbox-type-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-secondary);
+}
+.cs-inbox-type-mark {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--cs-radius-xs);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-primary-700);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}
 .cs-inbox-owner {
   display: inline-grid;
   grid-template-columns: 24px minmax(0, 1fr);
@@ -1282,6 +1330,22 @@ button, input, textarea { font: inherit; }
   gap: var(--cs-space-4);
 }
 .cs-inbox-detail h2 { margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }
+.cs-inbox-detail-title {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}
+.cs-inbox-close {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-muted);
+  background: var(--cs-color-surface-primary);
+}
 .cs-inbox-action-panel {
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-md);
@@ -1305,6 +1369,21 @@ button, input, textarea { font: inherit; }
   line-height: var(--cs-typography-label-lineHeight);
 }
 .cs-inbox-preview-note p { margin: 0; color: var(--cs-color-text-secondary); }
+.cs-inbox-linked-list {
+  display: grid;
+  gap: var(--cs-space-2);
+}
+.cs-inbox-linked-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: start;
+  color: var(--cs-color-text-secondary);
+}
+.cs-inbox-linked-row strong {
+  display: block;
+  color: var(--cs-color-text-primary);
+}
 .cs-inbox-receipt-strip {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1322,6 +1401,12 @@ button, input, textarea { font: inherit; }
 .cs-inbox-receipt span { color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }
 .cs-inbox-actions { display: grid; gap: var(--cs-space-2); }
 .cs-inbox-actions .cs-button { justify-content: center; text-align: center; }
+.cs-inbox-foot {
+  padding: var(--cs-space-3) var(--cs-space-4);
+  border-top: 1px solid var(--cs-color-border-default);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}
 .cs-collection-workbench {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
@@ -3401,7 +3486,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Action proposed</strong>
-    <div class="cs-meta">2026-07-05 03:29 UTC</div>
+    <div class="cs-meta">2026-07-05 03:38 UTC</div>
   </div>
 </div>
 
@@ -3409,7 +3494,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path activated</strong>
-    <div class="cs-meta">2026-07-05 03:29 UTC</div>
+    <div class="cs-meta">2026-07-05 03:38 UTC</div>
   </div>
 </div>
 
@@ -3417,7 +3502,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <div class="cs-meta">2026-07-05 03:29 UTC</div>
+    <div class="cs-meta">2026-07-05 03:38 UTC</div>
   </div>
 </div>
 
@@ -3425,7 +3510,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Decision path prepared</strong>
-    <div class="cs-meta">2026-07-05 03:29 UTC</div>
+    <div class="cs-meta">2026-07-05 03:38 UTC</div>
   </div>
 </div>
 
@@ -3433,7 +3518,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-dot"></span>
   <div>
     <strong>Claim drafted</strong>
-    <div class="cs-meta">2026-07-05 03:29 UTC</div>
+    <div class="cs-meta">2026-07-05 03:38 UTC</div>
   </div>
 </div>
 </div>

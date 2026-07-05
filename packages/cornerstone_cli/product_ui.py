@@ -1784,13 +1784,28 @@ button, input, textarea {{ font: inherit; }}
   border-color: var(--cs-color-primary-600);
 }}
 .cs-inbox-toolbar {{
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--cs-space-3);
-  flex-wrap: wrap;
+  align-items: center;
   margin-bottom: var(--cs-space-4);
 }}
 .cs-inbox-toolbar .cs-filter-row {{ margin-top: 0; }}
+.cs-inbox-filter-label {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  min-height: 34px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: 0 var(--cs-space-3);
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-inbox-filter-label span {{
+  color: var(--cs-color-primary-700);
+}}
 .cs-inbox-table {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
@@ -1799,7 +1814,7 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-inbox-head, .cs-inbox-row {{
   display: grid;
-  grid-template-columns: minmax(200px, 1.35fr) minmax(64px, .45fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .65fr);
+  grid-template-columns: 28px minmax(210px, 1.45fr) minmax(82px, .55fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .68fr);
   gap: var(--cs-space-2);
   align-items: center;
 }}
@@ -1819,6 +1834,21 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-primary-50);
   box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
 }}
+.cs-inbox-select {{
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-xs);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-surface-primary);
+  font-size: 11px;
+  font-weight: var(--cs-typography-weight-bold);
+}}
+.cs-inbox-row.is-selected .cs-inbox-select {{
+  border-color: var(--cs-color-primary-600);
+  background: var(--cs-color-primary-600);
+}}
 .cs-inbox-item-title {{
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
@@ -1837,6 +1867,24 @@ button, input, textarea {{ font: inherit; }}
 }}
 .cs-inbox-item-title strong {{ display: block; }}
 .cs-inbox-item-title .cs-meta {{ display: block; }}
+.cs-inbox-type-cell {{
+  display: inline-flex;
+  align-items: center;
+  gap: var(--cs-space-2);
+  color: var(--cs-color-text-secondary);
+}}
+.cs-inbox-type-mark {{
+  width: 20px;
+  height: 20px;
+  border-radius: var(--cs-radius-xs);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--cs-color-border-default);
+  background: var(--cs-color-surface-subtle);
+  color: var(--cs-color-primary-700);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
 .cs-inbox-owner {{
   display: inline-grid;
   grid-template-columns: 24px minmax(0, 1fr);
@@ -1861,6 +1909,22 @@ button, input, textarea {{ font: inherit; }}
   gap: var(--cs-space-4);
 }}
 .cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
+.cs-inbox-detail-title {{
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: start;
+}}
+.cs-inbox-close {{
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  display: grid;
+  place-items: center;
+  color: var(--cs-color-text-muted);
+  background: var(--cs-color-surface-primary);
+}}
 .cs-inbox-action-panel {{
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-md);
@@ -1884,6 +1948,21 @@ button, input, textarea {{ font: inherit; }}
   line-height: var(--cs-typography-label-lineHeight);
 }}
 .cs-inbox-preview-note p {{ margin: 0; color: var(--cs-color-text-secondary); }}
+.cs-inbox-linked-list {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-inbox-linked-row {{
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: start;
+  color: var(--cs-color-text-secondary);
+}}
+.cs-inbox-linked-row strong {{
+  display: block;
+  color: var(--cs-color-text-primary);
+}}
 .cs-inbox-receipt-strip {{
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1901,6 +1980,12 @@ button, input, textarea {{ font: inherit; }}
 .cs-inbox-receipt span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
 .cs-inbox-actions {{ display: grid; gap: var(--cs-space-2); }}
 .cs-inbox-actions .cs-button {{ justify-content: center; text-align: center; }}
+.cs-inbox-foot {{
+  padding: var(--cs-space-3) var(--cs-space-4);
+  border-top: 1px solid var(--cs-color-border-default);
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
 .cs-collection-workbench {{
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
@@ -4912,6 +4997,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     detail = _inbox_detail_panel(items[0] if items else None)
     counts = _inbox_counts(items)
     lane_summary = _inbox_lane_summary(counts)
+    item_range = f"1-{len(items)} of {len(items)} items" if items else "0 of 0 items"
     return f"""
 <section data-product-surface="inbox">
   <div class="cs-page-head">
@@ -4930,6 +5016,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
       {lane_summary}
       <div class="cs-inbox-toolbar">
         <div class="cs-filter-row">
+          <span class="cs-inbox-filter-label"><span>F</span> Filters</span>
           <span class="cs-filter-chip">Type: all visible</span>
           <span class="cs-filter-chip">Owner: personal/default</span>
           <span class="cs-filter-chip">Priority: open first</span>
@@ -4939,9 +5026,10 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
       </div>
       <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
         <div class="cs-inbox-head" aria-hidden="true">
-          <span>Item</span><span>Type</span><span>Owner</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
+          <span></span><span>Item</span><span>Type</span><span>Owner</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
         </div>
         {rows}
+        <div class="cs-inbox-foot">{h(item_range)}</div>
       </div>
     </div>
     {detail}
@@ -4986,6 +5074,7 @@ def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
     priority_state = "failed" if item.get("priority") == "High" else "underReview" if item.get("priority") == "Medium" else "draft"
     return f"""
 <a class="cs-inbox-row{selected_class}" href="{h(item["href"])}" role="listitem">
+  <span class="cs-inbox-select" aria-hidden="true"></span>
   <span class="cs-inbox-item-title">
     <span class="cs-inbox-icon" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>
     <span>
@@ -4993,7 +5082,7 @@ def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
       <span class="cs-meta">{h(item["detail"])}</span>
     </span>
   </span>
-  <span>{h(item.get("type") or item["kind"])}</span>
+  <span class="cs-inbox-type-cell"><span class="cs-inbox-type-mark" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>{h(item.get("type") or item["kind"])}</span>
   <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>{h(item.get("owner") or "Owner")}</span></span>
   <span class="cs-meta">{h(item["date"])}</span>
   <span>{_chip(item.get("priority") or "Medium", priority_state)}</span>
@@ -5020,12 +5109,17 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
 </aside>
 """
     reason = _inbox_waiting_reason(item)
+    linked_sources = _inbox_linked_sources(item)
     return f"""
 <aside class="cs-panel flat cs-inbox-detail">
-  <div>
-    <div class="cs-kicker">Selected item</div>
-    <h2>{h(item["title"])}</h2>
-    <p class="cs-muted">{h(item["detail"])}</p>
+  <div class="cs-inbox-detail-title">
+    <span class="cs-inbox-icon" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>
+    <div>
+      <div class="cs-kicker">Selected item</div>
+      <h2>{h(item["title"])}</h2>
+      <p class="cs-muted">{h(item["detail"])}</p>
+    </div>
+    <span class="cs-inbox-close" aria-hidden="true">x</span>
   </div>
   <div class="cs-row">{_chip(item.get("queue") or "Needs review", "underReview")}{_chip(item.get("priority") or "Medium", "underReview")}{_chip(item["label"], item["state"])}</div>
   <section>
@@ -5046,6 +5140,10 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
     </div>
   </section>
   <section class="cs-inbox-preview-note">
+    <h3>Linked sources</h3>
+    <div class="cs-inbox-linked-list">{linked_sources}</div>
+  </section>
+  <section class="cs-inbox-preview-note">
     <h3>Why this is here</h3>
     <p>{h(reason)}</p>
   </section>
@@ -5062,6 +5160,23 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
     </div>
   </section>
 </aside>
+"""
+
+
+def _inbox_linked_sources(item: dict[str, str]) -> str:
+    title = item.get("title") or "Selected work"
+    source_label = "Source support" if item.get("kind") == "Claim" else "Review sources"
+    if item.get("kind") == "Action":
+        source_label = "Dry-run impact"
+    return f"""
+<a class="cs-inbox-linked-row" href="/search?q={quote(title)}">
+  <span class="cs-inbox-type-mark" aria-hidden="true">S</span>
+  <span><strong>{h(source_label)}</strong><span class="cs-meta">Search matching local records before deciding.</span></span>
+</a>
+<a class="cs-inbox-linked-row" href="/audit">
+  <span class="cs-inbox-type-mark" aria-hidden="true">A</span>
+  <span><strong>Audit trail</strong><span class="cs-meta">Open the local receipt history for this work.</span></span>
+</a>
 """
 
 
