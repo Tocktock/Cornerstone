@@ -372,37 +372,44 @@ button, input, textarea { font: inherit; }
   align-content: start;
 }
 .cs-home-canvas {
-  padding: var(--cs-space-5);
+  padding: var(--cs-space-4);
   display: grid;
-  gap: var(--cs-space-5);
+  gap: var(--cs-space-4);
 }
 .cs-home-canvas .cs-panel-header { margin-bottom: 0; }
 .cs-home-canvas p { max-width: 62ch; }
 .cs-home-workspace {
   display: grid;
-  gap: var(--cs-space-5);
+  gap: var(--cs-space-3);
 }
 .cs-home-source-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--cs-space-3);
+  gap: var(--cs-space-2);
   align-items: center;
   justify-content: center;
+}
+.cs-home-paste-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: stretch;
 }
 .cs-home-source-note {
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
   text-align: center;
 }
 .cs-drop {
-  min-height: 260px;
+  min-height: 196px;
   border: 1px dashed var(--cs-color-border-strong);
   border-radius: var(--cs-radius-lg);
   background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-primary-50) 42%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary));
+    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-primary-50) 34%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary));
   display: grid;
-  gap: var(--cs-space-4);
-  padding: var(--cs-space-5);
+  gap: var(--cs-space-3);
+  padding: var(--cs-space-4);
   align-content: center;
 }
 .cs-drop.is-hot { border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }
@@ -419,14 +426,14 @@ button, input, textarea { font: inherit; }
 .cs-drop textarea:focus, .cs-field:focus { border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }
 .cs-drop-target {
   display: grid;
-  gap: var(--cs-space-3);
+  gap: var(--cs-space-2);
   place-items: center;
   text-align: center;
   padding: 0;
 }
 .cs-drop-mark {
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   border-radius: var(--cs-radius-pill);
   display: grid;
   place-items: center;
@@ -434,10 +441,10 @@ button, input, textarea { font: inherit; }
   color: var(--cs-color-primary-700);
   font-weight: var(--cs-typography-weight-bold);
   border: 1px solid var(--cs-color-primary-100);
-  font-size: 22px;
+  font-size: 18px;
 }
 .cs-drop textarea.cs-drop-input {
-  min-height: 64px;
+  min-height: 48px;
   background: var(--cs-color-surface-primary);
 }
 .cs-or-divider {
@@ -457,7 +464,7 @@ button, input, textarea { font: inherit; }
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-lg);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2) var(--cs-space-3);
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
@@ -2945,7 +2952,7 @@ button, input, textarea { font: inherit; }
   .cs-home-intro { min-height: auto; }
   .cs-home-canvas { padding: var(--cs-space-4); }
   .cs-home-canvas > .cs-panel-header p { display: none; }
-  .cs-home-source-row, .cs-home-item, .cs-next-step { grid-template-columns: 1fr; }
+  .cs-home-source-row, .cs-home-item, .cs-next-step, .cs-home-paste-row { grid-template-columns: 1fr; }
   .cs-drop { min-height: auto; padding: var(--cs-space-3); }
   .cs-drop-target { grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }
   .cs-drop-target p { display: none; }
@@ -3106,7 +3113,7 @@ button, input, textarea { font: inherit; }
             <div class="cs-drop-mark" aria-hidden="true">In</div>
             <div>
               <strong>Drag and drop files or paste notes here</strong>
-              <p class="cs-muted">Supports local text files and pasted notes. The original source stays preserved.</p>
+              <p class="cs-muted">Local files and pasted text become saved sources with the original content preserved.</p>
             </div>
           </div>
           <div class="cs-home-source-row">
@@ -3114,8 +3121,10 @@ button, input, textarea { font: inherit; }
             <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
             <input id="cs-file-input" type="file" hidden="">
           </div>
-          <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-          <div class="cs-home-source-note">Dropped files are read locally by the browser before saving.</div>
+          <div class="cs-home-paste-row" aria-label="Paste text source">
+            <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
+            <div class="cs-home-source-note">Dropped files are read locally by the browser before saving. Paste is optional until you save.</div>
+          </div>
           <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite">Ready for a source.</div>
         </form>
         <div class="cs-or-divider">or ask a question</div>
@@ -3142,22 +3151,22 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/artifacts">View sources</a>
   </div>
   <div class="cs-home-item-list">
-<a class="cs-home-item" href="/claims/claim_772d433452a8e806?view=html">
+<a class="cs-home-item" href="/claims/claim_e54d508ac2ee7ad6?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">C</span>
   <span>
     <p>Claim</p>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
-    <p>2026-07-05 02:16 UTC - Review source support</p>
+    <p>2026-07-05 02:29 UTC - Review source support</p>
   </span>
   <span class="cs-chip cs-chip-evidenceBacked">Source support</span>
 </a>
 
-<a class="cs-home-item" href="/actions/action_73877fa0fd3532c2?view=html">
+<a class="cs-home-item" href="/actions/action_e3051a63559d96a9?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">A</span>
   <span>
     <p>Action</p>
     <h3>Draft a vendor renewal follow-up</h3>
-    <p>2026-07-05 02:16 UTC - Preview before approval</p>
+    <p>2026-07-05 02:29 UTC - Preview before approval</p>
   </span>
   <span class="cs-chip cs-chip-underReview">Needs approval</span>
 </a>
@@ -3167,17 +3176,17 @@ button, input, textarea { font: inherit; }
   <span>
     <p>Source</p>
     <h3>Vendor renewal note: the renewal date is August 1, finance flagged a pr...</h3>
-    <p>2026-07-05 02:16 UTC - Original text preserved</p>
+    <p>2026-07-05 02:29 UTC - Original text preserved</p>
   </span>
   <span class="cs-chip cs-chip-searchable">Searchable</span>
 </a>
 
-<a class="cs-home-item" href="/briefs/brief_329124beb9d4544a?view=html">
+<a class="cs-home-item" href="/briefs/brief_761ad90f467e2ffe?view=html">
   <span class="cs-home-item-icon" aria-hidden="true">B</span>
   <span>
     <p>Brief</p>
     <h3>Brief for vendor renewal</h3>
-    <p>2026-07-05 02:16 UTC - Draft from visible sources</p>
+    <p>2026-07-05 02:29 UTC - Draft from visible sources</p>
   </span>
   <span class="cs-chip cs-chip-draft">Keyword summary</span>
 </a>
@@ -3252,7 +3261,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-activity-icon" aria-hidden="true">S</span>
   <div>
     <strong>Source opened</strong>
-    <p class="cs-meta">Artifact / art_085c96... / 2026-07-05 02:16 UTC</p>
+    <p class="cs-meta">Artifact / art_085c96... / 2026-07-05 02:29 UTC</p>
   </div>
 </div>
 
@@ -3260,7 +3269,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-activity-icon" aria-hidden="true">A</span>
   <div>
     <strong>Action proposed</strong>
-    <p class="cs-meta">Action / action_738... / 2026-07-05 02:16 UTC</p>
+    <p class="cs-meta">Action / action_e30... / 2026-07-05 02:29 UTC</p>
   </div>
 </div>
 
@@ -3268,7 +3277,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-activity-icon" aria-hidden="true">D</span>
   <div>
     <strong>Decision path activated</strong>
-    <p class="cs-meta">Mission / mission_e4... / 2026-07-05 02:16 UTC</p>
+    <p class="cs-meta">Mission / mission_da... / 2026-07-05 02:29 UTC</p>
   </div>
 </div>
 
@@ -3276,7 +3285,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-activity-icon" aria-hidden="true">D</span>
   <div>
     <strong>Workspace mode recorded</strong>
-    <p class="cs-meta">Workspace / 3e548f87d1... / 2026-07-05 02:16 UTC</p>
+    <p class="cs-meta">Workspace / 3e548f87d1... / 2026-07-05 02:29 UTC</p>
   </div>
 </div>
 
@@ -3284,7 +3293,7 @@ button, input, textarea { font: inherit; }
   <span class="cs-activity-icon" aria-hidden="true">D</span>
   <div>
     <strong>Decision path prepared</strong>
-    <p class="cs-meta">Mission / mission_e4... / 2026-07-05 02:16 UTC</p>
+    <p class="cs-meta">Mission / mission_da... / 2026-07-05 02:29 UTC</p>
   </div>
 </div>
 </div>
@@ -3296,11 +3305,11 @@ button, input, textarea { font: inherit; }
     <h2>Latest brief</h2>
     <span class="cs-chip cs-chip-draft">Keyword summary</span>
   </div>
-  <a class="cs-list-row" href="/briefs/brief_329124beb9d4544a?view=html">
+  <a class="cs-list-row" href="/briefs/brief_761ad90f467e2ffe?view=html">
     <div>
       <h3>Brief for vendor renewal</h3>
       <p>Vendor renewal note: the renewal date is August 1, finance flagged a price increase, and the decision owner needs a source-backed brief before action.</p>
-      <div class="cs-meta">2026-07-05 02:16 UTC</div>
+      <div class="cs-meta">2026-07-05 02:29 UTC</div>
     </div>
     <span class="cs-meta">Open</span>
   </a>
@@ -3313,32 +3322,32 @@ button, input, textarea { font: inherit; }
     <a class="cs-meta" href="/inbox">Open inbox</a>
   </div>
   <div class="cs-list">
-<a class="cs-list-row" href="/briefs/brief_329124beb9d4544a?view=html">
+<a class="cs-list-row" href="/briefs/brief_761ad90f467e2ffe?view=html">
   <div>
     <div class="cs-meta">Brief</div>
     <h3>Brief for vendor renewal</h3>
     <p>Check sources and gaps before sharing.</p>
-    <div class="cs-meta">2026-07-05 02:16 UTC</div>
+    <div class="cs-meta">2026-07-05 02:29 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-draft">Keyword summary</span></div>
 </a>
 
-<a class="cs-list-row" href="/claims/claim_772d433452a8e806?view=html">
+<a class="cs-list-row" href="/claims/claim_e54d508ac2ee7ad6?view=html">
   <div>
     <div class="cs-meta">Claim</div>
     <h3>The vendor renewal needs a decision before the August 1 renewal date.</h3>
     <p>Needs source support before it can be approved.</p>
-    <div class="cs-meta">2026-07-05 02:16 UTC</div>
+    <div class="cs-meta">2026-07-05 02:29 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-evidenceBacked">Source support</span></div>
 </a>
 
-<a class="cs-list-row" href="/actions/action_73877fa0fd3532c2?view=html">
+<a class="cs-list-row" href="/actions/action_e3051a63559d96a9?view=html">
   <div>
     <div class="cs-meta">Action</div>
     <h3>Draft a vendor renewal follow-up</h3>
     <p>Preview the impact before any external write.</p>
-    <div class="cs-meta">2026-07-05 02:16 UTC</div>
+    <div class="cs-meta">2026-07-05 02:29 UTC</div>
   </div>
   <div class="cs-row"><span class="cs-chip cs-chip-underReview">Needs approval</span></div>
 </a>

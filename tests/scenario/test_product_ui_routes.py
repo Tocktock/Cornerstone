@@ -110,6 +110,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn('data-product-surface="home"', home)
         self.assertIn("Drop anything, or ask what we know", home)
         self.assertIn("Drag and drop files or paste notes here", home)
+        self.assertIn("Paste text source", home)
+        self.assertIn("Dropped files are read locally by the browser before saving.", home)
         self.assertIn("Browse files", home)
         self.assertIn("Save source", home)
         self.assertIn("Ask the workspace", home)
