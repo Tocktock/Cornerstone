@@ -81,6 +81,7 @@ PRODUCT_ALPHA_NAV = [
     ("Home", "#home-ops-inbox"),
     ("Search", "#search"),
     ("Artifacts", "#artifact-viewer"),
+    ("Briefs", "#vs4-brief-detail"),
     ("Claims", "#claim-builder"),
     ("Actions", "#action-card"),
 ]
@@ -1568,7 +1569,7 @@ def render_home(readiness: dict[str, Any], scenario: str | None = None, autorun_
   <main>
     <nav aria-label="Primary">
       <p class="nav-caption">Daily work</p>
-      <ul id="primary-nav" data-vs4-nav="Home,Search,Artifacts,Claims,Actions">{nav_items}</ul>
+      <ul id="primary-nav" data-vs4-nav="Home,Search,Artifacts,Briefs,Claims,Actions">{nav_items}</ul>
     </nav>
     <div>
       <section
@@ -2965,7 +2966,7 @@ Search phrase: alpha-evidence-anchor.</code>
         home,
         search,
         artifact,
-        small_nav: ["Home", "Search", "Artifacts", "Claims", "Actions"].every((label) => navText.includes(label)) && !navText.includes("Connectors") && !navText.includes("Ontology"),
+        small_nav: ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions"].every((label) => navText.includes(label)) && !navText.includes("Connectors") && !navText.includes("Ontology"),
         prominent_global_search: Boolean(document.querySelector(".global-search")),
         trust_evidence_chips: chips,
         reference_surfaces: referenceRows,
@@ -3794,7 +3795,7 @@ Search phrase: alpha-evidence-anchor.</code>
         skip_link_present: Boolean(document.querySelector("[data-vs4-skip-link='daily-work']")),
         skip_link_target_exists: Boolean(document.getElementById("home-ops-inbox")),
         landmarks_present: Boolean(document.querySelector("header")) && Boolean(document.querySelector("main")) && Boolean(document.querySelector("nav[aria-label='Primary']")),
-        primary_nav_keyboard_reachable: navLabels.join(",") === "Home,Search,Artifacts,Claims,Actions",
+        primary_nav_keyboard_reachable: navLabels.join(",") === "Home,Search,Artifacts,Briefs,Claims,Actions",
         focusable_controls_present: focusable.length >= 20,
         interactive_accessible_names_all: unnamedControls.length === 0,
         continue_links_target_existing_sections: continueLinks.length >= 5 && invalidContinueLinks.length === 0,
@@ -3809,7 +3810,7 @@ Search phrase: alpha-evidence-anchor.</code>
         claim_trust_ladder_labelled: Boolean(document.querySelector("[aria-label='Claim trust ladder']")),
         product_language_first_in_focus_order: firstLabels.includes("Skip to daily work") &&
           firstLabels.includes("Global search") &&
-          ["Home", "Search", "Artifacts", "Claims", "Actions"].every((label) => firstLabels.includes(label)) &&
+          ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions"].every((label) => firstLabels.includes(label)) &&
           forbiddenFocusTerms.every((term) => !firstLabels.includes(term)),
         visible_focus_style: visibleFocusStyle,
         no_keyboard_trap: focusable.length >= 20 && invalidLinks.length === 0,
@@ -4264,7 +4265,7 @@ Search phrase: alpha-evidence-anchor.</code>
         scenario_verify_command_visible: commands.some((command) => command.includes("cornerstone scenario verify vs4-product-alpha-ui-daily-loop --json")),
         make_target_visible: commands.includes("make verify-vs4-product-alpha-human-review-handoff"),
         details_progressive: Boolean(detail && detail.tagName.toLowerCase() === "details" && detail.open === false),
-        normal_nav_unchanged: Array.from(document.querySelectorAll("#primary-nav a")).map((node) => node.textContent.trim()).join(",") === "Home,Search,Artifacts,Claims,Actions",
+        normal_nav_unchanged: Array.from(document.querySelectorAll("#primary-nav a")).map((node) => node.textContent.trim()).join(",") === "Home,Search,Artifacts,Briefs,Claims,Actions",
         human_acceptance_unclaimed: !document.querySelector("[data-vs4-human-ux-claimed='true']") &&
           Boolean(handoff && handoff.dataset.vs4HumanUxClaimed === "false"),
         forbidden_readiness_overclaim_absent: !document.querySelector("[data-vs4-production-claimed='true']") &&

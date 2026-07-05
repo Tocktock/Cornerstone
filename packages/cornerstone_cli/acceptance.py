@@ -1586,7 +1586,7 @@ def capture_vs4_product_alpha_browser_proof(
     no_horizontal_overflow = layout.get("horizontal_overflow") is False
     first_value_ok = layout.get("first_value_order_ok") is True
     mobile_first_value_ok = not responsive_required or layout.get("mobile_first_value_before_nav") is True
-    nav_labels = ["Home", "Search", "Artifacts", "Claims", "Actions", "Inbox", "Audit", "Owner"]
+    nav_labels = ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"]
     primary_nav_html = dom[dom.find('<nav class="cs-nav"') : dom.find("</nav>", dom.find('<nav class="cs-nav"'))] if '<nav class="cs-nav"' in dom else ""
     forbidden_readiness_claims = [
         "production_release_ready=true",
@@ -1626,7 +1626,11 @@ def capture_vs4_product_alpha_browser_proof(
         "action_card_visible": route_markers.get("action_local_mode_visible") is True,
         "learn_review_visible": True,
         "recent_activity_visible": "/audit" in product_routes and route_markers.get("product_routes_reachable") is True,
-        "workspace_context_visible": "Personal / default" in dom and "Local workspace" in dom,
+        "workspace_context_visible": "Evidence-first workspace" in dom
+        and "Local workspace" in dom
+        and "Workspace posture" in dom
+        and "Scope" in dom
+        and "Personal" in dom,
         "local_mode_boundary_visible": "Local only" in dom and route_markers.get("action_local_mode_visible") is True,
         "evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
         "general_packs_visible": True,
@@ -1973,7 +1977,7 @@ def capture_vs4_product_alpha_browser_proof(
     primary_nav_start = dom.find('id="primary-nav"')
     primary_nav_end = dom.find("</ul>", primary_nav_start) if primary_nav_start >= 0 else -1
     primary_nav_html = dom[primary_nav_start:primary_nav_end] if primary_nav_start >= 0 and primary_nav_end >= 0 else ""
-    nav_labels = ["Home", "Search", "Artifacts", "Claims", "Actions"]
+    nav_labels = ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions"]
     forbidden_readiness_claims = [
         "production_release_ready=true",
         "vs4-production-claimed=\"true\"",

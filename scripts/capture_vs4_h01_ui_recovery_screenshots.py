@@ -45,7 +45,7 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 )
 
 DESKTOP_ROUTES = [
-    {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Drop anything, or ask what we know", "Drag and drop files or paste notes here", "Browse files", "Ask the workspace", "Recent items", "Knowledge states", "Suggested next steps", "Recent activity"]},
+    {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Evidence-first workspace", "Source-backed decisions", "Workspace command", "Receipts required", "Drop anything, or ask what we know", "Drag and drop files or paste notes here", "Browse files", "Ask the workspace", "Recent items", "Knowledge states", "Suggested next steps", "Recent activity"]},
     {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search command center", "Search the workspace", "Type filters", "Sort by: keyword match", "Current search controls", "Search mode: local keyword", "Result receipt", "Open result", "What we found", "Suggested follow-ups"]},
     {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Decision queue", "Brief reading queue", "Review lanes", "Brief queue", "Source coverage", "Use next", "Brief posture"]},

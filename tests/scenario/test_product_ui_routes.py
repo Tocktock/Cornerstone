@@ -178,12 +178,25 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("text/html", content_type)
                 self.assertIn('data-product-shell="cornerstone"', html)
                 self.assertIn("CornerStone", html)
-                for label in ["Home", "Search", "Artifacts", "Claims", "Actions", "Inbox", "Audit", "Owner"]:
-                    self.assertIn(f">{label}<", html)
+                self.assertIn("Evidence-first workspace", html)
+                self.assertIn("Source-backed decisions", html)
+                self.assertIn("Drop input, ask, review the brief, then decide with receipts.", html)
+                self.assertIn("Workspace command", html)
+                self.assertIn("Search saved work and open receipts.", html)
+                self.assertIn("Receipts required", html)
+                self.assertIn('aria-label="Workspace posture"', html)
+                self.assertIn("Review queue", html)
+                self.assertIn("cs-nav-count", html)
+                for label in ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"]:
+                    self.assertIn(f"<span>{label}</span>", html)
                 self.assertIn("--cs-color-background-app:", html)
                 self.assertIn("--cs-state-saved-bg:", html)
                 self.assertIn("--cs-radius-pill:", html)
                 self.assert_product_surface_is_clean(html)
+
+        briefs_html = self.fetch_product_html("/briefs")
+        self.assertIn('href="/briefs" aria-current="page"', briefs_html)
+        self.assertNotIn('href="/" aria-current="page"', briefs_html)
 
     def test_day_zero_product_routes_offer_composed_empty_states(self) -> None:
         expected = {

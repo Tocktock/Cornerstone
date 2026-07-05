@@ -12171,15 +12171,16 @@ class ScaffoldCliTests(unittest.TestCase):
         ops_markers = payload["browser_proof"]["ops_inbox_triage_markers"]
         mobile_ops_markers = payload["mobile_browser_proof"]["ops_inbox_triage_markers"]
         for marker in [
-            "lane_filter_interactive",
-            "row_selection_interactive",
-            "keyboard_selection_interactive",
-            "selected_detail_updates_from_row",
-            "selected_detail_continue_target_matches_item",
-            "workspace_scope_persists_after_selection",
-            "evidence_audit_refs_persist_after_selection",
-            "journey_path_visible",
-            "no_live_writeback_after_selection",
+            "runtime_backed_after_drop_ask",
+            "runtime_selected_detail_record_refs_visible",
+            "runtime_rows_have_record_refs",
+            "runtime_mission_control_api_parity",
+            "journey_timeline_visible",
+            "journey_timeline_evidence_refs_visible",
+            "journey_timeline_audit_refs_visible",
+            "journey_timeline_no_live_writeback",
+            "loop_lineage_guard_no_authority_expansion",
+            "loop_lineage_guard_no_live_writeback",
         ]:
             self.assertTrue(ops_markers[marker], marker)
             self.assertTrue(mobile_ops_markers[marker], marker)
@@ -12223,7 +12224,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any(stage["stage"] == "Action" and stage["visible"] for stage in loop_view["stages"]))
         self.assertEqual(
             payload["browser_proof"]["primary_nav_labels"],
-            ["Home", "Search", "Artifacts", "Claims", "Actions"],
+            ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"],
         )
         self.assertEqual(
             payload["proof_boundary"]["vs4_slice_011_ops_inbox_triage_detail"],

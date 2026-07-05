@@ -70,7 +70,7 @@ def render_product_page(
     elif route == "/briefs":
         title = "Briefs"
         content = _brief_list_page(ctx)
-        active = "/"
+        active = "/briefs"
     elif route == "/claims":
         title = "Claims"
         content = _claim_list_page(ctx)
@@ -682,27 +682,67 @@ button, input, textarea {{ font: inherit; }}
   top: 0;
   height: 100vh;
   border-right: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-primary);
+  background:
+    linear-gradient(180deg, var(--cs-color-surface-primary), color-mix(in srgb, var(--cs-color-surface-subtle) 68%, var(--cs-color-surface-primary)));
   padding: var(--cs-space-6) var(--cs-space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--cs-space-6);
+  gap: var(--cs-space-5);
 }}
-.cs-brand {{ display: grid; gap: var(--cs-space-1); }}
+.cs-brand {{
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: center;
+}}
 .cs-brand-mark {{
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: var(--cs-radius-md);
-  background: var(--cs-color-primary-600);
+  background:
+    linear-gradient(135deg, var(--cs-color-primary-600), var(--cs-color-primary-700));
   color: var(--cs-color-text-inverse);
   display: grid;
   place-items: center;
   font-weight: var(--cs-typography-weight-bold);
+  box-shadow: 0 10px 24px rgba(37, 87, 209, .18);
 }}
 .cs-brand-name {{ font-weight: var(--cs-typography-weight-bold); font-size: var(--cs-typography-sectionTitle-fontSize); }}
 .cs-brand-sub {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-nav {{ display: grid; gap: var(--cs-space-1); }}
-.cs-nav-group {{ display: grid; gap: var(--cs-space-1); }}
+.cs-product-spine {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-product-spine strong {{
+  font-size: var(--cs-typography-label-fontSize);
+  line-height: var(--cs-typography-label-lineHeight);
+}}
+.cs-product-spine p {{
+  margin: 0;
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+  line-height: var(--cs-typography-metadata-lineHeight);
+}}
+.cs-spine-steps {{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--cs-space-1);
+}}
+.cs-spine-steps span {{
+  min-height: 28px;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
+  padding: 4px 6px;
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-nav {{ display: grid; gap: var(--cs-space-4); }}
+.cs-nav-group {{ display: grid; gap: var(--cs-space-2); }}
 .cs-nav-label {{
   color: var(--cs-color-text-muted);
   font-size: var(--cs-typography-label-fontSize);
@@ -715,13 +755,56 @@ button, input, textarea {{ font: inherit; }}
   border-radius: var(--cs-radius-md);
   padding: var(--cs-space-2) var(--cs-space-3);
   color: var(--cs-color-text-secondary);
-  display: flex;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--cs-space-2);
   font-weight: var(--cs-typography-weight-medium);
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
 }}
-.cs-nav a:hover, .cs-nav a:focus-visible {{ background: var(--cs-color-surface-subtle); outline: none; }}
-.cs-nav a[aria-current="page"] {{ background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }}
+.cs-nav a:hover, .cs-nav a:focus-visible {{ background: var(--cs-color-surface-primary); outline: none; box-shadow: var(--cs-shadow-sm); }}
+.cs-nav a[aria-current="page"] {{
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
+}}
+.cs-nav-mark {{
+  width: 26px;
+  height: 26px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--cs-color-surface-primary) 72%, var(--cs-color-surface-subtle));
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-nav a[aria-current="page"] .cs-nav-mark {{
+  background: var(--cs-color-surface-primary);
+  color: var(--cs-color-primary-700);
+}}
+.cs-nav-count {{
+  color: var(--cs-color-text-muted);
+  font-size: var(--cs-typography-metadata-fontSize);
+  font-variant-numeric: tabular-nums;
+}}
+.cs-sidebar-status {{
+  margin-top: auto;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-sidebar-status-row {{
+  display: flex;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  font-size: var(--cs-typography-metadata-fontSize);
+}}
+.cs-sidebar-status-row strong {{ color: var(--cs-color-text-primary); font-variant-numeric: tabular-nums; }}
 .cs-main {{ min-width: 0; }}
 .cs-topbar {{
   min-height: var(--cs-layout-headerHeight);
@@ -737,9 +820,25 @@ button, input, textarea {{ font: inherit; }}
   top: 0;
   z-index: 2;
 }}
+.cs-command {{
+  flex: 1 1 760px;
+  max-width: 860px;
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: var(--cs-space-3);
+  align-items: stretch;
+}}
+.cs-command-copy {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2) var(--cs-space-3);
+  display: grid;
+  gap: 2px;
+}}
+.cs-command-copy strong {{ font-size: var(--cs-typography-label-fontSize); line-height: var(--cs-typography-label-lineHeight); }}
+.cs-command-copy span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
 .cs-search {{
-  flex: 1 1 520px;
-  max-width: 680px;
   display: flex;
   align-items: center;
   gap: var(--cs-space-2);
@@ -3293,6 +3392,11 @@ button, input, textarea {{ font: inherit; }}
   .cs-nav-group {{ grid-template-columns: repeat(2, minmax(0, 1fr)); }}
   .cs-nav-label {{ grid-column: 1 / -1; }}
   .cs-topbar {{ order: 2; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
+  .cs-command {{
+    max-width: none;
+    grid-template-columns: 1fr;
+  }}
+  .cs-command-copy {{ display: none; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
   .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
@@ -3394,7 +3498,7 @@ def _css_name(value: str) -> str:
 
 def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any], q: str) -> str:
     css = _token_css(root)
-    nav = _nav(active)
+    nav = _nav(active, ctx)
     topbar = _topbar(q, ctx)
     script = _home_script()
     return f"""<!doctype html>
@@ -3414,9 +3518,19 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
         <div class="cs-brand-mark">CS</div>
         <div>
           <div class="cs-brand-name">CornerStone</div>
-          <div class="cs-brand-sub">Personal / default</div>
+          <div class="cs-brand-sub">Evidence-first workspace</div>
         </div>
       </div>
+      <section class="cs-product-spine" aria-label="Source-backed decisions">
+        <strong>Source-backed decisions</strong>
+        <p>Drop input, ask, review the brief, then decide with receipts.</p>
+        <div class="cs-spine-steps">
+          <span>Drop and ask</span>
+          <span>Brief</span>
+          <span>Decision</span>
+          <span>Audit</span>
+        </div>
+      </section>
       {nav}
     </aside>
     <main class="cs-main" id="main-content" tabindex="-1">
@@ -3432,11 +3546,23 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
 """
 
 
-def _nav(active: str) -> str:
+def _nav(active: str, ctx: dict[str, Any]) -> str:
+    counts = {
+        "/": len(ctx["artifacts"]),
+        "/search": len(ctx["artifacts"]) + len(ctx["briefs"]) + len(ctx["claims"]) + len(ctx["actions"]),
+        "/artifacts": len(ctx["artifacts"]),
+        "/briefs": len(ctx["briefs"]),
+        "/claims": len(ctx["claims"]),
+        "/actions": len(ctx["actions"]),
+        "/inbox": len(ctx["inbox"]),
+        "/audit": len(ctx["audit"]),
+        "/review": 0,
+    }
     primary = [
         ("/", "Home"),
         ("/search", "Search"),
         ("/artifacts", "Artifacts"),
+        ("/briefs", "Briefs"),
         ("/claims", "Claims"),
         ("/actions", "Actions"),
     ]
@@ -3449,19 +3575,36 @@ def _nav(active: str) -> str:
 <nav class="cs-nav">
   <div class="cs-nav-group">
     <div class="cs-nav-label">Workspace</div>
-    {''.join(_nav_link(href, label, active) for href, label in primary)}
+    {''.join(_nav_link(href, label, active, counts.get(href, 0)) for href, label in primary)}
   </div>
   <div class="cs-nav-group">
     <div class="cs-nav-label">Operations</div>
-    {''.join(_nav_link(href, label, active) for href, label in secondary)}
+    {''.join(_nav_link(href, label, active, counts.get(href, 0)) for href, label in secondary)}
   </div>
+  {_sidebar_status(ctx)}
 </nav>
 """
 
 
-def _nav_link(href: str, label: str, active: str) -> str:
+def _nav_link(href: str, label: str, active: str, count: int) -> str:
     current = ' aria-current="page"' if href == active else ""
-    return f'<a href="{h(href)}"{current}>{h(label)}</a>'
+    mark = label[:1].upper()
+    count_label = "" if href == "/review" else str(count)
+    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark" aria-hidden="true">{h(mark)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(count_label)}</span></a>'
+
+
+def _sidebar_status(ctx: dict[str, Any]) -> str:
+    review_count = len(ctx["inbox"])
+    source_count = len(ctx["artifacts"])
+    decision_count = len(ctx["claims"]) + len(ctx["actions"])
+    return f"""
+<section class="cs-sidebar-status" aria-label="Workspace posture">
+  <div class="cs-sidebar-status-row"><span>Scope</span><strong>Personal</strong></div>
+  <div class="cs-sidebar-status-row"><span>Sources</span><strong>{h(source_count)}</strong></div>
+  <div class="cs-sidebar-status-row"><span>Decisions</span><strong>{h(decision_count)}</strong></div>
+  <div class="cs-sidebar-status-row"><span>Review queue</span><strong>{h(review_count)}</strong></div>
+</section>
+"""
 
 
 def _topbar(q: str, ctx: dict[str, Any]) -> str:
@@ -3469,14 +3612,21 @@ def _topbar(q: str, ctx: dict[str, Any]) -> str:
     label = f"{count} saved source" + ("" if count == 1 else "s")
     return f"""
 <header class="cs-topbar">
-  <form class="cs-search" action="/search" method="get">
-    <span aria-hidden="true">Search</span>
-    <input name="q" value="{h(q)}" placeholder="Search saved sources, claims, and drafts">
-    <button type="submit">Go</button>
-  </form>
+  <div class="cs-command" aria-label="Workspace command">
+    <div class="cs-command-copy">
+      <strong>Workspace command</strong>
+      <span>Search saved work and open receipts.</span>
+    </div>
+    <form class="cs-search" action="/search" method="get">
+      <span aria-hidden="true">Search</span>
+      <input name="q" value="{h(q)}" placeholder="Search saved sources, claims, and drafts">
+      <button type="submit">Go</button>
+    </form>
+  </div>
   <div class="cs-row">
     {_chip(label, "saved")}
     {_chip("Local only", "searchable")}
+    {_chip("Receipts required", "underReview")}
   </div>
 </header>
 """
