@@ -2479,11 +2479,11 @@ button, input, textarea {{ font: inherit; }}
 .cs-brief-titlebar {{
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-3);
+  gap: var(--cs-space-2);
   align-items: start;
-  padding-bottom: var(--cs-space-4);
+  padding-bottom: var(--cs-space-3);
   border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-4);
+  margin-bottom: var(--cs-space-3);
 }}
 .cs-brief-titlebar .cs-brief-actions {{
   justify-content: flex-start;
@@ -2518,7 +2518,7 @@ button, input, textarea {{ font: inherit; }}
   flex: 1 1 24rem;
   min-width: 0;
   max-width: 58ch;
-  font-size: 30px;
+  font-size: 28px;
   line-height: 1.16;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -2529,33 +2529,32 @@ button, input, textarea {{ font: inherit; }}
 .cs-brief-fact-strip {{
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
+  gap: var(--cs-space-2);
 }}
 .cs-brief-fact {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-md);
   background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
+  padding: var(--cs-space-2);
   display: grid;
-  gap: var(--cs-space-1);
+  gap: 2px;
 }}
-.cs-brief-fact strong {{ font-size: var(--cs-typography-sectionTitle-fontSize); line-height: var(--cs-typography-sectionTitle-lineHeight); }}
+.cs-brief-fact strong {{ font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
 .cs-brief-receipt-panel {{
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-lg);
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 50%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 58%);
-  padding: var(--cs-space-4);
+  padding: var(--cs-space-3);
   display: grid;
-  gap: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-brief-receipt-grid {{
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr));
   gap: var(--cs-space-3);
-  align-items: stretch;
+  margin-bottom: var(--cs-space-3);
+}}
+.cs-brief-lead-grid {{
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .75fr);
+  gap: var(--cs-space-3);
+  align-items: start;
 }}
 .cs-brief-answer-card, .cs-brief-receipt-card {{
   border: 1px solid var(--cs-color-border-default);
@@ -2566,6 +2565,11 @@ button, input, textarea {{ font: inherit; }}
   align-content: start;
   gap: var(--cs-space-2);
   min-width: 0;
+}}
+.cs-brief-answer-card.is-primary {{
+  min-height: 100%;
+  border-color: var(--cs-color-primary-100);
+  background: var(--cs-color-surface-primary);
 }}
 .cs-brief-answer-card p, .cs-brief-receipt-card p {{
   margin: 0;
@@ -2578,10 +2582,14 @@ button, input, textarea {{ font: inherit; }}
   font-size: 16px;
   line-height: 1.65;
 }}
+.cs-brief-receipt-stack {{
+  display: grid;
+  gap: var(--cs-space-2);
+}}
 .cs-brief-receipt-card strong {{
   color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
+  font-size: var(--cs-typography-body-fontSize);
+  line-height: var(--cs-typography-body-lineHeight);
   overflow-wrap: anywhere;
 }}
 .cs-summary-card {{
@@ -3714,7 +3722,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-topbar-actions {{ justify-content: flex-start; }}
   .cs-search {{ max-width: none; flex-basis: auto; }}
   .cs-content {{ order: 1; padding: var(--cs-space-4); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-receipt-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
+  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-meta, .cs-policy-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
   .cs-home-intro {{ min-height: auto; }}
@@ -6018,39 +6026,36 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         <a class="cs-button secondary" href="/audit">Open audit trail</a>
       </div>
     </header>
-    <div class="cs-brief-fact-strip" aria-label="Brief status">
-      <div class="cs-brief-fact"><span class="cs-meta">State</span><strong>{h(label)}</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Mode</span><strong>{h(mode)}</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Created</span><strong>{h(_display_date(brief))}</strong></div>
-    </div>
     <section class="cs-brief-receipt-panel" aria-label="Receipt summary">
       <div class="cs-panel-header">
         <div>
-          <h2>Receipt summary</h2>
-          <p class="cs-muted">Decision snapshot, source support, and label state stay together before any action.</p>
+          <span class="cs-meta">Receipt summary</span>
+          <h2>Brief answer and receipt</h2>
+          <p class="cs-muted">Read the answer, source support, and label state before promoting any finding.</p>
         </div>
         {receipt_chip}
       </div>
-      <div class="cs-brief-receipt-grid">
-        <div class="cs-brief-answer-card">
+      <div class="cs-brief-lead-grid">
+        <div class="cs-brief-answer-card is-primary">
           <span class="cs-meta">What we found</span>
           <p>{h(summary_text)}</p>
+          <div class="cs-brief-fact-strip" aria-label="Brief status">
+            <div class="cs-brief-fact"><span class="cs-meta">Decision snapshot</span><strong>Reviewed draft</strong></div>
+            <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
+            <div class="cs-brief-fact"><span class="cs-meta">Drafted findings</span><strong>{h(finding_count)}</strong></div>
+          </div>
         </div>
-        <div class="cs-brief-receipt-card">
-          <span class="cs-meta">Decision snapshot</span>
-          <strong>Reviewed draft</strong>
-          <p>This brief should be used only with the findings, sources, and limits visible on this page.</p>
-        </div>
-        <div class="cs-brief-receipt-card">
-          <span class="cs-meta">Citation receipt</span>
-          <strong>{h(citation_receipt["resolved_citation_count"])} / {h(citation_receipt["citation_refs_count"])} resolved</strong>
-          <p>{h(receipt_note)}</p>
-        </div>
-        <div class="cs-brief-receipt-card">
-          <span class="cs-meta">Label state</span>
-          <strong>{h(label_state)}</strong>
-          <p>{h(str(citation_receipt["citation_check_refs_count"]))} citation check ref{"s" if citation_receipt["citation_check_refs_count"] != 1 else ""}; {h(citation_receipt["citation_ref_kind"])} refs.</p>
+        <div class="cs-brief-receipt-stack">
+          <div class="cs-brief-receipt-card">
+            <span class="cs-meta">Citation receipt</span>
+            <strong>{h(citation_receipt["resolved_citation_count"])} / {h(citation_receipt["citation_refs_count"])} resolved</strong>
+            <p>{h(receipt_note)}</p>
+          </div>
+          <div class="cs-brief-receipt-card">
+            <span class="cs-meta">Label state</span>
+            <strong>{h(label_state)}</strong>
+            <p>{h(str(citation_receipt["citation_check_refs_count"]))} citation check ref{"s" if citation_receipt["citation_check_refs_count"] != 1 else ""}; {h(citation_receipt["citation_ref_kind"])} refs.</p>
+          </div>
         </div>
       </div>
     </section>
