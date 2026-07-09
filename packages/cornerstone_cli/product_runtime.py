@@ -390,9 +390,9 @@ def _utc_from_timestamp(timestamp: float) -> str:
     return datetime.fromtimestamp(timestamp, timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _git_commit(root: Path) -> str | None:
+def _git_revision(root: Path, *revision: str) -> str | None:
     result = subprocess.run(
-        ["git", "rev-parse", "--short", "HEAD"],
+        ["git", "rev-parse", *revision],
         cwd=root,
         text=True,
         capture_output=True,
@@ -403,9 +403,70 @@ def _git_commit(root: Path) -> str | None:
     return result.stdout.strip() or None
 
 
+def _git_commit(root: Path) -> str | None:
+    return _git_revision(root, "--short", "HEAD")
+
+
+def _tracked_source_worktree_dirty(root: Path) -> bool | None:
+    result = subprocess.run(
+        [
+            "git",
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=no",
+            "--",
+            ".",
+            ":(exclude)docs/verification-reports/**",
+            ":(exclude)reports/**",
+            ":(exclude)tmp/**",
+            ":(exclude)data/local/**",
+        ],
+        cwd=root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    return bool(result.stdout.strip())
+
+
+def _full_object_id(value: Any) -> str | None:
+    if not isinstance(value, str) or len(value) not in {40, 64}:
+        return None
+    if any(character not in "0123456789abcdefABCDEF" for character in value):
+        return None
+    return value.lower()
+
+
+def _final_commit_full(source_tree: dict[str, Any]) -> str | None:
+    direct = _full_object_id(source_tree.get("final_commit_full")) or _full_object_id(
+        source_tree.get("final_commit")
+    )
+    if direct:
+        return direct
+    final_commit = source_tree.get("final_commit")
+    verified_base_commit = source_tree.get("verified_base_commit")
+    verified_base_commit_full = _full_object_id(source_tree.get("verified_base_commit_full"))
+    if (
+        isinstance(final_commit, str)
+        and isinstance(verified_base_commit, str)
+        and final_commit == verified_base_commit
+        and 7 <= len(final_commit) < len(verified_base_commit_full or "")
+        and verified_base_commit_full is not None
+        and verified_base_commit_full.startswith(final_commit.lower())
+    ):
+        return verified_base_commit_full
+    return None
+
+
 def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
     report_dir = root / "reports/scenario"
     candidates = sorted(report_dir.glob(f"{scenario_set}-*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    current_git_commit = _git_commit(root)
+    current_git_commit_full = _full_object_id(_git_revision(root, "HEAD"))
+    current_tree_hash = _full_object_id(_git_revision(root, "HEAD^{tree}"))
+    current_tracked_source_dirty = _tracked_source_worktree_dirty(root)
     for path in candidates:
         try:
             data = json.loads(path.read_text())
@@ -414,12 +475,44 @@ def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
         summary = data.get("summary", {})
         if data.get("scenario_set") != scenario_set or data.get("status") != "success" or summary.get("blocking") != 0:
             continue
+        source_tree = data.get("source_tree") if isinstance(data.get("source_tree"), dict) else {}
+        report_git_commit = data.get("ids", {}).get("git_commit")
+        verified_base_commit = source_tree.get("verified_base_commit") or report_git_commit
+        verified_base_commit_full = source_tree.get("verified_base_commit_full")
+        final_commit = source_tree.get("final_commit")
+        verified_tree_hash = _full_object_id(source_tree.get("verified_base_tree_hash"))
+        worktree_dirty_at_verification = source_tree.get("worktree_dirty_at_verification")
+        report_generated_before_commit = source_tree.get("report_generated_before_commit")
+        final_commit_full = _final_commit_full(source_tree)
+        exact_revision_matches = (
+            final_commit_full is not None
+            and final_commit_full == current_git_commit_full
+        ) or (
+            verified_tree_hash is not None
+            and verified_tree_hash == current_tree_hash
+        )
+        evidence_current = bool(
+            exact_revision_matches
+            and current_tracked_source_dirty is False
+            and worktree_dirty_at_verification is False
+            and report_generated_before_commit is False
+        )
         return {
             "scenario_set": scenario_set,
             "path": str(path.relative_to(root)),
             "timestamp": _utc_from_timestamp(path.stat().st_mtime),
-            "git_commit": data.get("ids", {}).get("git_commit"),
-            "current_git_commit": _git_commit(root),
+            "git_commit": report_git_commit,
+            "current_git_commit": current_git_commit,
+            "current_git_commit_full": current_git_commit_full,
+            "current_tracked_source_dirty": current_tracked_source_dirty,
+            "verified_base_commit": verified_base_commit,
+            "verified_base_commit_full": verified_base_commit_full,
+            "final_commit": final_commit,
+            "verified_tree_hash": verified_tree_hash,
+            "worktree_dirty_at_verification": worktree_dirty_at_verification,
+            "report_generated_before_commit": report_generated_before_commit,
+            "evidence_current": evidence_current,
+            "current_state_status": "current" if evidence_current else "stale",
             "status": data.get("status"),
             "gate_status": "pass",
             "scenario_count": summary.get("scenario_count"),
@@ -432,7 +525,17 @@ def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
         "path": None,
         "timestamp": None,
         "git_commit": None,
-        "current_git_commit": _git_commit(root),
+        "current_git_commit": current_git_commit,
+        "current_git_commit_full": current_git_commit_full,
+        "current_tracked_source_dirty": current_tracked_source_dirty,
+        "verified_base_commit": None,
+        "verified_base_commit_full": None,
+        "final_commit": None,
+        "verified_tree_hash": None,
+        "worktree_dirty_at_verification": None,
+        "report_generated_before_commit": None,
+        "evidence_current": False,
+        "current_state_status": "missing",
         "status": "missing",
         "gate_status": "missing",
         "scenario_count": 0,
@@ -471,9 +574,12 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
     production_release_ready = False
     last_runtime_report = _latest_successful_report(root, "vs0-product-runtime")
     last_acceptance_report = _latest_successful_report(root, "vs0-runtime-acceptance")
-    acceptance_status = "pass" if last_acceptance_report["gate_status"] == "pass" else (
-        "pending" if last_runtime_report["gate_status"] == "pass" else "blocked_on_runtime_report"
-    )
+    if last_acceptance_report["gate_status"] == "pass":
+        acceptance_status = "pass" if last_acceptance_report["evidence_current"] else "stale"
+    elif last_runtime_report["gate_status"] == "pass":
+        acceptance_status = "pending"
+    else:
+        acceptance_status = "blocked_on_runtime_report"
     readiness = {
         "schema_version": "cs.runtime_readiness.v0",
         "local_scenario_ready": local_scenario_ready,
@@ -484,9 +590,13 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
         "mock_connector_calls": 0,
         "last_successful_runtime_scenario": last_runtime_report,
         "last_successful_acceptance_scenario": last_acceptance_report,
+        "runtime_evidence_current": last_runtime_report["evidence_current"],
+        "acceptance_evidence_current": last_acceptance_report["evidence_current"],
         "acceptance_gate": {
             "scenario_set": "vs0-runtime-acceptance",
             "status": acceptance_status,
+            "evidence_current": last_acceptance_report["evidence_current"],
+            "current_state_status": last_acceptance_report["current_state_status"],
             "contract": "docs/scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md",
             "report_path": last_acceptance_report["path"],
         },

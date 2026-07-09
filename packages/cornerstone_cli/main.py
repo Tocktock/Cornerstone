@@ -10374,18 +10374,26 @@ def command_workspace_mode_set(args: argparse.Namespace) -> int:
     return EXIT_SUCCESS
 
 
-def command_workspace_show(args: argparse.Namespace) -> int:
+def _command_workspace_detail(args: argparse.Namespace, command: str) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
     workspace = store.workspace_detail(requested_scope)
-    payload = base_response("cornerstone workspace show", "success", root)
+    payload = base_response(command, "success", root)
     payload.update(requested_scope)
     payload["workspace"] = workspace
     payload["ids"].update({"workspace_id": requested_scope["workspace_id"]})
     payload["evidence_refs"].append(f"workspace:{requested_scope['workspace_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
+
+
+def command_workspace_current(args: argparse.Namespace) -> int:
+    return _command_workspace_detail(args, "cornerstone workspace current")
+
+
+def command_workspace_show(args: argparse.Namespace) -> int:
+    return _command_workspace_detail(args, "cornerstone workspace show")
 
 
 def command_workspace_mode_show(args: argparse.Namespace) -> int:
@@ -24098,6 +24106,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     workspace = subcommands.add_parser("workspace", help="Workspace governance commands")
     workspace_sub = workspace.add_subparsers(dest="workspace_command")
+
+    workspace_current = workspace_sub.add_parser("current", help="Show active workspace and context boundary")
+    add_state_argument(workspace_current)
+    add_scope_arguments(workspace_current)
+    workspace_current.add_argument("--json", action="store_true", help="Emit JSON output")
+    workspace_current.set_defaults(func=command_workspace_current)
 
     workspace_show = workspace_sub.add_parser("show", help="Show active workspace and context boundary")
     add_state_argument(workspace_show)

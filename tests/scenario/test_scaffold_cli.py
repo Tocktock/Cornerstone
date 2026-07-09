@@ -53,6 +53,7 @@ from cornerstone_cli.main import (
     _vs3_local_checkpoint_self_transcript_validation,
     _vs4_filtered_scenario_report_path,
 )
+from cornerstone_cli.product_runtime import _latest_successful_report
 
 SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
 VS3_HUMAN_GATE_PACKAGE_PATHS = [
@@ -260,11 +261,156 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(runtime_report["path"], "reports/scenario/vs0-product-runtime-2026-06-11.json")
         self.assertEqual(runtime_report["gate_status"], "pass")
         self.assertEqual(runtime_report["blocking"], 0)
+        self.assertIn("verified_base_commit", runtime_report)
+        self.assertIn("final_commit", runtime_report)
+        self.assertIn("verified_tree_hash", runtime_report)
+        self.assertIn("worktree_dirty_at_verification", runtime_report)
+        self.assertIn("report_generated_before_commit", runtime_report)
+        self.assertIn("evidence_current", runtime_report)
+        self.assertIsInstance(runtime_report["evidence_current"], bool)
+        self.assertEqual(
+            runtime_report["current_state_status"],
+            "current" if runtime_report["evidence_current"] else "stale",
+        )
+        self.assertEqual(
+            payload["readiness"]["runtime_evidence_current"],
+            runtime_report["evidence_current"],
+        )
         acceptance_report = payload["readiness"]["last_successful_acceptance_scenario"]
         if acceptance_report["path"] is not None:
             self.assertEqual(acceptance_report["scenario_set"], "vs0-runtime-acceptance")
             self.assertEqual(acceptance_report["gate_status"], "pass")
-            self.assertEqual(payload["readiness"]["acceptance_gate"]["status"], "pass")
+            self.assertEqual(
+                payload["readiness"]["acceptance_gate"]["status"],
+                "pass" if acceptance_report["evidence_current"] else "stale",
+            )
+            self.assertEqual(
+                payload["readiness"]["acceptance_gate"]["evidence_current"],
+                acceptance_report["evidence_current"],
+            )
+
+    def test_latest_successful_report_marks_revision_drift_as_stale(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-readiness-binding-") as temp_dir:
+            root = Path(temp_dir)
+            subprocess.run(["git", "init", "-q"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.email", "codex@example.invalid"], cwd=root, check=True)
+            subprocess.run(["git", "config", "user.name", "Codex Test"], cwd=root, check=True)
+            marker = root / "runtime-source.txt"
+            marker.write_text("first revision\n")
+            subprocess.run(["git", "add", "runtime-source.txt"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-q", "-m", "first"], cwd=root, check=True)
+            verified_commit = subprocess.run(
+                ["git", "rev-parse", "--short", "HEAD"],
+                cwd=root,
+                check=True,
+                text=True,
+                capture_output=True,
+            ).stdout.strip()
+            verified_commit_full = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=root,
+                check=True,
+                text=True,
+                capture_output=True,
+            ).stdout.strip()
+            verified_tree_hash = subprocess.run(
+                ["git", "rev-parse", "HEAD^{tree}"],
+                cwd=root,
+                check=True,
+                text=True,
+                capture_output=True,
+            ).stdout.strip()
+            report_path = root / "reports/scenario/vs0-product-runtime-test.json"
+            report_path.parent.mkdir(parents=True)
+            report = {
+                "scenario_set": "vs0-product-runtime",
+                "status": "success",
+                "summary": {"blocking": 0, "scenario_count": 1, "pass": 1, "human_required": 0},
+                "ids": {"git_commit": verified_commit},
+            }
+            report_path.write_text(json.dumps(report))
+
+            metadata_incomplete = _latest_successful_report(root, "vs0-product-runtime")
+            self.assertFalse(metadata_incomplete["evidence_current"])
+
+            report["source_tree"] = {
+                "verified_base_commit": "c",
+                "verified_base_commit_full": verified_commit_full,
+                "verified_base_tree_hash": "c",
+                "final_commit": "c",
+                "worktree_dirty_at_verification": False,
+                "report_generated_before_commit": False,
+            }
+            report_path.write_text(json.dumps(report))
+
+            malformed_revision = _latest_successful_report(root, "vs0-product-runtime")
+            self.assertFalse(malformed_revision["evidence_current"])
+
+            report["source_tree"] = {
+                "verified_base_commit": verified_commit,
+                "verified_base_commit_full": verified_commit_full,
+                "verified_base_tree_hash": verified_tree_hash,
+                "final_commit": verified_commit,
+                "worktree_dirty_at_verification": False,
+                "report_generated_before_commit": False,
+            }
+            report_path.write_text(json.dumps(report))
+
+            current = _latest_successful_report(root, "vs0-product-runtime")
+            self.assertTrue(current["evidence_current"])
+            self.assertEqual(current["verified_base_commit"], verified_commit)
+
+            marker.write_text("second revision\n")
+            uncommitted_drift = _latest_successful_report(root, "vs0-product-runtime")
+            self.assertFalse(uncommitted_drift["evidence_current"])
+            self.assertTrue(uncommitted_drift["current_tracked_source_dirty"])
+
+            subprocess.run(["git", "add", "runtime-source.txt"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-q", "-m", "second"], cwd=root, check=True)
+
+            stale = _latest_successful_report(root, "vs0-product-runtime")
+            self.assertFalse(stale["evidence_current"])
+            self.assertEqual(stale["current_state_status"], "stale")
+
+    def test_workspace_current_exposes_active_scope_and_keeps_show_compatible(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-workspace-current-") as state_dir:
+            scope_args = (
+                "--tenant-id",
+                "tenant-alpha",
+                "--owner-id",
+                "owner-alpha",
+                "--namespace-id",
+                "project",
+                "--workspace-id",
+                "project-x",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            current_result = run_cli("workspace", "current", *scope_args)
+            show_result = run_cli("workspace", "show", *scope_args)
+
+            self.assertEqual(current_result.returncode, 0, current_result.stdout + current_result.stderr)
+            self.assertEqual(show_result.returncode, 0, show_result.stdout + show_result.stderr)
+            current = json.loads(current_result.stdout)
+            shown = json.loads(show_result.stdout)
+            self.assertEqual(current["command"], "cornerstone workspace current")
+            self.assertEqual(current["schema_version"], "cs.cli.v0")
+            self.assertEqual(current["status"], "success")
+            self.assertEqual(
+                current["workspace"]["active_scope"],
+                {
+                    "tenant_id": "tenant-alpha",
+                    "owner_id": "owner-alpha",
+                    "namespace_id": "project",
+                    "workspace_id": "project-x",
+                },
+            )
+            self.assertFalse(current["workspace"]["context_boundary"]["implicit_cross_namespace_context"])
+            self.assertFalse(current["workspace"]["context_boundary"]["implicit_cross_owner_context"])
+            self.assertEqual(current["evidence_refs"], ["workspace:project-x"])
+            self.assertEqual(current["workspace"]["active_scope"], shown["workspace"]["active_scope"])
+            self.assertEqual(current["workspace"]["context_boundary"], shown["workspace"]["context_boundary"])
 
     def test_full_scenario_list_count(self) -> None:
         result = run_cli("scenario", "list", "--set", "full", "--json")
