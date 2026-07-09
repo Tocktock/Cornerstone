@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -179,6 +180,8 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("Drop, ask, decide, and audit with visible receipts.", html)
                 self.assertIn("Global search", html)
                 self.assertIn("Search across saved sources, claims, briefs, and action drafts", html)
+                self.assertIn('aria-label="Search the active workspace"', html)
+                self.assertIn("Owner: local-user", html)
                 self.assertIn("Workspace: default", html)
                 self.assertIn("Receipts required", html)
                 self.assertIn('aria-label="Workspace posture"', html)
@@ -186,7 +189,7 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("cs-nav-count", html)
                 for label in ["Home", "Search", "Artifacts", "Claims", "Actions"]:
                     self.assertIn(f"<span>{label}</span>", html)
-                self.assertIn('href="/review" aria-label="Open owner area"', html)
+                self.assertIn('href="/review" aria-label="Open owner area for local-user"', html)
                 self.assertIn("--cs-color-background-app:", html)
                 self.assertIn("--cs-state-saved-bg:", html)
                 self.assertIn("--cs-radius-pill:", html)
@@ -196,6 +199,46 @@ class ProductUiRoutesTest(unittest.TestCase):
         for label in ["Briefs", "Inbox", "Audit", "Owner"]:
             self.assertNotIn(f"<span>{label}</span>", nav)
         self.assertNotIn('aria-current="page"', nav)
+
+    def test_product_css_resolves_every_custom_property(self) -> None:
+        css = product_ui._token_css(ROOT)
+        defined = set(re.findall(r"(--[A-Za-z0-9_-]+)\s*:", css))
+        used = set(re.findall(r"var\((--[A-Za-z0-9_-]+)", css))
+
+        self.assertEqual(used - defined, set())
+        self.assertIn("--cs-color-surface-primary: var(--cs-color-background-surface);", css)
+        self.assertIn("--cs-shadow-sm: var(--cs-shadow-card);", css)
+        mobile_css = css.split("@media (max-width: 980px)", 1)[1]
+        self.assertRegex(mobile_css, r"\.cs-main \{ order: 1;")
+        self.assertRegex(mobile_css, r"\.cs-sidebar \{\s+order: 3;")
+        self.assertRegex(mobile_css, r"\.cs-nav \{\s+position: fixed;")
+        self.assertRegex(mobile_css, r"\.cs-nav-group \{ grid-template-columns: repeat\(5,")
+        self.assertRegex(mobile_css, r"\.cs-topbar \{ order: 1;")
+        self.assertRegex(mobile_css, r"\.cs-content \{ order: 2;")
+
+    def test_action_target_search_keeps_rows_and_counts_consistent(self) -> None:
+        action = {
+            "action_id": "action-target-only",
+            "scope": dict(DEFAULT_SCOPE),
+            "dry_run": {
+                "goal": "Prepare a follow-up",
+                "expected_impact": {"target": "UniqueTargetQueue"},
+            },
+        }
+        ctx = {
+            "artifacts": [],
+            "briefs": [],
+            "claims": [],
+            "actions": [action],
+            "scope": dict(DEFAULT_SCOPE),
+        }
+
+        html = product_ui._search_page(ctx, "UniqueTargetQueue", "actions")
+
+        self.assertIn("1 results", html)
+        self.assertIn("Actions <strong>1</strong>", html)
+        self.assertIn('<span class="cs-result-type">Action</span>', html)
+        self.assertNotIn("No actions matched this keyword", html)
 
     def test_day_zero_product_routes_offer_composed_empty_states(self) -> None:
         expected = {
@@ -304,6 +347,7 @@ class ProductUiRoutesTest(unittest.TestCase):
     def test_nondefault_workspace_is_visible_and_propagated(self) -> None:
         scope = {
             **DEFAULT_SCOPE,
+            "owner_id": "owner-alpha",
             "namespace_id": "project",
             "workspace_id": "project-x",
         }
@@ -312,11 +356,14 @@ class ProductUiRoutesTest(unittest.TestCase):
 
         self.assertEqual(status, 200)
         self.assertIn('data-namespace-id="project"', html)
+        self.assertIn('data-owner-id="owner-alpha"', html)
         self.assertIn('data-workspace-id="project-x"', html)
-        self.assertIn("project / project-x", html)
+        self.assertIn("owner-alpha / project / project-x", html)
+        self.assertIn("Owner: owner-alpha", html)
         self.assertIn("Workspace: project-x", html)
+        self.assertIn('aria-label="Open owner area for owner-alpha">OA</a>', html)
         self.assertIn(
-            'const scope = {"namespace_id":"project","owner_id":"local-user","tenant_id":"local-dev","workspace_id":"project-x"};',
+            'const scope = {"namespace_id":"project","owner_id":"owner-alpha","tenant_id":"local-dev","workspace_id":"project-x"};',
             html,
         )
         self.assertIn("preserveScope();", html)
@@ -344,17 +391,25 @@ class ProductUiRoutesTest(unittest.TestCase):
         )
         self.assertEqual(scoped_status, 200)
         self.assertIn(source_text, scoped_detail)
-        self.assertIn("project / project-x", scoped_detail)
+        self.assertIn("owner-alpha / project / project-x", scoped_detail)
         self.assertEqual(default_status, 404)
         self.assertNotIn(source_text, default_detail)
+        self.assertIn('data-product-state="permission-denied-or-not-found"', default_detail)
+        self.assertIn("does not reveal whether unavailable work belongs to another owner", default_detail)
 
-        hostile_scope = {**scope, "workspace_id": "</script><script>alert(1)</script>"}
+        hostile_scope = {
+            **scope,
+            "owner_id": '<img src=x onerror="alert(2)">',
+            "workspace_id": "</script><script>alert(1)</script>",
+        }
         _, _, hostile_html = _request(
             self.base_url,
             f"/?{urlencode(hostile_scope)}",
             headers={"accept": "text/html"},
         )
         self.assertNotIn("</script><script>alert(1)</script>", hostile_html)
+        self.assertNotIn('<img src=x onerror="alert(2)">', hostile_html)
+        self.assertIn('&lt;img src=x onerror=&quot;alert(2)&quot;&gt;', hostile_html)
         self.assertIn("\\u003c/script\\u003e", hostile_html)
 
     def test_workspace_load_failures_render_a_degraded_recovery_state(self) -> None:
@@ -487,28 +542,30 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Saved sources", html)
         self.assertIn("Back to saved sources", html)
         self.assertIn("Original source", html)
-        self.assertIn("Artifact evidence workspace", html)
+        self.assertIn("Plain text preview from the saved source", html)
         self.assertIn("Original source document viewer", html)
         self.assertIn("Original artifact preview", html)
-        self.assertIn("Text preview controls", html)
-        self.assertIn("1 / 1", html)
-        self.assertIn("Source pages", html)
-        self.assertIn("Preview rail", html)
+        self.assertIn("Original source preview", html)
+        self.assertIn("Source outline", html)
         self.assertIn("Source text", html)
         self.assertIn("Source metadata", html)
         self.assertIn("Artifact inspection summary", html)
-        self.assertIn("Source reading summary", html)
-        self.assertIn("Original source summary", html)
+        self.assertIn("Source reading preview", html)
+        self.assertIn("Original source excerpt", html)
         self.assertIn("Evidence links", html)
         self.assertIn("Preview mode", html)
         self.assertIn("Plain text preview", html)
         self.assertIn("Original content primary", html)
         self.assertIn("Details", html)
-        self.assertIn("Tags", html)
-        self.assertIn("Keyword summary", html)
-        self.assertIn("Extracted keywords", html)
+        self.assertIn('href="#keywords">Keywords', html)
+        self.assertIn("Source excerpt", html)
+        self.assertIn("Frequent local terms", html)
         self.assertIn("Linked work", html)
-        self.assertIn("View linked evidence", html)
+        self.assertIn("View linked work", html)
+        self.assertIn("Search this source", html)
+        self.assertNotIn('class="cs-artifact-tool is-muted">Pane', html)
+        self.assertNotIn('class="cs-artifact-tool is-muted">Find', html)
+        self.assertNotIn('class="cs-artifact-tool is-muted">100%', html)
         self.assertIn("Provenance", html)
         self.assertIn("Open audit trail", html)
         self.assert_product_surface_is_clean(html)
@@ -519,15 +576,16 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("What we found", search_html)
         self.assertIn("Suggested follow-ups", search_html)
         self.assertIn("Receipt coverage", search_html)
-        self.assertIn("Search command center", search_html)
-        self.assertIn("Type filters", search_html)
-        self.assertIn("Current search controls", search_html)
+        self.assertIn("Workspace search", search_html)
+        self.assertIn("Filter results by record type", search_html)
+        self.assertIn("Current search context", search_html)
+        self.assertIn('aria-label="Search saved workspace records"', search_html)
         self.assertIn("Search mode: local keyword", search_html)
         self.assertIn("Keyword match", search_html)
         self.assertIn("Receipt-first results", search_html)
         self.assertIn("Local record receipt", search_html)
         self.assertIn("Open receipt", search_html)
-        self.assertIn("Sort by: keyword match", search_html)
+        self.assertIn("Order: keyword match", search_html)
         self.assert_product_surface_is_clean(search_html)
 
         audit_html = self.fetch_product_html("/audit")
@@ -548,7 +606,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Integrity chain", audit_html)
         self.assertIn("Scope and recovery", audit_html)
         self.assertIn("Source saved", audit_html)
-        self.assertIn("Evidence bundle prepared", audit_html)
+        self.assertIn("Supporting evidence prepared", audit_html)
         self.assertIn("Decision recorded", audit_html)
         self.assertIn("Action proposed", audit_html)
         self.assertIn("Hash chain verified", audit_html)
@@ -698,6 +756,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertNotIn("extractive_fallback", brief_html)
         self.assertNotIn("Evidence-backed", brief_html)
         self.assertNotIn("decision-ready", brief_html)
+        self.assertNotIn("Evidence Bundle", brief_html)
         self.assert_product_surface_is_clean(brief_html)
 
         claim_html = self.fetch_product_html(f"/claims/{claim_id}?view=html")
@@ -726,7 +785,9 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Review controls", claim_html)
         self.assertIn("Claim statement", claim_html)
         self.assertIn("Decision gate", claim_html)
-        self.assertIn("Promote to decision locked", claim_html)
+        self.assertIn("Decision save locked", claim_html)
+        self.assertNotIn("Promotion stays locked", claim_html)
+        self.assertNotIn("Promotion", claim_html)
         self.assertIn("Review required before approval", claim_html)
         self.assert_product_surface_is_clean(claim_html)
 
@@ -987,7 +1048,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Workspace", detail_html)
         self.assertIn("Authority boundary", detail_html)
         self.assertIn("Review controls", detail_html)
-        self.assertIn("Promotion and approval controls are intentionally unavailable", detail_html)
+        self.assertIn("Saving this draft as approved knowledge is intentionally unavailable", detail_html)
+        self.assertNotIn("Promotion", detail_html)
         self.assert_product_surface_is_clean(detail_html)
 
         inbox_html = self.fetch_product_html("/inbox")
@@ -1145,7 +1207,49 @@ class ProductUiRoutesTest(unittest.TestCase):
         scope = dict(DEFAULT_SCOPE)
         brief = {"brief_id": "brief-open", "title": "Open brief", "scope": scope, "gaps": ["Missing source span"], "created_at": "2026-07-09T10:00:00Z"}
         claim = {"claim_id": "claim-open", "statement": "Open claim", "scope": scope, "status": "draft", "created_at": "2026-07-09T10:01:00Z"}
-        failed_action = {"action_id": "action-failed", "dry_run": {"goal": "Failed action"}, "scope": scope, "execution": {"status": "failed", "result": {"status": "failed"}}, "created_at": "2026-07-09T10:02:00Z"}
+        failed_action = {
+            "action_id": "action-failed",
+            "dry_run": {"goal": "Failed action", "expected_impact": {"real_external_http_calls": 0}},
+            "scope": scope,
+            "connector_boundary": {"mocked": True, "direct_provider_access": False},
+            "execution": {
+                "status": "failed",
+                "result": {
+                    "status": "failed",
+                    "message": "The local preview runner stopped before completion.",
+                    "recovery_path": "Review the failure receipt before creating a new preview.",
+                    "external_http_calls": 0,
+                },
+            },
+            "created_at": "2026-07-09T10:02:00Z",
+        }
+        approved_failed_action = {
+            "action_id": "action-approved-failed",
+            "dry_run": {
+                "goal": "Approved action with a failed provider attempt",
+                "expected_impact": {
+                    "expected_connector_calls": 1,
+                    "real_external_http_calls": 0,
+                },
+            },
+            "scope": scope,
+            "approval": {
+                "status": "approved",
+                "approver": "owner-alpha",
+                "approved_at": "2026-07-09T10:02:30Z",
+            },
+            "connector_boundary": {"mocked": False, "direct_provider_access": False},
+            "execution": {
+                "status": "failed",
+                "result": {
+                    "status": "failed",
+                    "message": "The provider returned an error after the request was sent.",
+                    "recovery_path": "Inspect the provider receipt before retrying.",
+                    "external_http_calls": 1,
+                },
+            },
+            "created_at": "2026-07-09T10:02:30Z",
+        }
         blocked_action = {"action_id": "action-blocked", "dry_run": {"goal": "Blocked action"}, "scope": scope, "execution": {"status": "blocked_by_workspace_mode"}, "created_at": "2026-07-09T10:03:00Z"}
         executed_action = {"action_id": "action-executed", "dry_run": {"goal": "Executed action"}, "scope": scope, "execution": {"status": "executed", "result": {"status": "success"}}, "created_at": "2026-07-09T10:04:00Z"}
         draft_memory = {"memory_id": "memory-draft", "statement": "Draft memory", "scope": scope, "status": "draft", "canonicality": {"owner_approved": False}, "created_at": "2026-07-09T10:05:00Z"}
@@ -1156,6 +1260,7 @@ class ProductUiRoutesTest(unittest.TestCase):
             [claim],
             [failed_action, blocked_action, executed_action],
             [draft_memory, approved_memory],
+            scope=scope,
         )
         titles = {item["title"] for item in items}
         queues = {item["title"]: item["queue"] for item in items}
@@ -1165,6 +1270,39 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(queues["Failed action"], "Failed runs")
         self.assertEqual(queues["Blocked action"], "Policy blocked")
         self.assertEqual(next(item for item in items if item["kind"] == "Brief")["evidence_gap_count"], 1)
+        self.assertEqual({item["owner"] for item in items}, {"local-user"})
+
+        detail_ctx = {"artifacts": [], "audit": [], "scope": scope}
+        failed_html = product_ui._action_detail(detail_ctx, failed_action)
+        self.assertIn('data-product-state="failed-with-recovery"', failed_html)
+        self.assertIn('data-action-failure-recovery="true"', failed_html)
+        self.assertIn("Action failed", failed_html)
+        self.assertIn("Failed with recovery", failed_html)
+        self.assertIn("The local preview runner stopped before completion.", failed_html)
+        self.assertIn("Review the failure receipt before creating a new preview.", failed_html)
+        self.assertIn("No external HTTP call was recorded.", failed_html)
+        self.assertNotIn('href="/inbox">Request approval</a>', failed_html)
+        self.assertNotIn("Dry-run first", failed_html)
+
+        approved_failed_html = product_ui._action_detail(detail_ctx, approved_failed_action)
+        self.assertIn('data-product-state="failed"', approved_failed_html)
+        self.assertIn('data-real-external-http-calls="1"', approved_failed_html)
+        self.assertIn("Approved by owner-alpha", approved_failed_html)
+        self.assertIn("Observed external calls</dt><dd>1", approved_failed_html)
+        self.assertIn("1 external HTTP call was recorded", approved_failed_html)
+        self.assertIn("Action lifecycle receipt", approved_failed_html)
+        self.assertNotIn("No approvals have been recorded yet", approved_failed_html)
+        self.assertNotIn("No provider send has run", approved_failed_html)
+        self.assertNotIn("Preview only. Impact", approved_failed_html)
+        self.assertNotIn("No live provider send claimed", approved_failed_html)
+
+        blocked_html = product_ui._action_detail(detail_ctx, blocked_action)
+        self.assertIn('data-product-state="blocked"', blocked_html)
+        self.assertIn('data-action-policy-blocked="true"', blocked_html)
+        self.assertIn("Action blocked", blocked_html)
+        self.assertIn("Blocked by workspace mode", blocked_html)
+        self.assertNotIn("This action is permitted only after review", blocked_html)
+        self.assertNotIn('href="/inbox">Request approval</a>', blocked_html)
 
     def test_brief_to_claim_preserves_lineage_and_activity(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
@@ -1258,6 +1396,23 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Cause:", denied_html)
         self.assertIn("Recovery:", denied_html)
         self.assertIn("Denial receipt", denied_html)
+        self.assertIn("Attach supporting evidence with at least one saved source", denied_html)
+        self.assertNotIn("missing_evidence_bundle", denied_html)
+        self.assertNotIn("Evidence Bundle", denied_html)
+        self.assertNotIn("artifact reference", denied_html)
+
+        claim_search = self.fetch_product_html("/search?q=Unsupported+statement&type=claims")
+        self.assertIn("Type: Claims", claim_search)
+        self.assertIn("Claim draft; no visible supporting source is attached.", claim_search)
+        self.assertNotIn("Claim draft with linked evidence.", claim_search)
+        source_search = self.fetch_product_html("/search?q=Unsupported+statement&type=sources")
+        self.assertIn("Type: Sources", source_search)
+        self.assertIn("0 results", source_search)
+        self.assertIn("No sources matched this keyword", source_search)
+        self.assertIn("1 other local result exists", source_search)
+        self.assertIn('href="/search?q=Unsupported%20statement&amp;type=all"', source_search)
+        self.assertNotIn("No saved source, brief, claim, or action draft matched", source_search)
+        self.assertNotIn('<span class="cs-result-type">Claim</span>', source_search)
 
         _, bundle_id, _ = self.create_source_stack()
         claim_status, _, claim_raw = _request(
