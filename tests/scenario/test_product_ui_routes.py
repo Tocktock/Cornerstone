@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import importlib.util
 import json
-import re
 import shutil
 import sys
 import tempfile
@@ -12,13 +11,16 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlencode
 
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli import product_ui
+from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
+from cornerstone_cli.runtime import LocalRuntimeStore
 
 CAPTURE_SCRIPT = ROOT / "scripts" / "capture_vs4_h01_ui_recovery_screenshots.py"
 _capture_spec = importlib.util.spec_from_file_location("capture_vs4_h01_ui_recovery_screenshots", CAPTURE_SCRIPT)
@@ -28,24 +30,6 @@ _capture_spec.loader.exec_module(capture_vs4)
 
 
 PRODUCT_ROUTES = ["/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"]
-
-FORBIDDEN_PRODUCT_PATTERNS = [
-    r"local_scenario_ready=",
-    r"vs0_runtime_ready=",
-    r"production_release_ready=",
-    r"real_external_http_calls=",
-    r"\bVS[0-9]",
-    r"scenario",
-    r"verifier",
-    r"human gate",
-    r"acceptance",
-    r"walkthrough",
-    r"package path",
-    r"readiness",
-    r"browser proof",
-    r"review packet",
-]
-
 
 def _request(
     base_url: str,
@@ -193,21 +177,23 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("Drop, ask, decide, and audit with visible receipts.", html)
                 self.assertIn("Global search", html)
                 self.assertIn("Search across saved sources, claims, briefs, and action drafts", html)
-                self.assertIn("Local workspace", html)
+                self.assertIn("Workspace: default", html)
                 self.assertIn("Receipts required", html)
                 self.assertIn('aria-label="Workspace posture"', html)
                 self.assertIn("Review queue", html)
                 self.assertIn("cs-nav-count", html)
-                for label in ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"]:
+                for label in ["Home", "Search", "Artifacts", "Claims", "Actions"]:
                     self.assertIn(f"<span>{label}</span>", html)
+                self.assertIn('href="/review" aria-label="Open owner area"', html)
                 self.assertIn("--cs-color-background-app:", html)
                 self.assertIn("--cs-state-saved-bg:", html)
                 self.assertIn("--cs-radius-pill:", html)
                 self.assert_product_surface_is_clean(html)
 
-        briefs_html = self.fetch_product_html("/briefs")
-        self.assertIn('href="/briefs" aria-current="page"', briefs_html)
-        self.assertNotIn('href="/" aria-current="page"', briefs_html)
+        nav = product_ui._nav("/briefs", {"artifacts": [], "briefs": [], "claims": [], "actions": [], "inbox": [], "audit": []})
+        for label in ["Briefs", "Inbox", "Audit", "Owner"]:
+            self.assertNotIn(f"<span>{label}</span>", nav)
+        self.assertNotIn('aria-current="page"', nav)
 
     def test_day_zero_product_routes_offer_composed_empty_states(self) -> None:
         expected = {
@@ -261,6 +247,165 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(artifact_status, 404)
         self.assertIn("application/json", artifact_content_type)
         self.assertEqual(json.loads(artifact_body)["errors"][0]["code"], "CS_ARTIFACT_NOT_FOUND")
+
+    def test_user_content_with_review_vocabulary_remains_visible(self) -> None:
+        text = "Business continuity readiness scenario for the annual acceptance review."
+        status, _, created_raw = _request(
+            self.base_url,
+            "/artifacts",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "text": text},
+        )
+        self.assertEqual(status, 200)
+        artifact_id = json.loads(created_raw)["artifact"]["artifact_id"]
+
+        artifacts_html = self.fetch_product_html("/artifacts")
+        detail_html = self.fetch_product_html(f"/artifacts/{artifact_id}?view=html")
+
+        self.assertIn("Business continuity readiness scenario", artifacts_html)
+        self.assertIn(text, detail_html)
+        self.assertNotIn('data-product-surface="owner-record"', detail_html)
+        self.assert_product_surface_is_clean(detail_html)
+        self.assertFalse(product_ui._internal_product_record({"_preview": text}))
+        self.assertTrue(product_ui._internal_product_record({"visibility": "owner_only", "_preview": text}))
+
+    def test_internal_fixture_lineage_stays_out_of_normal_product_routes(self) -> None:
+        store = LocalRuntimeStore(self.state_dir)
+        source_text = "VS4-H01 scenario verifier review packet."
+        artifact = store.ingest_text_artifact(
+            source_text,
+            DEFAULT_SCOPE,
+            source_type="local_fixture",
+            source_ref="fixtures/vs4/internal.txt",
+            trust="trusted",
+        )["artifact"]
+        search = store.search("scenario verifier", **DEFAULT_SCOPE)["snapshot"]
+        bundle = store.create_evidence_bundle(search["search_snapshot_id"], DEFAULT_SCOPE)["bundle"]
+        brief = store.create_brief_from_evidence_bundle(bundle["evidence_bundle_id"], DEFAULT_SCOPE)["brief"]
+        brief_title = str(brief.get("title") or "")
+        self.assertTrue(brief_title)
+
+        artifacts_html = self.fetch_product_html("/artifacts")
+        briefs_html = self.fetch_product_html("/briefs")
+        artifact_detail = self.fetch_product_html(f"/artifacts/{artifact['artifact_id']}?view=html")
+        brief_detail = self.fetch_product_html(f"/briefs/{brief['brief_id']}?view=html")
+
+        self.assertNotIn(source_text, artifacts_html)
+        self.assertNotIn(brief_title, briefs_html)
+        self.assertIn('data-product-surface="owner-record"', artifact_detail)
+        self.assertIn('data-product-surface="owner-record"', brief_detail)
+        self.assertNotIn(source_text, artifact_detail)
+        self.assertNotIn(source_text, brief_detail)
+        self.assert_product_surface_is_clean(artifacts_html)
+        self.assert_product_surface_is_clean(briefs_html)
+
+    def test_nondefault_workspace_is_visible_and_propagated(self) -> None:
+        scope = {
+            **DEFAULT_SCOPE,
+            "namespace_id": "project",
+            "workspace_id": "project-x",
+        }
+        query = urlencode(scope)
+        status, _, html = _request(self.base_url, f"/?{query}", headers={"accept": "text/html"})
+
+        self.assertEqual(status, 200)
+        self.assertIn('data-namespace-id="project"', html)
+        self.assertIn('data-workspace-id="project-x"', html)
+        self.assertIn("project / project-x", html)
+        self.assertIn("Workspace: project-x", html)
+        self.assertIn(
+            'const scope = {"namespace_id":"project","owner_id":"local-user","tenant_id":"local-dev","workspace_id":"project-x"};',
+            html,
+        )
+        self.assertIn("preserveScope();", html)
+        self.assertIn('window.location.href = scopedUrl("/artifacts/"', html)
+        self.assertNotIn('workspace_id: "default"', html)
+
+        source_text = "Project X scope isolation receipt."
+        create_status, _, created_raw = _request(
+            self.base_url,
+            "/artifacts",
+            method="POST",
+            payload={**scope, "text": source_text},
+        )
+        self.assertEqual(create_status, 200)
+        artifact_id = json.loads(created_raw)["artifact"]["artifact_id"]
+        scoped_status, _, scoped_detail = _request(
+            self.base_url,
+            f"/artifacts/{artifact_id}?view=html&{query}",
+            headers={"accept": "text/html"},
+        )
+        default_status, _, default_detail = _request(
+            self.base_url,
+            f"/artifacts/{artifact_id}?view=html",
+            headers={"accept": "text/html"},
+        )
+        self.assertEqual(scoped_status, 200)
+        self.assertIn(source_text, scoped_detail)
+        self.assertIn("project / project-x", scoped_detail)
+        self.assertEqual(default_status, 404)
+        self.assertNotIn(source_text, default_detail)
+
+        hostile_scope = {**scope, "workspace_id": "</script><script>alert(1)</script>"}
+        _, _, hostile_html = _request(
+            self.base_url,
+            f"/?{urlencode(hostile_scope)}",
+            headers={"accept": "text/html"},
+        )
+        self.assertNotIn("</script><script>alert(1)</script>", hostile_html)
+        self.assertIn("\\u003c/script\\u003e", hostile_html)
+
+    def test_workspace_load_failures_render_a_degraded_recovery_state(self) -> None:
+        class BrokenStore:
+            def _artifact_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+                raise OSError("artifact store unavailable")
+
+            def _brief_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+                raise OSError("brief store unavailable")
+
+            def _claim_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+                raise OSError("claim store unavailable")
+
+            def _action_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+                raise OSError("action store unavailable")
+
+            def _memory_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
+                raise OSError("memory store unavailable")
+
+            def _all_audit_events(self) -> list[dict[str, Any]]:
+                raise OSError("audit store unavailable")
+
+            def verify_audit(self) -> dict[str, Any]:
+                raise OSError("audit verification unavailable")
+
+        html = product_ui.render_product_page(ROOT, BrokenStore(), DEFAULT_SCOPE, "/", {})
+
+        self.assertIn('data-product-state="degraded"', html)
+        self.assertIn("Some workspace data could not be loaded", html)
+        self.assertIn("saved sources", html)
+        self.assertIn("audit integrity", html)
+        self.assertIn("No records were changed", html)
+        self.assertIn("Retry this page", html)
+
+    def test_audit_page_does_not_claim_integrity_after_tampering(self) -> None:
+        _request(
+            self.base_url,
+            "/artifacts",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "text": "Audit integrity source."},
+        )
+        audit_path = self.state_dir / "audit" / "events.jsonl"
+        events = audit_path.read_text().splitlines()
+        event = json.loads(events[0])
+        event["event_type"] = "artifact.tampered"
+        events[0] = json.dumps(event, sort_keys=True)
+        audit_path.write_text("\n".join(events) + "\n")
+
+        audit_html = self.fetch_product_html("/audit")
+
+        self.assertIn('data-audit-integrity-status="failed"', audit_html)
+        self.assertIn("Integrity failed", audit_html)
+        self.assertNotIn("Hash chain verified", audit_html)
 
     def test_screenshot_matrix_covers_primary_mobile_routes(self) -> None:
         ids = {
@@ -404,7 +549,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Evidence bundle prepared", audit_html)
         self.assertIn("Decision recorded", audit_html)
         self.assertIn("Action proposed", audit_html)
-        self.assertIn("Hash chained", audit_html)
+        self.assertIn("Hash chain verified", audit_html)
         self.assert_product_surface_is_clean(audit_html)
 
     def test_brief_chunk_citation_receipts_do_not_fallback_to_first_source(self) -> None:
@@ -707,8 +852,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         return html
 
     def assert_product_surface_is_clean(self, html: str) -> None:
-        for pattern in FORBIDDEN_PRODUCT_PATTERNS:
-            self.assertIsNone(re.search(pattern, html, re.IGNORECASE), pattern)
+        self.assertIsNone(VS4_PRODUCT_FORBIDDEN_RE.search(html))
 
 
 if __name__ == "__main__":

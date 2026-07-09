@@ -12224,7 +12224,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(any(stage["stage"] == "Action" and stage["visible"] for stage in loop_view["stages"]))
         self.assertEqual(
             payload["browser_proof"]["primary_nav_labels"],
-            ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"],
+            ["Home", "Search", "Artifacts", "Claims", "Actions"],
         )
         self.assertEqual(
             payload["proof_boundary"]["vs4_slice_011_ops_inbox_triage_detail"],

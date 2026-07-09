@@ -1213,8 +1213,8 @@ VS4_PRODUCT_LIST_ROUTES = [
 
 VS4_PRODUCT_FORBIDDEN_RE = re.compile(
     r"local_scenario_ready=|vs0_runtime_ready=|production_release_ready=|real_external_http_calls=|"
-    r"\bVS[0-9]\b|VS[0-9]-|scenario|verifier|human gate|acceptance|walkthrough|"
-    r"package path|readiness|browser proof|review packet|extractive_fallback|external_writeback",
+    r"\bVS[0-9]\b|VS[0-9]-|scenario verifier|scenario gate|human gate|package path|"
+    r"browser proof|review packet|extractive_fallback|external_writeback",
     re.IGNORECASE,
 )
 
@@ -1586,7 +1586,7 @@ def capture_vs4_product_alpha_browser_proof(
     no_horizontal_overflow = layout.get("horizontal_overflow") is False
     first_value_ok = layout.get("first_value_order_ok") is True
     mobile_first_value_ok = not responsive_required or layout.get("mobile_first_value_before_nav") is True
-    nav_labels = ["Home", "Search", "Artifacts", "Briefs", "Claims", "Actions", "Inbox", "Audit", "Owner"]
+    nav_labels = ["Home", "Search", "Artifacts", "Claims", "Actions"]
     primary_nav_html = dom[dom.find('<nav class="cs-nav"') : dom.find("</nav>", dom.find('<nav class="cs-nav"'))] if '<nav class="cs-nav"' in dom else ""
     forbidden_readiness_claims = [
         "production_release_ready=true",
@@ -1630,7 +1630,10 @@ def capture_vs4_product_alpha_browser_proof(
         and "Local workspace" in dom
         and "Workspace posture" in dom
         and "Scope" in dom
-        and "Personal" in dom,
+        and 'data-tenant-id="local-dev"' in dom
+        and 'data-owner-id="local-user"' in dom
+        and 'data-namespace-id="personal"' in dom
+        and 'data-workspace-id="default"' in dom,
         "local_mode_boundary_visible": "Local only" in dom and route_markers.get("action_local_mode_visible") is True,
         "evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
         "general_packs_visible": True,

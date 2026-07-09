@@ -22,27 +22,39 @@ REFERENCE_IMAGE_ROWS = [
     ("cornerstone-reference-08-action-dry-run-approval.png", "Action dry-run", "Active surface", "Dry-run impact, proposed changes, policy decision, risk, approval, and auditability."),
 ]
 
-FORBIDDEN_PRODUCT_ROUTE_TERMS = [
-    "scenario",
-    "verifier",
-    "human gate",
-    "acceptance",
-    "walkthrough",
-    "package path",
-    "readiness",
-    "browser proof",
-    "review packet",
-]
-
-INTERNAL_PRODUCT_RECORD_RE = re.compile(
-    r"\bVS[0-9]\b|VS[0-9]-|scenario|verifier|human gate|acceptance|walkthrough|"
-    r"package path|readiness|browser proof|review packet|EVUX|scaffold",
-    re.IGNORECASE,
-)
+INTERNAL_PRODUCT_VISIBILITIES = {"internal", "owner_only", "verification_only"}
+INTERNAL_PRODUCT_SOURCE_TYPES = {"internal_fixture", "local_fixture", "scenario_fixture", "verification_fixture"}
+PRODUCT_RECORD_ID_KEYS = ("artifact_id", "brief_id", "claim_id", "action_id", "memory_id")
 
 
 def h(value: Any) -> str:
     return escape("" if value is None else str(value), quote=True)
+
+
+def _script_json(value: Any) -> str:
+    return (
+        json.dumps(value, separators=(",", ":"), sort_keys=True)
+        .replace("&", "\\u0026")
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+        .replace("\u2028", "\\u2028")
+        .replace("\u2029", "\\u2029")
+    )
+
+
+def _scope_label(scope: Any, *, include_owner: bool = False) -> str:
+    if not isinstance(scope, dict):
+        return "personal / default"
+    values = []
+    if include_owner:
+        values.append(str(scope.get("owner_id") or "local-user"))
+    values.extend(
+        [
+            str(scope.get("namespace_id") or "personal"),
+            str(scope.get("workspace_id") or "default"),
+        ]
+    )
+    return " / ".join(values)
 
 
 def render_product_page(
@@ -133,8 +145,8 @@ def render_product_detail(
         record = store.get_artifact(record_id, scope)
         if record:
             record = dict(record)
-            record["_preview"] = _safe_preview(store, record, 5000)
-        if record and _internal_product_record(record):
+            record["_preview"] = _safe_preview(store, record, 5000, ctx["load_errors"], "source preview")
+        if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("source")
             title = "Owner record"
             active = "/artifacts"
@@ -146,7 +158,7 @@ def render_product_detail(
         record = store.get_brief(record_id)
         if record and record.get("scope") != scope:
             record = None
-        if record and _internal_product_record(record):
+        if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("brief")
             title = "Owner record"
             active = "/"
@@ -158,7 +170,7 @@ def render_product_detail(
         record = store.get_claim(record_id)
         if record and record.get("scope") != scope:
             record = None
-        if record and _internal_product_record(record):
+        if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("claim")
             title = "Owner record"
             active = "/claims"
@@ -170,7 +182,7 @@ def render_product_detail(
         record = store.get_action(record_id)
         if record and record.get("scope") != scope:
             record = None
-        if record and _internal_product_record(record):
+        if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("action")
             title = "Owner record"
             active = "/actions"
@@ -185,26 +197,35 @@ def render_product_detail(
 
 
 def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
-    artifacts = _recent(_safe_records(lambda: store._artifact_records(scope)))
-    briefs = _recent(_safe_records(lambda: store._brief_records(scope)))
-    claims = _recent(_safe_records(lambda: store._claim_records(scope)))
-    actions = _recent(_safe_records(lambda: store._action_records(scope)))
-    memories = _recent(_safe_records(lambda: store._memory_records(scope)))
+    load_errors: list[str] = []
+    artifacts = _recent(_safe_records(lambda: store._artifact_records(scope), load_errors, "saved sources"))
+    briefs = _recent(_safe_records(lambda: store._brief_records(scope), load_errors, "briefs"))
+    claims = _recent(_safe_records(lambda: store._claim_records(scope), load_errors, "claims"))
+    actions = _recent(_safe_records(lambda: store._action_records(scope), load_errors, "action drafts"))
+    memories = _recent(_safe_records(lambda: store._memory_records(scope), load_errors, "memory drafts"))
     audit = _recent(
         [
             event
-            for event in _safe_records(lambda: store._all_audit_events())
+            for event in _safe_records(lambda: store._all_audit_events(), load_errors, "activity receipts")
             if _same_scope(event.get("scope") if isinstance(event.get("scope"), dict) else event, scope)
         ],
         limit=80,
     )
+    try:
+        audit_integrity = store.verify_audit()
+    except Exception:
+        load_errors.append("audit integrity")
+        audit_integrity = {"status": "not_verified", "event_count": 0, "errors": []}
     for artifact in artifacts:
-        artifact["_preview"] = _safe_preview(store, artifact, 260)
-    artifacts = [record for record in artifacts if not _internal_product_record(record)]
-    briefs = [record for record in briefs if not _internal_product_record(record)]
-    claims = [record for record in claims if not _internal_product_record(record)]
-    actions = [record for record in actions if not _internal_product_record(record)]
-    memories = [record for record in memories if not _internal_product_record(record)]
+        artifact["_preview"] = _safe_preview(store, artifact, 260, load_errors, "source preview")
+    internal_lineage_refs, internal_record_objects = _internal_product_lineage(
+        [artifacts, briefs, claims, actions, memories]
+    )
+    artifacts = [record for record in artifacts if id(record) not in internal_record_objects]
+    briefs = [record for record in briefs if id(record) not in internal_record_objects]
+    claims = [record for record in claims if id(record) not in internal_record_objects]
+    actions = [record for record in actions if id(record) not in internal_record_objects]
+    memories = [record for record in memories if id(record) not in internal_record_objects]
     return {
         "store": store,
         "scope": scope,
@@ -214,23 +235,36 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
         "actions": actions,
         "memories": memories,
         "audit": audit,
+        "audit_integrity": audit_integrity,
+        "internal_lineage_refs": internal_lineage_refs,
+        "load_errors": list(dict.fromkeys(load_errors)),
         "suggestions": _suggestions(artifacts, briefs, claims),
         "inbox": _inbox_items(briefs, claims, actions, memories),
     }
 
 
-def _safe_records(read: Any) -> list[dict[str, Any]]:
+def _safe_records(read: Any, errors: list[str] | None = None, label: str = "workspace records") -> list[dict[str, Any]]:
     try:
         records = read()
     except Exception:
+        if errors is not None:
+            errors.append(label)
         return []
     return [record for record in records if isinstance(record, dict)]
 
 
-def _safe_preview(store: Any, artifact: dict[str, Any], limit: int = 240) -> str:
+def _safe_preview(
+    store: Any,
+    artifact: dict[str, Any],
+    limit: int = 240,
+    errors: list[str] | None = None,
+    label: str = "source preview",
+) -> str:
     try:
         return store.derived_text_preview(artifact, limit)
     except Exception:
+        if errors is not None:
+            errors.append(label)
         return ""
 
 
@@ -238,12 +272,77 @@ def _same_scope(value: Any, scope: dict[str, str]) -> bool:
     return isinstance(value, dict) and all(value.get(key) == expected for key, expected in scope.items())
 
 
-def _internal_product_record(record: dict[str, Any]) -> bool:
-    try:
-        text = json.dumps(record, sort_keys=True)
-    except TypeError:
-        text = str(record)
-    return bool(INTERNAL_PRODUCT_RECORD_RE.search(text))
+def _record_identity_refs(record: dict[str, Any]) -> set[str]:
+    refs: set[str] = set()
+    for key in PRODUCT_RECORD_ID_KEYS:
+        value = record.get(key)
+        if not isinstance(value, str) or not value:
+            continue
+        kind = key.removesuffix("_id")
+        refs.update({value, f"{kind}:{value}"})
+    return refs
+
+
+def _record_lineage_refs(record: dict[str, Any]) -> set[str]:
+    refs: set[str] = set()
+
+    def collect(value: Any, key: str = "") -> None:
+        if isinstance(value, dict):
+            ref_type = value.get("type")
+            ref_id = value.get("id")
+            if isinstance(ref_type, str) and isinstance(ref_id, str) and ref_type and ref_id:
+                refs.update({ref_id, f"{ref_type}:{ref_id}"})
+            for child_key, child_value in value.items():
+                collect(child_value, str(child_key))
+            return
+        if isinstance(value, list):
+            for item in value:
+                collect(item, key)
+            return
+        if not isinstance(value, str) or not value:
+            return
+        if key.endswith("_id") or key.endswith("_ref") or key.endswith("_refs"):
+            refs.add(value)
+
+    collect(record)
+    return refs
+
+
+def _internal_product_lineage(
+    record_groups: list[list[dict[str, Any]]],
+) -> tuple[set[str], set[int]]:
+    internal_refs: set[str] = set()
+    internal_record_objects: set[int] = set()
+    pending = [record for records in record_groups for record in records]
+    changed = True
+    while changed:
+        changed = False
+        for record in pending:
+            object_id = id(record)
+            if object_id in internal_record_objects:
+                continue
+            if not _internal_product_record(record, internal_refs):
+                continue
+            internal_record_objects.add(object_id)
+            internal_refs.update(_record_identity_refs(record))
+            changed = True
+    return internal_refs, internal_record_objects
+
+
+def _internal_product_record(record: dict[str, Any], internal_refs: set[str] | None = None) -> bool:
+    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
+    provenance = record.get("provenance") if isinstance(record.get("provenance"), dict) else {}
+    source = record.get("source") if isinstance(record.get("source"), dict) else {}
+    visibility_values = {
+        str(record.get("visibility") or "").lower(),
+        str(record.get("product_visibility") or "").lower(),
+        str(metadata.get("visibility") or "").lower(),
+        str(metadata.get("product_visibility") or "").lower(),
+        str(provenance.get("visibility") or "").lower(),
+    }
+    source_type = str(source.get("type") or source.get("source_type") or "").lower()
+    explicitly_internal = bool(visibility_values & INTERNAL_PRODUCT_VISIBILITIES) or source_type in INTERNAL_PRODUCT_SOURCE_TYPES
+    return explicitly_internal or bool(internal_refs and _record_lineage_refs(record) & internal_refs)
 
 
 def _recent(records: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
@@ -433,6 +532,7 @@ def _audit_lifecycle_card(title: str, count: int, detail: str, state: str) -> st
 def _audit_detail(event: dict[str, Any], position: int) -> str:
     subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
     details = event.get("details") if isinstance(event.get("details"), dict) else {}
+    event_scope = event.get("scope") if isinstance(event.get("scope"), dict) else event
     event_id = _short_ref(event.get("event_id"), 16)
     event_hash = _short_ref(event.get("event_hash"), 16)
     previous_hash = _short_ref(event.get("previous_hash"), 16)
@@ -449,7 +549,7 @@ def _audit_detail(event: dict[str, Any], position: int) -> str:
     <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>{h(event_hash)}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>{h(previous_hash)}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Detail fields</span><strong>{h(detail_keys)}</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>{h(str(event.get("workspace_id") or "default"))}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Scope</span><strong>{h(_scope_label(event_scope))}</strong></div>
   </div>
 </details>
 """
@@ -3967,11 +4067,30 @@ def _css_name(value: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]+", "-", value).strip("-")
 
 
+def _degraded_notice(load_errors: list[str]) -> str:
+    affected = ", ".join(load_errors)
+    return f"""
+<section class="cs-panel" data-product-state="degraded" role="alert">
+  <div class="cs-panel-header">
+    <div>
+      <h2>Some workspace data could not be loaded</h2>
+      <p class="cs-muted">Unavailable: {h(affected)}. No records were changed. Retry this page; if the state remains unavailable, inspect the local runtime before continuing.</p>
+    </div>
+    {_chip("Degraded", "failed")}
+  </div>
+</section>
+"""
+
+
 def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any], q: str) -> str:
     css = _token_css(root)
     nav = _nav(active, ctx)
     topbar = _topbar(q, ctx)
-    script = _home_script()
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    load_errors = ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else []
+    if load_errors:
+        content = _degraded_notice(list(dict.fromkeys(str(item) for item in load_errors))) + content
+    script = _home_script(scope)
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -3983,7 +4102,14 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
 </head>
 <body>
   <a class="cs-skip-link" href="#main-content">Skip to content</a>
-  <div class="cs-shell" data-product-shell="cornerstone">
+  <div
+    class="cs-shell"
+    data-product-shell="cornerstone"
+    data-tenant-id="{h(scope.get('tenant_id') or 'local-dev')}"
+    data-owner-id="{h(scope.get('owner_id') or 'local-user')}"
+    data-namespace-id="{h(scope.get('namespace_id') or 'personal')}"
+    data-workspace-id="{h(scope.get('workspace_id') or 'default')}"
+  >
     <aside class="cs-sidebar" aria-label="CornerStone navigation">
       <div class="cs-brand">
         <div class="cs-brand-mark">CS</div>
@@ -4013,35 +4139,21 @@ def _nav(active: str, ctx: dict[str, Any]) -> str:
         "/": len(ctx["artifacts"]),
         "/search": len(ctx["artifacts"]) + len(ctx["briefs"]) + len(ctx["claims"]) + len(ctx["actions"]),
         "/artifacts": len(ctx["artifacts"]),
-        "/briefs": len(ctx["briefs"]),
         "/claims": len(ctx["claims"]),
         "/actions": len(ctx["actions"]),
-        "/inbox": len(ctx["inbox"]),
-        "/audit": len(ctx["audit"]),
-        "/review": 0,
     }
     primary = [
         ("/", "Home"),
         ("/search", "Search"),
         ("/artifacts", "Artifacts"),
-        ("/briefs", "Briefs"),
         ("/claims", "Claims"),
         ("/actions", "Actions"),
-    ]
-    secondary = [
-        ("/inbox", "Inbox"),
-        ("/audit", "Audit"),
-        ("/review", "Owner"),
     ]
     return f"""
 <nav class="cs-nav">
   <div class="cs-nav-group">
     <div class="cs-nav-label">Workspace</div>
     {''.join(_nav_link(href, label, active, counts.get(href, 0)) for href, label in primary)}
-  </div>
-  <div class="cs-nav-group">
-    <div class="cs-nav-label">Operations</div>
-    {''.join(_nav_link(href, label, active, counts.get(href, 0)) for href, label in secondary)}
   </div>
   {_sidebar_status(ctx)}
 </nav>
@@ -4051,17 +4163,17 @@ def _nav(active: str, ctx: dict[str, Any]) -> str:
 def _nav_link(href: str, label: str, active: str, count: int) -> str:
     current = ' aria-current="page"' if href == active else ""
     mark = label[:1].upper()
-    count_label = "" if href == "/review" else str(count)
-    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark" aria-hidden="true">{h(mark)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(count_label)}</span></a>'
+    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark" aria-hidden="true">{h(mark)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(str(count))}</span></a>'
 
 
 def _sidebar_status(ctx: dict[str, Any]) -> str:
     review_count = len(ctx["inbox"])
     source_count = len(ctx["artifacts"])
     decision_count = len(ctx["claims"]) + len(ctx["actions"])
+    scope_label = _scope_label(ctx.get("scope"))
     return f"""
 <section class="cs-sidebar-status" aria-label="Workspace posture">
-  <div class="cs-sidebar-status-row"><span>Scope</span><strong>Personal</strong></div>
+  <div class="cs-sidebar-status-row"><span>Scope</span><strong>{h(scope_label)}</strong></div>
   <div class="cs-sidebar-status-row"><span>Sources</span><strong>{h(source_count)}</strong></div>
   <div class="cs-sidebar-status-row"><span>Decisions</span><strong>{h(decision_count)}</strong></div>
   <div class="cs-sidebar-status-row"><span>Review queue</span><strong>{h(review_count)}</strong></div>
@@ -4072,6 +4184,8 @@ def _sidebar_status(ctx: dict[str, Any]) -> str:
 def _topbar(q: str, ctx: dict[str, Any]) -> str:
     count = len(ctx["artifacts"])
     label = f"{count} saved source" + ("" if count == 1 else "s")
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    workspace_label = f"Workspace: {scope.get('workspace_id') or 'default'}"
     return f"""
 <header class="cs-topbar">
   <div class="cs-command" aria-label="Global search">
@@ -4083,10 +4197,10 @@ def _topbar(q: str, ctx: dict[str, Any]) -> str:
   </div>
   <div class="cs-topbar-actions" aria-label="Workspace status">
     {_chip(label, "saved")}
-    {_chip("Local workspace", "searchable")}
+    {_chip(workspace_label, "searchable")}
     {_chip("Receipts required", "underReview")}
     <span class="cs-icon-button" aria-label="Help">?</span>
-    <span class="cs-avatar" aria-label="Owner">JT</span>
+    <a class="cs-avatar" href="/review" aria-label="Open owner area">JT</a>
   </div>
 </header>
 """
@@ -4304,7 +4418,7 @@ def _knowledge_states_block(ctx: dict[str, Any]) -> str:
 <section class="cs-panel flat">
   <div class="cs-panel-header">
     <h2>Knowledge states</h2>
-    <span class="cs-meta">Local workspace</span>
+    <span class="cs-meta">{h(_scope_label(ctx.get("scope")))}</span>
   </div>
   <div class="cs-stat-list">
     <div class="cs-stat-row">
@@ -4417,6 +4531,7 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
         for index, (label, count) in enumerate(counts)
     )
     right_rail = _search_right_rail(counts, q)
+    scope_label = _scope_label(ctx.get("scope"))
     return f"""
 <section data-product-surface="search">
   <div class="cs-search-workbench">
@@ -4452,7 +4567,7 @@ def _search_page(ctx: dict[str, Any], q: str) -> str:
         <div class="cs-search-mode" aria-label="Current search controls">
           <div class="cs-filter-row">
             <span class="cs-filter-chip">Search mode: local keyword</span>
-            <span class="cs-filter-chip">Scope: personal/default</span>
+            <span class="cs-filter-chip">Scope: {h(scope_label)}</span>
             <span class="cs-filter-chip">Type: all visible</span>
             <span class="cs-filter-chip">Result receipt required</span>
           </div>
@@ -4868,7 +4983,7 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Saved sources", len(artifacts)), ("Linked refs", linked_count), ("Searchable", len(artifacts))])}
-      {_collection_toolbar("Source register", len(artifacts), ["Scope: personal/default", "Type: all sources", "Sort: newest first"])}
+      {_collection_toolbar("Source register", len(artifacts), [f"Scope: {_scope_label(ctx.get('scope'))}", "Type: all sources", "Sort: newest first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -4954,7 +5069,7 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
     <div>
       {_collection_summary([("Briefs", len(briefs)), ("With sources", with_sources), ("Source refs", source_ref_count)])}
       {_queue_focus("Brief reading queue", "Review lanes keep drafted answers, source coverage, and next use visible before a brief becomes decision material.", [("Ready to read", with_sources, "Source links visible", "searchable"), ("Needs source check", needs_sources, "Do not use in decisions yet", "draft"), ("Can feed decision", with_sources, "Review before claim or action", "saved")])}
-      {_collection_toolbar("Brief queue", len(briefs), ["Scope: personal/default", "State: drafts and source-backed", "Sort: newest first"])}
+      {_collection_toolbar("Brief queue", len(briefs), [f"Scope: {_scope_label(ctx.get('scope'))}", "State: drafts and source-backed", "Sort: newest first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5043,7 +5158,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
     <div>
       {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Evidence-backed", evidence_backed_count), ("Approved", approved_count)])}
       {_queue_focus("Claim review lanes", "Move statements from draft to source support, then to evidence-backed only after citation checks, then approved.", [("Draft lane", needs_support, "Needs source support", "draft"), ("Source-support lane", supported_count, "Support attached", "searchable"), ("Evidence-backed locked", evidence_backed_count, "Citation checks required", "underReview"), ("Approved lane", approved_count, "Decision-ready after review", "saved")])}
-      {_collection_toolbar("Claim review queue", len(claims), ["Scope: personal/default", "State: open and approved", "Sort: needs review first"])}
+      {_collection_toolbar("Claim review queue", len(claims), [f"Scope: {_scope_label(ctx.get('scope'))}", "State: open and approved", "Sort: needs review first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5124,7 +5239,7 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
     <div>
       {_collection_summary([("Drafts", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
       {_queue_focus("Action approval lanes", "Dry-run, risk, policy, and approval stay in the queue before any external step is available.", [("Preview lane", preview_count, "Inspect impact first", "searchable"), ("Approval lane", approval_count, "Owner review required", "underReview"), ("Executed lane", executed_count, "Audit after send", "saved")])}
-      {_collection_toolbar("Action preview queue", len(actions), ["Scope: personal/default", "Mode: dry-run first", "Sort: approval risk first"])}
+      {_collection_toolbar("Action preview queue", len(actions), [f"Scope: {_scope_label(ctx.get('scope'))}", "Mode: dry-run first", "Sort: approval risk first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5157,6 +5272,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     counts = _inbox_counts(items)
     lane_summary = _inbox_lane_summary(counts)
     item_range = f"1-{len(items)} of {len(items)} items" if items else "0 of 0 items"
+    scope_label = _scope_label(ctx.get("scope"))
     return f"""
 <section data-product-surface="inbox">
   <div class="cs-page-head">
@@ -5177,7 +5293,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
         <div class="cs-filter-row">
           <span class="cs-inbox-filter-label"><span>F</span> Filters</span>
           <span class="cs-filter-chip">Type: all visible</span>
-          <span class="cs-filter-chip">Owner: personal/default</span>
+          <span class="cs-filter-chip">Owner: {h(scope_label)}</span>
           <span class="cs-filter-chip">Priority: open first</span>
           <span class="cs-filter-chip">Trust/risk: visible labels</span>
         </div>
@@ -5377,6 +5493,17 @@ def _inbox_empty() -> str:
 
 def _audit_page(ctx: dict[str, Any]) -> str:
     events = ctx["audit"]
+    integrity = ctx.get("audit_integrity") if isinstance(ctx.get("audit_integrity"), dict) else {}
+    integrity_status = str(integrity.get("status") or "not_verified")
+    if integrity_status == "success":
+        integrity_label = "Hash chain verified"
+        integrity_state = "searchable"
+    elif integrity_status == "failed":
+        integrity_label = "Integrity failed"
+        integrity_state = "failed"
+    else:
+        integrity_label = "Integrity unavailable"
+        integrity_state = "underReview"
     event_count = len(events)
     visible_count = min(event_count, 40)
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
@@ -5427,7 +5554,7 @@ def _audit_page(ctx: dict[str, Any]) -> str:
     <div class="cs-brief-fact-strip">
       <div class="cs-brief-fact"><span class="cs-meta">Latest receipt</span><strong>{h(latest_activity)}</strong></div>
       <div class="cs-brief-fact"><span class="cs-meta">Scope</span><strong>{h(workspace)}</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Chain status</span><strong>{"Hash chained" if events else "Ready"}</strong></div>
+      <div class="cs-brief-fact"><span class="cs-meta">Chain status</span><strong>{h(integrity_label if events else "Ready")}</strong></div>
     </div>
     <div class="cs-audit-latest-actions">
       <a class="cs-button secondary" href="#activity-receipts">Read activity receipts</a>
@@ -5480,7 +5607,7 @@ def _audit_page(ctx: dict[str, Any]) -> str:
         <span>{h(str(event.get("workspace_id") or workspace))}</span>
       </div>
     </div>
-    {_chip("Hash chained", "searchable")}
+    {_chip(integrity_label, integrity_state)}
   </div>
   {_audit_detail(event, index)}
 </article>
@@ -5489,7 +5616,7 @@ def _audit_page(ctx: dict[str, Any]) -> str:
         )
         rows = f'<div class="cs-audit-list">{rows}</div>'
     return f"""
-<section data-product-surface="audit">
+<section data-product-surface="audit" data-audit-integrity-status="{h(integrity_status)}">
   <header class="cs-audit-hero" aria-label="Audit receipt workspace">
     <div class="cs-brief-title">
       <div class="cs-kicker">Audit</div>
@@ -5504,7 +5631,8 @@ def _audit_page(ctx: dict[str, Any]) -> str:
     </div>
     <div class="cs-audit-actions">
       {_chip("Local ledger", "searchable")}
-      {_chip("Readable receipts", "evidenceBacked")}
+      {_chip("Readable receipts", "searchable")}
+      {_chip(integrity_label, integrity_state)}
       <a class="cs-button secondary" href="/artifacts">Open source register</a>
       <a class="cs-button secondary" href="/">Back to Home</a>
     </div>
@@ -5536,7 +5664,7 @@ def _audit_page(ctx: dict[str, Any]) -> str:
         <h2 class="cs-section-title">Integrity chain</h2>
         <p class="cs-muted">Each row keeps its event hash, previous hash, subject, event type, and ledger position behind Raw event detail.</p>
         <div class="cs-audit-side-list" aria-label="Audit integrity checks">
-          <div class="cs-audit-side-item"><strong>Hash chained</strong><span class="cs-muted">Event hash and previous hash stay inspectable per receipt.</span></div>
+          <div class="cs-audit-side-item"><strong>{h(integrity_label)}</strong><span class="cs-muted">Event hash and previous hash are verified before this page claims chain integrity.</span></div>
           <div class="cs-audit-side-item"><strong>Scoped ledger</strong><span class="cs-muted">Receipts are shown for the current local workspace.</span></div>
           <div class="cs-audit-side-item"><strong>Readable first</strong><span class="cs-muted">Plain labels stay above raw fields.</span></div>
         </div>
@@ -5990,7 +6118,7 @@ def _detail_orientation(
 
 def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) -> str:
     title = _artifact_title(artifact)
-    text = _safe_preview(store, artifact, 5000) or "No readable text preview is available for this source."
+    text = _safe_preview(store, artifact, 5000, ctx.get("load_errors"), "source preview") or "No readable text preview is available for this source."
     linked = _linked_records(ctx, artifact.get("artifact_id"))
     source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
     fingerprint = _fingerprint(artifact.get("checksum_sha256") or artifact.get("original_storage_ref"))
@@ -7360,16 +7488,40 @@ def _internal_record_notice(label: str) -> str:
 """
 
 
-def _home_script() -> str:
+def _home_script(scope: dict[str, Any]) -> str:
+    safe_scope = {
+        "tenant_id": str(scope.get("tenant_id") or "local-dev"),
+        "owner_id": str(scope.get("owner_id") or "local-user"),
+        "namespace_id": str(scope.get("namespace_id") or "personal"),
+        "workspace_id": str(scope.get("workspace_id") or "default"),
+    }
     return """
 <script>
 (function () {
-  const scope = {
-    tenant_id: "local-dev",
-    owner_id: "local-user",
-    namespace_id: "personal",
-    workspace_id: "default"
-  };
+  const scope = __SCOPE__;
+  function scopedUrl(path) {
+    const url = new URL(path, window.location.origin);
+    Object.entries(scope).forEach(([key, value]) => url.searchParams.set(key, value));
+    return url.pathname + url.search + url.hash;
+  }
+  function preserveScope() {
+    document.querySelectorAll('a[href^="/"]').forEach(link => {
+      link.setAttribute("href", scopedUrl(link.getAttribute("href")));
+    });
+    document.querySelectorAll('form[method="get"], form[method="GET"]').forEach(form => {
+      Object.entries(scope).forEach(([key, value]) => {
+        let input = form.querySelector('input[name="' + key + '"]');
+        if (!input) {
+          input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          form.appendChild(input);
+        }
+        input.value = value;
+      });
+    });
+  }
+  preserveScope();
   const dropForm = document.getElementById("cs-drop-form");
   const dropText = document.getElementById("cs-drop-text");
   const dropStatus = document.getElementById("cs-drop-status");
@@ -7418,7 +7570,7 @@ def _home_script() -> str:
       const artifact = saved.artifact || {};
       const id = artifact["artifact" + "_id"];
       setStatus(dropStatus, "Saved. Opening source...", "success");
-      if (id) window.location.href = "/artifacts/" + encodeURIComponent(id) + "?view=html";
+      if (id) window.location.href = scopedUrl("/artifacts/" + encodeURIComponent(id) + "?view=html");
     } catch (error) {
       setStatus(dropStatus, error.message, "error");
     } finally {
@@ -7491,4 +7643,4 @@ def _home_script() -> str:
   }
 }());
 </script>
-"""
+""".replace("__SCOPE__", _script_json(safe_scope))
