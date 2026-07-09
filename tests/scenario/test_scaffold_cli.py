@@ -13652,6 +13652,92 @@ class ScaffoldCliTests(unittest.TestCase):
         finally:
             shutil.rmtree(state_dir, ignore_errors=True)
 
+    def test_claim_create_from_brief_preserves_cli_lineage(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-claim-brief-") as state_dir:
+            ingest = run_cli(
+                "artifact",
+                "ingest",
+                "fixtures/vs0/packs/01_artifact_basic/input.txt",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(ingest.returncode, 0, ingest.stdout + ingest.stderr)
+            search = run_cli(
+                "search",
+                "query",
+                "alpha-evidence-anchor",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(search.returncode, 0, search.stdout + search.stderr)
+            snapshot_id = json.loads(search.stdout)["search_snapshot"]["search_snapshot_id"]
+            bundle = run_cli(
+                "evidence",
+                "bundle",
+                "create",
+                "--search-snapshot-id",
+                snapshot_id,
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(bundle.returncode, 0, bundle.stdout + bundle.stderr)
+            bundle_id = json.loads(bundle.stdout)["evidence_bundle"]["evidence_bundle_id"]
+            brief = run_cli(
+                "brief",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(brief.returncode, 0, brief.stdout + brief.stderr)
+            brief_id = json.loads(brief.stdout)["brief"]["brief_id"]
+
+            claim = run_cli(
+                "claim",
+                "create",
+                "--brief",
+                brief_id,
+                "--statement",
+                "The alpha evidence anchor is present in the source Brief.",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(claim.returncode, 0, claim.stdout + claim.stderr)
+            payload = json.loads(claim.stdout)
+            self.assertEqual(payload["ids"]["brief_id"], brief_id)
+            self.assertEqual(payload["ids"]["evidence_bundle_id"], bundle_id)
+            self.assertEqual(payload["claim"]["related_brief"]["brief_id"], brief_id)
+            self.assertTrue(payload["claim"]["rationale"])
+            self.assertTrue(payload["claim"]["gaps"])
+            self.assertTrue(payload["claim"]["activity_refs"])
+            self.assertIn(f"brief:{brief_id}", payload["evidence_refs"])
+            self.assertTrue(payload["audit_refs"])
+
+            denied = run_cli(
+                "claim",
+                "create",
+                "--brief",
+                brief_id,
+                "--statement",
+                "Cross-scope Brief use must be denied.",
+                "--owner-id",
+                "other-user",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(denied.returncode, 6, denied.stdout + denied.stderr)
+            denied_payload = json.loads(denied.stdout)
+            self.assertEqual(denied_payload["errors"][0]["code"], "CS_SCOPE_DENIED")
+            self.assertEqual(denied_payload["errors"][0]["message"], "Claim source is outside the requested scope.")
+            self.assertEqual(denied_payload["errors"][0]["brief_id"], brief_id)
+
     def test_vs0_artifact_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-artifacts", "--json")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

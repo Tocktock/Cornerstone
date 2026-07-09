@@ -647,15 +647,43 @@ def _claim_evidence_backed_earned(record: dict[str, Any]) -> bool:
     return trust == "evidence_backed" and label_check.get("earned_evidence_backed") is True
 
 
+def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
+    approval = record.get("approval") if isinstance(record.get("approval"), dict) else {}
+    execution = record.get("execution") if isinstance(record.get("execution"), dict) else {}
+    result = execution.get("result") if isinstance(execution.get("result"), dict) else {}
+    approval_status = str(approval.get("status") or "not_recorded").lower()
+    execution_status = str(execution.get("status") or "not_started").lower()
+    result_status = str(result.get("status") or "").lower()
+    if execution_status == "executed":
+        stage = "executed"
+    elif execution_status in {"failed", "error"} or result_status in {"failed", "error"}:
+        stage = "failed"
+    elif approval_status == "approved" or execution_status == "ready_to_execute":
+        stage = "approved"
+    elif approval_status in {"pending", "not_approved", "required"}:
+        stage = "pending"
+    else:
+        stage = "draft"
+    return {
+        "stage": stage,
+        "approval": approval,
+        "approval_status": approval_status,
+        "execution": execution,
+        "execution_status": execution_status,
+        "result": result,
+        "result_status": result_status,
+    }
+
+
 def _action_label(record: dict[str, Any]) -> tuple[str, str]:
-    status = str(record.get("status") or "").lower()
-    dry_run = record.get("dry_run") if isinstance(record.get("dry_run"), dict) else {}
-    decision = str((dry_run.get("policy_decision") or {}).get("decision") or "").lower() if isinstance(dry_run, dict) else ""
-    if status == "executed":
+    stage = _action_lifecycle(record)["stage"]
+    if stage == "executed":
         return "Executed", "executed"
-    if status == "failed":
+    if stage == "failed":
         return "Failed", "failed"
-    if "approval" in decision:
+    if stage == "approved":
+        return "Approved", "approved"
+    if stage == "pending":
         return "Needs approval", "underReview"
     return "Draft", "draft"
 
@@ -5186,25 +5214,42 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
     approval_count = 0
     for action in actions:
         label, state = _action_label(action)
-        if state == "underReview":
+        lifecycle = _action_lifecycle(action)
+        stage = str(lifecycle["stage"])
+        if stage == "pending":
             approval_count += 1
         dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
-        detail = str(dry_run.get("goal") or "Preview before any external write.")
+        result = lifecycle["result"]
+        detail = str(
+            result.get("message")
+            if stage == "executed" and isinstance(result, dict) and result.get("message")
+            else dry_run.get("goal") or "Preview before any external write."
+        )
         impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
         risk = str(impact.get("risk") or action.get("risk") or "review").title()
+        lifecycle_chip = ("Recorded result", "saved") if stage == "executed" else ("Dry-run first", "searchable")
+        footer = (
+            [
+                ("Execution", "Recorded"),
+                ("Result", str(result.get("status") or "available").title()),
+                ("Approval", str(lifecycle["approval_status"]).replace("_", " ").title()),
+            ]
+            if stage == "executed"
+            else [
+                ("Dry-run", "Preview before send"),
+                ("Risk", f"{risk} risk"),
+                ("Next review step", "Check policy and approval"),
+            ]
+        )
         rows += _collection_row(
             "A",
             _action_title(action),
             detail,
             _detail_href("actions", action.get("action_id")),
             [("Action", ""), (_display_date(action), ""), (f"{risk} risk", "")],
-            [(label, state), ("Dry-run first", "searchable")],
-            footer=[
-                ("Dry-run", "Preview before send"),
-                ("Risk", f"{risk} risk"),
-                ("Next review step", "Check policy and approval"),
-            ],
-            action_label="Open preview",
+            [(label, state), lifecycle_chip],
+            footer=footer,
+            action_label="Open result" if stage == "executed" else "Open preview",
         )
     rows = rows or _empty_state(
         "Day zero",
@@ -5226,18 +5271,18 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
             ("Audit link", "Execution remains traceable if approved."),
         ],
     )
-    executed_count = sum(1 for action in actions if str(action.get("status") or "").lower() == "executed")
+    executed_count = sum(1 for action in actions if _action_lifecycle(action)["stage"] == "executed")
     preview_count = max(len(actions) - executed_count, 0)
     return f"""
 <section data-product-surface="actions">
   <div class="cs-page-head">
     <div class="cs-kicker">Actions</div>
-    <h1>Action drafts</h1>
-    <p>Every action starts with a preview and stays local until approval is clear.</p>
+    <h1>Action records</h1>
+    <p>Every action starts with a preview; approved and executed lifecycle records remain visible here.</p>
   </div>
   <div class="cs-collection-workbench">
     <div>
-      {_collection_summary([("Drafts", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
+      {_collection_summary([("Records", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
       {_queue_focus("Action approval lanes", "Dry-run, risk, policy, and approval stay in the queue before any external step is available.", [("Preview lane", preview_count, "Inspect impact first", "searchable"), ("Approval lane", approval_count, "Owner review required", "underReview"), ("Executed lane", executed_count, "Audit after send", "saved")])}
       {_collection_toolbar("Action preview queue", len(actions), [f"Scope: {_scope_label(ctx.get('scope'))}", "Mode: dry-run first", "Sort: approval risk first"])}
       <div class="cs-collection-list">{rows}</div>
@@ -6302,6 +6347,84 @@ def _linked_records(ctx: dict[str, Any], artifact_id: Any) -> str:
     return f'<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
 
 
+def _evidence_bundle_id(record: dict[str, Any]) -> str:
+    bundle = record.get("evidence_bundle") if isinstance(record.get("evidence_bundle"), dict) else {}
+    return str(bundle.get("evidence_bundle_id") or "")
+
+
+def _related_brief_id(record: dict[str, Any]) -> str:
+    related = record.get("related_brief") if isinstance(record.get("related_brief"), dict) else {}
+    return str(related.get("brief_id") or "")
+
+
+def _record_activity_panel(ctx: dict[str, Any], record_kind: str, record_id: str, audit_refs: list[str]) -> str:
+    events = []
+    for event in ctx.get("audit", []):
+        subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+        if str(subject.get("type") or "") == record_kind and str(subject.get("id") or "") == record_id:
+            events.append(event)
+    rows = "".join(
+        f'<div class="cs-stat-row"><span class="cs-stat-icon">A</span><div><strong>{h(_plain_event(str(event.get("event_type") or "recorded")))}</strong><div class="cs-meta">{h(_display_date(event))}</div></div>{_chip("Receipt", "searchable")}</div>'
+        for event in events[:5]
+    )
+    refs = "".join(f"<li><code>{h(ref)}</code></li>" for ref in audit_refs[:5])
+    if not rows:
+        rows = '<div class="cs-empty">No record-specific activity receipt is visible yet.</div>'
+    return f"""
+<section class="cs-artifact-side-card" data-record-activity="{h(record_kind)}:{h(record_id)}">
+  <h2 class="cs-section-title">Activity</h2>
+  <div class="cs-stat-list">{rows}</div>
+  <details class="cs-audit-detail">
+    <summary>Audit refs</summary>
+    <ul>{refs or '<li>No audit ref recorded.</li>'}</ul>
+  </details>
+</section>
+"""
+
+
+def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
+    brief_id = str(brief.get("brief_id") or "")
+    bundle_id = _evidence_bundle_id(brief)
+    claims = [
+        claim
+        for claim in ctx.get("claims", [])
+        if _related_brief_id(claim) == brief_id
+    ]
+    claim_ids = {str(claim.get("claim_id") or "") for claim in claims}
+    actions = [action for action in ctx.get("actions", []) if str(action.get("source_claim_id") or "") in claim_ids]
+    memories = [
+        memory
+        for memory in ctx.get("memories", [])
+        if bundle_id and any(str(ref) == f"evidence_bundle:{bundle_id}" for ref in memory.get("evidence_refs", []))
+    ]
+    claim_rows = "".join(
+        f'<a class="cs-list-row" href="{h(_detail_href("claims", claim.get("claim_id")))}"><span class="cs-meta">Claim candidate</span><strong>{h(_claim_title(claim))}</strong></a>'
+        for claim in claims[:4]
+    ) or '<div class="cs-empty">No Claim candidate has been created from this Brief yet.</div>'
+    memory_rows = "".join(
+        f'<div class="cs-list-row"><span class="cs-meta">Memory/Wiki candidate</span><strong>{h(_truncate(str(memory.get("title") or memory.get("statement") or "Knowledge draft"), 96))}</strong></div>'
+        for memory in memories[:4]
+    ) or '<div class="cs-empty">No Memory/Wiki candidate has been created. Knowledge promotion remains review-only.</div>'
+    action_rows = "".join(
+        f'<a class="cs-list-row" href="{h(_detail_href("actions", action.get("action_id")))}"><span class="cs-meta">Action preview</span><strong>{h(_action_title(action))}</strong></a>'
+        for action in actions[:4]
+    )
+    if not action_rows:
+        suggestions = [str(item) for item in brief.get("recommended_next_steps", []) if isinstance(item, str)]
+        action_rows = "".join(f'<div class="cs-list-row"><span class="cs-meta">Suggested action</span><strong>{h(item)}</strong></div>' for item in suggestions[:3])
+        action_rows = action_rows or '<div class="cs-empty">No suggested action is recorded.</div>'
+    return f"""
+<section class="cs-panel" aria-label="Related Brief work">
+  <div class="cs-panel-header"><div><h2>Related work</h2><p class="cs-muted">Only persisted records are shown as candidates; suggestions remain clearly labelled.</p></div></div>
+  <div class="cs-brief-note-grid">
+    <div><h3>Claim candidates</h3>{claim_rows}</div>
+    <div><h3>Memory/Wiki candidates</h3>{memory_rows}</div>
+  </div>
+  <div><h3>Suggested actions</h3>{action_rows}</div>
+</section>
+"""
+
+
 def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     label, state = _brief_label(brief)
     summary = str(brief.get("summary") or "")
@@ -6332,7 +6455,17 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         if citation_ready
         else "Unsupported or unresolved citation work remains; use this as a draft until source spans are checked."
     )
-    summary_text = summary or "No summary text was drafted yet. Use the findings and source snippets below before promoting this brief."
+    summary_text = summary or (key_points[0] if key_points else "No summary text was drafted yet. Use the findings and source snippets below before promoting this brief.")
+    brief_id = str(brief.get("brief_id") or "")
+    claim_statement = next((value for value in [*key_points, *findings, summary_text] if value.strip()), "")
+    can_create_claim = bool(brief_id and _evidence_bundle_id(brief) and claim_statement)
+    related_work = _brief_related_work(ctx, brief)
+    activity = _record_activity_panel(
+        ctx,
+        "brief",
+        brief_id,
+        [str(ref) for ref in brief.get("audit_refs", []) if isinstance(ref, str)],
+    )
     return f"""
 <section
   class="cs-brief-workbench"
@@ -6425,6 +6558,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         <ul class="cs-brief-note-list">{next_rows}</ul>
       </section>
     </div>
+    {related_work}
   </div>
   <aside class="cs-stack">
     <nav class="cs-artifact-rail-tabs" aria-label="Brief detail tabs">
@@ -6443,12 +6577,14 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Use this brief</h2>
       <div class="cs-review-box">
-        <a class="cs-button" href="/claims">Draft claim from finding</a>
+        {f'<button class="cs-button" type="button" id="cs-create-claim-button" data-brief-id="{h(brief_id)}" data-statement="{h(claim_statement)}">Draft claim from finding</button>' if can_create_claim else '<span class="cs-button is-disabled" aria-disabled="true">Claim draft needs source evidence</span>'}
         <a class="cs-button secondary" href="/actions">Review action previews</a>
         <a class="cs-button secondary" href="/audit">Open audit trail</a>
       </div>
+      <div id="cs-claim-create-status" class="cs-status is-idle" data-state="idle" role="status">No Claim candidate created yet.</div>
       <p class="cs-muted">Use this as a draft until each important statement is matched to a source span.</p>
     </section>
+    {activity}
   </aside>
 </section>
 """
@@ -6462,7 +6598,13 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     has_sources = bool(source_items)
     is_approved = str(claim.get("status") or "").lower() == "approved"
     evidence_backed_earned = _claim_evidence_backed_earned(claim)
-    approval_note = "Approval stays locked until review is recorded." if has_sources else "Approval stays locked until supporting evidence is attached."
+    approval_note = (
+        "Owner approval is recorded; autonomous action remains outside this Claim record."
+        if is_approved
+        else "Approval stays locked until review is recorded."
+        if has_sources
+        else "Approval stays locked until supporting evidence is attached."
+    )
     rationale = str(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before promoting this claim."
     claim_title = _claim_title(claim)
     claim_statement = str(claim.get("statement") or claim_title)
@@ -6470,8 +6612,8 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     confidence_label = "Medium" if has_sources else "Needs evidence"
     source_label = f"{len(source_items)} source{'s' if len(source_items) != 1 else ''}"
     approved_stage = "is-active" if is_approved else ""
-    source_stage = "is-active" if has_sources or is_approved else ""
-    evidence_stage = "is-active" if evidence_backed_earned or is_approved else ""
+    source_stage = "is-active" if has_sources else ""
+    evidence_stage = "is-active" if evidence_backed_earned else ""
     category = "Decision support"
     tags = [
         "Evidence review",
@@ -6479,6 +6621,57 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         "Audit-ready",
     ]
     review_class = "is-ready" if has_sources else "is-review"
+    claim_id = str(claim.get("claim_id") or "")
+    related_brief_id = _related_brief_id(claim)
+    related_brief = (
+        f'<a class="cs-button secondary" href="{h(_detail_href("briefs", related_brief_id))}">Open source Brief</a>'
+        if related_brief_id
+        else '<span class="cs-muted">No source Brief lineage is recorded.</span>'
+    )
+    gaps = [str(value) for value in claim.get("gaps", []) if isinstance(value, str)]
+    gap_rows = "".join(f"<li>{h(value)}</li>" for value in gaps[:6]) or "<li>No separate gaps were recorded; inspect source coverage before authority use.</li>"
+    denial_events = []
+    for event in ctx.get("audit", []):
+        subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+        if str(event.get("event_type") or "") == "claim.approval.denied" and str(subject.get("id") or "") == claim_id:
+            denial_events.append(event)
+    denial_panel = ""
+    if denial_events:
+        denied = denial_events[0]
+        details = denied.get("details") if isinstance(denied.get("details"), dict) else {}
+        audit_ref = f"audit:{denied.get('event_id')}" if denied.get("event_id") else "Audit receipt unavailable"
+        denial_panel = f"""
+<section class="cs-panel" data-claim-approval-denial="true">
+  <div class="cs-panel-header"><div><h2>Approval blocked</h2><p class="cs-muted">The Claim remains a draft.</p></div>{_chip("Evidence required", "insufficientEvidence")}</div>
+  <p><strong>Cause:</strong> {h(_plain_runtime_text(details.get("reason") or "Supporting source evidence is missing."))}</p>
+  <p><strong>Recovery:</strong> Attach an Evidence Bundle with at least one artifact reference, then retry approval.</p>
+  <details class="cs-audit-detail"><summary>Denial receipt</summary><p><code>{h(audit_ref)}</code></p><p>{h(_plain_runtime_text(details.get("required") or "Evidence is required before approval."))}</p></details>
+</section>
+"""
+    activity = _record_activity_panel(
+        ctx,
+        "claim",
+        claim_id,
+        [str(ref) for ref in claim.get("audit_refs", []) if isinstance(ref, str)],
+    )
+    lifecycle_name = "Approved claim" if is_approved else "Claim draft"
+    workspace_title = "Approved claim workspace" if is_approved else "Claim draft workspace"
+    workspace_note = (
+        "Review the approved statement, its source support, and its audit receipt together."
+        if is_approved
+        else "Draft the claim beside its source support, then request review before a decision uses it."
+    )
+    heading_chips = _chip(label, state) + (_chip("Source support", "searchable") if has_sources else "")
+    top_actions = (
+        '<a class="cs-button" href="/audit">Open approval receipt</a><a class="cs-button secondary" href="/claims">Back to claims</a>'
+        if is_approved
+        else '<a class="cs-button secondary" href="/claims">Save draft</a><a class="cs-button" href="/inbox">Request review</a><span class="cs-button is-disabled" aria-disabled="true">Promote to decision locked</span><a class="cs-button secondary" href="/claims">Back to claims</a><a class="cs-button secondary" href="/inbox">Open inbox</a>'
+    )
+    review_controls = (
+        '<a class="cs-button" href="/audit">Open approval receipt</a><a class="cs-button secondary" href="/claims">Back to claims</a>'
+        if is_approved
+        else '<a class="cs-button secondary" href="/claims">Save draft</a><a class="cs-button" href="/inbox">Request review</a><span class="cs-button is-disabled" aria-disabled="true">Promote to decision locked</span>'
+    )
     return f"""
 <section
   class="cs-grid-two cs-claim-workbench"
@@ -6498,36 +6691,32 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </nav>
           <div class="cs-claim-heading-row">
             <h1>{h(claim_title)}</h1>
-            {_chip("Draft", "draft")}{_chip("Source support", "searchable") if has_sources else ""}
+            {heading_chips}
           </div>
           <div class="cs-brief-meta">
-            <span>Claim draft</span>
+            <span>{h(lifecycle_name)}</span>
             <span>Created {h(_display_date(claim))}</span>
             <span>{h(source_label)} attached</span>
           </div>
         </div>
         <div class="cs-claim-actions" aria-label="Claim review actions">
-          <a class="cs-button secondary" href="/claims">Save draft</a>
-          <a class="cs-button" href="/inbox">Request review</a>
-          <span class="cs-button is-disabled" aria-disabled="true">Promote to decision locked</span>
-          <a class="cs-button secondary" href="/claims">Back to claims</a>
-          <a class="cs-button secondary" href="/inbox">Open inbox</a>
+          {top_actions}
         </div>
       </div>
-      <div class="cs-row">{_chip(label, state)}{_chip("Review required before approval", "underReview")}</div>
+      <div class="cs-row">{_chip(label, state)}{_chip("Owner approval recorded", "approved") if is_approved else _chip("Review required before approval", "underReview")}</div>
     </div>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
-          <h2>Claim draft workspace</h2>
-          <p class="cs-muted">Draft the claim beside its source support, then request review before a decision uses it.</p>
+          <h2>{h(workspace_title)}</h2>
+          <p class="cs-muted">{h(workspace_note)}</p>
         </div>
       </div>
       <div class="cs-claim-pathbar" aria-label="Evidence-to-decision path">
         <div class="cs-claim-pathbar-title">
           <span class="cs-meta">Trust ladder</span>
           <strong>Evidence-to-decision path</strong>
-          <span class="cs-muted">Promotion stays locked until source and owner review are recorded.</span>
+          <span class="cs-muted">{"Owner approval is recorded; citation integrity and autonomous action remain separate gates." if is_approved else "Promotion stays locked until source and owner review are recorded."}</span>
         </div>
         <div class="cs-claim-progress" aria-label="Trust ladder">
           <div class="cs-claim-progress-step is-active">
@@ -6548,7 +6737,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </div>
         </div>
       </div>
-      <div class="cs-claim-tabs" aria-label="Claim workspace sections">
+      <div class="cs-claim-tabs" aria-label="Claim workspace overview">
         <span class="cs-claim-tab is-active">Claim</span>
         <span class="cs-claim-tab">Supporting evidence</span>
         <span class="cs-claim-tab">Counter evidence</span>
@@ -6594,14 +6783,20 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         <span class="cs-claim-save-note">Saved locally</span>
       </div>
       <div class="cs-claim-review-strip" aria-label="Claim review summary">
-        <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">Review before approval</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">{"Owner approval recorded" if is_approved else "Review before approval"}</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
         <div class="cs-claim-review-card"><span class="cs-meta">Evidence-backed gate</span><strong>{"Earned" if evidence_backed_earned else "Locked"}</strong><span class="cs-meta">Citation checks required</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>Locked</strong><span class="cs-meta">Owner review required</span></div>
+        <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>{"Approved" if is_approved else "Locked"}</strong><span class="cs-meta">{"Owner approval recorded" if is_approved else "Owner review required"}</span></div>
       </div>
     </section>
+    {denial_panel}
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Brief lineage and gaps</h2><p class="cs-muted">The source Brief stays separate from this Claim record.</p></div></div>
+      <div class="cs-review-box">{related_brief}</div>
+      <ul class="cs-brief-note-list">{gap_rows}</ul>
+    </section>
     <section class="cs-claim-footrail" aria-label="Claim provenance">
-      <div><span class="cs-meta">Record</span><strong>Local draft</strong></div>
+      <div><span class="cs-meta">Record</span><strong>{"Approved local claim" if is_approved else "Local draft"}</strong></div>
       <div><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong></div>
       <div><span class="cs-meta">Status</span><strong>{h(status_label)}</strong></div>
       <div><span class="cs-meta">Last activity</span><strong>{h(_display_date(claim))}</strong></div>
@@ -6612,22 +6807,20 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <div class="cs-panel-header">
         <div>
           <h2>Supporting evidence</h2>
-          <p class="cs-muted">Only visible local sources are selectable here.</p>
+          <p class="cs-muted">These links open the visible local sources attached to this Claim.</p>
         </div>
         {_chip(str(len(source_items)), "searchable")}
       </div>
-      <div class="cs-evidence-toolbar" aria-label="Evidence picker controls">
-        <span class="cs-filter-chip">Filters</span>
-        <span class="cs-filter-chip">Sort: source order</span>
+      <div class="cs-evidence-toolbar" aria-label="Supporting source link order">
+        <span class="cs-filter-chip">Visible sources</span>
+        <span class="cs-filter-chip">Source order</span>
       </div>
       {source_list}
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Review controls</h2>
       <div class="cs-review-box">
-        <a class="cs-button secondary" href="/claims">Save draft</a>
-        <a class="cs-button" href="/inbox">Request review</a>
-        <span class="cs-button is-disabled" aria-disabled="true">Promote to decision locked</span>
+        {review_controls}
         <p class="cs-muted">{h(approval_note)}</p>
       </div>
     </section>
@@ -6635,7 +6828,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <div class="cs-panel-header">
         <div>
           <h2>Decision gate</h2>
-          <p class="cs-muted">Source support, owner review, and audit records stay separate before promotion.</p>
+          <p class="cs-muted">{"Owner approval is recorded; source support, citation integrity, audit, and action authority remain separately visible." if is_approved else "Source support, owner review, and audit records stay separate before promotion."}</p>
         </div>
       </div>
       <div class="cs-claim-control-list">
@@ -6646,7 +6839,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
             <p class="cs-muted">{h(source_label)} visible in this workspace.</p>
           </div>
         </div>
-        <div class="cs-claim-control-row is-review">
+        <div class="cs-claim-control-row {"is-ready" if is_approved else "is-review"}">
           <span class="cs-claim-control-mark" aria-hidden="true">2</span>
           <div>
             <strong>Citation checks</strong>
@@ -6657,7 +6850,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           <span class="cs-claim-control-mark" aria-hidden="true">3</span>
           <div>
             <strong>Owner review</strong>
-            <p class="cs-muted">Review required before approval or shared truth.</p>
+            <p class="cs-muted">{"Owner approval is recorded for this Claim." if is_approved else "Review required before approval or shared truth."}</p>
           </div>
         </div>
         <div class="cs-claim-control-row">
@@ -6673,6 +6866,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <h2 class="cs-section-title">Authority</h2>
       <p class="cs-muted">{h(str(authority.get("blocked_reason") or "Owner approval is required before this claim becomes shared truth or drives autonomous action."))}</p>
     </section>
+    {activity}
   </aside>
 </section>
 """
@@ -6680,6 +6874,10 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
 
 def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     label, state = _action_label(action)
+    lifecycle = _action_lifecycle(action)
+    lifecycle_stage = str(lifecycle["stage"])
+    is_executed = lifecycle_stage == "executed"
+    is_approved = lifecycle_stage in {"approved", "executed"}
     dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
     diff = dry_run.get("diff") if isinstance(dry_run.get("diff"), dict) else {}
     impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
@@ -6689,19 +6887,62 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     decision_label = _plain_policy_decision(str(policy.get("decision") or ""))
     real_external_calls = int(impact.get("real_external_http_calls", 0) or 0)
     expected_connector_calls = int(impact.get("expected_connector_calls", 0) or 0)
-    call_label = "Simulated in local mode" if real_external_calls == 0 else "Provider send planned"
+    call_label = (
+        "Local mock execution recorded"
+        if is_executed and action.get("connector_boundary", {}).get("mocked") is True
+        else "Governed execution recorded"
+        if is_executed
+        else "Simulated in local mode"
+        if real_external_calls == 0
+        else "Provider send planned"
+    )
     connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
     connector_label = "Mediated preview" if connector.get("direct_provider_access") is False else "Provider access needs review"
-    approval = action.get("approval") if isinstance(action.get("approval"), dict) else {}
+    approval = lifecycle["approval"]
     approval_required = bool(approval.get("required") or "approval" in decision_label.lower())
-    approval_label = "Approval required" if approval_required else "Approval not required"
+    approval_label = "Approval recorded" if is_approved else "Approval required" if approval_required else "Approval not required"
     risk_label = str(impact.get("risk") or action.get("risk") or "review").title()
     target = str(impact.get("target") or "Local preview only.")
     goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
     action_title = _action_title(action)
-    approval_status = str(approval.get("status") or "pending")
+    approval_status = str(lifecycle["approval_status"]).replace("_", " ").title()
+    execution_status = str(lifecycle["execution_status"]).replace("_", " ").title()
+    execution_result = lifecycle["result"]
+    result_status = str(execution_result.get("status") or "recorded").replace("_", " ").title()
+    result_message = _plain_runtime_text(execution_result.get("message") or "The governed local execution result is recorded.")
     reason = _plain_runtime_text(approval.get("required_reason") or policy.get("reason") or "A reason is required before approval can move this preview toward execution.")
     policy_reason = _plain_runtime_text(policy.get("reason") or "This action is permitted only after review confirms the source, target, and risk.")
+    lifecycle_note = (
+        "A local governed execution result is recorded; this page does not claim an unrecorded live provider send."
+        if is_executed
+        else "Approval is recorded; execution has not been recorded."
+        if is_approved
+        else "Preview impact, policy, and approval history before any external step."
+    )
+    lifecycle_meta = "Executed result" if is_executed else "Approved action" if is_approved else "Dry-run first"
+    external_meta = "No live provider send claimed" if is_executed else "No external send yet"
+    action_controls = (
+        f'{_chip(label, state)}{_chip(approval_label, "approved")}{_chip(f"{risk_label} risk", "underReview")}'
+        if is_approved
+        else f'{_chip("Preview (dry run)", "searchable")}{_chip(approval_label, "underReview")}{_chip(f"{risk_label} risk", "underReview")}<a class="cs-button" href="/inbox">Request approval</a>'
+    )
+    approval_history = (
+        f'<div class="cs-stat-row"><span class="cs-stat-icon">A</span><div><strong>Approved by {h(str(approval.get("approver") or "owner"))}</strong><div class="cs-meta">{h(str(approval.get("approved_at") or _display_date(action)))}</div></div>{_chip("Recorded", "approved")}</div>'
+        if is_approved
+        else '<div class="cs-empty">No approvals have been recorded yet.</div>'
+    )
+    execution_panel = (
+        f'<section class="cs-panel" data-action-execution-result="true"><div class="cs-panel-header"><div><h2>Execution result</h2><p class="cs-muted">Durable lifecycle state from this Action record.</p></div>{_chip(result_status, "executed")}</div><p>{h(result_message)}</p><dl class="cs-detail-grid"><dt>Execution</dt><dd>{h(execution_status)}</dd><dt>Result</dt><dd>{h(result_status)}</dd><dt>Boundary</dt><dd>{h(_plain_runtime_text(execution_result.get("side_effect_boundary") or "governed local record"))}</dd><dt>External HTTP calls</dt><dd>{h(str(execution_result.get("external_http_calls", 0)))}</dd></dl></section>'
+        if is_executed
+        else ""
+    )
+    action_id = str(action.get("action_id") or "")
+    activity = _record_activity_panel(
+        ctx,
+        "action",
+        action_id,
+        [str(action.get("audit_ref"))] if action.get("audit_ref") else [],
+    )
     return f"""
 <section
   class="cs-grid-two cs-action-workbench"
@@ -6720,14 +6961,14 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </nav>
       <div class="cs-action-titlebar">
         <div>
-          <div class="cs-kicker">Action preview</div>
+          <div class="cs-kicker">{"Action result" if is_executed else "Approved action" if is_approved else "Action preview"}</div>
           <h1>{h(action_title)}</h1>
           <div class="cs-brief-meta">
-            <span>Dry-run first</span>
+            <span>{h(lifecycle_meta)}</span>
             <span>{h(_display_date(action))}</span>
-            <span>No external send yet</span>
+            <span>{h(external_meta)}</span>
           </div>
-          <p class="cs-muted">Preview impact, policy, and approval history before any external step.</p>
+          <p class="cs-muted">{h(lifecycle_note)}</p>
         </div>
         <div class="cs-action-actions">
           <a class="cs-button secondary" href="/actions">Back to actions</a>
@@ -6735,18 +6976,16 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         </div>
       </div>
       <div class="cs-brief-actions">
-        {_chip("Preview (dry run)", "searchable")}
-        {_chip(approval_label, "underReview")}
-        {_chip(f"{risk_label} risk", "underReview")}
-        <a class="cs-button" href="/inbox">Request approval</a>
+        {action_controls}
       </div>
     </header>
-    {_action_approval_receipt(goal, diff, target, decision_label, approval_label, approval_status, risk_label, call_label, expected_connector_calls, real_external_calls, policy_reason)}
+    {_action_approval_receipt(goal, diff, target, decision_label, approval_label, approval_status, risk_label, call_label, expected_connector_calls, real_external_calls, policy_reason, is_executed=is_executed, result=execution_result)}
+    {execution_panel}
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
           <h2>Summary</h2>
-          <p class="cs-muted">This is the proposed change, not an execution result.</p>
+          <p class="cs-muted">{"This durable result follows the original dry-run and approval record." if is_executed else "This is the proposed change, not an execution result."}</p>
         </div>
         {_chip(label, state)}
       </div>
@@ -6764,35 +7003,35 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </div>
     </section>
     <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip("Will be reviewed", "underReview")}</div>
+      <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip("Execution recorded", "executed") if is_executed else _chip("Will be reviewed", "underReview")}</div>
       <div class="cs-action-object-row">
         <span class="cs-action-object-icon" aria-hidden="true">A</span>
         <span>
           <strong>{h(target)}</strong>
           <span class="cs-meta">{h(connector_label)} / {h(call_label)}</span>
         </span>
-        {_chip("Will be reviewed", "underReview")}
+        {_chip("Execution recorded", "executed") if is_executed else _chip("Will be reviewed", "underReview")}
       </div>
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
           <h2>Proposed changes</h2>
-          <p class="cs-muted">Preview the before and after state before requesting approval.</p>
+          <p class="cs-muted">{"The original before/after preview is retained with the result." if is_executed else "Preview the before and after state before requesting approval."}</p>
         </div>
         {_chip("Diff preview", "searchable")}
       </div>
-      {_action_diff_view(diff, target)}
+      {_action_diff_view(diff, target, is_executed=is_executed, approval_recorded=is_approved)}
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
           <h2>External calls</h2>
-          <p class="cs-muted">Provider writes remain simulated until approval is clear.</p>
+          <p class="cs-muted">{"The recorded local result does not imply an unrecorded live provider send." if is_executed else "Provider writes remain simulated until approval is clear."}</p>
         </div>
-        {_chip("Simulated in local mode", "draft")}
+        {_chip(call_label, "executed" if is_executed else "draft")}
       </div>
-      {_action_external_calls(impact, connector_label, call_label)}
+      {_action_external_calls(impact, connector_label, call_label, is_executed=is_executed, approval_recorded=is_approved, result=execution_result)}
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -6806,9 +7045,9 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <strong>{h(decision_label)}</strong>
         <span>{h(policy_reason)}</span>
       </div>
-      {_action_policy_checks(bool(source_items), approval_label, call_label)}
+      {_action_policy_checks(bool(source_items), approval_label, call_label, is_executed=is_executed, approval_recorded=is_approved)}
     </section>
-    {_action_route_strip(approval_label, call_label)}
+    {_action_route_strip(approval_label, call_label, is_executed=is_executed, approval_recorded=is_approved)}
   </div>
   <aside class="cs-stack cs-action-rail">
     <section class="cs-panel flat">
@@ -6819,17 +7058,17 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <dt>Status</dt><dd>{h(approval_status)}</dd>
       </dl>
       <div class="cs-review-box">
-        <a class="cs-button" href="/inbox">Request approval</a>
+        {f'<a class="cs-button" href="/audit">Open approval receipt</a>' if is_approved else '<a class="cs-button" href="/inbox">Request approval</a>'}
         <div class="cs-approval-note">
           <strong>Required reason</strong>
           <span>{h(reason)}</span>
         </div>
-        <p class="cs-muted">Execution is not shown as the primary action until approval is satisfied.</p>
+        <p class="cs-muted">{"Approval and execution are recorded as separate lifecycle steps." if is_approved else "Execution is not shown as the primary action until approval is satisfied."}</p>
       </div>
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Approval history</h2>
-      <div class="cs-empty">No approvals have been recorded yet.</div>
+      {approval_history}
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Sources</h2>
@@ -6837,8 +7076,9 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Auditability</h2>
-      <p class="cs-muted">Dry-run, policy, approval, and execution records remain inspectable before this action can become a workflow result.</p>
+      <p class="cs-muted">Dry-run, policy, approval, and execution records remain separately inspectable.</p>
     </section>
+    {activity}
   </aside>
 </section>
 """
@@ -6856,22 +7096,34 @@ def _action_approval_receipt(
     expected_connector_calls: int,
     real_external_calls: int,
     policy_reason: str,
+    *,
+    is_executed: bool = False,
+    result: dict[str, Any] | None = None,
 ) -> str:
+    result = result or {}
     before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
     after = _plain_runtime_text(diff.get("after") or "No provider send has been performed.")
     call_note = (
-        "No provider send has run in this local workspace."
+        "A governed local execution result is recorded; no unrecorded live provider send is claimed."
+        if is_executed
+        else "No provider send has run in this local workspace."
         if real_external_calls == 0
         else "A provider send still requires the approval record and audit trail."
     )
+    receipt_title = "Action lifecycle receipt" if is_executed else "Dry-run approval receipt"
+    receipt_note = (
+        "The original preview, policy, approval, and durable execution result remain visible together."
+        if is_executed
+        else "Preview only. Impact, proposed change, provider call plan, policy, and approval gate are visible before execution."
+    )
     return f"""
-<section class="cs-action-receipt-panel" aria-label="Dry-run approval receipt">
+<section class="cs-action-receipt-panel" aria-label="{h(receipt_title)}">
   <div class="cs-panel-header">
     <div>
-      <h2>Dry-run approval receipt</h2>
-      <p class="cs-muted">Preview only. Impact, proposed change, provider call plan, policy, and approval gate are visible before execution.</p>
+      <h2>{h(receipt_title)}</h2>
+      <p class="cs-muted">{h(receipt_note)}</p>
     </div>
-    {_chip("Dry-run", "draft")}
+    {_chip("Executed", "executed") if is_executed else _chip("Dry-run", "draft")}
   </div>
   <div class="cs-action-receipt-grid">
     <div class="cs-action-receipt-card">
@@ -6902,13 +7154,34 @@ def _action_approval_receipt(
 """
 
 
-def _action_route_strip(approval_label: str, call_label: str) -> str:
-    steps = [
-        ("1", "Dry-run sequence", "Preview the proposed change before any provider write.", "searchable", True),
-        ("2", "Impact review", "Check the affected object and the before/after state.", "underReview", False),
-        ("3", approval_label, "Approval stays explicit before execution can appear.", "underReview", False),
-        ("4", "Audit trail", f"{call_label}; records stay inspectable.", "draft", False),
-    ]
+def _action_route_strip(
+    approval_label: str,
+    call_label: str,
+    *,
+    is_executed: bool = False,
+    approval_recorded: bool = False,
+) -> str:
+    steps = (
+        [
+            ("1", "Dry-run recorded", "The original proposed change remains inspectable.", "searchable", False),
+            ("2", "Impact reviewed", "The affected object and before/after state remain visible.", "saved", False),
+            ("3", approval_label, "Owner approval is recorded separately from execution.", "approved", False),
+            ("4", "Execution and audit", f"{call_label}; the durable result is inspectable.", "executed", True),
+        ]
+        if is_executed
+        else [
+            ("1", "Dry-run sequence", "Preview the proposed change before any provider write.", "searchable", True),
+            ("2", "Impact review", "Check the affected object and the before/after state.", "underReview", False),
+            (
+                "3",
+                approval_label,
+                "Owner approval is recorded; execution is still pending." if approval_recorded else "Approval stays explicit before execution can appear.",
+                "approved" if approval_recorded else "underReview",
+                approval_recorded,
+            ),
+            ("4", "Audit trail", f"{call_label}; records stay inspectable.", "draft", False),
+        ]
+    )
     cards = "".join(
         f"""
 <div class="cs-action-route-step{" is-current" if active else ""}">
@@ -6923,19 +7196,19 @@ def _action_route_strip(approval_label: str, call_label: str) -> str:
         for index, title, description, state, active in steps
     )
     return f"""
-<section class="cs-action-route-strip" aria-label="Dry-run sequence">
+<section class="cs-action-route-strip" aria-label="{'Action lifecycle' if is_executed else 'Dry-run sequence'}">
   {cards}
 </section>
 """
 
 
 def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_approved: bool) -> str:
-    source_class = "is-active" if has_sources or is_approved else "is-locked"
-    evidence_class = "is-active" if evidence_backed_earned or is_approved else "is-locked"
+    source_class = "is-active" if has_sources else "is-locked"
+    evidence_class = "is-active" if evidence_backed_earned else "is-locked"
     approved_class = "is-active" if is_approved else "is-locked"
     source_note = "Supporting source is attached." if has_sources else "Attach at least one source."
     evidence_note = "Citation checks earned this label." if evidence_backed_earned else "Locked until citation checks pass."
-    approved_note = "Decision-ready." if is_approved else "Requires review first."
+    approved_note = "Owner approval recorded." if is_approved else "Requires review first."
     return f"""
 <div class="cs-trust-ladder" aria-label="Claim trust ladder">
   <div class="cs-trust-step is-active">
@@ -6958,27 +7231,73 @@ def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_appr
 """
 
 
-def _action_diff_view(diff: dict[str, Any], target: str) -> str:
+def _action_diff_view(
+    diff: dict[str, Any],
+    target: str,
+    *,
+    is_executed: bool = False,
+    approval_recorded: bool = False,
+) -> str:
     before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
     after = _plain_runtime_text(diff.get("after") or "No external write has been performed.")
     return f"""
 <div class="cs-action-preview-frame">
   <div class="cs-action-preview-meta">
     <span>Target: {h(target)}</span>
-    <span>Before approval: preview only</span>
+    <span>{"Original dry-run preview retained" if is_executed or approval_recorded else "Before approval: preview only"}</span>
   </div>
 <div class="cs-diff-view" aria-label="Dry-run diff preview">
   <div class="cs-diff-line before"><span class="cs-meta">Before</span><span>{h(before)}</span></div>
   <div class="cs-diff-line after"><span class="cs-meta">After</span><span>{h(after)}</span></div>
 </div>
-  <p class="cs-meta">Preview shown. Exact downstream formatting may vary after approval.</p>
+  <p class="cs-meta">{"Execution is recorded separately from this original preview." if is_executed else "Preview shown. Exact downstream formatting may vary after approval."}</p>
 </div>
 """
 
 
-def _action_external_calls(impact: dict[str, Any], connector_label: str, call_label: str) -> str:
+def _action_external_calls(
+    impact: dict[str, Any],
+    connector_label: str,
+    call_label: str,
+    *,
+    is_executed: bool = False,
+    approval_recorded: bool = False,
+    result: dict[str, Any] | None = None,
+) -> str:
     expected = int(impact.get("expected_connector_calls", 0) or 0)
     target = str(impact.get("target") or "Local preview only.")
+    result = result or {}
+    if is_executed:
+        boundary = _plain_runtime_text(result.get("side_effect_boundary") or "governed local record")
+        return f"""
+<div class="cs-call-row">
+  <div>
+    <strong>{h(call_label)}</strong>
+    <p class="cs-muted">The durable result records a {h(boundary)} boundary; this UI does not infer a live provider send.</p>
+  </div>
+  {_chip("Recorded", "executed")}
+</div>
+<div class="cs-call-facts" aria-label="Call result">
+  <div class="cs-call-fact"><strong>Planned connector calls</strong><span>{h(expected)}</span></div>
+  <div class="cs-call-fact"><strong>Recorded HTTP calls</strong><span>{h(str(result.get("external_http_calls", 0)))}</span></div>
+  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(boundary)}</span></div>
+</div>
+"""
+    if approval_recorded:
+        return f"""
+<div class="cs-call-row">
+  <div>
+    <strong>{h(connector_label)}</strong>
+    <p class="cs-muted">The connector plan is approved but no execution result is recorded yet for {h(target)}.</p>
+  </div>
+  {_chip("Execution pending", "underReview")}
+</div>
+<div class="cs-call-facts" aria-label="Call preview">
+  <div class="cs-call-fact"><strong>Provider calls</strong><span>{h(expected)} approved</span></div>
+  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
+  <div class="cs-call-fact"><strong>Boundary</strong><span>Governed execution pending</span></div>
+</div>
+"""
     if expected <= 0:
         return f"""
 <div class="cs-call-row">
@@ -7010,13 +7329,30 @@ def _action_external_calls(impact: dict[str, Any], connector_label: str, call_la
 """
 
 
-def _action_policy_checks(has_sources: bool, approval_label: str, call_label: str) -> str:
+def _action_policy_checks(
+    has_sources: bool,
+    approval_label: str,
+    call_label: str,
+    *,
+    is_executed: bool = False,
+    approval_recorded: bool = False,
+) -> str:
     source_state = "Source visible" if has_sources else "Source not linked"
     source_note = "At least one local source is visible near this action." if has_sources else "Open sources before requesting approval."
     checks = [
         ("1", source_state, source_note, "searchable" if has_sources else "underReview"),
-        ("2", approval_label, "Request approval before this preview can move further.", "underReview"),
-        ("3", call_label, "External effects are still bounded by the action approval path.", "draft"),
+        (
+            "2",
+            approval_label,
+            "Owner approval is recorded." if approval_recorded else "Request approval before this preview can move further.",
+            "approved" if approval_recorded else "underReview",
+        ),
+        (
+            "3",
+            call_label,
+            "The recorded execution remains bounded by the governed Action path." if is_executed else "External effects are still bounded by the action approval path.",
+            "executed" if is_executed else "draft",
+        ),
     ]
     rows = "".join(
         f"""
@@ -7053,12 +7389,11 @@ def _evidence_picker_from_items(items: list[dict[str, str]]) -> str:
     if not items:
         return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
     rows = []
-    for index, item in enumerate(items[:6]):
-        selected_class = " is-selected" if index == 0 else ""
+    for item in items[:6]:
         rows.append(
             f"""
-<a class="cs-evidence-row{selected_class}" href="{h(item["href"])}">
-  <span class="cs-checkmark" aria-hidden="true">&#10003;</span>
+<a class="cs-evidence-row" href="{h(item["href"])}">
+  <span class="cs-checkmark" aria-hidden="true">S</span>
   <span>
     <strong>{h(item["title"])}</strong>
     <span class="cs-meta">{h(item["label"])} / {h(item["date"])} / {h(item["fingerprint"])}</span>
@@ -7067,7 +7402,7 @@ def _evidence_picker_from_items(items: list[dict[str, str]]) -> str:
 </a>
 """
         )
-    return f'<div class="cs-evidence-picker">{"".join(rows)}</div>'
+    return f'<div class="cs-evidence-picker" aria-label="Supporting source links">{"".join(rows)}</div>'
 
 
 def _source_card(item: dict[str, str]) -> str:
@@ -7190,6 +7525,9 @@ def _citation_item_for_ref(ref: str, source_items: list[dict[str, str]], record:
 
 def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, str]], record: dict[str, Any] | None = None) -> str:
     record = record or {}
+    brief_id = str(record.get("brief_id") or "")
+    audit_refs = [str(ref) for ref in record.get("audit_refs", []) if isinstance(ref, str)]
+    receipt_ref = audit_refs[0] if audit_refs else "No creation audit ref recorded"
     items: list[dict[str, str]] = []
     unresolved: list[str] = []
     for ref in refs:
@@ -7215,11 +7553,14 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
   </summary>
   <div class="cs-citation-body">
     <p class="cs-citation-snippet"><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
+    <p class="cs-muted"><strong>Why this supports the finding:</strong> this recorded source span is the cited support for this draft finding; inspect it before use.</p>
     <div class="cs-citation-meta" aria-label="Full provenance">
       <div><span class="cs-meta">Citation ref</span><strong>{h(ref_kind)}</strong></div>
       <div><span class="cs-meta">Source span</span><strong>{h(span)}</strong></div>
       <div><span class="cs-meta">Saved</span><strong>{h(item["date"])}</strong></div>
       <div><span class="cs-meta">Fingerprint</span><strong>{h(item["fingerprint"])}</strong></div>
+      <div><span class="cs-meta">Related object</span><strong>{h(f'Brief {brief_id}' if brief_id else 'Brief draft')}</strong></div>
+      <div><span class="cs-meta">Audit receipt</span><strong>{h(receipt_ref)}</strong></div>
     </div>
     <div class="cs-citation-actions">
       <a class="cs-button secondary" href="{h(item["href"])}">Open source</a>
@@ -7532,6 +7873,8 @@ def _home_script(scope: dict[str, Any]) -> str:
   const askInput = document.getElementById("cs-ask-input");
   const askStatus = document.getElementById("cs-ask-status");
   const askButton = document.getElementById("cs-ask-submit-button");
+  const claimButton = document.getElementById("cs-create-claim-button");
+  const claimStatus = document.getElementById("cs-claim-create-status");
   function setStatus(node, message, state) {
     if (!node) return;
     const status = state || "idle";
@@ -7555,7 +7898,9 @@ def _home_script(scope: dict[str, Any]) -> str:
     });
     const payload = await response.json();
     if (!response.ok || payload.status === "failed" || payload.status === "denied") {
-      throw new Error((payload.errors && payload.errors[0] && payload.errors[0].message) || "Request failed.");
+      const error = new Error((payload.errors && payload.errors[0] && payload.errors[0].message) || "Request failed.");
+      error.payload = payload;
+      throw error;
     }
     return payload;
   }
@@ -7615,6 +7960,29 @@ def _home_script(scope: dict[str, Any]) -> str:
       if (askInput) askInput.focus();
     });
   });
+  if (claimButton) {
+    claimButton.addEventListener("click", async function () {
+      const briefId = claimButton.getAttribute("data-brief-id") || "";
+      const statement = claimButton.getAttribute("data-statement") || "";
+      if (!briefId || !statement) {
+        setStatus(claimStatus, "This Brief needs a supported finding before a Claim can be drafted.", "error");
+        return;
+      }
+      claimButton.disabled = true;
+      setStatus(claimStatus, "Drafting Claim candidate...", "loading");
+      try {
+        const created = await postJson("/claims", {brief_id: briefId, statement});
+        const claim = created.claim || {};
+        const claimId = claim["claim" + "_id"];
+        if (!claimId) throw new Error("Claim candidate was not saved.");
+        setStatus(claimStatus, "Claim candidate saved. Opening draft...", "success");
+        window.location.href = scopedUrl("/claims/" + encodeURIComponent(claimId) + "?view=html");
+      } catch (error) {
+        setStatus(claimStatus, error.message, "error");
+        claimButton.disabled = false;
+      }
+    });
+  }
   if (askForm && askInput) {
     askForm.addEventListener("submit", async function (event) {
       event.preventDefault();
@@ -7626,6 +7994,8 @@ def _home_script(scope: dict[str, Any]) -> str:
       setBusy(askForm, askButton, true, "Checking", "Ask");
       try {
         setStatus(askStatus, "Checking saved sources...", "loading");
+        const searched = await postJson("/search", {query: question, excluded_source_types: ["conversation_turn"]});
+        const sourceSnapshot = searched.search_snapshot || {};
         const started = await postJson("/conversations", {message: question});
         const conversation = started.conversation || {};
         const id = conversation["conversation" + "_id"];
@@ -7633,7 +8003,24 @@ def _home_script(scope: dict[str, Any]) -> str:
         const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
         const answer = answered.answer || {};
         const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
-        setStatus(askStatus, "Draft answer: " + text, "success");
+        const safety = conversation.safety || {};
+        if (safety.unsafe_instruction_detected === true) {
+          setStatus(askStatus, "Draft answer saved. Brief preparation was blocked because the Ask text contained unsafe instructions.", "error");
+          return;
+        }
+        if (Number(sourceSnapshot.result_count || 0) > 0 && sourceSnapshot.search_snapshot_id) {
+          setStatus(askStatus, "Preparing a source-linked fallback Brief...", "loading");
+          const bundled = await postJson("/evidence-bundles", {search_snapshot_id: sourceSnapshot.search_snapshot_id});
+          const bundle = bundled.evidence_bundle || {};
+          if (!bundle.evidence_bundle_id) throw new Error("Evidence Bundle was not saved.");
+          const prepared = await postJson("/briefs", {evidence_bundle_id: bundle.evidence_bundle_id});
+          const brief = prepared.brief || {};
+          if (!brief.brief_id) throw new Error("Brief draft was not saved.");
+          setStatus(askStatus, "Keyword-summary Brief prepared. Opening draft...", "success");
+          window.location.href = scopedUrl("/briefs/" + encodeURIComponent(brief.brief_id) + "?view=html");
+          return;
+        }
+        setStatus(askStatus, "Draft answer: " + text + " No pre-existing source matched, so no Brief was created.", "success");
       } catch (error) {
         setStatus(askStatus, error.message, "error");
       } finally {

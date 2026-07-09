@@ -9,6 +9,7 @@ import threading
 import unittest
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode
@@ -715,8 +716,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Citation checks", claim_html)
         self.assertIn("Citation checks required", claim_html)
         self.assertIn("Supporting evidence", claim_html)
-        self.assertIn("Evidence picker controls", claim_html)
-        self.assertIn("Sort: source order", claim_html)
+        self.assertIn("Supporting source link order", claim_html)
+        self.assertIn("Source order", claim_html)
         self.assertIn("Impacted objects", claim_html)
         self.assertIn("Related frameworks", claim_html)
         self.assertIn("Saved locally", claim_html)
@@ -816,6 +817,282 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Review sources", inbox_html)
         self.assertIn("Open audit trail", inbox_html)
         self.assert_product_surface_is_clean(inbox_html)
+
+    def test_home_ask_prepares_fallback_brief_from_non_conversation_sources(self) -> None:
+        artifact_id, _, _ = self.create_source_stack()
+        home = self.fetch_product_html("/")
+        self.assertIn('excluded_source_types: ["conversation_turn"]', home)
+        self.assertLess(home.index('postJson("/search"'), home.index('postJson("/conversations"'))
+        self.assertIn("Keyword-summary Brief prepared", home)
+        self.assertIn("Brief preparation was blocked because the Ask text contained unsafe instructions", home)
+
+        conversation_status, _, conversation_raw = _request(
+            self.base_url,
+            "/conversations",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "message": "What does the vendor renewal source say?"},
+        )
+        self.assertEqual(conversation_status, 200)
+        conversation = json.loads(conversation_raw)["conversation"]
+        conversation_artifact_id = conversation["source_artifact_id"]
+
+        search_status, _, search_raw = _request(
+            self.base_url,
+            "/search",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "query": "vendor renewal",
+                "excluded_source_types": ["conversation_turn"],
+            },
+        )
+        self.assertEqual(search_status, 200)
+        snapshot = json.loads(search_raw)["search_snapshot"]
+        result_artifact_ids = {row.get("artifact_id") for row in snapshot["results"]}
+        self.assertEqual(snapshot["excluded_source_types"], ["conversation_turn"])
+        self.assertIn(artifact_id, result_artifact_ids)
+        self.assertNotIn(conversation_artifact_id, result_artifact_ids)
+
+        bundle_status, _, bundle_raw = _request(
+            self.base_url,
+            "/evidence-bundles",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "search_snapshot_id": snapshot["search_snapshot_id"]},
+        )
+        self.assertEqual(bundle_status, 200)
+        bundle_id = json.loads(bundle_raw)["evidence_bundle"]["evidence_bundle_id"]
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief = json.loads(brief_raw)["brief"]
+        self.assertEqual(brief["output_mode"], "extractive_fallback")
+        self.assertFalse(brief["presented_as_fact"])
+        self.assertIn(f"artifact:{artifact_id}", brief["evidence_refs"])
+        self.assertNotIn(f"artifact:{conversation_artifact_id}", brief["evidence_refs"])
+
+    def test_brief_to_claim_preserves_lineage_and_activity(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief = json.loads(brief_raw)["brief"]
+        brief_id = brief["brief_id"]
+
+        brief_html = self.fetch_product_html(f"/briefs/{brief_id}?view=html")
+        self.assertIn('id="cs-create-claim-button"', brief_html)
+        self.assertIn(f'data-brief-id="{brief_id}"', brief_html)
+        self.assertIn("Related work", brief_html)
+        self.assertIn("Memory/Wiki candidates", brief_html)
+        self.assertIn("Activity", brief_html)
+
+        claim_status, _, claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "brief_id": brief_id,
+                "statement": "The vendor renewal requires owner review before August.",
+            },
+        )
+        self.assertEqual(claim_status, 200)
+        claim_payload = json.loads(claim_raw)
+        claim = claim_payload["claim"]
+        self.assertEqual(claim["related_brief"]["brief_id"], brief_id)
+        self.assertEqual(claim["evidence_bundle"]["evidence_bundle_id"], bundle_id)
+        self.assertTrue(claim["rationale"])
+        self.assertTrue(claim["gaps"])
+        self.assertTrue(claim["activity_refs"])
+        self.assertTrue(claim["audit_refs"])
+        self.assertIn(f"brief:{brief_id}", claim_payload["evidence_refs"])
+        claim_create_events = [
+            event
+            for event in LocalRuntimeStore(self.state_dir)._all_audit_events()
+            if event.get("event_type") == "claim.draft.created" and event.get("subject", {}).get("id") == claim["claim_id"]
+        ]
+        self.assertEqual(claim_create_events[-1]["details"]["brief_id"], brief_id)
+
+        direct_claim_status, _, direct_claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Direct bundle claim must not be attributed to a Brief.",
+            },
+        )
+        self.assertEqual(direct_claim_status, 200, direct_claim_raw)
+        refreshed_brief_html = self.fetch_product_html(f"/briefs/{brief_id}?view=html")
+        self.assertIn("The vendor renewal requires owner review before August.", refreshed_brief_html)
+        self.assertNotIn("Direct bundle claim must not be attributed to a Brief.", refreshed_brief_html)
+
+        claim_html = self.fetch_product_html(f"/claims/{claim['claim_id']}?view=html")
+        self.assertIn("Brief lineage and gaps", claim_html)
+        self.assertIn("Open source Brief", claim_html)
+        self.assertIn("Activity", claim_html)
+
+    def test_claim_approval_denial_and_approved_page_report_durable_state(self) -> None:
+        unsupported_status, _, unsupported_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "statement": "Unsupported statement"},
+        )
+        self.assertEqual(unsupported_status, 200)
+        unsupported = json.loads(unsupported_raw)["claim"]
+        denial_status, _, denial_raw = _request(
+            self.base_url,
+            f"/claims/{unsupported['claim_id']}/approve",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(denial_status, 400)
+        denial = json.loads(denial_raw)
+        self.assertEqual(denial["errors"][0]["code"], "CS_CLAIM_EVIDENCE_REQUIRED")
+        self.assertIn("Attach an Evidence Bundle", denial["errors"][0]["resolution_path"])
+        self.assertEqual(LocalRuntimeStore(self.state_dir).get_claim(unsupported["claim_id"])["status"], "draft")
+
+        denied_html = self.fetch_product_html(f"/claims/{unsupported['claim_id']}?view=html")
+        self.assertIn("Approval blocked", denied_html)
+        self.assertIn("Cause:", denied_html)
+        self.assertIn("Recovery:", denied_html)
+        self.assertIn("Denial receipt", denied_html)
+
+        _, bundle_id, _ = self.create_source_stack()
+        claim_status, _, claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id, "statement": "Supported vendor renewal statement"},
+        )
+        self.assertEqual(claim_status, 200)
+        claim_id = json.loads(claim_raw)["claim"]["claim_id"]
+        approve_status, _, _ = _request(
+            self.base_url,
+            f"/claims/{claim_id}/approve",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(approve_status, 200)
+        approved_html = self.fetch_product_html(f"/claims/{claim_id}?view=html")
+        self.assertIn("Approved claim", approved_html)
+        self.assertIn("Owner approval recorded", approved_html)
+        self.assertIn("Open approval receipt", approved_html)
+        self.assertNotIn("Claim draft workspace", approved_html)
+        self.assertNotIn("Promote to decision locked", approved_html)
+        self.assertNotIn("Review required before approval", approved_html)
+        self.assertNotIn("Review before approval", approved_html)
+        self.assertNotIn("Promotion stays locked until source and owner review are recorded", approved_html)
+
+        show_status, show_content_type, _ = _request(self.base_url, f"/claims/{claim_id}", headers={"accept": "application/json"})
+        self.assertEqual(show_status, 200)
+        self.assertIn("application/json", show_content_type)
+        claim_read_events = [
+            event
+            for event in LocalRuntimeStore(self.state_dir)._all_audit_events()
+            if event.get("event_type") == "claim.read" and event.get("subject", {}).get("id") == claim_id
+        ]
+        self.assertTrue(claim_read_events)
+        self.assertEqual(claim_read_events[-1]["details"]["reason"], "api_claim_show")
+
+    def test_executed_action_reports_durable_state_and_html_details_remain_read_only(self) -> None:
+        artifact_id, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief_id = json.loads(brief_raw)["brief"]["brief_id"]
+        claim_status, _, claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "brief_id": brief_id, "statement": "Renewal follow-up is required."},
+        )
+        self.assertEqual(claim_status, 200)
+        claim_id = json.loads(claim_raw)["claim"]["claim_id"]
+        action_status, _, action_raw = _request(
+            self.base_url,
+            "/actions",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "claim_id": claim_id,
+                "goal": "Record a renewal follow-up",
+                "action_kind": "external_writeback",
+                "risk": "medium",
+                "target": "mock renewal queue",
+            },
+        )
+        self.assertEqual(action_status, 200)
+        action_id = json.loads(action_raw)["action_card"]["action_id"]
+        approve_status, _, _ = _request(
+            self.base_url,
+            f"/actions/{action_id}/approve",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "approver": "owner"},
+        )
+        self.assertEqual(approve_status, 200)
+        execute_status, _, execute_raw = _request(
+            self.base_url,
+            f"/actions/{action_id}/execute",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(execute_status, 200, execute_raw)
+
+        store = LocalRuntimeStore(self.state_dir)
+        audit_count_before_detail_reads = len(store._all_audit_events())
+        detail_paths = [
+            f"/artifacts/{artifact_id}?view=html",
+            f"/briefs/{brief_id}?view=html",
+            f"/claims/{claim_id}?view=html",
+            f"/actions/{action_id}?view=html",
+        ] * 4
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            detail_results = list(
+                executor.map(
+                    lambda path: _request(self.base_url, path, headers={"accept": "text/html"}),
+                    detail_paths,
+                )
+            )
+        self.assertTrue(all(status == 200 and "text/html" in content_type for status, content_type, _ in detail_results))
+
+        self.fetch_product_html(f"/artifacts/{artifact_id}?view=html")
+        self.fetch_product_html(f"/briefs/{brief_id}?view=html")
+        self.fetch_product_html(f"/claims/{claim_id}?view=html")
+        action_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
+        self.assertIn("Action result", action_html)
+        self.assertIn("Execution result", action_html)
+        self.assertIn("Local mock execution recorded", action_html)
+        self.assertIn("Approved by owner", action_html)
+        self.assertIn("Execution and audit", action_html)
+        self.assertNotIn("Request approval", action_html)
+        self.assertNotIn("No approvals have been recorded yet", action_html)
+        self.assertNotIn("Before approval: preview only", action_html)
+        self.assertNotIn("This is the proposed change, not an execution result", action_html)
+
+        actions_html = self.fetch_product_html("/actions")
+        self.assertIn("Action records", actions_html)
+        self.assertIn("Records", actions_html)
+        self.assertIn("Open result", actions_html)
+        self.assertIn("Recorded result", actions_html)
+
+        events_after_detail_reads = store._all_audit_events()
+        self.assertEqual(len(events_after_detail_reads), audit_count_before_detail_reads)
+        self.assertFalse(any(event.get("details", {}).get("reason") == "product_ui_detail" for event in events_after_detail_reads))
+        self.assertEqual(store.verify_audit()["status"], "success")
 
     def create_source_stack(self) -> tuple[str, str, str]:
         body = dict(DEFAULT_SCOPE)

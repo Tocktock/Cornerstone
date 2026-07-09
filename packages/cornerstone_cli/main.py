@@ -9365,6 +9365,7 @@ def command_evidence_bundle_show(args: argparse.Namespace) -> int:
             {
                 "code": "CS_SCOPE_DENIED",
                 "message": "Evidence bundle is outside the requested scope.",
+                "evidence_bundle_id": args.evidence_bundle_id,
                 "resource_scope": result.get("resource_scope"),
             }
         )
@@ -9586,7 +9587,14 @@ def command_claim_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    if args.evidence_bundle_id:
+    if args.brief_id:
+        result = store.create_claim_from_brief(
+            args.brief_id,
+            args.statement,
+            requested_scope,
+            ontology_object_refs=args.ontology_object_ref or [],
+        )
+    elif args.evidence_bundle_id:
         result = store.create_claim_from_evidence_bundle(
             args.evidence_bundle_id,
             args.statement,
@@ -9598,11 +9606,13 @@ def command_claim_create(args: argparse.Namespace) -> int:
     payload = base_response("cornerstone claim create", "success", root)
     payload.update(requested_scope)
     if result.get("status") == "not_found":
+        resource = str(result.get("resource") or "evidence_bundle")
         payload["status"] = "failed"
         payload["errors"].append(
             {
-                "code": "CS_EVIDENCE_BUNDLE_NOT_FOUND",
-                "message": "Evidence bundle was not found.",
+                "code": "CS_BRIEF_NOT_FOUND" if resource == "brief" else "CS_EVIDENCE_BUNDLE_NOT_FOUND",
+                "message": "Brief was not found." if resource == "brief" else "Evidence bundle was not found.",
+                "brief_id": args.brief_id,
                 "evidence_bundle_id": args.evidence_bundle_id,
             }
         )
@@ -9613,12 +9623,25 @@ def command_claim_create(args: argparse.Namespace) -> int:
         payload["errors"].append(
             {
                 "code": "CS_SCOPE_DENIED",
-                "message": "Evidence bundle is outside the requested scope.",
+                "message": "Claim source is outside the requested scope.",
+                "brief_id": args.brief_id,
+                "evidence_bundle_id": args.evidence_bundle_id,
                 "resource_scope": result.get("resource_scope"),
             }
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_EVIDENCE_REQUIRED",
+                "message": "Claim creation requires a Brief with source evidence.",
+                "brief_id": args.brief_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
 
     claim = result["claim"]
     audit_event = result["audit_event"]
@@ -9629,12 +9652,17 @@ def command_claim_create(args: argparse.Namespace) -> int:
         payload["ids"]["evidence_bundle_id"] = evidence["evidence_bundle_id"]
     if evidence.get("search_snapshot_id"):
         payload["ids"]["search_snapshot_id"] = evidence["search_snapshot_id"]
+    related_brief = claim.get("related_brief") if isinstance(claim.get("related_brief"), dict) else {}
+    if related_brief.get("brief_id"):
+        payload["ids"]["brief_id"] = related_brief["brief_id"]
     payload["claim"] = claim
     payload["evidence_refs"].append(f"claim:{claim['claim_id']}")
     if evidence.get("evidence_bundle_id"):
         payload["evidence_refs"].append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
     if evidence.get("search_snapshot_id"):
         payload["evidence_refs"].append(f"search_snapshot:{evidence['search_snapshot_id']}")
+    if related_brief.get("brief_id"):
+        payload["evidence_refs"].append(f"brief:{related_brief['brief_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
     payload["evidence_refs"].extend(claim.get("ontology_context", {}).get("object_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
@@ -23854,8 +23882,10 @@ def build_parser() -> argparse.ArgumentParser:
     claim = subcommands.add_parser("claim", help="Draft claim commands")
     claim_sub = claim.add_subparsers(dest="claim_command")
 
-    claim_create = claim_sub.add_parser("create", help="Create a draft claim from an evidence bundle")
-    claim_create.add_argument("--evidence-bundle-id", help="Evidence bundle ID")
+    claim_create = claim_sub.add_parser("create", help="Create a draft claim from a Brief or evidence bundle")
+    claim_source = claim_create.add_mutually_exclusive_group()
+    claim_source.add_argument("--brief", dest="brief_id", help="Brief ID whose evidence lineage the claim must preserve")
+    claim_source.add_argument("--evidence-bundle-id", help="Evidence bundle ID")
     claim_create.add_argument("--statement", required=True, help="Draft claim statement")
     claim_create.add_argument("--ontology-object-ref", action="append", default=[], help="Promoted ontology object ref used as context only")
     add_state_argument(claim_create)

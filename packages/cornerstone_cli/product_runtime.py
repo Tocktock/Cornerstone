@@ -5611,11 +5611,15 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _show_artifact(self, artifact_id: str) -> None:
         scope = self._query_scope()
-        artifact = self.store.get_artifact(artifact_id, scope)
-        if artifact is None:
+        result = self.store.read_product_record("artifact", artifact_id, scope, reason="api_artifact_show")
+        if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_ARTIFACT_NOT_FOUND", "message": "Artifact not found."}]), 404)
             return
-        event = self.store.append_audit("artifact.read", scope, {"type": "artifact", "id": artifact_id}, {"reason": "api_artifact_show"})
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."}]), 403)
+            return
+        artifact = result["record"]
+        event = result["audit_event"]
         detail = dict(artifact)
         detail["derived_text_preview"] = self.store.derived_text_preview(artifact)
         detail["ontology_context"] = self.store.ontology_context_for_artifact(artifact_id, scope)
@@ -5694,15 +5698,14 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _show_claim(self, claim_id: str) -> None:
         scope = self._query_scope()
-        claim = self.store.get_claim(claim_id)
-        if claim is None:
+        result = self.store.read_product_record("claim", claim_id, scope, reason="api_claim_show")
+        if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_CLAIM_NOT_FOUND", "message": "Claim not found."}]), 404)
             return
-        if claim.get("scope") != scope:
+        if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Claim is outside the requested scope."}]), 403)
             return
-        event = self.store.append_audit("claim.read", scope, {"type": "claim", "id": claim_id}, {"reason": "api_claim_show"})
-        self._send_json(_json_response("success", claim=claim, evidence_refs=[f"claim:{claim_id}"], audit_refs=[f"audit:{event['event_id']}"]))
+        self._send_json(_json_response("success", claim=result["record"], evidence_refs=[f"claim:{claim_id}"], audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
     def _show_memory(self, memory_id: str) -> None:
         scope = self._query_scope()
@@ -5725,15 +5728,14 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _show_action(self, action_id: str) -> None:
         scope = self._query_scope()
-        action = self.store.get_action(action_id)
-        if action is None:
+        result = self.store.read_product_record("action", action_id, scope, reason="api_action_show")
+        if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_ACTION_NOT_FOUND", "message": "Action Card not found."}]), 404)
             return
-        if action.get("scope") != scope:
+        if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Action Card is outside the requested scope."}]), 403)
             return
-        event = self.store.append_audit("action.read", scope, {"type": "action", "id": action_id}, {"reason": "api_action_show"})
-        self._send_json(_json_response("success", action_card=action, evidence_refs=[f"action:{action_id}"], audit_refs=[f"audit:{event['event_id']}"]))
+        self._send_json(_json_response("success", action_card=result["record"], evidence_refs=[f"action:{action_id}"], audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
     def _audit_events(self) -> None:
         scope = self._query_scope()
@@ -5919,7 +5921,12 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
     def _search(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
         query = str(body.get("query", ""))
-        result = self.store.search(query, **scope)
+        excluded_source_types = {
+            str(value)
+            for value in body.get("excluded_source_types", [])
+            if isinstance(value, str)
+        }
+        result = self.store.search(query, **scope, excluded_source_types=excluded_source_types)
         snapshot = result["snapshot"]
         refs = [f"search_snapshot:{snapshot['search_snapshot_id']}"]
         for row in snapshot.get("results", []):
@@ -5990,22 +5997,45 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
     def _create_claim(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
         bundle_id = body.get("evidence_bundle_id")
-        if isinstance(bundle_id, str) and bundle_id:
-            ontology_refs = [str(value) for value in body.get("ontology_object_refs", []) if isinstance(value, str)]
+        brief_id = body.get("brief_id")
+        ontology_refs = [str(value) for value in body.get("ontology_object_refs", []) if isinstance(value, str)]
+        if isinstance(brief_id, str) and brief_id:
+            result = self.store.create_claim_from_brief(
+                brief_id,
+                str(body.get("statement", "")),
+                scope,
+                ontology_object_refs=ontology_refs,
+            )
+        elif isinstance(bundle_id, str) and bundle_id:
             result = self.store.create_claim_from_evidence_bundle(bundle_id, str(body.get("statement", "")), scope, ontology_object_refs=ontology_refs)
         else:
             result = self.store.create_unsupported_claim(str(body.get("statement", "")), scope)
         if result.get("status") == "not_found":
-            self._send_json(_json_response("failed", errors=[{"code": "CS_EVIDENCE_BUNDLE_NOT_FOUND", "message": "Evidence bundle not found."}]), 404)
+            resource = str(result.get("resource") or "evidence_bundle")
+            code = "CS_BRIEF_NOT_FOUND" if resource == "brief" else "CS_EVIDENCE_BUNDLE_NOT_FOUND"
+            message = "Brief not found." if resource == "brief" else "Evidence bundle not found."
+            self._send_json(_json_response("failed", errors=[{"code": code, "message": message}]), 404)
             return
         if result.get("status") == "scope_denied":
-            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Evidence bundle is outside the requested scope."}]), 403)
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Claim source is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "evidence_required":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CLAIM_EVIDENCE_REQUIRED", "message": "Claim creation requires a Brief with source evidence."}],
+                ),
+                400,
+            )
             return
         claim = result["claim"]
         refs = [f"claim:{claim['claim_id']}"]
         evidence = claim.get("evidence_bundle", {})
         if evidence.get("evidence_bundle_id"):
             refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        related_brief = claim.get("related_brief") if isinstance(claim.get("related_brief"), dict) else {}
+        if related_brief.get("brief_id"):
+            refs.append(f"brief:{related_brief['brief_id']}")
         refs.extend(evidence.get("artifact_refs", []))
         refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
         self._send_json(_json_response("success", claim=claim, evidence_refs=refs, audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
@@ -6061,7 +6091,13 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                     "failed",
                     claim=result["claim"],
                     audit_refs=[f"audit:{result['audit_event']['event_id']}"],
-                    errors=[{"code": "CS_CLAIM_EVIDENCE_REQUIRED", "message": "Claim approval requires evidence."}],
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_EVIDENCE_REQUIRED",
+                            "message": "Claim approval requires evidence.",
+                            "resolution_path": "Attach an Evidence Bundle with at least one artifact reference, then retry approval.",
+                        }
+                    ],
                 ),
                 400,
             )

@@ -8539,7 +8539,16 @@ class LocalRuntimeStore:
             + "\n\n".join(evidence_blocks)
         )
 
-    def search(self, query: str, *, tenant_id: str, owner_id: str, namespace_id: str, workspace_id: str) -> dict[str, Any]:
+    def search(
+        self,
+        query: str,
+        *,
+        tenant_id: str,
+        owner_id: str,
+        namespace_id: str,
+        workspace_id: str,
+        excluded_source_types: set[str] | None = None,
+    ) -> dict[str, Any]:
         started = perf_counter()
         scope = {
             "tenant_id": tenant_id,
@@ -8548,8 +8557,13 @@ class LocalRuntimeStore:
             "workspace_id": workspace_id,
         }
         query_terms = search_terms(query)
+        excluded_source_types = {str(value).lower() for value in (excluded_source_types or set())}
         results: list[dict[str, Any]] = []
         for artifact in self._artifact_records(scope):
+            source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
+            source_type = str(source.get("type") or source.get("source_type") or "").lower()
+            if source_type in excluded_source_types:
+                continue
             text = self._derived_text(artifact)
             haystack = text.lower()
             score = 0
@@ -8648,6 +8662,8 @@ class LocalRuntimeStore:
             "created_at": utc_now(),
             "duration_ms": duration_ms,
         }
+        if excluded_source_types:
+            snapshot_base["excluded_source_types"] = sorted(excluded_source_types)
         snapshot_id = f"search_{_json_hash(snapshot_base)[:16]}"
         snapshot = dict(snapshot_base)
         snapshot["search_snapshot_id"] = snapshot_id
@@ -9027,18 +9043,41 @@ class LocalRuntimeStore:
         return {"brief": brief, "audit_event": event}
 
     def show_brief(self, brief_id: str, scope: dict[str, str]) -> dict[str, Any]:
-        brief = self.get_brief(brief_id)
-        if brief is None:
-            return {"status": "not_found"}
-        if brief.get("scope") != scope:
-            return {"status": "scope_denied", "resource_scope": brief.get("scope")}
+        result = self.read_product_record("brief", brief_id, scope, reason="cli_brief_show")
+        if result.get("status"):
+            return result
+        return {"brief": result["record"], "audit_event": result["audit_event"]}
+
+    def read_product_record(
+        self,
+        record_kind: str,
+        record_id: str,
+        scope: dict[str, str],
+        *,
+        reason: str,
+    ) -> dict[str, Any]:
+        normalized = record_kind.rstrip("s")
+        getters = {
+            "artifact": lambda value: self.get_artifact(value, scope),
+            "brief": self.get_brief,
+            "claim": self.get_claim,
+            "action": self.get_action,
+        }
+        getter = getters.get(normalized)
+        if getter is None:
+            return {"status": "unsupported_kind", "record_kind": record_kind}
+        record = getter(record_id)
+        if record is None:
+            return {"status": "not_found", "record_kind": normalized}
+        if record.get("scope") != scope:
+            return {"status": "scope_denied", "record_kind": normalized, "resource_scope": record.get("scope")}
         event = self.append_audit(
-            "brief.read",
+            f"{normalized}.read",
             scope,
-            {"type": "brief", "id": brief_id},
-            {"reason": "cli_brief_show"},
+            {"type": normalized, "id": record_id},
+            {"reason": reason},
         )
-        return {"brief": brief, "audit_event": event}
+        return {"record": record, "audit_event": event}
 
     def create_unsupported_claim(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
         claim_base = {
@@ -9076,12 +9115,38 @@ class LocalRuntimeStore:
         )
         return {"claim": claim, "audit_event": event}
 
+    def create_claim_from_brief(
+        self,
+        brief_id: str,
+        statement: str,
+        scope: dict[str, str],
+        *,
+        ontology_object_refs: list[str] | None = None,
+    ) -> dict[str, Any]:
+        brief = self.get_brief(brief_id)
+        if brief is None:
+            return {"status": "not_found", "resource": "brief", "brief_id": brief_id}
+        if brief.get("scope") != scope:
+            return {"status": "scope_denied", "resource": "brief", "resource_scope": brief.get("scope")}
+        evidence = brief.get("evidence_bundle") if isinstance(brief.get("evidence_bundle"), dict) else {}
+        bundle_id = str(evidence.get("evidence_bundle_id") or "")
+        if not bundle_id:
+            return {"status": "evidence_required", "resource": "brief", "brief_id": brief_id}
+        return self.create_claim_from_evidence_bundle(
+            bundle_id,
+            statement,
+            scope,
+            ontology_object_refs=ontology_object_refs,
+            related_brief=brief,
+        )
+
     def create_claim_from_evidence_bundle(
         self,
         bundle_id: str,
         statement: str,
         scope: dict[str, str],
         ontology_object_refs: list[str] | None = None,
+        related_brief: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         bundle = self.get_evidence_bundle(bundle_id)
         if bundle is None:
@@ -9103,7 +9168,30 @@ class LocalRuntimeStore:
             "status": "draft",
             "trust_state": "evidence_backed",
             "statement": statement,
+            "rationale": (
+                f"Drafted from {related_brief.get('title') or related_brief.get('brief_id')} with the same Evidence Bundle."
+                if related_brief
+                else "Drafted from the linked Evidence Bundle; review the visible source support before approval."
+            ),
+            "gaps": [
+                str(value)
+                for value in (
+                    related_brief.get("uncertainty", [])
+                    if related_brief and isinstance(related_brief.get("uncertainty"), list)
+                    else ["Citation checks and owner review are still required before authority use."]
+                )
+                if isinstance(value, str)
+            ],
             "scope": scope,
+            "related_brief": (
+                {
+                    "brief_id": related_brief.get("brief_id"),
+                    "title": related_brief.get("title"),
+                    "evidence_bundle_id": bundle_id,
+                }
+                if related_brief
+                else None
+            ),
             "evidence_bundle": {
                 "evidence_bundle_id": bundle_id,
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
@@ -9137,6 +9225,8 @@ class LocalRuntimeStore:
                 "can_drive_autonomous_action": False,
                 "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
             },
+            "activity_refs": [],
+            "audit_refs": [],
             "created_at": utc_now(),
         }
         claim_id = f"claim_{_json_hash(claim_base)[:16]}"
@@ -9150,9 +9240,13 @@ class LocalRuntimeStore:
             {
                 "evidence_bundle_id": bundle_id,
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
+                **({"brief_id": related_brief.get("brief_id")} if related_brief else {}),
                 "ontology_context_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in ontology_context_objects],
             },
         )
+        claim["activity_refs"] = [f"audit:{event['event_id']}"]
+        claim["audit_refs"] = [f"audit:{event['event_id']}"]
+        _write_json(self.claim_path(claim_id), claim)
         return {"claim": claim, "audit_event": event}
 
     def approve_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
@@ -9201,18 +9295,10 @@ class LocalRuntimeStore:
         return {"status": "approved", "claim": approved, "audit_event": event}
 
     def show_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
-        claim = self.get_claim(claim_id)
-        if claim is None:
-            return {"status": "not_found"}
-        if claim.get("scope") != scope:
-            return {"status": "scope_denied", "resource_scope": claim.get("scope")}
-        event = self.append_audit(
-            "claim.read",
-            scope,
-            {"type": "claim", "id": claim_id},
-            {"reason": "cli_claim_show"},
-        )
-        return {"claim": claim, "audit_event": event}
+        result = self.read_product_record("claim", claim_id, scope, reason="cli_claim_show")
+        if result.get("status"):
+            return result
+        return {"claim": result["record"], "audit_event": result["audit_event"]}
 
     def _claim_evidence_refs(self, claim: dict[str, Any]) -> list[str]:
         evidence = claim.get("evidence_bundle", {})
