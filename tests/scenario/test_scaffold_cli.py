@@ -241,6 +241,132 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["schema_version"], "cs.cli.v0")
         self.assertEqual(payload["status"], "success")
 
+    def test_cli_parser_failures_are_structured_and_redacted_in_json(self) -> None:
+        secret_value = "super-secret-parser-value"
+        cases = [
+            (("artifact", "show", "--json"), "missing_required_argument"),
+            (("conversation", "start", "--json"), "missing_required_argument"),
+            (("access", "evaluate", "--action", secret_value, "--json"), "invalid_choice"),
+            ((secret_value, "--json"), "invalid_choice"),
+            (("artifact", secret_value, "--json"), "invalid_choice"),
+            (("scenario", "list", "--set", secret_value, "--json"), "invalid_choice"),
+            (
+                ("scenario", "verify", "vs0-product-runtime", "--dry-run", "--list", "--json"),
+                "incompatible_arguments",
+            ),
+            (("workspace", "--json"), "unrecognized_argument"),
+            (("observe", "--json"), "missing_subcommand"),
+            (("version", "--js", "--json"), "unrecognized_argument"),
+            (("--json", "artifact", "show"), "missing_required_argument"),
+        ]
+
+        for arguments, expected_reason in cases:
+            with self.subTest(arguments=arguments):
+                result = run_cli(*arguments)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertEqual(result.stderr, "")
+                self.assertNotIn(secret_value, result.stdout)
+                payload = json.loads(result.stdout)
+                self.assertEqual(payload["schema_version"], "cs.cli.v0")
+                self.assertEqual(payload["status"], "failed")
+                self.assertIsInstance(payload["ids"], dict)
+                self.assertEqual(payload["evidence_refs"], [])
+                self.assertEqual(payload["audit_refs"], [])
+                self.assertEqual(payload["policy_decision_refs"], [])
+                self.assertEqual(
+                    payload["scope_status"],
+                    {
+                        "applied": False,
+                        "source": "default_unparsed",
+                        "reason": "argument_validation_failed",
+                    },
+                )
+                self.assertEqual(len(payload["errors"]), 1)
+                self.assertEqual(payload["errors"][0]["code"], "CS_CLI_INVALID_INPUT")
+                self.assertEqual(payload["errors"][0]["reason"], expected_reason)
+                self.assertTrue(payload["errors"][0]["input_redacted"])
+                self.assertIn("resolution", payload["errors"][0])
+                if arguments == ("workspace", "--json"):
+                    self.assertEqual(payload["command"], "cornerstone workspace")
+
+        misattributed = run_cli(secret_value, "artifact", "--json")
+        self.assertEqual(misattributed.returncode, 1, misattributed.stdout + misattributed.stderr)
+        self.assertEqual(json.loads(misattributed.stdout)["command"], "cornerstone")
+
+        scoped = run_cli(
+            "artifact",
+            "show",
+            "--tenant-id",
+            "attempted-tenant",
+            "--owner-id",
+            "attempted-owner",
+            "--namespace-id",
+            "attempted-namespace",
+            "--workspace-id",
+            "attempted-workspace",
+            "--json",
+        )
+        self.assertEqual(scoped.returncode, 1, scoped.stdout + scoped.stderr)
+        scoped_payload = json.loads(scoped.stdout)
+        self.assertFalse(scoped_payload["scope_status"]["applied"])
+        self.assertNotIn("attempted-tenant", scoped.stdout)
+
+        handler_failure = run_cli("artifact", "ingest", "--json")
+        self.assertEqual(handler_failure.returncode, 1, handler_failure.stdout + handler_failure.stderr)
+        self.assertEqual(handler_failure.stderr, "")
+        handler_payload = json.loads(handler_failure.stdout)
+        self.assertEqual(handler_payload["errors"][0]["code"], "CS_ARTIFACT_INPUT_REQUIRED")
+        self.assertNotIn("scope_status", handler_payload)
+
+    def test_cli_parser_text_failures_exit_one_without_echoing_invalid_values(self) -> None:
+        secret_value = "super-secret-parser-value"
+        invalid = run_cli("access", "evaluate", "--action", secret_value)
+        self.assertEqual(invalid.returncode, 1, invalid.stdout + invalid.stderr)
+        self.assertEqual(invalid.stdout, "")
+        self.assertNotIn(secret_value, invalid.stderr)
+        self.assertIn("unsupported value", invalid.stderr)
+
+        positional_json = run_cli("artifact", "show", "--", "--json", secret_value)
+        self.assertEqual(positional_json.returncode, 1, positional_json.stdout + positional_json.stderr)
+        self.assertEqual(positional_json.stdout, "")
+        self.assertNotIn(secret_value, positional_json.stderr)
+        self.assertIn("unsupported argument", positional_json.stderr)
+
+        abbreviated_json = run_cli("version", "--js")
+        self.assertEqual(abbreviated_json.returncode, 1, abbreviated_json.stdout + abbreviated_json.stderr)
+        self.assertEqual(abbreviated_json.stdout, "")
+        self.assertIn("unsupported argument", abbreviated_json.stderr)
+
+        command_after_invalid = run_cli(secret_value, "--", "artifact", "--json")
+        self.assertEqual(command_after_invalid.returncode, 1, command_after_invalid.stdout + command_after_invalid.stderr)
+        self.assertEqual(command_after_invalid.stdout, "")
+        self.assertNotIn(secret_value, command_after_invalid.stderr)
+        self.assertIn("cornerstone: error", command_after_invalid.stderr)
+        self.assertNotIn("cornerstone artifact: error", command_after_invalid.stderr)
+
+        for arguments, expected_help in [
+            (("workspace",), "cornerstone workspace --help"),
+            (("workspace", "mode"), "cornerstone workspace mode --help"),
+        ]:
+            with self.subTest(arguments=arguments):
+                missing_subcommand = run_cli(*arguments)
+                self.assertEqual(
+                    missing_subcommand.returncode,
+                    1,
+                    missing_subcommand.stdout + missing_subcommand.stderr,
+                )
+                self.assertEqual(missing_subcommand.stdout, "")
+                self.assertIn("requires a subcommand", missing_subcommand.stderr)
+                self.assertIn(expected_help, missing_subcommand.stderr)
+
+    def test_cli_root_and_help_paths_remain_successful(self) -> None:
+        for arguments in [(), ("--help",), ("workspace", "--help"), ("workspace", "mode", "--help")]:
+            with self.subTest(arguments=arguments):
+                result = run_cli(*arguments)
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+                self.assertEqual(result.stderr, "")
+                self.assertIn("usage:", result.stdout)
+
     def test_ready_reports_local_runtime_without_production_overclaim(self) -> None:
         result = run_cli("ready", "--json")
         self.assertEqual(result.returncode, 0, result.stdout)

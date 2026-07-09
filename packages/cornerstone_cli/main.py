@@ -204,6 +204,29 @@ VS3_CLI_STDOUT_PROOF_BOUNDARY_OPTIONAL_NOT_CLAIMED = {
     "real_network",
     "migration_restore",
 }
+
+
+class CliArgumentParserError(Exception):
+    def __init__(self, *, prog: str, usage: str, parser_message: str) -> None:
+        super().__init__(parser_message)
+        self.prog = prog
+        self.usage = usage
+        self.parser_message = parser_message
+
+
+class CornerstoneArgumentParser(argparse.ArgumentParser):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        kwargs.setdefault("allow_abbrev", False)
+        super().__init__(*args, **kwargs)
+
+    def error(self, message: str) -> None:
+        raise CliArgumentParserError(
+            prog=self.prog,
+            usage=self.format_usage(),
+            parser_message=message,
+        )
+
+
 VS3_COMPONENT_EVIDENCE_REF_PREFIXES = (
     "artifact:",
     "audit_state:",
@@ -357,6 +380,105 @@ def print_payload(payload: dict[str, Any], as_json: bool) -> None:
     print(f"{command}: {status}")
     for error in payload.get("errors", []):
         print(f"- {error.get('code')}: {error.get('message')}")
+
+
+def _cli_argument_error_detail(error: CliArgumentParserError) -> dict[str, Any]:
+    parser_message = error.parser_message.lower()
+    if "invalid choice" in parser_message:
+        reason = "invalid_choice"
+        message = "A CLI argument used an unsupported value."
+    elif "unrecognized arguments" in parser_message:
+        reason = "unrecognized_argument"
+        message = "The CLI received an unsupported argument."
+    elif "the following arguments are required" in parser_message and "_command" in parser_message:
+        reason = "missing_subcommand"
+        message = "The command group requires a subcommand."
+    elif "the following arguments are required" in parser_message or "expected one argument" in parser_message:
+        reason = "missing_required_argument"
+        message = "Required CLI input is missing."
+    elif "not allowed with argument" in parser_message:
+        reason = "incompatible_arguments"
+        message = "The CLI received incompatible arguments."
+    elif "subcommand is required" in parser_message:
+        reason = "missing_subcommand"
+        message = "The command group requires a subcommand."
+    else:
+        reason = "invalid_input"
+        message = "CLI input validation failed."
+    return {
+        "code": "CS_CLI_INVALID_INPUT",
+        "message": message,
+        "reason": reason,
+        "resolution": f"Run '{error.prog} --help' and retry with supported arguments.",
+        "input_redacted": True,
+    }
+
+
+def _emit_cli_argument_error(error: CliArgumentParserError, *, as_json: bool) -> int:
+    detail = _cli_argument_error_detail(error)
+    if as_json:
+        payload = base_response(error.prog, "failed", repo_root())
+        payload["scope_status"] = {
+            "applied": False,
+            "source": "default_unparsed",
+            "reason": "argument_validation_failed",
+        }
+        payload["errors"].append(detail)
+        print_payload(payload, True)
+    else:
+        sys.stderr.write(error.usage)
+        sys.stderr.write(f"{error.prog}: error: {detail['message']}\n")
+        sys.stderr.write(f"{detail['resolution']}\n")
+    return EXIT_INVALID
+
+
+def _contextual_cli_argument_error(
+    parser: argparse.ArgumentParser,
+    error: CliArgumentParserError,
+    raw_argv: list[str],
+) -> CliArgumentParserError:
+    if error.prog != "cornerstone":
+        return error
+    root_commands = {
+        choice
+        for action in parser._actions
+        if isinstance(action, argparse._SubParsersAction)
+        for choice in action.choices
+    }
+    command_position: str | None = None
+    for argument in raw_argv:
+        if argument == "--":
+            break
+        if argument == "--json" and command_position is None:
+            continue
+        command_position = argument
+        break
+    command = command_position if command_position in root_commands else None
+    if command is None:
+        return error
+    return CliArgumentParserError(
+        prog=f"cornerstone {command}",
+        usage=error.usage,
+        parser_message=error.parser_message,
+    )
+
+
+def _parsed_command_prog(args: argparse.Namespace) -> str:
+    command_parts = [
+        value
+        for name, value in vars(args).items()
+        if (name == "command" or name.endswith("_command")) and isinstance(value, str) and value
+    ]
+    return " ".join(["cornerstone", *command_parts])
+
+
+def _json_output_requested(raw_argv: list[str]) -> bool:
+    for argument in raw_argv:
+        if argument == "--":
+            return False
+        if argument == "--json":
+            return True
+    return False
 
 
 def resolve_output_path(root: Path, output: str) -> Path:
@@ -23347,7 +23469,7 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="cornerstone", description="CornerStone scaffold CLI")
+    parser = CornerstoneArgumentParser(prog="cornerstone", description="CornerStone scaffold CLI")
     subcommands = parser.add_subparsers(dest="command")
 
     version = subcommands.add_parser("version", help="Print version information")
@@ -26386,9 +26508,27 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    raw_argv = list(sys.argv[1:] if argv is None else argv)
+    json_output_requested = _json_output_requested(raw_argv)
     parser = build_parser()
-    args = parser.parse_args(argv)
+    try:
+        args = parser.parse_args(raw_argv)
+    except CliArgumentParserError as error:
+        return _emit_cli_argument_error(
+            _contextual_cli_argument_error(parser, error, raw_argv),
+            as_json=json_output_requested,
+        )
     if not hasattr(args, "func"):
+        if raw_argv:
+            prog = _parsed_command_prog(args)
+            return _emit_cli_argument_error(
+                CliArgumentParserError(
+                    prog=prog,
+                    usage=f"usage: {prog} <subcommand> ...\n",
+                    parser_message="a subcommand is required",
+                ),
+                as_json=json_output_requested,
+            )
         parser.print_help()
         return EXIT_SUCCESS
     return args.func(args)
