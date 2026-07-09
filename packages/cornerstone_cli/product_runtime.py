@@ -6042,14 +6042,56 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _create_memory(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
+        requested = {
+            "trust_state": str(body.get("trust_state", "draft")),
+            "status": str(body.get("status", "draft")),
+            "memory_type": str(body.get("memory_type", "knowledge_candidate")),
+            "synthesis_mode": str(body.get("synthesis_mode", "auto")),
+        }
+        candidate_shape = {
+            "trust_state": "draft",
+            "status": "draft",
+            "memory_type": "knowledge_candidate",
+            "synthesis_mode": "auto",
+        }
+        lifecycle_violations = sorted(key for key, allowed in candidate_shape.items() if requested[key] != allowed)
+        if lifecycle_violations:
+            event = self.store.append_audit(
+                "memory.candidate.creation.denied",
+                scope,
+                {"type": "product_memory_boundary", "id": "candidate_creation"},
+                {
+                    "reason_code": "CS_MEMORY_CANDIDATE_ONLY",
+                    "reason": "The product API can create review-only Memory candidates, not approved durable memory.",
+                    "lifecycle_violations": lifecycle_violations,
+                    "allowed_lifecycle": candidate_shape,
+                    "memory_records_created": 0,
+                    "authority_expansions": 0,
+                },
+            )
+            self._send_json(
+                _json_response(
+                    "denied",
+                    audit_refs=[f"audit:{event['event_id']}"],
+                    errors=[
+                        {
+                            "code": "CS_MEMORY_CANDIDATE_ONLY",
+                            "message": "Memory creation through the product API is limited to Draft / Needs Review candidates.",
+                            "resolution_path": "Create a draft candidate, then use a separately governed owner-review path before approved-memory use.",
+                        }
+                    ],
+                ),
+                403,
+            )
+            return
         result = self.store.create_memory_from_evidence_bundle(
             str(body.get("evidence_bundle_id", "")),
             str(body.get("statement", "")),
             scope,
-            trust_state=str(body.get("trust_state", "draft")),
-            status=str(body.get("status", "draft")),
-            memory_type=str(body.get("memory_type", "knowledge_candidate")),
-            synthesis_mode=str(body.get("synthesis_mode", "auto")),
+            trust_state=requested["trust_state"],
+            status=requested["status"],
+            memory_type=requested["memory_type"],
+            synthesis_mode=requested["synthesis_mode"],
         )
         if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_EVIDENCE_BUNDLE_NOT_FOUND", "message": "Evidence Bundle not found."}]), 404)
@@ -6115,6 +6157,49 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         scope = _scope_from_body(body)
         claim_id = str(body.get("claim_id", ""))
         mission_id = body.get("mission_id") if isinstance(body.get("mission_id"), str) else None
+        requested_mode = str(body.get("mode", "assist"))
+        requested_connector = str(body.get("connector", "mock_connector"))
+        workspace_mode = str(self.store.get_workspace_mode(scope).get("mode") or "assist")
+        boundary_violations = []
+        if requested_mode != "assist":
+            boundary_violations.append("product_action_mode_must_be_assist")
+        if requested_connector != "mock_connector":
+            boundary_violations.append("product_action_connector_must_be_mock")
+        if workspace_mode in {"locked", "manual"}:
+            boundary_violations.append("workspace_mode_blocks_product_preview")
+        elif mission_id and workspace_mode != "assist":
+            boundary_violations.append("existing_mission_workspace_mode_must_be_assist")
+        if boundary_violations:
+            event = self.store.append_audit(
+                "action.preview.creation.denied",
+                scope,
+                {"type": "product_action_boundary", "id": "preview_creation"},
+                {
+                    "reason_code": "CS_ACTION_PREVIEW_BOUNDARY",
+                    "reason": "The product API creates local mock Action previews in Assist mode only.",
+                    "boundary_violations": boundary_violations,
+                    "workspace_mode": workspace_mode,
+                    "mission_records_created": 0,
+                    "action_records_created": 0,
+                    "authority_expansions": 0,
+                    "real_external_http_calls": 0,
+                },
+            )
+            self._send_json(
+                _json_response(
+                    "denied",
+                    audit_refs=[f"audit:{event['event_id']}"],
+                    errors=[
+                        {
+                            "code": "CS_ACTION_PREVIEW_BOUNDARY",
+                            "message": "Product Action creation is limited to Assist-mode local mock previews.",
+                            "resolution_path": "Keep the workspace and request in Assist mode with connector=mock_connector, or use a separately governed owner CLI path for dormant autonomy workflows.",
+                        }
+                    ],
+                ),
+                403,
+            )
+            return
         created_mission: dict[str, Any] | None = None
         activation: dict[str, Any] | None = None
         if not mission_id:
@@ -6128,7 +6213,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 return
             created_mission = mission_result["mission"]
             mission_id = created_mission["mission_id"]
-            activation = self.store.activate_mission(mission_id, scope, mode=str(body.get("mode", "autopilot")))
+            activation = self.store.activate_mission(mission_id, scope, mode=requested_mode)
         result = self.store.propose_action(
             mission_id,
             claim_id,
@@ -6136,7 +6221,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             str(body.get("risk", "high")),
             scope,
             goal=str(body.get("goal", "Run a local mock ConnectorHub action.")),
-            connector=str(body.get("connector", "mock_connector")),
+            connector=requested_connector,
             target=str(body.get("target", "mock://local-target")),
             ontology_object_refs=[str(value) for value in body.get("ontology_object_refs", []) if isinstance(value, str)],
         )

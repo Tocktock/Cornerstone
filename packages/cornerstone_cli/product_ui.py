@@ -9,7 +9,7 @@ from typing import Any
 from urllib.parse import quote
 
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
-PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "actions"}
+PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "memories", "actions"}
 
 REFERENCE_IMAGE_ROWS = [
     ("cornerstone-reference-01-vendor-detail.png", "Vendor object detail", "Dormant direction", "Entity/object explorer structure only; do not add this surface during the VS5 scope freeze."),
@@ -178,6 +178,18 @@ def render_product_detail(
         content = _claim_detail(ctx, record) if record else _not_found("claim")
         title = _truncate(str(record.get("statement") or "Claim"), 72) if record else "Claim not found"
         active = "/claims"
+    elif kind == "memories":
+        record = store.get_memory(record_id)
+        if record and record.get("scope") != scope:
+            record = None
+        if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
+            content = _internal_record_notice("memory candidate")
+            title = "Owner record"
+            active = "/inbox"
+            return 200, _page(root, title, active, content, ctx, "")
+        content = _memory_detail(ctx, record) if record else _not_found("memory candidate")
+        title = _truncate(str(record.get("title") or record.get("statement") or "Memory candidate"), 72) if record else "Memory candidate not found"
+        active = "/inbox"
     elif kind == "actions":
         record = store.get_action(record_id)
         if record and record.get("scope") != scope:
@@ -449,6 +461,10 @@ def _plain_event(event_type: str) -> str:
         "claim.draft.created": "Claim drafted",
         "claim.read": "Claim opened",
         "claim.approve": "Claim approved",
+        "memory.draft.created": "Memory candidate drafted",
+        "memory.owner_approved.created": "Owner-approved memory recorded",
+        "memory.candidate.creation.denied": "Memory authority request blocked",
+        "memory.read": "Memory candidate opened",
         "action.create": "Action drafted",
         "action.card.proposed": "Action proposed",
         "action.read": "Action opened",
@@ -456,6 +472,8 @@ def _plain_event(event_type: str) -> str:
         "action.dry_run.read": "Action preview opened",
         "action.approve": "Action approved",
         "action.execute": "Action executed",
+        "action.execution.denied": "Action execution blocked",
+        "action.preview.creation.denied": "Action preview boundary blocked",
         "conversation.start": "Ask started",
         "conversation.answer": "Draft answer saved",
         "mission.contract.created": "Decision path prepared",
@@ -654,10 +672,18 @@ def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
     approval_status = str(approval.get("status") or "not_recorded").lower()
     execution_status = str(execution.get("status") or "not_started").lower()
     result_status = str(result.get("status") or "").lower()
+    record_status = str(record.get("status") or "").lower()
     if execution_status == "executed":
         stage = "executed"
     elif execution_status in {"failed", "error"} or result_status in {"failed", "error"}:
         stage = "failed"
+    elif (
+        record_status in {"policy_blocked", "blocked", "denied"}
+        or execution_status.startswith("blocked")
+        or execution_status in {"denied", "policy_denied"}
+        or result_status in {"blocked", "denied", "policy_denied"}
+    ):
+        stage = "blocked"
     elif approval_status == "approved" or execution_status == "ready_to_execute":
         stage = "approved"
     elif approval_status in {"pending", "not_approved", "required"}:
@@ -681,6 +707,8 @@ def _action_label(record: dict[str, Any]) -> tuple[str, str]:
         return "Executed", "executed"
     if stage == "failed":
         return "Failed", "failed"
+    if stage == "blocked":
+        return "Policy blocked", "policyBlocked"
     if stage == "approved":
         return "Approved", "approved"
     if stage == "pending":
@@ -712,19 +740,28 @@ def _inbox_items(
     claims: list[dict[str, Any]],
     actions: list[dict[str, Any]],
     memories: list[dict[str, Any]],
-) -> list[dict[str, str]]:
-    items: list[dict[str, str]] = []
-    for brief in briefs[:3]:
+) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for brief in briefs[:2]:
         label, state = _brief_label(brief)
+        gaps = [
+            str(value)
+            for key in ("gaps", "uncertainty")
+            for value in (brief.get(key) if isinstance(brief.get(key), list) else [])
+            if isinstance(value, str) and value.strip()
+        ]
+        gap_count = len(gaps)
         items.append(
             {
                 "kind": "Brief",
                 "title": _brief_title(brief),
-                "detail": "Check sources and gaps before sharing.",
+                "detail": f"Review {gap_count} evidence gap{'s' if gap_count != 1 else ''} and linked sources before sharing.",
                 "label": label,
                 "state": state,
                 "href": _detail_href("briefs", brief.get("brief_id")),
                 "date": _display_date(brief),
+                "created_at": _record_time_key(brief),
+                "evidence_gap_count": gap_count,
                 "queue": "Needs review",
                 "priority": "Medium",
                 "owner": "Owner",
@@ -732,7 +769,7 @@ def _inbox_items(
                 "icon": "B",
             }
         )
-    for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"][:4]:
+    for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"][:2]:
         label, state = _claim_label(claim)
         items.append(
             {
@@ -743,6 +780,7 @@ def _inbox_items(
                 "state": state,
                 "href": _detail_href("claims", claim.get("claim_id")),
                 "date": _display_date(claim),
+                "created_at": _record_time_key(claim),
                 "queue": "Needs review",
                 "priority": "High" if state == "draft" else "Medium",
                 "owner": "Owner",
@@ -750,34 +788,64 @@ def _inbox_items(
                 "icon": "C",
             }
         )
-    for action in actions[:4]:
+    pending_actions = [action for action in actions if _action_lifecycle(action)["stage"] != "executed"]
+    for action in pending_actions[:2]:
+        stage = str(_action_lifecycle(action)["stage"])
         label, state = _action_label(action)
+        queue = (
+            "Failed runs"
+            if stage == "failed"
+            else "Policy blocked"
+            if stage == "blocked"
+            else "Approval requests"
+            if stage == "pending"
+            else "Needs review"
+        )
+        detail = (
+            "Inspect the failed run and recovery receipt before retrying."
+            if stage == "failed"
+            else "Resolve the policy block before any execution attempt."
+            if stage == "blocked"
+            else "Preview the impact before any external write."
+        )
         items.append(
             {
                 "kind": "Action",
                 "title": _action_title(action),
-                "detail": "Preview the impact before any external write.",
+                "detail": detail,
                 "label": label,
                 "state": state,
                 "href": _detail_href("actions", action.get("action_id")),
                 "date": _display_date(action),
-                "queue": "Approval requests" if state == "underReview" else "Needs review",
-                "priority": "High" if state == "underReview" else "Medium",
+                "created_at": _record_time_key(action),
+                "queue": queue,
+                "priority": "High" if stage in {"pending", "failed", "blocked"} else "Medium",
                 "owner": "Owner",
                 "type": "Action",
                 "icon": "A",
             }
         )
-    for memory in memories[:2]:
+    draft_memories = [
+        memory
+        for memory in memories
+        if str(memory.get("status") or "draft").lower() != "owner_approved"
+        and not bool(
+            memory.get("canonicality", {}).get("owner_approved")
+            if isinstance(memory.get("canonicality"), dict)
+            else False
+        )
+    ]
+    for memory in draft_memories[:2]:
         items.append(
             {
                 "kind": "Memory",
                 "title": _truncate(str(memory.get("title") or memory.get("statement") or "Knowledge draft"), 96),
-                "detail": "Saved as a draft until approved by the owner.",
-                "label": "Draft",
-                "state": "draft",
-                "href": "/inbox",
+                "detail": "Visible review draft; it cannot influence answers, routing, or actions.",
+                "label": "Draft / Needs review",
+                "state": "underReview",
+                "href": _detail_href("memories", memory.get("memory_id")),
                 "date": _display_date(memory),
+                "created_at": _record_time_key(memory),
                 "queue": "Needs review",
                 "priority": "Low",
                 "owner": "Owner",
@@ -785,7 +853,7 @@ def _inbox_items(
                 "icon": "M",
             }
         )
-    return _recent(items, limit=8)  # type: ignore[arg-type]
+    return _recent(items, limit=8)
 
 
 def _detail_href(kind: str, record_id: Any) -> str:
@@ -5318,6 +5386,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     lane_summary = _inbox_lane_summary(counts)
     item_range = f"1-{len(items)} of {len(items)} items" if items else "0 of 0 items"
     scope_label = _scope_label(ctx.get("scope"))
+    recent_activity = _recent_activity_block(ctx)
     return f"""
 <section data-product-surface="inbox">
   <div class="cs-page-head">
@@ -5329,6 +5398,7 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     <div>
       <div class="cs-inbox-tabs" aria-label="Inbox queues">
         <span class="cs-inbox-tab is-active">Needs review {_chip(str(counts["needs_review"]), "underReview")}</span>
+        <span class="cs-inbox-tab">Evidence gaps {_chip(str(counts["evidence_gaps"]), "insufficientEvidence")}</span>
         <span class="cs-inbox-tab">Approval requests {_chip(str(counts["approval_requests"]), "draft")}</span>
         <span class="cs-inbox-tab">Policy blocked {_chip(str(counts["policy_blocked"]), "policyBlocked")}</span>
         <span class="cs-inbox-tab">Failed runs {_chip(str(counts["failed"]), "failed")}</span>
@@ -5354,27 +5424,30 @@ def _inbox_page(ctx: dict[str, Any]) -> str:
     </div>
     {detail}
   </div>
+  <div class="cs-inbox-activity" aria-label="Inbox recent activity">{recent_activity}</div>
 </section>
 """
 
 
-def _inbox_counts(items: list[dict[str, str]]) -> dict[str, int]:
+def _inbox_counts(items: list[dict[str, Any]]) -> dict[str, int]:
     return {
         "needs_review": sum(1 for item in items if item.get("queue") == "Needs review"),
         "approval_requests": sum(1 for item in items if item.get("queue") == "Approval requests"),
-        "policy_blocked": sum(1 for item in items if item.get("state") == "policyBlocked"),
-        "failed": sum(1 for item in items if item.get("state") == "failed"),
+        "policy_blocked": sum(1 for item in items if item.get("queue") == "Policy blocked"),
+        "failed": sum(1 for item in items if item.get("queue") == "Failed runs"),
+        "evidence_gaps": sum(int(item.get("evidence_gap_count", 0) or 0) for item in items),
     }
 
 
 def _inbox_lane_summary(counts: dict[str, int]) -> str:
     lanes = [
         ("Needs review", counts["needs_review"], True),
+        ("Evidence gaps", counts["evidence_gaps"], False),
         ("Approval requests", counts["approval_requests"], False),
         ("Policy blocked", counts["policy_blocked"], False),
         ("Failed runs", counts["failed"], False),
     ]
-    total = sum(counts.values())
+    total = counts["needs_review"] + counts["approval_requests"] + counts["policy_blocked"] + counts["failed"]
     pills = "".join(
         f"""
 <span class="cs-inbox-summary-pill{" is-active" if active else ""}">{h(label)} <strong>{h(count)}</strong></span>
@@ -5389,7 +5462,7 @@ def _inbox_lane_summary(counts: dict[str, int]) -> str:
 """
 
 
-def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
+def _inbox_table_row(item: dict[str, Any], selected: bool = False) -> str:
     selected_class = " is-selected" if selected else ""
     priority_state = "failed" if item.get("priority") == "High" else "underReview" if item.get("priority") == "Medium" else "draft"
     return f"""
@@ -5411,7 +5484,7 @@ def _inbox_table_row(item: dict[str, str], selected: bool = False) -> str:
 """
 
 
-def _inbox_detail_panel(item: dict[str, str] | None) -> str:
+def _inbox_detail_panel(item: dict[str, Any] | None) -> str:
     if not item:
         return f"""
 <aside class="cs-panel flat">
@@ -5454,7 +5527,7 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
   <section class="cs-inbox-action-panel">
     <h2 class="cs-section-title">Next actions</h2>
     <div class="cs-inbox-actions">
-      <a class="cs-button" href="{h(item["href"])}">Review item</a>
+      <a class="cs-button" href="{h(item["href"])}">Continue review</a>
       <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Review sources</a>
       <a class="cs-button secondary" href="/audit">Open audit trail</a>
     </div>
@@ -5483,7 +5556,7 @@ def _inbox_detail_panel(item: dict[str, str] | None) -> str:
 """
 
 
-def _inbox_linked_sources(item: dict[str, str]) -> str:
+def _inbox_linked_sources(item: dict[str, Any]) -> str:
     title = item.get("title") or "Selected work"
     source_label = "Source support" if item.get("kind") == "Claim" else "Review sources"
     if item.get("kind") == "Action":
@@ -5500,7 +5573,7 @@ def _inbox_linked_sources(item: dict[str, str]) -> str:
 """
 
 
-def _inbox_waiting_reason(item: dict[str, str]) -> str:
+def _inbox_waiting_reason(item: dict[str, Any]) -> str:
     kind = item.get("kind") or item.get("type") or "Record"
     if kind == "Action":
         return "This action is waiting because the product only previews external impact until the owner opens the approval path."
@@ -6402,7 +6475,7 @@ def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         for claim in claims[:4]
     ) or '<div class="cs-empty">No Claim candidate has been created from this Brief yet.</div>'
     memory_rows = "".join(
-        f'<div class="cs-list-row"><span class="cs-meta">Memory/Wiki candidate</span><strong>{h(_truncate(str(memory.get("title") or memory.get("statement") or "Knowledge draft"), 96))}</strong></div>'
+        f'<a class="cs-list-row" href="{h(_detail_href("memories", memory.get("memory_id")))}"><span class="cs-meta">Memory/Wiki candidate</span><strong>{h(_truncate(str(memory.get("title") or memory.get("statement") or "Knowledge draft"), 96))}</strong></a>'
         for memory in memories[:4]
     ) or '<div class="cs-empty">No Memory/Wiki candidate has been created. Knowledge promotion remains review-only.</div>'
     action_rows = "".join(
@@ -6872,6 +6945,100 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
 """
 
 
+def _memory_detail(ctx: dict[str, Any], memory: dict[str, Any]) -> str:
+    memory_id = str(memory.get("memory_id") or "")
+    statement = str(memory.get("title") or memory.get("statement") or "Knowledge draft")
+    status = str(memory.get("status") or "draft").lower()
+    trust_state = str(memory.get("trust_state") or "draft").lower()
+    canonicality = memory.get("canonicality") if isinstance(memory.get("canonicality"), dict) else {}
+    usage = memory.get("usage_permissions") if isinstance(memory.get("usage_permissions"), dict) else {}
+    freshness = memory.get("freshness") if isinstance(memory.get("freshness"), dict) else {}
+    source = memory.get("source") if isinstance(memory.get("source"), dict) else {}
+    scope = memory.get("scope") if isinstance(memory.get("scope"), dict) else {}
+    owner_approved = status == "owner_approved" and canonicality.get("owner_approved") is True
+    label = "Owner approved" if owner_approved else "Draft / Needs review"
+    state = "approved" if owner_approved else "underReview"
+    source_items = _source_items(ctx, memory)
+    source_list = _source_links_from_items(source_items)
+    evidence_refs = [str(ref) for ref in memory.get("evidence_refs", []) if isinstance(ref, str)]
+    audit_refs = [str(ref) for ref in memory.get("audit_refs", []) if isinstance(ref, str)]
+    influence_answers = usage.get("can_influence_answers") is True
+    influence_actions = usage.get("can_influence_actions") is True
+    influence_routing = usage.get("can_influence_routing") is True
+    freshness_status = str(freshness.get("status") or "not reviewed").replace("_", " ").title()
+    reviewed_at = str(freshness.get("last_reviewed_at") or "Not reviewed")
+    source_bundle = str(source.get("evidence_bundle_id") or "Not recorded")
+    audit = _record_activity_panel(ctx, "memory", memory_id, audit_refs)
+    return f"""
+<section
+  class="cs-grid-two cs-memory-workbench"
+  data-product-surface="memory-detail"
+  data-owner-approved="{str(owner_approved).lower()}"
+  data-can-influence-answers="{str(influence_answers).lower()}"
+  data-can-influence-actions="{str(influence_actions).lower()}"
+  data-can-influence-routing="{str(influence_routing).lower()}"
+>
+  <div class="cs-stack">
+    <header class="cs-brief-titlebar">
+      <div class="cs-brief-title">
+        <nav class="cs-brief-breadcrumb" aria-label="Detail path">
+          <span class="cs-meta">Detail path</span>
+          <a href="/inbox">Ops Inbox</a>
+          <span aria-hidden="true">/</span>
+          <span>Memory candidate</span>
+        </nav>
+        <div class="cs-brief-heading-row"><h1>{h(_truncate(statement, 120))}</h1>{_chip(label, state)}</div>
+        <p class="cs-muted">This record stays inspectable as a source-linked review item. Draft state does not grant answer, routing, or action authority.</p>
+      </div>
+      <div class="cs-brief-actions">
+        <a class="cs-button secondary" href="/inbox">Back to inbox</a>
+        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+      </div>
+    </header>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Knowledge statement</h2><p class="cs-muted">Review the statement beside the evidence that produced it.</p></div>{_chip(label, state)}</div>
+      <p>{h(statement)}</p>
+      <dl class="cs-detail-grid">
+        <dt>Lifecycle</dt><dd>{h(status.replace("_", " ").title())}</dd>
+        <dt>Trust state</dt><dd>{h(trust_state.replace("_", " ").title())}</dd>
+        <dt>Freshness</dt><dd>{h(freshness_status)}</dd>
+        <dt>Last reviewed</dt><dd>{h(reviewed_at)}</dd>
+        <dt>Owner</dt><dd>{h(str(scope.get("owner_id") or "local-user"))}</dd>
+        <dt>Workspace</dt><dd>{h(str(scope.get("workspace_id") or "default"))}</dd>
+      </dl>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Authority boundary</h2><p class="cs-muted">Permissions are explicit; draft candidates are not hidden durable truth.</p></div>{_chip("Review only" if not owner_approved else "Owner approved", state)}</div>
+      <dl class="cs-detail-grid">
+        <dt>Influence answers</dt><dd>{"Allowed" if influence_answers else "Not allowed"}</dd>
+        <dt>Influence routing</dt><dd>{"Allowed" if influence_routing else "Not allowed"}</dd>
+        <dt>Influence actions</dt><dd>{"Allowed" if influence_actions else "Not allowed"}</dd>
+        <dt>Canonical owner approval</dt><dd>{"Recorded" if owner_approved else "Not recorded"}</dd>
+      </dl>
+      <p class="cs-muted">Promotion and approval controls are intentionally unavailable in this active review slice.</p>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Source and evidence</h2><p class="cs-muted">The candidate remains secondary to its saved sources.</p></div>{_chip(str(len(source_items)), "searchable")}</div>
+      {source_list}
+      <details class="cs-audit-detail"><summary>Evidence refs</summary><ul>{''.join(f'<li><code>{h(ref)}</code></li>' for ref in evidence_refs) or '<li>No evidence ref recorded.</li>'}</ul></details>
+      <p class="cs-meta">Evidence Bundle: {h(source_bundle)}</p>
+    </section>
+  </div>
+  <aside class="cs-stack">
+    <section class="cs-artifact-side-card">
+      <h2 class="cs-section-title">Review controls</h2>
+      <div class="cs-review-box">
+        <a class="cs-button" href="/search?q={quote(statement)}">Review matching sources</a>
+        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+        <a class="cs-button secondary" href="/inbox">Continue in Ops Inbox</a>
+      </div>
+    </section>
+    {audit}
+  </aside>
+</section>
+"""
+
+
 def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     label, state = _action_label(action)
     lifecycle = _action_lifecycle(action)
@@ -6885,6 +7052,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     source_list = _source_links_from_items(source_items)
     policy = action.get("policy_decision") if isinstance(action.get("policy_decision"), dict) else dry_run.get("policy_decision") if isinstance(dry_run.get("policy_decision"), dict) else {}
     decision_label = _plain_policy_decision(str(policy.get("decision") or ""))
+    workspace_mode = str(policy.get("workspace_mode") or "local").replace("_", " ").title()
     real_external_calls = int(impact.get("real_external_http_calls", 0) or 0)
     expected_connector_calls = int(impact.get("expected_connector_calls", 0) or 0)
     call_label = (
@@ -6897,6 +7065,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         else "Provider send planned"
     )
     connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
+    execution_mode = "Local / Mock / Draft" if connector.get("mocked") is True and not is_executed else "Local / Mock result" if connector.get("mocked") is True else f"{workspace_mode} / Governed"
     connector_label = "Mediated preview" if connector.get("direct_provider_access") is False else "Provider access needs review"
     approval = lifecycle["approval"]
     approval_required = bool(approval.get("required") or "approval" in decision_label.lower())
@@ -6937,6 +7106,31 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         else ""
     )
     action_id = str(action.get("action_id") or "")
+    source_claim_id = str(action.get("source_claim_id") or "")
+    source_claim_link = (
+        f'<a class="cs-button secondary" href="{h(_detail_href("claims", source_claim_id))}">Open supporting Claim</a>'
+        if source_claim_id
+        else '<span class="cs-muted">No supporting Claim lineage is recorded.</span>'
+    )
+    denial_events = []
+    for event in ctx.get("audit", []):
+        subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+        if str(event.get("event_type") or "") == "action.execution.denied" and str(subject.get("id") or "") == action_id:
+            denial_events.append(event)
+    denial_panel = ""
+    if denial_events:
+        denial = denial_events[0]
+        denial_details = denial.get("details") if isinstance(denial.get("details"), dict) else {}
+        resolution_values = denial_details.get("resolution_path") if isinstance(denial_details.get("resolution_path"), list) else []
+        resolution = " ".join(str(value) for value in resolution_values if isinstance(value, str)) or "Review approval, source evidence, and the local safety boundary before retrying."
+        denial_panel = f"""
+<section class="cs-panel" data-action-execution-denial="true">
+  <div class="cs-panel-header"><div><h2>Execution blocked</h2><p class="cs-muted">The Action remains non-executed and no external write is claimed.</p></div>{_chip("Policy blocked", "policyBlocked")}</div>
+  <p><strong>Cause:</strong> {h(_plain_runtime_text(denial_details.get("reason") or "The safety gate denied execution."))}</p>
+  <p><strong>Recovery:</strong> {h(_plain_runtime_text(resolution))}</p>
+  <details class="cs-audit-detail"><summary>Safety receipt</summary><dl class="cs-detail-grid"><dt>Reason code</dt><dd>{h(str(denial_details.get("reason_code") or "Not recorded"))}</dd><dt>Safety envelope</dt><dd>{h(str(denial_details.get("action_safety_envelope_id") or "Not recorded"))}</dd><dt>External HTTP calls</dt><dd>{h(str(denial_details.get("external_http_calls", 0)))}</dd></dl></details>
+</section>
+"""
     activity = _record_activity_panel(
         ctx,
         "action",
@@ -6948,6 +7142,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
   class="cs-grid-two cs-action-workbench"
   data-product-surface="action-detail"
   data-approval-required="{str(approval_required).lower()}"
+  data-execution-mode="{h(execution_mode)}"
   data-real-external-http-calls="{h(real_external_calls)}"
   data-expected-connector-calls="{h(expected_connector_calls)}"
 >
@@ -6981,6 +7176,7 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     </header>
     {_action_approval_receipt(goal, diff, target, decision_label, approval_label, approval_status, risk_label, call_label, expected_connector_calls, real_external_calls, policy_reason, is_executed=is_executed, result=execution_result)}
     {execution_panel}
+    {denial_panel}
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
@@ -7003,6 +7199,11 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </div>
     </section>
     <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Why this action</h2><p class="cs-muted">The proposal stays linked to the Claim and evidence that justify reviewing it.</p></div>{_chip("Source-linked", "searchable") if source_claim_id else _chip("Lineage missing", "insufficientEvidence")}</div>
+      <p>{h(policy_reason)}</p>
+      <div class="cs-review-box">{source_claim_link}</div>
+    </section>
+    <section class="cs-panel">
       <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip("Execution recorded", "executed") if is_executed else _chip("Will be reviewed", "underReview")}</div>
       <div class="cs-action-object-row">
         <span class="cs-action-object-icon" aria-hidden="true">A</span>
@@ -7012,6 +7213,16 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         </span>
         {_chip("Execution recorded", "executed") if is_executed else _chip("Will be reviewed", "underReview")}
       </div>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Expected impact</h2><p class="cs-muted">This is the dry-run expectation, not proof that a provider write occurred.</p></div>{_chip(execution_mode, "draft" if not is_executed else "executed")}</div>
+      <dl class="cs-detail-grid">
+        <dt>Execution mode</dt><dd>{h(execution_mode)}</dd>
+        <dt>Workspace mode</dt><dd>{h(workspace_mode)}</dd>
+        <dt>Target</dt><dd>{h(target)}</dd>
+        <dt>Planned connector calls</dt><dd>{h(expected_connector_calls)}</dd>
+        <dt>Real external HTTP calls</dt><dd>{h(real_external_calls)}</dd>
+      </dl>
     </section>
     <section class="cs-panel">
       <div class="cs-panel-header">
@@ -7046,6 +7257,16 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         <span>{h(policy_reason)}</span>
       </div>
       {_action_policy_checks(bool(source_items), approval_label, call_label, is_executed=is_executed, approval_recorded=is_approved)}
+      <details class="cs-audit-detail"><summary>Policy receipt</summary><p><code>{h(str(policy.get("id") or "No policy ref recorded"))}</code></p></details>
+    </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Safety check</h2><p class="cs-muted">Connector mediation, credentials, and live-call evidence remain explicit.</p></div>{_chip("Local mock" if connector.get("mocked") is True else "Review boundary", "searchable")}</div>
+      <dl class="cs-detail-grid">
+        <dt>Connector mediated</dt><dd>{"Yes" if connector.get("direct_provider_access") is False else "Needs review"}</dd>
+        <dt>Credentials exposed</dt><dd>{"No" if connector.get("credentials_exposed_to_agent") is False else "Needs review"}</dd>
+        <dt>Mocked</dt><dd>{"Yes" if connector.get("mocked") is True else "No"}</dd>
+        <dt>Live writes observed</dt><dd>{h(real_external_calls)}</dd>
+      </dl>
     </section>
     {_action_route_strip(approval_label, call_label, is_executed=is_executed, approval_recorded=is_approved)}
   </div>

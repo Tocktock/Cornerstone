@@ -4880,10 +4880,10 @@ class LocalRuntimeStore:
                 "user_visible_source": True,
             },
             "freshness": {
-                "status": "current",
-                "last_reviewed_at": utc_now(),
+                "status": "current" if status == "owner_approved" else "review_required",
+                "last_reviewed_at": utc_now() if status == "owner_approved" else None,
                 "stale_after_days": 90,
-                "warning_visible": False,
+                "warning_visible": status != "owner_approved",
             },
             "usage_permissions": {
                 "can_influence_answers": influence_answers,
@@ -4893,7 +4893,7 @@ class LocalRuntimeStore:
                 "allowed_scope": scope,
             },
             "identity_visibility": {
-                "user_owned_permanent_wiki": True,
+                "user_owned_permanent_wiki": status == "owner_approved",
                 "hidden_profile": False,
                 "inspectable": True,
                 "controllable": True,
@@ -4913,14 +4913,17 @@ class LocalRuntimeStore:
                 f"search_snapshot:{bundle.get('search_snapshot_id')}",
                 *artifact_refs,
             ],
+            "activity_refs": [],
+            "audit_refs": [],
             "created_at": utc_now(),
         }
         memory_id = f"memory_{_json_hash(memory_base)[:16]}"
         memory = dict(memory_base)
         memory["memory_id"] = memory_id
         _write_json(self.memory_path(memory_id), memory)
+        event_type = "memory.owner_approved.created" if status == "owner_approved" else "memory.draft.created"
         event = self.append_audit(
-            "memory.owner_approved.created",
+            event_type,
             scope,
             {"type": "memory", "id": memory_id},
             {
@@ -4932,6 +4935,10 @@ class LocalRuntimeStore:
                 "synthesis_mode": synthesis_mode,
             },
         )
+        audit_ref = f"audit:{event['event_id']}"
+        memory["activity_refs"] = [audit_ref]
+        memory["audit_refs"] = [audit_ref]
+        _write_json(self.memory_path(memory_id), memory)
         return {"memory": memory, "audit_event": event}
 
     def create_raw_agent_memory(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
@@ -11323,6 +11330,7 @@ class LocalRuntimeStore:
                     "policy": safety_denial["policy"],
                     "reason": safety_denial["reason"],
                     "reason_code": safety_denial.get("reason_code"),
+                    "resolution_path": safety_denial.get("resolution_path", []),
                     "action_safety_envelope_id": safety_envelope.get("action_safety_envelope_id")
                     if safety_envelope
                     else None,
@@ -11350,6 +11358,7 @@ class LocalRuntimeStore:
                     "policy": policy["policy"],
                     "reason": policy["reason"],
                     "reason_code": "CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED",
+                    "resolution_path": policy.get("resolution_path", []),
                     "external_http_calls": 0,
                     "provider_mutations": 0,
                 },
@@ -11385,6 +11394,7 @@ class LocalRuntimeStore:
                         "policy": decision["policy"],
                         "reason": decision["reason"],
                         "reason_code": decision["reason_code"],
+                        "resolution_path": decision.get("resolution_path", []),
                         "action_safety_envelope_id": safety_envelope["action_safety_envelope_id"],
                         "external_http_calls": 0,
                         "provider_mutations": 0,
@@ -11429,6 +11439,7 @@ class LocalRuntimeStore:
                         "policy": decision["policy"],
                         "reason": decision["reason"],
                         "reason_code": decision["reason_code"],
+                        "resolution_path": decision.get("resolution_path", []),
                         "action_safety_envelope_id": safety_envelope["action_safety_envelope_id"],
                         "idempotency_id": connector_execution["idempotency"].get("idempotency_id"),
                         "idempotency_conflict_id": conflict.get("idempotency_conflict_id"),
@@ -12845,7 +12856,9 @@ class LocalRuntimeStore:
         if conversation.get("scope") != scope:
             return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
 
-        search_result = self.search(question, **scope)
+        # The Ask turn is stored as an Artifact before this method runs. It is
+        # conversation context, not independent evidence for its own answer.
+        search_result = self.search(question, excluded_source_types={"conversation_turn"}, **scope)
         snapshot = search_result["snapshot"]
         evidence_refs: list[str] = []
         meaningful_question_terms = {

@@ -22,6 +22,7 @@ from cornerstone_cli import product_ui
 from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
 from cornerstone_cli.runtime import LocalRuntimeStore
+from cornerstone_cli.validators import count_unredacted_secrets
 
 CAPTURE_SCRIPT = ROOT / "scripts" / "capture_vs4_h01_ui_recovery_screenshots.py"
 _capture_spec = importlib.util.spec_from_file_location("capture_vs4_h01_ui_recovery_screenshots", CAPTURE_SCRIPT)
@@ -813,7 +814,9 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Safety state", inbox_html)
         self.assertIn("Inbox receipt", inbox_html)
         self.assertIn("Next actions", inbox_html)
-        self.assertIn("Review item", inbox_html)
+        self.assertIn("Continue review", inbox_html)
+        self.assertIn("Evidence gaps", inbox_html)
+        self.assertIn("Recent activity", inbox_html)
         self.assertIn("Review sources", inbox_html)
         self.assertIn("Open audit trail", inbox_html)
         self.assert_product_surface_is_clean(inbox_html)
@@ -873,6 +876,295 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertFalse(brief["presented_as_fact"])
         self.assertIn(f"artifact:{artifact_id}", brief["evidence_refs"])
         self.assertNotIn(f"artifact:{conversation_artifact_id}", brief["evidence_refs"])
+
+    def test_conversation_answer_cannot_cite_its_own_ask_turn(self) -> None:
+        question = "What does the workspace say about a renewal deadline?"
+        conversation_status, _, conversation_raw = _request(
+            self.base_url,
+            "/conversations",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "message": question},
+        )
+        self.assertEqual(conversation_status, 200)
+        conversation = json.loads(conversation_raw)["conversation"]
+
+        answer_status, _, answer_raw = _request(
+            self.base_url,
+            f"/conversations/{conversation['conversation_id']}/answers",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "question": question},
+        )
+        self.assertEqual(answer_status, 200)
+        payload = json.loads(answer_raw)
+        answer = payload["answer"]
+        snapshot = payload["search_snapshot"]
+        self.assertEqual(snapshot["result_count"], 0)
+        self.assertEqual(snapshot["excluded_source_types"], ["conversation_turn"])
+        self.assertEqual(answer["label"], "insufficient_evidence")
+        self.assertEqual(answer["supporting_result_count"], 0)
+        self.assertFalse(answer["presented_as_fact"])
+        self.assertNotIn(f"artifact:{conversation['source_artifact_id']}", answer["evidence_refs"])
+
+    def test_product_memory_api_is_candidate_only_and_detail_is_truthful(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        store = LocalRuntimeStore(self.state_dir)
+
+        denied_status, _, denied_raw = _request(
+            self.base_url,
+            "/memories",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": "sk-memorybundle12345678",
+                "statement": "Blocked request sk-memorystatement12345678 must not reach durable audit text.",
+                "status": "owner_approved",
+                "trust_state": "approved",
+                "memory_type": "sk-memorytype12345678",
+                "synthesis_mode": "owner_approved",
+            },
+        )
+        self.assertEqual(denied_status, 403)
+        denied = json.loads(denied_raw)
+        self.assertEqual(denied["status"], "denied")
+        self.assertEqual(denied["errors"][0]["code"], "CS_MEMORY_CANDIDATE_ONLY")
+        self.assertIn("separately governed owner-review path", denied["errors"][0]["resolution_path"])
+        self.assertEqual(store._memory_records(DEFAULT_SCOPE), [])
+        denial_events = [
+            event
+            for event in store._all_audit_events()
+            if event.get("event_type") == "memory.candidate.creation.denied"
+        ]
+        self.assertEqual(denial_events[-1]["details"]["memory_records_created"], 0)
+        self.assertEqual(denial_events[-1]["details"]["authority_expansions"], 0)
+        denial_audit_text = store.audit_path.read_text()
+        self.assertEqual(count_unredacted_secrets(denial_audit_text), 0)
+        self.assertNotIn("sk-memorybundle12345678", denial_audit_text)
+        self.assertNotIn("sk-memorytype12345678", denial_audit_text)
+        self.assertNotIn("sk-memorystatement12345678", denial_audit_text)
+
+        created_status, _, created_raw = _request(
+            self.base_url,
+            "/memories",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Vendor renewal timing should remain a review draft.",
+            },
+        )
+        self.assertEqual(created_status, 200)
+        created_payload = json.loads(created_raw)
+        memory = created_payload["memory"]
+        memory_id = memory["memory_id"]
+        self.assertEqual(memory["status"], "draft")
+        self.assertEqual(memory["trust_state"], "draft")
+        self.assertEqual(memory["memory_type"], "knowledge_candidate")
+        self.assertFalse(memory["canonicality"]["owner_approved"])
+        self.assertEqual(memory["freshness"]["status"], "review_required")
+        self.assertIsNone(memory["freshness"]["last_reviewed_at"])
+        self.assertTrue(memory["freshness"]["warning_visible"])
+        self.assertFalse(memory["identity_visibility"]["user_owned_permanent_wiki"])
+        self.assertFalse(memory["usage_permissions"]["can_influence_answers"])
+        self.assertFalse(memory["usage_permissions"]["can_influence_actions"])
+        self.assertTrue(memory["audit_refs"])
+        self.assertEqual(memory["audit_refs"], memory["activity_refs"])
+        self.assertEqual(store.get_memory(memory_id)["audit_refs"], memory["audit_refs"])
+        draft_events = [
+            event
+            for event in store._all_audit_events()
+            if event.get("event_type") == "memory.draft.created" and event.get("subject", {}).get("id") == memory_id
+        ]
+        self.assertEqual(len(draft_events), 1)
+
+        detail_html = self.fetch_product_html(f"/memories/{memory_id}?view=html")
+        self.assertIn('data-product-surface="memory-detail"', detail_html)
+        self.assertIn('data-owner-approved="false"', detail_html)
+        self.assertIn('data-can-influence-answers="false"', detail_html)
+        self.assertIn('data-can-influence-actions="false"', detail_html)
+        self.assertIn("Draft / Needs review", detail_html)
+        self.assertIn("Trust state", detail_html)
+        self.assertIn("Freshness", detail_html)
+        self.assertIn("Workspace", detail_html)
+        self.assertIn("Authority boundary", detail_html)
+        self.assertIn("Review controls", detail_html)
+        self.assertIn("Promotion and approval controls are intentionally unavailable", detail_html)
+        self.assert_product_surface_is_clean(detail_html)
+
+        inbox_html = self.fetch_product_html("/inbox")
+        self.assertIn(f"/memories/{memory_id}?view=html", inbox_html)
+        self.assertIn("Visible review draft; it cannot influence answers, routing, or actions.", inbox_html)
+
+        approved = store.create_memory_from_evidence_bundle(
+            bundle_id,
+            "Explicit owner CLI memory must not be relabelled as a draft.",
+            DEFAULT_SCOPE,
+        )["memory"]
+        approved_detail = self.fetch_product_html(f"/memories/{approved['memory_id']}?view=html")
+        self.assertIn('data-owner-approved="true"', approved_detail)
+        self.assertIn("Owner approved", approved_detail)
+        inbox_after_approval = self.fetch_product_html("/inbox")
+        self.assertNotIn("Explicit owner CLI memory must not be relabelled as a draft.", inbox_after_approval)
+
+    def test_action_defaults_to_assist_and_denial_receipt_stays_visible(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief_id = json.loads(brief_raw)["brief"]["brief_id"]
+        claim_status, _, claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "brief_id": brief_id, "statement": "Renewal follow-up needs review."},
+        )
+        self.assertEqual(claim_status, 200)
+        claim_id = json.loads(claim_raw)["claim"]["claim_id"]
+        for boundary_override in (
+            {"mode": "autopilot", "action_kind": "internal_status_update", "risk": "low"},
+            {"connector": "live_connector"},
+            {"mode": "sk-actionmode12345678", "claim_id": "sk-actionclaim12345678"},
+        ):
+            with self.subTest(boundary_override=boundary_override):
+                denied_create_status, _, denied_create_raw = _request(
+                    self.base_url,
+                    "/actions",
+                    method="POST",
+                    payload={
+                        **DEFAULT_SCOPE,
+                        "claim_id": claim_id,
+                        "goal": "Attempt to escape the local Action preview boundary",
+                        **boundary_override,
+                    },
+                )
+                self.assertEqual(denied_create_status, 403)
+                denied_create = json.loads(denied_create_raw)
+                self.assertEqual(denied_create["status"], "denied")
+                self.assertEqual(denied_create["errors"][0]["code"], "CS_ACTION_PREVIEW_BOUNDARY")
+                self.assertIn("separately governed owner CLI path", denied_create["errors"][0]["resolution_path"])
+        boundary_store = LocalRuntimeStore(self.state_dir)
+        self.assertEqual(boundary_store._mission_records(DEFAULT_SCOPE), [])
+        self.assertEqual(boundary_store._action_records(DEFAULT_SCOPE), [])
+        self.assertEqual(boundary_store.get_workspace_mode(DEFAULT_SCOPE)["mode"], "assist")
+        boundary_store.set_workspace_mode("locked", DEFAULT_SCOPE)
+        locked_status, _, locked_raw = _request(
+            self.base_url,
+            "/actions",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "claim_id": claim_id,
+                "goal": "A product preview must not unlock the workspace",
+            },
+        )
+        self.assertEqual(locked_status, 403)
+        self.assertEqual(json.loads(locked_raw)["errors"][0]["code"], "CS_ACTION_PREVIEW_BOUNDARY")
+        self.assertEqual(boundary_store.get_workspace_mode(DEFAULT_SCOPE)["mode"], "locked")
+        self.assertEqual(boundary_store._mission_records(DEFAULT_SCOPE), [])
+        self.assertEqual(boundary_store._action_records(DEFAULT_SCOPE), [])
+        boundary_denials = [
+            event
+            for event in boundary_store._all_audit_events()
+            if event.get("event_type") == "action.preview.creation.denied"
+        ]
+        self.assertEqual(len(boundary_denials), 4)
+        self.assertTrue(all(event["details"]["authority_expansions"] == 0 for event in boundary_denials))
+        self.assertTrue(all(event["details"]["real_external_http_calls"] == 0 for event in boundary_denials))
+        boundary_audit_text = boundary_store.audit_path.read_text()
+        self.assertEqual(count_unredacted_secrets(boundary_audit_text), 0)
+        self.assertNotIn("sk-actionmode12345678", boundary_audit_text)
+        self.assertNotIn("sk-actionclaim12345678", boundary_audit_text)
+        boundary_store.set_workspace_mode("autopilot", DEFAULT_SCOPE)
+        self.assertEqual(boundary_store.get_workspace_mode(DEFAULT_SCOPE)["mode"], "autopilot")
+
+        action_status, _, action_raw = _request(
+            self.base_url,
+            "/actions",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "claim_id": claim_id,
+                "goal": "Prepare a local renewal follow-up preview",
+                "action_kind": "external_writeback",
+                "risk": "medium",
+                "target": "mock renewal queue",
+            },
+        )
+        self.assertEqual(action_status, 200)
+        action_payload = json.loads(action_raw)
+        action = action_payload["action_card"]
+        action_id = action["action_id"]
+        self.assertEqual(action_payload["workspace_mode"]["mode"], "assist")
+        self.assertEqual(boundary_store.get_workspace_mode(DEFAULT_SCOPE)["mode"], "assist")
+        self.assertTrue(action["connector_boundary"]["mocked"])
+        self.assertFalse(action["connector_boundary"]["direct_provider_access"])
+        self.assertEqual(action["dry_run"]["expected_impact"]["real_external_http_calls"], 0)
+
+        brief_html = self.fetch_product_html(f"/briefs/{brief_id}?view=html")
+        self.assertIn(f"/actions/{action_id}?view=html", brief_html)
+        self.assertIn("Prepare a local renewal follow-up preview", brief_html)
+
+        action_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
+        self.assertIn('data-execution-mode="Local / Mock / Draft"', action_html)
+        self.assertIn("Why this action", action_html)
+        self.assertIn("Open supporting Claim", action_html)
+        self.assertIn("Expected impact", action_html)
+        self.assertIn("Execution mode", action_html)
+        self.assertIn("Assist", action_html)
+        self.assertIn("Safety check", action_html)
+        self.assertIn("Live writes observed", action_html)
+
+        denied_status, _, denied_raw = _request(
+            self.base_url,
+            f"/actions/{action_id}/execute",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(denied_status, 403)
+        denial = json.loads(denied_raw)
+        self.assertEqual(denial["status"], "denied")
+        self.assertTrue(denial["errors"][0]["resolution_path"])
+
+        denied_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
+        self.assertIn("Execution blocked", denied_html)
+        self.assertIn("Cause:", denied_html)
+        self.assertIn("Recovery:", denied_html)
+        self.assertIn("Safety receipt", denied_html)
+        self.assert_product_surface_is_clean(denied_html)
+        denial_events = [
+            event
+            for event in LocalRuntimeStore(self.state_dir)._all_audit_events()
+            if event.get("event_type") == "action.execution.denied" and event.get("subject", {}).get("id") == action_id
+        ]
+        self.assertTrue(denial_events[-1]["details"]["resolution_path"])
+
+    def test_inbox_classifies_open_lifecycle_without_terminal_or_approved_records(self) -> None:
+        scope = dict(DEFAULT_SCOPE)
+        brief = {"brief_id": "brief-open", "title": "Open brief", "scope": scope, "gaps": ["Missing source span"], "created_at": "2026-07-09T10:00:00Z"}
+        claim = {"claim_id": "claim-open", "statement": "Open claim", "scope": scope, "status": "draft", "created_at": "2026-07-09T10:01:00Z"}
+        failed_action = {"action_id": "action-failed", "dry_run": {"goal": "Failed action"}, "scope": scope, "execution": {"status": "failed", "result": {"status": "failed"}}, "created_at": "2026-07-09T10:02:00Z"}
+        blocked_action = {"action_id": "action-blocked", "dry_run": {"goal": "Blocked action"}, "scope": scope, "execution": {"status": "blocked_by_workspace_mode"}, "created_at": "2026-07-09T10:03:00Z"}
+        executed_action = {"action_id": "action-executed", "dry_run": {"goal": "Executed action"}, "scope": scope, "execution": {"status": "executed", "result": {"status": "success"}}, "created_at": "2026-07-09T10:04:00Z"}
+        draft_memory = {"memory_id": "memory-draft", "statement": "Draft memory", "scope": scope, "status": "draft", "canonicality": {"owner_approved": False}, "created_at": "2026-07-09T10:05:00Z"}
+        approved_memory = {"memory_id": "memory-approved", "statement": "Approved memory", "scope": scope, "status": "owner_approved", "canonicality": {"owner_approved": True}, "created_at": "2026-07-09T10:06:00Z"}
+
+        items = product_ui._inbox_items(
+            [brief],
+            [claim],
+            [failed_action, blocked_action, executed_action],
+            [draft_memory, approved_memory],
+        )
+        titles = {item["title"] for item in items}
+        queues = {item["title"]: item["queue"] for item in items}
+        self.assertNotIn("Executed action", titles)
+        self.assertNotIn("Approved memory", titles)
+        self.assertIn("Draft memory", titles)
+        self.assertEqual(queues["Failed action"], "Failed runs")
+        self.assertEqual(queues["Blocked action"], "Policy blocked")
+        self.assertEqual(next(item for item in items if item["kind"] == "Brief")["evidence_gap_count"], 1)
 
     def test_brief_to_claim_preserves_lineage_and_activity(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
@@ -1088,6 +1380,10 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Records", actions_html)
         self.assertIn("Open result", actions_html)
         self.assertIn("Recorded result", actions_html)
+
+        inbox_html = self.fetch_product_html("/inbox")
+        self.assertNotIn(f"/actions/{action_id}?view=html", inbox_html)
+        self.assertNotIn("Record a renewal follow-up", inbox_html)
 
         events_after_detail_reads = store._all_audit_events()
         self.assertEqual(len(events_after_detail_reads), audit_count_before_detail_reads)

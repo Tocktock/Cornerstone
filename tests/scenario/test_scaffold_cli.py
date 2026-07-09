@@ -14084,7 +14084,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(evidence["unsupported_answer_presented_as_fact"])
         self.assertEqual(evidence["unsupported_answer_supporting_result_count"], 0)
         self.assertIn("budget", evidence["unsupported_answer_meaningful_question_terms"])
-        self.assertEqual(evidence["unsupported_answer_matched_terms"], ["is"])
+        self.assertEqual(evidence["unsupported_answer_matched_terms"], [])
         self.assertLessEqual(evidence["first_use_duration_ms"], 5000)
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
