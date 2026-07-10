@@ -151,6 +151,7 @@ from cornerstone_cli.scenarios import (
     verify_vs0_scaffold,
 )
 from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
+from cornerstone_cli.product_access import ProductAccessApplication, RecordReadRequest, SearchRequest
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
 from cornerstone_cli.runtime import (
     DEFAULT_EMBEDDING_MODEL,
@@ -929,8 +930,15 @@ def command_artifact_show(args: argparse.Namespace) -> int:
     payload = base_response("cornerstone artifact show", "success", root)
     payload.update(requested_scope)
     store = LocalRuntimeStore(state_dir(root, args))
-    artifact = store.get_artifact(args.artifact_id, requested_scope)
-    if artifact is None:
+    result = ProductAccessApplication(store).read(
+        RecordReadRequest(
+            record_kind="artifact",
+            record_id=args.artifact_id,
+            scope=requested_scope,
+            reason="cli_artifact_show",
+        )
+    )
+    if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
             {
@@ -941,13 +949,13 @@ def command_artifact_show(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_NOT_FOUND
-
-    audit_event = store.append_audit(
-        "artifact.read",
-        requested_scope,
-        {"type": "artifact", "id": artifact["artifact_id"]},
-        {"reason": "cli_artifact_show"},
-    )
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."})
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    artifact = result["record"]
+    audit_event = result["audit_event"]
     artifact_detail = dict(artifact)
     artifact_detail["derived_text_preview"] = store.derived_text_preview(artifact)
     artifact_detail["related_claims"] = store.related_claims_for_artifact(artifact["artifact_id"], requested_scope)
@@ -964,6 +972,115 @@ def command_artifact_show(args: argparse.Namespace) -> int:
     payload["evidence_refs"].append(f"artifact:{artifact['artifact_id']}")
     payload["evidence_refs"].extend(f"claim:{claim['claim_id']}" for claim in artifact_detail["related_claims"])
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_artifact_download(args: argparse.Namespace) -> int:
+    root = repo_root()
+    requested_scope = scope_args(args)
+    payload = base_response("cornerstone artifact download", "success", root)
+    payload.update(requested_scope)
+    output_path = resolve_output_path(root, args.output)
+    if output_path.exists() and not args.force:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_OUTPUT_EXISTS",
+                "message": "Output path already exists; use --force to replace it.",
+                "output_path": str(output_path),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    store = LocalRuntimeStore(state_dir(root, args))
+    result = store.read_artifact_original(
+        args.artifact_id,
+        requested_scope,
+        reason="cli_artifact_download",
+    )
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_ORIGINAL_NOT_FOUND",
+                "message": "Artifact original was not found.",
+                "artifact_id": args.artifact_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."}
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_ORIGINAL_INTEGRITY_FAILED",
+                "message": "Artifact original failed its checksum or size check.",
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
+    artifact = result["artifact"]
+    content = result["content"]
+    audit_event = result["audit_event"]
+    payload["ids"].update(
+        {
+            "artifact_id": artifact["artifact_id"],
+            "checksum_sha256": artifact["checksum_sha256"],
+            "audit_event_id": audit_event["event_id"],
+        }
+    )
+    payload["output_path"] = str(output_path)
+    payload["size_bytes"] = len(content)
+    payload["media_type"] = artifact.get("media_type")
+    payload["evidence_refs"].extend(
+        [f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"]
+    )
+    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    output_write_failed = False
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        output_write_failed = True
+    if not output_write_failed:
+        try:
+            if args.force:
+                output_path.write_bytes(content)
+            else:
+                with output_path.open("xb") as destination:
+                    destination.write(content)
+        except FileExistsError:
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_ARTIFACT_OUTPUT_EXISTS",
+                    "message": "Output path already exists; use --force to replace it.",
+                    "output_path": str(output_path),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
+        except OSError:
+            output_write_failed = True
+    if output_write_failed:
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_OUTPUT_WRITE_FAILED",
+                "message": "The verified original could not be written to the requested output path.",
+                "output_path": str(output_path),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -9411,8 +9528,33 @@ def command_human_gate_vs3_p_gate(args: argparse.Namespace) -> int:
 def command_search_query(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
-    result = store.search(args.query, **scope_args(args))
-    snapshot = result["snapshot"]
+    requested_scope = scope_args(args)
+    result = ProductAccessApplication(store).search(
+        SearchRequest(
+            query=args.query,
+            scope=requested_scope,
+            mode=args.mode,
+            type_filter=args.result_type,
+            page=args.page,
+            page_size=args.page_size,
+        )
+    )
+    if result.get("status") != "success":
+        payload = base_response("cornerstone search query", "failed", root)
+        payload.update(requested_scope)
+        payload["errors"].append(
+            {
+                "code": "CS_SEARCH_QUERY_REQUIRED"
+                if result.get("status") == "query_required"
+                else "CS_SEARCH_REQUEST_INVALID",
+                "message": "Search query is required."
+                if result.get("status") == "query_required"
+                else f"Search request is invalid: {result.get('status')}",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    snapshot = result["search_snapshot"]
     audit_event = result["audit_event"]
     payload = base_response("cornerstone search query", "success", root)
     payload.update(snapshot["filters"])
@@ -9423,13 +9565,20 @@ def command_search_query(args: argparse.Namespace) -> int:
         }
     )
     payload["search_snapshot"] = snapshot
-    payload["evidence_refs"].append(f"search_snapshot:{snapshot['search_snapshot_id']}")
-    payload["evidence_refs"].extend(
-        ref
-        for result_row in snapshot.get("results", [])
-        for ref in result_row.get("evidence_refs", [])
-    )
-    payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["search_results"] = result["results"]
+    payload["search_facets"] = result["facets"]
+    payload["search_page"] = {
+        "mode": args.mode,
+        "type": result["type_filter"],
+        "page": result["page"],
+        "page_size": result["page_size"],
+        "page_count": result["page_count"],
+        "result_count": result["result_count"],
+        "start": result["page_start"],
+        "end": result["page_end"],
+    }
+    payload["evidence_refs"].extend(result["evidence_refs"])
+    payload["audit_refs"].extend(result["audit_refs"])
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -9438,10 +9587,14 @@ def command_search_snapshot_show(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    snapshot = store.get_search_snapshot(args.search_snapshot_id)
+    result = store.read_search_snapshot(
+        args.search_snapshot_id,
+        requested_scope,
+        reason="cli_search_snapshot_show",
+    )
     payload = base_response("cornerstone search snapshot show", "success", root)
     payload.update(requested_scope)
-    if snapshot is None:
+    if result.get("status") == "not_found":
         payload["status"] = "failed"
         payload["errors"].append(
             {
@@ -9452,23 +9605,19 @@ def command_search_snapshot_show(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_NOT_FOUND
-    if snapshot.get("filters") != requested_scope:
+    if result.get("status") == "scope_denied":
         payload["status"] = "failed"
         payload["errors"].append(
             {
                 "code": "CS_SCOPE_DENIED",
                 "message": "Search snapshot is outside the requested scope.",
-                "resource_scope": snapshot.get("filters"),
+                "resource_scope": result.get("resource_scope"),
             }
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
-    audit_event = store.append_audit(
-        "search.snapshot.read",
-        requested_scope,
-        {"type": "search_snapshot", "id": args.search_snapshot_id},
-        {"reason": "cli_search_snapshot_show"},
-    )
+    snapshot = result["snapshot"]
+    audit_event = result["audit_event"]
     payload["search_snapshot"] = snapshot
     payload["ids"].update({"search_snapshot_id": args.search_snapshot_id, "audit_event_id": audit_event["event_id"]})
     payload["evidence_refs"].append(f"search_snapshot:{args.search_snapshot_id}")
@@ -9506,6 +9655,28 @@ def command_evidence_bundle_create(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "invalid_search_mode":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_SEARCH_REQUIRED",
+                "message": "Evidence Bundles require an evidence-mode Search Snapshot.",
+                "resolution_path": "Run cornerstone search query with --mode evidence, then retry.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_ARTIFACT_INTEGRITY_FAILED",
+                "message": "Evidence Bundle creation requires every source original to pass integrity checks.",
+                "artifact_id": result.get("artifact_id"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
     bundle = result["bundle"]
     audit_event = result["audit_event"]
@@ -15692,6 +15863,20 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status"):
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_QUESTION_REQUIRED"
+                if result.get("status") == "query_required"
+                else "CS_CONVERSATION_ANSWER_FAILED",
+                "message": "Question is required."
+                if result.get("status") == "query_required"
+                else str(result.get("status")),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
 
     answer = result["answer"]
     snapshot = result["search_snapshot"]
@@ -24363,6 +24548,15 @@ def build_parser() -> argparse.ArgumentParser:
     artifact_show.add_argument("--json", action="store_true", help="Emit JSON output")
     artifact_show.set_defaults(func=command_artifact_show)
 
+    artifact_download = artifact_sub.add_parser("download", help="Write the verified immutable original to a file")
+    artifact_download.add_argument("artifact_id", help="Artifact ID")
+    artifact_download.add_argument("--output", required=True, help="Destination path for the original bytes")
+    artifact_download.add_argument("--force", action="store_true", help="Replace an existing destination file")
+    add_state_argument(artifact_download)
+    add_scope_arguments(artifact_download)
+    artifact_download.add_argument("--json", action="store_true", help="Emit JSON metadata; original bytes go only to --output")
+    artifact_download.set_defaults(func=command_artifact_download)
+
     source = subcommands.add_parser("source", help="Source-system safety commands")
     source_sub = source.add_subparsers(dest="source_command")
 
@@ -24634,11 +24828,26 @@ def build_parser() -> argparse.ArgumentParser:
     sandbox_verify.add_argument("--json", action="store_true", help="Emit JSON output")
     sandbox_verify.set_defaults(func=command_sandbox_verify)
 
-    search = subcommands.add_parser("search", help="Search artifact-derived content")
+    search = subcommands.add_parser("search", help="Search scoped workspace records and evidence")
     search_sub = search.add_subparsers(dest="search_command")
 
-    search_query = search_sub.add_parser("query", help="Search local artifact-derived content")
+    search_query = search_sub.add_parser("query", help="Search scoped workspace records or evidence")
     search_query.add_argument("query", help="Search query")
+    search_query.add_argument(
+        "--mode",
+        choices=["evidence", "workspace"],
+        default="evidence",
+        help="Search evidence sources (default) or the user workspace",
+    )
+    search_query.add_argument(
+        "--type",
+        dest="result_type",
+        choices=["all", "sources", "briefs", "claims", "actions"],
+        default="all",
+        help="Filter the projected result page without changing the stored snapshot",
+    )
+    search_query.add_argument("--page", type=int, default=1, help="One-based result page")
+    search_query.add_argument("--page-size", type=int, default=20, help="Results per page (1-100)")
     add_state_argument(search_query)
     add_scope_arguments(search_query)
     search_query.add_argument("--json", action="store_true", help="Emit JSON output")

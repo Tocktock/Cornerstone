@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import json
 import re
 import shutil
@@ -36,6 +37,22 @@ from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server  # noqa: 
 
 DEFAULT_OUTPUT_DIR = ROOT / "output/playwright/vs4-h01-ui-recovery"
 DEFAULT_STATE_DIR = ROOT / "tmp/vs4-h01-ui-recovery-screenshot-state"
+
+PRODUCT_RUNTIME_SOURCES = (
+    ROOT / "packages/cornerstone_cli/__init__.py",
+    ROOT / "packages/cornerstone_cli/acceptance.py",
+    ROOT / "packages/cornerstone_cli/artifacts.py",
+    ROOT / "packages/cornerstone_cli/briefing.py",
+    ROOT / "packages/cornerstone_cli/product_access.py",
+    ROOT / "packages/cornerstone_cli/product_runtime.py",
+    ROOT / "packages/cornerstone_cli/product_ui.py",
+    ROOT / "packages/cornerstone_cli/product_visibility.py",
+    ROOT / "packages/cornerstone_cli/runtime.py",
+    ROOT / "packages/cornerstone_cli/validators.py",
+)
+UI_ASSET_ROOT = ROOT / "packages/cornerstone_cli/ui"
+REFERENCE_IMAGE_ROOT = ROOT / "docs/design/reference-images"
+DESIGN_TOKEN_PATH = ROOT / "docs/design/tokens/cornerstone_design_tokens_v0_3.json"
 
 FORBIDDEN_PRODUCT_RE = re.compile(
     r"local_scenario_ready=|vs0_runtime_ready=|production_release_ready=|real_external_http_calls=|"
@@ -150,7 +167,7 @@ DAY_ZERO_ROUTES = [
     {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required_text": ["No claims need review", "Open briefs", "Check sources", "Startup path", "What will appear"]},
     {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required_text": ["No action previews yet", "Open claims", "Open briefs", "Startup path", "What will appear"]},
     {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required_text": ["No work waiting", "No selected work", "Start from Home", "Startup path", "What will appear"]},
-    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required_text": ["History ready", "No activity recorded yet", "Start from Home", "Open saved sources", "Ledger integrity"]},
+    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required_text": ["History", "Workspace history", "Page opened", "Ledger integrity", "full local ledger"]},
 ]
 
 NOT_FOUND_ROUTES = [
@@ -298,7 +315,8 @@ LAYOUT_SCRIPT = """
       "--cs-layout-sidebarWidth:",
       "--cs-state-saved-bg:",
       "--cs-radius-pill:"
-    ].every((token) => html.includes(token)),
+    ].every((token) => getComputedStyle(document.documentElement)
+      .getPropertyValue(token.slice(0, -1)).trim().length > 0),
   };
 })()
 """
@@ -345,6 +363,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Capture the VS4-H01 UI recovery screenshot pack.")
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--state-dir", type=Path, default=DEFAULT_STATE_DIR)
+    parser.add_argument(
+        "--validate-manifest",
+        type=Path,
+        help="Validate an existing screenshot-pack manifest without running a new capture.",
+    )
     parser.add_argument("--json", action="store_true", help="Print the manifest JSON to stdout.")
     parser.add_argument("--keep-state", action="store_true", help="Do not clear the screenshot fixture state directory first.")
     return parser.parse_args()
@@ -386,10 +409,132 @@ def source_revision() -> dict[str, Any]:
         return result.stdout.strip()
 
     status_lines = [line for line in git("status", "--porcelain=v1").splitlines() if line]
+    git_commit_sha = git("rev-parse", "HEAD")
     return {
-        "git_sha": git("rev-parse", "HEAD"),
+        # Keep git_sha for compatibility with existing review packages.
+        "git_sha": git_commit_sha,
+        "git_commit_sha": git_commit_sha,
+        "git_tree_sha": git("rev-parse", "HEAD^{tree}"),
         "dirty": bool(status_lines),
         "changed_path_count": len(status_lines),
+    }
+
+
+def source_fingerprint_paths() -> tuple[Path, ...]:
+    paths = [DESIGN_TOKEN_PATH, *PRODUCT_RUNTIME_SOURCES]
+    paths.extend(
+        path
+        for path in UI_ASSET_ROOT.rglob("*")
+        if path.is_file() and "__pycache__" not in path.parts
+    )
+    paths.extend(
+        path
+        for path in REFERENCE_IMAGE_ROOT.rglob("*")
+        if path.is_file() and path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".svg"}
+    )
+    paths.append(Path(__file__).resolve())
+    return tuple(sorted(set(paths), key=lambda path: relative_to_root(ROOT, path)))
+
+
+def source_fingerprint() -> dict[str, str]:
+    paths = source_fingerprint_paths()
+    missing = [relative_to_root(ROOT, path) for path in paths if not path.is_file()]
+    if missing:
+        raise FileNotFoundError(f"Missing source fingerprint inputs: {', '.join(missing)}")
+    return {relative_to_root(ROOT, path): sha256_file(path) for path in paths}
+
+
+def _source_path(raw_path: str) -> Path:
+    path = Path(raw_path)
+    return path if path.is_absolute() else ROOT / path
+
+
+def _evidence_path(raw_path: str, package_root: Path) -> Path:
+    path = Path(raw_path)
+    if path.is_absolute():
+        return path
+    package_path = package_root / path
+    if package_path.exists():
+        return package_path
+    # Compatibility for older manifests whose evidence paths were repo-relative.
+    return ROOT / path
+
+
+def validate_manifest(manifest: dict[str, Any], *, package_root: Path) -> list[str]:
+    errors: list[str] = []
+    revision = manifest.get("source_revision") or {}
+    if not revision.get("git_commit_sha"):
+        errors.append("source_revision.git_commit_sha_missing")
+    if not revision.get("git_tree_sha"):
+        errors.append("source_revision.git_tree_sha_missing")
+    current_revision = source_revision()
+    if revision.get("git_commit_sha") != current_revision.get("git_commit_sha"):
+        errors.append("source_revision.git_commit_changed_during_capture")
+    if revision.get("git_tree_sha") != current_revision.get("git_tree_sha"):
+        errors.append("source_revision.git_tree_changed_during_capture")
+
+    recorded_fingerprint = manifest.get("source_fingerprint") or {}
+    recorded_fingerprint_sha256 = hashlib.sha256(
+        json.dumps(recorded_fingerprint, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    if manifest.get("source_fingerprint_sha256") != recorded_fingerprint_sha256:
+        errors.append("source_fingerprint.aggregate_sha256_mismatch")
+    expected_paths = {relative_to_root(ROOT, path) for path in source_fingerprint_paths()}
+    recorded_paths = set(recorded_fingerprint)
+    for path in sorted(expected_paths - recorded_paths):
+        errors.append(f"source_fingerprint.path_missing:{path}")
+    for path in sorted(recorded_paths - expected_paths):
+        errors.append(f"source_fingerprint.path_unexpected:{path}")
+    for raw_path, recorded_sha256 in sorted(recorded_fingerprint.items()):
+        path = _source_path(raw_path)
+        if not path.is_file():
+            errors.append(f"source_fingerprint.file_missing:{raw_path}")
+        elif sha256_file(path) != recorded_sha256:
+            errors.append(f"source_fingerprint.sha256_mismatch:{raw_path}")
+
+    pages = manifest.get("pages") or []
+    if not pages:
+        errors.append("pages.empty")
+    if (manifest.get("summary") or {}).get("page_count") != len(pages):
+        errors.append("summary.page_count_mismatch")
+    for page in pages:
+        page_name = str(page.get("name") or "unknown")
+        if page.get("status") != "PASS":
+            errors.append(f"page.{page_name}.status_not_pass")
+        for kind in ("screenshot", "dom"):
+            raw_path = str(page.get(f"{kind}_path") or "")
+            recorded_sha256 = page.get(f"{kind}_sha256")
+            if not raw_path:
+                errors.append(f"page.{page_name}.{kind}_path_missing")
+                continue
+            path = _evidence_path(raw_path, package_root)
+            if not path.is_file():
+                errors.append(f"page.{page_name}.{kind}_file_missing")
+            elif not recorded_sha256 or sha256_file(path) != recorded_sha256:
+                errors.append(f"page.{page_name}.{kind}_sha256_mismatch")
+
+    negative_evidence = manifest.get("negative_evidence") or {}
+    if negative_evidence.get("owner_acceptance_claimed") != 0:
+        errors.append("negative_evidence.owner_acceptance_overclaim")
+    if negative_evidence.get("production_readiness_claimed") != 0:
+        errors.append("negative_evidence.production_readiness_overclaim")
+    return errors
+
+
+def validate_persisted_manifest(path: Path) -> dict[str, Any]:
+    manifest = json.loads(path.read_text())
+    errors = validate_manifest(manifest, package_root=path.resolve().parent)
+    embedded_validation = manifest.get("manifest_validation") or {}
+    if embedded_validation.get("status") != "PASS" or embedded_validation.get("error_count") != 0:
+        errors.append("manifest_validation.embedded_status_not_pass")
+    if manifest.get("status") != "PASS":
+        errors.append("manifest.status_not_pass")
+    return {
+        "status": "PASS" if not errors else "FAIL",
+        "manifest_path": str(path.resolve()),
+        "page_count": len(manifest.get("pages") or []),
+        "source_fingerprint_count": len(manifest.get("source_fingerprint") or {}),
+        "errors": errors,
     }
 
 
@@ -674,10 +819,10 @@ def capture_page(
         "forbidden_terms": forbidden,
         "layout": layout,
         "interaction": interaction,
-        "screenshot_path": relative_to_root(ROOT, screenshot_path),
+        "screenshot_path": relative_to_root(output_dir, screenshot_path),
         "screenshot_bytes": screenshot_bytes,
         "screenshot_sha256": sha256_file(screenshot_path) if screenshot_bytes else None,
-        "dom_path": relative_to_root(ROOT, dom_path),
+        "dom_path": relative_to_root(output_dir, dom_path),
         "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
         "chrome_exit_code": exit_code,
         "error": error,
@@ -706,7 +851,8 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
         "## Evidence Files",
         "",
         f"- `screenshot-pack-manifest.json`",
-        f"- Source revision: `{manifest['source_revision']['git_sha']}`; dirty: `{str(manifest['source_revision']['dirty']).lower()}`.",
+        f"- Source commit: `{manifest['source_revision']['git_commit_sha']}`; tree: `{manifest['source_revision']['git_tree_sha']}`; dirty: `{str(manifest['source_revision']['dirty']).lower()}`.",
+        f"- Source fingerprint: `{manifest['source_fingerprint_sha256']}` across {len(manifest['source_fingerprint'])} UI/runtime inputs.",
         f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures, including day-zero, not-found, and Home validation states)",
         "- `dom/` captured HTML for each screenshot route",
         "",
@@ -750,8 +896,21 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
 
 def main() -> int:
     args = parse_args()
+    if args.validate_manifest is not None:
+        validation = validate_persisted_manifest(args.validate_manifest)
+        if args.json:
+            print(json.dumps(validation, indent=2, sort_keys=True))
+        else:
+            print(f"{validation['status']} manifest={validation['manifest_path']} errors={len(validation['errors'])}")
+        return 0 if validation["status"] == "PASS" else 1
+
     output_dir: Path = args.output_dir
     state_dir: Path = args.state_dir
+    # Snapshot source identity before clearing state or creating any capture output.
+    # This keeps the manifest tied to the code under test instead of to its own
+    # generated screenshots, DOM captures, or runtime records.
+    source_revision_snapshot = source_revision()
+    source_fingerprint_snapshot = source_fingerprint()
     if not args.keep_state and state_dir.exists():
         shutil.rmtree(state_dir)
     state_dir.mkdir(parents=True, exist_ok=True)
@@ -803,18 +962,11 @@ def main() -> int:
         "state_dir": relative_to_root(ROOT, state_dir),
         "base_url": base_url,
         "fixture_ids": ids,
-        "source_revision": source_revision(),
-        "source_fingerprint": {
-            relative_to_root(ROOT, path): sha256_file(path)
-            for path in (
-                ROOT / "docs/design/tokens/cornerstone_design_tokens_v0_3.json",
-                ROOT / "packages/cornerstone_cli/briefing.py",
-                ROOT / "packages/cornerstone_cli/product_ui.py",
-                ROOT / "packages/cornerstone_cli/product_runtime.py",
-                ROOT / "packages/cornerstone_cli/runtime.py",
-                ROOT / "scripts/capture_vs4_h01_ui_recovery_screenshots.py",
-            )
-        },
+        "source_revision": source_revision_snapshot,
+        "source_fingerprint": source_fingerprint_snapshot,
+        "source_fingerprint_sha256": hashlib.sha256(
+            json.dumps(source_fingerprint_snapshot, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest(),
         "summary": {
             "page_count": len(pages),
             "pass": len(pages) - len(failed_pages),
@@ -837,6 +989,14 @@ def main() -> int:
         "thread_errors": thread_error,
         "pages": pages,
     }
+    manifest_validation_errors = validate_manifest(manifest, package_root=output_dir.resolve())
+    manifest["manifest_validation"] = {
+        "status": "PASS" if not manifest_validation_errors else "FAIL",
+        "error_count": len(manifest_validation_errors),
+        "errors": manifest_validation_errors,
+    }
+    if manifest_validation_errors:
+        manifest["status"] = "FAIL"
     write_json(output_dir / "screenshot-pack-manifest.json", manifest)
     build_owner_package(output_dir, manifest)
     if args.json:

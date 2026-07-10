@@ -8,9 +8,24 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from cornerstone_cli.artifacts import MAX_BROWSER_UPLOAD_BYTES, artifact_presentation
+from cornerstone_cli.product_access import (
+    CollectionViewRequest,
+    ProductAccessApplication,
+    RecordReadRequest,
+    SearchRequest,
+)
+from cornerstone_cli.product_visibility import (
+    CONTEXT_ONLY_SOURCE_TYPES,
+    INTERNAL_PRODUCT_SOURCE_TYPES,
+    context_only_artifact as _context_only_artifact,
+    internal_product_lineage as _internal_product_lineage,
+    internal_product_record as _internal_product_record,
+)
 from cornerstone_cli.ui.icons import icon
 from cornerstone_cli.ui.language import record_action, record_icon
-from cornerstone_cli.ui.styles import render_styles as _token_css
+from cornerstone_cli.ui.styles import render_styles as _token_css, style_asset
+from cornerstone_cli.validators import redact_text
 
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
 PRODUCT_SEARCH_TYPES = [
@@ -27,6 +42,7 @@ INBOX_LANES = [
     ("policy-blocked", "Policy blocked"),
     ("failed-runs", "Failed runs"),
 ]
+INBOX_PAGE_SIZE = 20
 AUDIT_LIFECYCLES = [
     ("all", "All activity"),
     ("created", "Created"),
@@ -48,12 +64,6 @@ REFERENCE_IMAGE_ROWS = [
     ("cornerstone-reference-07-home-upload-ask.png", "Home workspace", "Active surface", "Drop zone, ask box, recent items, knowledge states, and next steps."),
     ("cornerstone-reference-08-action-dry-run-approval.png", "Action dry-run", "Active surface", "Dry-run impact, proposed changes, policy decision, risk, approval, and auditability."),
 ]
-
-INTERNAL_PRODUCT_VISIBILITIES = {"internal", "owner_only", "verification_only"}
-INTERNAL_PRODUCT_SOURCE_TYPES = {"internal_fixture", "local_fixture", "scenario_fixture", "verification_fixture"}
-CONTEXT_ONLY_SOURCE_TYPES = {"conversation_turn"}
-PRODUCT_RECORD_ID_KEYS = ("artifact_id", "brief_id", "claim_id", "action_id", "memory_id")
-
 
 def h(value: Any) -> str:
     return escape("" if value is None else str(value), quote=True)
@@ -100,20 +110,87 @@ def render_product_page(
     path: str,
     query: dict[str, list[str]],
 ) -> str:
-    ctx = _build_context(store, scope)
     route = path if path in PRODUCT_LIST_ROUTES else "/"
     q = (query.get("q") or [""])[-1].strip()
+    page_access: dict[str, Any] | None = None
+    page_access_failed = False
+    if route != "/search" or not q:
+        allowed_filter_keys = {
+            "/search": {"type", "page"},
+            "/inbox": {"lane", "item", "page"},
+            "/audit": {"record", "lifecycle", "page"},
+        }.get(route, set())
+        try:
+            page_access = ProductAccessApplication(store).view_collection(
+                CollectionViewRequest(
+                    surface=route,
+                    scope=scope,
+                    filters={
+                        key: values[-1]
+                        for key, values in query.items()
+                        if values and key in allowed_filter_keys
+                    },
+                )
+            )
+        except Exception:
+            page_access = None
+            page_access_failed = True
+    ctx = _build_context(
+        store,
+        scope,
+        include_audit=route in {"/", "/audit"},
+        verify_audit_integrity=route == "/audit",
+    )
+    if page_access:
+        ctx["page_audit_ref"] = str((page_access.get("audit_refs") or [""])[0])
+    if page_access_failed:
+        ctx["load_errors"].append("page access audit")
+        for key in ("artifacts", "briefs", "claims", "actions", "memories", "inbox", "audit", "audit_all"):
+            ctx[key] = []
+        ctx["inbox_total"] = 0
+        return _page(
+            root,
+            "Access unavailable",
+            route,
+            _access_audit_unavailable(),
+            ctx,
+            redact_text(q),
+        )
     requested_search_type = (query.get("type") or ["all"])[-1].strip().lower()
     search_type = requested_search_type if requested_search_type in {value for value, _ in PRODUCT_SEARCH_TYPES} else "all"
     if route == "/":
+        _ensure_artifact_previews(ctx)
         title = "Home"
         content = _home(ctx)
         active = "/"
     elif route == "/search":
+        try:
+            page = max(1, int((query.get("page") or ["1"])[-1]))
+        except ValueError:
+            page = 1
+        snapshot_id = (query.get("snapshot") or [""])[-1].strip() or None
+        search_outcome: dict[str, Any] | None = None
+        if q:
+            try:
+                search_outcome = ProductAccessApplication(store).search(
+                    SearchRequest(
+                        query=q,
+                        scope=scope,
+                        mode="workspace",
+                        type_filter=search_type,
+                        page=page,
+                        page_size=20,
+                        snapshot_id=snapshot_id,
+                        excluded_source_types=frozenset(INTERNAL_PRODUCT_SOURCE_TYPES | CONTEXT_ONLY_SOURCE_TYPES),
+                    )
+                )
+            except Exception:
+                search_outcome = {"status": "access_unavailable"}
         title = "Search"
-        content = _search_page(ctx, q, search_type)
+        content = _search_page(ctx, q, search_type, search_outcome)
         active = "/search"
     elif route == "/artifacts":
+        _ensure_artifact_previews(ctx)
         title = "Artifacts"
         content = _artifact_list_page(ctx)
         active = "/artifacts"
@@ -133,10 +210,19 @@ def render_product_page(
         title = "Inbox"
         requested_lane = (query.get("lane") or [""])[-1].strip().lower()
         requested_item = (query.get("item") or [""])[-1].strip()
-        lane, lane_items, selected_item = _select_inbox_item(ctx["inbox"], requested_lane, requested_item)
+        try:
+            requested_page = max(1, int((query.get("page") or ["1"])[-1]))
+        except ValueError:
+            requested_page = 1
+        lane, lane_items, visible_items, selected_item, page_info = _select_inbox_item(
+            ctx["inbox"],
+            requested_lane,
+            requested_item,
+            requested_page,
+        )
         ctx["selected_inbox_item"] = selected_item
         _load_selected_product_loop(ctx, selected_item)
-        content = _inbox_page(ctx, lane, lane_items)
+        content = _inbox_page(ctx, lane, lane_items, visible_items, page_info)
         active = "/inbox"
     else:
         title = "Audit"
@@ -149,7 +235,7 @@ def render_product_page(
             page = 1
         content = _audit_page(ctx, record_filter, lifecycle_filter, page)
         active = "/audit"
-    return _page(root, title, active, content, ctx, q)
+    return _page(root, title, active, content, ctx, redact_text(q) if route == "/search" else q)
 
 
 def render_owner_review_page(
@@ -158,7 +244,7 @@ def render_owner_review_page(
     scope: dict[str, str],
     readiness: dict[str, Any],
 ) -> str:
-    ctx = _build_context(store, scope)
+    ctx = _build_context(store, scope, include_audit=True)
     content = _owner_review_page(ctx, readiness)
     return _page(root, "Owner", "/review", content, ctx, "")
 
@@ -189,10 +275,27 @@ def render_product_detail(
     kind: str,
     record_id: str,
 ) -> tuple[int, str]:
-    ctx = _build_context(store, scope)
-    record: dict[str, Any] | None
+    ctx = _build_context(store, scope, include_audit=True)
+    access_result = ProductAccessApplication(store).read(
+        RecordReadRequest(
+            record_kind=kind,
+            record_id=record_id,
+            scope=scope,
+            reason="product_ui_detail",
+        )
+    )
+    record = access_result.get("record") if isinstance(access_result.get("record"), dict) else None
+    audit_event = access_result.get("audit_event") if isinstance(access_result.get("audit_event"), dict) else None
+    audit_ref = f"audit:{audit_event['event_id']}" if audit_event and audit_event.get("event_id") else ""
+    evidence_kind = {
+        "artifacts": "artifact",
+        "briefs": "brief",
+        "claims": "claim",
+        "memories": "memory",
+        "actions": "action",
+    }.get(kind, kind)
+    evidence_ref = f"{evidence_kind}:{record_id}"
     if kind == "artifacts":
-        record = store.get_artifact(record_id, scope)
         if record:
             record = dict(record)
             record["_preview"] = _safe_preview(store, record, 5000, ctx["load_errors"], "source preview")
@@ -205,9 +308,6 @@ def render_product_detail(
         title = _artifact_title(record) if record else "Source not found"
         active = "/artifacts"
     elif kind == "briefs":
-        record = store.get_brief(record_id)
-        if record and record.get("scope") != scope:
-            record = None
         if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("brief")
             title = "Owner record"
@@ -217,9 +317,6 @@ def render_product_detail(
         title = str(record.get("title") or "Brief") if record else "Brief not found"
         active = "/"
     elif kind == "claims":
-        record = store.get_claim(record_id)
-        if record and record.get("scope") != scope:
-            record = None
         if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("claim")
             title = "Owner record"
@@ -229,9 +326,6 @@ def render_product_detail(
         title = _truncate(str(record.get("statement") or "Claim"), 72) if record else "Claim not found"
         active = "/claims"
     elif kind == "memories":
-        record = store.get_memory(record_id)
-        if record and record.get("scope") != scope:
-            record = None
         if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("memory candidate")
             title = "Owner record"
@@ -241,9 +335,6 @@ def render_product_detail(
         title = _truncate(str(record.get("title") or record.get("statement") or "Memory candidate"), 72) if record else "Memory candidate not found"
         active = "/inbox"
     elif kind == "actions":
-        record = store.get_action(record_id)
-        if record and record.get("scope") != scope:
-            record = None
         if record and _internal_product_record(record, ctx["internal_lineage_refs"]):
             content = _internal_record_notice("action")
             title = "Owner record"
@@ -255,31 +346,42 @@ def render_product_detail(
     else:
         return 404, _page(root, "Not found", "/", _not_found("record"), ctx, "")
     status = 200 if record else 404
+    if record and audit_ref:
+        content += _access_receipt(evidence_ref, audit_ref)
     return status, _page(root, title, active, content, ctx, "")
 
 
-def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
+def _build_context(
+    store: Any,
+    scope: dict[str, str],
+    *,
+    include_audit: bool = False,
+    verify_audit_integrity: bool = False,
+) -> dict[str, Any]:
     load_errors: list[str] = []
     artifacts = _recent(_safe_records(lambda: store._artifact_records(scope), load_errors, "saved sources"))
     briefs = _recent(_safe_records(lambda: store._brief_records(scope), load_errors, "briefs"))
     claims = _recent(_safe_records(lambda: store._claim_records(scope), load_errors, "claims"))
     actions = _recent(_safe_records(lambda: store._action_records(scope), load_errors, "action drafts"))
     memories = _recent(_safe_records(lambda: store._memory_records(scope), load_errors, "memory drafts"))
-    audit_all = _recent(
-        [
-            event
-            for event in _safe_records(lambda: store._all_audit_events(), load_errors, "activity history")
-            if _same_scope(event.get("scope") if isinstance(event.get("scope"), dict) else event, scope)
-        ]
+    audit_all = (
+        _recent(
+            [
+                event
+                for event in _safe_records(lambda: store._all_audit_events(), load_errors, "activity history")
+                if _same_scope(event.get("scope") if isinstance(event.get("scope"), dict) else event, scope)
+            ]
+        )
+        if include_audit
+        else []
     )
-    audit = audit_all[:80]
-    try:
-        audit_integrity = store.verify_audit()
-    except Exception:
-        load_errors.append("audit integrity")
-        audit_integrity = {"status": "not_verified", "event_count": 0, "errors": []}
-    for artifact in artifacts:
-        artifact["_preview"] = _safe_preview(store, artifact, 260, load_errors, "source preview")
+    audit = [event for event in audit_all if event.get("event_type") != "product.collection.read"][:80]
+    audit_integrity = {"status": "not_verified", "event_count": len(audit_all), "errors": []}
+    if verify_audit_integrity:
+        try:
+            audit_integrity = store.verify_audit()
+        except Exception:
+            load_errors.append("audit integrity")
     internal_lineage_refs, internal_record_objects = _internal_product_lineage(
         [artifacts, briefs, claims, actions, memories]
     )
@@ -293,7 +395,7 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
     actions = [record for record in actions if id(record) not in internal_record_objects]
     memories = [record for record in memories if id(record) not in internal_record_objects]
     inbox = _inbox_items(briefs, claims, actions, memories, scope=scope)
-    inbox_total = _inbox_open_count(briefs, claims, actions, memories)
+    inbox_total = len(inbox)
     return {
         "store": store,
         "scope": scope,
@@ -312,6 +414,14 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
         "inbox_total": inbox_total,
         "selected_product_loop": None,
     }
+
+
+def _ensure_artifact_previews(ctx: dict[str, Any], limit: int = 260) -> None:
+    store = ctx.get("store")
+    errors = ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else []
+    for artifact in ctx.get("artifacts", []):
+        if isinstance(artifact, dict) and "_preview" not in artifact:
+            artifact["_preview"] = _safe_preview(store, artifact, limit, errors, "source preview")
 
 
 def _load_selected_product_loop(ctx: dict[str, Any], selected: dict[str, Any] | None = None) -> None:
@@ -341,7 +451,8 @@ def _select_inbox_item(
     items: list[dict[str, Any]],
     requested_lane: str,
     requested_item: str,
-) -> tuple[str, list[dict[str, Any]], dict[str, Any] | None]:
+    requested_page: int = 1,
+) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]], dict[str, Any] | None, dict[str, int]]:
     valid_lanes = {value for value, _ in INBOX_LANES}
     explicit_lane = requested_lane in valid_lanes
     lane = requested_lane if explicit_lane else "needs-review"
@@ -352,11 +463,42 @@ def _select_inbox_item(
             if candidate_items:
                 lane, lane_items = candidate, candidate_items
                 break
-    selected = next(
-        (item for item in lane_items if str(item.get("record_ref") or "") == requested_item),
-        lane_items[0] if lane_items else None,
+    requested_index = next(
+        (
+            index
+            for index, item in enumerate(lane_items)
+            if str(item.get("record_ref") or "") == requested_item
+        ),
+        None,
     )
-    return lane, lane_items, selected
+    page_count = max(1, (len(lane_items) + INBOX_PAGE_SIZE - 1) // INBOX_PAGE_SIZE)
+    page = (
+        requested_index // INBOX_PAGE_SIZE + 1
+        if requested_index is not None
+        else min(max(requested_page, 1), page_count)
+    )
+    start = (page - 1) * INBOX_PAGE_SIZE
+    visible_items = lane_items[start : start + INBOX_PAGE_SIZE]
+    selected = (
+        lane_items[requested_index]
+        if requested_index is not None
+        else visible_items[0]
+        if visible_items
+        else None
+    )
+    return (
+        lane,
+        lane_items,
+        visible_items,
+        selected,
+        {
+            "page": page,
+            "page_count": page_count,
+            "page_start": start + 1 if lane_items else 0,
+            "page_end": min(start + INBOX_PAGE_SIZE, len(lane_items)),
+            "result_count": len(lane_items),
+        },
+    )
 
 
 def _safe_records(read: Any, errors: list[str] | None = None, label: str = "workspace records") -> list[dict[str, Any]]:
@@ -384,6 +526,24 @@ def _safe_preview(
         return ""
 
 
+def _artifact_state(ctx: dict[str, Any], artifact: dict[str, Any]) -> dict[str, Any]:
+    store = ctx.get("store")
+    try:
+        text_available = bool(store.derived_text_available(artifact))
+        original_available = bool(store.original_available(artifact))
+    except Exception:
+        text_available = False
+        original_available = False
+        errors = ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else []
+        if "source representation" not in errors:
+            errors.append("source representation")
+    return artifact_presentation(
+        artifact,
+        text_available=text_available,
+        original_available=original_available,
+    )
+
+
 def _safe_source_text(
     store: Any,
     artifact: dict[str, Any],
@@ -400,85 +560,6 @@ def _safe_source_text(
 
 def _same_scope(value: Any, scope: dict[str, str]) -> bool:
     return isinstance(value, dict) and all(value.get(key) == expected for key, expected in scope.items())
-
-
-def _record_identity_refs(record: dict[str, Any]) -> set[str]:
-    refs: set[str] = set()
-    for key in PRODUCT_RECORD_ID_KEYS:
-        value = record.get(key)
-        if not isinstance(value, str) or not value:
-            continue
-        kind = key.removesuffix("_id")
-        refs.update({value, f"{kind}:{value}"})
-    return refs
-
-
-def _record_lineage_refs(record: dict[str, Any]) -> set[str]:
-    refs: set[str] = set()
-
-    def collect(value: Any, key: str = "") -> None:
-        if isinstance(value, dict):
-            ref_type = value.get("type")
-            ref_id = value.get("id")
-            if isinstance(ref_type, str) and isinstance(ref_id, str) and ref_type and ref_id:
-                refs.update({ref_id, f"{ref_type}:{ref_id}"})
-            for child_key, child_value in value.items():
-                collect(child_value, str(child_key))
-            return
-        if isinstance(value, list):
-            for item in value:
-                collect(item, key)
-            return
-        if not isinstance(value, str) or not value:
-            return
-        if key.endswith("_id") or key.endswith("_ref") or key.endswith("_refs"):
-            refs.add(value)
-
-    collect(record)
-    return refs
-
-
-def _internal_product_lineage(
-    record_groups: list[list[dict[str, Any]]],
-) -> tuple[set[str], set[int]]:
-    internal_refs: set[str] = set()
-    internal_record_objects: set[int] = set()
-    pending = [record for records in record_groups for record in records]
-    changed = True
-    while changed:
-        changed = False
-        for record in pending:
-            object_id = id(record)
-            if object_id in internal_record_objects:
-                continue
-            if not _internal_product_record(record, internal_refs):
-                continue
-            internal_record_objects.add(object_id)
-            internal_refs.update(_record_identity_refs(record))
-            changed = True
-    return internal_refs, internal_record_objects
-
-
-def _internal_product_record(record: dict[str, Any], internal_refs: set[str] | None = None) -> bool:
-    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
-    provenance = record.get("provenance") if isinstance(record.get("provenance"), dict) else {}
-    source = record.get("source") if isinstance(record.get("source"), dict) else {}
-    visibility_values = {
-        str(record.get("visibility") or "").lower(),
-        str(record.get("product_visibility") or "").lower(),
-        str(metadata.get("visibility") or "").lower(),
-        str(metadata.get("product_visibility") or "").lower(),
-        str(provenance.get("visibility") or "").lower(),
-    }
-    source_type = str(source.get("type") or source.get("source_type") or "").lower()
-    explicitly_internal = bool(visibility_values & INTERNAL_PRODUCT_VISIBILITIES) or source_type in INTERNAL_PRODUCT_SOURCE_TYPES
-    return explicitly_internal or bool(internal_refs and _record_lineage_refs(record) & internal_refs)
-
-
-def _context_only_artifact(record: dict[str, Any]) -> bool:
-    source = record.get("source") if isinstance(record.get("source"), dict) else {}
-    source_type = str(source.get("type") or source.get("source_type") or "").lower()
-    return source_type in CONTEXT_ONLY_SOURCE_TYPES
 
 
 def _recent(records: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
@@ -539,17 +620,20 @@ def _short_ref(value: Any, length: int = 12) -> str:
 def _artifact_title(record: dict[str, Any] | None) -> str:
     if not record:
         return "Source"
-    preview = str(record.get("_preview") or "").strip()
-    if preview:
-        return _truncate(preview, 72)
     source = record.get("source")
     source_ref = ""
     if isinstance(source, dict):
+        filename = str(source.get("filename") or "").strip()
+        if filename:
+            return _truncate(redact_text(filename), 72)
         source_ref = str(source.get("ref") or "").strip()
     else:
         source_ref = str(record.get("source_ref") or source or "").strip()
+    preview = str(record.get("_preview") or "").strip()
+    if preview:
+        return _truncate(preview, 72)
     if source_ref and source_ref not in {"local_file", "cli_text", "home.drop_text"}:
-        return _truncate(source_ref, 72)
+        return _truncate(redact_text(source_ref), 72)
     media = str(record.get("media_type") or "source").replace("/", " ")
     return media.title()
 
@@ -609,6 +693,7 @@ def _plain_event(event_type: str) -> str:
         "conversation.answer.created": "Draft answer saved",
         "product.mission_control.viewed": "Review queue opened",
         "product.loop.viewed": "Work journey opened",
+        "product.collection.read": "Page opened",
         "mission.contract.created": "Decision path prepared",
         "mission.activated": "Decision path activated",
         "workspace.mode.set": "Workspace mode recorded",
@@ -867,7 +952,7 @@ def _inbox_items(
 ) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     owner_label = str((scope or {}).get("owner_id") or "Owner")
-    for brief in briefs[:2]:
+    for brief in briefs:
         label, state = _brief_label(brief)
         gaps = [
             str(value)
@@ -897,7 +982,7 @@ def _inbox_items(
                 "record_ref": f"brief:{brief.get('brief_id')}" if brief.get("brief_id") else "",
             }
         )
-    for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"][:2]:
+    for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"]:
         label, state = _claim_label(claim)
         items.append(
             {
@@ -920,7 +1005,7 @@ def _inbox_items(
             }
         )
     pending_actions = [action for action in actions if _action_lifecycle(action)["stage"] != "executed"]
-    for action in pending_actions[:2]:
+    for action in pending_actions:
         stage = str(_action_lifecycle(action)["stage"])
         label, state = _action_label(action)
         queue = (
@@ -969,7 +1054,7 @@ def _inbox_items(
             else False
         )
     ]
-    for memory in draft_memories[:2]:
+    for memory in draft_memories:
         items.append(
             {
                 "kind": "Memory",
@@ -990,7 +1075,7 @@ def _inbox_items(
                 "record_ref": f"memory:{memory.get('memory_id')}" if memory.get("memory_id") else "",
             }
         )
-    return _recent(items, limit=8)
+    return _recent(items)
 
 
 def _inbox_open_count(
@@ -1035,11 +1120,37 @@ def _degraded_notice(load_errors: list[str]) -> str:
 """
 
 
+def _access_audit_unavailable() -> str:
+    return """
+<section class="cs-panel" data-product-state="access-audit-unavailable" role="alert">
+  <div class="cs-panel-header">
+    <div>
+      <h1>Workspace access is temporarily unavailable</h1>
+      <p class="cs-muted">CornerStone could not record this page view in History, so no workspace records are shown. Restore the local audit ledger and retry.</p>
+    </div>
+  </div>
+</section>
+"""
+
+
+def _access_receipt(evidence_ref: str, audit_ref: str) -> str:
+    return f"""
+<details class="cs-disclosure cs-access-receipt" data-evidence-ref="{h(evidence_ref)}" data-audit-ref="{h(audit_ref)}">
+  <summary><strong>Access receipt</strong><span>Evidence and History reference</span></summary>
+  <dl class="cs-detail-grid">
+    <dt>Record</dt><dd>{h(evidence_ref)}</dd>
+    <dt>History</dt><dd><a href="/audit?record={quote(evidence_ref, safe='')}">{h(audit_ref)}</a></dd>
+  </dl>
+</details>
+"""
+
+
 def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any], q: str) -> str:
-    css = _token_css(root)
+    stylesheet_name, _, _ = style_asset(root)
     nav = _nav(active, ctx)
     topbar = _topbar(q, ctx)
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    page_audit_ref = str(ctx.get("page_audit_ref") or "")
     load_errors = ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else []
     if load_errors:
         content = _degraded_notice(list(dict.fromkeys(str(item) for item in load_errors))) + content
@@ -1050,8 +1161,8 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/assets/{h(stylesheet_name)}">
   <title>{h(title)} - CornerStone</title>
-  <style>{css}</style>
 </head>
 <body>
   <a class="cs-skip-link" href="#main-content">Skip to content</a>
@@ -1062,6 +1173,7 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
     data-owner-id="{h(scope.get('owner_id') or 'local-user')}"
     data-namespace-id="{h(scope.get('namespace_id') or 'personal')}"
     data-workspace-id="{h(scope.get('workspace_id') or 'default')}"
+    data-page-audit-ref="{h(page_audit_ref)}"
   >
     <aside class="cs-sidebar" aria-label="CornerStone navigation">
       <a class="cs-brand" href="/" aria-label="CornerStone Home">
@@ -1191,13 +1303,13 @@ def _home(ctx: dict[str, Any]) -> str:
             <div class="cs-drop-mark">{icon("upload")}</div>
             <div>
               <strong>Drop a file or paste notes</strong>
-              <p class="cs-muted">The original stays saved and visible.</p>
+              <p class="cs-muted">Files up to {MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)} MB are archived byte-for-byte; pasted text stays a separate source.</p>
             </div>
           </div>
           <div class="cs-home-source-row">
             <button class="cs-button secondary" type="button" id="cs-file-button">Browse files</button>
             <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
-            <input id="cs-file-input" type="file" hidden>
+            <input id="cs-file-input" type="file" aria-label="Choose a file to archive" hidden>
           </div>
           <div class="cs-home-paste-row" aria-label="Paste text source">
             <label class="cs-sr-only" for="cs-drop-text">Paste source text</label>
@@ -1233,14 +1345,15 @@ def _home(ctx: dict[str, Any]) -> str:
 def _recent_items_block(ctx: dict[str, Any]) -> str:
     items: list[dict[str, Any]] = []
     for artifact in ctx["artifacts"][:3]:
+        presentation = _artifact_state(ctx, artifact)
         items.append(
             {
                 "kind": "Source",
                 "title": _artifact_title(artifact),
                 "detail": f"{_display_date(artifact)} - Original text preserved",
                 "href": _detail_href("artifacts", artifact.get("artifact_id")),
-                "label": "Searchable",
-                "state": "searchable",
+                "label": presentation["label"],
+                "state": presentation["state"],
             }
         )
     for brief in ctx["briefs"][:2]:
@@ -1339,33 +1452,76 @@ def _recent_activity_block(ctx: dict[str, Any]) -> str:
 """
 
 
-def _search_page(ctx: dict[str, Any], q: str, search_type: str = "all") -> str:
-    counts = _search_counts(ctx, q)
-    counts_by_label = dict(counts)
+def _search_page(
+    ctx: dict[str, Any],
+    q: str,
+    search_type: str = "all",
+    outcome: dict[str, Any] | None = None,
+) -> str:
+    display_query = redact_text(q)
+    success = bool(outcome and outcome.get("status") == "success")
+    facets = outcome.get("facets", {}) if success and isinstance(outcome.get("facets"), dict) else {}
+    counts_by_label = {
+        "All": int(facets.get("all", 0) or 0),
+        "Sources": int(facets.get("sources", 0) or 0),
+        "Briefs": int(facets.get("briefs", 0) or 0),
+        "Claims": int(facets.get("claims", 0) or 0),
+        "Actions": int(facets.get("actions", 0) or 0),
+    }
     selected_type_label = dict(PRODUCT_SEARCH_TYPES).get(search_type, "All")
-    total = counts_by_label.get(selected_type_label, 0)
-    results = _search_records(ctx, q, search_type)
+    total = int(outcome.get("result_count", 0) or 0) if success else 0
+    snapshot = outcome.get("search_snapshot", {}) if success and isinstance(outcome.get("search_snapshot"), dict) else {}
+    snapshot_id = str(snapshot.get("search_snapshot_id") or "")
+    audit_ref = str((outcome.get("audit_refs") or [""])[0]) if success else ""
+    results = [
+        _search_snapshot_result(row)
+        for row in (outcome.get("results", []) if success else [])
+        if isinstance(row, dict)
+    ]
     rows = (
         "".join(results)
         if results
         else _search_empty(
-            q,
+            display_query,
             search_type=search_type,
             selected_type_label=selected_type_label,
             all_result_count=counts_by_label.get("All", 0),
         )
     )
     count_tabs = "".join(
-        f'<a class="cs-search-tab{" is-active" if value == search_type else ""}" href="/search?q={quote(q)}&amp;type={h(value)}"'
+        f'<a class="cs-search-tab{" is-active" if value == search_type else ""}" href="{h(_search_href(display_query, value, snapshot_id))}"'
         f'{" aria-current=\"page\"" if value == search_type else ""}>{h(label)} <strong>{h(counts_by_label.get(label, 0))}</strong></a>'
         for value, label in PRODUCT_SEARCH_TYPES
     )
     scope_label = _scope_label(ctx.get("scope"))
-    heading = f'Results for “{q}”' if q.strip() else "Search saved work"
+    heading = f'Results for “{display_query}”' if display_query.strip() else "Search saved work"
     guidance = (
         "Keyword matches across saved sources and derived work. Open the source before using a draft in a decision."
-        if q.strip()
+        if display_query.strip()
         else "Use the search field above to find saved sources, Briefs, decisions, and action drafts."
+    )
+    page = int(outcome.get("page", 1) or 1) if success else 1
+    page_count = int(outcome.get("page_count", 1) or 1) if success else 1
+    pager = _search_pager(display_query, search_type, snapshot_id, page, page_count)
+    receipt = (
+        f"""
+  <details class="cs-disclosure cs-search-receipt" data-search-snapshot-id="{h(snapshot_id)}" data-audit-ref="{h(audit_ref)}">
+    <summary><strong>Search receipt</strong><span>Scope, snapshot, and History reference</span></summary>
+    <dl class="cs-detail-grid">
+      <dt>Snapshot</dt><dd>{h(f'search_snapshot:{snapshot_id}')}</dd>
+      <dt>History</dt><dd>{h(audit_ref)}</dd>
+      <dt>Visible range</dt><dd>{h(str(outcome.get('page_start', 0)))}-{h(str(outcome.get('page_end', 0)))} of {h(str(total))}</dd>
+      <dt>Workspace</dt><dd>{h(scope_label)}</dd>
+    </dl>
+  </details>
+"""
+        if success
+        else ""
+    )
+    error_notice = (
+        '<section class="cs-panel" data-product-state="degraded" role="alert"><h2>Search snapshot unavailable</h2><p>That saved search is unavailable in this workspace. Run the search again.</p></section>'
+        if outcome and not success
+        else ""
     )
     return f"""
 <section class="cs-search-page" data-product-surface="search">
@@ -1382,106 +1538,108 @@ def _search_page(ctx: dict[str, Any], q: str, search_type: str = "all") -> str:
     </div>
     {rows}
   </div>
+  {pager}
+  {receipt}
+  {error_notice}
 </section>
 """
 
 
-def _search_records(ctx: dict[str, Any], q: str, search_type: str = "all") -> list[str]:
-    query = q.lower().strip()
-    if not query:
-        return []
-    rows: list[tuple[int, str]] = []
-    for artifact in ctx["artifacts"]:
-        text = " ".join([_artifact_title(artifact), str(artifact.get("_preview") or "")]).lower()
-        score = _score(text, query)
-        if score > 0 and search_type in {"all", "sources"}:
-            rows.append(
-                (
-                    score,
-                    _search_result_row(
-                        "Source",
-                        _artifact_title(artifact),
-                        str(artifact.get("_preview") or "Open to inspect the saved source."),
-                        _detail_href("artifacts", artifact.get("artifact_id")),
-                        "Searchable",
-                        "searchable",
-                        _display_date(artifact),
-                    ),
-                )
-            )
-    for brief in ctx["briefs"]:
-        text = " ".join([_brief_title(brief), str(brief.get("summary") or ""), " ".join(str(item) for item in brief.get("key_points", []) if isinstance(item, str))]).lower()
-        score = _score(text, query)
-        if score > 0 and search_type in {"all", "briefs"}:
-            label, state = _brief_label(brief)
-            rows.append((score, _search_result_row("Brief", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
-    for claim in ctx["claims"]:
-        text = _claim_title(claim).lower()
-        score = _score(text, query)
-        if score > 0 and search_type in {"all", "claims"}:
-            label, state = _claim_label(claim)
-            visible_source_count = len(_source_items(ctx, claim))
-            detail = (
-                f"Claim draft with {visible_source_count} visible supporting source{'s' if visible_source_count != 1 else ''}."
-                if visible_source_count
-                else "Claim draft; no visible supporting source is attached."
-            )
-            rows.append((score, _search_result_row("Claim", _claim_title(claim), detail, _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
-    for action in ctx["actions"]:
-        dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
-        text = _action_search_text(action)
-        score = _score(text, query)
-        if score > 0 and search_type in {"all", "actions"}:
-            label, state = _action_label(action)
-            rows.append((score, _search_result_row("Action", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
-    rows.sort(key=lambda item: item[0], reverse=True)
-    return [row for _, row in rows[:20]]
+def _search_href(q: str, search_type: str, snapshot_id: str = "", page: int | None = None) -> str:
+    values = [f"q={quote(q)}", f"type={quote(search_type)}"]
+    if snapshot_id:
+        values.append(f"snapshot={quote(snapshot_id)}")
+    if page and page > 1:
+        values.append(f"page={page}")
+    return "/search?" + "&".join(values)
 
 
-def _action_search_text(action: dict[str, Any]) -> str:
-    dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
-    impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
-    return " ".join(
-        [
-            _action_title(action),
-            str(dry_run.get("goal") or ""),
-            str(dry_run.get("target") or ""),
-            str(impact.get("target") or ""),
-        ]
-    ).lower()
+def _search_snapshot_result(row: dict[str, Any]) -> str:
+    result_type = str(row.get("result_type") or "artifact")
+    kind = {"artifact": "Source", "brief": "Brief", "claim": "Claim", "action": "Action"}.get(result_type, "Source")
+    record_id = str(row.get(f"{result_type}_id") or "")
+    href_kind = {"artifact": "artifacts", "brief": "briefs", "claim": "claims", "action": "actions"}.get(result_type, "artifacts")
+    if result_type == "artifact":
+        presentation = artifact_presentation(
+            {
+                "original_storage_ref": row.get("original_storage_ref"),
+                "checksum_sha256": "snapshot",
+                "derived": {"status": row.get("derived_status"), "text_ref": row.get("derived_text_ref")},
+            },
+            text_available=row.get("derived_text_available") is True,
+            original_available=row.get("original_available") is True,
+        )
+        label, state = str(presentation["label"]), str(presentation["state"])
+    elif result_type == "brief":
+        label, state = _brief_label(
+            {
+                "status": row.get("record_status"),
+                "trust_label": row.get("trust_state"),
+                "output_mode": row.get("output_mode"),
+            }
+        )
+    elif result_type == "claim":
+        status = str(row.get("record_status") or "").lower()
+        label, state = ("Approved", "approved") if status == "approved" else ("Source support", "searchable") if len(row.get("evidence_refs", [])) > 1 else ("Draft", "draft")
+    else:
+        execution = str(row.get("execution_status") or "").lower()
+        approval = str(row.get("approval_status") or "").lower()
+        status = str(row.get("record_status") or "").lower()
+        if execution == "executed":
+            label, state = "Executed", "executed"
+        elif execution in {"failed", "error"}:
+            label, state = "Failed", "failed"
+        elif status in {"blocked", "denied", "policy_blocked"}:
+            label, state = "Policy blocked", "policyBlocked"
+        elif approval == "approved":
+            label, state = "Approved", "approved"
+        elif approval in {"pending", "required", "not_approved"}:
+            label, state = "Needs approval", "underReview"
+        else:
+            label, state = "Draft", "draft"
+    modes = [str(value).replace("_", " ").title() for value in row.get("retrieval_modes", []) if isinstance(value, str)]
+    match_label = "Keyword match" + (f" · {', '.join(modes)}" if modes else "")
+    return _search_result_row(
+        kind,
+        str(row.get("title") or f"{kind} result"),
+        str(row.get("snippet") or "Open the record to inspect this match."),
+        _detail_href(href_kind, record_id),
+        label,
+        state,
+        _display_date(row),
+        result_ref=str(row.get("result_ref") or ""),
+        match_label=match_label,
+    )
 
 
-def _score(text: str, query: str) -> int:
-    terms = [term for term in re.split(r"[^a-zA-Z0-9]+", query.lower()) if term]
-    score = 10 if query in text else 0
-    score += sum(1 for term in terms if term in text)
-    return score
+def _search_pager(q: str, search_type: str, snapshot_id: str, page: int, page_count: int) -> str:
+    if page_count <= 1:
+        return ""
+    previous = (
+        f'<a class="cs-button secondary" rel="prev" href="{h(_search_href(q, search_type, snapshot_id, page - 1))}">Previous</a>'
+        if page > 1
+        else '<span class="cs-button secondary" aria-disabled="true">Previous</span>'
+    )
+    following = (
+        f'<a class="cs-button secondary" rel="next" href="{h(_search_href(q, search_type, snapshot_id, page + 1))}">Next</a>'
+        if page < page_count
+        else '<span class="cs-button secondary" aria-disabled="true">Next</span>'
+    )
+    return f'<nav class="cs-pagination" aria-label="Search result pages">{previous}<span>Page {page} of {page_count}</span>{following}</nav>'
 
 
-def _search_counts(ctx: dict[str, Any], q: str) -> list[tuple[str, int]]:
-    if not q.strip():
-        return [
-            ("All", 0),
-            ("Sources", 0),
-            ("Briefs", 0),
-            ("Claims", 0),
-            ("Actions", 0),
-        ]
-    query = q.lower().strip()
-    source_count = sum(1 for artifact in ctx["artifacts"] if _score(" ".join([_artifact_title(artifact), str(artifact.get("_preview") or "")]).lower(), query) > 0)
-    brief_count = sum(1 for brief in ctx["briefs"] if _score(" ".join([_brief_title(brief), str(brief.get("summary") or ""), " ".join(str(item) for item in brief.get("key_points", []) if isinstance(item, str))]).lower(), query) > 0)
-    claim_count = sum(1 for claim in ctx["claims"] if _score(_claim_title(claim).lower(), query) > 0)
-    action_count = sum(1 for action in ctx["actions"] if _score(_action_search_text(action), query) > 0)
-    return [
-        ("All", source_count + brief_count + claim_count + action_count),
-        ("Sources", source_count),
-        ("Briefs", brief_count),
-        ("Claims", claim_count),
-        ("Actions", action_count),
-    ]
-
-
-def _search_result_row(kind: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
+def _search_result_row(
+    kind: str,
+    title: str,
+    detail: str,
+    href: str,
+    label: str,
+    state: str,
+    date: str,
+    *,
+    result_ref: str = "",
+    match_label: str = "Keyword match",
+) -> str:
     icon_class = {
         "Source": "is-source",
         "Brief": "is-brief",
@@ -1489,10 +1647,10 @@ def _search_result_row(kind: str, title: str, detail: str, href: str, label: str
         "Action": "is-action",
     }.get(kind, "is-source")
     return f"""
-<article class="cs-result-row">
+<article class="cs-result-row" data-result-ref="{h(result_ref)}">
   <span class="cs-result-icon {h(icon_class)}">{icon(record_icon(kind))}</span>
   <span class="cs-result-body">
-    <span class="cs-result-meta"><span class="cs-result-type">{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
+    <span class="cs-result-meta"><span class="cs-result-type">{h(kind)}</span><span>{h(date)}</span><span>{h(match_label)}</span></span>
     <h3><a href="{h(href)}">{h(title)}</a></h3>
     <p>{h(_truncate(detail, 240))}</p>
   </span>
@@ -1716,17 +1874,7 @@ def _collection_row(
 
 def _artifact_list_page(ctx: dict[str, Any]) -> str:
     artifacts = ctx["artifacts"]
-    rows = "".join(
-        _collection_row(
-            "S",
-            _artifact_title(artifact),
-            str(artifact.get("_preview") or "Open to inspect the saved source."),
-            _detail_href("artifacts", artifact.get("artifact_id")),
-            [("Source", ""), (_display_date(artifact), "")],
-            [("Searchable", "searchable"), ("Saved", "saved")],
-        )
-        for artifact in artifacts
-    ) or _empty_state(
+    rows = "".join(_artifact_collection_row(ctx, artifact) for artifact in artifacts) or _empty_state(
         "Day zero",
         "Start with a source",
         "Drop a note, paste text, or save a file from Home. Sources stay preserved before any brief, claim, or action uses them.",
@@ -1746,7 +1894,16 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
             ("Linked use", "Briefs and claims can reference this source."),
         ],
     )
-    linked_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"], *ctx["actions"]] for ref in _evidence_refs(record) if ref.startswith("artifact:"))
+    presentations = [_artifact_state(ctx, artifact) for artifact in artifacts]
+    searchable_count = sum(1 for presentation in presentations if presentation["searchable"])
+    preserved_count = sum(1 for presentation in presentations if presentation["saved"])
+    pending_count = len(artifacts) - searchable_count
+    linked_count = sum(
+        1
+        for record in [*ctx["briefs"], *ctx["claims"], *ctx["actions"]]
+        for ref in _evidence_refs(record)
+        if ref.startswith("artifact:")
+    )
     return f"""
 <section data-product-surface="artifacts">
   <div class="cs-page-head">
@@ -1756,7 +1913,7 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
   </div>
   <div class="cs-collection-workbench">
     <div>
-      {_collection_summary([("Saved sources", len(artifacts)), ("Linked refs", linked_count), ("Searchable", len(artifacts))])}
+      {_collection_summary([("Saved sources", len(artifacts)), ("Searchable", searchable_count), ("Not searchable", pending_count)])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -1771,7 +1928,7 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Source posture</h2>
         <dl class="cs-detail-grid">
-          <dt>Preserved</dt><dd>{h(len(artifacts))}</dd>
+          <dt>Preserved</dt><dd>{h(preserved_count)}</dd>
           <dt>Linked uses</dt><dd>{h(linked_count)}</dd>
           <dt>Trust</dt><dd>Untrusted until checked</dd>
         </dl>
@@ -1780,6 +1937,26 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
   </div>
 </section>
 """
+
+
+def _artifact_collection_row(ctx: dict[str, Any], artifact: dict[str, Any]) -> str:
+    presentation = _artifact_state(ctx, artifact)
+    chips = [("Saved", "saved")] if presentation["saved"] else [("Integrity issue", "failed")]
+    presentation_chip = (str(presentation["label"]), str(presentation["state"]))
+    if presentation["label"] != "Saved" and presentation_chip not in chips:
+        chips.append(presentation_chip)
+    return _collection_row(
+        "S",
+        _artifact_title(artifact),
+        str(artifact.get("_preview") or presentation["explanation"]),
+        _detail_href("artifacts", artifact.get("artifact_id")),
+        [("Source", ""), (_display_date(artifact), "")],
+        chips,
+        footer=[
+            ("Representation", str(presentation["label"])),
+            ("Original", "Preserved" if presentation["saved"] else "Unavailable"),
+        ],
+    )
 
 
 def _brief_list_page(ctx: dict[str, Any]) -> str:
@@ -2046,14 +2223,25 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
 """
 
 
-def _inbox_page(ctx: dict[str, Any], lane: str, lane_items: list[dict[str, Any]]) -> str:
+def _inbox_page(
+    ctx: dict[str, Any],
+    lane: str,
+    lane_items: list[dict[str, Any]],
+    visible_items: list[dict[str, Any]],
+    page_info: dict[str, int],
+) -> str:
     all_items = ctx["inbox"]
     active_label = dict(INBOX_LANES).get(lane, "Needs review")
     selected = ctx.get("selected_inbox_item") if isinstance(ctx.get("selected_inbox_item"), dict) else None
     selected_ref = str(selected.get("record_ref") or "") if selected else ""
     rows = "".join(
-        _inbox_table_row(item, lane, str(item.get("record_ref") or "") == selected_ref)
-        for item in lane_items
+        _inbox_table_row(
+            item,
+            lane,
+            str(item.get("record_ref") or "") == selected_ref,
+            page=page_info["page"],
+        )
+        for item in visible_items
     )
     if not rows:
         rows = (
@@ -2083,8 +2271,9 @@ def _inbox_page(ctx: dict[str, Any], lane: str, lane_items: list[dict[str, Any]]
             f'{h(lane_label)}<strong>{h(str(counts[count_keys[slug]]))}</strong></a>'
         )
     lane_tabs = "".join(lane_tab_rows)
+    pager = _inbox_pager(lane, page_info["page"], page_info["page_count"])
     return f"""
-<section data-product-surface="inbox" data-inbox-lane="{h(lane)}" data-selected-item="{h(selected_ref)}">
+<section data-product-surface="inbox" data-inbox-lane="{h(lane)}" data-selected-item="{h(selected_ref)}" data-inbox-page="{h(str(page_info['page']))}" data-inbox-total="{h(str(len(lane_items)))}">
   <div class="cs-page-head">
     <div class="cs-kicker">Review</div>
     <h1>Work that needs attention</h1>
@@ -2096,12 +2285,13 @@ def _inbox_page(ctx: dict[str, Any], lane: str, lane_items: list[dict[str, Any]]
       <div class="cs-inbox-list-heading">
         <div>
           <h2 id="cs-inbox-list-title">{h(active_label)}</h2>
-          <p class="cs-muted">{h(str(len(lane_items)))} open item{"s" if len(lane_items) != 1 else ""} in this lane.</p>
+          <p class="cs-muted">Showing {h(str(page_info['page_start']))}-{h(str(page_info['page_end']))} of {h(str(len(lane_items)))} open item{"s" if len(lane_items) != 1 else ""} in this lane.</p>
         </div>
       </div>
       <div class="cs-inbox-table" role="list" aria-label="{h(active_label)} items">
         {rows}
       </div>
+      {pager}
     </section>
     {detail}
   </div>
@@ -2119,11 +2309,12 @@ def _inbox_counts(items: list[dict[str, Any]]) -> dict[str, int]:
     }
 
 
-def _inbox_table_row(item: dict[str, Any], lane: str, selected: bool = False) -> str:
+def _inbox_table_row(item: dict[str, Any], lane: str, selected: bool = False, *, page: int = 1) -> str:
     selected_class = " is-selected" if selected else ""
     priority_state = "failed" if item.get("priority") == "High" else "underReview" if item.get("priority") == "Medium" else "draft"
     item_ref = str(item.get("record_ref") or "")
-    selection_href = f"/inbox?lane={quote(lane, safe='')}&amp;item={quote(item_ref, safe='')}#selected-work"
+    page_query = f"&amp;page={page}" if page > 1 else ""
+    selection_href = f"/inbox?lane={quote(lane, safe='')}{page_query}&amp;item={quote(item_ref, safe='')}#selected-work"
     current = ' aria-current="true"' if selected else ""
     return f"""
 <a class="cs-inbox-row{selected_class}" href="{selection_href}" role="listitem"{current}>
@@ -2136,6 +2327,24 @@ def _inbox_table_row(item: dict[str, Any], lane: str, selected: bool = False) ->
   <span class="cs-inbox-row-state">{_chip(item.get("priority") or "Medium", priority_state)}{_chip(item["label"], item["state"])}</span>
 </a>
 """
+
+
+def _inbox_pager(lane: str, page: int, page_count: int) -> str:
+    if page_count <= 1:
+        return ""
+    previous_href = f"/inbox?lane={quote(lane, safe='')}&amp;page={page - 1}"
+    next_href = f"/inbox?lane={quote(lane, safe='')}&amp;page={page + 1}"
+    previous = (
+        f'<a class="cs-button secondary" rel="prev" href="{previous_href}">Previous</a>'
+        if page > 1
+        else '<span class="cs-button secondary" aria-disabled="true">Previous</span>'
+    )
+    following = (
+        f'<a class="cs-button secondary" rel="next" href="{next_href}">Next</a>'
+        if page < page_count
+        else '<span class="cs-button secondary" aria-disabled="true">Next</span>'
+    )
+    return f'<nav class="cs-pagination" aria-label="Review item pages">{previous}<span>Page {page} of {page_count}</span>{following}</nav>'
 
 
 def _inbox_detail_panel(
@@ -2358,7 +2567,7 @@ def _inbox_journey_recovery_details() -> str:
     </div>
     <div data-vs4-loop-recovery-state="lineage-mismatch" data-vs4-loop-recovery-status="blocked-safe">
       <strong>Different journey</strong>
-      <span>CornerStone did not combine unrelated evidence-backed work. No new journey or activity record was created.</span>
+      <span>CornerStone did not combine unrelated evidence-backed work. No new journey or activity record was created by the workflow; only this page view was added to History.</span>
     </div>
   </div>
 </details>
@@ -3021,6 +3230,7 @@ def _generic_row(kind: str, title: str, detail: str, href: str, label: str, stat
 
 def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) -> str:
     title = _artifact_title(artifact)
+    presentation = _artifact_state(ctx, artifact)
     text, truncated = _safe_source_text(store, artifact, errors=ctx.get("load_errors"))
     if not text:
         text = "No readable text preview is available for this source."
@@ -3038,9 +3248,28 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
     )
     source_query = quote(title)
     artifact_id = str(artifact.get("artifact_id") or "")
-    preview_note = "Showing the first 50,000 characters. The saved original remains unchanged." if truncated else "Line breaks are preserved from the saved source text."
+    preview_note = (
+        "Showing the first 50,000 characters. The saved original remains unchanged."
+        if truncated
+        else "Line breaks are preserved from the saved source text."
+        if presentation["preview_supported"]
+        else str(presentation["explanation"])
+    )
+    state_chip = "" if presentation["label"] == "Saved" else _chip(str(presentation["label"]), str(presentation["state"]))
+    saved_chip = _chip("Saved", "saved") if presentation["saved"] else _chip("Integrity issue", "failed")
+    search_action = (
+        f'<a class="cs-button" href="/search?q={h(source_query)}">Search this source</a>'
+        if presentation["searchable"]
+        else ""
+    )
+    download_action = (
+        f'<a class="cs-button secondary" href="/artifacts/{h(artifact_id)}/original">Download original</a>'
+        if presentation["saved"]
+        else ""
+    )
+    original_size = int(artifact.get("original_size_bytes") or 0)
     return f"""
-<section class="cs-artifact-workbench" data-product-surface="artifact-detail" aria-label="Source inspection workspace">
+<section class="cs-artifact-workbench" data-product-surface="artifact-detail" data-artifact-searchable="{str(bool(presentation['searchable'])).lower()}" data-derived-status="{h(presentation['derived_status'])}" aria-label="Source inspection workspace">
   <div class="cs-stack">
     <header class="cs-artifact-compact-hero">
       <div class="cs-artifact-title">
@@ -3054,12 +3283,13 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
           <span class="cs-artifact-file-mark">{icon("document")}</span>
           <div>
             <h1>{h(title)}</h1>
-            <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}</div>
+            <div class="cs-row">{saved_chip}{state_chip}</div>
           </div>
         </div>
       </div>
       <div class="cs-artifact-actions">
-        <a class="cs-button" href="/search?q={h(source_query)}">Search this source</a>
+        {search_action}
+        {download_action}
         <a class="cs-button ghost" href="/artifacts">Back to saved sources</a>
       </div>
     </header>
@@ -3085,10 +3315,14 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         <dt>Saved</dt><dd>{h(_display_date(artifact))}</dd>
         <dt>Source</dt><dd>{h(source_label)}</dd>
         <dt>File type</dt><dd>{h(media_type)}</dd>
+        <dt>Original size</dt><dd>{h(original_size)} bytes</dd>
+        <dt>Representation</dt><dd>{h(presentation["label"])}</dd>
         <dt>Workspace</dt><dd>{h(workspace)}</dd>
         <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
       </dl>
       <p class="cs-muted">The fingerprint identifies the saved content. Derived work remains separate.</p>
+      <p><strong>Current state:</strong> {h(presentation["explanation"])}</p>
+      <p><strong>Next:</strong> {h(presentation["recovery"])}</p>
     </section>
     {linked}
     <details class="cs-artifact-side-card" id="keywords">
@@ -3937,7 +4171,7 @@ def _source_card(item: dict[str, str]) -> str:
   <div class="cs-row">
     <a class="cs-button secondary" href="{h(item["href"])}">Inspect source</a>
     <a class="cs-button ghost" href="/audit">History</a>
-    {_chip("Searchable", "searchable")}
+    {_chip(item.get("state_label") or "Saved", item.get("state") or "saved")}
   </div>
   <div class="cs-provenance" aria-label="Full provenance">
     <dl class="cs-detail-grid">
@@ -4146,16 +4380,26 @@ def _source_items_from_refs(
         artifact = next((item for item in ctx["artifacts"] if item.get("artifact_id") == artifact_id), None)
         if not artifact:
             continue
+        presentation = _artifact_state(ctx, artifact)
         source_ref = storage_refs.get(ref) or artifact.get("checksum_sha256") or artifact.get("original_storage_ref")
+        preview = str(artifact.get("_preview") or "") or _safe_preview(
+            ctx.get("store"),
+            artifact,
+            260,
+            ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else None,
+            "source preview",
+        )
         items.append(
             {
                 "ref": ref,
                 "label": f"Source {index}",
                 "title": _artifact_title(artifact),
-                "snippet": snippets.get(ref) or str(artifact.get("_preview") or "Open source."),
+                "snippet": snippets.get(ref) or preview or "Open source.",
                 "href": _detail_href("artifacts", artifact_id),
                 "date": _display_date(artifact),
                 "fingerprint": _fingerprint(source_ref),
+                "state_label": str(presentation["label"]),
+                "state": str(presentation["state"]),
             }
         )
     return items
@@ -4194,7 +4438,7 @@ def _plain_source(source: dict[str, Any]) -> str:
     source_ref = str(source.get("ref") or source.get("path") or "").strip()
     if not source_ref or source_ref in {"home.drop_text", "home-paste", "cli_text"}:
         return source_type.title()
-    return _truncate(source_ref, 96)
+    return _truncate(redact_text(source_ref), 96)
 
 
 def _artifact_keywords(text: str, title: str) -> list[tuple[str, int]]:
@@ -4451,6 +4695,27 @@ def _home_script(scope: dict[str, Any]) -> str:
     }
     return payload;
   }
+  async function postFile(file) {
+    if (file.size > __MAX_UPLOAD_BYTES__) {
+      throw new Error("File exceeds the __MAX_UPLOAD_MB__ MB local upload limit.");
+    }
+    const response = await fetch(scopedUrl("/artifacts/upload"), {
+      method: "POST",
+      headers: {
+        "content-type": file.type || "application/octet-stream",
+        "accept": "application/json",
+        "x-cornerstone-filename": encodeURIComponent(file.name || "upload.bin")
+      },
+      body: file
+    });
+    const payload = await response.json();
+    if (!response.ok || payload.status === "failed" || payload.status === "denied") {
+      const error = new Error((payload.errors && payload.errors[0] && payload.errors[0].message) || "File upload failed.");
+      error.payload = payload;
+      throw error;
+    }
+    return payload;
+  }
   async function saveText(text, sourceRef) {
     setBusy(dropForm, saveButton, true, "Saving", "Save source");
     setStatus(dropStatus, "Saving source...", "loading");
@@ -4467,6 +4732,23 @@ def _home_script(scope: dict[str, Any]) -> str:
       setStatus(dropStatus, error.message, "error");
     } finally {
       setBusy(dropForm, saveButton, false, "Saving", "Save source");
+    }
+  }
+  async function saveFile(file) {
+    setBusy(dropForm, saveButton, true, "Archiving", "Save source");
+    if (fileButton) fileButton.disabled = true;
+    setStatus(dropStatus, "Archiving original file bytes...", "loading");
+    try {
+      const saved = await postFile(file);
+      const artifact = saved.artifact || {};
+      const id = artifact["artifact" + "_id"];
+      setStatus(dropStatus, "Original archived. Opening source...", "success");
+      if (id) window.location.href = scopedUrl("/artifacts/" + encodeURIComponent(id) + "?view=html");
+    } catch (error) {
+      setStatus(dropStatus, error.message, "error");
+    } finally {
+      setBusy(dropForm, saveButton, false, "Archiving", "Save source");
+      if (fileButton) fileButton.disabled = false;
     }
   }
   if (dropForm && dropText) {
@@ -4490,7 +4772,7 @@ def _home_script(scope: dict[str, Any]) -> str:
       event.preventDefault();
       const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
+      saveFile(file);
     });
   }
   if (fileButton && fileInput) {
@@ -4498,7 +4780,7 @@ def _home_script(scope: dict[str, Any]) -> str:
     fileInput.addEventListener("change", function () {
       const file = fileInput.files && fileInput.files[0];
       if (!file) return;
-      file.text().then(text => saveText(text, file.name)).catch(error => setStatus(dropStatus, error.message, "error"));
+      saveFile(file);
     });
   }
   document.querySelectorAll("[data-ask-suggestion]").forEach(button => {
@@ -4636,4 +4918,6 @@ def _home_script(scope: dict[str, Any]) -> str:
   }
 }());
 </script>
-""".replace("__SCOPE__", _script_json(safe_scope))
+""".replace("__SCOPE__", _script_json(safe_scope)).replace(
+        "__MAX_UPLOAD_BYTES__", str(MAX_BROWSER_UPLOAD_BYTES)
+    ).replace("__MAX_UPLOAD_MB__", str(MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)))

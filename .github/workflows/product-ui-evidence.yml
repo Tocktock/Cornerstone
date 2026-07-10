@@ -1,0 +1,125 @@
+name: Product UI evidence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/product-ui-evidence.yml"
+      - "docs/design/reference-images/**"
+      - "docs/design/tokens/**"
+      - "packages/cornerstone_cli/__init__.py"
+      - "packages/cornerstone_cli/acceptance.py"
+      - "packages/cornerstone_cli/artifacts.py"
+      - "packages/cornerstone_cli/briefing.py"
+      - "packages/cornerstone_cli/main.py"
+      - "packages/cornerstone_cli/product_access.py"
+      - "packages/cornerstone_cli/product_runtime.py"
+      - "packages/cornerstone_cli/product_ui.py"
+      - "packages/cornerstone_cli/product_visibility.py"
+      - "packages/cornerstone_cli/runtime.py"
+      - "packages/cornerstone_cli/ui/**"
+      - "packages/cornerstone_cli/validators.py"
+      - "scripts/capture_vs4_h01_ui_recovery_screenshots.py"
+      - "scripts/verify_design_system_docs.sh"
+      - "tests/scenario/test_product_ui_routes.py"
+      - "tests/scenario/test_scaffold_cli.py"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/product-ui-evidence.yml"
+      - "docs/design/reference-images/**"
+      - "docs/design/tokens/**"
+      - "packages/cornerstone_cli/__init__.py"
+      - "packages/cornerstone_cli/acceptance.py"
+      - "packages/cornerstone_cli/artifacts.py"
+      - "packages/cornerstone_cli/briefing.py"
+      - "packages/cornerstone_cli/main.py"
+      - "packages/cornerstone_cli/product_access.py"
+      - "packages/cornerstone_cli/product_runtime.py"
+      - "packages/cornerstone_cli/product_ui.py"
+      - "packages/cornerstone_cli/product_visibility.py"
+      - "packages/cornerstone_cli/runtime.py"
+      - "packages/cornerstone_cli/ui/**"
+      - "packages/cornerstone_cli/validators.py"
+      - "scripts/capture_vs4_h01_ui_recovery_screenshots.py"
+      - "scripts/verify_design_system_docs.sh"
+      - "tests/scenario/test_product_ui_routes.py"
+      - "tests/scenario/test_scaffold_cli.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-ui-evidence-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-product-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Compile the product UI slice
+        run: |
+          python -m py_compile \
+            packages/cornerstone_cli/__init__.py \
+            packages/cornerstone_cli/acceptance.py \
+            packages/cornerstone_cli/artifacts.py \
+            packages/cornerstone_cli/briefing.py \
+            packages/cornerstone_cli/main.py \
+            packages/cornerstone_cli/product_access.py \
+            packages/cornerstone_cli/product_runtime.py \
+            packages/cornerstone_cli/product_ui.py \
+            packages/cornerstone_cli/product_visibility.py \
+            packages/cornerstone_cli/runtime.py \
+            packages/cornerstone_cli/ui/__init__.py \
+            packages/cornerstone_cli/ui/icons.py \
+            packages/cornerstone_cli/ui/language.py \
+            packages/cornerstone_cli/ui/styles.py \
+            scripts/capture_vs4_h01_ui_recovery_screenshots.py
+
+      - name: Verify design-system inputs
+        run: scripts/verify_design_system_docs.sh
+
+      - name: Run focused product UI tests
+        run: python -m unittest tests.scenario.test_product_ui_routes
+
+      - name: Run focused CLI parity tests
+        run: |
+          python -m unittest \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_briefing_application_applies_one_config_to_brief_and_ask \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_artifact_ingest_show_and_audit_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_search_query_and_evidence_bundle
+
+      - name: Capture current-revision browser evidence
+        run: |
+          python scripts/capture_vs4_h01_ui_recovery_screenshots.py \
+            --output-dir "$RUNNER_TEMP/cornerstone-product-ui-capture" \
+            --state-dir "$RUNNER_TEMP/cornerstone-product-ui-state" \
+            --json | tee "$RUNNER_TEMP/cornerstone-product-ui-capture.json"
+
+      - name: Validate persisted capture manifest
+        run: |
+          python scripts/capture_vs4_h01_ui_recovery_screenshots.py \
+            --validate-manifest "$RUNNER_TEMP/cornerstone-product-ui-capture/screenshot-pack-manifest.json" \
+            --json
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: product-ui-evidence-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/cornerstone-product-ui-capture
+            ${{ runner.temp }}/cornerstone-product-ui-capture.json
+          if-no-files-found: error
+          retention-days: 14

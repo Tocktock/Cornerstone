@@ -9,10 +9,13 @@ import shutil
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
+from functools import lru_cache
 from time import perf_counter
 from pathlib import Path
 from typing import Any
 
+from cornerstone_cli.artifacts import normalize_media_type
+from cornerstone_cli.product_visibility import context_only_artifact, internal_product_lineage
 from cornerstone_cli.validators import redact_text
 
 
@@ -121,6 +124,26 @@ STRUCTURE_LABELS = {
     "claim": ("fact", "claim"),
     "fact": ("fact", "fact"),
 }
+
+
+@lru_cache(maxsize=1024)
+def _original_file_matches(
+    path_value: str,
+    modified_ns: int,
+    size_bytes: int,
+    checksum: str,
+) -> bool:
+    del modified_ns
+    path = Path(path_value)
+    digest = hashlib.sha256()
+    try:
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        actual_size = path.stat().st_size
+    except OSError:
+        return False
+    return actual_size == size_bytes and digest.hexdigest() == checksum
 
 
 def _vs5_value_plane_metadata(
@@ -569,6 +592,29 @@ def detect_unsafe_instructions(text: str) -> list[str]:
 
 def search_terms(text: str) -> list[str]:
     return [term for term in re.findall(r"[a-z0-9-]+", text.lower()) if term]
+
+
+def _rank_search_text(query: str, text: str) -> tuple[int, list[dict[str, str]], list[str]]:
+    haystack = text.lower()
+    normalized_query = query.lower()
+    score = 0
+    match_reasons: list[dict[str, str]] = []
+    retrieval_modes: set[str] = set()
+    if normalized_query and normalized_query in haystack:
+        score += 10
+        retrieval_modes.add("exact")
+        match_reasons.append({"type": "exact", "query": query})
+    for term in search_terms(query):
+        if term in haystack:
+            score += 1
+            retrieval_modes.add("keyword")
+            match_reasons.append({"type": "keyword", "query_term": term, "matched_term": term})
+        for alias in SEMANTIC_ALIASES.get(term, []):
+            if alias in haystack and alias != term:
+                score += 2
+                retrieval_modes.add("semantic")
+                match_reasons.append({"type": "semantic_alias", "query_term": term, "matched_term": alias})
+    return score, match_reasons, sorted(retrieval_modes)
 
 
 def _claim_support_terms(text: str) -> set[str]:
@@ -1247,6 +1293,30 @@ class LocalRuntimeStore:
             return None
         return _read_json(path)
 
+    def read_search_snapshot(
+        self,
+        snapshot_id: str,
+        scope: dict[str, str],
+        *,
+        reason: str,
+    ) -> dict[str, Any]:
+        snapshot = self.get_search_snapshot(snapshot_id)
+        if snapshot is None:
+            return {"status": "not_found", "record_kind": "search_snapshot"}
+        if snapshot.get("filters") != scope:
+            return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+        event = self.append_audit(
+            "search.snapshot.read",
+            scope,
+            {"type": "search_snapshot", "id": snapshot_id},
+            {
+                "reason": reason,
+                "query": redact_text(str(snapshot.get("query") or "")),
+                "result_count": snapshot.get("result_count", 0),
+            },
+        )
+        return {"snapshot": snapshot, "audit_event": event}
+
     def get_evidence_bundle(self, bundle_id: str) -> dict[str, Any] | None:
         path = self.evidence_bundle_path(bundle_id)
         if not path.exists():
@@ -1511,11 +1581,17 @@ class LocalRuntimeStore:
     def _artifact_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
         if not self.record_dir.exists():
             return []
-        records = []
-        for path in sorted(self.record_dir.glob("**/*.json")):
+        scoped_dir = self.record_dir / scope_key(scope)
+        paths = [*sorted(scoped_dir.glob("*.json")), *sorted(self.record_dir.glob("*.json"))]
+        records: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for path in paths:
             record = _read_json(path)
-            if record.get("scope") == scope:
-                records.append(record)
+            artifact_id = str(record.get("artifact_id") or "")
+            if record.get("scope") != scope or artifact_id in seen_ids:
+                continue
+            seen_ids.add(artifact_id)
+            records.append(record)
         return records
 
     def _claim_records(self, scope: dict[str, str]) -> list[dict[str, Any]]:
@@ -7909,22 +7985,40 @@ class LocalRuntimeStore:
         )
         return {"experience_export": export, "audit_event": event}
 
-    def _derived_text(self, artifact: dict[str, Any]) -> str:
+    def _derived_text_path(self, artifact: dict[str, Any]) -> Path | None:
         text_ref = artifact.get("derived", {}).get("text_ref")
         if not text_ref:
+            return None
+        root = self.artifact_dir.resolve()
+        path = (root / str(text_ref)).resolve()
+        if root not in path.parents or not path.is_file():
+            return None
+        return path
+
+    def derived_text_available(self, artifact: dict[str, Any]) -> bool:
+        return self._derived_text_path(artifact) is not None
+
+    def _derived_text(self, artifact: dict[str, Any]) -> str:
+        path = self._derived_text_path(artifact)
+        if path is None:
             return ""
-        path = self.artifact_dir / text_ref
-        if not path.exists():
-            return ""
-        return path.read_text()
+        return path.read_text(encoding="utf-8", errors="replace")
 
     def derived_text_preview(self, artifact: dict[str, Any], limit: int = 500) -> str:
-        return self._derived_text(artifact)[:limit].replace("\n", " ").strip()
+        path = self._derived_text_path(artifact)
+        if path is None:
+            return ""
+        with path.open(encoding="utf-8", errors="replace") as handle:
+            return handle.read(max(0, limit)).replace("\n", " ").strip()
 
     def derived_text_content(self, artifact: dict[str, Any], limit: int = 50_000) -> tuple[str, bool]:
         """Return a line-preserving source preview and whether it was truncated."""
 
-        text = self._derived_text(artifact)
+        path = self._derived_text_path(artifact)
+        if path is None:
+            return "", False
+        with path.open(encoding="utf-8", errors="replace") as handle:
+            text = handle.read(max(0, limit) + 1)
         return text[:limit], len(text) > limit
 
     def _ontology_label_key(self, value: str) -> str:
@@ -8898,6 +8992,8 @@ class LocalRuntimeStore:
                 return [], {"status": "not_found", "artifact_id": artifact_id}
             if artifact.get("scope") != scope:
                 return [], {"status": "scope_denied", "resource_scope": artifact.get("scope")}
+            if not self.original_available(artifact):
+                return [], {"status": "integrity_failed", "artifact_id": artifact_id}
             derived_text = self._derived_text(artifact)
             snippet = result.get("snippet") or derived_text[:180].replace("\n", " ").strip()
             if not snippet:
@@ -9321,6 +9417,8 @@ class LocalRuntimeStore:
         namespace_id: str,
         workspace_id: str,
         excluded_source_types: set[str] | None = None,
+        result_types: set[str] | None = None,
+        search_mode: str = "evidence",
     ) -> dict[str, Any]:
         started = perf_counter()
         scope = {
@@ -9331,14 +9429,46 @@ class LocalRuntimeStore:
         }
         query_terms = search_terms(query)
         excluded_source_types = {str(value).lower() for value in (excluded_source_types or set())}
+        selected_result_types = set(result_types or {"artifact", "ontology_object"})
+        artifact_records = self._artifact_records(scope) if "artifact" in selected_result_types else []
+        brief_records = self._brief_records(scope) if "brief" in selected_result_types else []
+        claim_records = self._claim_records(scope) if "claim" in selected_result_types else []
+        action_records = self._action_records(scope) if "action" in selected_result_types else []
+        if search_mode == "workspace":
+            _, internal_objects = internal_product_lineage(
+                [artifact_records, brief_records, claim_records, action_records, self._memory_records(scope)]
+            )
+            artifact_records = [
+                record
+                for record in artifact_records
+                if id(record) not in internal_objects and not context_only_artifact(record)
+            ]
+            brief_records = [record for record in brief_records if id(record) not in internal_objects]
+            claim_records = [record for record in claim_records if id(record) not in internal_objects]
+            action_records = [record for record in action_records if id(record) not in internal_objects]
         results: list[dict[str, Any]] = []
-        for artifact in self._artifact_records(scope):
+        for artifact in artifact_records:
             source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
             source_type = str(source.get("type") or source.get("source_type") or "").lower()
             if source_type in excluded_source_types:
                 continue
+            original_available = self.original_available(artifact)
+            if search_mode == "evidence" and not original_available:
+                continue
             text = self._derived_text(artifact)
-            haystack = text.lower()
+            source_ref = str(source.get("ref") or "").strip()
+            filename = str(source.get("filename") or "").strip()
+            first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
+            if filename:
+                title = filename
+            elif source_ref and source_ref not in {"home.drop_text", "home-paste", "cli_text", "local_file"}:
+                title = source_ref
+            elif first_line:
+                title = first_line[:96]
+            else:
+                title = "Saved source"
+            title = redact_text(title)
+            haystack = f"{title}\n{text}".lower()
             score = 0
             match_reasons: list[dict[str, str]] = []
             retrieval_modes: set[str] = set()
@@ -9364,13 +9494,20 @@ class LocalRuntimeStore:
                 if isinstance(candidate, str) and candidate.lower() in haystack:
                     first_term = candidate.lower()
                     break
-            start = haystack.find(first_term) if first_term else 0
+            text_haystack = text.lower()
+            start = text_haystack.find(first_term) if first_term and first_term in text_haystack else 0
             start = max(start, 0)
             snippet = text[start : start + 180].replace("\n", " ").strip()
             results.append(
                 {
                     "result_type": "artifact",
+                    "result_ref": f"artifact:{artifact['artifact_id']}",
                     "artifact_id": artifact["artifact_id"],
+                    "title": title,
+                    "created_at": artifact.get("provenance", {}).get("created_at") or source.get("ingested_at"),
+                    "derived_status": artifact.get("derived", {}).get("status"),
+                    "derived_text_available": self.derived_text_available(artifact),
+                    "original_available": original_available,
                     "score": score,
                     "snippet": snippet,
                     "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
@@ -9384,7 +9521,7 @@ class LocalRuntimeStore:
                     ],
                 }
             )
-        for ontology_object in self._ontology_object_records(scope):
+        for ontology_object in self._ontology_object_records(scope) if "ontology_object" in selected_result_types else []:
             haystack_parts = [
                 str(ontology_object.get("label", "")),
                 str(ontology_object.get("seed_type", "")),
@@ -9414,6 +9551,7 @@ class LocalRuntimeStore:
             results.append(
                 {
                     "result_type": "ontology_object",
+                    "result_ref": f"ontology_object:{ontology_object['ontology_object_id']}",
                     "ontology_object_id": ontology_object["ontology_object_id"],
                     "artifact_id": artifact_id,
                     "score": score,
@@ -9424,12 +9562,135 @@ class LocalRuntimeStore:
                     "evidence_refs": [f"ontology_object:{ontology_object['ontology_object_id']}", *evidence_refs],
                 }
             )
-        results.sort(key=lambda row: (-int(row["score"]), str(row.get("artifact_id") or row.get("ontology_object_id") or "")))
+        for brief in brief_records:
+            key_points = brief.get("key_points") if isinstance(brief.get("key_points"), list) else []
+            uncertainty = brief.get("uncertainty") if isinstance(brief.get("uncertainty"), list) else []
+            title = str(brief.get("title") or "Untitled Brief")
+            summary = str(brief.get("summary") or "")
+            haystack = " ".join([title, summary, *(str(item) for item in key_points), *(str(item) for item in uncertainty)])
+            score, match_reasons, retrieval_modes = _rank_search_text(query, haystack)
+            if score <= 0:
+                continue
+            bundle = brief.get("evidence_bundle") if isinstance(brief.get("evidence_bundle"), dict) else {}
+            evidence_refs = [
+                f"brief:{brief['brief_id']}",
+                *(str(ref) for ref in bundle.get("artifact_refs", []) if isinstance(ref, str)),
+            ]
+            results.append(
+                {
+                    "result_type": "brief",
+                    "result_ref": f"brief:{brief['brief_id']}",
+                    "brief_id": brief["brief_id"],
+                    "title": title,
+                    "snippet": summary or (str(key_points[0]) if key_points else "Brief draft"),
+                    "score": score,
+                    "scope": brief.get("scope"),
+                    "created_at": brief.get("created_at"),
+                    "record_status": brief.get("status"),
+                    "trust_state": brief.get("trust_state"),
+                    "output_mode": brief.get("output_mode"),
+                    "retrieval_modes": retrieval_modes,
+                    "match_reasons": match_reasons,
+                    "evidence_refs": list(dict.fromkeys(evidence_refs)),
+                }
+            )
+        for claim in claim_records:
+            statement = str(claim.get("statement") or "Untitled Claim")
+            score, match_reasons, retrieval_modes = _rank_search_text(query, statement)
+            if score <= 0:
+                continue
+            bundle = claim.get("evidence_bundle") if isinstance(claim.get("evidence_bundle"), dict) else {}
+            evidence_refs = [
+                f"claim:{claim['claim_id']}",
+                *(str(ref) for ref in bundle.get("artifact_refs", []) if isinstance(ref, str)),
+            ]
+            source_count = max(0, len(evidence_refs) - 1)
+            claim_snippet = str(claim.get("rationale") or "").strip()
+            if not claim_snippet:
+                claim_snippet = (
+                    f"Claim draft with {source_count} supporting source{'s' if source_count != 1 else ''}."
+                    if source_count
+                    else "Claim draft; no visible supporting source is attached."
+                )
+            results.append(
+                {
+                    "result_type": "claim",
+                    "result_ref": f"claim:{claim['claim_id']}",
+                    "claim_id": claim["claim_id"],
+                    "title": statement,
+                    "snippet": claim_snippet,
+                    "score": score,
+                    "scope": claim.get("scope"),
+                    "created_at": claim.get("created_at"),
+                    "record_status": claim.get("status"),
+                    "trust_state": claim.get("trust_state"),
+                    "retrieval_modes": retrieval_modes,
+                    "match_reasons": match_reasons,
+                    "evidence_refs": list(dict.fromkeys(evidence_refs)),
+                }
+            )
+        for action in action_records:
+            dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
+            impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
+            title = str(dry_run.get("goal") or action.get("title") or "Action draft")
+            target = str(dry_run.get("target") or impact.get("target") or "")
+            score, match_reasons, retrieval_modes = _rank_search_text(query, f"{title} {target}")
+            if score <= 0:
+                continue
+            evidence = action.get("evidence") if isinstance(action.get("evidence"), dict) else {}
+            if not evidence and isinstance(action.get("evidence_bundle"), dict):
+                evidence = action["evidence_bundle"]
+            evidence_refs = [
+                f"action:{action['action_id']}",
+                *(str(ref) for ref in evidence.get("artifact_refs", []) if isinstance(ref, str)),
+            ]
+            if action.get("source_claim_id"):
+                evidence_refs.append(f"claim:{action['source_claim_id']}")
+            execution = action.get("execution") if isinstance(action.get("execution"), dict) else {}
+            approval = action.get("approval") if isinstance(action.get("approval"), dict) else {}
+            results.append(
+                {
+                    "result_type": "action",
+                    "result_ref": f"action:{action['action_id']}",
+                    "action_id": action["action_id"],
+                    "title": title,
+                    "snippet": target or "Action preview",
+                    "score": score,
+                    "scope": action.get("scope"),
+                    "created_at": action.get("created_at"),
+                    "record_status": action.get("status"),
+                    "approval_status": approval.get("status"),
+                    "execution_status": execution.get("status"),
+                    "retrieval_modes": retrieval_modes,
+                    "match_reasons": match_reasons,
+                    "evidence_refs": list(dict.fromkeys(evidence_refs)),
+                }
+            )
+        results.sort(key=lambda row: (-int(row["score"]), str(row.get("result_ref") or "")))
+        for row in results:
+            for key in ("title", "snippet"):
+                if isinstance(row.get(key), str):
+                    row[key] = redact_text(row[key])
+            reasons = row.get("match_reasons")
+            if not isinstance(reasons, list):
+                continue
+            row["match_reasons"] = [
+                {
+                    str(key): redact_text(str(value)) if isinstance(value, str) else value
+                    for key, value in reason.items()
+                }
+                for reason in reasons
+                if isinstance(reason, dict)
+            ]
         duration_ms = round((perf_counter() - started) * 1000, 3)
+        persisted_query = redact_text(query)
         snapshot_base = {
             "schema_version": "cs.search_snapshot.v0",
-            "query": query,
+            "query": persisted_query,
+            "query_sha256": sha256_bytes(query.encode("utf-8")),
             "filters": scope,
+            "search_mode": search_mode,
+            "result_types": sorted(selected_result_types),
             "result_count": len(results),
             "results": results,
             "created_at": utc_now(),
@@ -9445,7 +9706,13 @@ class LocalRuntimeStore:
             "search.snapshot.created",
             scope,
             {"type": "search_snapshot", "id": snapshot_id},
-            {"query": query, "result_count": len(results), "duration_ms": duration_ms},
+            {
+                "query": persisted_query,
+                "search_mode": search_mode,
+                "result_types": sorted(selected_result_types),
+                "result_count": len(results),
+                "duration_ms": duration_ms,
+            },
         )
         return {"snapshot": snapshot, "audit_event": event}
 
@@ -9455,6 +9722,12 @@ class LocalRuntimeStore:
             return {"status": "not_found"}
         if snapshot.get("filters") != scope:
             return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+        if str(snapshot.get("search_mode") or "evidence") != "evidence":
+            return {
+                "status": "invalid_search_mode",
+                "required_search_mode": "evidence",
+                "actual_search_mode": snapshot.get("search_mode"),
+            }
         evidence_items, evidence_error = self._evidence_items_from_snapshot(snapshot, scope)
         if evidence_error is not None:
             return evidence_error
@@ -9859,12 +10132,19 @@ class LocalRuntimeStore:
         *,
         reason: str,
     ) -> dict[str, Any]:
-        normalized = record_kind.rstrip("s")
+        normalized = {
+            "artifacts": "artifact",
+            "briefs": "brief",
+            "claims": "claim",
+            "actions": "action",
+            "memories": "memory",
+        }.get(record_kind.lower(), record_kind.lower())
         getters = {
             "artifact": lambda value: self.get_artifact(value, scope),
             "brief": self.get_brief,
             "claim": self.get_claim,
             "action": self.get_action,
+            "memory": self.get_memory,
         }
         getter = getters.get(normalized)
         if getter is None:
@@ -9878,9 +10158,85 @@ class LocalRuntimeStore:
             f"{normalized}.read",
             scope,
             {"type": normalized, "id": record_id},
-            {"reason": reason},
+            {
+                "reason": reason,
+                "record_sha256": _json_hash(record),
+                "schema_version": record.get("schema_version"),
+            },
         )
         return {"record": record, "audit_event": event}
+
+    def original_available(self, artifact: dict[str, Any]) -> bool:
+        checksum = str(artifact.get("checksum_sha256") or "")
+        storage_ref = str(artifact.get("original_storage_ref") or "")
+        expected_size = artifact.get("original_size_bytes")
+        if (
+            not re.fullmatch(r"[0-9a-f]{64}", checksum)
+            or storage_ref != f"sha256:{checksum}"
+            or not isinstance(expected_size, int)
+            or expected_size < 0
+        ):
+            return False
+        original_root = self.original_dir.resolve()
+        original_path = (original_root / checksum).resolve()
+        if original_path.parent != original_root or not original_path.is_file():
+            return False
+        try:
+            stat = original_path.stat()
+        except OSError:
+            return False
+        if stat.st_size != expected_size:
+            return False
+        return _original_file_matches(
+            str(original_path),
+            stat.st_mtime_ns,
+            expected_size,
+            checksum,
+        )
+
+    def read_artifact_original(
+        self,
+        artifact_id: str,
+        scope: dict[str, str],
+        *,
+        reason: str,
+    ) -> dict[str, Any]:
+        artifact = self.get_artifact(artifact_id, scope)
+        if artifact is None:
+            return {"status": "not_found", "record_kind": "artifact"}
+        if artifact.get("scope") != scope:
+            return {
+                "status": "scope_denied",
+                "record_kind": "artifact",
+                "resource_scope": artifact.get("scope"),
+            }
+        checksum = str(artifact.get("checksum_sha256") or "")
+        storage_ref = str(artifact.get("original_storage_ref") or "")
+        if not re.fullmatch(r"[0-9a-f]{64}", checksum) or storage_ref != f"sha256:{checksum}":
+            return {"status": "integrity_failed", "reason": "invalid_original_storage_ref"}
+        original_root = self.original_dir.resolve()
+        original_path = (original_root / checksum).resolve()
+        if original_path.parent != original_root:
+            return {"status": "integrity_failed", "reason": "invalid_original_path"}
+        if not original_path.is_file():
+            return {"status": "integrity_failed", "reason": "original_missing"}
+        content = original_path.read_bytes()
+        expected_size = artifact.get("original_size_bytes")
+        if not isinstance(expected_size, int) or expected_size < 0:
+            return {"status": "integrity_failed", "reason": "invalid_original_size"}
+        if sha256_bytes(content) != checksum or len(content) != expected_size:
+            return {"status": "integrity_failed", "reason": "original_content_mismatch"}
+        event = self.append_audit(
+            "artifact.original.read",
+            scope,
+            {"type": "artifact", "id": artifact_id},
+            {
+                "reason": reason,
+                "checksum_sha256": checksum,
+                "size_bytes": len(content),
+            },
+        )
+        return {"artifact": artifact, "content": content, "audit_event": event}
 
     def create_unsupported_claim(self, statement: str, scope: dict[str, str]) -> dict[str, Any]:
         claim_base = {
@@ -13876,6 +14232,7 @@ class LocalRuntimeStore:
         question: str,
         scope: dict[str, str],
         *,
+        search_result: dict[str, Any] | None = None,
         model_provider: str = DEFAULT_MODEL_PROVIDER,
         generation_model: str = DEFAULT_GENERATION_MODEL,
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
@@ -13889,7 +14246,8 @@ class LocalRuntimeStore:
 
         # The Ask turn is stored as an Artifact before this method runs. It is
         # conversation context, not independent evidence for its own answer.
-        search_result = self.search(question, excluded_source_types={"conversation_turn"}, **scope)
+        if search_result is None:
+            search_result = self.search(question, excluded_source_types={"conversation_turn"}, **scope)
         snapshot = search_result["snapshot"]
         evidence_refs: list[str] = []
         meaningful_question_terms = {
@@ -14129,21 +14487,24 @@ class LocalRuntimeStore:
         _write_json(self.answer_path(answer["answer_id"]), answer)
         return {"answer": answer, "search_snapshot": snapshot, "audit_events": [search_result["audit_event"], event]}
 
-    def ingest_artifact(
+    def ingest_artifact_bytes(
         self,
-        input_path: Path,
+        data: bytes,
         *,
+        filename: str,
         tenant_id: str,
         owner_id: str,
         namespace_id: str,
         workspace_id: str,
         source: str,
+        source_ref: str | None = None,
+        source_path: str | None = None,
         media_type: str,
         derived_mode: str,
         trust: str,
         lineage_from: str | None,
     ) -> dict[str, Any]:
-        data = input_path.read_bytes()
+        media_type = normalize_media_type(media_type, filename)
         checksum = sha256_bytes(data)
         artifact_id = f"art_{checksum[:16]}"
         original_storage_ref = f"sha256:{checksum}"
@@ -14158,21 +14519,131 @@ class LocalRuntimeStore:
             "namespace_id": namespace_id,
             "workspace_id": workspace_id,
         }
+        observed_at = utc_now()
+        source_observation = {
+            "type": source,
+            "filename": filename,
+            "media_type": media_type,
+            "size_bytes": len(data),
+            "ingested_at": observed_at,
+        }
+        if source_ref:
+            source_observation["ref"] = source_ref
+        if source_path:
+            source_observation["path"] = source_path
+        raw_text_for_safety = data.decode("utf-8", errors="replace") if trust == "untrusted" else ""
+        blocked_attempts = detect_unsafe_instructions(raw_text_for_safety) if trust == "untrusted" else []
+        safety = {
+            "untrusted_evidence": trust == "untrusted",
+            "unsafe_instruction_detected": bool(blocked_attempts),
+            "blocked_attempt_count": len(blocked_attempts),
+            "blocked_attempts": blocked_attempts,
+            "tool_calls_created": 0,
+            "action_cards_created_from_untrusted_artifact": 0,
+            "external_http_calls": 0,
+            "authority_expanded": False,
+        }
         existing = self.get_artifact(artifact_id, scope)
         if existing and existing.get("scope") == scope:
+            updated = dict(existing)
+            source_history = list(updated.get("source_history", [])) if isinstance(updated.get("source_history"), list) else []
+            if not source_history and isinstance(updated.get("source"), dict):
+                source_history.append(dict(updated["source"]))
+            source_history.append(source_observation)
+            updated["source_history"] = source_history[-32:]
+            trust_downgraded = False
+            if trust == "untrusted":
+                trust_downgraded = bool(
+                    updated.get("trust_state") != "untrusted"
+                    or updated.get("safety", {}).get("untrusted_evidence") is not True
+                    or updated.get("safety", {}).get("unsafe_instruction_detected")
+                    != safety["unsafe_instruction_detected"]
+                )
+                updated["trust_state"] = "untrusted"
+                updated["safety"] = safety
+                updated["source"] = source_observation
+                provenance = updated.setdefault("provenance", {})
+                transformations = provenance.setdefault("transformations", [])
+                if "trust_forced_untrusted" not in transformations:
+                    transformations.append("trust_forced_untrusted")
+                if "source_rebound_to_untrusted_upload" not in transformations:
+                    transformations.append("source_rebound_to_untrusted_upload")
+            derived = updated.get("derived") if isinstance(updated.get("derived"), dict) else {}
+            derived_status = str(derived.get("status") or "").lower()
+            if derived_status in {"deferred", "unsupported"} and media_type.startswith("text/"):
+                try:
+                    later_text = data.decode("utf-8")
+                except UnicodeDecodeError:
+                    later_text = ""
+                if later_text and "\x00" not in later_text:
+                    redacted_text = redact_text(later_text)
+                    derived_text_ref = f"derived/{artifact_id}.txt"
+                    derived_path = self.artifact_dir / derived_text_ref
+                    derived_path.parent.mkdir(parents=True, exist_ok=True)
+                    derived_path.write_text(redacted_text)
+                    updated["media_type"] = media_type
+                    updated["derived"] = {
+                        "status": "ready",
+                        "media_type": "text/plain",
+                        "text_ref": derived_text_ref,
+                        "redacted": redacted_text != later_text,
+                    }
+                    transformations = updated.setdefault("provenance", {}).setdefault("transformations", [])
+                    if "derived_text_created_from_later_observation" not in transformations:
+                        transformations.append("derived_text_created_from_later_observation")
+            _write_json(self.artifact_path(artifact_id, scope), updated)
             event = self.append_audit(
                 "artifact.deduplicated",
                 scope,
                 {"type": "artifact", "id": artifact_id},
-                {"checksum_sha256": checksum, "original_storage_ref": original_storage_ref},
+                {
+                    "checksum_sha256": checksum,
+                    "original_storage_ref": original_storage_ref,
+                    "filename": redact_text(filename),
+                    "media_type": media_type,
+                    "size_bytes": len(data),
+                    "source_type": source,
+                    "effective_trust": updated.get("trust_state"),
+                    "trust_downgraded": trust_downgraded,
+                    "unsafe_instruction_detected": updated.get("safety", {}).get("unsafe_instruction_detected", False),
+                    "derived_status": updated.get("derived", {}).get("status"),
+                },
             )
+            audit_events = [event]
+            policy_decisions: list[dict[str, str]] = []
+            if blocked_attempts:
+                unsafe_event = self.append_audit(
+                    "unsafe_instruction.detected",
+                    scope,
+                    {"type": "artifact", "id": artifact_id},
+                    {
+                        "ingest_event": "artifact.deduplicated",
+                        "blocked_attempt_count": len(blocked_attempts),
+                        "tool_calls_created": 0,
+                        "action_cards_created_from_untrusted_artifact": 0,
+                        "external_http_calls": 0,
+                        "authority_expanded": False,
+                    },
+                )
+                audit_events.append(unsafe_event)
+                policy_decisions.append(
+                    {
+                        "id": f"policy_{unsafe_event['event_hash'][:16]}",
+                        "decision": "deny",
+                        "reason": "prompt_injection_blocked",
+                        "scope": "artifact_ingest",
+                    }
+                )
             return {
-                "artifact": existing,
+                "artifact": updated,
                 "deduplicated": True,
                 "audit_event": event,
+                "audit_events": audit_events,
+                "policy_decisions": policy_decisions,
+                "trust_downgraded": trust_downgraded,
             }
 
-        now = utc_now()
+        now = observed_at
         transformations = ["hash_calculated", "original_preserved"]
         derived: dict[str, Any]
         if derived_mode == "fail":
@@ -14204,18 +14675,7 @@ class LocalRuntimeStore:
             }
             transformations.append("derived_text_created")
 
-        raw_text_for_safety = data.decode("utf-8", errors="replace") if media_type.startswith("text/") else ""
-        blocked_attempts = detect_unsafe_instructions(raw_text_for_safety) if trust == "untrusted" else []
-        safety = {
-            "untrusted_evidence": trust == "untrusted",
-            "unsafe_instruction_detected": bool(blocked_attempts),
-            "blocked_attempt_count": len(blocked_attempts),
-            "blocked_attempts": blocked_attempts,
-            "tool_calls_created": 0,
-            "action_cards_created_from_untrusted_artifact": 0,
-            "external_http_calls": 0,
-            "authority_expanded": False,
-        }
+        source_record = source_observation
         record = {
             "schema_version": "cs.artifact.v0",
             "artifact_id": artifact_id,
@@ -14228,11 +14688,7 @@ class LocalRuntimeStore:
             "trust_state": trust,
             "safety": safety,
             "scope": scope,
-            "source": {
-                "type": source,
-                "path": str(input_path),
-                "ingested_at": now,
-            },
+            "source": source_record,
             "provenance": {
                 "created_at": now,
                 "lineage_from": lineage_from,
@@ -14250,6 +14706,10 @@ class LocalRuntimeStore:
                 "original_storage_ref": original_storage_ref,
                 "derived_status": derived["status"],
                 "trust_state": trust,
+                "filename": redact_text(filename),
+                "media_type": media_type,
+                "size_bytes": len(data),
+                "source_type": source,
             },
         )
         audit_events = [event]
@@ -14283,3 +14743,32 @@ class LocalRuntimeStore:
             "audit_events": audit_events,
             "policy_decisions": policy_decisions,
         }
+
+    def ingest_artifact(
+        self,
+        input_path: Path,
+        *,
+        tenant_id: str,
+        owner_id: str,
+        namespace_id: str,
+        workspace_id: str,
+        source: str,
+        media_type: str,
+        derived_mode: str,
+        trust: str,
+        lineage_from: str | None,
+    ) -> dict[str, Any]:
+        return self.ingest_artifact_bytes(
+            input_path.read_bytes(),
+            filename=input_path.name,
+            tenant_id=tenant_id,
+            owner_id=owner_id,
+            namespace_id=namespace_id,
+            workspace_id=workspace_id,
+            source=source,
+            source_path=str(input_path),
+            media_type=media_type,
+            derived_mode=derived_mode,
+            trust=trust,
+            lineage_from=lineage_from,
+        )

@@ -248,6 +248,14 @@ class ScaffoldCliTests(unittest.TestCase):
         store = mock.Mock(spec=LocalRuntimeStore)
         store.create_brief_from_evidence_bundle.return_value = {"brief": {}}
         store.answer_conversation.return_value = {"answer": {}}
+        store.search.return_value = {
+            "snapshot": {
+                "search_snapshot_id": "search-test",
+                "query": "What changed?",
+                "results": [],
+            },
+            "audit_event": {"event_id": "audit-search-test"},
+        }
         config = RuntimeModelConfig(
             provider="ollama",
             generation_model="generation:test",
@@ -256,16 +264,28 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         application = BriefingApplication(store, config)
         scope = {"workspace_id": "default"}
+        store.get_conversation.return_value = {"scope": scope}
 
         application.create_brief("bundle-test", scope)
         application.answer("conversation-test", "What changed?", scope)
 
         expected_config = config.store_kwargs()
         store.create_brief_from_evidence_bundle.assert_called_once_with("bundle-test", scope, **expected_config)
+        store.search.assert_called_once_with(
+            "What changed?",
+            **scope,
+            excluded_source_types={"conversation_turn"},
+            result_types={"artifact", "ontology_object"},
+            search_mode="evidence",
+        )
         store.answer_conversation.assert_called_once_with(
             "conversation-test",
             "What changed?",
             scope,
+            search_result={
+                "snapshot": store.search.return_value["snapshot"],
+                "audit_event": store.search.return_value["audit_event"],
+            },
             **expected_config,
         )
 
@@ -15679,6 +15699,93 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertTrue(show_payload["artifact"]["provenance"]["transformations"])
             self.assertTrue(show_payload["audit_refs"])
 
+            output_path = state_dir / "downloaded-original.bin"
+            download = run_cli(
+                "artifact",
+                "download",
+                artifact["artifact_id"],
+                "--output",
+                str(output_path),
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(download.returncode, 0, download.stdout + download.stderr)
+            download_payload = json.loads(download.stdout)
+            expected_bytes = (ROOT / "fixtures/vs0/packs/01_artifact_basic/input.txt").read_bytes()
+            self.assertEqual(output_path.read_bytes(), expected_bytes)
+            self.assertEqual(download_payload["size_bytes"], len(expected_bytes))
+            self.assertEqual(download_payload["ids"]["checksum_sha256"], hashlib.sha256(expected_bytes).hexdigest())
+            self.assertTrue(download_payload["evidence_refs"])
+            self.assertTrue(download_payload["audit_refs"])
+
+            cross_scope_path = state_dir / "cross-scope-original.bin"
+            cross_scope = run_cli(
+                "artifact",
+                "download",
+                artifact["artifact_id"],
+                "--output",
+                str(cross_scope_path),
+                "--owner-id",
+                "different-owner",
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(cross_scope.returncode, 3, cross_scope.stdout + cross_scope.stderr)
+            self.assertEqual(
+                json.loads(cross_scope.stdout)["errors"][0]["code"],
+                "CS_ARTIFACT_ORIGINAL_NOT_FOUND",
+            )
+            self.assertFalse(cross_scope_path.exists())
+
+            output_path.write_bytes(b"do not overwrite")
+            refused = run_cli(
+                "artifact",
+                "download",
+                artifact["artifact_id"],
+                "--output",
+                str(output_path),
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(refused.returncode, 1, refused.stdout + refused.stderr)
+            self.assertEqual(json.loads(refused.stdout)["errors"][0]["code"], "CS_ARTIFACT_OUTPUT_EXISTS")
+            self.assertEqual(output_path.read_bytes(), b"do not overwrite")
+
+            blocked_parent = state_dir / "not-a-directory"
+            blocked_parent.write_bytes(b"file")
+            write_failed = run_cli(
+                "artifact",
+                "download",
+                artifact["artifact_id"],
+                "--output",
+                str(blocked_parent / "original.bin"),
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(write_failed.returncode, 5, write_failed.stdout + write_failed.stderr)
+            self.assertEqual(
+                json.loads(write_failed.stdout)["errors"][0]["code"],
+                "CS_ARTIFACT_OUTPUT_WRITE_FAILED",
+            )
+
+            forced = run_cli(
+                "artifact",
+                "download",
+                artifact["artifact_id"],
+                "--output",
+                str(output_path),
+                "--force",
+                "--state-dir",
+                "tmp/test-artifact-cli",
+                "--json",
+            )
+            self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
+            self.assertEqual(output_path.read_bytes(), expected_bytes)
+
             audit = run_cli("audit", "verify", "--state-dir", "tmp/test-artifact-cli", "--json")
             self.assertEqual(audit.returncode, 0, audit.stdout + audit.stderr)
             audit_payload = json.loads(audit.stdout)
@@ -15834,9 +15941,35 @@ LocalRuntimeStore(state_dir).append_audit(
             self.assertEqual(snapshot["query"], "alpha-evidence-anchor")
             self.assertEqual(snapshot["result_count"], 1)
             self.assertIn("alpha-evidence-anchor", snapshot["results"][0]["snippet"])
+            self.assertEqual(search_payload["search_results"], snapshot["results"])
+            self.assertEqual(search_payload["search_page"]["mode"], "evidence")
+            self.assertEqual(search_payload["search_page"]["type"], "all")
+            self.assertEqual(search_payload["search_page"]["result_count"], 1)
+            self.assertEqual(search_payload["search_facets"]["sources"], 1)
             self.assertTrue(any(ref.startswith("search_snapshot:") for ref in search_payload["evidence_refs"]))
             self.assertTrue(any(ref.startswith("artifact:") for ref in search_payload["evidence_refs"]))
             self.assertTrue(search_payload["audit_refs"])
+
+            workspace_search = run_cli(
+                "search",
+                "query",
+                "alpha-evidence-anchor",
+                "--mode",
+                "workspace",
+                "--type",
+                "sources",
+                "--page-size",
+                "1",
+                "--state-dir",
+                "tmp/test-search-evidence",
+                "--json",
+            )
+            self.assertEqual(workspace_search.returncode, 0, workspace_search.stdout + workspace_search.stderr)
+            workspace_payload = json.loads(workspace_search.stdout)
+            self.assertEqual(workspace_payload["search_page"]["mode"], "workspace")
+            self.assertEqual(workspace_payload["search_page"]["type"], "sources")
+            self.assertEqual(workspace_payload["search_page"]["page_size"], 1)
+            self.assertEqual(workspace_payload["search_results"][0]["result_type"], "artifact")
 
             bundle = run_cli(
                 "evidence",
