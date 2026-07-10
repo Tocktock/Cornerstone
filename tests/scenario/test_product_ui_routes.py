@@ -198,6 +198,9 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn('aria-label="Search the active workspace"', html)
                 self.assertIn('aria-label="Open Review inbox with 0 items"', html)
                 self.assertIn('<details class="cs-help-menu">', html)
+                self.assertIn('aria-label="Open help"', html)
+                self.assertIn('<span class="cs-help-glyph" aria-hidden="true">?</span>', html)
+                self.assertNotIn('/assets/icons/help.svg', html)
                 self.assertIn('aria-label="Open local workspace settings"', html)
                 self.assertIn("cs-nav-count", html)
                 for label in ["Home", "Search", "Artifacts", "Claims", "Actions"]:
@@ -887,6 +890,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn(".cs-search button { width: 44px; min-width: 44px; min-height: 44px;", css)
         self.assertIn(".cs-review-link:focus-visible { border-color: var(--cs-color-border-focus); box-shadow: var(--cs-shadow-focus); }", css)
         self.assertIn(".cs-help-menu > summary:focus-visible { border-color: var(--cs-color-border-focus); box-shadow: var(--cs-shadow-focus); }", css)
+        self.assertIn(".cs-help-glyph {", css)
+        self.assertIn("font-size: 20px;", css)
         self.assertRegex(css, re.compile(r"\.cs-icon-button \{.*?width: 44px;.*?height: 44px;", re.DOTALL))
         self.assertIn(".cs-status[hidden] { display: none; }", css)
         self.assertIn("@media (prefers-reduced-motion: reduce)", css)

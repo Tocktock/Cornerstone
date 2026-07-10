@@ -1266,7 +1266,7 @@ def _topbar(q: str, ctx: dict[str, Any]) -> str:
   <div class="cs-topbar-actions" aria-label="Workspace tools">
     <a class="cs-review-link" href="/inbox" aria-label="Open Review inbox with {h(review_count)} item{"s" if review_count != 1 else ""}">{icon("review")}<span>Review</span><strong>{h(review_count)}</strong></a>
     <details class="cs-help-menu">
-      <summary class="cs-icon-button" aria-label="Help">{icon("help")}</summary>
+      <summary class="cs-icon-button" aria-label="Open help"><span class="cs-help-glyph" aria-hidden="true">?</span></summary>
       <div class="cs-help-popover">
         <strong>Start with Drop or Ask</strong>
         <p>Save a source, ask a question, then open the Brief and its sources before making a decision.</p>

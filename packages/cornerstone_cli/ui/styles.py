@@ -317,6 +317,16 @@ button, input, textarea, select {{ font: inherit; }}
 .cs-help-menu[open] > summary,
 .cs-help-menu > summary:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
 .cs-help-menu > summary:focus-visible {{ border-color: var(--cs-color-border-focus); box-shadow: var(--cs-shadow-focus); }}
+.cs-help-glyph {{
+  display: block;
+  width: 20px;
+  height: 20px;
+  color: var(--cs-color-text-primary);
+  font-size: 20px;
+  font-weight: var(--cs-typography-weight-bold);
+  line-height: 20px;
+  text-align: center;
+}}
 .cs-help-popover {{
   position: absolute;
   z-index: 4;
