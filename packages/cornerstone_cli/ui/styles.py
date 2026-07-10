@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -3537,6 +3539,17 @@ button, input, textarea, select {{ font: inherit; }}
   .cs-home-layout.has-activity {{ grid-template-columns: 1fr; }}
   .cs-home-activity {{ position: static; }}
 }}
+.cs-pagination {{
+  margin-top: var(--cs-space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+}}
+.cs-pagination > span:not(.cs-button) {{ font-variant-numeric: tabular-nums; }}
+.cs-pagination .cs-button[aria-disabled="true"] {{ opacity: .5; cursor: default; pointer-events: none; }}
+.cs-search-receipt, .cs-access-receipt {{ margin-top: var(--cs-space-5); }}
 @media (max-width: 980px) {{
   .cs-shell {{ grid-template-columns: 1fr; padding-bottom: calc(68px + env(safe-area-inset-bottom)); }}
   .cs-main {{ order: 1; display: flex; flex-direction: column; }}
@@ -3723,6 +3736,19 @@ button, input, textarea, select {{ font: inherit; }}
   .cs-audit-filters .cs-button {{ width: 100%; }}
 }}
 """
+
+
+@lru_cache(maxsize=8)
+def _style_asset_cached(root_value: str) -> tuple[str, bytes, str]:
+    css = render_styles(Path(root_value).resolve()).encode("utf-8")
+    digest = hashlib.sha256(css).hexdigest()
+    return f"cornerstone.{digest[:16]}.css", css, digest
+
+
+def style_asset(root: Path) -> tuple[str, bytes, str]:
+    """Return the immutable content-addressed product stylesheet."""
+
+    return _style_asset_cached(str(root.resolve()))
 
 
 def _css_name(value: str) -> str:

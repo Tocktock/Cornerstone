@@ -96,11 +96,14 @@ Then open the local UI, or drive the same loop from another terminal:
 ```sh
 export PATH="$PWD:$PATH"
 cornerstone artifact ingest --text "paste anything messy here" --source user_paste --json
+cornerstone artifact download <artifact_id> --output ./saved-original.bin --json
 cornerstone search query "your topic" --json
 cornerstone evidence bundle create --search-snapshot-id <id> --json
 cornerstone brief create --evidence-bundle-id <id> --json
 cornerstone claim create --evidence-bundle-id <id> --statement "..." --json
 ```
+
+`artifact download` is the scoped, audited read path for the immutable original. It writes bytes only to the required `--output` path, refuses to replace an existing path unless `--force` is explicit, and never writes binary data to stdout. This is a local read/export, not a product mutation or external action, so it has no dry-run; it does append an Artifact-read audit event. `--json` returns the schema version, tenant/owner/namespace/workspace scope, Artifact ID and checksum, size and media type, evidence refs, and audit refs. Exit codes are `0` success, `1` invalid input or an existing output, `3` original unavailable (missing or outside the requested scope, intentionally non-disclosing), and `5` integrity or output-write failure. The deterministic success, no-overwrite, force, cross-scope, write-failure, and audit transcript is exercised by `ScaffoldCliTests.test_artifact_ingest_show_and_audit_verify`.
 
 **What you will see today:** the full evidence/audit loop working structurally — and a brief that is still extractive (your own text back, labeled and linked). That gap is VS5. Do not demo this as an intelligent product yet.
 

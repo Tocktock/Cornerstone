@@ -6,11 +6,18 @@ import subprocess
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, unquote, urlparse
 from datetime import datetime, timezone
 
 from cornerstone_cli import __version__
+from cornerstone_cli.artifacts import (
+    ArtifactApplication,
+    ArtifactUploadError,
+    MAX_BROWSER_UPLOAD_BYTES,
+    normalize_media_type,
+)
 from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
+from cornerstone_cli.product_access import ProductAccessApplication, SearchRequest
 from cornerstone_cli.product_ui import (
     PRODUCT_DETAIL_ROUTES,
     PRODUCT_LIST_ROUTES,
@@ -21,6 +28,7 @@ from cornerstone_cli.product_ui import (
     render_product_page,
 )
 from cornerstone_cli.runtime import LocalRuntimeStore
+from cornerstone_cli.ui.styles import style_asset
 
 
 DEFAULT_SCOPE = {
@@ -34,7 +42,9 @@ API_ROUTES = [
     "GET /health",
     "GET /ready",
     "POST /artifacts",
+    "POST /artifacts/upload",
     "GET /artifacts/{artifact_id}",
+    "GET /artifacts/{artifact_id}/original",
     "POST /conversations",
     "POST /conversations/{conversation_id}/answers",
     "POST /conversations/{conversation_id}/promote",
@@ -5394,6 +5404,14 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         return BriefingApplication(self.store, self.server.model_config)
 
     @property
+    def artifacts(self) -> ArtifactApplication:
+        return ArtifactApplication(self.store)
+
+    @property
+    def access(self) -> ProductAccessApplication:
+        return ProductAccessApplication(self.store)
+
+    @property
     def root(self) -> Path:
         return self.server.root
 
@@ -5432,6 +5450,33 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_css(self, data: bytes, digest: str) -> None:
+        etag = f'"sha256-{digest}"'
+        if self.headers.get("if-none-match") == etag:
+            self.send_response(304)
+            self.send_header("etag", etag)
+            self.send_header("cache-control", "public, max-age=31536000, immutable")
+            self.end_headers()
+            return
+        self.send_response(200)
+        self.send_header("content-type", "text/css; charset=utf-8")
+        self.send_header("content-length", str(len(data)))
+        self.send_header("cache-control", "public, max-age=31536000, immutable")
+        self.send_header("etag", etag)
+        self.send_header("x-content-type-options", "nosniff")
+        self.end_headers()
+        self.wfile.write(data)
+
+    def _send_binary(self, content: bytes, *, media_type: str, filename: str) -> None:
+        self.send_response(200)
+        self.send_header("content-type", normalize_media_type(media_type, filename))
+        self.send_header("content-length", str(len(content)))
+        self.send_header("content-disposition", f"attachment; filename*=UTF-8''{quote(filename, safe='')}")
+        self.send_header("cache-control", "private, no-store")
+        self.send_header("x-content-type-options", "nosniff")
+        self.end_headers()
+        self.wfile.write(content)
+
     def _body(self) -> dict[str, Any]:
         length = int(self.headers.get("content-length", "0") or "0")
         if length <= 0:
@@ -5440,6 +5485,34 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if not raw:
             return {}
         return json.loads(raw.decode("utf-8"))
+
+    def _upload_body(self) -> bytes:
+        raw_length = self.headers.get("content-length")
+        if raw_length is None:
+            raise ArtifactUploadError(
+                "CS_ARTIFACT_UPLOAD_LENGTH_REQUIRED",
+                "File upload requires a Content-Length header.",
+                status_code=411,
+            )
+        try:
+            length = int(raw_length)
+        except ValueError as error:
+            raise ArtifactUploadError(
+                "CS_ARTIFACT_UPLOAD_LENGTH_INVALID",
+                "File upload Content-Length is invalid.",
+            ) from error
+        if length < 0:
+            raise ArtifactUploadError("CS_ARTIFACT_UPLOAD_LENGTH_INVALID", "File upload Content-Length is invalid.")
+        if length > MAX_BROWSER_UPLOAD_BYTES:
+            raise ArtifactUploadError(
+                "CS_ARTIFACT_UPLOAD_TOO_LARGE",
+                f"File exceeds the {MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)} MB local upload limit.",
+                status_code=413,
+            )
+        content = self.rfile.read(length)
+        if len(content) != length:
+            raise ArtifactUploadError("CS_ARTIFACT_UPLOAD_INCOMPLETE", "File upload ended before all bytes arrived.")
+        return content
 
     def _path_parts(self) -> list[str]:
         return [part for part in urlparse(self.path).path.split("/") if part]
@@ -5481,6 +5554,16 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parts = self._path_parts()
         query = self._query()
+        if len(parts) == 2 and parts[0] == "assets" and parts[1].startswith("cornerstone.") and parts[1].endswith(".css"):
+            stylesheet_name, stylesheet_data, stylesheet_digest = style_asset(self.root)
+            if parts[1] == stylesheet_name:
+                self._send_css(stylesheet_data, stylesheet_digest)
+                return
+            self._send_json(
+                _json_response("not_found", errors=[{"code": "CS_UI_STYLESHEET_NOT_FOUND", "message": "UI stylesheet not found."}]),
+                404,
+            )
+            return
         if len(parts) == 3 and parts[:2] == ["assets", "icons"]:
             icon_name = parts[2]
             icon_path = (self.root / "packages" / "cornerstone_cli" / "ui" / "static" / "icons" / icon_name).resolve()
@@ -5545,6 +5628,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "artifacts":
             self._show_artifact(parts[1])
             return
+        if len(parts) == 3 and parts[0] == "artifacts" and parts[2] == "original":
+            self._show_artifact_original(parts[1])
+            return
         if len(parts) == 2 and parts[0] == "search-snapshots":
             self._show_search_snapshot(parts[1])
             return
@@ -5576,6 +5662,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         parts = self._path_parts()
+        if parts == ["artifacts", "upload"]:
+            self._ingest_uploaded_artifact()
+            return
         try:
             body = self._body()
         except json.JSONDecodeError as error:
@@ -5820,14 +5909,15 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _show_search_snapshot(self, snapshot_id: str) -> None:
         scope = self._query_scope()
-        snapshot = self.store.get_search_snapshot(snapshot_id)
-        if snapshot is None:
+        result = self.store.read_search_snapshot(snapshot_id, scope, reason="api_snapshot_show")
+        if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_SEARCH_SNAPSHOT_NOT_FOUND", "message": "Search snapshot not found."}]), 404)
             return
-        if snapshot.get("filters") != scope:
+        if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Search snapshot is outside the requested scope."}]), 403)
             return
-        event = self.store.append_audit("search.snapshot.read", scope, {"type": "search_snapshot", "id": snapshot_id}, {"reason": "api_snapshot_show"})
+        snapshot = result["snapshot"]
+        event = result["audit_event"]
         self._send_json(
             _json_response(
                 "success",
@@ -5942,12 +6032,10 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         scope = _scope_from_body(body)
         text_value = body.get("text")
         if isinstance(text_value, str) and text_value.strip():
-            result = self.store.ingest_text_artifact(
+            result = self.artifacts.ingest_paste(
                 text_value,
                 scope,
-                source_type="user_paste",
                 source_ref=str(body.get("source_ref", "home.drop_text")),
-                trust="untrusted",
             )
             artifact = result["artifact"]
             self._send_json(
@@ -5995,6 +6083,66 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
         )
 
+    def _ingest_uploaded_artifact(self) -> None:
+        try:
+            content = self._upload_body()
+            result = self.artifacts.ingest_file(
+                content,
+                self._query_scope(),
+                filename=unquote(self.headers.get("x-cornerstone-filename", "upload.bin")),
+                media_type=self.headers.get("content-type", "application/octet-stream"),
+            )
+        except ArtifactUploadError as error:
+            self._send_json(
+                _json_response("failed", errors=[{"code": error.code, "message": str(error)}]),
+                error.status_code,
+            )
+            return
+        artifact = result["artifact"]
+        self._send_json(
+            _json_response(
+                "success",
+                artifact=artifact,
+                deduplicated=result.get("deduplicated", False),
+                file_ingest=True,
+                evidence_refs=[f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"],
+                audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [result["audit_event"]])],
+                policy_decision_refs=[f"policy:{decision['id']}" for decision in result.get("policy_decisions", [])],
+            )
+        )
+
+    def _show_artifact_original(self, artifact_id: str) -> None:
+        result = self.artifacts.read_original(
+            artifact_id,
+            self._query_scope(),
+            reason="api_artifact_original_download",
+        )
+        if result.get("status") == "not_found":
+            self._send_json(
+                _json_response("not_found", errors=[{"code": "CS_ARTIFACT_ORIGINAL_NOT_FOUND", "message": "Artifact original was not found."}]),
+                404,
+            )
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(
+                _json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."}]),
+                403,
+            )
+            return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response("failed", errors=[{"code": "CS_ARTIFACT_ORIGINAL_INTEGRITY_FAILED", "message": "Artifact original failed its checksum or size check."}]),
+                409,
+            )
+            return
+        artifact = result["artifact"]
+        source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
+        self._send_binary(
+            result["content"],
+            media_type=str(artifact.get("media_type") or "application/octet-stream"),
+            filename=str(source.get("filename") or f"{artifact_id}.bin"),
+        )
+
     def _start_conversation(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
         message = str(body.get("message", "")).strip()
@@ -6016,12 +6164,31 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _answer_conversation(self, conversation_id: str, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
-        result = self.briefing.answer(conversation_id, str(body.get("question", "")), scope)
+        question = str(body.get("question", "")).strip()
+        if not question:
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_QUESTION_REQUIRED", "message": "Question is required."}],
+                ),
+                400,
+            )
+            return
+        result = self.briefing.answer(conversation_id, question, scope)
         if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_NOT_FOUND", "message": "Conversation not found."}]), 404)
             return
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Conversation is outside the requested scope."}]), 403)
+            return
+        if result.get("status"):
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_ANSWER_FAILED", "message": str(result.get("status"))}],
+                ),
+                400,
+            )
             return
         answer = result["answer"]
         snapshot = result["search_snapshot"]
@@ -6113,23 +6280,78 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _search(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
-        query = str(body.get("query", ""))
+        query = str(body.get("query", "")).strip()
+        if not query:
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_SEARCH_QUERY_REQUIRED", "message": "Search query is required."}],
+                ),
+                400,
+            )
+            return
         excluded_source_types = {
             str(value)
             for value in body.get("excluded_source_types", [])
             if isinstance(value, str)
         }
-        result = self.store.search(query, **scope, excluded_source_types=excluded_source_types)
-        snapshot = result["snapshot"]
-        refs = [f"search_snapshot:{snapshot['search_snapshot_id']}"]
-        for row in snapshot.get("results", []):
-            refs.extend(row.get("evidence_refs", []))
+        try:
+            page = int(body.get("page", 1) or 1)
+            page_size = int(body.get("page_size", 20) or 20)
+        except (TypeError, ValueError):
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_SEARCH_PAGE_INVALID", "message": "Search page and page_size must be integers."}],
+                ),
+                400,
+            )
+            return
+        result = self.access.search(
+            SearchRequest(
+                query=query,
+                scope=scope,
+                mode=str(body.get("mode") or "evidence"),
+                type_filter=str(body.get("type") or body.get("type_filter") or "all"),
+                page=page,
+                page_size=page_size,
+                snapshot_id=str(body.get("snapshot_id")) if body.get("snapshot_id") else None,
+                excluded_source_types=frozenset(excluded_source_types),
+            )
+        )
+        if result.get("status") == "not_found":
+            self._send_json(_json_response("failed", errors=[{"code": "CS_SEARCH_SNAPSHOT_NOT_FOUND", "message": "Search snapshot not found."}]), 404)
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Search snapshot is outside the requested scope."}]), 403)
+            return
+        if result.get("status") != "success":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_SEARCH_REQUEST_INVALID", "message": str(result.get("status") or "Search request is invalid.")}],
+                ),
+                400,
+            )
+            return
+        snapshot = result["search_snapshot"]
         self._send_json(
             _json_response(
                 "success",
                 search_snapshot=snapshot,
-                evidence_refs=refs,
-                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                search_results=result["results"],
+                ordered_result_refs=result["ordered_result_refs"],
+                facets=result["facets"],
+                pagination={
+                    "page": result["page"],
+                    "page_size": result["page_size"],
+                    "page_count": result["page_count"],
+                    "page_start": result["page_start"],
+                    "page_end": result["page_end"],
+                    "result_count": result["result_count"],
+                },
+                evidence_refs=result["evidence_refs"],
+                audit_refs=result["audit_refs"],
             )
         )
 
@@ -6141,6 +6363,36 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Search snapshot is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "invalid_search_mode":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_EVIDENCE_SEARCH_REQUIRED",
+                            "message": "Evidence Bundles require an evidence-mode Search Snapshot.",
+                            "resolution_path": "Run Search with mode=evidence, then create the Evidence Bundle from that snapshot.",
+                        }
+                    ],
+                ),
+                400,
+            )
+            return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_EVIDENCE_ARTIFACT_INTEGRITY_FAILED",
+                            "message": "Evidence Bundle creation requires every source original to pass integrity checks.",
+                            "artifact_id": result.get("artifact_id"),
+                        }
+                    ],
+                ),
+                409,
+            )
             return
         bundle = result["bundle"]
         self._send_json(

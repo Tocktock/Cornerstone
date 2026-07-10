@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 from urllib.parse import urlparse
 
+from cornerstone_cli.product_access import ProductAccessApplication, SearchRequest
 from cornerstone_cli.runtime import (
     DEFAULT_EMBEDDING_MODEL,
     DEFAULT_GENERATION_MODEL,
@@ -86,10 +87,30 @@ class BriefingApplication:
         )
 
     def answer(self, conversation_id: str, question: str, scope: dict[str, str]) -> dict[str, Any]:
+        conversation = self.store.get_conversation(conversation_id)
+        if conversation is None:
+            return {"status": "not_found", "resource": "conversation"}
+        if conversation.get("scope") != scope:
+            return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
+        search = ProductAccessApplication(self.store).search(
+            SearchRequest(
+                query=question,
+                scope=scope,
+                mode="evidence",
+                page_size=100,
+                excluded_source_types=frozenset({"conversation_turn"}),
+            )
+        )
+        if search.get("status") != "success":
+            return search
         return self.store.answer_conversation(
             conversation_id,
             question,
             scope,
+            search_result={
+                "snapshot": search["search_snapshot"],
+                "audit_event": search["audit_event"],
+            },
             **self.model_config.store_kwargs(),
         )
 

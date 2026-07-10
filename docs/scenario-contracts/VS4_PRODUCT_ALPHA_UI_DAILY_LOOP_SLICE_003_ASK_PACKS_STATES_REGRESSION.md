@@ -139,7 +139,7 @@ This slice is done when:
 
 - Ask: `cornerstone conversation start --message <question-or-input> --json`; `cornerstone conversation answer <conversation_id> --question <question> --json`.
 - Ask promotion: `cornerstone conversation promote <conversation_id> --kind claim --statement <statement> --evidence-bundle-id <id> --json`.
-- Source / Artifact: `cornerstone artifact ingest <path> --json`.
+- Source / Artifact: `cornerstone artifact ingest <path> --json`; `cornerstone artifact show <artifact_id> --json`; `cornerstone artifact download <artifact_id> --output <path> [--force] --json`.
 - Search: `cornerstone search query <query> --json`.
 - Evidence: `cornerstone evidence bundle create --search-snapshot-id <id> --json`.
 - Brief: `cornerstone brief create --evidence-bundle-id <id> --json`; `cornerstone brief show <brief_id> --json`.

@@ -145,7 +145,7 @@ This slice is done when:
 
 ## CLI Parity
 
-- Source / Artifact: `cornerstone artifact ingest <path> --json`.
+- Source / Artifact: `cornerstone artifact ingest <path> --json`; `cornerstone artifact show <artifact_id> --json`; `cornerstone artifact download <artifact_id> --output <path> [--force] --json`.
 - Search: `cornerstone search query <query> --json`.
 - Evidence: `cornerstone evidence bundle create --search-snapshot-id <id> --json`.
 - Brief: `cornerstone brief create --evidence-bundle-id <id> --json`; `cornerstone brief show <brief_id> --json`.
