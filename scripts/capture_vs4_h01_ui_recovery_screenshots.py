@@ -53,6 +53,7 @@ PRODUCT_RUNTIME_SOURCES = (
 UI_ASSET_ROOT = ROOT / "packages/cornerstone_cli/ui"
 REFERENCE_IMAGE_ROOT = ROOT / "docs/design/reference-images"
 DESIGN_TOKEN_PATH = ROOT / "docs/design/tokens/cornerstone_design_tokens_v0_3.json"
+DEVTOOLS_READY_TIMEOUT_SECONDS = 20.0
 
 FORBIDDEN_PRODUCT_RE = re.compile(
     r"local_scenario_ready=|vs0_runtime_ready=|production_release_ready=|real_external_http_calls=|"
@@ -689,11 +690,14 @@ def capture_page(
     try:
         process = _launch_cdp_chrome(chrome, profile_dir, debug_port, window_size)
         version = None
-        for _ in range(80):
+        devtools_deadline = time.monotonic() + DEVTOOLS_READY_TIMEOUT_SECONDS
+        while time.monotonic() < devtools_deadline:
             try:
                 version = _json_urlopen(f"http://127.0.0.1:{debug_port}/json/version")
                 break
             except OSError:
+                if process.poll() is not None:
+                    raise RuntimeError(f"devtools_process_exited:{process.returncode}")
                 time.sleep(0.1)
         if version is None:
             raise TimeoutError("devtools_version")

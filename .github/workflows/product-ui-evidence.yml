@@ -102,6 +102,7 @@ jobs:
 
       - name: Capture current-revision browser evidence
         run: |
+          set -o pipefail
           python scripts/capture_vs4_h01_ui_recovery_screenshots.py \
             --output-dir "$RUNNER_TEMP/cornerstone-product-ui-capture" \
             --state-dir "$RUNNER_TEMP/cornerstone-product-ui-state" \
