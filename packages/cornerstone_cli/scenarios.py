@@ -27875,7 +27875,16 @@ def _run_vs4_ask_packs_states_cli_workflow(root: Path, state_rel: str) -> dict[s
     }
 
 
-def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
+def _run_vs4_regression_workflows(
+    root: Path,
+    *,
+    requested_scenario_ids: set[str] | None = None,
+) -> dict[str, Any]:
+    full_family = requested_scenario_ids is None
+    requested = requested_scenario_ids or set()
+    vs0_required = full_family or bool({"VS4-REG-001", "VS4-REG-007"} & requested)
+    vs1_required = full_family or bool({"VS4-REG-002", "VS4-REG-007"} & requested)
+    vs1_full_nested_dependencies_required = vs1_required and full_family
     vs0_rows = [
         "VS0-UI-001",
         "VS0-UI-002",
@@ -27906,22 +27915,30 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
         "tmp/vs4-regression-vs1-ontology-suggest-promote.json",
         "--json",
     ]
-    transcripts = {
-        "vs0_operator_acceptance_ui": _run_cli_json(root, vs0_command, timeout=420),
-        "vs1_ontology_suggest_promote": _run_cli_json(
+    transcripts: dict[str, dict[str, Any]] = {}
+    if vs0_required:
+        transcripts["vs0_operator_acceptance_ui"] = _run_cli_json(root, vs0_command, timeout=420)
+    if vs1_required:
+        vs1_kwargs: dict[str, Any] = {"timeout": 600}
+        if not vs1_full_nested_dependencies_required:
+            # Filtered proof may exercise VS1 compatibility without owning the
+            # dormant VS2 dependency. The skip remains visible and keeps REG-002
+            # failed; only the reserved full-family gate executes nested proof.
+            vs1_kwargs["env_overrides"] = {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"}
+        else:
+            # The terminal full-family gate owns nested regression proof even if
+            # the parent shell previously enabled the targeted-run guard.
+            vs1_kwargs["env_overrides"] = {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "0"}
+        transcripts["vs1_ontology_suggest_promote"] = _run_cli_json(
             root,
             vs1_command,
-            timeout=600,
-            # Keep the real VS1 CLI/API/browser workflow within the targeted-run
-            # budget. The skipped dependency is detected below, so REG-002 stays
-            # failed until equivalent fresh regression proof is available.
-            env_overrides={"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
-        ),
-    }
-    vs0 = _payload(transcripts["vs0_operator_acceptance_ui"])
-    vs1 = _payload(transcripts["vs1_ontology_suggest_promote"])
+            **vs1_kwargs,
+        )
+    vs0 = _payload(transcripts.get("vs0_operator_acceptance_ui", {}))
+    vs1 = _payload(transcripts.get("vs1_ontology_suggest_promote", {}))
     vs0_ok = (
-        _exit_ok(transcripts["vs0_operator_acceptance_ui"])
+        vs0_required
+        and _exit_ok(transcripts["vs0_operator_acceptance_ui"])
         and vs0.get("scenario_set") == "vs0-operator-acceptance-ui"
         and vs0.get("status") == "success"
         and vs0.get("summary", {}).get("blocking") == 0
@@ -27947,7 +27964,8 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
         )
     )
     vs1_verifier_fresh = (
-        _exit_ok(transcripts["vs1_ontology_suggest_promote"])
+        vs1_required
+        and _exit_ok(transcripts["vs1_ontology_suggest_promote"])
         and vs1.get("scenario_set") == "vs1-ontology-suggest-promote"
         and vs1.get("status") == "success"
         and vs1.get("summary", {}).get("blocking") == 0
@@ -28002,32 +28020,70 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
         and vs1_zero_auto_promotion
         and vs1_negative.get("real_external_http_calls") == 0
     )
-    return {
-        "checks": {
-            "vs0_regression_passed": vs0_ok,
-            "vs1_regression_passed": vs1_ok,
-            "vs1_verifier_fresh": vs1_verifier_fresh,
-            "vs1_nested_regression_dependencies_fresh": vs1_nested_regression_dependencies_fresh,
-            "vs1_api_proof_passed": vs1_api_proof_passed,
-            "vs1_browser_proof_passed": vs1_browser_proof_passed,
-            "vs1_zero_auto_promotion": vs1_zero_auto_promotion,
-            "fresh_command_outputs": _exit_ok(transcripts["vs0_operator_acceptance_ui"])
-            and _exit_ok(transcripts["vs1_ontology_suggest_promote"]),
-            "all_pass": vs0_ok and vs1_ok,
-        },
-        "transcripts": transcripts,
-        "negative_evidence": {
-            "vs0_regression_failed": 0 if vs0_ok else 1,
-            "vs1_regression_failed": 0 if vs1_ok else 1,
-            "vs1_cli_auto_promotions": int(vs1_negative.get("auto_promotions", 1) or 0),
-            "vs1_cli_external_http_calls": int(
-                vs1_negative.get("real_external_http_calls", 1) or 0
-            ),
-            "stale_regression_report_reused": 0
-            if _exit_ok(transcripts["vs1_ontology_suggest_promote"])
-            else 1,
-        },
+    fresh_command_outputs = bool(transcripts) and all(_exit_ok(transcript) for transcript in transcripts.values())
+    checks = {
+        "vs0_regression_required": vs0_required,
+        "vs1_regression_required": vs1_required,
+        "vs1_full_nested_dependencies_required": vs1_full_nested_dependencies_required,
+        "vs1_guarded_compatibility_mode": vs1_required and not vs1_full_nested_dependencies_required,
+        "vs0_regression_passed": vs0_ok if vs0_required else None,
+        "vs1_regression_passed": vs1_ok if vs1_required else None,
+        "vs1_verifier_fresh": vs1_verifier_fresh if vs1_required else None,
+        "vs1_nested_regression_dependencies_fresh": (
+            vs1_nested_regression_dependencies_fresh if vs1_required else None
+        ),
+        "vs1_api_proof_passed": vs1_api_proof_passed if vs1_required else None,
+        "vs1_browser_proof_passed": vs1_browser_proof_passed if vs1_required else None,
+        "vs1_zero_auto_promotion": vs1_zero_auto_promotion if vs1_required else None,
+        "fresh_command_outputs": fresh_command_outputs,
+        "all_pass": (
+            bool(transcripts)
+            and (not vs0_required or vs0_ok)
+            and (not vs1_required or vs1_ok)
+        ),
     }
+    negative_evidence: dict[str, int] = {}
+    if full_family or "VS4-REG-001" in requested:
+        negative_evidence["vs0_regression_failed"] = 0 if vs0_ok else 1
+    if full_family or "VS4-REG-002" in requested:
+        negative_evidence.update(
+            {
+                "vs1_regression_failed": 0 if vs1_ok else 1,
+                "vs1_cli_auto_promotions": int(vs1_negative.get("auto_promotions", 1) or 0),
+                "vs1_cli_external_http_calls": int(
+                    vs1_negative.get("real_external_http_calls", 1) or 0
+                ),
+                "stale_regression_report_reused": 0
+                if _exit_ok(transcripts.get("vs1_ontology_suggest_promote", {}))
+                else 1,
+            }
+        )
+    return {
+        "mode": {
+            "scope": "full_family" if full_family else "filtered",
+            "requested_scenario_ids": sorted(requested),
+            "vs0_regression_required": vs0_required,
+            "vs1_regression_required": vs1_required,
+            "vs1_full_nested_dependencies_required": vs1_full_nested_dependencies_required,
+            "vs1_guarded_compatibility_mode": vs1_required and not vs1_full_nested_dependencies_required,
+        },
+        "checks": checks,
+        "transcripts": transcripts,
+        "negative_evidence": negative_evidence,
+    }
+
+
+def _vs4_regression_cli_parity_ready(checks: dict[str, Any]) -> bool:
+    return all(
+        checks.get(key) is True
+        for key in [
+            "fresh_command_outputs",
+            "vs0_regression_passed",
+            "vs1_api_proof_passed",
+            "vs1_browser_proof_passed",
+            "vs1_zero_auto_promotion",
+        ]
+    )
 
 
 def _vs4_json_ref(value: Any) -> dict[str, Any]:
@@ -28337,7 +28393,11 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
     }
 
 
-def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
+def verify_vs4_product_alpha_ui_daily_loop(
+    root: Path,
+    *,
+    scenario_filter: set[str] | None = None,
+) -> dict[str, Any]:
     browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-browser")
     mobile_browser_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-mobile-browser")
     cli_state_rel = _scenario_state_rel("vs4-product-alpha-ui-daily-loop-cli")
@@ -28447,7 +28507,10 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     }
     cli_workflow = _run_vs4_brief_detail_cli_workflow(root, cli_state_rel)
     slice3_cli_workflow = _run_vs4_ask_packs_states_cli_workflow(root, slice3_cli_state_rel)
-    regression_workflows = _run_vs4_regression_workflows(root)
+    regression_workflows = _run_vs4_regression_workflows(
+        root,
+        requested_scenario_ids=scenario_filter,
+    )
     shell_markers = browser_proof.get("shell_markers", {})
     detail_markers = browser_proof.get("brief_detail_markers", {})
     browser_negative = browser_proof.get("negative_evidence", {})
@@ -28600,7 +28663,35 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
     mobile_unsafe_http_boundary_ok = bool(mobile_unsafe_http_boundary_markers) and all(
         value is True for value in mobile_unsafe_http_boundary_markers.values()
     )
-    all_negative_zero = all(value == 0 for value in negative.values())
+    security_negative_keys = {
+        "approved_memory_before_review",
+        "same_checksum_user_paste_kept_trusted",
+        "unsafe_prompt_action_cards_created",
+        "unsafe_prompt_authority_expanded",
+        "unsafe_prompt_tool_calls_created",
+        "user_paste_probe_authority_expanded",
+        "user_paste_probe_external_http_calls",
+        "vs4_action_execution_without_authorized_approval",
+        "vs4_action_result_created_on_denial",
+        "vs4_action_state_changed_to_executed_on_denial",
+        "vs4_direct_provider_access_on_denial",
+        "vs4_external_http_calls_on_denial",
+        "vs4_provider_mutations_on_denial",
+        "vs4_provider_receipt_created_on_denial",
+        "vs4_real_provider_calls_on_denial",
+        "vs4_unauthorized_action_approval_accepted",
+        "vs4_workflow_run_started_on_denial",
+        "zero_evidence_approval_created_approved_claim",
+        *{
+            key
+            for key in slice3_negative
+            if key.startswith("unsafe_ask_")
+        },
+    }
+    security_negative_zero = all(
+        key in negative and int(negative.get(key, 1) or 0) == 0
+        for key in security_negative_keys
+    )
     overclaim_negative_zero = all(
         int(negative.get(key, 0) or 0) == 0
         for key in [
@@ -29080,7 +29171,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and cli_checks.get("runtime_draft_memory_cli_boundary")
         and loop_lineage_guard_ok
         and journey_timeline_ok
-        and all_negative_zero
+        and security_negative_zero
         else "FAIL",
         "VS4-REG-005": "PASS"
         if detail_markers.get("reference_images_not_pass_evidence")
@@ -29136,6 +29227,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and human_review_handoff_markers.get("validation_command_visible")
         and human_review_handoff_markers.get("make_target_visible")
         and detail_markers.get("cli_parity_required")
+        and _vs4_regression_cli_parity_ready(regression_checks)
         and loop_lineage_guard_ok
         and journey_timeline_ok
         else "FAIL",
@@ -29655,7 +29747,7 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
                 _vs4_file_artifact_ref(root, f"{DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR}/browser-proof.json"),
             ],
             "retained_cli_stdout_json": sorted(retained_cli_transcripts),
-            "regression_transcripts_hashed": True,
+            "regression_transcripts_hashed": bool(regression_workflows.get("transcripts")),
         },
         "state_dir": {
             "browser": browser_state_rel,

@@ -19894,7 +19894,10 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     elif args.contract == "vs1-ontology-suggest-promote":
         report = verify_vs1_ontology_suggest_promote(root)
     elif args.contract == "vs4-product-alpha-ui-daily-loop":
-        report = verify_vs4_product_alpha_ui_daily_loop(root)
+        report = verify_vs4_product_alpha_ui_daily_loop(
+            root,
+            scenario_filter=set(args.scenario) if args.scenario else None,
+        )
     elif args.contract == "vs5-slice-001":
         report = verify_vs5_slice_001(
             root,

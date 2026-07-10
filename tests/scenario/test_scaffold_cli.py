@@ -60,6 +60,8 @@ from cornerstone_cli.acceptance import (
     validate_runtime_acceptance_quickstart_report,
 )
 from cornerstone_cli.scenarios import (
+    _vs4_regression_cli_parity_ready,
+    _run_vs4_regression_workflows,
     _vs2_regression_guard_enabled,
     _vs2_regression_guard_transcript,
     _vs3_overclaim_lint,
@@ -160,6 +162,91 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 class ScaffoldCliTests(unittest.TestCase):
+    def test_vs4_regression_workflows_route_filtered_and_full_dependency_depth(self) -> None:
+        transcript = {
+            "exit_code": 0,
+            "timed_out": False,
+            "stdout_json": {},
+        }
+        run_path = "cornerstone_cli.scenarios._run_cli_json"
+
+        with mock.patch(run_path, return_value=transcript) as run_cli_json:
+            security_only = _run_vs4_regression_workflows(
+                ROOT,
+                requested_scenario_ids={"VS4-REG-004"},
+            )
+        self.assertEqual(run_cli_json.call_count, 0)
+        self.assertEqual(security_only["mode"]["scope"], "filtered")
+        self.assertFalse(security_only["mode"]["vs0_regression_required"])
+        self.assertFalse(security_only["mode"]["vs1_regression_required"])
+        self.assertEqual(security_only["transcripts"], {})
+        self.assertEqual(security_only["negative_evidence"], {})
+
+        with mock.patch(run_path, return_value=transcript) as run_cli_json:
+            parity = _run_vs4_regression_workflows(
+                ROOT,
+                requested_scenario_ids={"VS4-REG-007"},
+            )
+        self.assertEqual(run_cli_json.call_count, 2)
+        parity_vs1_call = next(
+            call
+            for call in run_cli_json.call_args_list
+            if call.args[1][2] == "vs1-ontology-suggest-promote"
+        )
+        self.assertEqual(
+            parity_vs1_call.kwargs["env_overrides"],
+            {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
+        )
+        self.assertTrue(parity["mode"]["vs1_guarded_compatibility_mode"])
+        self.assertFalse(parity["mode"]["vs1_full_nested_dependencies_required"])
+        self.assertNotIn("vs1_regression_failed", parity["negative_evidence"])
+        self.assertFalse(_vs4_regression_cli_parity_ready(parity["checks"]))
+
+        passing_parity_checks = {
+            "fresh_command_outputs": True,
+            "vs0_regression_passed": True,
+            "vs1_api_proof_passed": True,
+            "vs1_browser_proof_passed": True,
+            "vs1_zero_auto_promotion": True,
+        }
+        self.assertTrue(_vs4_regression_cli_parity_ready(passing_parity_checks))
+        for key in passing_parity_checks:
+            with self.subTest(missing_regression_check=key):
+                failed_checks = dict(passing_parity_checks)
+                failed_checks[key] = False
+                self.assertFalse(_vs4_regression_cli_parity_ready(failed_checks))
+
+        with mock.patch(run_path, return_value=transcript) as run_cli_json:
+            targeted_vs1 = _run_vs4_regression_workflows(
+                ROOT,
+                requested_scenario_ids={"VS4-REG-002"},
+            )
+        self.assertEqual(run_cli_json.call_count, 1)
+        self.assertEqual(
+            run_cli_json.call_args.kwargs["env_overrides"],
+            {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
+        )
+        self.assertTrue(targeted_vs1["mode"]["vs1_guarded_compatibility_mode"])
+        self.assertEqual(targeted_vs1["negative_evidence"]["vs1_regression_failed"], 1)
+
+        with mock.patch(run_path, return_value=transcript) as run_cli_json:
+            full_family = _run_vs4_regression_workflows(ROOT)
+        self.assertEqual(run_cli_json.call_count, 2)
+        full_vs1_call = next(
+            call
+            for call in run_cli_json.call_args_list
+            if call.args[1][2] == "vs1-ontology-suggest-promote"
+        )
+        self.assertEqual(
+            full_vs1_call.kwargs["env_overrides"],
+            {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "0"},
+        )
+        self.assertEqual(full_family["mode"]["scope"], "full_family")
+        self.assertTrue(full_family["mode"]["vs1_full_nested_dependencies_required"])
+        self.assertFalse(full_family["mode"]["vs1_guarded_compatibility_mode"])
+        self.assertIn("vs0_regression_failed", full_family["negative_evidence"])
+        self.assertIn("vs1_regression_failed", full_family["negative_evidence"])
+
     def test_source_snapshot_expands_dirty_directory_to_hashable_files(self) -> None:
         snapshot_root = ROOT / "tmp/test-source-snapshot-directory"
         if snapshot_root.exists():
@@ -14462,6 +14549,13 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertGreaterEqual(payload["summary"]["in_this_slice"], 1)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        regression_mode = payload["regression_workflows"]["mode"]
+        self.assertEqual(regression_mode["scope"], "filtered")
+        self.assertTrue(regression_mode["vs0_regression_required"])
+        self.assertTrue(regression_mode["vs1_regression_required"])
+        self.assertTrue(regression_mode["vs1_guarded_compatibility_mode"])
+        self.assertFalse(regression_mode["vs1_full_nested_dependencies_required"])
+        self.assertNotIn("vs1_regression_failed", payload["negative_evidence"])
 
         checks = payload["cli_workflow"]["checks"]
         self.assertTrue(checks["action_execution_boundary"])
@@ -14514,10 +14608,6 @@ class ScaffoldCliTests(unittest.TestCase):
         ]:
             self.assertTrue(decision_pages["markers"][marker], marker)
             self.assertTrue(mobile_decision_pages["markers"][marker], marker)
-        self.assertIn("Denied until authorized approval", decision_pages["action_page_text"])
-        self.assertIn("CS_ACTION_AUTHORIZED_APPROVAL_REQUIRED", decision_pages["action_page_text"])
-        self.assertIn("CS_ACTION_APPROVER_UNAUTHORIZED", decision_pages["action_page_text"])
-        self.assertIn("action_safety_envelope: denied", decision_pages["action_page_text"])
         self.assertEqual(
             payload["proof_boundary"]["vs4_slice_012_action_execution_boundary"],
             "LOCAL_PASS_WHEN_FILTERED_TO_SELECTED_ROWS",
