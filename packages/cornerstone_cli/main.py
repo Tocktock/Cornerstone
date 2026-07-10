@@ -150,8 +150,14 @@ from cornerstone_cli.scenarios import (
     verify_vs0_fixtures,
     verify_vs0_scaffold,
 )
+from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
 from cornerstone_cli.product_runtime import build_readiness_report, run_server
-from cornerstone_cli.runtime import DEFAULT_EMBEDDING_MODEL, DEFAULT_GENERATION_MODEL, LocalRuntimeStore
+from cornerstone_cli.runtime import (
+    DEFAULT_EMBEDDING_MODEL,
+    DEFAULT_GENERATION_MODEL,
+    DEFAULT_OLLAMA_BASE_URL,
+    LocalRuntimeStore,
+)
 from cornerstone_cli.validators import count_unredacted_secrets
 from cornerstone_cli.vs2_security import run_vs2_local_security_proof
 from cornerstone_cli.vs2_production_like import REPORT_PATH as VS2_PRODUCTION_LIKE_REPORT_PATH
@@ -342,6 +348,31 @@ def _trim_focused_command_evidence_for_stdout(
 
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def _runtime_model_config(args: argparse.Namespace) -> RuntimeModelConfig:
+    """Build the immutable model configuration shared by every transport."""
+
+    return RuntimeModelConfig(
+        provider=args.model_provider,
+        generation_model=args.generation_model,
+        embedding_model=args.embedding_model,
+        ollama_base_url=args.ollama_url or DEFAULT_OLLAMA_BASE_URL,
+    )
+
+
+def _model_name_argument(value: str) -> str:
+    model = value.strip()
+    if not model:
+        raise argparse.ArgumentTypeError("model name must not be empty")
+    return model
+
+
+def _ollama_url_argument(value: str) -> str:
+    try:
+        return RuntimeModelConfig(ollama_base_url=value).ollama_base_url
+    except ValueError as error:
+        raise argparse.ArgumentTypeError(str(error)) from error
 
 
 def git_commit(root: Path) -> str | None:
@@ -611,7 +642,16 @@ def command_ready(args: argparse.Namespace) -> int:
 
 def command_runtime_serve(args: argparse.Namespace) -> int:
     root = repo_root()
-    run_server(root, state_dir(root, args), host=args.host, port=args.port)
+    try:
+        run_server(
+            root,
+            state_dir(root, args),
+            host=args.host,
+            port=args.port,
+            model_config=_runtime_model_config(args),
+        )
+    except KeyboardInterrupt:
+        pass
     return EXIT_SUCCESS
 
 
@@ -9603,13 +9643,9 @@ def command_brief_create(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.create_brief_from_evidence_bundle(
+    result = BriefingApplication(store, _runtime_model_config(args)).create_brief(
         args.evidence_bundle_id,
         requested_scope,
-        model_provider=args.model_provider,
-        generation_model=args.generation_model,
-        embedding_model=args.embedding_model,
-        ollama_base_url=args.ollama_url,
     )
     payload = base_response("cornerstone brief create", "success", root)
     payload.update(requested_scope)
@@ -9814,6 +9850,9 @@ def command_claim_create(args: argparse.Namespace) -> int:
     if related_brief.get("brief_id"):
         payload["evidence_refs"].append(f"brief:{related_brief['brief_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    statement_support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+    payload["evidence_refs"].extend(statement_support.get("citation_refs", []))
+    payload["evidence_refs"].extend(statement_support.get("citation_check_refs", []))
     payload["evidence_refs"].extend(claim.get("ontology_context", {}).get("object_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
@@ -9876,6 +9915,21 @@ def command_claim_approve(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "support_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_SUPPORT_REQUIRED",
+                "message": "Claim approval requires statement-level source support for the exact current revision.",
+                "resolution_path": [
+                    "Create the Claim from an exact cited Brief finding, or use wording that is directly anchored in the attached sources.",
+                    "Review the cited source text before retrying approval.",
+                    "Do not treat an attached Evidence Bundle by itself as support for the statement.",
+                ],
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
 
     payload["evidence_refs"].extend(
         [
@@ -9885,6 +9939,9 @@ def command_claim_approve(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+    payload["evidence_refs"].extend(support.get("citation_refs", []))
+    payload["evidence_refs"].extend(support.get("citation_check_refs", []))
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -15606,14 +15663,10 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.answer_conversation(
+    result = BriefingApplication(store, _runtime_model_config(args)).answer(
         args.conversation_id,
         args.question,
         requested_scope,
-        model_provider=args.model_provider,
-        generation_model=args.generation_model,
-        embedding_model=args.embedding_model,
-        ollama_base_url=args.ollama_url,
     )
     payload = base_response("cornerstone conversation answer", "success", root)
     payload.update(requested_scope)
@@ -24115,6 +24168,29 @@ def build_parser() -> argparse.ArgumentParser:
     runtime_serve = runtime_sub.add_parser("serve", help="Serve the local VS0 API/UI runtime")
     runtime_serve.add_argument("--host", default="127.0.0.1", help="Host interface")
     runtime_serve.add_argument("--port", type=int, default=8787, help="Port")
+    runtime_serve.add_argument(
+        "--model-provider",
+        choices=["local_test", "ollama"],
+        default="ollama",
+        help="Operator-owned Brief and Ask model provider",
+    )
+    runtime_serve.add_argument(
+        "--generation-model",
+        type=_model_name_argument,
+        default=DEFAULT_GENERATION_MODEL,
+        help="Generation model for Brief and Ask",
+    )
+    runtime_serve.add_argument(
+        "--embedding-model",
+        type=_model_name_argument,
+        default=DEFAULT_EMBEDDING_MODEL,
+        help="Embedding model for evidence retrieval",
+    )
+    runtime_serve.add_argument(
+        "--ollama-url",
+        type=_ollama_url_argument,
+        help="Loopback Ollama base URL; request bodies cannot override this setting",
+    )
     add_state_argument(runtime_serve)
     runtime_serve.set_defaults(func=command_runtime_serve)
 
@@ -24608,12 +24684,17 @@ def build_parser() -> argparse.ArgumentParser:
     brief = subcommands.add_parser("brief", help="Evidence-backed brief commands")
     brief_sub = brief.add_subparsers(dest="brief_command")
 
-    brief_create = brief_sub.add_parser("create", help="Create a deterministic brief from an evidence bundle")
+    brief_create = brief_sub.add_parser("create", help="Create a citation-grounded brief from an evidence bundle")
     brief_create.add_argument("--evidence-bundle-id", required=True, help="Evidence bundle ID")
-    brief_create.add_argument("--model-provider", default="local_test", help="Model provider to record for generation/fallback metadata")
-    brief_create.add_argument("--generation-model", default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed brief creation")
-    brief_create.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
-    brief_create.add_argument("--ollama-url", help="Ollama base URL for local model-backed brief creation")
+    brief_create.add_argument(
+        "--model-provider",
+        choices=["local_test", "ollama"],
+        default="local_test",
+        help="Model provider for brief generation",
+    )
+    brief_create.add_argument("--generation-model", type=_model_name_argument, default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed brief creation")
+    brief_create.add_argument("--embedding-model", type=_model_name_argument, default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
+    brief_create.add_argument("--ollama-url", type=_ollama_url_argument, help="Loopback Ollama base URL for model-backed brief creation")
     add_state_argument(brief_create)
     add_scope_arguments(brief_create)
     brief_create.add_argument("--json", action="store_true", help="Emit JSON output")
@@ -27064,10 +27145,15 @@ def build_parser() -> argparse.ArgumentParser:
     conversation_answer = conversation_sub.add_parser("answer", help="Answer a question from workspace evidence")
     conversation_answer.add_argument("conversation_id", help="Conversation ID")
     conversation_answer.add_argument("--question", required=True, help="Question to answer")
-    conversation_answer.add_argument("--model-provider", default="local_test", help="Model provider to record for answer/fallback metadata")
-    conversation_answer.add_argument("--generation-model", default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed answers")
-    conversation_answer.add_argument("--embedding-model", default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
-    conversation_answer.add_argument("--ollama-url", help="Ollama base URL for local model-backed answers")
+    conversation_answer.add_argument(
+        "--model-provider",
+        choices=["local_test", "ollama"],
+        default="local_test",
+        help="Model provider for evidence-backed answers",
+    )
+    conversation_answer.add_argument("--generation-model", type=_model_name_argument, default=DEFAULT_GENERATION_MODEL, help="Generation model for model-backed answers")
+    conversation_answer.add_argument("--embedding-model", type=_model_name_argument, default=DEFAULT_EMBEDDING_MODEL, help="Embedding model for model-backed evidence retrieval")
+    conversation_answer.add_argument("--ollama-url", type=_ollama_url_argument, help="Loopback Ollama base URL for model-backed answers")
     add_state_argument(conversation_answer)
     add_scope_arguments(conversation_answer)
     conversation_answer.add_argument("--json", action="store_true", help="Emit JSON output")

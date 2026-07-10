@@ -31,6 +31,7 @@ REFERENCE_IMAGE_ROWS = [
 
 INTERNAL_PRODUCT_VISIBILITIES = {"internal", "owner_only", "verification_only"}
 INTERNAL_PRODUCT_SOURCE_TYPES = {"internal_fixture", "local_fixture", "scenario_fixture", "verification_fixture"}
+CONTEXT_ONLY_SOURCE_TYPES = {"conversation_turn"}
 PRODUCT_RECORD_ID_KEYS = ("artifact_id", "brief_id", "claim_id", "action_id", "memory_id")
 
 
@@ -251,7 +252,11 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
     internal_lineage_refs, internal_record_objects = _internal_product_lineage(
         [artifacts, briefs, claims, actions, memories]
     )
-    artifacts = [record for record in artifacts if id(record) not in internal_record_objects]
+    artifacts = [
+        record
+        for record in artifacts
+        if id(record) not in internal_record_objects and not _context_only_artifact(record)
+    ]
     briefs = [record for record in briefs if id(record) not in internal_record_objects]
     claims = [record for record in claims if id(record) not in internal_record_objects]
     actions = [record for record in actions if id(record) not in internal_record_objects]
@@ -393,6 +398,12 @@ def _internal_product_record(record: dict[str, Any], internal_refs: set[str] | N
     source_type = str(source.get("type") or source.get("source_type") or "").lower()
     explicitly_internal = bool(visibility_values & INTERNAL_PRODUCT_VISIBILITIES) or source_type in INTERNAL_PRODUCT_SOURCE_TYPES
     return explicitly_internal or bool(internal_refs and _record_lineage_refs(record) & internal_refs)
+
+
+def _context_only_artifact(record: dict[str, Any]) -> bool:
+    source = record.get("source") if isinstance(record.get("source"), dict) else {}
+    source_type = str(source.get("type") or source.get("source_type") or "").lower()
+    return source_type in CONTEXT_ONLY_SOURCE_TYPES
 
 
 def _recent(records: list[dict[str, Any]], limit: int | None = None) -> list[dict[str, Any]]:
@@ -712,8 +723,16 @@ def _claim_label(record: dict[str, Any]) -> tuple[str, str]:
 
 def _claim_evidence_backed_earned(record: dict[str, Any]) -> bool:
     label_check = record.get("label_check") if isinstance(record.get("label_check"), dict) else {}
-    trust = str(record.get("trust_label") or record.get("status") or "").lower()
-    return trust == "evidence_backed" and label_check.get("earned_evidence_backed") is True
+    support = record.get("statement_support") if isinstance(record.get("statement_support"), dict) else {}
+    trust = str(record.get("trust_label") or record.get("trust_state") or record.get("status") or "").lower()
+    legacy_label_earned = label_check.get("earned_evidence_backed") is True
+    statement_support_earned = bool(
+        support.get("status") == "passed"
+        and support.get("citation_integrity_state") == "passed"
+        and support.get("citations_bound_to_evidence_revision") is True
+        and support.get("approval_eligible") is True
+    )
+    return trust == "evidence_backed" and (legacy_label_earned or statement_support_earned)
 
 
 def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
@@ -1137,7 +1156,7 @@ button, input, textarea {{ font: inherit; }}
   background: var(--cs-color-primary-600);
   color: var(--cs-color-text-inverse);
   padding: var(--cs-space-2) var(--cs-space-4);
-  min-height: 38px;
+  min-height: 44px;
   font-weight: var(--cs-typography-weight-semibold);
   cursor: pointer;
   transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
@@ -1152,8 +1171,8 @@ button, input, textarea {{ font: inherit; }}
   flex-wrap: wrap;
 }}
 .cs-icon-button {{
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   border: 1px solid var(--cs-color-border-default);
   border-radius: var(--cs-radius-pill);
   background: var(--cs-color-surface-primary);
@@ -1163,8 +1182,8 @@ button, input, textarea {{ font: inherit; }}
   font-weight: var(--cs-typography-weight-semibold);
 }}
 .cs-avatar {{
-  min-width: 36px;
-  height: 36px;
+  min-width: 44px;
+  height: 44px;
   border-radius: var(--cs-radius-pill);
   background: var(--cs-color-surface-subtle);
   border: 1px solid var(--cs-color-border-default);
@@ -1549,6 +1568,7 @@ button, input, textarea {{ font: inherit; }}
   font-size: var(--cs-typography-metadata-fontSize);
   font-weight: var(--cs-typography-weight-medium);
 }}
+.cs-search-tab {{ min-height: 44px; }}
 .cs-search-tab.is-active {{
   background: var(--cs-color-primary-50);
   border-color: var(--cs-color-primary-100);
@@ -1636,7 +1656,7 @@ button, input, textarea {{ font: inherit; }}
   flex-wrap: wrap;
   gap: var(--cs-space-2);
 }}
-.cs-result-actions .cs-button {{ min-height: 34px; padding: var(--cs-space-1) var(--cs-space-3); }}
+.cs-result-actions .cs-button {{ min-height: 44px; padding: var(--cs-space-1) var(--cs-space-3); }}
 .cs-search-rail {{
   position: sticky;
   top: calc(var(--cs-space-4) + 72px);
@@ -4252,30 +4272,49 @@ button, input, textarea {{ font: inherit; }}
   .cs-nav a[aria-current="page"] {{ box-shadow: inset 0 3px 0 var(--cs-color-primary-600); }}
   .cs-nav-mark {{ width: 22px; height: 22px; }}
   .cs-nav-count {{ display: none; }}
-  .cs-topbar {{ order: 1; position: static; padding: var(--cs-space-4); align-items: stretch; flex-direction: column; }}
+  .cs-topbar {{
+    order: 1;
+    position: static;
+    min-height: 64px;
+    padding: var(--cs-space-2) var(--cs-space-3);
+    align-items: center;
+    flex-direction: row;
+    gap: var(--cs-space-2);
+  }}
   .cs-command {{
+    flex: 1 1 auto;
     max-width: none;
     min-width: 0;
   }}
-  .cs-topbar-actions {{ justify-content: flex-start; }}
-  .cs-search {{ max-width: none; flex-basis: auto; }}
-  .cs-content {{ order: 2; padding: var(--cs-space-4); }}
+  .cs-topbar-actions {{ flex: 0 0 auto; justify-content: flex-start; flex-wrap: nowrap; }}
+  .cs-topbar-actions > :not(:first-child) {{ display: none; }}
+  .cs-topbar-actions .cs-chip {{ white-space: nowrap; }}
+  .cs-search {{ max-width: none; min-height: 48px; flex-basis: auto; padding: var(--cs-space-1) var(--cs-space-2); }}
+  .cs-search span[aria-hidden="true"] {{ display: none; }}
+  .cs-content {{ order: 2; padding: var(--cs-space-3); }}
   .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-card, .cs-policy-row, .cs-owner-scope-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
   .cs-owner-metric {{ border-right: 0; border-bottom: 1px solid var(--cs-color-border-default); }}
   .cs-owner-metric:last-child {{ border-bottom: 0; }}
   .cs-connector-table-head {{ display: none; }}
-  .cs-page-head {{ margin-bottom: var(--cs-space-4); }}
+  .cs-page-head {{ margin-bottom: var(--cs-space-3); }}
   .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
+  .cs-home-intro .cs-page-head p {{ display: none; }}
   .cs-home-intro {{ min-height: auto; }}
-  .cs-home-canvas {{ padding: var(--cs-space-4); }}
+  .cs-home-canvas {{ padding: var(--cs-space-3); gap: var(--cs-space-2); }}
+  .cs-home-canvas > .cs-panel-header {{ gap: var(--cs-space-2); }}
   .cs-home-canvas > .cs-panel-header p {{ display: none; }}
-  .cs-home-source-row, .cs-home-item, .cs-next-step, .cs-home-paste-row {{ grid-template-columns: 1fr; }}
-  .cs-home-loop-inline {{ justify-content: flex-start; max-width: none; }}
-  .cs-drop {{ min-height: auto; padding: var(--cs-space-3); }}
+  .cs-home-source-row {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }}
+  .cs-home-source-row .cs-button {{ justify-content: center; padding-inline: var(--cs-space-2); }}
+  .cs-home-item, .cs-next-step, .cs-home-paste-row {{ grid-template-columns: 1fr; }}
+  .cs-home-loop-inline {{ display: none; }}
+  .cs-home-source-note {{ display: none; }}
+  .cs-drop {{ min-height: auto; padding: var(--cs-space-2); gap: var(--cs-space-2); }}
   .cs-drop-target {{ grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }}
   .cs-drop-target p {{ display: none; }}
-  .cs-drop textarea.cs-drop-input {{ min-height: 72px; }}
-  .cs-ask-bar {{ grid-template-columns: 1fr; }}
+  .cs-drop-mark {{ width: 40px; height: 40px; font-size: 15px; }}
+  .cs-drop textarea.cs-drop-input {{ min-height: 64px; }}
+  .cs-ask-bar {{ grid-template-columns: auto minmax(0, 1fr); gap: var(--cs-space-2); }}
+  .cs-ask-bar .cs-field, .cs-ask-bar .cs-button {{ grid-column: 1 / -1; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-lane-summary {{ align-items: flex-start; }}
   .cs-journey-ref-grid {{ grid-template-columns: 1fr; }}
@@ -4713,7 +4752,11 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
 def _knowledge_states_block(ctx: dict[str, Any]) -> str:
     source_count = len(ctx["artifacts"])
     searchable_count = len(ctx["artifacts"])
-    supported_count = sum(1 for record in [*ctx["briefs"], *ctx["claims"]] if _evidence_refs(record))
+    supported_count = sum(
+        1
+        for record in ctx["briefs"]
+        if _brief_label_state(record)[1] == "evidenceBacked"
+    ) + sum(1 for record in ctx["claims"] if _claim_evidence_backed_earned(record))
     return f"""
 <section class="cs-panel flat">
   <div class="cs-panel-header">
@@ -4733,7 +4776,7 @@ def _knowledge_states_block(ctx: dict[str, Any]) -> str:
     </div>
     <div class="cs-stat-row">
       <span class="cs-stat-icon">E</span>
-      <div><strong>Source-backed</strong><div class="cs-meta">Drafts with visible support</div></div>
+      <div><strong>Source-backed</strong><div class="cs-meta">Outputs that earned the label</div></div>
       {_chip(str(supported_count), "evidenceBacked")}
     </div>
   </div>
@@ -6954,6 +6997,12 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     label_state = _brief_label_state(brief)[0]
     citation_receipt = _brief_citation_receipt(brief, source_items)
     presented_as_fact = brief.get("presented_as_fact") is True
+    if presented_as_fact and label_state == "Fact label earned":
+        decision_snapshot = "Source-backed"
+    elif label == "Keyword summary":
+        decision_snapshot = "Keyword summary only"
+    else:
+        decision_snapshot = "Draft — source check needed"
     citation_ready = citation_receipt["citation_refs_count"] > 0 and citation_receipt["unresolved_citation_count"] == 0 and citation_receipt["citation_check_refs_count"] > 0
     receipt_chip = _chip("Checked receipt" if citation_ready else "Source check", "searchable" if citation_ready else "underReview")
     receipt_note = (
@@ -7024,7 +7073,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
           <span class="cs-meta">What we found</span>
           <p>{h(summary_text)}</p>
           <div class="cs-brief-fact-strip" aria-label="Brief status">
-            <div class="cs-brief-fact"><span class="cs-meta">Decision snapshot</span><strong>Reviewed draft</strong></div>
+            <div class="cs-brief-fact"><span class="cs-meta">Decision snapshot</span><strong>{h(decision_snapshot)}</strong></div>
             <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
             <div class="cs-brief-fact"><span class="cs-meta">Drafted findings</span><strong>{h(finding_count)}</strong></div>
           </div>
@@ -7052,7 +7101,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         {_chip("Source coverage", "searchable")}
       </div>
       {point_rows}
-      {f'<h2 class="cs-section-title">More findings</h2>{finding_rows}' if finding_rows else ''}
+      {f'<h2 class="cs-section-title">More findings</h2>{finding_rows}' if findings else ''}
     </section>
     <div class="cs-brief-note-grid">
       <section class="cs-panel">
