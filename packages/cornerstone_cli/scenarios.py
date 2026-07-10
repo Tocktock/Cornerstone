@@ -27718,12 +27718,28 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
     for scenario_id in vs0_rows:
         vs0_command.extend(["--scenario", scenario_id])
     vs0_command.append("--json")
+    vs1_command = [
+        "scenario",
+        "verify",
+        "vs1-ontology-suggest-promote",
+        "--output",
+        "tmp/vs4-regression-vs1-ontology-suggest-promote.json",
+        "--json",
+    ]
     transcripts = {
         "vs0_operator_acceptance_ui": _run_cli_json(root, vs0_command, timeout=420),
+        "vs1_ontology_suggest_promote": _run_cli_json(
+            root,
+            vs1_command,
+            timeout=600,
+            # Keep the real VS1 CLI/API/browser workflow within the targeted-run
+            # budget. The skipped dependency is detected below, so REG-002 stays
+            # failed until equivalent fresh regression proof is available.
+            env_overrides={"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
+        ),
     }
-    vs1_workflow = _run_vs1_ontology_cli_workflow(root, root / _scenario_state_rel("vs4-regression-vs1-ontology-cli"))
     vs0 = _payload(transcripts["vs0_operator_acceptance_ui"])
-    vs1_checks = vs1_workflow.get("checks", {})
+    vs1 = _payload(transcripts["vs1_ontology_suggest_promote"])
     vs0_ok = (
         _exit_ok(transcripts["vs0_operator_acceptance_ui"])
         and vs0.get("scenario_set") == "vs0-operator-acceptance-ui"
@@ -27732,35 +27748,104 @@ def _run_vs4_regression_workflows(root: Path) -> dict[str, Any]:
         and {row.get("id") for row in vs0.get("scenario_results", [])} == set(vs0_rows)
         and str(vs0.get("browser_proof", {}).get("status")).lower() in {"pass", "passed", "success"}
     )
-    vs1_ok = (
-        vs1_workflow.get("status") == "success"
-        and vs1_checks.get("cli_artifact_search_suggest")
-        and vs1_checks.get("cli_draft_truth_guard")
-        and vs1_checks.get("cli_review_promote")
-        and vs1_checks.get("cli_profile_search")
-        and vs1_checks.get("cli_claim_action")
-        and vs1_checks.get("cli_invalid_graph")
+    vs1_rows = [
+        row for row in vs1.get("scenario_results", []) if isinstance(row, dict)
+    ]
+    vs1_nested_regression_transcripts = (
+        vs1.get("regression_command_transcript")
+        if isinstance(vs1.get("regression_command_transcript"), dict)
+        else {}
     )
-    vs1_cli_transcripts = vs1_workflow.get("cli_transcripts", {})
+    vs1_nested_regression_dependencies_fresh = (
+        bool(vs1_nested_regression_transcripts)
+        and all(
+            isinstance(entry, dict)
+            and entry.get("exit_code") == 0
+            and entry.get("timed_out") is False
+            and entry.get("skipped_by_vs2_regression_guard") is not True
+            for entry in vs1_nested_regression_transcripts.values()
+        )
+    )
+    vs1_verifier_fresh = (
+        _exit_ok(transcripts["vs1_ontology_suggest_promote"])
+        and vs1.get("scenario_set") == "vs1-ontology-suggest-promote"
+        and vs1.get("status") == "success"
+        and vs1.get("summary", {}).get("blocking") == 0
+        and vs1_nested_regression_dependencies_fresh
+        and bool(vs1_rows)
+        and all(
+            row.get("status") == ("HUMAN_REQUIRED" if row.get("owner") == "Human" else "PASS")
+            for row in vs1_rows
+        )
+    )
+    vs1_api_checks = (
+        vs1.get("api_workflow", {}).get("checks", {})
+        if isinstance(vs1.get("api_workflow"), dict)
+        else {}
+    )
+    vs1_api_proof_passed = all(
+        vs1_api_checks.get(check) is True
+        for check in [
+            "artifact_first",
+            "search_first",
+            "suggestion_set_complete",
+            "review_controls",
+            "draft_truth_denied",
+            "promotion_explicit",
+            "prompt_injection_no_promotion",
+            "audit_verify",
+        ]
+    )
+    vs1_browser_proof = (
+        vs1.get("browser_proof") if isinstance(vs1.get("browser_proof"), dict) else {}
+    )
+    vs1_browser_proof_passed = (
+        vs1_browser_proof.get("status") == "PASS"
+        and bool(vs1_browser_proof.get("required_markers"))
+        and all(vs1_browser_proof.get("required_markers", {}).values())
+        and bool(vs1_browser_proof.get("operator_markers"))
+        and all(vs1_browser_proof.get("operator_markers", {}).values())
+    )
+    vs1_negative = (
+        vs1.get("negative_evidence")
+        if isinstance(vs1.get("negative_evidence"), dict)
+        else {}
+    )
+    vs1_zero_auto_promotion = (
+        vs1_negative.get("auto_promotions") == 0
+        and vs1_negative.get("draft_suggestion_used_as_truth") == 0
+    )
+    vs1_ok = (
+        vs1_verifier_fresh
+        and vs1_api_proof_passed
+        and vs1_browser_proof_passed
+        and vs1_zero_auto_promotion
+        and vs1_negative.get("real_external_http_calls") == 0
+    )
     return {
         "checks": {
             "vs0_regression_passed": vs0_ok,
             "vs1_regression_passed": vs1_ok,
-            "fresh_command_outputs": _exit_ok(transcripts["vs0_operator_acceptance_ui"]) and vs1_workflow.get("status") == "success",
+            "vs1_verifier_fresh": vs1_verifier_fresh,
+            "vs1_nested_regression_dependencies_fresh": vs1_nested_regression_dependencies_fresh,
+            "vs1_api_proof_passed": vs1_api_proof_passed,
+            "vs1_browser_proof_passed": vs1_browser_proof_passed,
+            "vs1_zero_auto_promotion": vs1_zero_auto_promotion,
+            "fresh_command_outputs": _exit_ok(transcripts["vs0_operator_acceptance_ui"])
+            and _exit_ok(transcripts["vs1_ontology_suggest_promote"]),
             "all_pass": vs0_ok and vs1_ok,
         },
-        "transcripts": {
-            **transcripts,
-            "vs1_ontology_cli_workflow": vs1_workflow,
-        },
+        "transcripts": transcripts,
         "negative_evidence": {
             "vs0_regression_failed": 0 if vs0_ok else 1,
             "vs1_regression_failed": 0 if vs1_ok else 1,
-            "vs1_cli_auto_promotions": 0 if vs1_checks.get("cli_review_promote") and vs1_checks.get("cli_draft_truth_guard") else 1,
-            "vs1_cli_external_http_calls": 0
-            if _payload(vs1_cli_transcripts.get("action_execute", {})).get("action_result", {}).get("external_http_calls") == 0
+            "vs1_cli_auto_promotions": int(vs1_negative.get("auto_promotions", 1) or 0),
+            "vs1_cli_external_http_calls": int(
+                vs1_negative.get("real_external_http_calls", 1) or 0
+            ),
+            "stale_regression_report_reused": 0
+            if _exit_ok(transcripts["vs1_ontology_suggest_promote"])
             else 1,
-            "stale_regression_report_reused": 0,
         },
     }
 
@@ -28055,6 +28140,7 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
         initial_status = row.get("initial_status", "")
         priority_counts[priority] = priority_counts.get(priority, 0) + 1
         initial_status_counts[initial_status] = initial_status_counts.get(initial_status, 0) + 1
+    status_neutral = initial_status_counts == {"NOT_RUN": 27, "HUMAN_REQUIRED": 1}
     return {
         "row_count": len(rows),
         "priority_counts": priority_counts,
@@ -28062,8 +28148,12 @@ def _vs4_matrix_structural_checks(root: Path, rows: list[dict[str, str]]) -> dic
         "duplicate_ids": duplicate_ids,
         "missing_required": missing_required,
         "expected_counts_match": priority_counts == {"MUST_PASS": 20, "REGRESSION_GUARD": 7, "HUMAN_REQUIRED": 1},
-        "status_neutral": initial_status_counts == {"NOT_RUN": 27, "HUMAN_REQUIRED": 1},
-        "ok": len(rows) == 28 and not duplicate_ids and not missing_required and priority_counts == {"MUST_PASS": 20, "REGRESSION_GUARD": 7, "HUMAN_REQUIRED": 1},
+        "status_neutral": status_neutral,
+        "ok": len(rows) == 28
+        and not duplicate_ids
+        and not missing_required
+        and priority_counts == {"MUST_PASS": 20, "REGRESSION_GUARD": 7, "HUMAN_REQUIRED": 1}
+        and status_neutral,
     }
 
 
@@ -28298,6 +28388,13 @@ def verify_vs4_product_alpha_ui_daily_loop(root: Path) -> dict[str, Any]:
         and all(ops_inbox_triage_markers.get(marker) is True for marker in journey_timeline_required_markers)
         and all(mobile_ops_inbox_triage_markers.get(marker) is True for marker in journey_timeline_required_markers)
         and cli_checks.get("ops_inbox_loop_view_cli_parity") is True
+        and negative.get("vs4_ops_inbox_journey_timeline_missing") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_missing_stage_refs") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_missing_evidence_refs") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_missing_audit_refs") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_recovery_missing") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_authority_expanded") == 0
+        and negative.get("vs4_ops_inbox_journey_timeline_live_writeback") == 0
     )
     human_review_handoff_ok = bool(human_review_handoff_markers) and all(
         value is True for value in human_review_handoff_markers.values()

@@ -1498,6 +1498,166 @@ def _vs4_product_page_check(path: str, response: dict[str, Any], expected_surfac
     }
 
 
+def _vs4_product_journey_timeline_evidence(inbox_html: str) -> dict[str, Any]:
+    expected_stages = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
+
+    def attribute_values(fragment: str, attribute: str) -> list[str]:
+        pattern = re.compile(
+            rf"\b{re.escape(attribute)}\s*=\s*(['\"])(.*?)\1",
+            re.IGNORECASE | re.DOTALL,
+        )
+        return [match.group(2).strip() for match in pattern.finditer(fragment)]
+
+    timeline_sources = attribute_values(inbox_html, "data-vs4-ops-inbox-journey-timeline")
+    stage_labels = attribute_values(inbox_html, "data-vs4-journey-stage")
+    stage_refs = [
+        value
+        for value in attribute_values(inbox_html, "data-vs4-journey-stage-ref")
+        if value
+    ]
+    evidence_refs = [
+        value
+        for value in attribute_values(inbox_html, "data-vs4-journey-evidence-refs")
+        if value
+    ]
+    audit_refs = [
+        value
+        for value in attribute_values(inbox_html, "data-vs4-journey-audit-refs")
+        if value
+    ]
+    stage_rows = [
+        (match.group("attributes"), match.group("body"))
+        for match in re.finditer(
+            r"<article\b(?P<attributes>[^>]*\bdata-vs4-journey-stage\s*=\s*(['\"]).*?\2[^>]*)>"
+            r"(?P<body>.*?)</article>",
+            inbox_html,
+            re.IGNORECASE | re.DOTALL,
+        )
+    ]
+    staged_rows: dict[str, tuple[str, str]] = {}
+    for attributes, body in stage_rows:
+        labels = attribute_values(attributes, "data-vs4-journey-stage")
+        if labels:
+            staged_rows[labels[0]] = (attributes, body)
+
+    product_language_before_refs = True
+    progressive_detail_count = 0
+    for stage in expected_stages:
+        attributes, body = staged_rows.get(stage, ("", ""))
+        refs = attribute_values(attributes, "data-vs4-journey-stage-ref")
+        primary_ref = refs[0].split(" | ", 1)[0] if refs and refs[0] else ""
+        label_index = body.find(stage)
+        ref_index = body.find(primary_ref) if primary_ref else -1
+        product_language_before_refs = (
+            product_language_before_refs
+            and label_index >= 0
+            and (
+                ref_index > label_index
+                if primary_ref
+                else stage == "Inbox"
+            )
+        )
+        detail_tags = re.findall(r"<details\b([^>]*)>", body, re.IGNORECASE)
+        if detail_tags and all(not re.search(r"\bopen\b", tag, re.IGNORECASE) for tag in detail_tags):
+            progressive_detail_count += 1
+
+    opening_tags = re.findall(r"<[^/!][^>]*>", inbox_html, re.IGNORECASE | re.DOTALL)
+    recovery_states: dict[str, bool] = {}
+    for recovery_state in ["missing-ref", "cross-scope", "lineage-mismatch"]:
+        recovery_states[recovery_state] = any(
+            recovery_state in attribute_values(tag, "data-vs4-loop-recovery-state")
+            and "blocked-safe" in attribute_values(tag, "data-vs4-loop-recovery-status")
+            for tag in opening_tags
+        )
+    recovery_copy = {
+        "nothing_approved_or_sent": "Nothing new was approved or sent" in inbox_html,
+        "workspace_scope_unchanged": "Workspace scope stayed unchanged" in inbox_html,
+        "no_new_journey_or_activity": "No new journey or activity record was created" in inbox_html,
+    }
+    no_authority_expansion = "true" in attribute_values(
+        inbox_html,
+        "data-vs4-loop-recovery-no-authority-expansion",
+    )
+    no_live_writeback = "true" in attribute_values(
+        inbox_html,
+        "data-vs4-loop-recovery-no-live-writeback",
+    )
+    stage_refs_visible = (
+        len(stage_refs) >= 5
+        and all(
+            any(prefix in ref for ref in stage_refs)
+            for prefix in ["brief:", "claim:", "memory:", "action:", "learn:"]
+        )
+    )
+    evidence_refs_visible = (
+        len(evidence_refs) >= 5
+        and any("evidence_bundle:" in ref for ref in evidence_refs)
+    )
+    audit_refs_visible = (
+        len(audit_refs) >= 6
+        and all("audit:" in ref for ref in audit_refs)
+    )
+    markers = {
+        "journey_timeline_visible": "runtime-loop-view" in timeline_sources,
+        "journey_timeline_stage_count_6": len(stage_labels) >= 6,
+        "journey_timeline_stage_labels_complete": all(
+            stage in stage_labels for stage in expected_stages
+        ),
+        "journey_timeline_stage_refs_visible": stage_refs_visible,
+        "journey_timeline_evidence_refs_visible": evidence_refs_visible,
+        "journey_timeline_audit_refs_visible": audit_refs_visible,
+        "journey_timeline_progressive_detail": progressive_detail_count >= 6,
+        "journey_timeline_product_language_before_refs": product_language_before_refs
+        and len(staged_rows) >= 6,
+        "loop_recovery_missing_ref_visible": recovery_states["missing-ref"],
+        "loop_recovery_cross_scope_visible": recovery_states["cross-scope"],
+        "loop_recovery_lineage_mismatch_visible": recovery_states["lineage-mismatch"],
+        "loop_recovery_product_language_visible": all(recovery_copy.values()),
+        "journey_timeline_no_authority_expansion": no_authority_expansion,
+        "journey_timeline_no_live_writeback": no_live_writeback,
+    }
+    negative_evidence = {
+        "vs4_ops_inbox_journey_timeline_missing": 0
+        if markers["journey_timeline_visible"]
+        and markers["journey_timeline_stage_count_6"]
+        else 1,
+        "vs4_ops_inbox_journey_timeline_missing_stage_refs": 0
+        if markers["journey_timeline_stage_refs_visible"]
+        else 1,
+        "vs4_ops_inbox_journey_timeline_missing_evidence_refs": 0
+        if markers["journey_timeline_evidence_refs_visible"]
+        else 1,
+        "vs4_ops_inbox_journey_timeline_missing_audit_refs": 0
+        if markers["journey_timeline_audit_refs_visible"]
+        else 1,
+        "vs4_ops_inbox_journey_timeline_recovery_missing": 0
+        if all(recovery_states.values()) and markers["loop_recovery_product_language_visible"]
+        else 1,
+        "vs4_ops_inbox_journey_timeline_authority_expanded": 0
+        if no_authority_expansion
+        else 1,
+        "vs4_ops_inbox_journey_timeline_live_writeback": 0
+        if no_live_writeback
+        else 1,
+    }
+    return {
+        "markers": markers,
+        "negative_evidence": negative_evidence,
+        "details": {
+            "source": "runtime-loop-view" if markers["journey_timeline_visible"] else "missing",
+            "stage_labels": stage_labels,
+            "stage_refs": stage_refs,
+            "evidence_refs": evidence_refs,
+            "audit_refs": audit_refs,
+            "progressive_detail_count": progressive_detail_count,
+            "recovery_states": recovery_states,
+            "recovery_copy": recovery_copy,
+            "no_authority_expansion": no_authority_expansion,
+            "no_live_writeback": no_live_writeback,
+        },
+    }
+
+
 def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, Any]:
     server = make_server(root, state_dir)
     host, port = server.server_address
@@ -1591,10 +1751,12 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
         created["action_id"] = action_id
 
         product_routes: dict[str, dict[str, Any]] = {}
+        product_route_html: dict[str, str] = {}
         for route in VS4_PRODUCT_LIST_ROUTES:
             response = _vs4_http_request(base_url, route, accept="text/html")
             surface = "home" if route == "/" else route.strip("/").split("?", 1)[0]
             product_routes[route] = _vs4_product_page_check(route, response, surface)
+            product_route_html[route] = str(response.get("body") or "")
 
         detail_specs = [
             ("artifact_detail", f"/artifacts/{parse.quote(artifact_id)}?view=html", "artifact-detail"),
@@ -1633,6 +1795,9 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
             if not value.get("ok")
         }
         all_product_pages = [*product_routes.values(), *detail_routes.values()]
+        journey_timeline = _vs4_product_journey_timeline_evidence(
+            product_route_html.get("/inbox", "")
+        )
         marker_summary = {
             "temporary_records_created": all(bool(created.get(key)) for key in ["artifact_id", "search_snapshot_id", "evidence_bundle_id", "brief_id", "claim_id", "action_id"]),
             "product_routes_reachable": all(page.get("status") == 200 and page.get("html") for page in product_routes.values()),
@@ -1676,6 +1841,7 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
                 "content_type": json_default.get("content_type"),
                 "preserved": marker_summary["json_default_preserved"],
             },
+            "journey_timeline": journey_timeline,
             "markers": marker_summary,
             "thread_errors": thread_error,
         }
@@ -1946,6 +2112,21 @@ def capture_vs4_product_alpha_browser_proof(
         "human_acceptance_unclaimed": no_overclaim,
         "live_writeback_unclaimed": no_overclaim,
     }
+    journey_timeline = (
+        route_scan.get("journey_timeline")
+        if isinstance(route_scan.get("journey_timeline"), dict)
+        else {}
+    )
+    journey_timeline_markers = (
+        journey_timeline.get("markers")
+        if isinstance(journey_timeline.get("markers"), dict)
+        else {}
+    )
+    journey_timeline_negative = (
+        journey_timeline.get("negative_evidence")
+        if isinstance(journey_timeline.get("negative_evidence"), dict)
+        else {}
+    )
     ops_inbox_triage_markers = {
         "runtime_backed_after_drop_ask": shell_markers["ops_inbox_triage_visible"],
         "runtime_rows_have_record_refs": shell_markers["continue_work_rows"],
@@ -1970,20 +2151,20 @@ def capture_vs4_product_alpha_browser_proof(
         "loop_lineage_guard_no_invalid_audit": True,
         "loop_lineage_guard_no_authority_expansion": True,
         "loop_lineage_guard_no_live_writeback": True,
-        "journey_timeline_visible": True,
-        "journey_timeline_stage_count_6": True,
-        "journey_timeline_stage_labels_complete": True,
-        "journey_timeline_stage_refs_visible": True,
-        "journey_timeline_evidence_refs_visible": True,
-        "journey_timeline_audit_refs_visible": True,
-        "journey_timeline_progressive_detail": True,
-        "journey_timeline_product_language_before_refs": True,
-        "loop_recovery_missing_ref_visible": True,
-        "loop_recovery_cross_scope_visible": True,
-        "loop_recovery_lineage_mismatch_visible": True,
-        "loop_recovery_product_language_visible": True,
-        "journey_timeline_no_authority_expansion": True,
-        "journey_timeline_no_live_writeback": True,
+        "journey_timeline_visible": journey_timeline_markers.get("journey_timeline_visible") is True,
+        "journey_timeline_stage_count_6": journey_timeline_markers.get("journey_timeline_stage_count_6") is True,
+        "journey_timeline_stage_labels_complete": journey_timeline_markers.get("journey_timeline_stage_labels_complete") is True,
+        "journey_timeline_stage_refs_visible": journey_timeline_markers.get("journey_timeline_stage_refs_visible") is True,
+        "journey_timeline_evidence_refs_visible": journey_timeline_markers.get("journey_timeline_evidence_refs_visible") is True,
+        "journey_timeline_audit_refs_visible": journey_timeline_markers.get("journey_timeline_audit_refs_visible") is True,
+        "journey_timeline_progressive_detail": journey_timeline_markers.get("journey_timeline_progressive_detail") is True,
+        "journey_timeline_product_language_before_refs": journey_timeline_markers.get("journey_timeline_product_language_before_refs") is True,
+        "loop_recovery_missing_ref_visible": journey_timeline_markers.get("loop_recovery_missing_ref_visible") is True,
+        "loop_recovery_cross_scope_visible": journey_timeline_markers.get("loop_recovery_cross_scope_visible") is True,
+        "loop_recovery_lineage_mismatch_visible": journey_timeline_markers.get("loop_recovery_lineage_mismatch_visible") is True,
+        "loop_recovery_product_language_visible": journey_timeline_markers.get("loop_recovery_product_language_visible") is True,
+        "journey_timeline_no_authority_expansion": journey_timeline_markers.get("journey_timeline_no_authority_expansion") is True,
+        "journey_timeline_no_live_writeback": journey_timeline_markers.get("journey_timeline_no_live_writeback") is True,
     }
     human_review_handoff_markers = {
         "handoff_visible": route_markers.get("review_contains_internal_material") is True,
@@ -2053,6 +2234,8 @@ def capture_vs4_product_alpha_browser_proof(
         "claim_action_pages_plain": route_markers.get("claim_review_language_visible") is True
         and route_markers.get("action_local_mode_visible") is True
         and route_markers.get("action_internal_kind_hidden") is True,
+        "ops_inbox_triage_complete": bool(ops_inbox_triage_markers)
+        and all(value is True for value in ops_inbox_triage_markers.values()),
         "mobile_no_horizontal_overflow": no_horizontal_overflow,
         "no_readiness_or_acceptance_overclaim": no_overclaim,
     }
@@ -2095,7 +2278,10 @@ def capture_vs4_product_alpha_browser_proof(
         "decision_pages": {"markers": decision_pages_markers},
         "decision_pages_markers": decision_pages_markers,
         "ops_inbox_triage_required": True,
-        "ops_inbox_triage": {"markers": ops_inbox_triage_markers},
+        "ops_inbox_triage": {
+            "markers": ops_inbox_triage_markers,
+            "journey_timeline": journey_timeline.get("details", {}),
+        },
         "ops_inbox_triage_markers": ops_inbox_triage_markers,
         "human_review_handoff_required": True,
         "human_review_handoff": {"markers": human_review_handoff_markers},
@@ -2113,6 +2299,7 @@ def capture_vs4_product_alpha_browser_proof(
         "responsive_layout": responsive_layout,
         "responsive_markers": responsive_markers,
         "negative_evidence": {
+            **journey_timeline_negative,
             "production_readiness_claimed": 0,
             "onprem_readiness_claimed": 0,
             "final_security_claimed": 0,

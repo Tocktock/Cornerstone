@@ -50,6 +50,7 @@ from cornerstone_cli.acceptance import (
     _json_value_sha256,
     _release_manifest_content_payload,
     _source_snapshot,
+    _vs4_product_journey_timeline_evidence,
     collect_release_evidence,
     finalize_release_evidence,
     git_verification_metadata,
@@ -61,6 +62,8 @@ from cornerstone_cli.scenarios import (
     _vs2_regression_guard_enabled,
     _vs2_regression_guard_transcript,
     _vs3_overclaim_lint,
+    _vs4_matrix_rows,
+    _vs4_matrix_structural_checks,
 )
 from cornerstone_cli.main import (
     command_quickstart_verify,
@@ -13324,6 +13327,53 @@ class ScaffoldCliTests(unittest.TestCase):
         payload["_stderr"] = result.stderr
         return payload
 
+    def _filter_vs4_gate_fixture_report(
+        self,
+        report: dict[str, Any],
+        scenario_ids: list[str],
+    ) -> None:
+        requested = set(scenario_ids)
+        filtered_rows = [
+            row for row in report["scenario_results"] if row.get("id") in requested
+        ]
+        report["scenario_filter"] = sorted(requested)
+        report["scenario_results"] = filtered_rows
+        report["summary"].update(
+            {
+                "scenario_count": len(filtered_rows),
+                "pass": len([row for row in filtered_rows if row.get("status") == "PASS"]),
+                "fail": len([row for row in filtered_rows if row.get("status") == "FAIL"]),
+                "not_verified": len(
+                    [row for row in filtered_rows if row.get("status") == "NOT_VERIFIED"]
+                ),
+                "not_run": len([row for row in filtered_rows if row.get("status") == "NOT_RUN"]),
+                "human_required": len(
+                    [row for row in filtered_rows if row.get("owner") == "Human"]
+                ),
+                "blocking": len(
+                    [
+                        row
+                        for row in filtered_rows
+                        if row.get("owner") != "Human" and row.get("status") != "PASS"
+                    ]
+                ),
+                "in_this_slice": len(
+                    [
+                        row
+                        for row in filtered_rows
+                        if row.get("execution_classification") == "in_this_slice"
+                    ]
+                ),
+                "previous_slice": len(
+                    [
+                        row
+                        for row in filtered_rows
+                        if row.get("execution_classification") == "previous_slice"
+                    ]
+                ),
+            }
+        )
+
     def _assert_vs4_gate_fails_for_condition(
         self,
         payload: dict[str, Any],
@@ -13405,6 +13455,26 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["blocking"], 0)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
         self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        self.assertEqual(
+            payload["summary"]["in_this_slice"],
+            len(
+                [
+                    row
+                    for row in payload["scenario_results"]
+                    if row["execution_classification"] == "in_this_slice"
+                ]
+            ),
+        )
+        self.assertEqual(
+            payload["summary"]["previous_slice"],
+            len(
+                [
+                    row
+                    for row in payload["scenario_results"]
+                    if row["execution_classification"] == "previous_slice"
+                ]
+            ),
+        )
 
         self.assertEqual(payload["browser_proof"]["status"], "PASS")
         self.assertTrue(all(payload["browser_proof"]["brief_detail_markers"].values()))
@@ -13439,7 +13509,7 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["proof_boundary"]["full_vs4"], "AI_VERIFIABLE_LOCAL_ROWS_PASS_HUMAN_REQUIRED")
         self.assertEqual(payload["proof_boundary"]["live_provider"], "NOT_CLAIMED")
 
-    def test_vs4_product_alpha_slice_003_verify(self) -> None:
+    def test_vs4_product_alpha_slice_003_reports_current_blockers(self) -> None:
         selected = [
             "VS4-UI-013",
             "VS4-UI-014",
@@ -13453,18 +13523,29 @@ class ScaffoldCliTests(unittest.TestCase):
             args.extend(["--scenario", scenario_id])
         args.extend(["--json", "--output", "tmp/test-vs4-product-alpha-slice-003.json"])
         result = run_cli(*args)
-        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs4-product-alpha-ui-daily-loop")
         self.assertEqual(payload["slice"], VS4_ACTIVE_SLICE)
-        self.assertEqual(payload["status"], "success")
+        self.assertEqual(payload["status"], "failed")
         self.assertEqual(payload["summary"]["scenario_count"], len(selected))
-        self.assertEqual(payload["summary"]["pass"], len(selected))
-        self.assertEqual(payload["summary"]["blocking"], 0)
+        self.assertEqual(payload["summary"]["pass"], 1)
+        self.assertEqual(payload["summary"]["fail"], 5)
+        self.assertEqual(payload["summary"]["blocking"], 5)
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, set(selected))
-        self.assertEqual({row["status"] for row in payload["scenario_results"]}, {"PASS"})
+        self.assertEqual(
+            {row["id"]: row["status"] for row in payload["scenario_results"]},
+            {
+                "VS4-UI-013": "FAIL",
+                "VS4-UI-014": "FAIL",
+                "VS4-STATE-001": "FAIL",
+                "VS4-REF-001": "FAIL",
+                "VS4-REG-001": "PASS",
+                "VS4-REG-002": "FAIL",
+            },
+        )
 
-        self.assertEqual(payload["browser_proof"]["status"], "PASS")
+        self.assertEqual(payload["browser_proof"]["status"], "FAIL")
         markers = payload["browser_proof"]["brief_detail_markers"]
         self.assertTrue(markers["ask_flow_complete"])
         self.assertTrue(markers["general_packs_complete"])
@@ -13484,10 +13565,26 @@ class ScaffoldCliTests(unittest.TestCase):
             "cli_parity",
         ]:
             self.assertTrue(checks[key], key)
-        self.assertTrue(payload["regression_workflows"]["checks"]["vs0_regression_passed"])
-        self.assertTrue(payload["regression_workflows"]["checks"]["vs1_regression_passed"])
-        for value in payload["negative_evidence"].values():
-            self.assertEqual(value, 0)
+        regression_checks = payload["regression_workflows"]["checks"]
+        self.assertTrue(regression_checks["vs0_regression_passed"])
+        self.assertFalse(regression_checks["vs1_regression_passed"])
+        self.assertFalse(regression_checks["vs1_verifier_fresh"])
+        self.assertFalse(regression_checks["vs1_nested_regression_dependencies_fresh"])
+        self.assertTrue(regression_checks["vs1_api_proof_passed"])
+        self.assertTrue(regression_checks["vs1_browser_proof_passed"])
+        self.assertTrue(regression_checks["vs1_zero_auto_promotion"])
+        self.assertEqual(payload["negative_evidence"]["vs1_regression_failed"], 1)
+        self.assertEqual(payload["negative_evidence"]["stale_regression_report_reused"], 0)
+        for key in [
+            "vs4_ops_inbox_journey_timeline_missing",
+            "vs4_ops_inbox_journey_timeline_missing_stage_refs",
+            "vs4_ops_inbox_journey_timeline_missing_evidence_refs",
+            "vs4_ops_inbox_journey_timeline_missing_audit_refs",
+            "vs4_ops_inbox_journey_timeline_recovery_missing",
+            "vs4_ops_inbox_journey_timeline_authority_expanded",
+            "vs4_ops_inbox_journey_timeline_live_writeback",
+        ]:
+            self.assertEqual(payload["negative_evidence"][key], 1, key)
         self.assertEqual(payload["proof_boundary"]["human_ux_acceptance"], "HUMAN_REQUIRED")
 
     def test_vs4_product_alpha_ux_polish_learn_slice_verify(self) -> None:
@@ -14874,6 +14971,109 @@ class ScaffoldCliTests(unittest.TestCase):
         report_rel = self._vs4_gate_fixture_report("tmp/test-vs4-gate-missing-source-tree.json", tamper)
         payload = self._run_vs4_gate_fixture(report_rel)
         self._assert_vs4_gate_fails_for_condition(payload, "source_tree_metadata")
+
+    def test_vs4_scenario_gate_rejects_stale_source_tree(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            report["source_tree"]["verified_base_commit"] = "000000000"
+            report["source_tree"]["verified_base_commit_full"] = "0" * 40
+            report["source_tree"]["verified_base_tree_hash"] = "0" * 40
+
+        report_rel = self._vs4_gate_fixture_report(
+            "tmp/test-vs4-gate-stale-source-tree.json",
+            tamper,
+        )
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "source_tree_current")
+        self.assertTrue(payload["vs4_gate_validation"]["conditions"]["source_tree_metadata"])
+
+    def test_vs4_matrix_structural_checks_require_neutral_initial_statuses(self) -> None:
+        rows = [dict(row) for row in _vs4_matrix_rows(ROOT)]
+        ai_row = next(row for row in rows if row.get("owner") == "AI")
+        ai_row["initial_status"] = "PASS"
+        checks = _vs4_matrix_structural_checks(ROOT, rows)
+        self.assertFalse(checks["status_neutral"])
+        self.assertFalse(checks["ok"])
+
+    def test_vs4_product_journey_timeline_evidence_fails_closed_when_absent(self) -> None:
+        evidence = _vs4_product_journey_timeline_evidence(
+            '<section data-product-surface="inbox"><h1>Work that needs attention</h1></section>'
+        )
+        self.assertEqual(evidence["details"]["source"], "missing")
+        self.assertTrue(evidence["markers"])
+        self.assertTrue(all(value is False for value in evidence["markers"].values()))
+        self.assertTrue(all(value == 1 for value in evidence["negative_evidence"].values()))
+
+    def test_vs4_product_journey_timeline_evidence_requires_runtime_refs_and_safe_recovery(self) -> None:
+        stages = [
+            ("Inbox", ""),
+            ("Brief", "brief:brief_1"),
+            ("Claim", "claim:claim_1"),
+            ("Memory/Wiki", "memory:memory_1"),
+            ("Action", "action:action_1"),
+            ("Learn", "learn:learn_1"),
+        ]
+        stage_html = "".join(
+            f"""
+<article
+  data-vs4-journey-stage="{stage}"
+  data-vs4-journey-stage-ref="{ref}"
+  data-vs4-journey-evidence-refs="evidence_bundle:bundle_1"
+  data-vs4-journey-audit-refs="audit:audit_{index}"
+><strong>{stage}</strong><span>Review this stage.</span><code>{ref}</code><details><summary>Evidence and activity refs</summary></details></article>
+"""
+            for index, (stage, ref) in enumerate(stages, start=1)
+        )
+        html = f"""
+<section
+  data-vs4-ops-inbox-journey-timeline="runtime-loop-view"
+  data-vs4-loop-recovery-no-authority-expansion="true"
+  data-vs4-loop-recovery-no-live-writeback="true"
+>
+  {stage_html}
+  <div data-vs4-loop-recovery-state="missing-ref" data-vs4-loop-recovery-status="blocked-safe">Missing work item. Nothing new was approved or sent.</div>
+  <div data-vs4-loop-recovery-state="cross-scope" data-vs4-loop-recovery-status="blocked-safe">Outside workspace. Workspace scope stayed unchanged.</div>
+  <div data-vs4-loop-recovery-state="lineage-mismatch" data-vs4-loop-recovery-status="blocked-safe">Different journey. No new journey or activity record was created.</div>
+</section>
+"""
+        evidence = _vs4_product_journey_timeline_evidence(html)
+        self.assertEqual(evidence["details"]["source"], "runtime-loop-view")
+        self.assertTrue(all(evidence["markers"].values()))
+        self.assertTrue(all(value == 0 for value in evidence["negative_evidence"].values()))
+        self.assertEqual(evidence["details"]["stage_labels"], [stage for stage, _ in stages])
+        self.assertEqual(evidence["details"]["progressive_detail_count"], 6)
+
+    def test_vs4_filtered_gate_checks_journey_timeline_when_selected_rows_depend_on_it(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            self._filter_vs4_gate_fixture_report(
+                report,
+                ["VS4-GATE-001", "VS4-REG-007"],
+            )
+            report["browser_proof"]["ops_inbox_triage_markers"][
+                "journey_timeline_visible"
+            ] = False
+
+        report_rel = self._vs4_gate_fixture_report(
+            "tmp/test-vs4-gate-filtered-journey-timeline.json",
+            tamper,
+        )
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "ops_inbox_journey_timeline")
+
+    def test_vs4_filtered_gate_rejects_classification_summary_mismatch(self) -> None:
+        def tamper(report: dict[str, Any]) -> None:
+            self._filter_vs4_gate_fixture_report(
+                report,
+                ["VS4-GATE-001", "VS4-REG-007"],
+            )
+            report["summary"]["in_this_slice"] = 21
+            report["summary"]["previous_slice"] = 6
+
+        report_rel = self._vs4_gate_fixture_report(
+            "tmp/test-vs4-gate-filtered-summary.json",
+            tamper,
+        )
+        payload = self._run_vs4_gate_fixture(report_rel)
+        self._assert_vs4_gate_fails_for_condition(payload, "summary_counts")
 
     def test_vs4_human_gate_package_prepares_review_without_acceptance(self) -> None:
         scenario_report = "tmp/test-vs4-product-alpha-full-for-human-package.json"

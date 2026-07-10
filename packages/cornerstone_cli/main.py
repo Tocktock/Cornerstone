@@ -20043,6 +20043,22 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             report["summary"]["not_run"] = len([row for row in filtered_rows if row.get("status") == "NOT_RUN"])
             report["summary"]["human_required"] = len([row for row in filtered_rows if row.get("owner") == "Human"])
             report["summary"]["blocking"] = len(blocking)
+            if "in_this_slice" in report["summary"]:
+                report["summary"]["in_this_slice"] = len(
+                    [
+                        row
+                        for row in filtered_rows
+                        if row.get("execution_classification") == "in_this_slice"
+                    ]
+                )
+            if "previous_slice" in report["summary"]:
+                report["summary"]["previous_slice"] = len(
+                    [
+                        row
+                        for row in filtered_rows
+                        if row.get("execution_classification") == "previous_slice"
+                    ]
+                )
             report["status"] = "success" if not blocking else "failed"
 
     payload = base_response(f"cornerstone scenario verify {args.contract}", report["status"], root)
@@ -20531,6 +20547,39 @@ VS4_REQUIRED_SOURCE_TREE_FIELDS = {
     "worktree_dirty_at_verification",
     "report_generated_before_commit",
 }
+VS4_SOURCE_TREE_CURRENT_FIELDS = (
+    "verified_base_commit",
+    "verified_base_commit_full",
+    "verified_base_tree_hash",
+    "verified_source_worktree_hash",
+    "worktree_dirty_at_verification",
+    "report_generated_before_commit",
+)
+VS4_JOURNEY_TIMELINE_SCENARIO_IDS = frozenset(
+    {
+        "VS4-GATE-001",
+        "VS4-UI-001",
+        "VS4-UI-005",
+        "VS4-UI-006",
+        "VS4-UI-007",
+        "VS4-UI-008",
+        "VS4-UI-009",
+        "VS4-UI-010",
+        "VS4-UI-011",
+        "VS4-UI-012",
+        "VS4-UI-013",
+        "VS4-UI-015",
+        "VS4-UI-016",
+        "VS4-STATE-001",
+        "VS4-REF-001",
+        "VS4-REF-002",
+        "VS4-REG-003",
+        "VS4-REG-004",
+        "VS4-REG-005",
+        "VS4-REG-006",
+        "VS4-REG-007",
+    }
+)
 
 
 def _vs4_gate_json_ref(value: Any) -> dict[str, Any]:
@@ -20577,6 +20626,46 @@ def _vs4_gate_source_tree_summary(source_tree: Any) -> dict[str, Any]:
     if isinstance(generated_dirty_snapshots, list):
         summary["generated_dirty_snapshot_paths_ref"] = _vs4_gate_json_ref(generated_dirty_snapshots)
     return summary
+
+
+def _vs4_source_tree_current_validation(root: Path, source_tree: Any) -> dict[str, Any]:
+    current_source_tree = git_verification_metadata(root)
+    recorded = source_tree if isinstance(source_tree, dict) else {}
+    recorded_fingerprint = {
+        field: recorded.get(field) for field in VS4_SOURCE_TREE_CURRENT_FIELDS
+    }
+    current_fingerprint = {
+        field: current_source_tree.get(field) for field in VS4_SOURCE_TREE_CURRENT_FIELDS
+    }
+    mismatches = {
+        field: {
+            "recorded": recorded_fingerprint.get(field),
+            "current": current_fingerprint.get(field),
+        }
+        for field in VS4_SOURCE_TREE_CURRENT_FIELDS
+        if recorded_fingerprint.get(field) != current_fingerprint.get(field)
+    }
+    recorded_snapshots = recorded.get("verified_source_snapshot_paths")
+    current_snapshots = current_source_tree.get("verified_source_snapshot_paths")
+    snapshots_match = (
+        isinstance(recorded_snapshots, list)
+        and isinstance(current_snapshots, list)
+        and recorded_snapshots == current_snapshots
+    )
+    return {
+        "schema_version": "cs.vs4_source_tree_current_validation.v0",
+        "status": "passed" if not mismatches and snapshots_match else "failed",
+        "mismatches": mismatches,
+        "recorded_fingerprint": recorded_fingerprint,
+        "current_fingerprint": current_fingerprint,
+        "verified_source_snapshot_paths_match": snapshots_match,
+        "recorded_source_snapshot_path_count": len(recorded_snapshots)
+        if isinstance(recorded_snapshots, list)
+        else 0,
+        "current_source_snapshot_path_count": len(current_snapshots)
+        if isinstance(current_snapshots, list)
+        else 0,
+    }
 
 
 def _scenario_row_id(row: dict[str, Any]) -> str:
@@ -20742,6 +20831,22 @@ def _vs4_product_alpha_gate_validation(
         "blocking": 0,
         "fail": 0,
         "not_run": 0,
+        "in_this_slice": len(
+            [
+                row
+                for row in rows
+                if isinstance(row, dict)
+                and row.get("execution_classification") == "in_this_slice"
+            ]
+        ),
+        "previous_slice": len(
+            [
+                row
+                for row in rows
+                if isinstance(row, dict)
+                and row.get("execution_classification") == "previous_slice"
+            ]
+        ),
     }
     summary_mismatches = {
         key: {"expected": expected, "actual": summary.get(key)}
@@ -20986,7 +21091,7 @@ def _vs4_product_alpha_gate_validation(
     ]
     record_when_in_scope(
         "ops_inbox_journey_timeline",
-        full_report or VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY in expected_id_set,
+        full_report or bool(expected_id_set & VS4_JOURNEY_TIMELINE_SCENARIO_IDS),
         proof_boundary.get(VS4_ACTIVE_SLICE_PROOF_BOUNDARY_KEY) == VS4_SLICE_PROOF_BOUNDARY_VALUE
         and all(ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
         and all(mobile_ops_markers.get(marker) is True for marker in journey_timeline_required_markers)
@@ -21035,6 +21140,7 @@ def _vs4_product_alpha_gate_validation(
         "VS4 report must preserve native CLI parity transcripts and a passing VS4-REG-007 row.",
     )
     source_tree_missing = sorted(VS4_REQUIRED_SOURCE_TREE_FIELDS - set(source_tree))
+    source_tree_current_validation = _vs4_source_tree_current_validation(root, source_tree)
     record(
         "source_tree_metadata",
         isinstance(source_tree, dict)
@@ -21042,8 +21148,14 @@ def _vs4_product_alpha_gate_validation(
         and isinstance(source_tree.get("verified_source_snapshot_paths"), list)
         and isinstance(source_tree.get("generated_dirty_snapshot_paths"), list)
         and isinstance(source_tree.get("generated_dirty_paths"), list),
-        "VS4 report must include source-tree freshness metadata without requiring post-commit HEAD equality.",
+        "VS4 report must include source-tree metadata required for current-tree validation.",
         missing_fields=source_tree_missing,
+    )
+    record(
+        "source_tree_current",
+        source_tree_current_validation["status"] == "passed",
+        "VS4 report source-tree metadata must match the current code and non-generated source snapshot.",
+        validation=source_tree_current_validation,
     )
     return {
         "schema_version": "cs.vs4_product_alpha_scenario_gate_validation.v0",
@@ -21064,6 +21176,7 @@ def _vs4_product_alpha_gate_validation(
         "proof_boundary": proof_boundary,
         "summary": summary,
         "source_tree": _vs4_gate_source_tree_summary(source_tree),
+        "source_tree_current_validation": source_tree_current_validation,
     }
 
 
@@ -23741,6 +23854,9 @@ def command_scenario_gate(args: argparse.Namespace) -> int:
             "source_tree": _vs4_gate_source_tree_summary(data.get("source_tree")),
         }
         payload["vs4_gate_validation"] = vs4_gate_validation
+        payload["source_tree_current_validation"] = vs4_gate_validation[
+            "source_tree_current_validation"
+        ]
         payload["scenario_gate_conditions"] = vs4_gate_validation["conditions"]
         payload["scenario_gate_summary"] = {
             "failure_count": vs4_gate_validation["failure_count"],
