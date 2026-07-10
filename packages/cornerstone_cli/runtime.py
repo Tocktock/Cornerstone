@@ -9528,6 +9528,13 @@ class LocalRuntimeStore:
             return {"status": "not_found"}
         if bundle.get("filters") != scope:
             return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        evidence_items = bundle.get("evidence_items")
+        if not isinstance(evidence_items, list) or not evidence_items:
+            return {
+                "status": "evidence_required",
+                "resource": "evidence_bundle",
+                "evidence_bundle_id": bundle_id,
+            }
         ontology_context_objects = []
         for ref in ontology_object_refs or []:
             object_id = ref.split(":", 1)[1] if ref.startswith("ontology_object:") else ref
@@ -9572,8 +9579,8 @@ class LocalRuntimeStore:
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 "query": bundle.get("query"),
                 "filters": scope,
-                "evidence_item_count": len(bundle.get("evidence_items", [])),
-                "artifact_refs": [f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", [])],
+                "evidence_item_count": len(evidence_items),
+                "artifact_refs": [f"artifact:{item['artifact_id']}" for item in evidence_items],
                 "result_refs": [
                     f"search_snapshot:{bundle.get('search_snapshot_id')}",
                     f"evidence_bundle:{bundle_id}",

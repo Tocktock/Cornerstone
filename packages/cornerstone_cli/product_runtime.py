@@ -6163,7 +6163,14 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_json(
                 _json_response(
                     "failed",
-                    errors=[{"code": "CS_CLAIM_EVIDENCE_REQUIRED", "message": "Claim creation requires a Brief with source evidence."}],
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_EVIDENCE_REQUIRED",
+                            "message": "Claim creation requires a non-empty Evidence Bundle or a Brief with source evidence.",
+                            "brief_id": brief_id,
+                            "evidence_bundle_id": bundle_id,
+                        }
+                    ],
                 ),
                 400,
             )

@@ -12974,6 +12974,8 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
         rows = {row["id"]: row for row in payload["scenario_results"]}
         self.assertEqual(rows["VS0-RT-001"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-004"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-R03"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-008"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-R04"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-H02"]["status"], "HUMAN_REQUIRED")
@@ -12990,6 +12992,23 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertFalse(ui_summary["readiness_labels_present"])
         self.assertTrue(ui_summary["production_overclaim_absent"])
         self.assertTrue(ui_summary["human_ux_overclaim_absent"])
+        empty_claim = payload["cli_transcripts"]["empty_bundle_claim_create"]
+        self.assertEqual(empty_claim["exit_code"], 4)
+        self.assertIn("CS_CLAIM_EVIDENCE_REQUIRED", {error["code"] for error in empty_claim["stdout_json"]["errors"]})
+        self.assertNotIn("claim", empty_claim["stdout_json"])
+        api_empty_claim = payload["api_transcripts"]["empty_bundle_claim_create"]
+        self.assertEqual(api_empty_claim["status_code"], 400)
+        api_empty_claim_error = api_empty_claim["stdout_json"]["errors"][0]
+        self.assertIn(
+            "CS_CLAIM_EVIDENCE_REQUIRED",
+            {error["code"] for error in api_empty_claim["stdout_json"]["errors"]},
+        )
+        self.assertEqual(
+            api_empty_claim_error["evidence_bundle_id"],
+            payload["api_transcripts"]["empty_bundle_create"]["stdout_json"]["evidence_bundle"]["evidence_bundle_id"],
+        )
+        self.assertIn("non-empty Evidence Bundle", api_empty_claim_error["message"])
+        self.assertNotIn("claim", api_empty_claim["stdout_json"])
 
     def test_vs0_runtime_acceptance_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-runtime-acceptance", "--json")
@@ -15612,6 +15631,77 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(denied_payload["errors"][0]["code"], "CS_SCOPE_DENIED")
             self.assertEqual(denied_payload["errors"][0]["message"], "Claim source is outside the requested scope.")
             self.assertEqual(denied_payload["errors"][0]["brief_id"], brief_id)
+
+    def test_empty_evidence_bundle_cannot_create_evidence_backed_claim(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-empty-evidence-claim-") as state_dir:
+            search = run_cli(
+                "search",
+                "query",
+                "no-result-empty-evidence-anchor",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(search.returncode, 0, search.stdout + search.stderr)
+            snapshot = json.loads(search.stdout)["search_snapshot"]
+            self.assertEqual(snapshot["result_count"], 0)
+
+            bundle = run_cli(
+                "evidence",
+                "bundle",
+                "create",
+                "--search-snapshot-id",
+                snapshot["search_snapshot_id"],
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(bundle.returncode, 0, bundle.stdout + bundle.stderr)
+            evidence_bundle = json.loads(bundle.stdout)["evidence_bundle"]
+            self.assertEqual(evidence_bundle["evidence_items"], [])
+
+            state_path = Path(state_dir)
+            claim_files_before = sorted((state_path / "claims").glob("*.json"))
+            audit_path = state_path / "audit" / "events.jsonl"
+            audit_before = audit_path.read_text()
+
+            cross_scope = run_cli(
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                evidence_bundle["evidence_bundle_id"],
+                "--statement",
+                "An empty bundle from another scope must stay undisclosed.",
+                "--owner-id",
+                "other-user",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(cross_scope.returncode, 6, cross_scope.stdout + cross_scope.stderr)
+            cross_scope_payload = json.loads(cross_scope.stdout)
+            self.assertEqual(cross_scope_payload["errors"][0]["code"], "CS_SCOPE_DENIED")
+
+            claim = run_cli(
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                evidence_bundle["evidence_bundle_id"],
+                "--statement",
+                "A zero-result Evidence Bundle must not earn evidence-backed trust.",
+                "--state-dir",
+                state_dir,
+                "--json",
+            )
+            self.assertEqual(claim.returncode, 4, claim.stdout + claim.stderr)
+            payload = json.loads(claim.stdout)
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(payload["errors"][0]["code"], "CS_CLAIM_EVIDENCE_REQUIRED")
+            self.assertEqual(payload["errors"][0]["evidence_bundle_id"], evidence_bundle["evidence_bundle_id"])
+            self.assertIn("non-empty Evidence Bundle", payload["errors"][0]["message"])
+            self.assertNotIn("claim", payload)
+            self.assertEqual(sorted((state_path / "claims").glob("*.json")), claim_files_before)
+            self.assertEqual(audit_path.read_text(), audit_before)
 
     def test_vs0_artifact_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-artifacts", "--json")

@@ -9785,8 +9785,9 @@ def command_claim_create(args: argparse.Namespace) -> int:
         payload["errors"].append(
             {
                 "code": "CS_CLAIM_EVIDENCE_REQUIRED",
-                "message": "Claim creation requires a Brief with source evidence.",
+                "message": "Claim creation requires a non-empty Evidence Bundle or a Brief with source evidence.",
                 "brief_id": args.brief_id,
+                "evidence_bundle_id": args.evidence_bundle_id,
             }
         )
         print_payload(payload, args.json)

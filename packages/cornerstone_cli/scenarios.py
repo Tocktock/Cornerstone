@@ -24149,6 +24149,40 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         if unsupported_claim_id
         else {}
     )
+    transcripts["empty_search"] = _run_cli_json(
+        root,
+        ["search", "query", "no-result-empty-evidence-anchor", "--state-dir", state_rel, "--json"],
+    )
+    empty_snapshot = _payload(transcripts["empty_search"]).get("search_snapshot", {})
+    empty_snapshot_id = empty_snapshot.get("search_snapshot_id", "")
+    transcripts["empty_bundle_create"] = (
+        _run_cli_json(
+            root,
+            ["evidence", "bundle", "create", "--search-snapshot-id", empty_snapshot_id, "--state-dir", state_rel, "--json"],
+        )
+        if empty_snapshot_id
+        else {}
+    )
+    empty_bundle = _payload(transcripts["empty_bundle_create"]).get("evidence_bundle", {})
+    empty_bundle_id = empty_bundle.get("evidence_bundle_id", "")
+    transcripts["empty_bundle_claim_create"] = (
+        _run_cli_json(
+            root,
+            [
+                "claim",
+                "create",
+                "--evidence-bundle-id",
+                empty_bundle_id,
+                "--statement",
+                "A zero-result Evidence Bundle must not earn evidence-backed trust.",
+                "--state-dir",
+                state_rel,
+                "--json",
+            ],
+        )
+        if empty_bundle_id
+        else {}
+    )
 
     transcripts["mission_create"] = (
         _run_cli_json(
@@ -24294,6 +24328,34 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         api_transcripts["claim_approve"] = (
             _http_json(base_url, "POST", f"/claims/{api_claim_id}/approve", {}) if api_claim_id else {}
         )
+        api_transcripts["empty_search"] = _http_json(
+            base_url,
+            "POST",
+            "/search",
+            {"query": "no-result-empty-evidence-anchor"},
+        )
+        api_empty_snapshot = (api_transcripts["empty_search"].get("stdout_json") or {}).get("search_snapshot", {})
+        api_empty_snapshot_id = api_empty_snapshot.get("search_snapshot_id", "")
+        api_transcripts["empty_bundle_create"] = (
+            _http_json(base_url, "POST", "/evidence-bundles", {"search_snapshot_id": api_empty_snapshot_id})
+            if api_empty_snapshot_id
+            else {}
+        )
+        api_empty_bundle = (api_transcripts["empty_bundle_create"].get("stdout_json") or {}).get("evidence_bundle", {})
+        api_empty_bundle_id = api_empty_bundle.get("evidence_bundle_id", "")
+        api_transcripts["empty_bundle_claim_create"] = (
+            _http_json(
+                base_url,
+                "POST",
+                "/claims",
+                {
+                    "evidence_bundle_id": api_empty_bundle_id,
+                    "statement": "A zero-result Evidence Bundle must not earn evidence-backed trust.",
+                },
+            )
+            if api_empty_bundle_id
+            else {}
+        )
         api_transcripts["action_create"] = (
             _http_json(
                 base_url,
@@ -24398,6 +24460,15 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         and unsupported_show_claim.get("trust_state") == "draft"
         and unsupported_show_claim.get("authority", {}).get("can_be_approved") is False
     )
+    empty_bundle_claim_denied = (
+        _exit_ok(transcripts["empty_search"])
+        and empty_snapshot.get("result_count") == 0
+        and _exit_ok(transcripts["empty_bundle_create"])
+        and empty_bundle.get("evidence_items") == []
+        and transcripts["empty_bundle_claim_create"].get("exit_code") == 4
+        and "CS_CLAIM_EVIDENCE_REQUIRED" in _error_codes(transcripts["empty_bundle_claim_create"])
+        and not _payload(transcripts["empty_bundle_claim_create"]).get("claim")
+    )
     claim_ok = (
         _exit_ok(transcripts["bundle_create"])
         and _exit_ok(transcripts["bundle_show"])
@@ -24409,12 +24480,25 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         and approved_claim.get("trust_state") == "approved"
         and claim.get("evidence_bundle", {}).get("evidence_bundle_id") == bundle_id
         and zero_evidence_denied
+        and empty_bundle_claim_denied
+    )
+    api_empty_bundle_claim_payload = api_transcripts["empty_bundle_claim_create"].get("stdout_json") or {}
+    api_empty_bundle_claim_denied = (
+        api_transcripts["empty_search"].get("status_code") == 200
+        and api_empty_snapshot.get("result_count") == 0
+        and api_transcripts["empty_bundle_create"].get("status_code") == 200
+        and api_empty_bundle.get("evidence_items") == []
+        and api_transcripts["empty_bundle_claim_create"].get("status_code") == 400
+        and "CS_CLAIM_EVIDENCE_REQUIRED"
+        in {error.get("code") for error in api_empty_bundle_claim_payload.get("errors", []) if isinstance(error, dict)}
+        and not api_empty_bundle_claim_payload.get("claim")
     )
     api_claim_ok = (
         api_transcripts["bundle_create"].get("status_code") == 200
         and api_transcripts["claim_create"].get("status_code") == 200
         and api_transcripts["claim_approve"].get("status_code") == 200
         and (api_transcripts["claim_approve"].get("stdout_json") or {}).get("claim", {}).get("trust_state") == "approved"
+        and api_empty_bundle_claim_denied
     )
 
     dry_run = _payload(transcripts["action_dry_run"]).get("dry_run", {})
@@ -24518,8 +24602,13 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "VS0-RT-004",
             "MUST_PASS",
             "PASS" if claim_ok and api_claim_ok else "FAIL",
-            ["cornerstone evidence bundle create --search-snapshot-id <id> --json", "cornerstone claim create --evidence-bundle-id <id> --json", "cornerstone claim approve <id> --json"],
-            "Evidence Bundle-backed claims can be approved; zero-evidence claims remain draft and cannot be approved.",
+            [
+                "cornerstone evidence bundle create --search-snapshot-id <id> --json",
+                "cornerstone claim create --evidence-bundle-id <id> --json",
+                "cornerstone claim approve <id> --json",
+                "POST /claims",
+            ],
+            "Non-empty Evidence Bundle-backed claims can be approved; empty bundles cannot create evidence-backed claims through CLI or API.",
         ),
         _row(
             "VS0-RT-005",
@@ -24572,9 +24661,13 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         _row(
             "VS0-RT-R03",
             "REGRESSION_GUARD",
-            "PASS" if zero_evidence_denied else "FAIL",
-            ["cornerstone claim approve <unsupported_claim_id> --json"],
-            "Zero-evidence claim approval is rejected and the claim remains draft.",
+            "PASS" if zero_evidence_denied and empty_bundle_claim_denied and api_empty_bundle_claim_denied else "FAIL",
+            [
+                "cornerstone claim approve <unsupported_claim_id> --json",
+                "cornerstone claim create --evidence-bundle-id <empty_bundle_id> --json",
+                "POST /claims with an empty Evidence Bundle",
+            ],
+            "Zero-evidence approval is rejected, unsupported claims remain draft, and empty bundles cannot earn evidence-backed trust.",
         ),
         _row(
             "VS0-RT-R04",
