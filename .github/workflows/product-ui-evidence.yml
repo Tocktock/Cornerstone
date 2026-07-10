@@ -58,9 +58,6 @@ jobs:
   verify-product-ui:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    env:
-      CAPTURE_OUTPUT_DIR: ${{ runner.temp }}/cornerstone-product-ui-capture
-      CAPTURE_STATE_DIR: ${{ runner.temp }}/cornerstone-product-ui-state
 
     steps:
       - name: Check out source
@@ -106,14 +103,14 @@ jobs:
       - name: Capture current-revision browser evidence
         run: |
           python scripts/capture_vs4_h01_ui_recovery_screenshots.py \
-            --output-dir "$CAPTURE_OUTPUT_DIR" \
-            --state-dir "$CAPTURE_STATE_DIR" \
-            --json | tee "${{ runner.temp }}/cornerstone-product-ui-capture.json"
+            --output-dir "$RUNNER_TEMP/cornerstone-product-ui-capture" \
+            --state-dir "$RUNNER_TEMP/cornerstone-product-ui-state" \
+            --json | tee "$RUNNER_TEMP/cornerstone-product-ui-capture.json"
 
       - name: Validate persisted capture manifest
         run: |
           python scripts/capture_vs4_h01_ui_recovery_screenshots.py \
-            --validate-manifest "$CAPTURE_OUTPUT_DIR/screenshot-pack-manifest.json" \
+            --validate-manifest "$RUNNER_TEMP/cornerstone-product-ui-capture/screenshot-pack-manifest.json" \
             --json
 
       - name: Upload browser evidence
@@ -122,7 +119,7 @@ jobs:
         with:
           name: product-ui-evidence-${{ github.sha }}
           path: |
-            ${{ env.CAPTURE_OUTPUT_DIR }}
+            ${{ runner.temp }}/cornerstone-product-ui-capture
             ${{ runner.temp }}/cornerstone-product-ui-capture.json
           if-no-files-found: error
           retention-days: 14
