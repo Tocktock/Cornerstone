@@ -1283,6 +1283,15 @@ class LocalRuntimeStore:
             return None
         return _read_json(path)
 
+    def get_mission_outcome(self, outcome_id: str) -> dict[str, Any] | None:
+        path = self.mission_outcome_path(outcome_id)
+        if not path.exists():
+            return None
+        return _read_json(path)
+
+    def get_product_loop_outcome(self, outcome_id: str) -> dict[str, Any] | None:
+        return self.get_connected_outcome(outcome_id) or self.get_mission_outcome(outcome_id)
+
     def get_agent_pack(self, pack_id: str) -> dict[str, Any] | None:
         path = self.agent_pack_path(pack_id)
         if not path.exists():
@@ -4653,7 +4662,7 @@ class LocalRuntimeStore:
             "memory": self.get_memory,
             "mission": self.get_mission,
             "action": self.get_action,
-            "outcome": self.get_connected_outcome,
+            "outcome": self.get_product_loop_outcome,
             "lesson": self.get_lesson_candidate,
         }
         missing_message = "Loop View could not find one of the requested work items."

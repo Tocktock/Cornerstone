@@ -22934,6 +22934,14 @@ LocalRuntimeStore(state_dir).append_audit(
         self.assertTrue(evidence["repo_split_review_id"].startswith("reposplit_"))
         self.assertEqual(set(evidence["reversibility_ids"]), {"rollback", "compensation", "retry", "non_reversible"})
         self.assertEqual(len(evidence["escalation_ids"]), 6)
+        loop_view = payload["transcripts"]["product_loop_view"]["stdout_json"]["product_loop"]
+        self.assertEqual(loop_view["journey"], "Inbox -> Brief -> Claim -> Memory/Wiki -> Action -> Learn")
+        self.assertEqual(
+            [stage["stage"] for stage in loop_view["stages"]],
+            ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"],
+        )
+        self.assertEqual(loop_view["stages"][3]["ref"], f"memory:{evidence['memory_id']}")
+        self.assertEqual(loop_view["stages"][-1]["ref"], f"mission_outcome:{evidence['outcome_id']}")
         self.assertFalse(payload["human_required"])
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)

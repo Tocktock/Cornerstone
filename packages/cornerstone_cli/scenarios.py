@@ -23630,6 +23630,8 @@ def verify_full_mission_control_autonomy_lifecycle(root: Path) -> dict[str, Any]
             brief_id,
             "--claim-id",
             claim_id,
+            "--memory-id",
+            memory_id,
             "--mission-id",
             mission_id,
             "--action-id",
@@ -23721,7 +23723,8 @@ def verify_full_mission_control_autonomy_lifecycle(root: Path) -> dict[str, Any]
     loop_ok = (
         _exit_ok(transcripts["product_loop_view"])
         and loop_view.get("single_item_progression_visible") is True
-        and [stage.get("stage") for stage in loop_view.get("stages", [])] == ["Inbox", "Brief", "Claim", "Action", "Learn"]
+        and [stage.get("stage") for stage in loop_view.get("stages", [])]
+        == ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
         and all(stage.get("visible") is True and stage.get("ref") for stage in loop_view.get("stages", []))
     )
     boundary_ok = (
@@ -23848,7 +23851,7 @@ def verify_full_mission_control_autonomy_lifecycle(root: Path) -> dict[str, Any]
 
     rows = [
         _row("CS-PROD-006", "MUST_PASS", "PASS" if mission_control_ok and audit_ok else "FAIL", ["cornerstone product mission-control --json"], "Mission Control/Ops Inbox surface shows briefs, evidence gaps, missions, tasks, approvals, actions, memory changes, and learning opportunities."),
-        _row("CS-PROD-007", "MUST_PASS", "PASS" if loop_ok and audit_ok else "FAIL", ["cornerstone product loop-view --json"], "One item visibly progresses through Inbox, Brief, Claim, Action, and Learn."),
+        _row("CS-PROD-007", "MUST_PASS", "PASS" if loop_ok and audit_ok else "FAIL", ["cornerstone product loop-view --json"], "One item visibly progresses through Inbox, Brief, Claim, Memory/Wiki, Action, and Learn."),
         _row("CS-PROD-008", "MUST_PASS", "PASS" if boundary_ok and audit_ok else "FAIL", ["cornerstone product boundary --json"], "Product boundary copy explains source systems as systems of record and CornerStone as intelligence/evidence/mission/action-control/learning layer."),
         _row("CS-PROD-009", "MUST_PASS", "PASS" if personal_to_org_ok and audit_ok else "FAIL", ["cornerstone namespace promote --source-kind memory --mode copy_with_provenance --json"], "Personal memory can be explicitly promoted into organization namespace with provenance, policy, and audit."),
         _row("CS-PROD-010", "MUST_PASS", "PASS" if plain_language_ok and audit_ok else "FAIL", ["cornerstone product plain-language-review --json"], "First value and basic mission work use plain product language while advanced governance remains optional."),
