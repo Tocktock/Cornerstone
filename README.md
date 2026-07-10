@@ -83,14 +83,18 @@ Action Cards and Memory/Wiki candidates remain visible in the UI as review draft
 ## Run It Locally
 
 ```sh
-export PATH="$PWD:$PATH"
-cornerstone ready --json        # local_scenario_ready=true, production_release_ready=false
-cornerstone runtime serve --port 8787
+./run.sh
 ```
 
-Then open the local UI, or drive the same loop from the CLI:
+The launcher checks the pinned Ollama generation and embedding models, starts
+Ollama at its default local URL when it is not already running, and serves the
+UI and API at `http://127.0.0.1:8787`. Press `Ctrl-C` to stop everything started
+by the launcher.
+
+Then open the local UI, or drive the same loop from another terminal:
 
 ```sh
+export PATH="$PWD:$PATH"
 cornerstone artifact ingest --text "paste anything messy here" --source user_paste --json
 cornerstone search query "your topic" --json
 cornerstone evidence bundle create --search-snapshot-id <id> --json
