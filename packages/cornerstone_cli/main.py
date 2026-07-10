@@ -6,7 +6,10 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import math
+import os
+import re
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -26,14 +29,19 @@ from cornerstone_cli.acceptance import (
     DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
     DEFAULT_RELEASE_PACKAGE_DIR,
+    DEFAULT_RUNTIME_ACCEPTANCE_QUICKSTART_REPORT,
     DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
     DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT,
     command_transcript_entry,
     collect_release_evidence,
     finalize_release_evidence,
     git_verification_metadata,
+    relative_to_root,
+    release_package_locator_id,
+    run_runtime_acceptance_quickstart,
     run_evux_quickstart,
     utc_now,
+    validate_runtime_acceptance_quickstart_report,
     write_json,
     _is_generated_evidence_path,
 )
@@ -564,7 +572,26 @@ def command_health(args: argparse.Namespace) -> int:
 
 def command_ready(args: argparse.Namespace) -> int:
     root = repo_root()
-    report = build_readiness_report(root)
+    runtime_report_override: Path | None = None
+    override_value = os.environ.get("CORNERSTONE_INTERNAL_RUNTIME_REPORT_OVERRIDE")
+    if override_value:
+        candidate = (root / override_value).resolve()
+        try:
+            relative_candidate = candidate.relative_to(root.resolve())
+        except ValueError:
+            relative_candidate = Path()
+        if (
+            candidate.is_file()
+            and len(relative_candidate.parts) == 4
+            and relative_candidate.parts[:2] == ("tmp", "scenario")
+            and relative_candidate.parts[2].startswith("vs0-runtime-acceptance-")
+            and relative_candidate.parts[3] == "product-runtime-report.json"
+        ):
+            runtime_report_override = candidate
+    report = build_readiness_report(
+        root,
+        runtime_report_override=runtime_report_override,
+    )
     readiness = report["readiness"]
     ready = readiness["local_scenario_ready"] and readiness["vs0_runtime_ready"]
     missing = [row["name"] for row in report["checks"] if not row["present"]]
@@ -15221,6 +15248,57 @@ def command_release_evidence_collect(args: argparse.Namespace) -> int:
     browser_proof_dir = (root / browser_proof_dir_arg).resolve()
     output_dir = (root / output_dir_arg).resolve()
     verification_report = (root / verification_report_arg).resolve() if verification_report_arg else None
+    if args.scope == "vs0-evux":
+        quickstart_report = (root / DEFAULT_EVUX_QUICKSTART_REPORT).resolve()
+    else:
+        try:
+            selected_scenario = json.loads(scenario_report.read_text())
+        except (OSError, ValueError):
+            selected_scenario = {}
+        selected_scenario = selected_scenario if isinstance(selected_scenario, dict) else {}
+        acceptance_evidence = selected_scenario.get("acceptance_evidence")
+        declared_quickstart = (
+            acceptance_evidence.get("quickstart_report")
+            if isinstance(acceptance_evidence, dict)
+            else None
+        )
+        if isinstance(declared_quickstart, dict) and declared_quickstart.get("path"):
+            quickstart_source = (root / str(declared_quickstart["path"])).resolve()
+            quickstart_source_allowed = any(
+                quickstart_source.is_relative_to(allowed_root.resolve())
+                for allowed_root in (root, scenario_report.parent, output_dir)
+            )
+            declared_sha256 = declared_quickstart.get("sha256")
+            actual_sha256 = (
+                hashlib.sha256(quickstart_source.read_bytes()).hexdigest()
+                if quickstart_source_allowed and quickstart_source.is_file()
+                else None
+            )
+            if (
+                not quickstart_source_allowed
+                or not isinstance(declared_sha256, str)
+                or actual_sha256 != declared_sha256
+            ):
+                payload = base_response("cornerstone release evidence collect", "failed", root)
+                payload.update(requested_scope)
+                payload["errors"].append(
+                    {
+                        "code": "CS_RELEASE_QUICKSTART_BINDING_INVALID",
+                        "message": "The selected scenario report's quickstart artifact is missing or its hash changed.",
+                        "quickstart_path": declared_quickstart.get("path"),
+                    }
+                )
+                print_payload(payload, args.json)
+                return EXIT_EVIDENCE_MISSING
+        else:
+            quickstart_source = (root / DEFAULT_RUNTIME_ACCEPTANCE_QUICKSTART_REPORT).resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
+        quickstart_report = output_dir / "quickstart-report.json"
+        if quickstart_source != quickstart_report:
+            if quickstart_report.exists():
+                quickstart_report.unlink()
+            if quickstart_source.exists():
+                shutil.copy2(quickstart_source, quickstart_report)
     result = collect_release_evidence(
         root,
         requested_scope=requested_scope,
@@ -15230,19 +15308,22 @@ def command_release_evidence_collect(args: argparse.Namespace) -> int:
         product_runtime_report=product_runtime_report,
         browser_proof_dir=browser_proof_dir,
         verification_report=verification_report,
+        quickstart_report=quickstart_report,
     )
     payload = base_response("cornerstone release evidence collect", result["status"], root)
     payload.update(requested_scope)
     payload["release_evidence_package"] = result
     payload["ids"].update({"package_id": result.get("package_id")})
     if result["status"] != "success":
-        payload["errors"].append(
-            {
-                "code": "CS_RELEASE_EVIDENCE_INCOMPLETE",
-                "message": "Release evidence package is missing required artifacts.",
-                "missing_required": result.get("missing_required", []),
-            }
-        )
+        payload["errors"].extend(result.get("errors", []))
+        if not payload["errors"]:
+            payload["errors"].append(
+                {
+                    "code": "CS_RELEASE_EVIDENCE_INCOMPLETE",
+                    "message": "Release evidence package is missing required artifacts.",
+                    "missing_required": result.get("missing_required", []),
+                }
+            )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
     payload["evidence_refs"].append(f"release_evidence:{result['package_id']}")
@@ -15287,30 +15368,40 @@ def command_release_evidence_finalize(args: argparse.Namespace) -> int:
 def command_quickstart_verify(args: argparse.Namespace) -> int:
     root = repo_root()
     started = perf_counter()
-    if args.quickstart != "vs0-evux":
+    supported = ["vs0-runtime-acceptance", "vs0-evux"]
+    if args.quickstart not in supported:
         payload = base_response("cornerstone quickstart verify", "failed", root)
         payload["errors"].append(
             {
                 "code": "CS_QUICKSTART_UNSUPPORTED",
                 "message": "The requested quickstart verifier is not implemented.",
-                "supported": ["vs0-evux"],
+                "supported": supported,
             }
         )
         print_payload(payload, args.json)
         return EXIT_INVALID
-    output_path = (root / (args.output or DEFAULT_EVUX_QUICKSTART_REPORT)).resolve()
-    result = run_evux_quickstart(root, output_path=output_path)
+    if args.quickstart == "vs0-runtime-acceptance":
+        default_output = DEFAULT_RUNTIME_ACCEPTANCE_QUICKSTART_REPORT
+        runner = run_runtime_acceptance_quickstart
+        transcript_name = "quickstart_verify_vs0_runtime_acceptance"
+    else:
+        default_output = DEFAULT_EVUX_QUICKSTART_REPORT
+        runner = run_evux_quickstart
+        transcript_name = "quickstart_verify_vs0_evux"
+    output_arg = args.output or default_output
+    output_path = (root / output_arg).resolve()
+    result = runner(root, output_path=output_path)
     exit_code = EXIT_SUCCESS if result["status"] == "success" else EXIT_EVIDENCE_MISSING
     result["self_command_transcript"] = command_transcript_entry(
-        name="quickstart_verify_vs0_evux",
+        name=transcript_name,
         command=[
             "cornerstone",
             "quickstart",
             "verify",
-            "vs0-evux",
+            args.quickstart,
             "--json",
             "--output",
-            args.output or DEFAULT_EVUX_QUICKSTART_REPORT,
+            output_arg,
         ],
         exit_code=exit_code,
         timed_out=False,
@@ -15327,15 +15418,55 @@ def command_quickstart_verify(args: argparse.Namespace) -> int:
         ],
         stderr_tail=[],
     )
+    if args.quickstart == "vs0-runtime-acceptance" and result.get("status") == "success":
+        validation = validate_runtime_acceptance_quickstart_report(result, root=root)
+        if validation.get("ok") is not True:
+            result["status"] = "failed"
+            result.setdefault("errors", []).append(
+                {
+                    "code": "CS_QUICKSTART_REPORT_VALIDATION_FAILED",
+                    "message": "The executed quickstart report failed independent validation.",
+                    "validation_error_count": validation.get("error_count"),
+                    "validation_error_codes": sorted(
+                        {
+                            str(error.get("code"))
+                            for error in (validation.get("errors") or [])
+                            if isinstance(error, dict) and error.get("code")
+                        }
+                    ),
+                }
+            )
+            exit_code = EXIT_EVIDENCE_MISSING
+            result["self_command_transcript"]["exit_code"] = exit_code
+            result["self_command_transcript"]["stdout_tail"] = [
+                json.dumps(
+                    {
+                        "status": result.get("status"),
+                        "generated_ids": result.get("generated_ids"),
+                        "negative_evidence": result.get("negative_evidence"),
+                    },
+                    sort_keys=True,
+                )
+            ]
     write_json(output_path, result)
-    payload = base_response("cornerstone quickstart verify vs0-evux", result["status"], root)
-    payload.update(result)
+    payload = base_response(f"cornerstone quickstart verify {args.quickstart}", result["status"], root)
+    if args.quickstart == "vs0-runtime-acceptance":
+        payload.update(
+            {
+                key: value
+                for key, value in result.items()
+                if key not in {"schema_version", "status", "evidence_refs", "audit_refs", "errors"}
+            }
+        )
+        payload["quickstart_report"] = result
+        payload["evidence_refs"] = list(dict.fromkeys(result.get("evidence_refs", [])))
+        payload["audit_refs"] = list(dict.fromkeys(result.get("audit_refs", [])))
+        payload["errors"] = list(result.get("errors", []))
+    else:
+        payload.update(result)
     payload["output_path"] = str(output_path)
     payload["ids"].update(result.get("generated_ids", {}))
-    payload["evidence_refs"].extend(result.get("evidence_refs", []))
-    payload["audit_refs"].extend(result.get("audit_refs", []))
     if result["status"] != "success":
-        payload["errors"].extend(result.get("errors", []))
         print_payload(payload, args.json)
         return exit_code
     print_payload(payload, args.json)
@@ -19489,10 +19620,191 @@ def _vs3_status_neutral_scenario_verify_payload(
     return payload
 
 
+def _runtime_acceptance_release_row(payload: dict[str, Any]) -> dict[str, Any] | None:
+    rows = payload.get("scenario_results")
+    if not isinstance(rows, list):
+        return None
+    return next(
+        (
+            row
+            for row in rows
+            if isinstance(row, dict) and row.get("id") == "VS0-ACC-005"
+        ),
+        None,
+    )
+
+
+def _sync_runtime_acceptance_release_status(
+    payload: dict[str, Any],
+    release_result: dict[str, Any],
+) -> int:
+    row = _runtime_acceptance_release_row(payload)
+    if row is None:
+        return EXIT_SUCCESS if payload.get("status") == "success" else EXIT_EVIDENCE_MISSING
+
+    release_ok = release_result.get("status") == "success"
+    row["status"] = "PASS" if release_ok else "FAIL"
+    rows = payload.get("scenario_results") or []
+    blocking = [
+        candidate
+        for candidate in rows
+        if isinstance(candidate, dict)
+        and candidate.get("owner") != "Human"
+        and candidate.get("status") in {"FAIL", "NOT_VERIFIED", "NOT_RUN"}
+    ]
+    summary = payload.get("summary")
+    if not isinstance(summary, dict):
+        summary = {}
+        payload["summary"] = summary
+    summary.update(
+        {
+            "scenario_count": len(rows),
+            "pass": len([candidate for candidate in rows if candidate.get("status") == "PASS"]),
+            "fail": len([candidate for candidate in rows if candidate.get("status") == "FAIL"]),
+            "not_verified": len(
+                [candidate for candidate in rows if candidate.get("status") == "NOT_VERIFIED"]
+            ),
+            "not_run": len([candidate for candidate in rows if candidate.get("status") == "NOT_RUN"]),
+            "human_required": len(
+                [candidate for candidate in rows if candidate.get("owner") == "Human"]
+            ),
+            "blocking": len(blocking),
+        }
+    )
+    preexisting_errors = [
+        error
+        for error in (payload.get("errors") or [])
+        if not isinstance(error, dict) or error.get("code") != "CS_RELEASE_EVIDENCE_FINALIZATION_FAILED"
+    ]
+    summary["blocking"] = len(blocking) + (1 if preexisting_errors else 0)
+    payload["status"] = "success" if not blocking and not preexisting_errors else "failed"
+    locator = payload.get("release_evidence_package")
+    if isinstance(locator, dict):
+        locator["status"] = release_result.get("status")
+        locator["missing_required"] = list(release_result.get("missing_required") or [])
+        locator["artifact_count"] = release_result.get("artifact_count")
+
+    errors = list(preexisting_errors)
+    if not release_ok:
+        errors.append(
+            {
+                "code": "CS_RELEASE_EVIDENCE_FINALIZATION_FAILED",
+                "message": "Final release evidence collection did not bind a successful package to the exact scenario report bytes.",
+                "missing_required": list(release_result.get("missing_required") or []),
+            }
+        )
+    payload["errors"] = errors
+    exit_code = EXIT_SUCCESS if payload["status"] == "success" else EXIT_EVIDENCE_MISSING
+    self_transcript = payload.get("self_command_transcript")
+    if isinstance(self_transcript, dict):
+        self_transcript["exit_code"] = exit_code
+        self_transcript["stdout_tail"] = [
+            json.dumps(
+                {
+                    "schema_version": payload.get("cli_schema_version"),
+                    "json_schema": payload.get("schema_version"),
+                    "status": payload.get("status"),
+                    "scenario_set": payload.get("scenario_set"),
+                    "summary": summary,
+                },
+                sort_keys=True,
+            )
+        ]
+    return exit_code
+
+
+def _release_manifest_binds_report(
+    root: Path,
+    release_result: dict[str, Any],
+    report_path: Path,
+) -> bool:
+    manifest_ref = release_result.get("manifest_path")
+    if not isinstance(manifest_ref, str) or not manifest_ref:
+        return False
+    manifest_path = (root / manifest_ref).resolve()
+    try:
+        manifest = json.loads(manifest_path.read_text())
+        report = json.loads(report_path.read_text())
+    except (OSError, ValueError):
+        return False
+    report_sha256 = hashlib.sha256(report_path.read_bytes()).hexdigest()
+    scenario_bound = any(
+        isinstance(entry, dict)
+        and entry.get("role") == "acceptance_scenario_report"
+        and entry.get("present") is True
+        and entry.get("required") is True
+        and entry.get("sha256") == report_sha256
+        for entry in manifest.get("artifacts", [])
+    )
+    acceptance_evidence = report.get("acceptance_evidence")
+    quickstart = (
+        acceptance_evidence.get("quickstart_report")
+        if isinstance(acceptance_evidence, dict)
+        else None
+    )
+    quickstart_bound = isinstance(quickstart, dict) and any(
+        isinstance(entry, dict)
+        and entry.get("role") == "quickstart_report"
+        and entry.get("present") is True
+        and entry.get("required") is True
+        and entry.get("path") == quickstart.get("path")
+        and entry.get("sha256") == quickstart.get("sha256")
+        for entry in manifest.get("artifacts", [])
+    )
+    locator = report.get("release_evidence_package")
+    locator = locator if isinstance(locator, dict) else {}
+    manifest_content = {
+        key: value
+        for key, value in manifest.items()
+        if key not in {"package_id", "content_digest_sha256"}
+    }
+    return bool(
+        scenario_bound
+        and quickstart_bound
+        and manifest.get("status") == release_result.get("status")
+        and manifest.get("package_id") == locator.get("package_id")
+        and manifest.get("content_digest_sha256")
+        == hashlib.sha256(
+            json.dumps(
+                manifest_content,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest()
+    )
+
+
 def command_scenario_verify(args: argparse.Namespace) -> int:
     root = repo_root()
     started_at = utc_now()
     started = perf_counter()
+    canonical_acceptance_report = (root / DEFAULT_ACCEPTANCE_SCENARIO_REPORT).resolve()
+    requested_acceptance_report = (
+        (root / args.output).resolve()
+        if args.contract == "vs0-runtime-acceptance" and args.output
+        else canonical_acceptance_report
+    )
+    is_canonical_runtime_acceptance_run = (
+        args.contract == "vs0-runtime-acceptance"
+        and not args.scenario
+        and requested_acceptance_report == canonical_acceptance_report
+    )
+    if (
+        args.contract == "vs0-runtime-acceptance"
+        and args.scenario
+        and args.output
+        and requested_acceptance_report == canonical_acceptance_report
+    ):
+        payload = base_response("cornerstone scenario verify vs0-runtime-acceptance", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_SCENARIO_FILTER_CANONICAL_OUTPUT_DENIED",
+                "message": "A focused runtime-acceptance verification cannot replace the canonical full-family report.",
+                "canonical_output": DEFAULT_ACCEPTANCE_SCENARIO_REPORT,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
     if args.contract == "vs3-onprem-trusted-extension" and (args.dry_run or args.list):
         mode = "dry_run" if args.dry_run else "list"
         payload = _vs3_status_neutral_scenario_verify_payload(
@@ -19566,7 +19878,10 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     elif args.contract == "vs0-product-runtime":
         report = verify_vs0_product_runtime(root)
     elif args.contract == "vs0-runtime-acceptance":
-        report = verify_vs0_runtime_acceptance(root)
+        report = verify_vs0_runtime_acceptance(
+            root,
+            canonical_outputs=is_canonical_runtime_acceptance_run,
+        )
     elif args.contract == "vs0-evux":
         report = verify_vs0_evux(root)
     elif args.contract == "vs0-evux-governance":
@@ -19734,7 +20049,14 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     payload.update(report)
     output_arg = args.output
     if args.contract == "vs0-runtime-acceptance" and not output_arg:
-        output_arg = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
+        if args.scenario:
+            scenario_slug = "-".join(
+                re.sub(r"[^a-z0-9]+", "-", scenario_id.lower()).strip("-")
+                for scenario_id in sorted(set(args.scenario))
+            )
+            output_arg = f"tmp/scenario/vs0-runtime-acceptance-{scenario_slug}-{os.getpid()}.json"
+        else:
+            output_arg = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
     if args.contract == "vs0-evux" and not output_arg:
         output_arg = DEFAULT_EVUX_SCENARIO_REPORT
     if args.contract == "vs0-evux-governance" and not output_arg:
@@ -19868,25 +20190,194 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         payload["output_path"] = str(output_path)
-        output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        runtime_release_row = (
+            _runtime_acceptance_release_row(payload)
+            if args.contract == "vs0-runtime-acceptance"
+            else None
+        )
+        release_output_dir: Path | None = None
+        quickstart_report_path: Path | None = None
+        product_runtime_report_path: Path | None = None
+        browser_proof_path: Path | None = None
         if args.contract == "vs0-runtime-acceptance":
-            release_result = collect_release_evidence(
-                root,
-                requested_scope={
-                    "tenant_id": payload["tenant_id"],
-                    "owner_id": payload["owner_id"],
-                    "namespace_id": payload["namespace_id"],
-                    "workspace_id": payload["workspace_id"],
-                },
-                scope_name="vs0-runtime-acceptance",
-                output_dir=root / DEFAULT_RELEASE_PACKAGE_DIR,
-                scenario_report=output_path,
-                product_runtime_report=root / DEFAULT_PRODUCT_RUNTIME_REPORT,
-                browser_proof_dir=root / DEFAULT_BROWSER_PROOF_DIR,
-                verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+            acceptance_evidence = payload.get("acceptance_evidence")
+            acceptance_evidence = acceptance_evidence if isinstance(acceptance_evidence, dict) else {}
+            quickstart_evidence = (
+                acceptance_evidence.get("quickstart_report")
             )
-            payload["release_evidence_package"] = release_result
-            output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+            quickstart_report_path = (
+                root / str(quickstart_evidence.get("path"))
+                if isinstance(quickstart_evidence, dict) and quickstart_evidence.get("path")
+                else root / DEFAULT_RUNTIME_ACCEPTANCE_QUICKSTART_REPORT
+            )
+            product_runtime_report_path = root / str(
+                acceptance_evidence.get("product_runtime_report_path")
+                or DEFAULT_PRODUCT_RUNTIME_REPORT
+            )
+            browser_proof_path = root / str(
+                acceptance_evidence.get("browser_proof_dir") or DEFAULT_BROWSER_PROOF_DIR
+            )
+            if runtime_release_row is None:
+                payload["release_evidence_package"] = {
+                    "schema_version": "cs.release_evidence_locator.v0",
+                    "status": "NOT_RUN_FILTERED",
+                    "reason": "VS0-ACC-005 was not selected; no release package was collected.",
+                    "package_identity_authority": "manifest",
+                    "binding_role": "acceptance_scenario_report",
+                }
+            else:
+                release_output_dir = (
+                    root / DEFAULT_RELEASE_PACKAGE_DIR
+                    if is_canonical_runtime_acceptance_run
+                    else output_path.parent / f"{output_path.stem}-release-evidence"
+                )
+                release_output_dir.mkdir(parents=True, exist_ok=True)
+                durable_quickstart_report = release_output_dir / "quickstart-report.json"
+                if durable_quickstart_report.exists():
+                    durable_quickstart_report.unlink()
+                if quickstart_report_path.exists():
+                    shutil.copy2(quickstart_report_path, durable_quickstart_report)
+                quickstart_report_path = durable_quickstart_report
+                if isinstance(quickstart_evidence, dict):
+                    quickstart_evidence["path"] = relative_to_root(root, quickstart_report_path)
+                    quickstart_evidence["sha256"] = (
+                        hashlib.sha256(quickstart_report_path.read_bytes()).hexdigest()
+                        if quickstart_report_path.exists()
+                        else None
+                    )
+                preflight = payload.get("release_evidence_package")
+                preflight = preflight if isinstance(preflight, dict) else {}
+                payload["release_evidence_package"] = {
+                    "schema_version": "cs.release_evidence_locator.v0",
+                    "status": preflight.get("status") or "failed",
+                    "preflight_status": preflight.get("preflight_status") or preflight.get("status") or "failed",
+                    "manifest_path": relative_to_root(root, release_output_dir / "manifest.json"),
+                    "command_transcript_path": relative_to_root(
+                        root,
+                        release_output_dir / "command-transcript.json",
+                    ),
+                    "output_dir": relative_to_root(root, release_output_dir),
+                    "artifact_count": preflight.get("artifact_count"),
+                    "missing_required": list(preflight.get("missing_required") or []),
+                    "quickstart_artifact_bound": preflight.get("quickstart_artifact_bound") is True,
+                    "quickstart_transcript_bound": preflight.get("quickstart_transcript_bound") is True,
+                    "package_identity_authority": "manifest",
+                    "package_id_path": "manifest.json#/package_id",
+                    "content_digest_path": "manifest.json#/content_digest_sha256",
+                    "binding_role": "acceptance_scenario_report",
+                }
+                runtime_release_row["evidence"] = [
+                    "cornerstone release evidence collect --scope vs0-runtime-acceptance --json",
+                    relative_to_root(root, release_output_dir / "manifest.json"),
+                    relative_to_root(root, quickstart_report_path),
+                ]
+                exit_code = _sync_runtime_acceptance_release_status(
+                    payload,
+                    {
+                        "status": payload["release_evidence_package"]["status"],
+                        "artifact_count": payload["release_evidence_package"]["artifact_count"],
+                        "missing_required": payload["release_evidence_package"]["missing_required"],
+                    },
+                )
+                payload["release_evidence_package"]["package_id"] = release_package_locator_id(
+                    root,
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=payload,
+                )
+        output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+        if args.contract == "vs0-runtime-acceptance" and runtime_release_row is not None:
+            assert release_output_dir is not None
+            assert quickstart_report_path is not None
+            assert product_runtime_report_path is not None
+            assert browser_proof_path is not None
+            release_finalized = False
+            for _attempt in range(3):
+                release_result = collect_release_evidence(
+                    root,
+                    requested_scope={
+                        "tenant_id": payload["tenant_id"],
+                        "owner_id": payload["owner_id"],
+                        "namespace_id": payload["namespace_id"],
+                        "workspace_id": payload["workspace_id"],
+                    },
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=output_path,
+                    product_runtime_report=product_runtime_report_path,
+                    browser_proof_dir=browser_proof_path,
+                    verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+                    quickstart_report=quickstart_report_path,
+                )
+                binding_ok = _release_manifest_binds_report(root, release_result, output_path)
+                effective_result = dict(release_result)
+                if not binding_ok:
+                    effective_result["status"] = "failed"
+                locator = payload.get("release_evidence_package") or {}
+                row_status = runtime_release_row.get("status")
+                result_matches_report = (
+                    binding_ok
+                    and locator.get("status") == effective_result.get("status")
+                    and locator.get("artifact_count") == effective_result.get("artifact_count")
+                    and list(locator.get("missing_required") or [])
+                    == list(effective_result.get("missing_required") or [])
+                    and row_status
+                    == ("PASS" if effective_result.get("status") == "success" else "FAIL")
+                )
+                if result_matches_report:
+                    release_finalized = True
+                    break
+                exit_code = _sync_runtime_acceptance_release_status(payload, effective_result)
+                payload["release_evidence_package"]["package_id"] = release_package_locator_id(
+                    root,
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=payload,
+                )
+                output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+            if not release_finalized:
+                failure_result = collect_release_evidence(
+                    root,
+                    requested_scope={
+                        "tenant_id": payload["tenant_id"],
+                        "owner_id": payload["owner_id"],
+                        "namespace_id": payload["namespace_id"],
+                        "workspace_id": payload["workspace_id"],
+                    },
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=output_path,
+                    product_runtime_report=product_runtime_report_path,
+                    browser_proof_dir=browser_proof_path,
+                    verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+                    quickstart_report=quickstart_report_path,
+                )
+                failure_result = dict(failure_result)
+                failure_result["status"] = "failed"
+                exit_code = _sync_runtime_acceptance_release_status(payload, failure_result)
+                payload["release_evidence_package"]["package_id"] = release_package_locator_id(
+                    root,
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=payload,
+                )
+                output_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+                collect_release_evidence(
+                    root,
+                    requested_scope={
+                        "tenant_id": payload["tenant_id"],
+                        "owner_id": payload["owner_id"],
+                        "namespace_id": payload["namespace_id"],
+                        "workspace_id": payload["workspace_id"],
+                    },
+                    scope_name="vs0-runtime-acceptance",
+                    output_dir=release_output_dir,
+                    scenario_report=output_path,
+                    product_runtime_report=product_runtime_report_path,
+                    browser_proof_dir=browser_proof_path,
+                    verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+                    quickstart_report=quickstart_report_path,
+                )
         if args.contract == "vs0-evux":
             release_result = collect_release_evidence(
                 root,
@@ -23487,7 +23978,11 @@ def build_parser() -> argparse.ArgumentParser:
     quickstart = subcommands.add_parser("quickstart", help="Executable quickstart verification commands")
     quickstart_sub = quickstart.add_subparsers(dest="quickstart_command")
     quickstart_verify = quickstart_sub.add_parser("verify", help="Verify an executable local quickstart")
-    quickstart_verify.add_argument("quickstart", choices=["vs0-evux"], help="Quickstart verifier")
+    quickstart_verify.add_argument(
+        "quickstart",
+        choices=["vs0-runtime-acceptance", "vs0-evux"],
+        help="Quickstart verifier",
+    )
     quickstart_verify.add_argument("--output", help="Quickstart transcript output path")
     quickstart_verify.add_argument("--json", action="store_true", help="Emit JSON output")
     quickstart_verify.set_defaults(func=command_quickstart_verify)
@@ -26395,7 +26890,12 @@ def build_parser() -> argparse.ArgumentParser:
     evidence_sub = evidence.add_subparsers(dest="release_evidence_command")
 
     collect = evidence_sub.add_parser("collect", help="Collect a release-facing evidence package")
-    collect.add_argument("--scope", default="vs0-runtime-acceptance", help="Evidence package scope")
+    collect.add_argument(
+        "--scope",
+        choices=["vs0-runtime-acceptance", "vs0-evux"],
+        default="vs0-runtime-acceptance",
+        help="Evidence package scope",
+    )
     collect.add_argument("--scenario-report", help="Acceptance scenario report path")
     collect.add_argument("--product-runtime-report", help="VS0 product runtime scenario report path")
     collect.add_argument("--browser-proof-dir", help="Browser proof directory")
@@ -26407,7 +26907,12 @@ def build_parser() -> argparse.ArgumentParser:
     collect.set_defaults(func=command_release_evidence_collect)
 
     finalize = evidence_sub.add_parser("finalize", help="Finalize release evidence with a post-commit rollup")
-    finalize.add_argument("--scope", default="vs0-runtime-acceptance", help="Evidence package scope")
+    finalize.add_argument(
+        "--scope",
+        choices=["vs0-runtime-acceptance", "vs0-evux"],
+        default="vs0-runtime-acceptance",
+        help="Evidence package scope",
+    )
     finalize.add_argument("--output-dir", help="Evidence package output directory")
     add_state_argument(finalize)
     add_scope_arguments(finalize)

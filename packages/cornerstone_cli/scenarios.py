@@ -31,7 +31,6 @@ from cornerstone_cli.acceptance import (
     DEFAULT_OPERATOR_UI_REPORT,
     DEFAULT_OPERATOR_UI_SCENARIO_REPORT,
     DEFAULT_PRODUCT_RUNTIME_REPORT,
-    DEFAULT_RELEASE_PACKAGE_DIR,
     DEFAULT_VS1_ONTOLOGY_BROWSER_PROOF_DIR,
     DEFAULT_VS1_ONTOLOGY_REPORT,
     DEFAULT_VS1_ONTOLOGY_SCENARIO_REPORT,
@@ -47,6 +46,7 @@ from cornerstone_cli.acceptance import (
     git_verification_metadata,
     relative_to_root,
     run_evux_quickstart,
+    validate_runtime_acceptance_quickstart_report,
 )
 from cornerstone_cli.connector import (
     GITHUB_PROVIDER_FAILURE_MODES,
@@ -698,9 +698,23 @@ def verify_vs0_fixtures(root: Path, corpus: str = "fixtures/vs0", model_provider
     }
 
 
-def _run_cli_json(root: Path, args: list[str], *, timeout: float | None = None) -> dict[str, Any]:
+def _run_cli_json(
+    root: Path,
+    args: list[str],
+    *,
+    timeout: float | None = None,
+    env_overrides: dict[str, str] | None = None,
+) -> dict[str, Any]:
     command = [str(root / "cornerstone"), *args]
     timeout_seconds = timeout if timeout is not None else SCENARIO_CLI_TIMEOUT_SECONDS
+    command_env = os.environ.copy()
+    command_env.pop("CORNERSTONE_INTERNAL_RUNTIME_REPORT_OVERRIDE", None)
+    safe_env_overrides = {
+        key: value
+        for key, value in (env_overrides or {}).items()
+        if isinstance(key, str) and isinstance(value, str)
+    }
+    command_env.update(safe_env_overrides)
     try:
         result = subprocess.run(
             command,
@@ -709,6 +723,7 @@ def _run_cli_json(root: Path, args: list[str], *, timeout: float | None = None) 
             capture_output=True,
             check=False,
             timeout=timeout_seconds,
+            env=command_env,
         )
         stdout = result.stdout
         stderr = result.stderr
@@ -726,7 +741,7 @@ def _run_cli_json(root: Path, args: list[str], *, timeout: float | None = None) 
         stdout_json = json.loads(stdout)
     except ValueError as error:
         json_error = str(error)
-    return {
+    transcript = {
         "schema_version": "cs.cli_transcript.v0",
         "command": ["cornerstone", *args],
         "exit_code": exit_code,
@@ -736,6 +751,9 @@ def _run_cli_json(root: Path, args: list[str], *, timeout: float | None = None) 
         "stderr_redacted": redact_text(stderr),
         "json_error": json_error,
     }
+    if safe_env_overrides:
+        transcript["env_overrides"] = safe_env_overrides
+    return transcript
 
 
 def _payload(transcript: dict[str, Any]) -> dict[str, Any]:
@@ -24531,22 +24549,6 @@ def _read_json_file(path: Path) -> dict[str, Any]:
         return {}
 
 
-def _readme_acceptance_quickstart_ok(root: Path) -> bool:
-    readme = (root / "README.md").read_text()
-    required = [
-        "VS0 Runtime Acceptance Quickstart",
-        "cornerstone runtime serve",
-        "cornerstone artifact ingest",
-        "cornerstone search query",
-        "cornerstone evidence bundle create",
-        "cornerstone claim create",
-        "cornerstone action dry-run",
-        "cornerstone audit verify",
-        "cornerstone scenario verify vs0-runtime-acceptance",
-    ]
-    return all(token in readme for token in required)
-
-
 def _has_unqualified_external_calls(value: Any, path: tuple[str, ...] = ()) -> bool:
     if isinstance(value, dict):
         for key, item in value.items():
@@ -24559,27 +24561,72 @@ def _has_unqualified_external_calls(value: Any, path: tuple[str, ...] = ()) -> b
     return False
 
 
-def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
+def verify_vs0_runtime_acceptance(
+    root: Path,
+    *,
+    canonical_outputs: bool = True,
+) -> dict[str, Any]:
     state_rel = _scenario_state_rel("vs0-runtime-acceptance")
     state_path = root / state_rel
     if state_path.exists():
         shutil.rmtree(state_path)
 
-    product_runtime_report_rel = DEFAULT_PRODUCT_RUNTIME_REPORT
-    acceptance_report_rel = DEFAULT_ACCEPTANCE_SCENARIO_REPORT
-    browser_proof_dir = root / DEFAULT_BROWSER_PROOF_DIR
-    release_package_dir = root / DEFAULT_RELEASE_PACKAGE_DIR
+    product_runtime_report_rel = (
+        DEFAULT_PRODUCT_RUNTIME_REPORT
+        if canonical_outputs
+        else f"{state_rel}/product-runtime-report.json"
+    )
+    quickstart_report_rel = f"{state_rel}/quickstart-report.json"
+    quickstart_report_path = root / quickstart_report_rel
+    browser_proof_dir = (
+        root / DEFAULT_BROWSER_PROOF_DIR
+        if canonical_outputs
+        else state_path / "browser-proof"
+    )
+    browser_proof_rel = relative_to_root(root, browser_proof_dir / "browser-proof.json")
+    release_package_dir = state_path / "release-package-preflight"
     if browser_proof_dir.exists():
         shutil.rmtree(browser_proof_dir)
 
     transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["quickstart_verify"] = _run_cli_json(
+        root,
+        [
+            "quickstart",
+            "verify",
+            "vs0-runtime-acceptance",
+            "--output",
+            quickstart_report_rel,
+            "--json",
+        ],
+    )
     transcripts["product_runtime_verify"] = _run_cli_json(
         root,
         ["scenario", "verify", "vs0-product-runtime", "--output", product_runtime_report_rel, "--json"],
     )
-    transcripts["ready"] = _run_cli_json(root, ["ready", "--json"])
+    transcripts["ready"] = _run_cli_json(
+        root,
+        ["ready", "--json"],
+        env_overrides=(
+            {"CORNERSTONE_INTERNAL_RUNTIME_REPORT_OVERRIDE": product_runtime_report_rel}
+            if not canonical_outputs
+            else None
+        ),
+    )
     product_runtime_payload = _payload(transcripts["product_runtime_verify"])
     ready_payload = _payload(transcripts["ready"])
+    quickstart_cli_payload = _payload(transcripts["quickstart_verify"])
+    quickstart_report = _read_json_file(quickstart_report_path)
+    quickstart_validation = validate_runtime_acceptance_quickstart_report(
+        quickstart_report,
+        root=root,
+        cli_payload=quickstart_cli_payload,
+    )
+    quickstart_report_sha256 = (
+        hashlib.sha256(quickstart_report_path.read_bytes()).hexdigest()
+        if quickstart_report_path.exists()
+        else None
+    )
     readiness = ready_payload.get("readiness", {})
     last_runtime_report = readiness.get("last_successful_runtime_scenario", {})
 
@@ -24624,7 +24671,7 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         and all(browser_proof.get("readiness_labels_present", {}).values())
         and browser_proof.get("production_overclaim_absent") is True
     )
-    quickstart_ok = _readme_acceptance_quickstart_ok(root)
+    quickstart_ok = _exit_ok(transcripts["quickstart_verify"]) and quickstart_validation.get("ok") is True
     production_overclaim_ok = (
         readiness.get("production_release_ready") is False
         and product_runtime_payload.get("runtime_evidence", {}).get("readiness", {}).get("production_release_ready") is False
@@ -24650,7 +24697,7 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
             "VS0-ACC-001",
             "MUST_PASS",
             "PASS" if browser_ok else "FAIL",
-            ["Google Chrome headless screenshot", "reports/browser/vs0-runtime-acceptance-2026-06-11/browser-proof.json"],
+            ["Google Chrome headless screenshot", browser_proof_rel],
             "Real browser proof covers required UI surfaces and confirms production readiness is not overclaimed.",
         ),
         _row(
@@ -24671,14 +24718,21 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
             "VS0-ACC-004",
             "MUST_PASS",
             "PASS" if quickstart_ok else "FAIL",
-            ["README.md", "cornerstone scenario verify vs0-product-runtime --json"],
-            "README quickstart gives a repeatable local fixture path from runtime start through audit.",
+            [
+                f"cornerstone quickstart verify vs0-runtime-acceptance --output {quickstart_report_rel} --json",
+                quickstart_report_rel,
+                f"sha256:{quickstart_report_sha256}" if quickstart_report_sha256 else "quickstart_report:missing",
+            ],
+            "Executed quickstart proves the active fixture-to-draft-decision-to-audit spine with independently validated transcripts.",
         ),
         _row(
             "VS0-ACC-005",
             "MUST_PASS",
             "PASS" if release_candidate_ready else "FAIL",
-            ["cornerstone release evidence collect --scope vs0-runtime-acceptance --json", DEFAULT_RELEASE_PACKAGE_DIR],
+            [
+                "cornerstone release evidence collect --scope vs0-runtime-acceptance --json",
+                relative_to_root(root, release_package_dir / "manifest.json"),
+            ],
             "Release evidence package contains scenario report refs, browser proof, command evidence, negative evidence, and human-required rows.",
         ),
         _row(
@@ -24734,6 +24788,10 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         "schema_version": "cs.cli.v0",
         "status": "success" if not candidate_blocking else "failed",
         "scenario_set": "vs0-runtime-acceptance",
+        "tenant_id": "local-dev",
+        "owner_id": "local-user",
+        "namespace_id": "personal",
+        "workspace_id": "default",
         "summary": {
             "scenario_count": len(rows),
             "pass": len([row for row in rows if row["status"] == "PASS"]),
@@ -24743,6 +24801,12 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         },
         "scenario_results": rows,
         "negative_evidence": negative_evidence,
+        "acceptance_evidence": {
+            "quickstart_report": {
+                "path": quickstart_report_rel,
+                "sha256": quickstart_report_sha256,
+            }
+        },
     }
     candidate_report_path.parent.mkdir(parents=True, exist_ok=True)
     candidate_report_path.write_text(json.dumps(candidate_payload, indent=2, sort_keys=True) + "\n")
@@ -24755,11 +24819,40 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         product_runtime_report=root / product_runtime_report_rel,
         browser_proof_dir=browser_proof_dir,
         verification_report=root / DEFAULT_ACCEPTANCE_REPORT,
+        quickstart_report=quickstart_report_path,
     )
+    release_manifest_path = root / str(release_package.get("manifest_path") or "")
+    release_manifest = _read_json_file(release_manifest_path)
+    quickstart_artifact_bound = any(
+        isinstance(entry, dict)
+        and entry.get("role") == "quickstart_report"
+        and entry.get("required") is True
+        and entry.get("present") is True
+        and entry.get("path") == quickstart_report_rel
+        and entry.get("sha256") == quickstart_report_sha256
+        for entry in release_manifest.get("artifacts", [])
+    )
+    release_command_transcript = _read_json_file(
+        root / str(release_package.get("command_transcript_path") or "")
+    )
+    successful_release_commands = {
+        str(entry.get("name"))
+        for entry in release_command_transcript.get("commands", [])
+        if isinstance(entry, dict)
+        and entry.get("exit_code") == 0
+        and entry.get("timed_out") is False
+    }
+    quickstart_transcript_bound = {
+        "quickstart_verify_vs0_runtime_acceptance",
+        "quickstart_report_validation",
+        "quickstart_scenario_binding",
+    }.issubset(successful_release_commands)
     release_package_ok = (
         release_package.get("status") == "success"
         and release_package.get("artifact_count", 0) >= 8
         and not release_package.get("missing_required")
+        and quickstart_artifact_bound
+        and quickstart_transcript_bound
     )
     finalized_rows = []
     for row in rows:
@@ -24786,13 +24879,31 @@ def verify_vs0_runtime_acceptance(root: Path) -> dict[str, Any]:
         "scenario_results": rows,
         "cli_transcripts": transcripts,
         "browser_proof": browser_proof,
-        "release_evidence_package": release_package,
+        "release_evidence_package": {
+            "schema_version": "cs.release_evidence_locator.v0",
+            "status": release_package.get("status"),
+            "preflight_status": release_package.get("status"),
+            "artifact_count": release_package.get("artifact_count"),
+            "missing_required": release_package.get("missing_required", []),
+            "quickstart_artifact_bound": quickstart_artifact_bound,
+            "quickstart_transcript_bound": quickstart_transcript_bound,
+            "package_identity_authority": "manifest",
+            "binding_role": "acceptance_scenario_report",
+        },
         "acceptance_evidence": {
+            "product_runtime_report_path": product_runtime_report_rel,
+            "browser_proof_dir": relative_to_root(root, browser_proof_dir),
             "readiness": readiness,
             "last_runtime_report": last_runtime_report,
             "dry_run_expected_impact": dry_run_impact,
             "execution_result": execution_result,
-            "readme_quickstart_present": quickstart_ok,
+            "quickstart_report": {
+                "path": quickstart_report_rel,
+                "sha256": quickstart_report_sha256,
+                "validation": quickstart_validation,
+                "generated_ids": quickstart_report.get("generated_ids"),
+                "final_audit_verification": quickstart_report.get("final_audit_verification"),
+            },
             "product_runtime_report_status": product_runtime_payload.get("status"),
             "product_runtime_summary": product_runtime_payload.get("summary"),
         },
@@ -30022,6 +30133,10 @@ def verify_vs0_evux(root: Path) -> dict[str, Any]:
         "schema_version": "cs.cli.v0",
         "status": "success" if not candidate_blocking else "failed",
         "scenario_set": "vs0-evux",
+        "tenant_id": "local-dev",
+        "owner_id": "local-user",
+        "namespace_id": "personal",
+        "workspace_id": "default",
         "summary": {
             "scenario_count": len(preliminary_rows),
             "pass": len([row for row in preliminary_rows if row["status"] == "PASS"]),

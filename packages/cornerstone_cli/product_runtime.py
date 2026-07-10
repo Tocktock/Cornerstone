@@ -460,9 +460,31 @@ def _final_commit_full(source_tree: dict[str, Any]) -> str | None:
     return None
 
 
-def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
+def _latest_successful_report(
+    root: Path,
+    scenario_set: str,
+    *,
+    override_path: Path | None = None,
+) -> dict[str, Any]:
     report_dir = root / "reports/scenario"
-    candidates = sorted(report_dir.glob(f"{scenario_set}-*.json"), key=lambda path: path.stat().st_mtime, reverse=True)
+    candidates: list[Path] = []
+    if override_path is not None:
+        resolved_override = override_path.resolve()
+        try:
+            resolved_override.relative_to(root.resolve())
+        except ValueError:
+            resolved_override = Path()
+        if resolved_override.is_file():
+            candidates.append(resolved_override)
+    candidates.extend(
+        path
+        for path in sorted(
+            report_dir.glob(f"{scenario_set}-*.json"),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+        if path.resolve() not in {candidate.resolve() for candidate in candidates}
+    )
     current_git_commit = _git_commit(root)
     current_git_commit_full = _full_object_id(_git_revision(root, "HEAD"))
     current_tree_hash = _full_object_id(_git_revision(root, "HEAD^{tree}"))
@@ -545,7 +567,11 @@ def _latest_successful_report(root: Path, scenario_set: str) -> dict[str, Any]:
     }
 
 
-def build_readiness_report(root: Path) -> dict[str, Any]:
+def build_readiness_report(
+    root: Path,
+    *,
+    runtime_report_override: Path | None = None,
+) -> dict[str, Any]:
     runtime_file = root / "packages/cornerstone_cli/product_runtime.py"
     local_checks = [
         ("native_cli", root / "cornerstone"),
@@ -572,7 +598,11 @@ def build_readiness_report(root: Path) -> dict[str, Any]:
         == {"Home/Ops Inbox", "Brief Detail", "Artifact Viewer", "Search", "Claim candidate", "Action Card", "Audit Detail"}
     )
     production_release_ready = False
-    last_runtime_report = _latest_successful_report(root, "vs0-product-runtime")
+    last_runtime_report = _latest_successful_report(
+        root,
+        "vs0-product-runtime",
+        override_path=runtime_report_override,
+    )
     last_acceptance_report = _latest_successful_report(root, "vs0-runtime-acceptance")
     if last_acceptance_report["gate_status"] == "pass":
         acceptance_status = "pass" if last_acceptance_report["evidence_current"] else "stale"

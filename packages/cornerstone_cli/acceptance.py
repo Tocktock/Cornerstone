@@ -17,7 +17,7 @@ from typing import Any
 from urllib import error, parse, request
 
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, UI_SURFACES, make_server
-from cornerstone_cli.validators import redact_text
+from cornerstone_cli.validators import count_unredacted_secrets, redact_text
 
 
 CHROME_CANDIDATES = [
@@ -35,6 +35,7 @@ DEFAULT_ACCEPTANCE_FREEZE_REPORT = "docs/verification-reports/VS0_RUNTIME_ACCEPT
 DEFAULT_EVUX_SCENARIO_REPORT = "reports/scenario/vs0-evux-2026-06-13.json"
 DEFAULT_EVUX_BROWSER_PROOF_DIR = "reports/browser/vs0-evux-2026-06-13"
 DEFAULT_EVUX_QUICKSTART_REPORT = "reports/quickstart/vs0-evux-quickstart.json"
+DEFAULT_RUNTIME_ACCEPTANCE_QUICKSTART_REPORT = "tmp/quickstart/vs0-runtime-acceptance-current.json"
 DEFAULT_EVUX_RELEASE_PACKAGE_DIR = "reports/release/vs0-evux-2026-06-13"
 DEFAULT_EVUX_REPORT = "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md"
 DEFAULT_OPERATOR_UI_SCENARIO_REPORT = "reports/scenario/vs0-operator-acceptance-ui-2026-06-14.json"
@@ -54,6 +55,16 @@ DEFAULT_VS4_PRODUCT_ALPHA_SLICE_022_GATE_REPORT = (
 DEFAULT_VS4_PRODUCT_ALPHA_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence"
 DEFAULT_VS4_PRODUCT_ALPHA_MOBILE_BROWSER_PROOF_DIR = "reports/browser/vs4-product-alpha-ui-daily-loop-slice-021-runtime-loop-coherence-mobile"
 
+RUNTIME_ACCEPTANCE_QUICKSTART_COMMAND_ORDER = (
+    "artifact_ingest",
+    "search_query",
+    "evidence_bundle_create",
+    "brief_create",
+    "claim_create",
+    "audit_list",
+    "audit_verify",
+)
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -64,6 +75,32 @@ def relative_to_root(root: Path, path: Path) -> str:
         return str(path.resolve().relative_to(root.resolve()))
     except ValueError:
         return str(path.resolve())
+
+
+def release_package_locator_id(
+    root: Path,
+    *,
+    scope_name: str,
+    output_dir: Path,
+    scenario_report: dict[str, Any],
+) -> str:
+    normalized_report = json.loads(json.dumps(scenario_report))
+    release_locator = normalized_report.get("release_evidence_package")
+    if isinstance(release_locator, dict):
+        release_locator.pop("package_id", None)
+    identity = {
+        "schema_version": "cs.release_package_locator.v0",
+        "scope_name": scope_name,
+        "output_dir": relative_to_root(root, output_dir),
+        "scenario_report_sha256_without_package_id": hashlib.sha256(
+            json.dumps(
+                normalized_report,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        ).hexdigest(),
+    }
+    return f"releasepkg_{hashlib.sha256(json.dumps(identity, sort_keys=True).encode('utf-8')).hexdigest()[:16]}"
 
 
 def sha256_file(path: Path) -> str:
@@ -214,8 +251,15 @@ def _free_local_port() -> int:
 
 
 def _json_urlopen(url: str, *, timeout: float = 2.0) -> dict[str, Any]:
-    with request.urlopen(url, timeout=timeout) as response:
+    opener = request.build_opener(request.ProxyHandler({}))
+    with opener.open(url, timeout=timeout) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+def _json_urlopen_response(url: str, *, timeout: float = 2.0) -> tuple[int, dict[str, Any]]:
+    opener = request.build_opener(request.ProxyHandler({}))
+    with opener.open(url, timeout=timeout) as response:
+        return int(response.status), json.loads(response.read().decode("utf-8"))
 
 
 class _CDPClient:
@@ -2291,6 +2335,31 @@ def _artifact_entry(root: Path, path: Path, role: str, *, required: bool = True)
     return entry
 
 
+def _release_manifest_content_payload(manifest: dict[str, Any]) -> dict[str, Any]:
+    payload = {
+        key: value
+        for key, value in manifest.items()
+        if key
+        not in {
+            "package_id",
+            "content_digest_sha256",
+            "finalized_at",
+            "final_commit",
+            "final_tree_hash",
+            "artifact_integrity_errors",
+        }
+    }
+    artifacts = payload.get("artifacts")
+    if isinstance(artifacts, list):
+        payload["artifacts"] = [
+            entry
+            for entry in artifacts
+            if isinstance(entry, dict) and entry.get("role") != "post_commit_rollup"
+        ]
+    payload["post_commit_rollup"] = None
+    return payload
+
+
 def _release_transcript_entry(
     name: str,
     transcript: dict[str, Any],
@@ -2314,7 +2383,7 @@ def _release_transcript_entry(
     )
 
 
-def collect_release_evidence(
+def _collect_release_evidence(
     root: Path,
     *,
     requested_scope: dict[str, str],
@@ -2324,9 +2393,113 @@ def collect_release_evidence(
     product_runtime_report: Path,
     browser_proof_dir: Path,
     verification_report: Path | None = None,
+    quickstart_report: Path | None = None,
 ) -> dict[str, Any]:
     collect_started = time.monotonic()
     output_dir.mkdir(parents=True, exist_ok=True)
+    generated_output_paths = {
+        (output_dir / name).resolve()
+        for name in (
+            "manifest.json",
+            "command-transcript.json",
+            "command-evidence.json",
+            "human-usability-walkthrough.md",
+            "post_commit_rollup.json",
+        )
+    }
+    selected_input_paths = {
+        path.resolve()
+        for path in (
+            scenario_report,
+            product_runtime_report,
+            verification_report,
+            quickstart_report,
+        )
+        if path is not None
+    }
+    selected_role_paths = [
+        scenario_report.resolve(),
+        product_runtime_report.resolve(),
+        (browser_proof_dir / "browser-proof.json").resolve(),
+        (
+            browser_proof_dir
+            / ("workflow.png" if scope_name == "vs0-evux" else "home.png")
+        ).resolve(),
+        (
+            browser_proof_dir
+            / ("workflow.dom.html" if scope_name == "vs0-evux" else "home.dom.html")
+        ).resolve(),
+        *([quickstart_report.resolve()] if quickstart_report is not None else []),
+        *(
+            [verification_report.resolve()]
+            if scope_name == "vs0-evux" and verification_report is not None
+            else []
+        ),
+        *(
+            [(browser_proof_dir / "workflow-trace.json").resolve()]
+            if scope_name == "vs0-evux"
+            else []
+        ),
+    ]
+    selected_role_aliases = sorted(
+        {
+            relative_to_root(root, path)
+            for path in selected_role_paths
+            if selected_role_paths.count(path) > 1
+        }
+    )
+    if selected_role_aliases:
+        return {
+            "schema_version": "cs.release_evidence_collect_result.v0",
+            "status": "failed",
+            "package_id": None,
+            "manifest_path": relative_to_root(root, output_dir / "manifest.json"),
+            "output_dir": relative_to_root(root, output_dir),
+            "command_transcript_path": relative_to_root(
+                root,
+                output_dir / "command-transcript.json",
+            ),
+            "artifact_count": 0,
+            "missing_required": selected_role_aliases,
+            "negative_evidence": {},
+            "errors": [
+                {
+                    "code": "CS_RELEASE_INPUT_ROLE_ALIAS",
+                    "message": "Distinct release evidence roles cannot reference the same input file.",
+                    "paths": selected_role_aliases,
+                }
+            ],
+        }
+    output_aliases = sorted(
+        relative_to_root(root, path)
+        for path in generated_output_paths
+        & (selected_input_paths | set(selected_role_paths))
+    )
+    if output_aliases:
+        return {
+            "schema_version": "cs.release_evidence_collect_result.v0",
+            "status": "failed",
+            "package_id": None,
+            "manifest_path": relative_to_root(root, output_dir / "manifest.json"),
+            "output_dir": relative_to_root(root, output_dir),
+            "command_transcript_path": relative_to_root(
+                root,
+                output_dir / "command-transcript.json",
+            ),
+            "artifact_count": 0,
+            "missing_required": output_aliases,
+            "negative_evidence": {},
+            "errors": [
+                {
+                    "code": "CS_RELEASE_OUTPUT_ALIAS",
+                    "message": "Release evidence inputs cannot alias generated package outputs.",
+                    "paths": output_aliases,
+                }
+            ],
+        }
+    post_commit_rollup_path = output_dir / "post_commit_rollup.json"
+    if post_commit_rollup_path.exists():
+        post_commit_rollup_path.unlink()
     walkthrough_path = output_dir / "human-usability-walkthrough.md"
     is_evux = scope_name == "vs0-evux"
     walkthrough_path.write_text(
@@ -2367,7 +2540,9 @@ def collect_release_evidence(
     browser_screenshot = browser_proof_dir / ("workflow.png" if is_evux else "home.png")
     browser_dom = browser_proof_dir / ("workflow.dom.html" if is_evux else "home.dom.html")
     browser_trace = browser_proof_dir / "workflow-trace.json"
-    quickstart_report = root / DEFAULT_EVUX_QUICKSTART_REPORT if is_evux else None
+    if quickstart_report is None and is_evux:
+        quickstart_report = root / DEFAULT_EVUX_QUICKSTART_REPORT
+    quickstart_required = quickstart_report is not None
     command_transcript_path = output_dir / "command-transcript.json"
     command_evidence_path = output_dir / "command-evidence.json"
     acceptance_contract = root / (
@@ -2393,31 +2568,91 @@ def collect_release_evidence(
     quickstart_data: dict[str, Any] = {}
     if scenario_report.exists():
         try:
-            scenario_data = json.loads(scenario_report.read_text())
+            loaded = json.loads(scenario_report.read_text())
+            scenario_data = loaded if isinstance(loaded, dict) else {"status": "failed", "errors": ["invalid_shape"]}
         except ValueError:
             scenario_data = {"status": "failed", "errors": ["invalid_json"]}
     if product_runtime_report.exists():
         try:
-            product_runtime_data = json.loads(product_runtime_report.read_text())
+            loaded = json.loads(product_runtime_report.read_text())
+            product_runtime_data = loaded if isinstance(loaded, dict) else {"status": "failed", "errors": ["invalid_shape"]}
         except ValueError:
             product_runtime_data = {"status": "failed", "errors": ["invalid_json"]}
     if browser_proof.exists():
         try:
-            browser_data = json.loads(browser_proof.read_text())
+            loaded = json.loads(browser_proof.read_text())
+            browser_data = loaded if isinstance(loaded, dict) else {"status": "failed", "errors": ["invalid_shape"]}
         except ValueError:
             browser_data = {"status": "failed", "errors": ["invalid_json"]}
     if quickstart_report and quickstart_report.exists():
         try:
-            quickstart_data = json.loads(quickstart_report.read_text())
+            loaded = json.loads(quickstart_report.read_text())
+            quickstart_data = loaded if isinstance(loaded, dict) else {"status": "failed", "errors": ["invalid_shape"]}
         except ValueError:
             quickstart_data = {"status": "failed", "errors": ["invalid_json"]}
+    declared_acceptance_evidence = scenario_data.get("acceptance_evidence")
+    declared_quickstart = (
+        declared_acceptance_evidence.get("quickstart_report")
+        if isinstance(declared_acceptance_evidence, dict)
+        else None
+    )
+    quickstart_scenario_binding_ok = True
+    if quickstart_required and not is_evux:
+        actual_quickstart_sha256 = (
+            sha256_file(quickstart_report)
+            if quickstart_report is not None and quickstart_report.is_file()
+            else None
+        )
+        quickstart_scenario_binding_ok = bool(
+            isinstance(declared_quickstart, dict)
+            and isinstance(declared_quickstart.get("sha256"), str)
+            and declared_quickstart.get("sha256") == actual_quickstart_sha256
+        )
+    supported_scope_names = {"vs0-runtime-acceptance", "vs0-evux"}
+    scenario_scope = {
+        key: scenario_data.get(key)
+        for key in ("tenant_id", "owner_id", "namespace_id", "workspace_id")
+    }
+    quickstart_scope = quickstart_data.get("scope")
+    release_scope_binding_ok = bool(
+        scope_name in supported_scope_names
+        and scenario_data.get("scenario_set") == scope_name
+        and scenario_scope == requested_scope
+        and (
+            is_evux
+            or (
+                isinstance(quickstart_scope, dict)
+                and quickstart_scope == requested_scope
+            )
+        )
+    )
 
-    negative = dict(scenario_data.get("negative_evidence") or {})
-    negative.setdefault("real_external_http_calls", 0)
-    negative.setdefault("production_release_overclaim", 0)
-    negative.setdefault("live_connector_claim_without_human_evidence", 0)
-    negative.setdefault("human_usability_claim_without_human_evidence", 0)
-    negative.setdefault("unqualified_external_calls_in_release_report", 0)
+    raw_negative = scenario_data.get("negative_evidence")
+    negative = dict(raw_negative) if isinstance(raw_negative, dict) else {}
+    required_runtime_negative_keys = {
+        "real_external_http_calls",
+        "unqualified_external_calls_in_release_report",
+        "production_release_overclaim",
+        "live_connector_claim_without_human_evidence",
+        "human_usability_claim_without_human_evidence",
+        "tool_calls_from_untrusted_artifact",
+        "action_cards_from_prompt_injection",
+        "cross_namespace_reads",
+        "zero_evidence_claim_approvals",
+        "audit_tamper_verify_failures",
+    }
+    runtime_negative_evidence_ok = bool(
+        is_evux
+        or (
+            set(negative) == required_runtime_negative_keys
+            and all(
+                isinstance(value, int)
+                and not isinstance(value, bool)
+                and value == 0
+                for value in negative.values()
+            )
+        )
+    )
 
     base_artifacts = [
         _artifact_entry(root, scenario_report, "acceptance_scenario_report"),
@@ -2429,7 +2664,7 @@ def collect_release_evidence(
         _artifact_entry(root, acceptance_contract, "acceptance_contract"),
         _artifact_entry(root, acceptance_matrix, "acceptance_freeze_matrix" if is_evux else "acceptance_matrix"),
         _artifact_entry(root, verification_matrix, "acceptance_verification_matrix", required=True) if verification_matrix else None,
-        _artifact_entry(root, quickstart_report, "quickstart_report", required=is_evux) if quickstart_report else None,
+        _artifact_entry(root, quickstart_report, "quickstart_report", required=quickstart_required) if quickstart_report else None,
         _artifact_entry(root, freeze_report, "scenario_freeze_report", required=not is_evux),
         _artifact_entry(root, verification_report_path, "implementation_report", required=is_evux),
         _artifact_entry(root, root / "README.md", "operator_quickstart"),
@@ -2439,13 +2674,20 @@ def collect_release_evidence(
     preliminary_missing = [entry["path"] for entry in artifacts_without_transcripts if entry["required"] and not entry["present"]]
 
     command_entries: list[dict[str, Any]] = []
+    scope_command_name = scope_name.replace("-", "_")
     scenario_self = scenario_data.get("self_command_transcript")
     if isinstance(scenario_self, dict):
-        command_entries.append(_release_transcript_entry("scenario_verify_vs0_evux", scenario_self, source="scenario_report"))
+        command_entries.append(
+            _release_transcript_entry(
+                f"scenario_verify_{scope_command_name}",
+                scenario_self,
+                source="scenario_report",
+            )
+        )
     else:
         command_entries.append(
             _summarized_transcript(
-                name="scenario_verify_vs0_evux",
+                name=f"scenario_verify_{scope_command_name}",
                 command=[
                     "cornerstone",
                     "scenario",
@@ -2470,19 +2712,25 @@ def collect_release_evidence(
     )
     quickstart_self = quickstart_data.get("self_command_transcript")
     if isinstance(quickstart_self, dict):
-        command_entries.append(_release_transcript_entry("quickstart_verify_vs0_evux", quickstart_self, source="quickstart_report"))
-    elif is_evux:
+        command_entries.append(
+            _release_transcript_entry(
+                f"quickstart_verify_{scope_command_name}",
+                quickstart_self,
+                source="quickstart_report",
+            )
+        )
+    elif quickstart_required:
         command_entries.append(
             _summarized_transcript(
-                name="quickstart_verify_vs0_evux",
+                name=f"quickstart_verify_{scope_command_name}",
                 command=[
                     "cornerstone",
                     "quickstart",
                     "verify",
-                    "vs0-evux",
+                    scope_name,
                     "--json",
                     "--output",
-                    DEFAULT_EVUX_QUICKSTART_REPORT,
+                    relative_to_root(root, quickstart_report),
                 ],
                 status=str(quickstart_data.get("status") or "failed"),
                 summary={
@@ -2490,6 +2738,86 @@ def collect_release_evidence(
                     "negative_evidence": quickstart_data.get("negative_evidence"),
                 },
                 source="quickstart_report_summary",
+            )
+        )
+    quickstart_validation: dict[str, Any] | None = None
+    if quickstart_required and not is_evux:
+        quickstart_validation = validate_runtime_acceptance_quickstart_report(
+            quickstart_data,
+            root=root,
+        )
+        command_entries.append(
+            _summarized_transcript(
+                name="quickstart_report_validation",
+                command=["validate", relative_to_root(root, quickstart_report)],
+                status="success" if quickstart_validation.get("ok") else "failed",
+                summary={
+                    "validation_schema": quickstart_validation.get("schema_version"),
+                    "error_count": quickstart_validation.get("error_count"),
+                    "claim_ceiling": quickstart_validation.get("claim_ceiling"),
+                },
+                source="quickstart_report_validation",
+            )
+        )
+        command_entries.append(
+            _summarized_transcript(
+                name="quickstart_scenario_binding",
+                command=[
+                    "bind",
+                    relative_to_root(root, scenario_report),
+                    relative_to_root(root, quickstart_report),
+                ],
+                status="success" if quickstart_scenario_binding_ok else "failed",
+                summary={
+                    "declared_sha256": (
+                        declared_quickstart.get("sha256")
+                        if isinstance(declared_quickstart, dict)
+                        else None
+                    ),
+                    "actual_sha256": (
+                        sha256_file(quickstart_report)
+                        if quickstart_report is not None and quickstart_report.is_file()
+                        else None
+                    ),
+                },
+                source="scenario_quickstart_binding",
+            )
+        )
+    command_entries.append(
+        _summarized_transcript(
+            name="release_scope_binding",
+            command=[
+                "bind-scope",
+                scope_name,
+                relative_to_root(root, scenario_report),
+            ],
+            status="success" if release_scope_binding_ok else "failed",
+            summary={
+                "scenario_set": scenario_data.get("scenario_set"),
+                "scenario_scope": scenario_scope,
+                "quickstart_scope": quickstart_scope if not is_evux else "legacy_evux_report",
+                "requested_scope": requested_scope,
+            },
+            source="release_scope_binding",
+        )
+    )
+    if not is_evux:
+        command_entries.append(
+            _summarized_transcript(
+                name="release_negative_evidence_validation",
+                command=["validate-negative-evidence", relative_to_root(root, scenario_report)],
+                status="success" if runtime_negative_evidence_ok else "failed",
+                summary={
+                    "required_keys": sorted(required_runtime_negative_keys),
+                    "actual_keys": sorted(negative),
+                    "all_zero_integers": all(
+                        isinstance(value, int)
+                        and not isinstance(value, bool)
+                        and value == 0
+                        for value in negative.values()
+                    ),
+                },
+                source="release_negative_evidence_validation",
             )
         )
     regression_transcripts = scenario_data.get("regression_command_transcript") or {}
@@ -2541,9 +2869,6 @@ def collect_release_evidence(
         _artifact_entry(root, command_transcript_path, "command_transcript"),
         _artifact_entry(root, command_evidence_path, "command_evidence", required=False),
     ]
-    post_commit_rollup_path = output_dir / "post_commit_rollup.json"
-    if post_commit_rollup_path.exists():
-        artifacts.append(_artifact_entry(root, post_commit_rollup_path, "post_commit_rollup", required=True))
     missing_required = [entry["path"] for entry in artifacts if entry["required"] and not entry["present"]]
 
     manifest_base = {
@@ -2582,13 +2907,26 @@ def collect_release_evidence(
             "product_runtime_summary": product_runtime_data.get("summary"),
             "browser_status": browser_data.get("status"),
             "quickstart_status": quickstart_data.get("status"),
+            "quickstart_validation_status": (
+                quickstart_validation.get("status") if isinstance(quickstart_validation, dict) else None
+            ),
+            "quickstart_scenario_binding": quickstart_scenario_binding_ok,
+            "release_scope_binding": release_scope_binding_ok,
+            "runtime_negative_evidence_validation": runtime_negative_evidence_ok,
             "command_transcript_status": "success" if not command_blocking else "failed",
         },
         "missing_required": missing_required,
     }
-    manifest_id = hashlib.sha256(json.dumps(manifest_base, sort_keys=True).encode("utf-8")).hexdigest()[:16]
     manifest = dict(manifest_base)
-    manifest["package_id"] = f"releasepkg_{manifest_id}"
+    manifest["package_id"] = release_package_locator_id(
+        root,
+        scope_name=scope_name,
+        output_dir=output_dir,
+        scenario_report=scenario_data,
+    )
+    manifest["content_digest_sha256"] = _json_value_sha256(
+        _release_manifest_content_payload(manifest_base)
+    )
     manifest_path = output_dir / "manifest.json"
     write_json(manifest_path, manifest)
 
@@ -2605,7 +2943,55 @@ def collect_release_evidence(
     }
 
 
-def finalize_release_evidence(
+def collect_release_evidence(
+    root: Path,
+    *,
+    requested_scope: dict[str, str],
+    scope_name: str,
+    output_dir: Path,
+    scenario_report: Path,
+    product_runtime_report: Path,
+    browser_proof_dir: Path,
+    verification_report: Path | None = None,
+    quickstart_report: Path | None = None,
+) -> dict[str, Any]:
+    try:
+        return _collect_release_evidence(
+            root,
+            requested_scope=requested_scope,
+            scope_name=scope_name,
+            output_dir=output_dir,
+            scenario_report=scenario_report,
+            product_runtime_report=product_runtime_report,
+            browser_proof_dir=browser_proof_dir,
+            verification_report=verification_report,
+            quickstart_report=quickstart_report,
+        )
+    except Exception as error:  # defensive boundary for user-selected evidence files
+        return {
+            "schema_version": "cs.release_evidence_collect_result.v0",
+            "status": "failed",
+            "package_id": None,
+            "manifest_path": relative_to_root(root, output_dir / "manifest.json"),
+            "output_dir": relative_to_root(root, output_dir),
+            "command_transcript_path": relative_to_root(
+                root,
+                output_dir / "command-transcript.json",
+            ),
+            "artifact_count": 0,
+            "missing_required": ["release_evidence_input:malformed"],
+            "negative_evidence": {},
+            "errors": [
+                {
+                    "code": "CS_RELEASE_EVIDENCE_INPUT_MALFORMED",
+                    "message": "Release evidence inputs could not be normalized safely.",
+                    "error_type": type(error).__name__,
+                }
+            ],
+        }
+
+
+def _finalize_release_evidence(
     root: Path,
     *,
     requested_scope: dict[str, str],
@@ -2641,9 +3027,560 @@ def finalize_release_evidence(
                 }
             ],
         }
+    if (
+        not isinstance(manifest, dict)
+        or not isinstance(manifest.get("artifacts"), list)
+        or any(not isinstance(entry, dict) for entry in manifest.get("artifacts", []))
+    ):
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_INVALID_SHAPE",
+                    "message": "Release evidence manifest must be an object with object-valued artifact entries.",
+                    "path": relative_to_root(root, manifest_path),
+                }
+            ],
+        }
+    collected_content_digest = manifest.get("content_digest_sha256")
+    calculated_content_digest = _json_value_sha256(
+        _release_manifest_content_payload(manifest)
+    )
+    if (
+        not isinstance(collected_content_digest, str)
+        or collected_content_digest != calculated_content_digest
+    ):
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_CONTENT_DIGEST_MISMATCH",
+                    "message": "Release evidence manifest content changed after collection.",
+                    "path": relative_to_root(root, manifest_path),
+                    "collected_content_digest": collected_content_digest,
+                    "calculated_content_digest": calculated_content_digest,
+                }
+            ],
+        }
+    if (
+        manifest.get("scope_name") != scope_name
+        or manifest.get("scope") != requested_scope
+    ):
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_SCOPE_MISMATCH",
+                    "message": "Release evidence manifest scope does not match the finalization request.",
+                    "path": relative_to_root(root, manifest_path),
+                    "expected_scope_name": scope_name,
+                    "actual_scope_name": manifest.get("scope_name"),
+                    "expected_scope": requested_scope,
+                    "actual_scope": manifest.get("scope"),
+                }
+            ],
+        }
+
+    required_roles_by_scope = {
+        "vs0-runtime-acceptance": {
+            "acceptance_scenario_report",
+            "product_runtime_scenario_report",
+            "browser_proof_manifest",
+            "browser_screenshot",
+            "browser_dom_snapshot",
+            "acceptance_contract",
+            "acceptance_matrix",
+            "quickstart_report",
+            "scenario_freeze_report",
+            "operator_quickstart",
+            "human_usability_walkthrough_checklist",
+            "command_transcript",
+        },
+        "vs0-evux": {
+            "acceptance_scenario_report",
+            "product_runtime_scenario_report",
+            "browser_proof_manifest",
+            "browser_screenshot",
+            "browser_dom_snapshot",
+            "browser_workflow_trace",
+            "acceptance_contract",
+            "acceptance_freeze_matrix",
+            "acceptance_verification_matrix",
+            "quickstart_report",
+            "implementation_report",
+            "operator_quickstart",
+            "human_usability_walkthrough_checklist",
+            "command_transcript",
+        },
+    }
+    semantic_errors: list[dict[str, Any]] = []
+    if (
+        manifest.get("schema_version") != "cs.release_evidence_package.v0"
+        or manifest.get("status") != "success"
+    ):
+        semantic_errors.append(
+            {"code": "CS_RELEASE_MANIFEST_IDENTITY_INVALID"}
+        )
+    required_roles = required_roles_by_scope.get(scope_name)
+    artifacts = manifest.get("artifacts", [])
+    if required_roles is None:
+        semantic_errors.append(
+            {"code": "CS_RELEASE_SCOPE_UNSUPPORTED", "scope_name": scope_name}
+        )
+        required_roles = set()
+    required_role_paths: list[str] = []
+    for role in sorted(required_roles):
+        role_entries = [entry for entry in artifacts if entry.get("role") == role]
+        if (
+            len(role_entries) != 1
+            or role_entries[0].get("required") is not True
+            or role_entries[0].get("present") is not True
+        ):
+            semantic_errors.append(
+                {
+                    "code": "CS_RELEASE_REQUIRED_ROLE_INVALID",
+                    "role": role,
+                    "entry_count": len(role_entries),
+                }
+            )
+            continue
+        role_entry = role_entries[0]
+        role_path = role_entry.get("path")
+        normalized_role_path: Path | None = None
+        if isinstance(role_path, str):
+            candidate_path = (root / role_path).resolve()
+            normalized_candidate = relative_to_root(root, candidate_path)
+            if (
+                normalized_candidate == role_path
+                and candidate_path.is_file()
+            ):
+                normalized_role_path = candidate_path
+        if (
+            normalized_role_path is None
+            or not isinstance(role_entry.get("sha256"), str)
+            or re.fullmatch(r"[0-9a-f]{64}", role_entry.get("sha256", "")) is None
+            or not isinstance(role_entry.get("bytes"), int)
+            or isinstance(role_entry.get("bytes"), bool)
+            or role_entry.get("bytes") < 0
+        ):
+            semantic_errors.append(
+                {
+                    "code": "CS_RELEASE_REQUIRED_ROLE_IDENTITY_INVALID",
+                    "role": role,
+                    "path": role_path,
+                }
+            )
+        else:
+            required_role_paths.append(role_path)
+    if len(required_role_paths) != len(set(required_role_paths)):
+        semantic_errors.append(
+            {"code": "CS_RELEASE_REQUIRED_ROLE_PATH_ALIAS"}
+        )
+
+    if scope_name == "vs0-runtime-acceptance":
+        command_entries = [
+            entry for entry in artifacts if entry.get("role") == "command_transcript"
+        ]
+        command_data: Any = None
+        if len(command_entries) == 1 and isinstance(command_entries[0].get("path"), str):
+            try:
+                command_data = json.loads((root / command_entries[0]["path"]).read_text())
+            except (OSError, ValueError):
+                command_data = None
+        transcript_commands = (
+            command_data.get("commands") if isinstance(command_data, dict) else None
+        )
+        successful_required_commands = {
+            str(entry.get("name"))
+            for entry in transcript_commands
+            if isinstance(entry, dict)
+            and entry.get("required") is True
+            and entry.get("exit_code") == 0
+            and entry.get("timed_out") is False
+        } if isinstance(transcript_commands, list) else set()
+        required_command_names = {
+            "scenario_verify_vs0_runtime_acceptance",
+            "scenario_gate",
+            "quickstart_verify_vs0_runtime_acceptance",
+            "quickstart_report_validation",
+            "quickstart_scenario_binding",
+            "release_scope_binding",
+            "release_negative_evidence_validation",
+            "release_evidence_collect",
+        }
+        required_transcript_rows = [
+            entry
+            for entry in transcript_commands
+            if isinstance(entry, dict) and entry.get("required") is True
+        ] if isinstance(transcript_commands, list) else []
+        required_command_counts = {
+            name: len(
+                [entry for entry in required_transcript_rows if entry.get("name") == name]
+            )
+            for name in required_command_names
+        }
+        if (
+            not isinstance(command_data, dict)
+            or command_data.get("schema_version") != "cs.release_command_transcript.v0"
+            or command_data.get("scope_name") != scope_name
+            or not isinstance(transcript_commands, list)
+            or any(not isinstance(entry, dict) for entry in transcript_commands)
+            or not isinstance(command_data.get("summary"), dict)
+            or command_data["summary"].get("blocking") != 0
+            or not required_command_names.issubset(successful_required_commands)
+            or any(count != 1 for count in required_command_counts.values())
+            or any(
+                entry.get("exit_code") != 0 or entry.get("timed_out") is not False
+                for entry in required_transcript_rows
+            )
+        ):
+            semantic_errors.append(
+                {"code": "CS_RELEASE_COMMAND_TRANSCRIPT_INVALID"}
+            )
+
+        def runtime_role_entry(role: str) -> dict[str, Any]:
+            matches = [entry for entry in artifacts if entry.get("role") == role]
+            return matches[0] if len(matches) == 1 else {}
+
+        product_entry = runtime_role_entry("product_runtime_scenario_report")
+        product_data: Any = None
+        if isinstance(product_entry.get("path"), str):
+            try:
+                product_data = json.loads((root / product_entry["path"]).read_text())
+            except (OSError, ValueError):
+                product_data = None
+        product_summary = (
+            product_data.get("summary") if isinstance(product_data, dict) else None
+        )
+        product_scope = (
+            {
+                key: product_data.get(key)
+                for key in ("tenant_id", "owner_id", "namespace_id", "workspace_id")
+            }
+            if isinstance(product_data, dict)
+            else None
+        )
+        product_rows = (
+            product_data.get("scenario_results")
+            if isinstance(product_data, dict)
+            else None
+        )
+        expected_product_ai_ids = {
+            *(f"VS0-RT-{index:03d}" for index in range(1, 9)),
+            *(f"VS0-RT-R{index:02d}" for index in range(1, 5)),
+        }
+        expected_product_human_ids = {"VS0-RT-H01", "VS0-RT-H02"}
+        product_rows_by_id = {
+            str(row.get("id")): row
+            for row in product_rows
+            if isinstance(row, dict) and row.get("id")
+        } if isinstance(product_rows, list) else {}
+        if (
+            not isinstance(product_data, dict)
+            or product_data.get("schema_version") != "cs.cli.v0"
+            or product_data.get("scenario_set") != "vs0-product-runtime"
+            or product_data.get("status") != "success"
+            or product_data.get("errors") != []
+            or not isinstance(product_summary, dict)
+            or product_summary.get("blocking") != 0
+            or product_summary.get("scenario_count") != 14
+            or product_summary.get("pass") != 12
+            or product_summary.get("human_required") != 2
+            or product_scope != requested_scope
+            or not isinstance(product_rows, list)
+            or len(product_rows) != 14
+            or len(product_rows_by_id) != 14
+            or set(product_rows_by_id)
+            != expected_product_ai_ids | expected_product_human_ids
+            or any(
+                product_rows_by_id[scenario_id].get("owner") == "Human"
+                or product_rows_by_id[scenario_id].get("status") != "PASS"
+                for scenario_id in expected_product_ai_ids
+            )
+            or any(
+                product_rows_by_id[scenario_id].get("owner") != "Human"
+                or product_rows_by_id[scenario_id].get("status") != "HUMAN_REQUIRED"
+                for scenario_id in expected_product_human_ids
+            )
+            or manifest.get("product_runtime_report") != product_entry.get("path")
+        ):
+            semantic_errors.append(
+                {"code": "CS_RELEASE_PRODUCT_RUNTIME_REPORT_INVALID"}
+            )
+
+        browser_entry = runtime_role_entry("browser_proof_manifest")
+        screenshot_entry = runtime_role_entry("browser_screenshot")
+        dom_entry = runtime_role_entry("browser_dom_snapshot")
+        browser_data: Any = None
+        if isinstance(browser_entry.get("path"), str):
+            try:
+                browser_data = json.loads((root / browser_entry["path"]).read_text())
+            except (OSError, ValueError):
+                browser_data = None
+        expected_surfaces = {
+            "Home/Ops Inbox",
+            "Brief Detail",
+            "Artifact Viewer",
+            "Search",
+            "Claim candidate",
+            "Action Card",
+            "Audit Detail",
+        }
+        surface_presence = (
+            browser_data.get("surface_presence")
+            if isinstance(browser_data, dict)
+            else None
+        )
+        readiness_labels = (
+            browser_data.get("readiness_labels_present")
+            if isinstance(browser_data, dict)
+            else None
+        )
+        expected_readiness_labels = {
+            "local_scenario_ready=true",
+            "vs0_runtime_ready=true",
+            "production_release_ready=false",
+            "real_external_http_calls=0",
+        }
+        if (
+            not isinstance(browser_data, dict)
+            or browser_data.get("schema_version") != "cs.browser_proof.v0"
+            or browser_data.get("status") != "passed"
+            or browser_data.get("errors") != []
+            or browser_data.get("clean_browser_exit") is not True
+            or browser_data.get("production_overclaim_absent") is not True
+            or not isinstance(surface_presence, dict)
+            or set(surface_presence) != expected_surfaces
+            or any(value is not True for value in surface_presence.values())
+            or not isinstance(readiness_labels, dict)
+            or set(readiness_labels) != expected_readiness_labels
+            or any(value is not True for value in readiness_labels.values())
+            or browser_data.get("screenshot_path") != screenshot_entry.get("path")
+            or browser_data.get("screenshot_sha256") != screenshot_entry.get("sha256")
+            or browser_data.get("screenshot_bytes") != screenshot_entry.get("bytes")
+            or browser_data.get("dom_path") != dom_entry.get("path")
+            or browser_data.get("dom_sha256") != dom_entry.get("sha256")
+            or manifest.get("browser_proof") != browser_entry.get("path")
+        ):
+            semantic_errors.append(
+                {"code": "CS_RELEASE_BROWSER_PROOF_INVALID"}
+            )
+
+    scenario_entries = [
+        entry for entry in artifacts if entry.get("role") == "acceptance_scenario_report"
+    ]
+    scenario_data: dict[str, Any] | None = None
+    if len(scenario_entries) == 1 and isinstance(scenario_entries[0].get("path"), str):
+        scenario_path = root / scenario_entries[0]["path"]
+        try:
+            loaded_scenario = json.loads(scenario_path.read_text())
+            scenario_data = loaded_scenario if isinstance(loaded_scenario, dict) else None
+        except (OSError, ValueError):
+            scenario_data = None
+        if manifest.get("scenario_report") != scenario_entries[0]["path"]:
+            semantic_errors.append(
+                {"code": "CS_RELEASE_SCENARIO_REPORT_PATH_UNBOUND"}
+            )
+    if scenario_data is None:
+        semantic_errors.append({"code": "CS_RELEASE_SCENARIO_REPORT_INVALID"})
+    else:
+        scenario_scope = {
+            key: scenario_data.get(key)
+            for key in ("tenant_id", "owner_id", "namespace_id", "workspace_id")
+        }
+        if (
+            scenario_data.get("scenario_set") != scope_name
+            or scenario_scope != requested_scope
+        ):
+            semantic_errors.append(
+                {
+                    "code": "CS_RELEASE_SCENARIO_SCOPE_UNBOUND",
+                    "scenario_set": scenario_data.get("scenario_set"),
+                    "scenario_scope": scenario_scope,
+                }
+            )
+        scenario_summary = scenario_data.get("summary")
+        scenario_rows = scenario_data.get("scenario_results")
+        release_rows = [
+            row
+            for row in scenario_rows
+            if isinstance(row, dict) and row.get("id") == "VS0-ACC-005"
+        ] if isinstance(scenario_rows, list) else []
+        if scope_name == "vs0-runtime-acceptance" and (
+            scenario_data.get("schema_version") != "cs.cli.v0"
+            or scenario_data.get("status") != "success"
+            or scenario_data.get("errors") != []
+            or not isinstance(scenario_summary, dict)
+            or scenario_summary.get("blocking") != 0
+            or len(release_rows) != 1
+            or release_rows[0].get("status") != "PASS"
+            or release_rows[0].get("owner") == "Human"
+        ):
+            semantic_errors.append(
+                {"code": "CS_RELEASE_SCENARIO_VERDICT_INVALID"}
+            )
+        expected_package_id = release_package_locator_id(
+            root,
+            scope_name=scope_name,
+            output_dir=output_dir,
+            scenario_report=scenario_data,
+        )
+        if manifest.get("package_id") != expected_package_id:
+            semantic_errors.append(
+                {
+                    "code": "CS_RELEASE_PACKAGE_ID_UNBOUND",
+                    "expected_package_id": expected_package_id,
+                    "actual_package_id": manifest.get("package_id"),
+                }
+            )
+        if scope_name == "vs0-runtime-acceptance":
+            locator = scenario_data.get("release_evidence_package")
+            expected_manifest_path = relative_to_root(root, output_dir / "manifest.json")
+            expected_output_dir = relative_to_root(root, output_dir)
+            if (
+                not isinstance(locator, dict)
+                or locator.get("schema_version") != "cs.release_evidence_locator.v0"
+                or locator.get("package_id") != expected_package_id
+                or locator.get("manifest_path") != expected_manifest_path
+                or locator.get("output_dir") != expected_output_dir
+            ):
+                semantic_errors.append(
+                    {"code": "CS_RELEASE_SCENARIO_LOCATOR_UNBOUND"}
+                )
+
+            acceptance_evidence = scenario_data.get("acceptance_evidence")
+            declared_quickstart = (
+                acceptance_evidence.get("quickstart_report")
+                if isinstance(acceptance_evidence, dict)
+                else None
+            )
+            quickstart_entries = [
+                entry for entry in artifacts if entry.get("role") == "quickstart_report"
+            ]
+            quickstart_entry = quickstart_entries[0] if len(quickstart_entries) == 1 else {}
+            quickstart_data: Any = None
+            if isinstance(quickstart_entry.get("path"), str):
+                try:
+                    quickstart_data = json.loads(
+                        (root / quickstart_entry["path"]).read_text()
+                    )
+                except (OSError, ValueError):
+                    quickstart_data = None
+            quickstart_validation = validate_runtime_acceptance_quickstart_report(
+                quickstart_data,
+                root=root,
+            )
+            if (
+                not isinstance(declared_quickstart, dict)
+                or declared_quickstart.get("path") != quickstart_entry.get("path")
+                or declared_quickstart.get("sha256") != quickstart_entry.get("sha256")
+                or quickstart_validation.get("ok") is not True
+            ):
+                semantic_errors.append(
+                    {
+                        "code": "CS_RELEASE_QUICKSTART_UNBOUND",
+                        "validation_error_codes": [
+                            error.get("code")
+                            for error in quickstart_validation.get("errors", [])
+                            if isinstance(error, dict)
+                        ],
+                    }
+                )
+
+    expected_human_ids = (
+        {"VS0-ACC-H01", "VS0-ACC-H02"}
+        if scope_name == "vs0-runtime-acceptance"
+        else {"VS0-EVUX-H01", "VS0-EVUX-H02"}
+    )
+    human_required = manifest.get("human_required")
+    human_ids = (
+        {
+            str(entry.get("id"))
+            for entry in human_required
+            if isinstance(entry, dict) and entry.get("id")
+        }
+        if isinstance(human_required, list)
+        else set()
+    )
+    human_rows_valid = bool(
+        isinstance(human_required, list)
+        and len(human_required) == 2
+        and all(
+            isinstance(entry, dict)
+            and entry.get("status") == "HUMAN_REQUIRED"
+            and isinstance(entry.get("required_evidence"), str)
+            and bool(entry.get("required_evidence", "").strip())
+            for entry in human_required
+        )
+    )
+    if human_ids != expected_human_ids or not human_rows_valid:
+        semantic_errors.append(
+            {
+                "code": "CS_RELEASE_HUMAN_REQUIRED_INVALID",
+                "expected_ids": sorted(expected_human_ids),
+                "actual_ids": sorted(human_ids),
+            }
+        )
+    if any(
+        manifest.get(field) is not False
+        for field in (
+            "production_release_ready",
+            "live_connector_ready",
+            "human_usability_accepted",
+        )
+    ):
+        semantic_errors.append(
+            {"code": "CS_RELEASE_CLAIM_BOUNDARY_INVALID"}
+        )
+
+    if scope_name == "vs0-runtime-acceptance":
+        negative = manifest.get("negative_evidence")
+        required_negative_keys = {
+            "real_external_http_calls",
+            "unqualified_external_calls_in_release_report",
+            "production_release_overclaim",
+            "live_connector_claim_without_human_evidence",
+            "human_usability_claim_without_human_evidence",
+            "tool_calls_from_untrusted_artifact",
+            "action_cards_from_prompt_injection",
+            "cross_namespace_reads",
+            "zero_evidence_claim_approvals",
+            "audit_tamper_verify_failures",
+        }
+        if (
+            not isinstance(negative, dict)
+            or set(negative) != required_negative_keys
+            or any(
+                not isinstance(value, int)
+                or isinstance(value, bool)
+                or value != 0
+                for value in negative.values()
+            )
+        ):
+            semantic_errors.append(
+                {"code": "CS_RELEASE_NEGATIVE_EVIDENCE_INVALID"}
+            )
+
+    if semantic_errors:
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_SEMANTICS_INVALID",
+                    "message": "Release evidence manifest is not bound to the required scenario package semantics.",
+                    "path": relative_to_root(root, manifest_path),
+                    "details": semantic_errors,
+                }
+            ],
+        }
 
     metadata = git_verification_metadata(root)
     artifact_hashes: list[dict[str, Any]] = []
+    artifact_integrity_errors: list[dict[str, Any]] = []
     for artifact in manifest.get("artifacts", []):
         path_value = artifact.get("path")
         if not isinstance(path_value, str):
@@ -2655,7 +3592,39 @@ def finalize_release_evidence(
             "present": path.exists(),
             "sha256": sha256_file(path) if path.exists() and path.is_file() else None,
             "bytes": path.stat().st_size if path.exists() and path.is_file() else 0,
+            "collected_present": artifact.get("present"),
+            "collected_sha256": artifact.get("sha256"),
+            "collected_bytes": artifact.get("bytes"),
         }
+        if artifact.get("required") is True:
+            if not entry["present"]:
+                artifact_integrity_errors.append(
+                    {
+                        "code": "CS_RELEASE_REQUIRED_ARTIFACT_MISSING",
+                        "role": artifact.get("role"),
+                        "path": path_value,
+                    }
+                )
+            elif artifact.get("sha256") and entry["sha256"] != artifact.get("sha256"):
+                artifact_integrity_errors.append(
+                    {
+                        "code": "CS_RELEASE_ARTIFACT_HASH_CHANGED",
+                        "role": artifact.get("role"),
+                        "path": path_value,
+                        "collected_sha256": artifact.get("sha256"),
+                        "current_sha256": entry["sha256"],
+                    }
+                )
+            elif artifact.get("bytes") is not None and entry["bytes"] != artifact.get("bytes"):
+                artifact_integrity_errors.append(
+                    {
+                        "code": "CS_RELEASE_ARTIFACT_SIZE_CHANGED",
+                        "role": artifact.get("role"),
+                        "path": path_value,
+                        "collected_bytes": artifact.get("bytes"),
+                        "current_bytes": entry["bytes"],
+                    }
+                )
         artifact_hashes.append(entry)
 
     rollup = {
@@ -2671,6 +3640,7 @@ def finalize_release_evidence(
         "manifest_path": relative_to_root(root, manifest_path),
         "manifest_sha256_before_rollup": sha256_file(manifest_path),
         "evidence_artifacts": artifact_hashes,
+        "artifact_integrity_errors": artifact_integrity_errors,
         "relationship_to_verified_snapshot": {
             "verified_base_commit": metadata.get("verified_base_commit"),
             "verified_base_tree_hash": metadata.get("verified_base_tree_hash"),
@@ -2687,11 +3657,29 @@ def finalize_release_evidence(
     manifest["finalized_at"] = utc_now()
     manifest["final_commit"] = rollup["final_commit"]
     manifest["final_tree_hash"] = rollup["final_tree_hash"]
-    manifest["status"] = "success" if manifest.get("status") == "success" and not rollup["worktree_dirty_before_rollup"] else "failed"
-    manifest["missing_required"] = [
-        entry["path"] for entry in artifacts if entry.get("required") and not entry.get("present")
-    ]
-    if manifest["missing_required"]:
+    manifest["artifact_integrity_errors"] = artifact_integrity_errors
+    current_artifacts = {entry["path"]: entry for entry in artifact_hashes}
+    manifest["missing_required"] = sorted(
+        {
+            entry["path"]
+            for entry in artifacts
+            if entry.get("required")
+            and not (
+                entry.get("role") == "post_commit_rollup"
+                and entry.get("present") is True
+            )
+            and not current_artifacts.get(entry["path"], {}).get("present")
+        }
+    )
+    manifest["status"] = (
+        "success"
+        if manifest.get("status") == "success"
+        and not rollup["worktree_dirty_before_rollup"]
+        and not artifact_integrity_errors
+        and not manifest["missing_required"]
+        else "failed"
+    )
+    if manifest["missing_required"] or artifact_integrity_errors:
         manifest["status"] = "failed"
     write_json(manifest_path, manifest)
 
@@ -2706,7 +3694,37 @@ def finalize_release_evidence(
         "worktree_dirty_before_rollup": rollup["worktree_dirty_before_rollup"],
         "artifact_count": len(artifacts),
         "missing_required": manifest["missing_required"],
+        "artifact_integrity_errors": artifact_integrity_errors,
     }
+
+
+def finalize_release_evidence(
+    root: Path,
+    *,
+    requested_scope: dict[str, str],
+    scope_name: str,
+    output_dir: Path,
+) -> dict[str, Any]:
+    try:
+        return _finalize_release_evidence(
+            root,
+            requested_scope=requested_scope,
+            scope_name=scope_name,
+            output_dir=output_dir,
+        )
+    except Exception as error:  # defensive boundary for user-selected manifest files
+        return {
+            "schema_version": "cs.release_evidence_finalize_result.v0",
+            "status": "failed",
+            "errors": [
+                {
+                    "code": "CS_RELEASE_MANIFEST_MALFORMED",
+                    "message": "Release evidence manifest could not be normalized safely.",
+                    "path": relative_to_root(root, output_dir / "manifest.json"),
+                    "error_type": type(error).__name__,
+                }
+            ],
+        }
 
 
 def _run_cli(
@@ -2765,6 +3783,1248 @@ def _transcript_ok(transcript: dict[str, Any]) -> bool:
 def _transcript_payload(transcript: dict[str, Any]) -> dict[str, Any]:
     payload = transcript.get("stdout_json")
     return payload if isinstance(payload, dict) else {}
+
+
+def _json_value_sha256(value: Any) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _runtime_acceptance_ref_resolution(
+    root: Path,
+    state_path: Path,
+    *,
+    fixture: str,
+    evidence_refs: list[str],
+    audit_refs: list[str],
+) -> dict[str, Any]:
+    json_paths: dict[str, Path] = {}
+    artifact_records = state_path / "artifacts" / "records"
+    for reference in evidence_refs:
+        if reference.startswith("artifact:"):
+            identifier = reference.split(":", 1)[1]
+            match = next(artifact_records.rglob(f"{identifier}.json"), None)
+            if match is not None:
+                json_paths[reference] = match
+        elif reference.startswith("search_snapshot:"):
+            json_paths[reference] = state_path / "search" / "snapshots" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("evidence_bundle:"):
+            json_paths[reference] = state_path / "evidence" / "bundles" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("brief:"):
+            json_paths[reference] = state_path / "briefs" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("claim:"):
+            json_paths[reference] = state_path / "claims" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("namespace_audit_export:"):
+            json_paths[reference] = state_path / "namespace_audit_exports" / f"{reference.split(':', 1)[1]}.json"
+
+    audit_records: dict[str, dict[str, Any]] = {}
+    audit_path = state_path / "audit" / "events.jsonl"
+    if audit_path.exists():
+        for line in audit_path.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            event_id = event.get("event_id")
+            if isinstance(event_id, str):
+                audit_records[f"audit:{event_id}"] = event
+
+    entries: list[dict[str, Any]] = []
+    for reference in sorted(set(evidence_refs)):
+        if reference.startswith("storage:sha256:"):
+            checksum = reference.removeprefix("storage:sha256:")
+            state_original = state_path / "artifacts" / "originals" / checksum
+            fixture_path = root / fixture
+            state_checksum = sha256_file(state_original) if state_original.exists() else None
+            fixture_checksum = sha256_file(fixture_path) if fixture_path.exists() else None
+            record = {
+                "schema_version": "cs.storage_ref_resolution.v0",
+                "checksum_sha256": checksum,
+                "state_copy_bytes": state_original.stat().st_size if state_original.exists() else None,
+                "durable_fixture_path": fixture,
+                "durable_fixture_sha256": fixture_checksum,
+            }
+            entries.append(
+                {
+                    "ref": reference,
+                    "kind": "storage",
+                    "resolved": state_checksum == checksum and fixture_checksum == checksum,
+                    "state_path": relative_to_root(root, state_original),
+                    "state_file_sha256": state_checksum,
+                    "record_sha256": _json_value_sha256(record),
+                    "record": record,
+                }
+            )
+            continue
+        path = json_paths.get(reference)
+        record: dict[str, Any] = {}
+        if path is not None and path.exists():
+            try:
+                loaded = json.loads(path.read_text())
+                record = loaded if isinstance(loaded, dict) else {}
+            except ValueError:
+                record = {}
+        entries.append(
+            {
+                "ref": reference,
+                "kind": reference.split(":", 1)[0],
+                "resolved": bool(record),
+                "state_path": relative_to_root(root, path) if path is not None else None,
+                "state_file_sha256": sha256_file(path) if path is not None and path.exists() else None,
+                "record_sha256": _json_value_sha256(record) if record else None,
+                "record": record,
+            }
+        )
+
+    for reference in sorted(set(audit_refs)):
+        record = audit_records.get(reference) or {}
+        entries.append(
+            {
+                "ref": reference,
+                "kind": "audit",
+                "resolved": bool(record),
+                "state_path": relative_to_root(root, audit_path),
+                "state_file_sha256": sha256_file(audit_path) if audit_path.exists() else None,
+                "record_sha256": _json_value_sha256(record) if record else None,
+                "record": record,
+            }
+        )
+
+    expected_refs = sorted(set(evidence_refs) | set(audit_refs))
+    resolved_refs = sorted(entry["ref"] for entry in entries if entry.get("resolved") is True)
+    return {
+        "schema_version": "cs.quickstart_ref_resolution.v0",
+        "status": "resolved" if resolved_refs == expected_refs else "failed",
+        "reference_count": len(expected_refs),
+        "resolved_count": len(resolved_refs),
+        "all_resolved": resolved_refs == expected_refs,
+        "expected_refs": expected_refs,
+        "resolved_refs": resolved_refs,
+        "entries": entries,
+        "snapshot_sha256": _json_value_sha256(entries),
+    }
+
+
+def _validate_runtime_acceptance_quickstart_report(
+    report: dict[str, Any],
+    *,
+    root: Path,
+    cli_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    errors: list[dict[str, Any]] = []
+
+    def reject(code: str, **details: Any) -> None:
+        errors.append({"code": code, **details})
+
+    expected_order = list(RUNTIME_ACCEPTANCE_QUICKSTART_COMMAND_ORDER)
+    expected_scope = dict(DEFAULT_SCOPE)
+    expected_command_prefixes = {
+        "artifact_ingest": ["cornerstone", "artifact", "ingest", "fixtures/vs0/packs/01_artifact_basic/input.txt"],
+        "search_query": ["cornerstone", "search", "query", "alpha-evidence-anchor"],
+        "evidence_bundle_create": ["cornerstone", "evidence", "bundle", "create"],
+        "brief_create": ["cornerstone", "brief", "create"],
+        "claim_create": ["cornerstone", "claim", "create"],
+        "audit_list": ["cornerstone", "audit", "list"],
+        "audit_verify": ["cornerstone", "audit", "verify"],
+    }
+
+    if report.get("schema_version") != "cs.vs0_runtime_acceptance_quickstart_report.v0":
+        reject("CS_QUICKSTART_REPORT_SCHEMA_INVALID", actual=report.get("schema_version"))
+    if report.get("scenario_set") != "vs0-runtime-acceptance" or report.get("scenario_id") != "VS0-ACC-004":
+        reject(
+            "CS_QUICKSTART_REPORT_IDENTITY_INVALID",
+            scenario_set=report.get("scenario_set"),
+            scenario_id=report.get("scenario_id"),
+        )
+    if report.get("status") != "success" or report.get("errors") != []:
+        reject("CS_QUICKSTART_REPORT_STATUS_INVALID", status=report.get("status"), report_errors=report.get("errors"))
+    elapsed_seconds = report.get("elapsed_seconds")
+    if (
+        not isinstance(report.get("created_at"), str)
+        or not isinstance(elapsed_seconds, (int, float))
+        or isinstance(elapsed_seconds, bool)
+        or elapsed_seconds <= 0
+    ):
+        reject("CS_QUICKSTART_REPORT_TIMING_INVALID")
+    if report.get("scope") != expected_scope:
+        reject("CS_QUICKSTART_REPORT_SCOPE_INVALID", actual=report.get("scope"))
+    state_dir = report.get("state_dir")
+    state_dir_valid = bool(
+        isinstance(state_dir, str)
+        and re.fullmatch(r"tmp/quickstart/vs0-runtime-acceptance-[0-9]+", state_dir)
+        and (root / state_dir).resolve().is_relative_to(root.resolve())
+        and relative_to_root(root, (root / state_dir).resolve()) == state_dir
+    )
+    if not state_dir_valid:
+        reject("CS_QUICKSTART_STATE_DIR_INVALID", state_dir=state_dir)
+    if report.get("state_removed_after_verification") is not True:
+        reject("CS_QUICKSTART_STATE_CLEANUP_INVALID")
+    if report.get("command_order") != expected_order:
+        reject("CS_QUICKSTART_COMMAND_ORDER_INVALID", actual=report.get("command_order"))
+
+    transcripts = report.get("command_transcripts")
+    if not isinstance(transcripts, dict) or set(transcripts) != set(expected_order):
+        reject(
+            "CS_QUICKSTART_TRANSCRIPT_SET_INVALID",
+            actual=sorted(transcripts) if isinstance(transcripts, dict) else None,
+        )
+        transcripts = transcripts if isinstance(transcripts, dict) else {}
+
+    payloads: dict[str, dict[str, Any]] = {}
+    for name in expected_order:
+        transcript = transcripts.get(name)
+        if not isinstance(transcript, dict):
+            reject("CS_QUICKSTART_TRANSCRIPT_MISSING", transcript=name)
+            continue
+        command = transcript.get("command")
+        expected_prefix = expected_command_prefixes[name]
+        if not isinstance(command, list) or command[: len(expected_prefix)] != expected_prefix:
+            reject("CS_QUICKSTART_COMMAND_INVALID", transcript=name, command=command)
+            command = command if isinstance(command, list) else []
+        if command.count("--state-dir") != 1:
+            reject("CS_QUICKSTART_COMMAND_STATE_INVALID", transcript=name)
+        else:
+            state_index = command.index("--state-dir")
+            if state_index + 1 >= len(command) or command[state_index + 1] != state_dir:
+                reject("CS_QUICKSTART_COMMAND_STATE_INVALID", transcript=name)
+        if command.count("--json") != 1:
+            reject("CS_QUICKSTART_COMMAND_JSON_MODE_INVALID", transcript=name)
+        if transcript.get("schema_version") != "cs.cli_transcript.v0":
+            reject("CS_QUICKSTART_TRANSCRIPT_SCHEMA_INVALID", transcript=name)
+        if transcript.get("exit_code") != 0 or transcript.get("timed_out") is not False:
+            reject(
+                "CS_QUICKSTART_TRANSCRIPT_EXIT_INVALID",
+                transcript=name,
+                exit_code=transcript.get("exit_code"),
+                timed_out=transcript.get("timed_out"),
+            )
+        if transcript.get("json_error") is not None or transcript.get("stderr_redacted") not in {"", None}:
+            reject("CS_QUICKSTART_TRANSCRIPT_OUTPUT_INVALID", transcript=name)
+        payload = transcript.get("stdout_json")
+        if not isinstance(payload, dict):
+            reject("CS_QUICKSTART_TRANSCRIPT_JSON_MISSING", transcript=name)
+            continue
+        payloads[name] = payload
+        if payload.get("schema_version") != "cs.cli.v0" or payload.get("status") != "success" or payload.get("errors") != []:
+            reject("CS_QUICKSTART_TRANSCRIPT_PAYLOAD_INVALID", transcript=name)
+        if any(payload.get(key) != value for key, value in expected_scope.items()):
+            reject("CS_QUICKSTART_TRANSCRIPT_SCOPE_INVALID", transcript=name)
+
+    def flag_value(name: str, flag: str) -> str | None:
+        command = transcripts.get(name, {}).get("command") if isinstance(transcripts.get(name), dict) else None
+        if not isinstance(command, list) or command.count(flag) != 1:
+            return None
+        index = command.index(flag)
+        return str(command[index + 1]) if index + 1 < len(command) else None
+
+    generated_ids = report.get("generated_ids")
+    if not isinstance(generated_ids, dict):
+        reject("CS_QUICKSTART_GENERATED_IDS_INVALID")
+        generated_ids = {}
+    id_prefixes = {
+        "artifact_id": "art_",
+        "search_snapshot_id": "search_",
+        "evidence_bundle_id": "evb_",
+        "brief_id": "brief_",
+        "claim_id": "claim_",
+    }
+    for key, prefix in id_prefixes.items():
+        value = generated_ids.get(key)
+        if not isinstance(value, str) or not value.startswith(prefix):
+            reject("CS_QUICKSTART_GENERATED_ID_INVALID", field=key, value=value)
+
+    scope_cli = [
+        "--tenant-id",
+        expected_scope["tenant_id"],
+        "--owner-id",
+        expected_scope["owner_id"],
+        "--namespace-id",
+        expected_scope["namespace_id"],
+        "--workspace-id",
+        expected_scope["workspace_id"],
+    ]
+    exact_commands = {
+        "artifact_ingest": [
+            "cornerstone",
+            "artifact",
+            "ingest",
+            "fixtures/vs0/packs/01_artifact_basic/input.txt",
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "search_query": [
+            "cornerstone",
+            "search",
+            "query",
+            "alpha-evidence-anchor",
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "evidence_bundle_create": [
+            "cornerstone",
+            "evidence",
+            "bundle",
+            "create",
+            "--search-snapshot-id",
+            generated_ids.get("search_snapshot_id"),
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "brief_create": [
+            "cornerstone",
+            "brief",
+            "create",
+            "--evidence-bundle-id",
+            generated_ids.get("evidence_bundle_id"),
+            "--model-provider",
+            "local_test",
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "claim_create": [
+            "cornerstone",
+            "claim",
+            "create",
+            "--brief",
+            generated_ids.get("brief_id"),
+            "--statement",
+            "The Alpha evidence anchor is available for local structural review.",
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "audit_list": [
+            "cornerstone",
+            "audit",
+            "list",
+            "--state-dir",
+            state_dir,
+            *scope_cli,
+            "--json",
+        ],
+        "audit_verify": [
+            "cornerstone",
+            "audit",
+            "verify",
+            "--state-dir",
+            state_dir,
+            "--json",
+        ],
+    }
+    for name, expected_command in exact_commands.items():
+        transcript = transcripts.get(name)
+        actual_command = transcript.get("command") if isinstance(transcript, dict) else None
+        if actual_command != expected_command:
+            reject("CS_QUICKSTART_COMMAND_EXACTNESS_INVALID", transcript=name, command=actual_command)
+
+    artifact = payloads.get("artifact_ingest", {}).get("artifact")
+    snapshot = payloads.get("search_query", {}).get("search_snapshot")
+    bundle = payloads.get("evidence_bundle_create", {}).get("evidence_bundle")
+    brief = payloads.get("brief_create", {}).get("brief")
+    claim = payloads.get("claim_create", {}).get("claim")
+    artifact = artifact if isinstance(artifact, dict) else {}
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    bundle = bundle if isinstance(bundle, dict) else {}
+    brief = brief if isinstance(brief, dict) else {}
+    claim = claim if isinstance(claim, dict) else {}
+    observed_ids = {
+        "artifact_id": artifact.get("artifact_id"),
+        "search_snapshot_id": snapshot.get("search_snapshot_id"),
+        "evidence_bundle_id": bundle.get("evidence_bundle_id"),
+        "brief_id": brief.get("brief_id"),
+        "claim_id": claim.get("claim_id"),
+    }
+    if generated_ids != observed_ids:
+        reject("CS_QUICKSTART_GENERATED_IDS_UNBOUND", observed=observed_ids)
+
+    fixture_value = report.get("fixture")
+    fixture_path = (root / fixture_value).resolve() if isinstance(fixture_value, str) else Path()
+    try:
+        fixture_path.relative_to(root.resolve())
+        fixture_is_scoped = True
+    except ValueError:
+        fixture_is_scoped = False
+    fixture_sha256 = (
+        sha256_file(fixture_path)
+        if fixture_is_scoped and fixture_path.is_file()
+        else None
+    )
+    artifact_source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
+    content_identity = (
+        artifact.get("content_identity")
+        if isinstance(artifact.get("content_identity"), dict)
+        else {}
+    )
+    if (
+        fixture_value != "fixtures/vs0/packs/01_artifact_basic/input.txt"
+        or fixture_sha256 is None
+        or artifact.get("artifact_id") != f"art_{fixture_sha256[:16]}"
+        or artifact.get("checksum_sha256") != fixture_sha256
+        or artifact.get("original_storage_ref") != f"sha256:{fixture_sha256}"
+        or content_identity != {"algorithm": "sha256", "value": fixture_sha256}
+        or not isinstance(artifact_source.get("path"), str)
+        or Path(str(artifact_source.get("path"))).resolve() != fixture_path
+    ):
+        reject("CS_QUICKSTART_FIXTURE_ANCHOR_INVALID")
+
+    artifact_id = str(generated_ids.get("artifact_id") or "")
+    snapshot_id = str(generated_ids.get("search_snapshot_id") or "")
+    bundle_id = str(generated_ids.get("evidence_bundle_id") or "")
+    brief_id = str(generated_ids.get("brief_id") or "")
+    search_artifact_ids = {
+        str(row.get("artifact_id"))
+        for row in snapshot.get("results", [])
+        if isinstance(row, dict) and row.get("artifact_id")
+    }
+    bundle_artifact_ids = {
+        str(item.get("artifact_id"))
+        for item in bundle.get("evidence_items", [])
+        if isinstance(item, dict) and item.get("artifact_id")
+    }
+    related_brief = claim.get("related_brief") if isinstance(claim.get("related_brief"), dict) else {}
+    claim_bundle = claim.get("evidence_bundle") if isinstance(claim.get("evidence_bundle"), dict) else {}
+    brief_bundle = brief.get("evidence_bundle") if isinstance(brief.get("evidence_bundle"), dict) else {}
+    lineage_ok = (
+        artifact_id in search_artifact_ids
+        and artifact_id in bundle_artifact_ids
+        and bundle.get("search_snapshot_id") == snapshot_id
+        and brief_bundle.get("evidence_bundle_id") == bundle_id
+        and brief_bundle.get("search_snapshot_id") == snapshot_id
+        and related_brief.get("brief_id") == brief_id
+        and related_brief.get("evidence_bundle_id") == bundle_id
+        and claim_bundle.get("evidence_bundle_id") == bundle_id
+        and claim_bundle.get("search_snapshot_id") == snapshot_id
+        and flag_value("evidence_bundle_create", "--search-snapshot-id") == snapshot_id
+        and flag_value("brief_create", "--evidence-bundle-id") == bundle_id
+        and flag_value("brief_create", "--model-provider") == "local_test"
+        and flag_value("claim_create", "--brief") == brief_id
+    )
+    if not lineage_ok or report.get("lineage_verified") is not True:
+        reject("CS_QUICKSTART_LINEAGE_INVALID")
+
+    expected_brief_boundary = {
+        "output_mode": "extractive_fallback",
+        "trust_label": "extractive_fallback",
+        "presented_as_fact": False,
+        "model_provider": "local_test",
+        "model_mode": "not_invoked_extractive_fallback",
+    }
+    observed_brief_boundary = {
+        "output_mode": brief.get("output_mode"),
+        "trust_label": brief.get("trust_label"),
+        "presented_as_fact": brief.get("presented_as_fact"),
+        "model_provider": brief.get("model_provider"),
+        "model_mode": brief.get("model_mode"),
+    }
+    prompt_boundary = brief.get("prompt_boundary") if isinstance(brief.get("prompt_boundary"), dict) else {}
+    if (
+        report.get("brief_boundary") != expected_brief_boundary
+        or observed_brief_boundary != expected_brief_boundary
+        or prompt_boundary.get("provider_calls_allowed") is not False
+        or prompt_boundary.get("tool_calls_allowed") is not False
+        or prompt_boundary.get("actions_allowed") is not False
+        or prompt_boundary.get("external_http_calls_from_evidence") != 0
+    ):
+        reject("CS_QUICKSTART_BRIEF_BOUNDARY_INVALID")
+
+    authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
+    claim_boundary = report.get("claim_boundary") if isinstance(report.get("claim_boundary"), dict) else {}
+    if (
+        claim.get("status") != "draft"
+        or authority.get("can_drive_autonomous_action") is not False
+        or authority.get("can_publish_shared_truth") is not False
+        or claim_boundary.get("status") != "draft"
+        or claim_boundary.get("can_drive_autonomous_action") is not False
+        or claim_boundary.get("can_publish_shared_truth") is not False
+    ):
+        reject("CS_QUICKSTART_CLAIM_BOUNDARY_INVALID")
+
+    expected_audit_types = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "brief.created",
+        "claim.draft.created",
+    }
+    audit_events = payloads.get("audit_list", {}).get("audit_events")
+    audit_events = audit_events if isinstance(audit_events, list) else []
+    audit_types = {
+        str(event.get("event_type"))
+        for event in audit_events
+        if isinstance(event, dict) and event.get("event_type")
+    }
+    forbidden_audit_types = sorted(
+        event_type
+        for event_type in audit_types
+        if event_type.startswith(("action.", "agent.", "connector.", "memory.", "mission.", "workflow."))
+    )
+    integrity = payloads.get("audit_verify", {}).get("audit_integrity")
+    integrity = integrity if isinstance(integrity, dict) else {}
+    if (
+        audit_types != expected_audit_types
+        or report.get("audit_event_types") != sorted(expected_audit_types)
+        or forbidden_audit_types
+        or integrity.get("status") != "success"
+        or integrity.get("errors") != []
+        or integrity.get("event_count") != len(audit_events) + 1
+        or report.get("final_audit_verification") != integrity
+    ):
+        reject(
+            "CS_QUICKSTART_AUDIT_INVALID",
+            audit_types=sorted(audit_types),
+            forbidden_audit_types=forbidden_audit_types,
+            integrity=integrity,
+        )
+
+    observed_evidence_refs = sorted(
+        {
+            str(reference)
+            for payload in payloads.values()
+            for reference in (payload.get("evidence_refs") or [])
+            if reference
+        }
+    )
+    observed_audit_refs = sorted(
+        {
+            str(reference)
+            for payload in payloads.values()
+            for reference in (payload.get("audit_refs") or [])
+            if reference
+        }
+    )
+    if not observed_evidence_refs or report.get("evidence_refs") != observed_evidence_refs:
+        reject("CS_QUICKSTART_EVIDENCE_REFS_INVALID")
+    if not observed_audit_refs or report.get("audit_refs") != observed_audit_refs:
+        reject("CS_QUICKSTART_AUDIT_REFS_INVALID")
+    if report.get("policy_decision_refs") != [] or any(
+        payload.get("policy_decision_refs") != [] for payload in payloads.values()
+    ):
+        reject("CS_QUICKSTART_POLICY_REFS_INVALID")
+
+    ref_resolution = report.get("ref_resolution")
+    ref_resolution = ref_resolution if isinstance(ref_resolution, dict) else {}
+    resolution_entries = ref_resolution.get("entries")
+    resolution_entries = resolution_entries if isinstance(resolution_entries, list) else []
+    expected_resolved_refs = sorted(set(observed_evidence_refs) | set(observed_audit_refs))
+    actual_resolution_refs = [
+        entry.get("ref") for entry in resolution_entries if isinstance(entry, dict)
+    ]
+    resolution_records_valid = True
+    id_fields = {
+        "artifact": "artifact_id",
+        "search_snapshot": "search_snapshot_id",
+        "evidence_bundle": "evidence_bundle_id",
+        "brief": "brief_id",
+        "claim": "claim_id",
+        "namespace_audit_export": "namespace_audit_export_id",
+        "audit": "event_id",
+    }
+    namespace_export = payloads.get("audit_list", {}).get("namespace_audit_export")
+    namespace_export = namespace_export if isinstance(namespace_export, dict) else {}
+    authoritative_records = {
+        f"artifact:{artifact.get('artifact_id')}": artifact,
+        f"search_snapshot:{snapshot.get('search_snapshot_id')}": snapshot,
+        f"evidence_bundle:{bundle.get('evidence_bundle_id')}": bundle,
+        f"brief:{brief.get('brief_id')}": brief,
+        f"claim:{claim.get('claim_id')}": claim,
+        f"namespace_audit_export:{namespace_export.get('namespace_audit_export_id')}": namespace_export,
+    }
+    audit_semantics = {
+        f"audit:{event.get('event_id')}": event
+        for event in audit_events
+        if isinstance(event, dict) and event.get("event_id")
+    }
+    export_audit_refs_value = payloads.get("audit_list", {}).get("audit_refs")
+    export_audit_refs = {
+        str(reference)
+        for reference in export_audit_refs_value
+        if isinstance(reference, str)
+    } if isinstance(export_audit_refs_value, list) else set()
+    for entry in resolution_entries:
+        if not isinstance(entry, dict):
+            resolution_records_valid = False
+            continue
+        reference = entry.get("ref")
+        record = entry.get("record")
+        record = record if isinstance(record, dict) else {}
+        resolution_state_path = entry.get("state_path")
+        resolution_state_scoped = bool(
+            state_dir_valid
+            and isinstance(resolution_state_path, str)
+            and (root / resolution_state_path).resolve().is_relative_to(
+                (root / str(state_dir)).resolve()
+            )
+            and relative_to_root(root, (root / resolution_state_path).resolve())
+            == resolution_state_path
+        )
+        if (
+            entry.get("resolved") is not True
+            or not record
+            or entry.get("record_sha256") != _json_value_sha256(record)
+            or not isinstance(entry.get("state_file_sha256"), str)
+            or not resolution_state_scoped
+        ):
+            resolution_records_valid = False
+            continue
+        if isinstance(reference, str) and reference.startswith("storage:sha256:"):
+            checksum = reference.removeprefix("storage:sha256:")
+            if (
+                record.get("checksum_sha256") != checksum
+                or entry.get("state_file_sha256") != checksum
+                or record.get("state_copy_bytes")
+                != (fixture_path.stat().st_size if fixture_sha256 is not None else None)
+                or record.get("durable_fixture_path") != report.get("fixture")
+                or record.get("durable_fixture_sha256") != checksum
+            ):
+                resolution_records_valid = False
+            continue
+        if not isinstance(reference, str) or ":" not in reference:
+            resolution_records_valid = False
+            continue
+        kind, identifier = reference.split(":", 1)
+        id_field = id_fields.get(kind)
+        if id_field is None or record.get(id_field) != identifier:
+            resolution_records_valid = False
+        if kind == "audit":
+            event_without_hash = dict(record)
+            event_without_hash.pop("event_id", None)
+            event_hash = event_without_hash.pop("event_hash", None)
+            if (
+                event_hash != _json_value_sha256(event_without_hash)
+                or identifier != f"audit_{str(event_hash)[:16]}"
+                or {
+                    key: record.get(key)
+                    for key in expected_scope
+                }
+                != expected_scope
+            ):
+                resolution_records_valid = False
+            semantic_record = {
+                key: record.get(key)
+                for key in ("event_id", "event_type", "occurred_at", "subject", "details")
+            }
+            if reference in audit_semantics:
+                if semantic_record != audit_semantics[reference]:
+                    resolution_records_valid = False
+            elif reference in export_audit_refs:
+                if (
+                    record.get("event_type") != "namespace.audit.exported"
+                    or record.get("subject")
+                    != {
+                        "type": "namespace_audit_export",
+                        "id": namespace_export.get("namespace_audit_export_id"),
+                    }
+                    or record.get("details")
+                    != {"event_count": len(audit_events), "format": "json"}
+                ):
+                    resolution_records_valid = False
+            else:
+                resolution_records_valid = False
+        else:
+            record_scope = record.get("scope")
+            if not isinstance(record_scope, dict):
+                record_scope = record.get("filters")
+            if record_scope != expected_scope:
+                resolution_records_valid = False
+            if record != authoritative_records.get(reference):
+                resolution_records_valid = False
+    if (
+        ref_resolution.get("schema_version") != "cs.quickstart_ref_resolution.v0"
+        or ref_resolution.get("status") != "resolved"
+        or ref_resolution.get("all_resolved") is not True
+        or ref_resolution.get("reference_count") != len(expected_resolved_refs)
+        or ref_resolution.get("resolved_count") != len(expected_resolved_refs)
+        or ref_resolution.get("expected_refs") != expected_resolved_refs
+        or ref_resolution.get("resolved_refs") != expected_resolved_refs
+        or sorted(actual_resolution_refs) != expected_resolved_refs
+        or len(actual_resolution_refs) != len(set(actual_resolution_refs))
+        or ref_resolution.get("snapshot_sha256") != _json_value_sha256(resolution_entries)
+        or len(export_audit_refs) != 1
+        or not resolution_records_valid
+    ):
+        reject("CS_QUICKSTART_REF_RESOLUTION_INVALID")
+
+    runtime_probe = report.get("runtime_probe") if isinstance(report.get("runtime_probe"), dict) else {}
+    readiness = runtime_probe.get("readiness") if isinstance(runtime_probe.get("readiness"), dict) else {}
+    if (
+        runtime_probe.get("schema_version") != "cs.vs0_runtime_acceptance_probe.v0"
+        or runtime_probe.get("status") != "success"
+        or runtime_probe.get("transport") != "loopback_http"
+        or runtime_probe.get("host") != "127.0.0.1"
+        or runtime_probe.get("health_http_status") != 200
+        or runtime_probe.get("ready_http_status") != 200
+        or runtime_probe.get("health_schema_version") != "cs.runtime_api.v0"
+        or runtime_probe.get("ready_schema_version") != "cs.runtime_api.v0"
+        or runtime_probe.get("health_service") != "cornerstone-vs0-runtime"
+        or runtime_probe.get("loopback_http_requests") != 2
+        or runtime_probe.get("real_external_http_calls") != 0
+        or runtime_probe.get("clean_shutdown") is not True
+        or runtime_probe.get("thread_errors") != []
+        or runtime_probe.get("errors") != []
+        or readiness.get("local_scenario_ready") is not True
+        or readiness.get("vs0_runtime_ready") is not True
+        or readiness.get("production_release_ready") is not False
+        or readiness.get("human_required") is not True
+    ):
+        reject("CS_QUICKSTART_RUNTIME_PROBE_INVALID")
+
+    expected_negative = {
+        "real_external_http_calls": 0,
+        "production_release_overclaim": 0,
+        "live_connector_claim_without_human_evidence": 0,
+        "human_usability_claim_without_human_evidence": 0,
+    }
+    if report.get("negative_evidence") != expected_negative:
+        reject("CS_QUICKSTART_NEGATIVE_EVIDENCE_INVALID", actual=report.get("negative_evidence"))
+    required_not_verified = {
+        "unqualified_external_calls_in_release_report",
+        "tool_calls_from_untrusted_artifact",
+        "action_cards_from_prompt_injection",
+        "cross_namespace_reads",
+        "zero_evidence_claim_approvals",
+        "audit_tamper_verify_failures",
+    }
+    not_verified_negative_evidence = report.get("not_verified_negative_evidence")
+    if (
+        not isinstance(not_verified_negative_evidence, list)
+        or any(not isinstance(value, str) for value in not_verified_negative_evidence)
+        or set(not_verified_negative_evidence) != required_not_verified
+    ):
+        reject("CS_QUICKSTART_UNVERIFIED_BOUNDARY_INVALID")
+    expected_proof_boundary = {
+        "claim_ceiling": "STRUCTURAL_READY",
+        "product_value": "NOT_CLAIMED",
+        "production": "NOT_CLAIMED",
+        "live_provider": "NOT_CLAIMED",
+        "human_usability": "HUMAN_REQUIRED",
+        "vs5_intelligence": "NOT_CLAIMED",
+    }
+    proof_boundary = report.get("proof_boundary")
+    if proof_boundary != expected_proof_boundary:
+        reject("CS_QUICKSTART_PROOF_BOUNDARY_INVALID")
+
+    self_transcript = report.get("self_command_transcript")
+    expected_self_prefix = ["cornerstone", "quickstart", "verify", "vs0-runtime-acceptance", "--json", "--output"]
+    if (
+        not isinstance(self_transcript, dict)
+        or self_transcript.get("schema_version") != "cs.command_transcript.v0"
+        or self_transcript.get("name") != "quickstart_verify_vs0_runtime_acceptance"
+        or self_transcript.get("source") != "observed"
+        or self_transcript.get("required") is not True
+        or self_transcript.get("exit_code") != 0
+        or self_transcript.get("timed_out") is not False
+        or not isinstance(self_transcript.get("command"), list)
+        or self_transcript.get("command", [])[: len(expected_self_prefix)] != expected_self_prefix
+        or len(self_transcript.get("command", [])) != len(expected_self_prefix) + 1
+    ):
+        reject("CS_QUICKSTART_SELF_TRANSCRIPT_INVALID")
+
+    secret_scan_payload = {
+        "command_transcripts": {
+            name: {
+                "stdout_json": transcript.get("stdout_json"),
+                "stderr_redacted": transcript.get("stderr_redacted"),
+            }
+            for name, transcript in transcripts.items()
+            if isinstance(transcript, dict)
+        },
+        "ref_resolution": ref_resolution,
+    }
+    unredacted_secret_occurrences = count_unredacted_secrets(json.dumps(secret_scan_payload, sort_keys=True))
+    if unredacted_secret_occurrences:
+        reject("CS_QUICKSTART_UNREDACTED_SECRET", occurrences=unredacted_secret_occurrences)
+
+    cli_bound: bool | None = None
+    if cli_payload is not None:
+        cli_bound = (
+            cli_payload.get("schema_version") == "cs.cli.v0"
+            and cli_payload.get("status") == report.get("status")
+            and cli_payload.get("scenario_set") == report.get("scenario_set")
+            and cli_payload.get("scenario_id") == report.get("scenario_id")
+            and cli_payload.get("generated_ids") == report.get("generated_ids")
+            and cli_payload.get("final_audit_verification") == report.get("final_audit_verification")
+            and cli_payload.get("negative_evidence") == report.get("negative_evidence")
+            and cli_payload.get("quickstart_report") == report
+        )
+        if not cli_bound:
+            reject("CS_QUICKSTART_CLI_REPORT_BINDING_INVALID")
+
+    return {
+        "schema_version": "cs.vs0_runtime_acceptance_quickstart_validation.v0",
+        "status": "passed" if not errors else "failed",
+        "ok": not errors,
+        "error_count": len(errors),
+        "errors": errors,
+        "command_count": len(transcripts),
+        "generated_ids": generated_ids,
+        "lineage_verified": lineage_ok,
+        "audit_event_count_before_export": len(audit_events),
+        "final_audit_event_count": integrity.get("event_count"),
+        "cli_report_bound": cli_bound,
+        "unredacted_secret_occurrences": unredacted_secret_occurrences,
+        "claim_ceiling": proof_boundary.get("claim_ceiling") if isinstance(proof_boundary, dict) else None,
+    }
+
+
+def validate_runtime_acceptance_quickstart_report(
+    report: Any,
+    *,
+    root: Path | None = None,
+    cli_payload: Any = None,
+) -> dict[str, Any]:
+    if not isinstance(report, dict) or (cli_payload is not None and not isinstance(cli_payload, dict)):
+        return {
+            "schema_version": "cs.vs0_runtime_acceptance_quickstart_validation.v0",
+            "status": "failed",
+            "ok": False,
+            "error_count": 1,
+            "errors": [{"code": "CS_QUICKSTART_REPORT_SHAPE_INVALID"}],
+            "command_count": 0,
+            "generated_ids": {},
+            "lineage_verified": False,
+            "audit_event_count_before_export": 0,
+            "final_audit_event_count": None,
+            "cli_report_bound": False if cli_payload is not None else None,
+            "unredacted_secret_occurrences": 0,
+            "claim_ceiling": None,
+        }
+    if root is None:
+        return {
+            "schema_version": "cs.vs0_runtime_acceptance_quickstart_validation.v0",
+            "status": "failed",
+            "ok": False,
+            "error_count": 1,
+            "errors": [{"code": "CS_QUICKSTART_FIXTURE_ANCHOR_REQUIRED"}],
+            "command_count": 0,
+            "generated_ids": {},
+            "lineage_verified": False,
+            "audit_event_count_before_export": 0,
+            "final_audit_event_count": None,
+            "cli_report_bound": False if cli_payload is not None else None,
+            "unredacted_secret_occurrences": 0,
+            "claim_ceiling": None,
+        }
+    try:
+        return _validate_runtime_acceptance_quickstart_report(
+            report,
+            root=root,
+            cli_payload=cli_payload,
+        )
+    except Exception as error:  # defensive boundary for untrusted quickstart JSON
+        return {
+            "schema_version": "cs.vs0_runtime_acceptance_quickstart_validation.v0",
+            "status": "failed",
+            "ok": False,
+            "error_count": 1,
+            "errors": [
+                {
+                    "code": "CS_QUICKSTART_REPORT_MALFORMED",
+                    "error_type": type(error).__name__,
+                }
+            ],
+            "command_count": 0,
+            "generated_ids": {},
+            "lineage_verified": False,
+            "audit_event_count_before_export": 0,
+            "final_audit_event_count": None,
+            "cli_report_bound": False if cli_payload is not None else None,
+            "unredacted_secret_occurrences": 0,
+            "claim_ceiling": None,
+        }
+
+
+def _runtime_acceptance_probe(root: Path, state_path: Path) -> dict[str, Any]:
+    started_at = utc_now()
+    started = time.monotonic()
+    server = make_server(root, state_path, host="127.0.0.1", port=0)
+    host, port = server.server_address
+    thread_errors: list[str] = []
+
+    def serve() -> None:
+        try:
+            server.serve_forever()
+        except Exception as error:  # pragma: no cover - defensive thread boundary
+            thread_errors.append(redact_text(str(error)))
+
+    thread = threading.Thread(target=serve, daemon=True)
+    thread.start()
+    health: dict[str, Any] = {}
+    ready: dict[str, Any] = {}
+    probe_errors: list[str] = []
+    health_http_status: int | None = None
+    ready_http_status: int | None = None
+    try:
+        base_url = f"http://{host}:{port}"
+        health_http_status, health = _json_urlopen_response(f"{base_url}/health")
+        ready_http_status, ready = _json_urlopen_response(f"{base_url}/ready")
+    except Exception as error:  # pragma: no cover - defensive local runtime boundary
+        probe_errors.append(redact_text(str(error)))
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=5)
+
+    readiness = ready.get("readiness") if isinstance(ready.get("readiness"), dict) else {}
+    clean_shutdown = not thread.is_alive() and not thread_errors
+    success = (
+        not probe_errors
+        and clean_shutdown
+        and health_http_status == 200
+        and ready_http_status == 200
+        and health.get("schema_version") == "cs.runtime_api.v0"
+        and ready.get("schema_version") == "cs.runtime_api.v0"
+        and health.get("status") == "success"
+        and ready.get("status") == "success"
+        and health.get("service") == "cornerstone-vs0-runtime"
+        and health.get("real_external_http_calls") == 0
+        and readiness.get("local_scenario_ready") is True
+        and readiness.get("vs0_runtime_ready") is True
+        and readiness.get("production_release_ready") is False
+        and readiness.get("human_required") is True
+    )
+    return {
+        "schema_version": "cs.vs0_runtime_acceptance_probe.v0",
+        "status": "success" if success else "failed",
+        "started_at": started_at,
+        "ended_at": utc_now(),
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+        "transport": "loopback_http",
+        "host": "127.0.0.1",
+        "ephemeral_port": port,
+        "health_http_status": health_http_status,
+        "ready_http_status": ready_http_status,
+        "health_schema_version": health.get("schema_version"),
+        "ready_schema_version": ready.get("schema_version"),
+        "health_service": health.get("service"),
+        "health_status": health.get("status"),
+        "ready_status": ready.get("status"),
+        "readiness": {
+            "local_scenario_ready": readiness.get("local_scenario_ready"),
+            "vs0_runtime_ready": readiness.get("vs0_runtime_ready"),
+            "production_release_ready": readiness.get("production_release_ready"),
+            "human_required": readiness.get("human_required"),
+        },
+        "loopback_http_requests": 2,
+        "real_external_http_calls": 0,
+        "clean_shutdown": clean_shutdown,
+        "thread_errors": thread_errors,
+        "errors": probe_errors,
+    }
+
+
+def run_runtime_acceptance_quickstart(root: Path, *, output_path: Path) -> dict[str, Any]:
+    started = time.monotonic()
+    state_rel = f"tmp/quickstart/vs0-runtime-acceptance-{os.getpid()}"
+    state_path = root / state_rel
+    if state_path.exists():
+        shutil.rmtree(state_path)
+    fixture = "fixtures/vs0/packs/01_artifact_basic/input.txt"
+    scope = dict(DEFAULT_SCOPE)
+    scope_cli = [
+        "--tenant-id",
+        scope["tenant_id"],
+        "--owner-id",
+        scope["owner_id"],
+        "--namespace-id",
+        scope["namespace_id"],
+        "--workspace-id",
+        scope["workspace_id"],
+    ]
+
+    def scoped_command(arguments: list[str], *, include_scope: bool = True) -> list[str]:
+        command = [*arguments, "--state-dir", state_rel]
+        if include_scope:
+            command.extend(scope_cli)
+        return [*command, "--json"]
+
+    runtime_probe = _runtime_acceptance_probe(root, state_path)
+    transcripts: dict[str, dict[str, Any]] = {}
+    transcripts["artifact_ingest"] = _run_cli(root, scoped_command(["artifact", "ingest", fixture]))
+    artifact_payload = _transcript_payload(transcripts["artifact_ingest"])
+    artifact_id = str((artifact_payload.get("artifact") or {}).get("artifact_id") or "")
+
+    transcripts["search_query"] = _run_cli(
+        root,
+        scoped_command(["search", "query", "alpha-evidence-anchor"]),
+    )
+    search_payload = _transcript_payload(transcripts["search_query"])
+    search_snapshot = search_payload.get("search_snapshot") or {}
+    snapshot_id = str(search_snapshot.get("search_snapshot_id") or "")
+
+    transcripts["evidence_bundle_create"] = _run_cli(
+        root,
+        scoped_command(["evidence", "bundle", "create", "--search-snapshot-id", snapshot_id]),
+    )
+    bundle_payload = _transcript_payload(transcripts["evidence_bundle_create"])
+    evidence_bundle = bundle_payload.get("evidence_bundle") or {}
+    bundle_id = str(evidence_bundle.get("evidence_bundle_id") or "")
+
+    transcripts["brief_create"] = _run_cli(
+        root,
+        scoped_command(
+            [
+                "brief",
+                "create",
+                "--evidence-bundle-id",
+                bundle_id,
+                "--model-provider",
+                "local_test",
+            ]
+        ),
+    )
+    brief_payload = _transcript_payload(transcripts["brief_create"])
+    brief = brief_payload.get("brief") or {}
+    brief_id = str(brief.get("brief_id") or "")
+
+    transcripts["claim_create"] = _run_cli(
+        root,
+        scoped_command(
+            [
+                "claim",
+                "create",
+                "--brief",
+                brief_id,
+                "--statement",
+                "The Alpha evidence anchor is available for local structural review.",
+            ]
+        ),
+    )
+    claim_payload = _transcript_payload(transcripts["claim_create"])
+    claim = claim_payload.get("claim") or {}
+    claim_id = str(claim.get("claim_id") or "")
+
+    transcripts["audit_list"] = _run_cli(root, scoped_command(["audit", "list"]))
+    transcripts["audit_verify"] = _run_cli(
+        root,
+        scoped_command(["audit", "verify"], include_scope=False),
+    )
+    audit_list_payload = _transcript_payload(transcripts["audit_list"])
+    audit_events = audit_list_payload.get("audit_events") or []
+    audit_integrity = _transcript_payload(transcripts["audit_verify"]).get("audit_integrity") or {}
+
+    command_failures = sorted(
+        name for name, transcript in transcripts.items() if not _transcript_ok(transcript)
+    )
+    scope_mismatches = sorted(
+        name
+        for name, transcript in transcripts.items()
+        if any(_transcript_payload(transcript).get(key) != value for key, value in scope.items())
+    )
+    generated_ids = {
+        "artifact_id": artifact_id,
+        "search_snapshot_id": snapshot_id,
+        "evidence_bundle_id": bundle_id,
+        "brief_id": brief_id,
+        "claim_id": claim_id,
+    }
+    missing_ids = sorted(key for key, value in generated_ids.items() if not value)
+    search_artifact_ids = {
+        str(row.get("artifact_id"))
+        for row in search_snapshot.get("results", [])
+        if isinstance(row, dict) and row.get("artifact_id")
+    }
+    bundle_artifact_ids = {
+        str(item.get("artifact_id"))
+        for item in evidence_bundle.get("evidence_items", [])
+        if isinstance(item, dict) and item.get("artifact_id")
+    }
+    claim_related_brief = claim.get("related_brief") or {}
+    claim_evidence_bundle = claim.get("evidence_bundle") or {}
+    lineage_ok = (
+        artifact_id in search_artifact_ids
+        and artifact_id in bundle_artifact_ids
+        and str((brief.get("evidence_bundle") or {}).get("evidence_bundle_id") or "") == bundle_id
+        and str(claim_related_brief.get("brief_id") or "") == brief_id
+        and str(claim_related_brief.get("evidence_bundle_id") or "") == bundle_id
+        and str(claim_evidence_bundle.get("evidence_bundle_id") or "") == bundle_id
+    )
+    brief_boundary = {
+        "output_mode": brief.get("output_mode"),
+        "trust_label": brief.get("trust_label"),
+        "presented_as_fact": brief.get("presented_as_fact"),
+        "model_provider": brief.get("model_provider"),
+        "model_mode": brief.get("model_mode"),
+    }
+    claim_authority = claim.get("authority") or {}
+    claim_boundary = {
+        "status": claim.get("status"),
+        "trust_state": claim.get("trust_state"),
+        "can_drive_autonomous_action": claim_authority.get("can_drive_autonomous_action"),
+        "can_publish_shared_truth": claim_authority.get("can_publish_shared_truth"),
+    }
+    expected_audit_types = {
+        "artifact.ingested",
+        "search.snapshot.created",
+        "evidence_bundle.created",
+        "brief.created",
+        "claim.draft.created",
+    }
+    audit_types = {
+        str(event.get("event_type"))
+        for event in audit_events
+        if isinstance(event, dict) and event.get("event_type")
+    }
+    forbidden_audit_types = sorted(
+        event_type
+        for event_type in audit_types
+        if event_type.startswith(("action.", "connector.", "memory.", "mission.", "workflow."))
+    )
+    evidence_refs = sorted(
+        {
+            str(reference)
+            for transcript in transcripts.values()
+            for reference in (_transcript_payload(transcript).get("evidence_refs") or [])
+            if reference
+        }
+    )
+    audit_refs = sorted(
+        {
+            str(reference)
+            for transcript in transcripts.values()
+            for reference in (_transcript_payload(transcript).get("audit_refs") or [])
+            if reference
+        }
+    )
+    policy_decision_refs = sorted(
+        {
+            str(reference)
+            for transcript in transcripts.values()
+            for reference in (_transcript_payload(transcript).get("policy_decision_refs") or [])
+            if reference
+        }
+    )
+    ref_resolution = _runtime_acceptance_ref_resolution(
+        root,
+        state_path,
+        fixture=fixture,
+        evidence_refs=evidence_refs,
+        audit_refs=audit_refs,
+    )
+    errors: list[dict[str, Any]] = []
+    if runtime_probe.get("status") != "success":
+        errors.append({"code": "CS_QUICKSTART_RUNTIME_PROBE_FAILED", "details": runtime_probe.get("errors")})
+    if command_failures:
+        errors.append({"code": "CS_QUICKSTART_COMMAND_FAILED", "commands": command_failures})
+    if scope_mismatches:
+        errors.append({"code": "CS_QUICKSTART_SCOPE_MISMATCH", "commands": scope_mismatches})
+    if missing_ids:
+        errors.append({"code": "CS_QUICKSTART_ID_MISSING", "fields": missing_ids})
+    if not lineage_ok:
+        errors.append({"code": "CS_QUICKSTART_LINEAGE_INVALID"})
+    if brief_boundary != {
+        "output_mode": "extractive_fallback",
+        "trust_label": "extractive_fallback",
+        "presented_as_fact": False,
+        "model_provider": "local_test",
+        "model_mode": "not_invoked_extractive_fallback",
+    }:
+        errors.append({"code": "CS_QUICKSTART_BRIEF_BOUNDARY_INVALID", "brief_boundary": brief_boundary})
+    if (
+        claim_boundary.get("status") != "draft"
+        or claim_boundary.get("can_drive_autonomous_action") is not False
+        or claim_boundary.get("can_publish_shared_truth") is not False
+    ):
+        errors.append({"code": "CS_QUICKSTART_CLAIM_BOUNDARY_INVALID", "claim_boundary": claim_boundary})
+    if (
+        audit_integrity.get("status") != "success"
+        or audit_integrity.get("errors") != []
+        or audit_integrity.get("event_count") != len(audit_events) + 1
+        or audit_types != expected_audit_types
+        or forbidden_audit_types
+    ):
+        errors.append(
+            {
+                "code": "CS_QUICKSTART_AUDIT_INVALID",
+                "audit_types": sorted(audit_types),
+                "forbidden_audit_types": forbidden_audit_types,
+                "audit_integrity": audit_integrity,
+            }
+        )
+    if not evidence_refs or not audit_refs:
+        errors.append({"code": "CS_QUICKSTART_REFS_MISSING"})
+    if ref_resolution.get("all_resolved") is not True:
+        errors.append(
+            {
+                "code": "CS_QUICKSTART_REF_RESOLUTION_FAILED",
+                "unresolved_refs": sorted(
+                    set(ref_resolution.get("expected_refs") or [])
+                    - set(ref_resolution.get("resolved_refs") or [])
+                ),
+            }
+        )
+
+    state_cleanup_error: str | None = None
+    try:
+        if state_path.exists():
+            shutil.rmtree(state_path)
+    except OSError as error:  # pragma: no cover - defensive cleanup boundary
+        state_cleanup_error = redact_text(str(error))
+    if state_cleanup_error or state_path.exists():
+        errors.append({"code": "CS_QUICKSTART_STATE_CLEANUP_FAILED", "message": state_cleanup_error})
+
+    report = {
+        "schema_version": "cs.vs0_runtime_acceptance_quickstart_report.v0",
+        "status": "success" if not errors else "failed",
+        "scenario_set": "vs0-runtime-acceptance",
+        "scenario_id": "VS0-ACC-004",
+        "created_at": utc_now(),
+        "elapsed_seconds": round(time.monotonic() - started, 3),
+        "state_dir": state_rel,
+        "state_removed_after_verification": not state_path.exists(),
+        "scope": scope,
+        "fixture": fixture,
+        "runtime_probe": runtime_probe,
+        "command_order": list(RUNTIME_ACCEPTANCE_QUICKSTART_COMMAND_ORDER),
+        "command_transcripts": transcripts,
+        "generated_ids": generated_ids,
+        "lineage_verified": lineage_ok,
+        "brief_boundary": brief_boundary,
+        "claim_boundary": claim_boundary,
+        "final_audit_verification": audit_integrity,
+        "audit_event_types": sorted(audit_types),
+        "evidence_refs": evidence_refs,
+        "audit_refs": audit_refs,
+        "policy_decision_refs": policy_decision_refs,
+        "ref_resolution": ref_resolution,
+        "negative_evidence": {
+            "real_external_http_calls": int(runtime_probe.get("real_external_http_calls", 1) or 0),
+            "production_release_overclaim": 0
+            if (runtime_probe.get("readiness") or {}).get("production_release_ready") is False
+            else 1,
+            "live_connector_claim_without_human_evidence": 0,
+            "human_usability_claim_without_human_evidence": 0,
+        },
+        "not_verified_negative_evidence": [
+            "unqualified_external_calls_in_release_report",
+            "tool_calls_from_untrusted_artifact",
+            "action_cards_from_prompt_injection",
+            "cross_namespace_reads",
+            "zero_evidence_claim_approvals",
+            "audit_tamper_verify_failures",
+        ],
+        "proof_boundary": {
+            "claim_ceiling": "STRUCTURAL_READY",
+            "product_value": "NOT_CLAIMED",
+            "production": "NOT_CLAIMED",
+            "live_provider": "NOT_CLAIMED",
+            "human_usability": "HUMAN_REQUIRED",
+            "vs5_intelligence": "NOT_CLAIMED",
+        },
+        "errors": errors,
+    }
+    write_json(output_path, report)
+    return report
 
 
 def run_evux_quickstart(root: Path, *, output_path: Path) -> dict[str, Any]:

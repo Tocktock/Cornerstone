@@ -102,7 +102,15 @@ cornerstone claim create --evidence-bundle-id <id> --statement "..." --json
 
 ## VS0 Runtime Acceptance Quickstart
 
-Historical local acceptance loop (fixture data, mocked actions, zero external HTTP calls). Kept verbatim-compatible for the structural verifiers:
+Executable active-spine acceptance quickstart (isolated fixture state, local deterministic fallback, zero external HTTP calls):
+
+```sh
+cornerstone quickstart verify vs0-runtime-acceptance --json
+```
+
+The quickstart writes `tmp/quickstart/vs0-runtime-acceptance-current.json` and runs Artifact ingest → Search → Evidence Bundle → honest fallback Brief → draft Claim → Audit verification. It does not approve claims, create actions, invoke an external model, or claim product value.
+
+Historical broader local acceptance walkthrough (fixture data and mocked actions), kept verbatim-compatible for the structural verifiers:
 
 ```sh
 cornerstone runtime serve --port 8787
@@ -115,7 +123,7 @@ cornerstone audit verify --state-dir data/quickstart-vs0 --json
 cornerstone scenario verify vs0-runtime-acceptance --output reports/scenario/vs0-runtime-acceptance-2026-06-11.json --json
 ```
 
-Placeholder IDs are for manual walkthrough; scenario PASS requires generated transcripts. This quickstart proves structural behavior only — not product value, production tenancy, live providers, or human usability.
+Placeholder IDs are for manual walkthrough; scenario PASS requires generated transcripts. The executable quickstart proves structural behavior only — not product value, production tenancy, live providers, or human usability.
 
 ## Verification Reference
 

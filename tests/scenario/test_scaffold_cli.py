@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -8,8 +9,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -42,13 +46,25 @@ VS4_SLICE_025_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-sl
 VS4_FULL_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-2026-07-03.json"
 VS4_FULL_GATE_REPORT = "reports/scenario/vs4-product-alpha-ui-daily-loop-gate-2026-07-03.json"
 
-from cornerstone_cli.acceptance import _source_snapshot, git_verification_metadata
+from cornerstone_cli.acceptance import (
+    _json_value_sha256,
+    _release_manifest_content_payload,
+    _source_snapshot,
+    collect_release_evidence,
+    finalize_release_evidence,
+    git_verification_metadata,
+    release_package_locator_id,
+    run_runtime_acceptance_quickstart,
+    validate_runtime_acceptance_quickstart_report,
+)
 from cornerstone_cli.scenarios import (
     _vs2_regression_guard_enabled,
     _vs2_regression_guard_transcript,
     _vs3_overclaim_lint,
 )
 from cornerstone_cli.main import (
+    command_quickstart_verify,
+    _sync_runtime_acceptance_release_status,
     _vs3_human_gate_self_transcript_validation,
     _vs3_local_checkpoint_self_transcript_validation,
     _vs4_filtered_scenario_report_path,
@@ -367,6 +383,1206 @@ class ScaffoldCliTests(unittest.TestCase):
                 self.assertEqual(result.stderr, "")
                 self.assertIn("usage:", result.stdout)
 
+    def test_runtime_acceptance_quickstart_executes_only_the_active_structural_spine(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs0-acceptance-quickstart-") as temp_dir:
+            output_path = Path(temp_dir) / "quickstart-report.json"
+            result = run_cli(
+                "quickstart",
+                "verify",
+                "vs0-runtime-acceptance",
+                "--output",
+                str(output_path),
+                "--json",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(result.stderr, "")
+            payload = json.loads(result.stdout)
+            self.assertEqual(payload["status"], "success")
+            self.assertEqual(payload["scenario_set"], "vs0-runtime-acceptance")
+            self.assertEqual(payload["scenario_id"], "VS0-ACC-004")
+            self.assertEqual(payload["schema_version"], "cs.cli.v0")
+            self.assertEqual(
+                payload["quickstart_report"]["schema_version"],
+                "cs.vs0_runtime_acceptance_quickstart_report.v0",
+            )
+            self.assertEqual(
+                payload["command_order"],
+                [
+                    "artifact_ingest",
+                    "search_query",
+                    "evidence_bundle_create",
+                    "brief_create",
+                    "claim_create",
+                    "audit_list",
+                    "audit_verify",
+                ],
+            )
+            self.assertEqual(set(payload["command_transcripts"]), set(payload["command_order"]))
+            for transcript in payload["command_transcripts"].values():
+                self.assertEqual(transcript["exit_code"], 0)
+                self.assertFalse(transcript["timed_out"])
+                self.assertIsInstance(transcript["stdout_json"], dict)
+                self.assertEqual(transcript["stderr_redacted"], "")
+
+            generated_ids = payload["generated_ids"]
+            self.assertTrue(generated_ids["artifact_id"].startswith("art_"))
+            self.assertTrue(generated_ids["search_snapshot_id"].startswith("search_"))
+            self.assertTrue(generated_ids["evidence_bundle_id"].startswith("evb_"))
+            self.assertTrue(generated_ids["brief_id"].startswith("brief_"))
+            self.assertTrue(generated_ids["claim_id"].startswith("claim_"))
+            self.assertEqual(payload["brief_boundary"]["output_mode"], "extractive_fallback")
+            self.assertEqual(payload["brief_boundary"]["trust_label"], "extractive_fallback")
+            self.assertFalse(payload["brief_boundary"]["presented_as_fact"])
+            self.assertEqual(payload["claim_boundary"]["status"], "draft")
+            self.assertFalse(payload["claim_boundary"]["can_drive_autonomous_action"])
+            self.assertEqual(payload["final_audit_verification"]["status"], "success")
+            self.assertEqual(payload["runtime_probe"]["status"], "success")
+            self.assertTrue(payload["runtime_probe"]["clean_shutdown"])
+            self.assertEqual(payload["runtime_probe"]["real_external_http_calls"], 0)
+            self.assertTrue(payload["evidence_refs"])
+            self.assertTrue(payload["audit_refs"])
+            ref_resolution = payload["ref_resolution"]
+            self.assertTrue(ref_resolution["all_resolved"])
+            self.assertEqual(ref_resolution["status"], "resolved")
+            self.assertEqual(
+                set(ref_resolution["resolved_refs"]),
+                set(payload["evidence_refs"]) | set(payload["audit_refs"]),
+            )
+            export_audit_refs = set(
+                payload["command_transcripts"]["audit_list"]["stdout_json"]["audit_refs"]
+            )
+            export_resolution = [
+                entry
+                for entry in ref_resolution["entries"]
+                if entry["ref"] in export_audit_refs
+            ]
+            self.assertEqual(len(export_resolution), 1)
+            self.assertEqual(export_resolution[0]["record"]["event_type"], "namespace.audit.exported")
+            self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
+            self.assertEqual(payload["negative_evidence"]["production_release_overclaim"], 0)
+            self.assertIn("cross_namespace_reads", payload["not_verified_negative_evidence"])
+            self.assertEqual(payload["proof_boundary"]["claim_ceiling"], "STRUCTURAL_READY")
+            self.assertEqual(payload["proof_boundary"]["product_value"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["production"], "NOT_CLAIMED")
+            self.assertEqual(payload["proof_boundary"]["human_usability"], "HUMAN_REQUIRED")
+            self.assertFalse(Path(payload["state_dir"]).exists())
+            self.assertTrue(output_path.exists())
+            report = json.loads(output_path.read_text())
+            self.assertEqual(report["generated_ids"], generated_ids)
+            self.assertEqual(report["self_command_transcript"]["exit_code"], 0)
+            self.assertEqual(payload["quickstart_report"], report)
+            validation = validate_runtime_acceptance_quickstart_report(
+                report,
+                root=ROOT,
+                cli_payload=payload,
+            )
+            self.assertTrue(validation["ok"], validation)
+            self.assertEqual(validation["unredacted_secret_occurrences"], 0)
+
+            tamper_cases: list[tuple[str, dict[str, Any], str]] = []
+
+            tampered = json.loads(json.dumps(report))
+            tampered["command_order"].reverse()
+            tamper_cases.append(("command_order", tampered, "CS_QUICKSTART_COMMAND_ORDER_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["command_transcripts"]["brief_create"]["exit_code"] = 7
+            tamper_cases.append(("command_exit", tampered, "CS_QUICKSTART_TRANSCRIPT_EXIT_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["generated_ids"]["brief_id"] = "brief_forged"
+            tamper_cases.append(("generated_id", tampered, "CS_QUICKSTART_GENERATED_IDS_UNBOUND"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["command_transcripts"]["claim_create"]["stdout_json"]["claim"]["authority"][
+                "can_publish_shared_truth"
+            ] = True
+            tamper_cases.append(("claim_authority", tampered, "CS_QUICKSTART_CLAIM_BOUNDARY_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["evidence_refs"] = []
+            tamper_cases.append(("evidence_refs", tampered, "CS_QUICKSTART_EVIDENCE_REFS_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["final_audit_verification"]["event_count"] += 1
+            tamper_cases.append(("audit_count", tampered, "CS_QUICKSTART_AUDIT_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["runtime_probe"]["real_external_http_calls"] = 1
+            tamper_cases.append(("external_http", tampered, "CS_QUICKSTART_RUNTIME_PROBE_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            tampered["state_removed_after_verification"] = False
+            tamper_cases.append(("state_cleanup", tampered, "CS_QUICKSTART_STATE_CLEANUP_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            original_state_dir = tampered["state_dir"]
+            tampered["state_dir"] = (
+                "tmp/quickstart/vs0-runtime-acceptance-../../outside"
+            )
+            for transcript in tampered["command_transcripts"].values():
+                state_index = transcript["command"].index("--state-dir") + 1
+                transcript["command"][state_index] = tampered["state_dir"]
+            for entry in tampered["ref_resolution"]["entries"]:
+                entry["state_path"] = str(entry["state_path"]).replace(
+                    original_state_dir,
+                    tampered["state_dir"],
+                    1,
+                )
+            tamper_cases.append(
+                ("state_path_traversal", tampered, "CS_QUICKSTART_STATE_DIR_INVALID")
+            )
+
+            tampered = json.loads(json.dumps(report))
+            tampered["ref_resolution"]["entries"][0]["resolved"] = False
+            tamper_cases.append(("ref_resolution", tampered, "CS_QUICKSTART_REF_RESOLUTION_INVALID"))
+
+            tampered = json.loads(json.dumps(report))
+            storage_resolution = next(
+                entry
+                for entry in tampered["ref_resolution"]["entries"]
+                if entry["kind"] == "storage"
+            )
+            storage_resolution["state_file_sha256"] = "0" * 64
+            tampered["ref_resolution"]["snapshot_sha256"] = _json_value_sha256(
+                tampered["ref_resolution"]["entries"]
+            )
+            tamper_cases.append(
+                ("storage_receipt_hash", tampered, "CS_QUICKSTART_REF_RESOLUTION_INVALID")
+            )
+
+            tampered = json.loads(json.dumps(report))
+            artifact_resolution = next(
+                entry
+                for entry in tampered["ref_resolution"]["entries"]
+                if entry["kind"] == "artifact"
+            )
+            artifact_resolution["record"]["trust_state"] = "forged"
+            artifact_resolution["record_sha256"] = _json_value_sha256(artifact_resolution["record"])
+            tampered["ref_resolution"]["snapshot_sha256"] = _json_value_sha256(
+                tampered["ref_resolution"]["entries"]
+            )
+            tamper_cases.append(
+                ("self_consistent_forged_receipt", tampered, "CS_QUICKSTART_REF_RESOLUTION_INVALID")
+            )
+
+            tampered = json.loads(json.dumps(report))
+            forged_artifact = tampered["command_transcripts"]["artifact_ingest"]["stdout_json"]["artifact"]
+            forged_artifact["artifact_id"] = "art_0000000000000000"
+            forged_artifact["checksum_sha256"] = "0" * 64
+            forged_artifact["original_storage_ref"] = f"sha256:{'0' * 64}"
+            forged_artifact["content_identity"] = {"algorithm": "sha256", "value": "0" * 64}
+            tampered["generated_ids"]["artifact_id"] = forged_artifact["artifact_id"]
+            forged_receipt = next(
+                entry
+                for entry in tampered["ref_resolution"]["entries"]
+                if entry["kind"] == "artifact"
+            )
+            forged_receipt["ref"] = f"artifact:{forged_artifact['artifact_id']}"
+            forged_receipt["record"] = json.loads(json.dumps(forged_artifact))
+            forged_receipt["record_sha256"] = _json_value_sha256(forged_receipt["record"])
+            tampered["ref_resolution"]["snapshot_sha256"] = _json_value_sha256(
+                tampered["ref_resolution"]["entries"]
+            )
+            tamper_cases.append(
+                ("forged_fixture_identity", tampered, "CS_QUICKSTART_FIXTURE_ANCHOR_INVALID")
+            )
+
+            for case_name, tampered_report, expected_error in tamper_cases:
+                with self.subTest(case=case_name):
+                    rejected = validate_runtime_acceptance_quickstart_report(
+                        tampered_report,
+                        root=ROOT,
+                    )
+                    self.assertFalse(rejected["ok"])
+                    self.assertIn(expected_error, {error["code"] for error in rejected["errors"]})
+
+            malformed_shape = validate_runtime_acceptance_quickstart_report([], root=ROOT)
+            self.assertFalse(malformed_shape["ok"])
+            self.assertEqual(
+                malformed_shape["errors"][0]["code"],
+                "CS_QUICKSTART_REPORT_SHAPE_INVALID",
+            )
+            malformed_nested = json.loads(json.dumps(report))
+            malformed_nested["ref_resolution"]["entries"][0]["ref"] = []
+            malformed_validation = validate_runtime_acceptance_quickstart_report(
+                malformed_nested,
+                root=ROOT,
+            )
+            self.assertFalse(malformed_validation["ok"])
+            self.assertEqual(
+                malformed_validation["errors"][0]["code"],
+                "CS_QUICKSTART_REPORT_MALFORMED",
+            )
+
+            forbidden_groups = {
+                "action",
+                "agent",
+                "autopilot",
+                "brain",
+                "connector",
+                "memory",
+                "mission",
+                "model",
+                "ontology",
+                "pack",
+                "release",
+                "scenario",
+            }
+            executed_groups = {
+                transcript["command"][1]
+                for transcript in payload["command_transcripts"].values()
+            }
+            self.assertFalse(executed_groups & forbidden_groups)
+
+    def test_runtime_acceptance_quickstart_fails_when_independent_validation_diverges(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-quickstart-validation-") as temp_dir:
+            output_path = Path(temp_dir) / "quickstart-report.json"
+
+            def divergent_runner(root: Path, *, output_path: Path) -> dict[str, Any]:
+                report = run_runtime_acceptance_quickstart(root, output_path=output_path)
+                self.assertEqual(report["status"], "success", report)
+                report["command_transcripts"]["brief_create"]["stderr_redacted"] = (
+                    "unexpected child stderr"
+                )
+                return report
+
+            stdout = io.StringIO()
+            with mock.patch(
+                "cornerstone_cli.main.run_runtime_acceptance_quickstart",
+                side_effect=divergent_runner,
+            ), redirect_stdout(stdout):
+                exit_code = command_quickstart_verify(
+                    SimpleNamespace(
+                        quickstart="vs0-runtime-acceptance",
+                        output=str(output_path),
+                        json=True,
+                    )
+                )
+
+            self.assertEqual(exit_code, 4)
+            payload = json.loads(stdout.getvalue())
+            self.assertEqual(payload["status"], "failed")
+            self.assertEqual(
+                payload["errors"][0]["code"],
+                "CS_QUICKSTART_REPORT_VALIDATION_FAILED",
+            )
+            self.assertIn(
+                "CS_QUICKSTART_TRANSCRIPT_OUTPUT_INVALID",
+                payload["errors"][0]["validation_error_codes"],
+            )
+            self.assertEqual(
+                json.loads(output_path.read_text())["self_command_transcript"]["exit_code"],
+                4,
+            )
+
+    def test_runtime_acceptance_focused_verify_keeps_canonical_evidence_unchanged(self) -> None:
+        canonical_paths = [
+            ROOT / "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+            ROOT / "reports/scenario/vs0-product-runtime-2026-06-11.json",
+            ROOT / "reports/browser/vs0-runtime-acceptance-2026-06-11",
+            ROOT / "reports/release/vs0-runtime-acceptance-2026-06-11",
+        ]
+
+        def snapshot() -> dict[str, str]:
+            files = [
+                file
+                for path in canonical_paths
+                for file in ([path] if path.is_file() else sorted(path.rglob("*")))
+                if file.is_file()
+            ]
+            return {
+                str(file.relative_to(ROOT)): hashlib.sha256(file.read_bytes()).hexdigest()
+                for file in files
+            }
+
+        before = snapshot()
+        result = run_cli(
+            "scenario",
+            "verify",
+            "vs0-runtime-acceptance",
+            "--scenario",
+            "VS0-ACC-004",
+            "--json",
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["scenario_results"][0]["id"], "VS0-ACC-004")
+        self.assertEqual(payload["scenario_results"][0]["status"], "PASS")
+        self.assertEqual(payload["release_evidence_package"]["status"], "NOT_RUN_FILTERED")
+        self.assertTrue(Path(payload["output_path"]).is_relative_to(ROOT / "tmp"))
+        self.assertEqual(json.loads(Path(payload["output_path"]).read_text()), payload)
+        self.assertTrue(payload["acceptance_evidence"]["quickstart_report"]["validation"]["ok"])
+        self.assertEqual(snapshot(), before)
+
+        denied = run_cli(
+            "scenario",
+            "verify",
+            "vs0-runtime-acceptance",
+            "--scenario",
+            "VS0-ACC-004",
+            "--output",
+            "reports/scenario/vs0-runtime-acceptance-2026-06-11.json",
+            "--json",
+        )
+        self.assertEqual(denied.returncode, 1, denied.stdout + denied.stderr)
+        denied_payload = json.loads(denied.stdout)
+        self.assertEqual(
+            denied_payload["errors"][0]["code"],
+            "CS_SCENARIO_FILTER_CANONICAL_OUTPUT_DENIED",
+        )
+        self.assertEqual(snapshot(), before)
+
+    def test_runtime_acceptance_release_finalization_failure_is_terminal(self) -> None:
+        payload = {
+            "status": "success",
+            "scenario_set": "vs0-runtime-acceptance",
+            "cli_schema_version": "cs.cli.v0",
+            "schema_version": "cs.cli.v0",
+            "scenario_results": [
+                {
+                    "id": "VS0-ACC-005",
+                    "status": "PASS",
+                    "owner": "AI",
+                }
+            ],
+            "summary": {"scenario_count": 1, "pass": 1, "blocking": 0},
+            "release_evidence_package": {
+                "schema_version": "cs.release_evidence_locator.v0",
+                "status": "success",
+                "artifact_count": 15,
+                "missing_required": [],
+            },
+            "self_command_transcript": {
+                "exit_code": 0,
+                "stdout_tail": [],
+            },
+            "errors": [],
+        }
+        exit_code = _sync_runtime_acceptance_release_status(
+            payload,
+            {
+                "status": "failed",
+                "artifact_count": 15,
+                "missing_required": ["acceptance_scenario_report:sha256_binding"],
+            },
+        )
+        self.assertEqual(exit_code, 4)
+        self.assertEqual(payload["status"], "failed")
+        self.assertEqual(payload["scenario_results"][0]["status"], "FAIL")
+        self.assertEqual(payload["summary"]["blocking"], 1)
+        self.assertEqual(payload["self_command_transcript"]["exit_code"], 4)
+        self.assertEqual(payload["errors"][0]["code"], "CS_RELEASE_EVIDENCE_FINALIZATION_FAILED")
+
+        invalid_filter = {
+            "status": "failed",
+            "scenario_results": [{"id": "VS0-ACC-005", "status": "PASS", "owner": "AI"}],
+            "summary": {"scenario_count": 1, "pass": 1, "blocking": 1},
+            "release_evidence_package": {
+                "status": "success",
+                "artifact_count": 15,
+                "missing_required": [],
+            },
+            "self_command_transcript": {"exit_code": 4, "stdout_tail": []},
+            "errors": [{"code": "CS_SCENARIO_FILTER_MISSING"}],
+        }
+        invalid_exit = _sync_runtime_acceptance_release_status(
+            invalid_filter,
+            {"status": "success", "artifact_count": 15, "missing_required": []},
+        )
+        self.assertEqual(invalid_exit, 4)
+        self.assertEqual(invalid_filter["status"], "failed")
+        self.assertEqual(invalid_filter["summary"]["blocking"], 1)
+        self.assertEqual(invalid_filter["errors"][0]["code"], "CS_SCENARIO_FILTER_MISSING")
+
+    def test_release_finalization_rejects_required_artifact_drift_and_manifest_tamper(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as temp_dir:
+            output_dir = Path(temp_dir)
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            scenario_path = output_dir / "scenario-report.json"
+            artifact_path = output_dir / "quickstart-report.json"
+            quickstart = run_cli(
+                "quickstart",
+                "verify",
+                "vs0-runtime-acceptance",
+                "--output",
+                str(artifact_path),
+                "--json",
+            )
+            self.assertEqual(quickstart.returncode, 0, quickstart.stdout + quickstart.stderr)
+            artifact_bytes = artifact_path.read_bytes()
+            artifact_sha = hashlib.sha256(artifact_bytes).hexdigest()
+            scenario_data = {
+                "schema_version": "cs.cli.v0",
+                "status": "success",
+                "scenario_set": "vs0-runtime-acceptance",
+                **scope,
+                "summary": {"blocking": 0},
+                "scenario_results": [
+                    {"id": "VS0-ACC-005", "status": "PASS", "owner": "AI"}
+                ],
+                "acceptance_evidence": {
+                    "quickstart_report": {
+                        "path": str(artifact_path.relative_to(ROOT)),
+                        "sha256": artifact_sha,
+                    }
+                },
+                "release_evidence_package": {
+                    "schema_version": "cs.release_evidence_locator.v0",
+                    "manifest_path": str((output_dir / "manifest.json").relative_to(ROOT)),
+                    "output_dir": str(output_dir.relative_to(ROOT)),
+                },
+                "errors": [],
+            }
+            package_id = release_package_locator_id(
+                ROOT,
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+                scenario_report=scenario_data,
+            )
+            scenario_data["release_evidence_package"]["package_id"] = package_id
+            scenario_path.write_text(json.dumps(scenario_data, sort_keys=True) + "\n")
+            required_role_paths = {
+                "acceptance_scenario_report": scenario_path,
+                "product_runtime_scenario_report": output_dir / "product-runtime.json",
+                "browser_proof_manifest": output_dir / "browser-proof.json",
+                "browser_screenshot": output_dir / "home.png",
+                "browser_dom_snapshot": output_dir / "home.dom.html",
+                "acceptance_contract": output_dir / "acceptance-contract.md",
+                "acceptance_matrix": output_dir / "acceptance-matrix.csv",
+                "quickstart_report": artifact_path,
+                "scenario_freeze_report": output_dir / "scenario-freeze.md",
+                "operator_quickstart": output_dir / "README.md",
+                "human_usability_walkthrough_checklist": output_dir / "walkthrough.md",
+                "command_transcript": output_dir / "command-transcript.json",
+            }
+            for role, path in required_role_paths.items():
+                if not path.exists():
+                    path.write_text(f"{role}\n")
+            required_command_names = [
+                "scenario_verify_vs0_runtime_acceptance",
+                "scenario_gate",
+                "quickstart_verify_vs0_runtime_acceptance",
+                "quickstart_report_validation",
+                "quickstart_scenario_binding",
+                "release_scope_binding",
+                "release_negative_evidence_validation",
+                "release_evidence_collect",
+            ]
+            required_role_paths["command_transcript"].write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cs.release_command_transcript.v0",
+                        "scope_name": "vs0-runtime-acceptance",
+                        "commands": [
+                            {
+                                "name": name,
+                                "required": True,
+                                "exit_code": 0,
+                                "timed_out": False,
+                            }
+                            for name in required_command_names
+                        ],
+                        "summary": {"blocking": 0},
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            product_ai_ids = [
+                *(f"VS0-RT-{index:03d}" for index in range(1, 9)),
+                *(f"VS0-RT-R{index:02d}" for index in range(1, 5)),
+            ]
+            product_human_ids = ["VS0-RT-H01", "VS0-RT-H02"]
+            required_role_paths["product_runtime_scenario_report"].write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cs.cli.v0",
+                        "scenario_set": "vs0-product-runtime",
+                        "status": "success",
+                        **scope,
+                        "summary": {
+                            "blocking": 0,
+                            "scenario_count": 14,
+                            "pass": 12,
+                            "human_required": 2,
+                        },
+                        "scenario_results": [
+                            {"id": scenario_id, "owner": "AI", "status": "PASS"}
+                            for scenario_id in product_ai_ids
+                        ]
+                        + [
+                            {
+                                "id": scenario_id,
+                                "owner": "Human",
+                                "status": "HUMAN_REQUIRED",
+                            }
+                            for scenario_id in product_human_ids
+                        ],
+                        "errors": [],
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            screenshot_path = required_role_paths["browser_screenshot"]
+            dom_path = required_role_paths["browser_dom_snapshot"]
+            required_role_paths["browser_proof_manifest"].write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cs.browser_proof.v0",
+                        "status": "passed",
+                        "route": "/review",
+                        "clean_browser_exit": True,
+                        "production_overclaim_absent": True,
+                        "surface_presence": {
+                            surface: True
+                            for surface in (
+                                "Home/Ops Inbox",
+                                "Brief Detail",
+                                "Artifact Viewer",
+                                "Search",
+                                "Claim candidate",
+                                "Action Card",
+                                "Audit Detail",
+                            )
+                        },
+                        "readiness_labels_present": {
+                            "local_scenario_ready=true": True,
+                            "vs0_runtime_ready=true": True,
+                            "production_release_ready=false": True,
+                            "real_external_http_calls=0": True,
+                        },
+                        "screenshot_path": str(screenshot_path.relative_to(ROOT)),
+                        "screenshot_sha256": hashlib.sha256(
+                            screenshot_path.read_bytes()
+                        ).hexdigest(),
+                        "screenshot_bytes": screenshot_path.stat().st_size,
+                        "dom_path": str(dom_path.relative_to(ROOT)),
+                        "dom_sha256": hashlib.sha256(dom_path.read_bytes()).hexdigest(),
+                        "errors": [],
+                    },
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            artifacts = [
+                {
+                    "role": role,
+                    "path": str(path.relative_to(ROOT)),
+                    "required": True,
+                    "present": True,
+                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                    "bytes": path.stat().st_size,
+                }
+                for role, path in required_role_paths.items()
+            ]
+            manifest = {
+                "schema_version": "cs.release_evidence_package.v0",
+                "status": "success",
+                "scope_name": "vs0-runtime-acceptance",
+                "scope": scope,
+                "scenario_report": str(scenario_path.relative_to(ROOT)),
+                "product_runtime_report": str(
+                    required_role_paths["product_runtime_scenario_report"].relative_to(ROOT)
+                ),
+                "browser_proof": str(
+                    required_role_paths["browser_proof_manifest"].relative_to(ROOT)
+                ),
+                "artifacts": artifacts,
+                "production_release_ready": False,
+                "live_connector_ready": False,
+                "human_usability_accepted": False,
+                "negative_evidence": {
+                    "real_external_http_calls": 0,
+                    "unqualified_external_calls_in_release_report": 0,
+                    "production_release_overclaim": 0,
+                    "live_connector_claim_without_human_evidence": 0,
+                    "human_usability_claim_without_human_evidence": 0,
+                    "tool_calls_from_untrusted_artifact": 0,
+                    "action_cards_from_prompt_injection": 0,
+                    "cross_namespace_reads": 0,
+                    "zero_evidence_claim_approvals": 0,
+                    "audit_tamper_verify_failures": 0,
+                },
+                "human_required": [
+                    {
+                        "id": "VS0-ACC-H01",
+                        "status": "HUMAN_REQUIRED",
+                        "required_evidence": "Approved live-provider transcript.",
+                    },
+                    {
+                        "id": "VS0-ACC-H02",
+                        "status": "HUMAN_REQUIRED",
+                        "required_evidence": "Approved usability record.",
+                    },
+                ],
+                "post_commit_rollup": None,
+                "missing_required": [],
+            }
+            manifest["package_id"] = package_id
+            manifest["content_digest_sha256"] = _json_value_sha256(
+                _release_manifest_content_payload(manifest)
+            )
+            manifest_path = output_dir / "manifest.json"
+            manifest_bytes = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+
+            def restore_manifest() -> None:
+                manifest_path.write_bytes(manifest_bytes)
+                (output_dir / "post_commit_rollup.json").unlink(missing_ok=True)
+
+            restore_manifest()
+
+            drift_path = required_role_paths["browser_screenshot"]
+            drift_bytes = drift_path.read_bytes()
+            drift_path.write_bytes(b"forged screenshot")
+            drift = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(drift["status"], "failed")
+            self.assertEqual(
+                drift["artifact_integrity_errors"][0]["code"],
+                "CS_RELEASE_ARTIFACT_HASH_CHANGED",
+            )
+
+            drift_path.write_bytes(drift_bytes)
+            restore_manifest()
+            wrong_request_scope = dict(manifest["scope"], workspace_id="forged")
+            scope_mismatch = finalize_release_evidence(
+                ROOT,
+                requested_scope=wrong_request_scope,
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(scope_mismatch["status"], "failed")
+            self.assertEqual(
+                scope_mismatch["errors"][0]["code"],
+                "CS_RELEASE_MANIFEST_SCOPE_MISMATCH",
+            )
+
+            restore_manifest()
+            forged_package = json.loads(json.dumps(manifest))
+            forged_package["package_id"] = "releasepkg_forged"
+            manifest_path.write_text(
+                json.dumps(forged_package, indent=2, sort_keys=True) + "\n"
+            )
+            package_mismatch = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(package_mismatch["status"], "failed")
+            self.assertIn(
+                "CS_RELEASE_PACKAGE_ID_UNBOUND",
+                {
+                    detail["code"]
+                    for detail in package_mismatch["errors"][0]["details"]
+                },
+            )
+
+            restore_manifest()
+            missing_role_identity = json.loads(json.dumps(manifest))
+            quickstart_entry = next(
+                entry
+                for entry in missing_role_identity["artifacts"]
+                if entry["role"] == "quickstart_report"
+            )
+            quickstart_entry.pop("sha256")
+            quickstart_entry.pop("bytes")
+            missing_role_identity["content_digest_sha256"] = _json_value_sha256(
+                _release_manifest_content_payload(missing_role_identity)
+            )
+            manifest_path.write_text(
+                json.dumps(missing_role_identity, indent=2, sort_keys=True) + "\n"
+            )
+            role_identity = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(role_identity["status"], "failed")
+            self.assertIn(
+                "CS_RELEASE_REQUIRED_ROLE_IDENTITY_INVALID",
+                {detail["code"] for detail in role_identity["errors"][0]["details"]},
+            )
+
+            for role, expected_code in (
+                (
+                    "product_runtime_scenario_report",
+                    "CS_RELEASE_PRODUCT_RUNTIME_REPORT_INVALID",
+                ),
+                ("browser_proof_manifest", "CS_RELEASE_BROWSER_PROOF_INVALID"),
+            ):
+                with self.subTest(malformed_required_role=role):
+                    role_path = required_role_paths[role]
+                    role_bytes = role_path.read_bytes()
+                    role_path.write_text("malformed required evidence\n")
+                    malformed_role_manifest = json.loads(json.dumps(manifest))
+                    role_entry = next(
+                        entry
+                        for entry in malformed_role_manifest["artifacts"]
+                        if entry["role"] == role
+                    )
+                    role_entry["sha256"] = hashlib.sha256(role_path.read_bytes()).hexdigest()
+                    role_entry["bytes"] = role_path.stat().st_size
+                    malformed_role_manifest["content_digest_sha256"] = _json_value_sha256(
+                        _release_manifest_content_payload(malformed_role_manifest)
+                    )
+                    manifest_path.write_text(
+                        json.dumps(
+                            malformed_role_manifest,
+                            indent=2,
+                            sort_keys=True,
+                        )
+                        + "\n"
+                    )
+                    malformed_role = finalize_release_evidence(
+                        ROOT,
+                        requested_scope=manifest["scope"],
+                        scope_name="vs0-runtime-acceptance",
+                        output_dir=output_dir,
+                    )
+                    self.assertEqual(malformed_role["status"], "failed")
+                    self.assertIn(
+                        expected_code,
+                        {
+                            detail["code"]
+                            for detail in malformed_role["errors"][0]["details"]
+                        },
+                    )
+                    role_path.write_bytes(role_bytes)
+                    restore_manifest()
+
+            product_path = required_role_paths["product_runtime_scenario_report"]
+            product_bytes = product_path.read_bytes()
+            duplicate_product = json.loads(product_bytes)
+            duplicate_product["scenario_results"].insert(
+                0,
+                {"id": "VS0-RT-001", "owner": "AI", "status": "FAIL"},
+            )
+            product_path.write_text(
+                json.dumps(duplicate_product, sort_keys=True) + "\n"
+            )
+            duplicate_manifest = json.loads(json.dumps(manifest))
+            duplicate_product_entry = next(
+                entry
+                for entry in duplicate_manifest["artifacts"]
+                if entry["role"] == "product_runtime_scenario_report"
+            )
+            duplicate_product_entry["sha256"] = hashlib.sha256(
+                product_path.read_bytes()
+            ).hexdigest()
+            duplicate_product_entry["bytes"] = product_path.stat().st_size
+            duplicate_manifest["content_digest_sha256"] = _json_value_sha256(
+                _release_manifest_content_payload(duplicate_manifest)
+            )
+            manifest_path.write_text(
+                json.dumps(duplicate_manifest, indent=2, sort_keys=True) + "\n"
+            )
+            duplicate_rows = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(duplicate_rows["status"], "failed")
+            self.assertIn(
+                "CS_RELEASE_PRODUCT_RUNTIME_REPORT_INVALID",
+                {detail["code"] for detail in duplicate_rows["errors"][0]["details"]},
+            )
+            product_path.write_bytes(product_bytes)
+            restore_manifest()
+
+            overclaim_manifest = json.loads(json.dumps(manifest))
+            overclaim_manifest["production_release_ready"] = True
+            overclaim_manifest["human_required"][0]["status"] = "PASS"
+            overclaim_manifest["content_digest_sha256"] = _json_value_sha256(
+                _release_manifest_content_payload(overclaim_manifest)
+            )
+            manifest_path.write_text(
+                json.dumps(overclaim_manifest, indent=2, sort_keys=True) + "\n"
+            )
+            overclaim = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(overclaim["status"], "failed")
+            self.assertTrue(
+                {
+                    "CS_RELEASE_HUMAN_REQUIRED_INVALID",
+                    "CS_RELEASE_CLAIM_BOUNDARY_INVALID",
+                }.issubset(
+                    {detail["code"] for detail in overclaim["errors"][0]["details"]}
+                )
+            )
+
+            restore_manifest()
+            tampered_manifest = json.loads(json.dumps(manifest))
+            tampered_manifest["scope"]["workspace_id"] = "forged"
+            manifest_path.write_text(json.dumps(tampered_manifest, indent=2, sort_keys=True) + "\n")
+            tamper = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(tamper["status"], "failed")
+            self.assertEqual(
+                tamper["errors"][0]["code"],
+                "CS_RELEASE_MANIFEST_CONTENT_DIGEST_MISMATCH",
+            )
+
+            manifest_path.write_text("[]\n")
+            malformed = finalize_release_evidence(
+                ROOT,
+                requested_scope=manifest["scope"],
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_dir,
+            )
+            self.assertEqual(malformed["status"], "failed")
+            self.assertEqual(
+                malformed["errors"][0]["code"],
+                "CS_RELEASE_MANIFEST_INVALID_SHAPE",
+            )
+
+    def test_release_collection_rejects_non_object_quickstart_report(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as temp_dir:
+            base = Path(temp_dir)
+            quickstart_path = base / "quickstart.json"
+            quickstart_path.write_text("[]\n")
+            quickstart_sha = hashlib.sha256(quickstart_path.read_bytes()).hexdigest()
+            scenario_path = base / "scenario.json"
+            scenario_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cs.cli.v0",
+                        "status": "success",
+                        "scenario_set": "vs0-runtime-acceptance",
+                        "summary": {"blocking": 0},
+                        "scenario_results": [],
+                        "acceptance_evidence": {
+                            "quickstart_report": {
+                                "path": str(quickstart_path.relative_to(ROOT)),
+                                "sha256": quickstart_sha,
+                            }
+                        },
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            product_path = base / "product-runtime.json"
+            product_path.write_text('{"status":"success","summary":{"blocking":0}}\n')
+            browser_dir = base / "browser"
+            browser_dir.mkdir()
+            (browser_dir / "browser-proof.json").write_text('{"status":"passed"}\n')
+            (browser_dir / "home.png").write_bytes(b"png")
+            (browser_dir / "home.dom.html").write_text("<html></html>\n")
+            release_dir = base / "release"
+            release_dir.mkdir()
+            stale_rollup = release_dir / "post_commit_rollup.json"
+            stale_rollup.write_text('{"status":"stale"}\n')
+
+            result = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=release_dir,
+                scenario_report=scenario_path,
+                product_runtime_report=product_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=quickstart_path,
+            )
+            self.assertEqual(result["status"], "failed")
+            self.assertFalse(stale_rollup.exists())
+            release_manifest = json.loads((release_dir / "manifest.json").read_text())
+            self.assertNotIn(
+                "post_commit_rollup",
+                {entry["role"] for entry in release_manifest["artifacts"]},
+            )
+            command_report = json.loads((release_dir / "command-transcript.json").read_text())
+            commands = {entry["name"]: entry for entry in command_report["commands"]}
+            self.assertEqual(commands["quickstart_report_validation"]["exit_code"], 4)
+
+            scenario = json.loads(scenario_path.read_text())
+            scenario["acceptance_evidence"]["quickstart_report"]["sha256"] = "0" * 64
+            scenario_path.write_text(json.dumps(scenario, indent=2, sort_keys=True) + "\n")
+            mismatched = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=base / "release-mismatched",
+                scenario_report=scenario_path,
+                product_runtime_report=product_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=quickstart_path,
+            )
+            self.assertEqual(mismatched["status"], "failed")
+            mismatch_commands = json.loads(
+                (base / "release-mismatched" / "command-transcript.json").read_text()
+            )["commands"]
+            binding = next(
+                entry for entry in mismatch_commands if entry["name"] == "quickstart_scenario_binding"
+            )
+            self.assertEqual(binding["exit_code"], 4)
+
+            malformed_scenario = {
+                "schema_version": "cs.cli.v0",
+                "status": "success",
+                "scenario_set": "vs0-runtime-acceptance",
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "summary": {"blocking": 0},
+                "scenario_results": [],
+                "self_command_transcript": {"exit_code": "not-an-integer"},
+            }
+            scenario_path.write_text(json.dumps(malformed_scenario) + "\n")
+            malformed_result = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=base / "release-malformed-transcript",
+                scenario_report=scenario_path,
+                product_runtime_report=product_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=quickstart_path,
+            )
+            self.assertEqual(malformed_result["status"], "failed")
+            self.assertEqual(
+                malformed_result["errors"][0]["code"],
+                "CS_RELEASE_EVIDENCE_INPUT_MALFORMED",
+            )
+
+            valid_quickstart_path = base / "valid-quickstart.json"
+            valid_quickstart = run_cli(
+                "quickstart",
+                "verify",
+                "vs0-runtime-acceptance",
+                "--output",
+                str(valid_quickstart_path),
+                "--json",
+            )
+            self.assertEqual(
+                valid_quickstart.returncode,
+                0,
+                valid_quickstart.stdout + valid_quickstart.stderr,
+            )
+            valid_quickstart_sha = hashlib.sha256(
+                valid_quickstart_path.read_bytes()
+            ).hexdigest()
+            missing_negative_scenario = {
+                "schema_version": "cs.cli.v0",
+                "status": "success",
+                "scenario_set": "vs0-runtime-acceptance",
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+                "summary": {"blocking": 0},
+                "scenario_results": [],
+                "acceptance_evidence": {
+                    "quickstart_report": {
+                        "path": str(valid_quickstart_path.relative_to(ROOT)),
+                        "sha256": valid_quickstart_sha,
+                    }
+                },
+            }
+            scenario_path.write_text(
+                json.dumps(missing_negative_scenario, indent=2, sort_keys=True) + "\n"
+            )
+            missing_negative = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=base / "release-missing-negative",
+                scenario_report=scenario_path,
+                product_runtime_report=product_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=valid_quickstart_path,
+            )
+            self.assertEqual(missing_negative["status"], "failed")
+            missing_negative_manifest = json.loads(
+                (base / "release-missing-negative" / "manifest.json").read_text()
+            )
+            self.assertEqual(missing_negative_manifest["negative_evidence"], {})
+            missing_negative_commands = json.loads(
+                (base / "release-missing-negative" / "command-transcript.json").read_text()
+            )["commands"]
+            negative_validation = next(
+                entry
+                for entry in missing_negative_commands
+                if entry["name"] == "release_negative_evidence_validation"
+            )
+            self.assertEqual(negative_validation["exit_code"], 4)
+
+            aliased_roles = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=base / "release-role-alias",
+                scenario_report=scenario_path,
+                product_runtime_report=valid_quickstart_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=valid_quickstart_path,
+            )
+            self.assertEqual(aliased_roles["status"], "failed")
+            self.assertEqual(
+                aliased_roles["errors"][0]["code"],
+                "CS_RELEASE_INPUT_ROLE_ALIAS",
+            )
+
+            output_alias_dir = base / "release-output-alias"
+            output_alias_dir.mkdir()
+            output_alias_scenario = output_alias_dir / "command-transcript.json"
+            output_alias_scenario.write_text(json.dumps(missing_negative_scenario) + "\n")
+            output_alias = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-runtime-acceptance",
+                output_dir=output_alias_dir,
+                scenario_report=output_alias_scenario,
+                product_runtime_report=product_path,
+                browser_proof_dir=browser_dir,
+                quickstart_report=valid_quickstart_path,
+            )
+            self.assertEqual(output_alias["status"], "failed")
+            self.assertEqual(
+                output_alias["errors"][0]["code"],
+                "CS_RELEASE_OUTPUT_ALIAS",
+            )
+
+    def test_release_collection_preserves_legacy_evux_scope_binding(self) -> None:
+        with tempfile.TemporaryDirectory(dir=ROOT / "tmp") as temp_dir:
+            base = Path(temp_dir)
+            scenario_path = base / "vs0-evux-scenario.json"
+            scenario_path.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "cs.cli.v0",
+                        "status": "success",
+                        "scenario_set": "vs0-evux",
+                        "tenant_id": "local-dev",
+                        "owner_id": "local-user",
+                        "namespace_id": "personal",
+                        "workspace_id": "default",
+                        "summary": {"blocking": 0},
+                        "scenario_results": [],
+                        "errors": [],
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+                + "\n"
+            )
+            result = collect_release_evidence(
+                ROOT,
+                requested_scope={
+                    "tenant_id": "local-dev",
+                    "owner_id": "local-user",
+                    "namespace_id": "personal",
+                    "workspace_id": "default",
+                },
+                scope_name="vs0-evux",
+                output_dir=base / "release",
+                scenario_report=scenario_path,
+                product_runtime_report=(
+                    ROOT / "reports/scenario/vs0-product-runtime-2026-06-11.json"
+                ),
+                browser_proof_dir=ROOT / "reports/browser/vs0-evux-2026-06-13",
+                verification_report=(
+                    ROOT
+                    / "docs/verification-reports/VS0_EVIDENCE_CLEANUP_AND_INTERACTIVE_UI_LOOP_REPORT_2026-06-13.md"
+                ),
+                quickstart_report=ROOT / "reports/quickstart/vs0-evux-quickstart.json",
+            )
+            self.assertEqual(result["status"], "success", result)
+            commands = json.loads(
+                (base / "release" / "command-transcript.json").read_text()
+            )["commands"]
+            scope_binding = next(
+                entry for entry in commands if entry["name"] == "release_scope_binding"
+            )
+            self.assertEqual(scope_binding["exit_code"], 0)
+
+    def test_release_package_identity_changes_with_report_content_not_embedded_id(self) -> None:
+        report = {
+            "status": "success",
+            "scenario_results": [{"id": "VS0-ACC-005", "status": "PASS"}],
+            "release_evidence_package": {"package_id": "releasepkg_old"},
+        }
+        first = release_package_locator_id(
+            ROOT,
+            scope_name="vs0-runtime-acceptance",
+            output_dir=ROOT / "tmp/release-identity",
+            scenario_report=report,
+        )
+        report["release_evidence_package"]["package_id"] = "releasepkg_other"
+        self.assertEqual(
+            first,
+            release_package_locator_id(
+                ROOT,
+                scope_name="vs0-runtime-acceptance",
+                output_dir=ROOT / "tmp/release-identity",
+                scenario_report=report,
+            ),
+        )
+        report["scenario_results"][0]["status"] = "FAIL"
+        self.assertNotEqual(
+            first,
+            release_package_locator_id(
+                ROOT,
+                scope_name="vs0-runtime-acceptance",
+                output_dir=ROOT / "tmp/release-identity",
+                scenario_report=report,
+            ),
+        )
+
     def test_ready_reports_local_runtime_without_production_overclaim(self) -> None:
         result = run_cli("ready", "--json")
         self.assertEqual(result.returncode, 0, result.stdout)
@@ -414,6 +1630,57 @@ class ScaffoldCliTests(unittest.TestCase):
                 payload["readiness"]["acceptance_gate"]["evidence_current"],
                 acceptance_report["evidence_current"],
             )
+
+    def test_ready_accepts_only_verifier_scoped_runtime_report_override(self) -> None:
+        override_dir = ROOT / "tmp/scenario/vs0-runtime-acceptance-override-test"
+        override_dir.mkdir(parents=True, exist_ok=True)
+        override_path = override_dir / "product-runtime-report.json"
+        override_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "cs.cli.v0",
+                    "scenario_set": "vs0-product-runtime",
+                    "status": "success",
+                    "summary": {
+                        "scenario_count": 14,
+                        "pass": 12,
+                        "human_required": 2,
+                        "blocking": 0,
+                    },
+                    "ids": {"git_commit": "override-test"},
+                    "source_tree": {
+                        "worktree_dirty_at_verification": True,
+                        "report_generated_before_commit": True,
+                    },
+                },
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        )
+        env = os.environ.copy()
+        env["PATH"] = f"{ROOT}{os.pathsep}{env.get('PATH', '')}"
+        env["CORNERSTONE_INTERNAL_RUNTIME_REPORT_OVERRIDE"] = str(override_path.relative_to(ROOT))
+        result = subprocess.run(
+            ["cornerstone", "ready", "--json"],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(
+            payload["readiness"]["last_successful_runtime_scenario"]["path"],
+            str(override_path.relative_to(ROOT)),
+        )
+        self.assertFalse(payload["readiness"]["runtime_evidence_current"])
+        runtime_report = payload["readiness"]["last_successful_runtime_scenario"]
+        self.assertEqual(runtime_report["scenario_set"], "vs0-product-runtime")
+        self.assertEqual(runtime_report["path"], str(override_path.relative_to(ROOT)))
+        self.assertEqual(runtime_report["gate_status"], "pass")
+        self.assertEqual(runtime_report["blocking"], 0)
 
     def test_latest_successful_report_marks_revision_drift_as_stale(self) -> None:
         with tempfile.TemporaryDirectory(prefix="cornerstone-readiness-binding-") as temp_dir:
@@ -11687,6 +12954,49 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(impact["real_external_http_calls"], 0)
         self.assertNotIn("external_calls", impact)
         self.assertEqual(payload["release_evidence_package"]["status"], "success")
+        quickstart_evidence = payload["acceptance_evidence"]["quickstart_report"]
+        self.assertTrue(quickstart_evidence["validation"]["ok"])
+        self.assertEqual(quickstart_evidence["validation"]["claim_ceiling"], "STRUCTURAL_READY")
+        self.assertTrue(quickstart_evidence["sha256"])
+        manifest_path = ROOT / payload["release_evidence_package"]["manifest_path"]
+        manifest = json.loads(manifest_path.read_text())
+        self.assertTrue(manifest["package_id"].startswith("releasepkg_"))
+        self.assertEqual(
+            payload["release_evidence_package"]["package_id"],
+            manifest["package_id"],
+        )
+        self.assertTrue(manifest["content_digest_sha256"])
+        scenario_artifacts = [
+            entry for entry in manifest["artifacts"] if entry["role"] == "acceptance_scenario_report"
+        ]
+        self.assertEqual(len(scenario_artifacts), 1)
+        final_report_path = Path(payload["output_path"])
+        self.assertEqual(json.loads(final_report_path.read_text()), payload)
+        self.assertEqual(
+            scenario_artifacts[0]["sha256"],
+            hashlib.sha256(final_report_path.read_bytes()).hexdigest(),
+        )
+        quickstart_artifacts = [
+            entry for entry in manifest["artifacts"] if entry["role"] == "quickstart_report"
+        ]
+        self.assertEqual(len(quickstart_artifacts), 1)
+        self.assertTrue(quickstart_artifacts[0]["required"])
+        self.assertTrue(quickstart_artifacts[0]["present"])
+        self.assertEqual(quickstart_artifacts[0]["sha256"], quickstart_evidence["sha256"])
+        command_transcript_path = ROOT / payload["release_evidence_package"]["command_transcript_path"]
+        release_commands = json.loads(command_transcript_path.read_text())["commands"]
+        successful_names = {
+            command["name"]
+            for command in release_commands
+            if command["exit_code"] == 0 and command["timed_out"] is False
+        }
+        self.assertTrue(
+            {
+                "quickstart_verify_vs0_runtime_acceptance",
+                "quickstart_report_validation",
+                "quickstart_scenario_binding",
+            }.issubset(successful_names)
+        )
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
