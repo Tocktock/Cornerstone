@@ -13,6 +13,7 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
+from unittest import mock
 from urllib.parse import urlencode
 
 
@@ -21,6 +22,7 @@ sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli import product_ui
 from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE, _vs4_product_journey_timeline_evidence
+from cornerstone_cli.briefing import RuntimeModelConfig
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
 from cornerstone_cli.runtime import LocalRuntimeStore
 from cornerstone_cli.validators import count_unredacted_secrets
@@ -213,8 +215,13 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertRegex(mobile_css, r"\.cs-sidebar \{\s+order: 3;")
         self.assertRegex(mobile_css, r"\.cs-nav \{\s+position: fixed;")
         self.assertRegex(mobile_css, r"\.cs-nav-group \{ grid-template-columns: repeat\(5,")
-        self.assertRegex(mobile_css, r"\.cs-topbar \{ order: 1;")
+        self.assertRegex(mobile_css, r"\.cs-topbar \{\s+order: 1;")
         self.assertRegex(mobile_css, r"\.cs-content \{ order: 2;")
+        self.assertIn(".cs-topbar-actions > :not(:first-child) { display: none; }", mobile_css)
+        self.assertIn(".cs-home-loop-inline { display: none; }", mobile_css)
+        self.assertIn(".cs-home-intro .cs-page-head p { display: none; }", mobile_css)
+        self.assertRegex(css, re.compile(r"\.cs-search button, \.cs-button \{.*?min-height: 44px;", re.DOTALL))
+        self.assertRegex(css, re.compile(r"\.cs-icon-button \{.*?width: 44px;.*?height: 44px;", re.DOTALL))
 
     def test_action_target_search_keeps_rows_and_counts_consistent(self) -> None:
         action = {
@@ -938,6 +945,125 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn(f"artifact:{artifact_id}", brief["evidence_refs"])
         self.assertNotIn(f"artifact:{conversation_artifact_id}", brief["evidence_refs"])
 
+        ctx = product_ui._build_context(LocalRuntimeStore(self.state_dir), DEFAULT_SCOPE)
+        self.assertEqual(len(ctx["artifacts"]), 1)
+        self.assertEqual(ctx["artifacts"][0]["artifact_id"], artifact_id)
+        knowledge = product_ui._knowledge_states_block(ctx)
+        self.assertIn("Outputs that earned the label", knowledge)
+        self.assertIn('<span class="cs-chip cs-chip-evidenceBacked">0</span>', knowledge)
+
+        home_after_ask = self.fetch_product_html("/")
+        self.assertIn("1 saved source", home_after_ask)
+        self.assertNotIn("2 saved sources", home_after_ask)
+        self.assertNotIn("What does the vendor renewal source say?", home_after_ask)
+
+        brief_detail = self.fetch_product_html(f"/briefs/{brief['brief_id']}?view=html")
+        self.assertIn("Keyword summary only", brief_detail)
+        self.assertNotIn("Reviewed draft", brief_detail)
+        self.assertNotIn("More findings", brief_detail)
+
+    def test_http_brief_and_ask_use_operator_model_config_not_request_overrides(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        config = RuntimeModelConfig(
+            provider="ollama",
+            generation_model="operator-generation:test",
+            embedding_model="operator-embedding:test",
+            ollama_base_url="http://127.0.0.1:11435",
+        )
+        configured_server = make_server(ROOT, self.state_dir, model_config=config)
+        configured_thread = threading.Thread(target=configured_server.serve_forever, daemon=True)
+        configured_thread.start()
+        host, port = configured_server.server_address
+        configured_base_url = f"http://{host}:{port}"
+
+        def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+            prompt = str(kwargs.get("prompt") or "")
+            citation = re.search(r'evidence_chunk:[a-zA-Z0-9_-]+', prompt)
+            self.assertIsNotNone(citation)
+            citation_ref = citation.group(0)
+            if prompt.startswith("You generate"):
+                return {
+                    "title": "Vendor renewal brief",
+                    "key_points": [
+                        {
+                            "statement": "Vendor renewal auto-renewal is August 1.",
+                            "citation_refs": [citation_ref],
+                        }
+                    ],
+                    "uncertainty": [],
+                    "recommended_next_steps": [],
+                    "contradictions": [],
+                }
+            return {
+                "answer": "The vendor renewal auto-renewal is August 1.",
+                "citation_refs": [citation_ref],
+                "insufficient_evidence": False,
+            }
+
+        request_override = {
+            "model_provider": "local_test",
+            "generation_model": "request-generation:ignored",
+            "embedding_model": "request-embedding:ignored",
+            "ollama_url": "https://models.example.com",
+        }
+        try:
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]) as embedding, mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ) as generate:
+                health_status, _, health_raw = _request(configured_base_url, "/health")
+                self.assertEqual(health_status, 200)
+                self.assertEqual(json.loads(health_raw)["model_runtime"], config.public_metadata())
+
+                brief_status, _, brief_raw = _request(
+                    configured_base_url,
+                    "/briefs",
+                    method="POST",
+                    payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id, **request_override},
+                )
+                self.assertEqual(brief_status, 200)
+                brief = json.loads(brief_raw)["brief"]
+                self.assertEqual(brief["model_provider"], "ollama")
+                self.assertEqual(brief["generation_model"], config.generation_model)
+                self.assertEqual(brief["embedding_model"], config.embedding_model)
+                self.assertEqual(brief["trust_label"], "evidence_backed")
+
+                conversation_status, _, conversation_raw = _request(
+                    configured_base_url,
+                    "/conversations",
+                    method="POST",
+                    payload={**DEFAULT_SCOPE, "message": "Help me check the vendor renewal."},
+                )
+                self.assertEqual(conversation_status, 200)
+                conversation_id = json.loads(conversation_raw)["conversation"]["conversation_id"]
+                answer_status, _, answer_raw = _request(
+                    configured_base_url,
+                    f"/conversations/{conversation_id}/answers",
+                    method="POST",
+                    payload={
+                        **DEFAULT_SCOPE,
+                        "question": "When is the vendor renewal auto-renewal?",
+                        **request_override,
+                    },
+                )
+                self.assertEqual(answer_status, 200)
+                answer = json.loads(answer_raw)["answer"]
+                self.assertEqual(answer["model_provider"], "ollama")
+                self.assertEqual(answer["generation_model"], config.generation_model)
+                self.assertEqual(answer["embedding_model"], config.embedding_model)
+                self.assertEqual(answer["trust_label"], "evidence_backed")
+
+                self.assertGreaterEqual(generate.call_count, 2)
+                self.assertGreaterEqual(embedding.call_count, 2)
+                self.assertTrue(all(call.args[0] == config.ollama_base_url for call in generate.call_args_list))
+                self.assertTrue(all(call.kwargs["model"] == config.generation_model for call in generate.call_args_list))
+                self.assertTrue(all(call.args[0] == config.ollama_base_url for call in embedding.call_args_list))
+                self.assertTrue(all(call.kwargs["model"] == config.embedding_model for call in embedding.call_args_list))
+        finally:
+            configured_server.shutdown()
+            configured_server.server_close()
+            configured_thread.join(timeout=5)
+
     def test_conversation_answer_cannot_cite_its_own_ask_turn(self) -> None:
         question = "What does the workspace say about a renewal deadline?"
         conversation_status, _, conversation_raw = _request(
@@ -1422,7 +1548,14 @@ class ProductUiRoutesTest(unittest.TestCase):
             payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id, "statement": "Supported vendor renewal statement"},
         )
         self.assertEqual(claim_status, 200)
-        claim_id = json.loads(claim_raw)["claim"]["claim_id"]
+        supported_claim = json.loads(claim_raw)["claim"]
+        claim_id = supported_claim["claim_id"]
+        self.assertEqual(supported_claim["trust_state"], "evidence_backed")
+        self.assertEqual(supported_claim["statement_support"]["status"], "passed")
+        self.assertEqual(supported_claim["statement_support"]["citation_integrity_state"], "passed")
+        self.assertTrue(supported_claim["statement_support"]["citation_refs"])
+        self.assertTrue(supported_claim["statement_support"]["citation_check_refs"])
+        self.assertEqual(supported_claim["statement_support"]["semantic_faithfulness_state"], "human_required")
         approve_status, _, _ = _request(
             self.base_url,
             f"/claims/{claim_id}/approve",
@@ -1450,6 +1583,110 @@ class ProductUiRoutesTest(unittest.TestCase):
         ]
         self.assertTrue(claim_read_events)
         self.assertEqual(claim_read_events[-1]["details"]["reason"], "api_claim_show")
+
+    def test_valid_bundle_does_not_launder_an_unrelated_claim_statement(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        create_status, _, create_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "The lunar research program launched a spacecraft yesterday.",
+            },
+        )
+        self.assertEqual(create_status, 200, create_raw)
+        claim = json.loads(create_raw)["claim"]
+        self.assertEqual(claim["trust_state"], "draft")
+        self.assertEqual(claim["statement_support"]["status"], "not_verified")
+        self.assertEqual(claim["statement_support"]["citation_refs"], [])
+        self.assertFalse(claim["authority"]["can_be_approved"])
+
+        approve_status, _, approve_raw = _request(
+            self.base_url,
+            f"/claims/{claim['claim_id']}/approve",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(approve_status, 400, approve_raw)
+        approval = json.loads(approve_raw)
+        self.assertEqual(approval["errors"][0]["code"], "CS_CLAIM_SUPPORT_REQUIRED")
+        persisted = LocalRuntimeStore(self.state_dir).get_claim(claim["claim_id"])
+        self.assertEqual(persisted["status"], "draft")
+        self.assertFalse(persisted["authority"]["can_publish_shared_truth"])
+
+    def test_source_term_overlap_does_not_launder_a_negated_claim(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        create_status, _, create_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Vendor renewal auto-renewal is not August 1.",
+            },
+        )
+        self.assertEqual(create_status, 200, create_raw)
+        claim = json.loads(create_raw)["claim"]
+        anchor = claim["statement_support"]["anchor_validation"]
+        self.assertGreaterEqual(anchor["coverage"], anchor["required_coverage"])
+        self.assertTrue(anchor["numeric_tokens_supported"])
+        self.assertEqual(anchor["statement_negation_markers"], ["not"])
+        self.assertEqual(anchor["source_negation_markers"], [])
+        self.assertFalse(anchor["negation_compatible"])
+        self.assertEqual(claim["statement_support"]["status"], "not_verified")
+        self.assertFalse(claim["authority"]["can_be_approved"])
+
+        approve_status, _, approve_raw = _request(
+            self.base_url,
+            f"/claims/{claim['claim_id']}/approve",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(approve_status, 400, approve_raw)
+        self.assertEqual(json.loads(approve_raw)["errors"][0]["code"], "CS_CLAIM_SUPPORT_REQUIRED")
+
+    def test_claim_approval_revalidates_the_exact_statement_revision(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        create_status, _, create_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Vendor renewal annual price increased.",
+            },
+        )
+        self.assertEqual(create_status, 200, create_raw)
+        claim = json.loads(create_raw)["claim"]
+        self.assertEqual(claim["statement_support"]["status"], "passed")
+
+        store = LocalRuntimeStore(self.state_dir)
+        tampered = dict(claim)
+        tampered["statement"] = "The vendor contract was terminated yesterday."
+        store.claim_path(claim["claim_id"]).write_text(json.dumps(tampered, indent=2, sort_keys=True) + "\n")
+
+        approve_status, _, approve_raw = _request(
+            self.base_url,
+            f"/claims/{claim['claim_id']}/approve",
+            method="POST",
+            payload=dict(DEFAULT_SCOPE),
+        )
+        self.assertEqual(approve_status, 400, approve_raw)
+        approval = json.loads(approve_raw)
+        self.assertEqual(approval["errors"][0]["code"], "CS_CLAIM_SUPPORT_REQUIRED")
+        persisted = store.get_claim(claim["claim_id"])
+        self.assertEqual(persisted["status"], "draft")
+        denial_events = [
+            event
+            for event in store._all_audit_events()
+            if event.get("event_type") == "claim.approval.denied"
+            and event.get("subject", {}).get("id") == claim["claim_id"]
+        ]
+        self.assertEqual(denial_events[-1]["details"]["reason"], "statement_support_missing_or_stale")
 
     def test_inbox_renders_validated_runtime_journey_without_mutating_read(self) -> None:
         _, bundle_id, _ = self.create_source_stack()

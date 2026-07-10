@@ -4,6 +4,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -70,12 +71,15 @@ from cornerstone_cli.scenarios import (
 )
 from cornerstone_cli.main import (
     command_quickstart_verify,
+    command_runtime_serve,
     _sync_runtime_acceptance_release_status,
     _vs3_human_gate_self_transcript_validation,
     _vs3_local_checkpoint_self_transcript_validation,
     _vs4_filtered_scenario_report_path,
 )
+from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
 from cornerstone_cli.product_runtime import _latest_successful_report
+from cornerstone_cli.runtime import LocalRuntimeStore, _statement_source_anchor
 
 SKIP_VS2_REGRESSION_TESTS = os.environ.get("CORNERSTONE_SKIP_VS2_REGRESSION_TESTS") == "1"
 VS3_HUMAN_GATE_PACKAGE_PATHS = [
@@ -162,6 +166,124 @@ def run_cli(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 class ScaffoldCliTests(unittest.TestCase):
+    def test_runtime_model_config_is_immutable_and_loopback_only(self) -> None:
+        config = RuntimeModelConfig(
+            provider=" OLLAMA ",
+            generation_model=" ornith:test ",
+            embedding_model=" embed:test ",
+            ollama_base_url="http://localhost:11434/",
+        )
+        self.assertEqual(config.provider, "ollama")
+        self.assertEqual(config.generation_model, "ornith:test")
+        self.assertEqual(config.ollama_base_url, "http://localhost:11434")
+        with self.assertRaisesRegex(ValueError, "explicit loopback host"):
+            RuntimeModelConfig(ollama_base_url="https://models.example.com")
+        with self.assertRaisesRegex(ValueError, "must not contain credentials"):
+            RuntimeModelConfig(ollama_base_url="http://user:secret@127.0.0.1:11434")
+        with self.assertRaisesRegex(ValueError, "valid port"):
+            RuntimeModelConfig(ollama_base_url="http://127.0.0.1:99999")
+        with self.assertRaisesRegex(ValueError, "Unsupported model provider"):
+            RuntimeModelConfig(provider="remote")
+        with self.assertRaisesRegex(Exception, "cannot assign"):
+            config.provider = "local_test"  # type: ignore[misc]
+
+    def test_citation_chunk_ids_reject_path_traversal_before_disk_access(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-citation-path-boundary-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            secret_path = Path(state_dir) / "secret.json"
+            secret_path.write_text("not valid json", encoding="utf-8")
+
+            check = store._citation_check(
+                output_kind="brief",
+                citation_refs=["evidence_chunk:../../secret"],
+                scope=scope,
+                allowed_refs={"evidence_chunk:chunk_0000000000000000"},
+            )
+
+            self.assertEqual(check["status"], "failed")
+            self.assertEqual(
+                check["errors"],
+                [{"ref": "evidence_chunk:../../secret", "code": "INVALID_CITATION_REF"}],
+            )
+            self.assertEqual(check["fabricated_citation_count"], 1)
+            self.assertIsNone(store.get_evidence_chunk("../../secret"))
+            with self.assertRaisesRegex(ValueError, "Invalid evidence chunk id"):
+                store.evidence_chunk_path("../../secret")
+
+    def test_statement_source_anchor_scopes_negation_and_numeric_tokens(self) -> None:
+        supported = _statement_source_anchor(
+            "Alpha research should keep original material before derived summaries.",
+            [
+                "Alpha research needs a concise brief. "
+                "Keep original material before derived summaries. "
+                "Please suggest optional outputs without forcing setup."
+            ],
+        )
+        self.assertEqual(supported["status"], "passed")
+        self.assertTrue(supported["negation_compatible"])
+        self.assertEqual(supported["source_negation_markers"], [])
+        self.assertEqual(supported["source_segment_indexes"], [1, 0])
+
+        contradicted = _statement_source_anchor(
+            "Acme renewal is not due on July 31.",
+            ["Acme renewal is due on July 31."],
+        )
+        self.assertEqual(contradicted["status"], "failed")
+        self.assertFalse(contradicted["negation_compatible"])
+
+        numeric_substring = _statement_source_anchor(
+            "Acme renewal is due on day 31.",
+            ["Acme renewal is due on day 131."],
+        )
+        self.assertEqual(numeric_substring["status"], "failed")
+        self.assertFalse(numeric_substring["numeric_tokens_supported"])
+
+    def test_briefing_application_applies_one_config_to_brief_and_ask(self) -> None:
+        store = mock.Mock(spec=LocalRuntimeStore)
+        store.create_brief_from_evidence_bundle.return_value = {"brief": {}}
+        store.answer_conversation.return_value = {"answer": {}}
+        config = RuntimeModelConfig(
+            provider="ollama",
+            generation_model="generation:test",
+            embedding_model="embedding:test",
+            ollama_base_url="http://127.0.0.1:11435",
+        )
+        application = BriefingApplication(store, config)
+        scope = {"workspace_id": "default"}
+
+        application.create_brief("bundle-test", scope)
+        application.answer("conversation-test", "What changed?", scope)
+
+        expected_config = config.store_kwargs()
+        store.create_brief_from_evidence_bundle.assert_called_once_with("bundle-test", scope, **expected_config)
+        store.answer_conversation.assert_called_once_with(
+            "conversation-test",
+            "What changed?",
+            scope,
+            **expected_config,
+        )
+
+    def test_runtime_serve_treats_operator_interrupt_as_clean_shutdown(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-runtime-interrupt-") as state_dir:
+            args = SimpleNamespace(
+                host="127.0.0.1",
+                port=8787,
+                state_dir=state_dir,
+                model_provider="local_test",
+                generation_model="generation:test",
+                embedding_model="embedding:test",
+                ollama_url=None,
+            )
+            with mock.patch("cornerstone_cli.main.run_server", side_effect=KeyboardInterrupt) as run:
+                self.assertEqual(command_runtime_serve(args), 0)
+        self.assertEqual(run.call_args.kwargs["model_config"].provider, "local_test")
+
     def test_vs4_regression_workflows_route_filtered_and_full_dependency_depth(self) -> None:
         transcript = {
             "exit_code": 0,
@@ -16306,6 +16428,306 @@ LocalRuntimeStore(state_dir).append_audit(
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
+    def test_vs5_brief_rejects_a_valid_plus_fabricated_model_citation(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-fabricated-citation-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            artifact = store.ingest_text_artifact(
+                "Acme renewal is due on July 31 and Finance owner Mina must review it.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.fabricated-citation",
+            )["artifact"]
+            snapshot = store.search("Acme renewal", **scope)["snapshot"]
+            bundle = store.create_evidence_bundle(snapshot["search_snapshot_id"], scope)["bundle"]
+
+            def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+                prompt = str(kwargs.get("prompt") or "")
+                valid_ref = re.search(r'evidence_chunk:[a-zA-Z0-9_-]+', prompt)
+                self.assertIsNotNone(valid_ref)
+                return {
+                    "title": "Acme renewal review",
+                    "key_points": [
+                        {
+                            "statement": "Acme renewal is due on July 31.",
+                            "citation_refs": [valid_ref.group(0), "evidence_chunk:fabricated-ref"],
+                        }
+                    ],
+                    "uncertainty": ["Approval status is not in the source."],
+                    "recommended_next_steps": [],
+                    "contradictions": [],
+                }
+
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    scope,
+                    model_provider="ollama",
+                )
+
+            brief = result["brief"]
+            self.assertEqual(brief["trust_label"], "draft")
+            self.assertFalse(brief["presented_as_fact"])
+            self.assertIn("evidence_chunk:fabricated-ref", brief["citation_refs"])
+            check_id = brief["citation_check_refs"][0].split(":", 1)[1]
+            check = store.get_citation_check(check_id)
+            self.assertEqual(check["status"], "failed")
+            self.assertEqual(check["fabricated_citation_count"], 1)
+            self.assertEqual(check["citation_error_count"], 1)
+            self.assertEqual(check["errors"][0]["code"], "INVALID_CITATION_REF")
+            self.assertEqual(artifact["artifact_id"], bundle["evidence_items"][0]["artifact_id"])
+
+    def test_vs5_brief_keeps_real_but_unrelated_citation_in_draft(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-unrelated-citation-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            store.ingest_text_artifact(
+                "The citrus shipment contains twelve oranges and arrives Friday.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.unrelated-citation",
+            )
+            snapshot = store.search("citrus shipment", **scope)["snapshot"]
+            bundle = store.create_evidence_bundle(snapshot["search_snapshot_id"], scope)["bundle"]
+
+            def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+                prompt = str(kwargs.get("prompt") or "")
+                valid_ref = re.search(r'evidence_chunk:[a-zA-Z0-9_-]+', prompt)
+                self.assertIsNotNone(valid_ref)
+                return {
+                    "title": "Vendor decision",
+                    "key_points": [
+                        {
+                            "statement": "The vendor contract was terminated yesterday.",
+                            "citation_refs": [valid_ref.group(0)],
+                        }
+                    ],
+                    "uncertainty": [],
+                    "recommended_next_steps": [],
+                    "contradictions": [],
+                }
+
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    scope,
+                    model_provider="ollama",
+                )
+
+            brief = result["brief"]
+            self.assertEqual(brief["citation_check_refs"] and brief["trust_label"], "draft")
+            self.assertEqual(brief["statement_anchor_checks"][0]["status"], "failed")
+            self.assertEqual(brief["semantic_faithfulness_state"], "human_required")
+            self.assertFalse(brief["label_check"]["earned_evidence_backed"])
+
+    def test_vs5_brief_rejects_valid_same_scope_citation_outside_current_retrieval(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-brief-retrieval-allowlist-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            store.ingest_text_artifact(
+                "The citrus shipment contains twelve oranges and arrives Friday.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.current-brief-source",
+            )
+            current_snapshot = store.search("citrus shipment", **scope)["snapshot"]
+            current_bundle = store.create_evidence_bundle(current_snapshot["search_snapshot_id"], scope)["bundle"]
+
+            store.ingest_text_artifact(
+                "Project Aurora launches on Monday and Priya owns the readiness review.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.prior-brief-source",
+            )
+            prior_snapshot = store.search("Project Aurora", **scope)["snapshot"]
+            prior_items, prior_error = store._evidence_items_from_snapshot(prior_snapshot, scope)
+            self.assertIsNone(prior_error)
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]):
+                prior_chunks = store._build_evidence_chunks(
+                    prior_items,
+                    scope,
+                    query="Project Aurora",
+                    model_provider="ollama",
+                )["chunks"]
+            prior_ref = f"evidence_chunk:{prior_chunks[0]['evidence_chunk_id']}"
+
+            def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+                self.assertNotIn(prior_ref, str(kwargs.get("prompt") or ""))
+                return {
+                    "title": "Citrus shipment",
+                    "key_points": [
+                        {
+                            "statement": "Project Aurora launches on Monday.",
+                            "citation_refs": [prior_ref],
+                        }
+                    ],
+                    "uncertainty": [],
+                    "recommended_next_steps": [],
+                    "contradictions": [],
+                }
+
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = store.create_brief_from_evidence_bundle(
+                    current_bundle["evidence_bundle_id"],
+                    scope,
+                    model_provider="ollama",
+                )
+
+            brief = result["brief"]
+            self.assertEqual(brief["trust_label"], "draft")
+            self.assertFalse(brief["presented_as_fact"])
+            self.assertEqual(brief["statement_anchor_checks"][0]["allowed_citation_refs"], [])
+            self.assertEqual(brief["statement_anchor_checks"][0]["status"], "failed")
+            check = store.get_citation_check(brief["citation_check_refs"][0].split(":", 1)[1])
+            self.assertTrue(check["retrieval_allowlist_enforced"])
+            self.assertNotIn(prior_ref, check["allowed_citation_refs"])
+            self.assertEqual(check["out_of_retrieval_citation_count"], 1)
+            self.assertEqual(check["errors"], [{"ref": prior_ref, "code": "OUT_OF_RETRIEVAL_CITATION_REF"}])
+
+    def test_vs5_ask_rejects_a_valid_plus_fabricated_model_citation(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-fabricated-citation-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            store.ingest_text_artifact(
+                "Acme renewal is due on July 31 and Finance owner Mina must review it.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.ask-fabricated-citation",
+            )
+            conversation = store.start_conversation("Help with the renewal", scope)["conversation"]
+
+            def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+                prompt = str(kwargs.get("prompt") or "")
+                valid_ref = re.search(r'evidence_chunk:[a-zA-Z0-9_-]+', prompt)
+                self.assertIsNotNone(valid_ref)
+                return {
+                    "answer": "The Acme renewal is due on July 31.",
+                    "citation_refs": [valid_ref.group(0), "evidence_chunk:fabricated-answer-ref"],
+                    "insufficient_evidence": False,
+                }
+
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = store.answer_conversation(
+                    conversation["conversation_id"],
+                    "When is the Acme renewal due?",
+                    scope,
+                    model_provider="ollama",
+                )
+
+            answer = result["answer"]
+            self.assertEqual(answer["trust_label"], "insufficient_evidence")
+            self.assertFalse(answer["presented_as_fact"])
+            self.assertIn("evidence_chunk:fabricated-answer-ref", answer["citation_refs"])
+            check_id = answer["citation_check_refs"][0].split(":", 1)[1]
+            check = store.get_citation_check(check_id)
+            self.assertEqual(check["fabricated_citation_count"], 1)
+            self.assertEqual(check["status"], "failed")
+
+    def test_vs5_ask_rejects_valid_same_scope_citation_outside_current_retrieval(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-retrieval-allowlist-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            scope = {
+                "tenant_id": "local-dev",
+                "owner_id": "local-user",
+                "namespace_id": "personal",
+                "workspace_id": "default",
+            }
+            store.ingest_text_artifact(
+                "Acme renewal is due on July 31 and Finance owner Mina must review it.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.current-ask-source",
+            )
+            current_ask_search = store.search("When is the Acme renewal due?", **scope)
+            current_ask_snapshot = current_ask_search["snapshot"]
+            store.ingest_text_artifact(
+                "Project Aurora launches on Monday and Priya owns the readiness review.",
+                scope,
+                source_type="user_paste",
+                source_ref="test.vs5.prior-ask-source",
+            )
+            prior_snapshot = store.search("Project Aurora", **scope)["snapshot"]
+            prior_items, prior_error = store._evidence_items_from_snapshot(prior_snapshot, scope)
+            self.assertIsNone(prior_error)
+            with mock.patch("cornerstone_cli.runtime._ollama_embedding", return_value=[1.0, 0.0]):
+                prior_chunks = store._build_evidence_chunks(
+                    prior_items,
+                    scope,
+                    query="Project Aurora",
+                    model_provider="ollama",
+                )["chunks"]
+            prior_ref = f"evidence_chunk:{prior_chunks[0]['evidence_chunk_id']}"
+            conversation = store.start_conversation("Help with the Acme renewal", scope)["conversation"]
+
+            def generated(*_: Any, **kwargs: Any) -> dict[str, Any]:
+                self.assertNotIn(prior_ref, str(kwargs.get("prompt") or ""))
+                return {
+                    "answer": "Project Aurora launches on Monday.",
+                    "citation_refs": [prior_ref],
+                    "insufficient_evidence": False,
+                }
+
+            with mock.patch.object(
+                store,
+                "search",
+                return_value=current_ask_search,
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch("cornerstone_cli.runtime._ollama_generate_json", side_effect=generated):
+                result = store.answer_conversation(
+                    conversation["conversation_id"],
+                    "When is the Acme renewal due?",
+                    scope,
+                    model_provider="ollama",
+                )
+
+            answer = result["answer"]
+            self.assertEqual(answer["trust_label"], "insufficient_evidence")
+            self.assertFalse(answer["presented_as_fact"])
+            self.assertEqual(answer["statement_anchor_check"]["status"], "failed")
+            check = store.get_citation_check(answer["citation_check_refs"][0].split(":", 1)[1])
+            self.assertTrue(check["retrieval_allowlist_enforced"])
+            self.assertNotIn(prior_ref, check["allowed_citation_refs"])
+            self.assertEqual(check["out_of_retrieval_citation_count"], 1)
+            self.assertEqual(check["errors"], [{"ref": prior_ref, "code": "OUT_OF_RETRIEVAL_CITATION_REF"}])
+
+    @unittest.skipUnless(
+        os.environ.get("CORNERSTONE_RUN_OLLAMA_TESTS") == "1",
+        "Plane 2 Ollama checks are opt-in; deterministic local/CI verification must not require a running model.",
+    )
     def test_vs5_slice_001_ollama_brief_ask(self) -> None:
         with tempfile.TemporaryDirectory() as state_dir:
             source_text = (

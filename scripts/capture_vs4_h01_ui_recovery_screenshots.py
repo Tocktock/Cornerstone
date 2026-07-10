@@ -46,12 +46,12 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 
 DESKTOP_ROUTES = [
     {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Evidence-first workspace", "Global search", "Search across saved sources, claims, briefs, and action drafts", "Local workspace", "Receipts required", "Drop anything, or ask what we know", "Drag and drop files or paste notes here", "Paste text source", "Browse files", "Ask the workspace", "Daily loop handoff", "Original source kept", "Draft from saved sources", "Receipts before decisions", "Work leaves a trail", "Recent items", "Knowledge states", "Suggested next steps", "Recent activity"]},
-    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Search command center", "Search the workspace", "Type filters", "Sort by: keyword match", "Current search controls", "Search mode: local keyword", "Receipt-first results", "Local record receipt", "Open receipt", "What we found", "Suggested follow-ups"]},
+    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Workspace search", "Search the workspace", "Current search context", "Order: keyword match", "Search mode: local keyword", "Receipt-first results", "Local record receipt", "Open receipt", "What we found", "Suggested follow-ups"]},
     {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
     {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Decision queue", "Brief reading queue", "Review lanes", "visible queue item", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
     {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Decision queue", "Claim review lanes", "visible queue item", "Source-support lane", "Evidence-backed locked", "Claim review queue", "Review posture"]},
-    {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action drafts", "Decision queue", "Action approval lanes", "visible queue item", "Approval lane", "Action preview queue", "Dry-run posture"]},
-    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "open review items across one queue", "Filters", "Showing 3 open items", "1-3 of 3 items", "Owner", "Linked sources", "Next actions", "Review item", "Review sources", "Open audit trail"]},
+    {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action records", "Decision queue", "Action approval lanes", "visible queue item", "Approval lane", "Action preview queue", "Dry-run posture"]},
+    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "open review items across one queue", "Filters", "Showing 3 open items", "1-3 of 3 items", "Owner", "Linked sources", "Next actions", "Selected item", "Review sources", "Open audit trail"]},
     {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Audit receipt workspace", "Activity trail", "Audit status", "Latest readable receipt", "Read activity receipts", "Receipt summary", "Audit lifecycle", "Activity receipts", "Readable receipts", "Event stream", "Audit posture", "Audit integrity checks", "Integrity chain", "Scope and recovery", "Raw event detail"]},
     {
         "name": "owner-admin-desktop",
@@ -95,14 +95,14 @@ INTERACTION_ROUTES = [
 ]
 
 DETAIL_ROUTES = [
-    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Source inspection workspace", "Detail path", "Back to saved sources", "Original source", "Artifact evidence workspace", "Original source document viewer", "Original artifact preview", "Text preview controls", "1 / 1", "Source pages", "Preview rail", "Source metadata", "Source reading summary", "Original source summary", "Artifact inspection summary", "Evidence links", "Preview mode", "Plain text preview", "Original content primary", "Details", "Tags", "Source state", "Keyword summary", "Extracted keywords", "Provenance", "Open audit trail"]},
+    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Source inspection workspace", "Detail path", "Back to saved sources", "Original source", "Original source document viewer", "Original artifact preview", "Source outline", "Source metadata", "Source reading preview", "Original source excerpt", "Artifact inspection summary", "Evidence links", "Preview mode", "Plain text preview", "Original content primary", "Details", "Keywords", "Source state", "Frequent local terms", "Provenance", "Open audit trail"]},
     {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Brief reading workspace", "Detail path", "Back to briefs", "Open audit trail", "Receipt summary", "Brief answer and receipt", "Decision snapshot", "What we found", "Drafted findings", "Citation receipt", "Label state", "Findings with citations", "What this brief cannot confirm", "Suggested next steps", "Sources used", "Citation disclosure", "Source snippet", "Full provenance", "Audit trail", "Use this brief"]},
     {
         "name": "claim-detail-desktop",
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim draft workspace", "Evidence-to-decision path", "Claim review summary", "Claim statement", "Supporting evidence", "Evidence picker controls", "Sort: source order", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
+        "required": ["Detail path", "Back to claims", "Open inbox", "Claim draft workspace", "Evidence-to-decision path", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
     },
     {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Dry-run approval receipt", "Proposed change preview", "External call plan", "Approval gate", "Action review status", "Summary", "Impacted objects", "Dry-run sequence", "Proposed changes", "External calls", "Call preview", "Policy decision", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
 ]
@@ -384,6 +384,12 @@ def capture_page(
     output_dir: Path,
     window_size: str,
 ) -> dict[str, Any]:
+    emulated_viewport = {
+        "width": 375 if spec.get("mobile") else 1440,
+        "height": 844 if spec.get("mobile") else 1100,
+        "device_scale_factor": 1,
+        "mobile": bool(spec.get("mobile")),
+    }
     screenshots_dir = output_dir / "screenshots"
     dom_dir = output_dir / "dom"
     screenshots_dir.mkdir(parents=True, exist_ok=True)
@@ -400,6 +406,7 @@ def capture_page(
     exit_code: int | None = None
     layout: dict[str, Any] = {}
     interaction: dict[str, Any] = {}
+    visible_text = ""
     try:
         process = _launch_cdp_chrome(chrome, profile_dir, debug_port, window_size)
         version = None
@@ -421,6 +428,17 @@ def capture_page(
         page = _CDPClient(str(target["webSocketDebuggerUrl"]))
         page.command("Page.enable")
         page.command("Runtime.enable")
+        page.command(
+            "Emulation.setDeviceMetricsOverride",
+            {
+                "width": emulated_viewport["width"],
+                "height": emulated_viewport["height"],
+                "deviceScaleFactor": emulated_viewport["device_scale_factor"],
+                "mobile": emulated_viewport["mobile"],
+                "screenWidth": emulated_viewport["width"],
+                "screenHeight": emulated_viewport["height"],
+            },
+        )
         page.command("Page.navigate", {"url": url})
         try:
             page.wait_event("Page.loadEventFired", timeout=10)
@@ -439,6 +457,7 @@ def capture_page(
         if spec.get("interaction") == "home-validation":
             interaction = _runtime_eval(page, HOME_VALIDATION_SCRIPT, timeout=10) or {}
         layout = _runtime_eval(page, LAYOUT_SCRIPT, timeout=10) or {}
+        visible_text = str(_runtime_eval(page, "document.body ? document.body.innerText : ''", timeout=5) or "")
         dom = normalize_captured_dom(str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or ""))
         dom_path.write_text(dom)
         screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
@@ -466,7 +485,7 @@ def capture_page(
         shutil.rmtree(profile_dir, ignore_errors=True)
 
     dom_text = dom_path.read_text() if dom_path.exists() else ""
-    forbidden = [] if spec.get("allow_internal_terms") else sorted(set(match.group(0) for match in FORBIDDEN_PRODUCT_RE.finditer(dom_text)))
+    forbidden = [] if spec.get("allow_internal_terms") else sorted(set(match.group(0) for match in FORBIDDEN_PRODUCT_RE.finditer(visible_text)))
     required_missing = [text for text in spec.get("required", []) if text not in dom_text]
     screenshot_bytes = screenshot_path.stat().st_size if screenshot_path.exists() else 0
     checks = {
@@ -481,6 +500,10 @@ def capture_page(
         "mobile_first_value_before_nav": layout.get("mobile_first_value_before_nav") is True,
         "home_drop_ask_ordered": layout.get("home_drop_ask_ordered") is True,
         "home_drop_ask_in_first_viewport": layout.get("home_drop_ask_in_first_viewport") is True,
+        "viewport_matches_contract": (
+            layout.get("inner_width") == emulated_viewport["width"]
+            and layout.get("inner_height") == emulated_viewport["height"]
+        ),
         "interaction_passed": not spec.get("interaction") or interaction.get("passed") is True,
         "clean_browser_exit": exit_code == 0,
         "no_capture_error": error is None,
@@ -492,6 +515,7 @@ def capture_page(
         "surface": spec["surface"],
         "viewport": "mobile" if spec.get("mobile") else "desktop",
         "window_size": window_size,
+        "emulated_viewport": emulated_viewport,
         "url": url,
         "status": status,
         "checks": checks,
@@ -627,6 +651,17 @@ def main() -> int:
         "state_dir": relative_to_root(ROOT, state_dir),
         "base_url": base_url,
         "fixture_ids": ids,
+        "source_fingerprint": {
+            relative_to_root(ROOT, path): sha256_file(path)
+            for path in (
+                ROOT / "docs/design/tokens/cornerstone_design_tokens_v0_3.json",
+                ROOT / "packages/cornerstone_cli/briefing.py",
+                ROOT / "packages/cornerstone_cli/product_ui.py",
+                ROOT / "packages/cornerstone_cli/product_runtime.py",
+                ROOT / "packages/cornerstone_cli/runtime.py",
+                ROOT / "scripts/capture_vs4_h01_ui_recovery_screenshots.py",
+            )
+        },
         "summary": {
             "page_count": len(pages),
             "pass": len(pages) - len(failed_pages),

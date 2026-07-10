@@ -65,6 +65,41 @@ ANSWER_STOP_TERMS = {
     "why",
 }
 
+# Claim support needs content anchors, not workflow vocabulary.  These terms are
+# useful in UI copy and scenario descriptions, but they do not show that the
+# attached source supports the statement itself.
+CLAIM_SUPPORT_STOP_TERMS = ANSWER_STOP_TERMS | {
+    "acceptance",
+    "anchor",
+    "api",
+    "backed",
+    "brief",
+    "claim",
+    "evidence",
+    "local",
+    "path",
+    "ready",
+    "review",
+    "runtime",
+    "source",
+    "statement",
+    "supported",
+    "vs0",
+    "vs4",
+    "vs5",
+}
+
+CLAIM_SUPPORT_MIN_COVERAGE = 0.75
+NEGATION_TERMS = {
+    "cannot",
+    "neither",
+    "never",
+    "no",
+    "nor",
+    "not",
+    "without",
+}
+
 DEFAULT_MODEL_PROVIDER = "local_test"
 DEFAULT_GENERATION_MODEL = "ornith:35b"
 DEFAULT_EMBEDDING_MODEL = "qwen3-embedding:0.6b"
@@ -73,6 +108,8 @@ OLLAMA_TIMEOUT_SECONDS = 180
 EVIDENCE_CHUNK_MAX_CHARS = 1200
 EVIDENCE_CHUNK_OVERLAP_CHARS = 160
 EVIDENCE_CHUNK_LIMIT = 5
+EVIDENCE_CHUNK_ID_RE = re.compile(r"^chunk_[0-9a-f]{16}$")
+EVIDENCE_CHUNK_REF_RE = re.compile(r"^evidence_chunk:(chunk_[0-9a-f]{16})$")
 
 STRUCTURE_LABELS = {
     "person": ("object", "person"),
@@ -232,9 +269,18 @@ def _model_statement_rows(value: Any, allowed_refs: set[str], *, limit: int = 5)
         else:
             statement = str(row).strip()
             raw_refs = []
-        citation_refs = [ref for ref in (str(ref) for ref in raw_refs) if ref in allowed_refs]
+        # Preserve every model-claimed ref for the citation checker.  Filtering
+        # unknown refs here would erase the exact fabrication the checker must
+        # detect (for example one valid ref plus one invented ref).
+        citation_refs = [str(ref) for ref in raw_refs if str(ref).strip()]
         if statement:
-            result.append({"statement": statement, "citation_refs": sorted(set(citation_refs))})
+            result.append(
+                {
+                    "statement": statement,
+                    "citation_refs": sorted(set(citation_refs)),
+                    "allowed_citation_refs": sorted({ref for ref in citation_refs if ref in allowed_refs}),
+                }
+            )
     return result
 
 
@@ -525,6 +571,134 @@ def search_terms(text: str) -> list[str]:
     return [term for term in re.findall(r"[a-z0-9-]+", text.lower()) if term]
 
 
+def _claim_support_terms(text: str) -> set[str]:
+    """Return content-bearing terms for a conservative source-anchor check."""
+
+    return {
+        term
+        for term in re.findall(r"[^\W_]+", text.lower(), flags=re.UNICODE)
+        if (len(term) > 2 or term.isdigit()) and term not in CLAIM_SUPPORT_STOP_TERMS
+    }
+
+
+def _expanded_claim_support_terms(text: str) -> set[str]:
+    terms = _claim_support_terms(text)
+    expanded = set(terms)
+    for term in terms:
+        expanded.update(SEMANTIC_ALIASES.get(term, []))
+        expanded.update(alias for alias, equivalents in SEMANTIC_ALIASES.items() if term in equivalents)
+    return expanded
+
+
+def _claim_statement_sha256(statement: str) -> str:
+    return sha256_bytes(statement.strip().encode("utf-8"))
+
+
+def _negation_markers(text: str) -> set[str]:
+    lowered = text.lower().replace("’", "'")
+    markers = NEGATION_TERMS & set(re.findall(r"[^\W_]+", lowered, flags=re.UNICODE))
+    if re.search(r"\b[^\W_]+n't\b", lowered, flags=re.UNICODE):
+        markers.add("n't")
+    return markers
+
+
+def _statement_source_anchor(statement: str, source_texts: list[str]) -> dict[str, Any]:
+    """Check obvious statement/source relatedness without claiming faithfulness."""
+
+    statement_terms = _claim_support_terms(statement)
+    numeric_tokens = set(re.findall(r"\b\d+(?:[.,:/-]\d+)*\b", statement.lower()))
+    statement_negations = _negation_markers(statement)
+    best: tuple[int, float, int, set[str], bool, bool, set[str], list[int]] | None = None
+    for index, source_text in enumerate(source_texts):
+        segments = [
+            segment.strip()
+            for segment in re.split(r"(?<=[.!?])\s+|\n+", source_text)
+            if segment.strip()
+        ] or [source_text]
+        ranked_segments = []
+        for segment_index, segment in enumerate(segments):
+            expanded_terms = _expanded_claim_support_terms(segment)
+            segment_matches = {
+                term
+                for term in statement_terms
+                if term in expanded_terms
+                or bool(set(SEMANTIC_ALIASES.get(term, [])) & expanded_terms)
+            }
+            segment_numbers = set(re.findall(r"\b\d+(?:[.,:/-]\d+)*\b", segment.lower()))
+            ranked_segments.append(
+                (segment_index, segment, segment_matches, segment_numbers)
+            )
+        ranked_segments.sort(
+            key=lambda row: (
+                -len(row[2]),
+                -len(row[3] & numeric_tokens),
+                row[0],
+            )
+        )
+        matched_terms: set[str] = set()
+        source_numeric_tokens: set[str] = set()
+        source_negations: set[str] = set()
+        selected_segment_indexes: list[int] = []
+        for segment_index, segment, segment_matches, segment_numbers in ranked_segments:
+            if not (segment_matches - matched_terms) and not (
+                (segment_numbers & numeric_tokens) - source_numeric_tokens
+            ):
+                continue
+            matched_terms.update(segment_matches)
+            source_numeric_tokens.update(segment_numbers)
+            source_negations.update(_negation_markers(segment))
+            selected_segment_indexes.append(segment_index)
+            coverage_so_far = len(matched_terms) / len(statement_terms) if statement_terms else 0.0
+            if coverage_so_far >= CLAIM_SUPPORT_MIN_COVERAGE and numeric_tokens <= source_numeric_tokens:
+                break
+        coverage = len(matched_terms) / len(statement_terms) if statement_terms else 0.0
+        numeric_supported = numeric_tokens <= source_numeric_tokens
+        negation_compatible = bool(statement_negations) == bool(source_negations)
+        candidate = (
+            len(matched_terms),
+            coverage,
+            index,
+            matched_terms,
+            numeric_supported,
+            negation_compatible,
+            source_negations,
+            selected_segment_indexes,
+        )
+        if best is None or candidate[:2] > best[:2]:
+            best = candidate
+
+    matched_count = best[0] if best else 0
+    coverage = best[1] if best else 0.0
+    source_index = best[2] if best else None
+    matched_terms = best[3] if best else set()
+    numeric_supported = best[4] if best else not numeric_tokens
+    negation_compatible = best[5] if best else not statement_negations
+    source_negations = best[6] if best else set()
+    source_segment_indexes = best[7] if best else []
+    minimum_match_count = 1 if len(statement_terms) <= 1 else 2
+    anchor_passed = bool(
+        statement_terms
+        and matched_count >= minimum_match_count
+        and coverage >= CLAIM_SUPPORT_MIN_COVERAGE
+        and numeric_supported
+        and negation_compatible
+    )
+    return {
+        "status": "passed" if anchor_passed else "failed",
+        "statement_term_count": len(statement_terms),
+        "matched_term_count": matched_count,
+        "matched_terms": sorted(matched_terms),
+        "coverage": round(coverage, 6),
+        "required_coverage": CLAIM_SUPPORT_MIN_COVERAGE,
+        "numeric_tokens_supported": numeric_supported,
+        "statement_negation_markers": sorted(statement_negations),
+        "source_negation_markers": sorted(source_negations),
+        "negation_compatible": negation_compatible,
+        "source_index": source_index,
+        "source_segment_indexes": source_segment_indexes,
+    }
+
+
 def scope_key(scope: dict[str, str]) -> str:
     return _json_hash(
         {
@@ -733,7 +907,13 @@ class LocalRuntimeStore:
         return self.state_dir / "evidence" / "bundles" / f"{bundle_id}.json"
 
     def evidence_chunk_path(self, chunk_id: str) -> Path:
-        return self.evidence_chunk_dir / f"{chunk_id}.json"
+        if not EVIDENCE_CHUNK_ID_RE.fullmatch(chunk_id):
+            raise ValueError("Invalid evidence chunk id.")
+        base = self.evidence_chunk_dir.resolve()
+        path = (base / f"{chunk_id}.json").resolve()
+        if path.parent != base:
+            raise ValueError("Evidence chunk path escapes its storage directory.")
+        return path
 
     def citation_check_path(self, check_id: str) -> Path:
         return self.citation_check_dir / f"{check_id}.json"
@@ -1074,10 +1254,16 @@ class LocalRuntimeStore:
         return _read_json(path)
 
     def get_evidence_chunk(self, chunk_id: str) -> dict[str, Any] | None:
-        path = self.evidence_chunk_path(chunk_id)
+        try:
+            path = self.evidence_chunk_path(chunk_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            return _read_json(path)
+        except (OSError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_citation_check(self, check_id: str) -> dict[str, Any] | None:
         path = self.citation_check_path(check_id)
@@ -8819,15 +9005,36 @@ class LocalRuntimeStore:
             "embedding_model": embedding_model if use_embeddings else None,
         }
 
-    def _citation_check(self, *, output_kind: str, citation_refs: list[str], scope: dict[str, str]) -> dict[str, Any]:
+    def _citation_check(
+        self,
+        *,
+        output_kind: str,
+        citation_refs: list[str],
+        scope: dict[str, str],
+        allowed_refs: set[str] | None = None,
+    ) -> dict[str, Any]:
+        """Validate citation integrity and, when supplied, run-local provenance.
+
+        ``allowed_refs`` is the exact retrieval set quoted in the current
+        model prompt.  A valid persisted chunk from the same scope is still
+        ineligible when the model did not receive it for this run.
+        """
+
+        retrieval_allowlist = set(allowed_refs) if allowed_refs is not None else None
         errors = []
         resolved = []
         for ref in sorted(set(citation_refs)):
             if not ref.startswith("evidence_chunk:"):
                 errors.append({"ref": ref, "code": "UNSUPPORTED_CITATION_REF"})
                 continue
-            chunk_id = ref.split(":", 1)[1]
-            chunk = self.get_evidence_chunk(chunk_id)
+            ref_match = EVIDENCE_CHUNK_REF_RE.fullmatch(ref)
+            if ref_match is None:
+                errors.append({"ref": ref, "code": "INVALID_CITATION_REF"})
+                continue
+            if retrieval_allowlist is not None and ref not in retrieval_allowlist:
+                errors.append({"ref": ref, "code": "OUT_OF_RETRIEVAL_CITATION_REF"})
+                continue
+            chunk = self.get_evidence_chunk(ref_match.group(1))
             if chunk is None:
                 errors.append({"ref": ref, "code": "UNRESOLVED_CITATION_REF"})
                 continue
@@ -8858,10 +9065,30 @@ class LocalRuntimeStore:
             "scope": scope,
             "status": "passed" if citation_refs and not errors else "failed",
             "citation_refs": sorted(set(citation_refs)),
+            "retrieval_allowlist_enforced": retrieval_allowlist is not None,
+            "allowed_citation_refs": sorted(retrieval_allowlist or set()),
             "resolved_citations": resolved,
             "unresolved_ref_count": len([error for error in errors if error["code"] == "UNRESOLVED_CITATION_REF"]),
-            "fabricated_citation_count": len(errors),
+            "citation_error_count": len(errors),
+            "fabricated_citation_count": len(
+                [
+                    error
+                    for error in errors
+                    if error["code"]
+                    in {
+                        "UNSUPPORTED_CITATION_REF",
+                        "INVALID_CITATION_REF",
+                        "UNRESOLVED_CITATION_REF",
+                        "CITATION_ARTIFACT_NOT_FOUND",
+                        "SPAN_IN_SOURCE_MISMATCH",
+                    }
+                ]
+            ),
             "span_mismatch_count": len([error for error in errors if error["code"] == "SPAN_IN_SOURCE_MISMATCH"]),
+            "cross_scope_citation_count": len([error for error in errors if error["code"] == "CROSS_SCOPE_CITATION_REF"]),
+            "out_of_retrieval_citation_count": len(
+                [error for error in errors if error["code"] == "OUT_OF_RETRIEVAL_CITATION_REF"]
+            ),
             "errors": errors,
             "checked_at": utc_now(),
         }
@@ -8870,6 +9097,152 @@ class LocalRuntimeStore:
         check["citation_check_id"] = check_id
         _write_json(self.citation_check_path(check_id), check)
         return check
+
+    def _claim_statement_support(
+        self,
+        *,
+        bundle: dict[str, Any],
+        statement: str,
+        scope: dict[str, str],
+        related_brief: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Build deterministic, revision-bound support metadata for a Claim.
+
+        This check intentionally proves less than semantic faithfulness.  It
+        requires either an exact cited Brief finding or a conservative lexical
+        anchor into a chunk from the same Evidence Bundle.  Human review still
+        owns CS-VAL-003; the separate fields below keep that proof boundary
+        explicit.
+        """
+
+        statement = statement.strip()
+        bundle_id = str(bundle.get("evidence_bundle_id") or "")
+        evidence_items = bundle.get("evidence_items") if isinstance(bundle.get("evidence_items"), list) else []
+        evidence_revision = _json_hash(
+            {
+                "evidence_bundle_id": bundle_id,
+                "search_snapshot_id": bundle.get("search_snapshot_id"),
+                "artifact_refs": [
+                    f"artifact:{item.get('artifact_id')}"
+                    for item in evidence_items
+                    if isinstance(item, dict) and item.get("artifact_id")
+                ],
+                "snippets": [
+                    str(item.get("snippet") or "")
+                    for item in evidence_items
+                    if isinstance(item, dict)
+                ],
+            }
+        )
+        statement_sha256 = _claim_statement_sha256(statement)
+        citation_refs: list[str] = []
+        support_origin = "none"
+        anchor_validation: dict[str, Any] = {
+            "status": "not_verified",
+            "statement_term_count": 0,
+            "matched_term_count": 0,
+            "matched_terms": [],
+            "coverage": 0.0,
+            "required_coverage": CLAIM_SUPPORT_MIN_COVERAGE,
+            "numeric_tokens_supported": False,
+        }
+
+        if related_brief is not None:
+            for row in related_brief.get("key_point_citations", []):
+                if not isinstance(row, dict):
+                    continue
+                if str(row.get("statement") or "").strip() != statement:
+                    continue
+                citation_refs = sorted(
+                    {
+                        str(ref)
+                        for ref in row.get("citation_refs", [])
+                        if isinstance(ref, str) and ref.strip()
+                    }
+                )
+                if citation_refs:
+                    cited_chunks = [
+                        self.get_evidence_chunk(ref.split(":", 1)[1])
+                        for ref in citation_refs
+                        if ref.startswith("evidence_chunk:")
+                    ]
+                    anchor_validation = _statement_source_anchor(
+                        statement,
+                        [
+                            str(chunk.get("text") or "")
+                            for chunk in cited_chunks
+                            if isinstance(chunk, dict) and chunk.get("evidence_bundle_id") == bundle_id
+                        ],
+                    )
+                    if anchor_validation.get("status") == "passed":
+                        support_origin = "cited_brief_finding"
+                break
+
+        if not citation_refs and statement and evidence_items:
+            chunks_result = self._build_evidence_chunks(
+                evidence_items,
+                scope,
+                query=statement,
+                evidence_bundle_id=bundle_id,
+                model_provider="local_test",
+            )
+            chunks = [chunk for chunk in chunks_result.get("chunks", []) if isinstance(chunk, dict)]
+            anchor_validation = _statement_source_anchor(
+                statement,
+                [str(chunk.get("text") or "") for chunk in chunks],
+            )
+            source_index = anchor_validation.get("source_index")
+            if anchor_validation.get("status") == "passed" and isinstance(source_index, int) and source_index < len(chunks):
+                citation_refs = [f"evidence_chunk:{chunks[source_index]['evidence_chunk_id']}"]
+                support_origin = "deterministic_source_anchor"
+
+        citation_check = (
+            self._citation_check(output_kind="claim_statement", citation_refs=citation_refs, scope=scope)
+            if citation_refs
+            else None
+        )
+        citations_bound_to_bundle = bool(citation_refs)
+        for ref in citation_refs:
+            chunk = self.get_evidence_chunk(ref.split(":", 1)[1]) if ref.startswith("evidence_chunk:") else None
+            if chunk is None or chunk.get("evidence_bundle_id") != bundle_id:
+                citations_bound_to_bundle = False
+                break
+        citation_integrity_passed = bool(
+            citation_check
+            and citation_check.get("status") == "passed"
+            and citations_bound_to_bundle
+        )
+        support_passed = bool(
+            statement
+            and anchor_validation.get("status") == "passed"
+            and citation_integrity_passed
+        )
+        support_base = {
+            "schema_version": "cs.claim_statement_support.v0",
+            "status": "passed" if support_passed else "not_verified",
+            "statement_sha256": statement_sha256,
+            "statement_revision": 1,
+            "evidence_bundle_id": bundle_id,
+            "evidence_revision_sha256": evidence_revision,
+            "support_origin": support_origin,
+            "citation_refs": citation_refs,
+            "citation_check_refs": (
+                [f"citation_check:{citation_check['citation_check_id']}"]
+                if citation_check
+                else []
+            ),
+            "citation_integrity_state": "passed" if citation_integrity_passed else "not_verified",
+            "citations_bound_to_evidence_revision": citations_bound_to_bundle,
+            "statement_support_state": "deterministic_anchor_passed" if support_passed else "not_verified",
+            "semantic_faithfulness_state": "human_required",
+            "semantic_support_verified": False,
+            "anchor_validation": anchor_validation,
+            "approval_eligible": support_passed,
+        }
+        return {
+            **support_base,
+            "support_check_id": f"claimsupport_{_json_hash(support_base)[:16]}",
+        }
 
     def _prompt_boundary(self, chunks: list[dict[str, Any]], *, model_provider: str, generation_model: str | None, embedding_model: str | None) -> dict[str, Any]:
         blocked_attempt_count = sum(int(chunk.get("safety", {}).get("blocked_attempt_count", 0) or 0) for chunk in chunks)
@@ -9227,17 +9600,44 @@ class LocalRuntimeStore:
             key_point_citations = _model_statement_rows(model_output.get("key_points"), allowed_refs, limit=5)
             key_points = [row["statement"] for row in key_point_citations]
             citation_refs = sorted({ref for row in key_point_citations for ref in row.get("citation_refs", [])})
-            citation_check = self._citation_check(output_kind="brief", citation_refs=citation_refs, scope=scope)
+            citation_check = self._citation_check(
+                output_kind="brief",
+                citation_refs=citation_refs,
+                scope=scope,
+                allowed_refs=allowed_refs,
+            )
             citation_check_refs = [f"citation_check:{citation_check['citation_check_id']}"]
+            statement_anchor_checks = []
+            for row in key_point_citations:
+                cited_chunks = [
+                    self.get_evidence_chunk(ref.split(":", 1)[1])
+                    for ref in row.get("allowed_citation_refs", [])
+                    if ref.startswith("evidence_chunk:")
+                ]
+                anchor = _statement_source_anchor(
+                    row["statement"],
+                    [str(chunk.get("text") or "") for chunk in cited_chunks if isinstance(chunk, dict)],
+                )
+                statement_anchor_checks.append(
+                    {
+                        "statement_sha256": _claim_statement_sha256(row["statement"]),
+                        "citation_refs": row.get("citation_refs", []),
+                        "allowed_citation_refs": row.get("allowed_citation_refs", []),
+                        "status": anchor.get("status"),
+                        "anchor_validation": anchor,
+                        "semantic_faithfulness_state": "human_required",
+                    }
+                )
             earned_evidence_backed = (
                 citation_check.get("status") == "passed"
                 and bool(key_point_citations)
                 and all(row.get("citation_refs") for row in key_point_citations)
+                and all(row.get("status") == "passed" for row in statement_anchor_checks)
             )
             trust_label = "evidence_backed" if earned_evidence_backed else "draft"
             output_mode = "ollama_generated" if earned_evidence_backed else "ollama_draft"
             trust_label_reason = (
-                "Ollama generated this brief and deterministic citation-resolution/span checks passed for every cited load-bearing key point."
+                "Ollama generated this brief and deterministic citation-resolution, span, and source-anchor checks passed for every cited load-bearing key point."
                 if earned_evidence_backed
                 else "Ollama generated this brief, but deterministic citation checks did not earn evidence_backed for every load-bearing key point."
             )
@@ -9341,6 +9741,7 @@ class LocalRuntimeStore:
             )
             citation_check_refs = []
             key_point_citations = []
+            statement_anchor_checks = []
             prompt_boundary = self._prompt_boundary(
                 list(chunks_result.get("chunks", [])),
                 model_provider=model_provider,
@@ -9387,6 +9788,8 @@ class LocalRuntimeStore:
             **value_plane,
             "key_points": key_points,
             "key_point_citations": key_point_citations,
+            "statement_anchor_checks": statement_anchor_checks,
+            "semantic_faithfulness_state": "human_required" if model_provider == "ollama" else "not_verified",
             "evidence_links": evidence_links,
             "evidence_refs": evidence_refs,
             "audit_refs": [],
@@ -9564,11 +9967,21 @@ class LocalRuntimeStore:
                 return {"status": "scope_denied", "resource_scope": ontology_object.get("scope")}
             ontology_context_objects.append(ontology_object)
 
+        normalized_statement = statement.strip()
+        statement_support = self._claim_statement_support(
+            bundle=bundle,
+            statement=normalized_statement,
+            scope=scope,
+            related_brief=related_brief,
+        )
+        support_passed = statement_support.get("status") == "passed"
+
         claim_base = {
             "schema_version": "cs.claim.v0",
             "status": "draft",
-            "trust_state": "evidence_backed",
-            "statement": statement,
+            "trust_state": "evidence_backed" if support_passed else "draft",
+            "statement": normalized_statement,
+            "statement_support": statement_support,
             "rationale": (
                 f"Drafted from {related_brief.get('title') or related_brief.get('brief_id')} with the same Evidence Bundle."
                 if related_brief
@@ -9621,10 +10034,14 @@ class LocalRuntimeStore:
                 "usage_boundary": "context_only",
             },
             "authority": {
-                "can_be_approved": True,
+                "can_be_approved": support_passed,
                 "can_publish_shared_truth": False,
                 "can_drive_autonomous_action": False,
-                "blocked_reason": "Owner approval is required before shared truth or autonomous action use.",
+                "blocked_reason": (
+                    "Owner approval is required before shared truth or autonomous action use."
+                    if support_passed
+                    else "The exact Claim statement needs a same-bundle source anchor before approval."
+                ),
             },
             "activity_refs": [],
             "audit_refs": [],
@@ -9642,6 +10059,12 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": bundle_id,
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 **({"brief_id": related_brief.get("brief_id")} if related_brief else {}),
+                "trust_state": claim.get("trust_state"),
+                "statement_sha256": statement_support.get("statement_sha256"),
+                "support_check_id": statement_support.get("support_check_id"),
+                "statement_support_state": statement_support.get("statement_support_state"),
+                "citation_refs": statement_support.get("citation_refs", []),
+                "citation_check_refs": statement_support.get("citation_check_refs", []),
                 "ontology_context_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in ontology_context_objects],
             },
         )
@@ -9672,10 +10095,56 @@ class LocalRuntimeStore:
             )
             return {"status": "evidence_required", "claim": claim, "audit_event": event}
 
+        bundle_id = str(evidence.get("evidence_bundle_id") or "")
+        bundle = self.get_evidence_bundle(bundle_id)
+        stored_support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+        related_brief_ref = claim.get("related_brief") if isinstance(claim.get("related_brief"), dict) else {}
+        related_brief = self.get_brief(str(related_brief_ref.get("brief_id"))) if related_brief_ref.get("brief_id") else None
+        current_support = (
+            self._claim_statement_support(
+                bundle=bundle,
+                statement=str(claim.get("statement") or ""),
+                scope=scope,
+                related_brief=related_brief,
+            )
+            if bundle is not None and bundle.get("filters") == scope
+            else {}
+        )
+        support_is_current = bool(
+            stored_support.get("status") == "passed"
+            and current_support.get("status") == "passed"
+            and stored_support.get("statement_sha256") == current_support.get("statement_sha256")
+            and stored_support.get("evidence_revision_sha256") == current_support.get("evidence_revision_sha256")
+            and stored_support.get("citation_refs") == current_support.get("citation_refs")
+            and stored_support.get("citations_bound_to_evidence_revision") is True
+            and current_support.get("citations_bound_to_evidence_revision") is True
+        )
+        if not support_is_current:
+            event = self.append_audit(
+                "claim.approval.denied",
+                scope,
+                {"type": "claim", "id": claim_id},
+                {
+                    "reason": "statement_support_missing_or_stale",
+                    "required": "Bind the exact Claim statement to citation-checked source text from the current Evidence Bundle revision.",
+                    "statement_sha256": _claim_statement_sha256(str(claim.get("statement") or "")),
+                    "stored_support_check_id": stored_support.get("support_check_id"),
+                    "current_support_check_id": current_support.get("support_check_id"),
+                    "stored_support_state": stored_support.get("statement_support_state"),
+                    "current_support_state": current_support.get("statement_support_state"),
+                },
+            )
+            return {"status": "support_required", "claim": claim, "audit_event": event}
+
         approved = dict(claim)
         approved["status"] = "approved"
         approved["trust_state"] = "approved"
         approved["approved_at"] = utc_now()
+        approved["statement_support"] = {
+            **current_support,
+            "approval_revalidated_at": approved["approved_at"],
+            "approval_revalidated": True,
+        }
         approved["authority"] = {
             "can_be_approved": True,
             "can_publish_shared_truth": True,
@@ -9691,6 +10160,11 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": evidence.get("evidence_bundle_id"),
                 "evidence_item_count": evidence_item_count,
                 "artifact_refs": artifact_refs,
+                "statement_sha256": current_support.get("statement_sha256"),
+                "evidence_revision_sha256": current_support.get("evidence_revision_sha256"),
+                "support_check_id": current_support.get("support_check_id"),
+                "citation_refs": current_support.get("citation_refs", []),
+                "citation_check_refs": current_support.get("citation_check_refs", []),
             },
         )
         return {"status": "approved", "claim": approved, "audit_event": event}
@@ -9703,14 +10177,17 @@ class LocalRuntimeStore:
 
     def _claim_evidence_refs(self, claim: dict[str, Any]) -> list[str]:
         evidence = claim.get("evidence_bundle", {})
+        support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
         refs = [f"claim:{claim['claim_id']}"]
         if evidence.get("evidence_bundle_id"):
             refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
         if evidence.get("search_snapshot_id"):
             refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(support.get("citation_refs", []))
+        refs.extend(support.get("citation_check_refs", []))
         refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
-        return refs
+        return list(dict.fromkeys(refs))
 
     def _scoped_target(self, target_kind: str, target_id: str, scope: dict[str, str]) -> dict[str, Any]:
         getters = {
@@ -13467,25 +13944,43 @@ class LocalRuntimeStore:
             chunks = list(chunks_result.get("chunks", []))
             allowed_refs = {f"evidence_chunk:{chunk['evidence_chunk_id']}" for chunk in chunks}
             raw_refs = model_output.get("citation_refs") if isinstance(model_output.get("citation_refs"), list) else []
-            citation_refs = sorted({ref for ref in (str(ref) for ref in raw_refs) if ref in allowed_refs})
-            citation_check = self._citation_check(output_kind="conversation_answer", citation_refs=citation_refs, scope=scope)
+            # The checker must receive model-claimed refs verbatim enough to
+            # detect fabricated or malformed citations; do not pre-filter them
+            # to the retrieval allow-list.
+            citation_refs = sorted({str(ref) for ref in raw_refs if str(ref).strip()})
+            citation_check = self._citation_check(
+                output_kind="conversation_answer",
+                citation_refs=citation_refs,
+                scope=scope,
+                allowed_refs=allowed_refs,
+            )
             citation_check_refs = [f"citation_check:{citation_check['citation_check_id']}"]
             insufficient_requested = bool(model_output.get("insufficient_evidence"))
+            answer_text = str(model_output.get("answer") or "").strip()
+            cited_chunks = [
+                self.get_evidence_chunk(ref.split(":", 1)[1])
+                for ref in citation_refs
+                if ref.startswith("evidence_chunk:") and ref in allowed_refs
+            ]
+            statement_anchor_check = _statement_source_anchor(
+                answer_text,
+                [str(chunk.get("text") or "") for chunk in cited_chunks if isinstance(chunk, dict)],
+            )
             earned_evidence_backed = (
                 not insufficient_requested
                 and citation_check.get("status") == "passed"
                 and bool(citation_refs)
+                and statement_anchor_check.get("status") == "passed"
             )
             label = "evidence_backed" if earned_evidence_backed else "insufficient_evidence"
             presented_as_fact = earned_evidence_backed
             supporting_result_count = snapshot.get("result_count", 0) if earned_evidence_backed else 0
             output_mode = "ollama_answer" if earned_evidence_backed else "insufficient_evidence"
             trust_label_reason = (
-                "Ollama generated this answer and deterministic citation-resolution/span checks passed for the cited answer."
+                "Ollama generated this answer and deterministic citation-resolution, span, and source-anchor checks passed for the cited answer."
                 if earned_evidence_backed
                 else "Ollama did not produce a citation-checked direct answer from the scoped evidence."
             )
-            answer_text = str(model_output.get("answer") or "").strip()
             if not answer_text:
                 answer_text = "Insufficient evidence. Add or attach source evidence before treating this as fact."
             evidence_refs = sorted(
@@ -13524,6 +14019,10 @@ class LocalRuntimeStore:
                 earned_evidence_backed=earned_evidence_backed,
             )
         else:
+            statement_anchor_check = {
+                "status": "not_verified",
+                "semantic_faithfulness_state": "not_verified",
+            }
             if has_relevant_evidence:
                 evidence_refs.extend(
                     ref
@@ -13590,6 +14089,8 @@ class LocalRuntimeStore:
             "audit_refs": [],
             "model_run": model_run,
             "prompt_boundary": prompt_boundary,
+            "statement_anchor_check": statement_anchor_check,
+            "semantic_faithfulness_state": "human_required" if model_provider == "ollama" else "not_verified",
             "unsupported_assertions_labeled": not presented_as_fact,
             "created_at": utc_now(),
         }

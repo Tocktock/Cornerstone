@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlparse
 from datetime import datetime, timezone
 
 from cornerstone_cli import __version__
+from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
 from cornerstone_cli.product_ui import (
     PRODUCT_DETAIL_ROUTES,
     PRODUCT_LIST_ROUTES,
@@ -5363,10 +5364,19 @@ Search phrase: alpha-evidence-anchor.</code>
 
 
 class RuntimeHTTPServer(ThreadingHTTPServer):
-    def __init__(self, server_address: tuple[str, int], handler: type[BaseHTTPRequestHandler], *, root: Path, state_dir: Path) -> None:
+    def __init__(
+        self,
+        server_address: tuple[str, int],
+        handler: type[BaseHTTPRequestHandler],
+        *,
+        root: Path,
+        state_dir: Path,
+        model_config: RuntimeModelConfig,
+    ) -> None:
         super().__init__(server_address, handler)
         self.root = root
         self.state_dir = state_dir
+        self.model_config = model_config
 
 
 class VS0RuntimeHandler(BaseHTTPRequestHandler):
@@ -5378,6 +5388,10 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
     @property
     def store(self) -> LocalRuntimeStore:
         return LocalRuntimeStore(self.server.state_dir)
+
+    @property
+    def briefing(self) -> BriefingApplication:
+        return BriefingApplication(self.store, self.server.model_config)
 
     @property
     def root(self) -> Path:
@@ -5490,7 +5504,14 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_html(html_body, status_code)
             return
         if parts == ["health"]:
-            self._send_json(_json_response("success", service="cornerstone-vs0-runtime", real_external_http_calls=0))
+            self._send_json(
+                _json_response(
+                    "success",
+                    service="cornerstone-vs0-runtime",
+                    real_external_http_calls=0,
+                    model_runtime=self.server.model_config.public_metadata(),
+                )
+            )
             return
         if parts == ["ready"]:
             report = build_readiness_report(self.root)
@@ -5970,7 +5991,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _answer_conversation(self, conversation_id: str, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
-        result = self.store.answer_conversation(conversation_id, str(body.get("question", "")), scope)
+        result = self.briefing.answer(conversation_id, str(body.get("question", "")), scope)
         if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_NOT_FOUND", "message": "Conversation not found."}]), 404)
             return
@@ -6049,11 +6070,18 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
             return
         claim = result["claim"]
+        support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
         self._send_json(
             _json_response(
                 "success",
                 claim=claim,
-                evidence_refs=[f"conversation:{conversation_id}", f"claim:{claim['claim_id']}", *claim.get("evidence_bundle", {}).get("artifact_refs", [])],
+                evidence_refs=[
+                    f"conversation:{conversation_id}",
+                    f"claim:{claim['claim_id']}",
+                    *claim.get("evidence_bundle", {}).get("artifact_refs", []),
+                    *support.get("citation_refs", []),
+                    *support.get("citation_check_refs", []),
+                ],
                 audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [])],
             )
         )
@@ -6101,7 +6129,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
 
     def _create_brief(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
-        result = self.store.create_brief_from_evidence_bundle(str(body.get("evidence_bundle_id", "")), scope)
+        result = self.briefing.create_brief(str(body.get("evidence_bundle_id", "")), scope)
         if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_EVIDENCE_BUNDLE_NOT_FOUND", "message": "Evidence Bundle not found."}]), 404)
             return
@@ -6184,6 +6212,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if related_brief.get("brief_id"):
             refs.append(f"brief:{related_brief['brief_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+        refs.extend(support.get("citation_refs", []))
+        refs.extend(support.get("citation_check_refs", []))
         refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
         self._send_json(_json_response("success", claim=claim, evidence_refs=refs, audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
@@ -6291,11 +6322,37 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 400,
             )
             return
+        if result.get("status") == "support_required":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    claim=result["claim"],
+                    audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_SUPPORT_REQUIRED",
+                            "message": "Claim approval requires statement-level source support for the exact current revision.",
+                            "resolution_path": [
+                                "Create the Claim from an exact cited Brief finding, or use wording that is directly anchored in the attached sources.",
+                                "Review the cited source text before retrying approval.",
+                                "Do not treat an attached Evidence Bundle by itself as support for the statement.",
+                            ],
+                        }
+                    ],
+                ),
+                400,
+            )
+            return
+        support = result["claim"].get("statement_support") if isinstance(result["claim"].get("statement_support"), dict) else {}
         self._send_json(
             _json_response(
                 "success",
                 claim=result["claim"],
-                evidence_refs=[f"claim:{claim_id}"],
+                evidence_refs=[
+                    f"claim:{claim_id}",
+                    *support.get("citation_refs", []),
+                    *support.get("citation_check_refs", []),
+                ],
                 audit_refs=[f"audit:{result['audit_event']['event_id']}"],
             )
         )
@@ -6683,12 +6740,38 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         self._send_json(_json_response(report["status"], audit_integrity=report), 200 if report["status"] == "success" else 500)
 
 
-def make_server(root: Path, state_dir: Path, host: str = "127.0.0.1", port: int = 0) -> RuntimeHTTPServer:
-    return RuntimeHTTPServer((host, port), VS0RuntimeHandler, root=root.resolve(), state_dir=state_dir.resolve())
+def make_server(
+    root: Path,
+    state_dir: Path,
+    host: str = "127.0.0.1",
+    port: int = 0,
+    *,
+    model_config: RuntimeModelConfig | None = None,
+) -> RuntimeHTTPServer:
+    return RuntimeHTTPServer(
+        (host, port),
+        VS0RuntimeHandler,
+        root=root.resolve(),
+        state_dir=state_dir.resolve(),
+        model_config=model_config or RuntimeModelConfig.deterministic(),
+    )
 
 
-def run_server(root: Path, state_dir: Path, host: str = "127.0.0.1", port: int = 8787) -> None:
-    server = make_server(root, state_dir, host, port)
+def run_server(
+    root: Path,
+    state_dir: Path,
+    host: str = "127.0.0.1",
+    port: int = 8787,
+    *,
+    model_config: RuntimeModelConfig | None = None,
+) -> None:
+    server = make_server(
+        root,
+        state_dir,
+        host,
+        port,
+        model_config=model_config or RuntimeModelConfig.product_default(),
+    )
     try:
         server.serve_forever()
     finally:

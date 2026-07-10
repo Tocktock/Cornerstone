@@ -4659,7 +4659,7 @@ def _validate_runtime_acceptance_quickstart_report(
             "--brief",
             generated_ids.get("brief_id"),
             "--statement",
-            "The Alpha evidence anchor is available for local structural review.",
+            "Project Alpha research review keeps original source material before derived summaries.",
             "--state-dir",
             state_dir,
             *scope_cli,
@@ -5357,7 +5357,7 @@ def run_runtime_acceptance_quickstart(root: Path, *, output_path: Path) -> dict[
                 "--brief",
                 brief_id,
                 "--statement",
-                "The Alpha evidence anchor is available for local structural review.",
+                "Project Alpha research review keeps original source material before derived summaries.",
             ]
         ),
     )
@@ -5621,7 +5621,7 @@ def run_evux_quickstart(root: Path, *, output_path: Path) -> dict[str, Any]:
                 "--evidence-bundle-id",
                 bundle_id,
                 "--statement",
-                "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+                "Project Alpha research review keeps original source material before derived summaries.",
                 "--state-dir",
                 state_rel,
                 "--json",

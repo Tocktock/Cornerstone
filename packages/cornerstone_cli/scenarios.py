@@ -15588,7 +15588,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
             "--evidence-bundle-id",
             bundle_id,
             "--statement",
-            "The alpha evidence anchor is supported by an audit-linked evidence bundle.",
+            "Project Alpha research review keeps original source material before derived summaries.",
             "--state-dir",
             state_rel,
             "--json",
@@ -15884,6 +15884,26 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
     ) if snapshot_id else {}
     bundle = _payload(transcripts["bundle_create"]).get("evidence_bundle", {})
     bundle_id = bundle.get("evidence_bundle_id", "")
+    transcripts["unrelated_bundle_claim_create"] = _run_cli_json(
+        root,
+        [
+            "claim",
+            "create",
+            "--evidence-bundle-id",
+            bundle_id,
+            "--statement",
+            "The lunar research program launched a spacecraft yesterday.",
+            "--state-dir",
+            state_rel,
+            "--json",
+        ],
+    ) if bundle_id else {}
+    unrelated_bundle_claim = _payload(transcripts["unrelated_bundle_claim_create"]).get("claim", {})
+    unrelated_bundle_claim_id = unrelated_bundle_claim.get("claim_id", "")
+    transcripts["unrelated_bundle_claim_approve"] = _run_cli_json(
+        root,
+        ["claim", "approve", unrelated_bundle_claim_id, "--state-dir", state_rel, "--json"],
+    ) if unrelated_bundle_claim_id else {}
     transcripts["evidence_claim_create"] = _run_cli_json(
         root,
         [
@@ -15892,7 +15912,7 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
             "--evidence-bundle-id",
             bundle_id,
             "--statement",
-            "Evidence-backed claim with alpha evidence anchor.",
+            "Project Alpha research review keeps original material before derived summaries.",
             "--state-dir",
             state_rel,
             "--json",
@@ -15916,6 +15936,14 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         and "CS_CLAIM_EVIDENCE_REQUIRED" in unsupported_approval_codes
         and unsupported_approval_payload.get("audit_refs")
     )
+    unrelated_bundle_denied = (
+        unrelated_bundle_claim.get("trust_state") == "draft"
+        and unrelated_bundle_claim.get("statement_support", {}).get("status") == "not_verified"
+        and unrelated_bundle_claim.get("authority", {}).get("can_be_approved") is False
+        and transcripts["unrelated_bundle_claim_approve"].get("exit_code") == 4
+        and "CS_CLAIM_SUPPORT_REQUIRED" in _error_codes(transcripts["unrelated_bundle_claim_approve"])
+        and _payload(transcripts["unrelated_bundle_claim_approve"]).get("audit_refs")
+    )
     evidence_approved = (
         _exit_ok(transcripts["evidence_claim_approve"])
         and approved_claim.get("status") == "approved"
@@ -15936,6 +15964,7 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         and unsupported_claim.get("authority", {}).get("can_publish_shared_truth") is False
         and unsupported_claim.get("authority", {}).get("can_drive_autonomous_action") is False
         and unsupported_denied
+        and unrelated_bundle_denied
         and audit_ok
     )
     claim_007_ok = (
@@ -15971,7 +16000,7 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
                 "cornerstone claim create --evidence-bundle-id <bundle_id> --json",
                 "cornerstone claim approve <evidence_claim_id> --json",
             ],
-            "Claim approval requires an Evidence Bundle; missing evidence is denied and evidence-backed approval succeeds.",
+            "Claim approval requires both an Evidence Bundle and revision-bound statement support; missing support is denied and a source-anchored Claim can be approved.",
         ),
     ]
     blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
@@ -15998,6 +16027,11 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
             "evidence_bundle_id": bundle_id,
             "evidence_claim_id": evidence_claim_id,
             "evidence_claim_trust_state": evidence_claim.get("trust_state"),
+            "evidence_claim_statement_support": evidence_claim.get("statement_support"),
+            "unrelated_bundle_claim_id": unrelated_bundle_claim_id,
+            "unrelated_bundle_claim_trust_state": unrelated_bundle_claim.get("trust_state"),
+            "unrelated_bundle_claim_support_state": unrelated_bundle_claim.get("statement_support", {}).get("status"),
+            "unrelated_bundle_approval_error_codes": _error_codes(transcripts["unrelated_bundle_claim_approve"]),
             "approved_claim_status": approved_claim.get("status"),
             "approved_claim_trust_state": approved_claim.get("trust_state"),
             "approved_claim_authority": approved_claim.get("authority"),
@@ -16005,6 +16039,7 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         },
         "negative_evidence": {
             "unsupported_approval_allowed": 0 if unsupported_denied else 1,
+            "unrelated_bundle_claim_approved": 0 if unrelated_bundle_denied else 1,
             "evidence_claim_approval_blocked": 0 if evidence_approved else 1,
             "autonomous_action_allowed_from_claim": int(bool(approved_claim.get("authority", {}).get("can_drive_autonomous_action", True))),
         },
@@ -16045,7 +16080,7 @@ def verify_full_claim_collaboration(root: Path) -> dict[str, Any]:
             "--evidence-bundle-id",
             bundle_id,
             "--statement",
-            "The alpha evidence anchor supports a reusable operations decision.",
+            "Project Alpha research review keeps original source material before derived summaries.",
             "--state-dir",
             state_rel,
             "--json",
@@ -17073,7 +17108,7 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
             "--evidence-bundle-id",
             bundle_id,
             "--statement",
-            "The alpha evidence anchor is inspectable through the evidence viewer.",
+            "Project Alpha research review keeps original source material before derived summaries.",
             "--state-dir",
             state_rel,
             "--json",
@@ -22644,7 +22679,7 @@ def verify_vs0_product_domain_readiness(root: Path) -> dict[str, Any]:
                 "Hiring review note: candidate interview feedback highlights strong systems debugging and asks for a reference check. "
                 "Anchor: candidate-interview-anchor."
             ),
-            "claim": "The hiring review requires a reference-check follow-up supported by interview feedback.",
+            "claim": "Hiring review interview feedback highlights strong systems debugging and asks for a reference check.",
             "mission_goal": "Prepare a hiring review follow-up from evidence.",
         },
     ]
@@ -24115,7 +24150,7 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
                 "--evidence-bundle-id",
                 bundle_id,
                 "--statement",
-                "The Alpha evidence anchor is ready for the VS0 runtime loop.",
+                "Project Alpha research review keeps original source material before derived summaries.",
                 "--state-dir",
                 state_rel,
                 "--json",
@@ -24327,7 +24362,10 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
                 base_url,
                 "POST",
                 "/claims",
-                {"evidence_bundle_id": api_bundle_id, "statement": "The API path can create an evidence-backed VS0 runtime claim."},
+                {
+                    "evidence_bundle_id": api_bundle_id,
+                    "statement": "Project Alpha research review keeps original source material before derived summaries.",
+                },
             )
             if api_bundle_id
             else {}
@@ -25386,7 +25424,7 @@ def _run_evux_api_workflow(root: Path, state_path: Path) -> dict[str, Any]:
             "/claims",
             {
                 "evidence_bundle_id": ids["evidence_bundle_id"],
-                "statement": "The Alpha evidence anchor is ready for local VS0 EVUX acceptance.",
+                "statement": "Project Alpha research review keeps original source material before derived summaries.",
             },
         )
         ids["claim_id"] = _api_payload(transcripts["claim_create"]).get("claim", {}).get("claim_id", "")
