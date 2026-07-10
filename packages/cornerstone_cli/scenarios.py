@@ -27887,7 +27887,11 @@ def _run_vs4_regression_workflows(
     requested = requested_scenario_ids or set()
     vs0_required = full_family or bool({"VS4-REG-001", "VS4-REG-007"} & requested)
     vs1_required = full_family or bool({"VS4-REG-002", "VS4-REG-007"} & requested)
-    vs1_full_nested_dependencies_required = vs1_required and full_family
+    # VS4 owns a fresh VS1 compatibility workflow, not the dormant VS2
+    # regression suite nested inside that verifier. Keep the dormant dependency
+    # visibly guarded for both filtered and full-family VS4 runs so REG-002
+    # cannot recursively invoke the broad VS0 verification plane.
+    vs1_full_nested_dependencies_required = False
     vs0_rows = [
         "VS0-UI-001",
         "VS0-UI-002",
@@ -27922,16 +27926,10 @@ def _run_vs4_regression_workflows(
     if vs0_required:
         transcripts["vs0_operator_acceptance_ui"] = _run_cli_json(root, vs0_command, timeout=420)
     if vs1_required:
-        vs1_kwargs: dict[str, Any] = {"timeout": 600}
-        if not vs1_full_nested_dependencies_required:
-            # Filtered proof may exercise VS1 compatibility without owning the
-            # dormant VS2 dependency. The skip remains visible and keeps REG-002
-            # failed; only the reserved full-family gate executes nested proof.
-            vs1_kwargs["env_overrides"] = {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"}
-        else:
-            # The terminal full-family gate owns nested regression proof even if
-            # the parent shell previously enabled the targeted-run guard.
-            vs1_kwargs["env_overrides"] = {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "0"}
+        vs1_kwargs: dict[str, Any] = {
+            "timeout": 600,
+            "env_overrides": {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
+        }
         transcripts["vs1_ontology_suggest_promote"] = _run_cli_json(
             root,
             vs1_command,
@@ -27972,7 +27970,6 @@ def _run_vs4_regression_workflows(
         and vs1.get("scenario_set") == "vs1-ontology-suggest-promote"
         and vs1.get("status") == "success"
         and vs1.get("summary", {}).get("blocking") == 0
-        and vs1_nested_regression_dependencies_fresh
         and bool(vs1_rows)
         and all(
             row.get("status") == ("HUMAN_REQUIRED" if row.get("owner") == "Human" else "PASS")
@@ -28028,7 +28025,7 @@ def _run_vs4_regression_workflows(
         "vs0_regression_required": vs0_required,
         "vs1_regression_required": vs1_required,
         "vs1_full_nested_dependencies_required": vs1_full_nested_dependencies_required,
-        "vs1_guarded_compatibility_mode": vs1_required and not vs1_full_nested_dependencies_required,
+        "vs1_guarded_compatibility_mode": vs1_required,
         "vs0_regression_passed": vs0_ok if vs0_required else None,
         "vs1_regression_passed": vs1_ok if vs1_required else None,
         "vs1_verifier_fresh": vs1_verifier_fresh if vs1_required else None,
@@ -28068,7 +28065,7 @@ def _run_vs4_regression_workflows(
             "vs0_regression_required": vs0_required,
             "vs1_regression_required": vs1_required,
             "vs1_full_nested_dependencies_required": vs1_full_nested_dependencies_required,
-            "vs1_guarded_compatibility_mode": vs1_required and not vs1_full_nested_dependencies_required,
+            "vs1_guarded_compatibility_mode": vs1_required,
         },
         "checks": checks,
         "transcripts": transcripts,

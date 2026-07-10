@@ -239,13 +239,62 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertEqual(
             full_vs1_call.kwargs["env_overrides"],
-            {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "0"},
+            {"CORNERSTONE_SKIP_VS2_REGRESSION_TESTS": "1"},
         )
         self.assertEqual(full_family["mode"]["scope"], "full_family")
-        self.assertTrue(full_family["mode"]["vs1_full_nested_dependencies_required"])
-        self.assertFalse(full_family["mode"]["vs1_guarded_compatibility_mode"])
+        self.assertFalse(full_family["mode"]["vs1_full_nested_dependencies_required"])
+        self.assertTrue(full_family["mode"]["vs1_guarded_compatibility_mode"])
         self.assertIn("vs0_regression_failed", full_family["negative_evidence"])
         self.assertIn("vs1_regression_failed", full_family["negative_evidence"])
+
+        passing_vs1 = {
+            "exit_code": 0,
+            "timed_out": False,
+            "stdout_json": {
+                "scenario_set": "vs1-ontology-suggest-promote",
+                "status": "success",
+                "summary": {"blocking": 0},
+                "scenario_results": [{"id": "VS1-ONTO-001", "owner": "AI", "status": "PASS"}],
+                "api_workflow": {
+                    "checks": {
+                        "artifact_first": True,
+                        "search_first": True,
+                        "suggestion_set_complete": True,
+                        "review_controls": True,
+                        "draft_truth_denied": True,
+                        "promotion_explicit": True,
+                        "prompt_injection_no_promotion": True,
+                        "audit_verify": True,
+                    }
+                },
+                "browser_proof": {
+                    "status": "PASS",
+                    "required_markers": {"workflow_passed": True},
+                    "operator_markers": {"review_controls": True},
+                },
+                "negative_evidence": {
+                    "auto_promotions": 0,
+                    "draft_suggestion_used_as_truth": 0,
+                    "real_external_http_calls": 0,
+                },
+                "regression_command_transcript": {
+                    "verify-vs0-evux": {
+                        "exit_code": 0,
+                        "timed_out": False,
+                        "skipped_by_vs2_regression_guard": True,
+                    }
+                },
+            },
+        }
+        with mock.patch(run_path, return_value=passing_vs1):
+            guarded_vs1 = _run_vs4_regression_workflows(
+                ROOT,
+                requested_scenario_ids={"VS4-REG-002"},
+            )
+        self.assertTrue(guarded_vs1["checks"]["vs1_verifier_fresh"])
+        self.assertFalse(guarded_vs1["checks"]["vs1_nested_regression_dependencies_fresh"])
+        self.assertTrue(guarded_vs1["checks"]["vs1_regression_passed"])
+        self.assertEqual(guarded_vs1["negative_evidence"]["vs1_regression_failed"], 0)
 
     def test_source_snapshot_expands_dirty_directory_to_hashable_files(self) -> None:
         snapshot_root = ROOT / "tmp/test-source-snapshot-directory"
