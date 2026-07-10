@@ -4267,7 +4267,290 @@ class LocalRuntimeStore:
         _write_json(self.mission_control_path(surface_id), surface)
         return {"mission_control": surface, "audit_event": event}
 
-    def product_loop_view(
+    def resolve_product_loop_refs(
+        self,
+        scope: dict[str, str],
+        *,
+        selected_kind: str,
+        selected_id: str,
+    ) -> dict[str, Any]:
+        """Resolve one Inbox record to a coherent, scoped daily-loop lineage."""
+
+        kind = selected_kind.strip().lower().replace("/wiki", "")
+        getters = {
+            "brief": self.get_brief,
+            "claim": self.get_claim,
+            "memory": self.get_memory,
+            "action": self.get_action,
+        }
+        id_keys = {
+            "brief": "brief_id",
+            "claim": "claim_id",
+            "memory": "memory_id",
+            "action": "action_id",
+        }
+        if kind not in getters or not selected_id:
+            return {
+                "status": "not_found",
+                "error_code": "CS_LOOP_REF_NOT_FOUND",
+                "message": "Loop View could not find the selected Inbox work item.",
+                "resource": kind or "inbox_item",
+                "resource_id": selected_id or None,
+            }
+        selected = getters[kind](selected_id)
+        if selected is None:
+            return {
+                "status": "not_found",
+                "error_code": "CS_LOOP_REF_NOT_FOUND",
+                "message": "Loop View could not find the selected Inbox work item.",
+                "resource": kind,
+                "resource_id": selected_id,
+            }
+        if selected.get("scope") != scope:
+            return {
+                "status": "scope_denied",
+                "error_code": "CS_SCOPE_DENIED",
+                "message": "Loop View cannot show work from outside the requested workspace.",
+                "resource": kind,
+                "resource_id": selected_id,
+                "resource_scope": selected.get("scope"),
+            }
+
+        def _bundle_id(record_kind: str, record: dict[str, Any] | None) -> str:
+            if not record:
+                return ""
+            if record_kind in {"brief", "claim"}:
+                return str(record.get("evidence_bundle", {}).get("evidence_bundle_id") or "")
+            if record_kind == "memory":
+                return str(
+                    record.get("source", {}).get("evidence_bundle_id")
+                    or record.get("provenance", {}).get("source_evidence_bundle_id")
+                    or ""
+                )
+            if record_kind in {"mission", "action"}:
+                return str(record.get("evidence", {}).get("evidence_bundle_id") or "")
+            return ""
+
+        def _latest(records: list[dict[str, Any]]) -> dict[str, Any] | None:
+            if not records:
+                return None
+            return max(
+                records,
+                key=lambda record: (
+                    str(record.get("created_at") or record.get("updated_at") or ""),
+                    str(
+                        record.get("lesson_id")
+                        or record.get("trajectory_id")
+                        or record.get("action_id")
+                        or record.get("mission_id")
+                        or record.get("memory_id")
+                        or record.get("claim_id")
+                        or record.get("brief_id")
+                        or ""
+                    ),
+                ),
+            )
+
+        records: dict[str, dict[str, Any]] = {kind: selected}
+        bundle_id = _bundle_id(kind, selected)
+
+        if kind == "action":
+            claim_id = str(selected.get("source_claim_id") or "")
+            mission_id = str(selected.get("mission_id") or "")
+            claim = self.get_claim(claim_id) if claim_id else None
+            mission = self.get_mission(mission_id) if mission_id else None
+            if claim and claim.get("scope") == scope:
+                records["claim"] = claim
+                bundle_id = bundle_id or _bundle_id("claim", claim)
+            if (
+                mission
+                and mission.get("scope") == scope
+                and str(mission.get("source_claim", {}).get("claim_id") or "") == claim_id
+                and (not bundle_id or _bundle_id("mission", mission) == bundle_id)
+            ):
+                records["mission"] = mission
+
+        if kind == "claim":
+            bundle_id = bundle_id or _bundle_id("claim", selected)
+
+        if "claim" not in records and bundle_id and kind != "action":
+            claim_candidates = [
+                record
+                for record in self._claim_records(scope)
+                if _bundle_id("claim", record) == bundle_id
+            ]
+            directly_linked_claims = []
+            if kind == "brief":
+                directly_linked_claims = [
+                    record
+                    for record in claim_candidates
+                    if isinstance(record.get("related_brief"), dict)
+                    and str(record["related_brief"].get("brief_id") or "") == selected_id
+                ]
+            claim = (
+                _latest(directly_linked_claims)
+                if directly_linked_claims
+                else claim_candidates[0]
+                if len(claim_candidates) == 1
+                else None
+            )
+            if claim:
+                records["claim"] = claim
+
+        claim = records.get("claim")
+        claim_id = str(claim.get("claim_id") or "") if claim else ""
+
+        if "action" not in records and claim_id:
+            action_candidates = [
+                record
+                for record in self._action_records(scope)
+                if str(record.get("source_claim_id") or "") == claim_id
+                and (not bundle_id or _bundle_id("action", record) == bundle_id)
+            ]
+            action = _latest(action_candidates)
+            if action:
+                mission_id = str(action.get("mission_id") or "")
+                mission = self.get_mission(mission_id) if mission_id else None
+                if (
+                    mission
+                    and mission.get("scope") == scope
+                    and str(mission.get("source_claim", {}).get("claim_id") or "") == claim_id
+                    and (not bundle_id or _bundle_id("mission", mission) == bundle_id)
+                ):
+                    records["action"] = action
+                    records["mission"] = mission
+
+        if "mission" not in records and "action" in records:
+            mission_id = str(records["action"].get("mission_id") or "")
+            mission = self.get_mission(mission_id) if mission_id else None
+            if (
+                mission
+                and mission.get("scope") == scope
+                and str(mission.get("source_claim", {}).get("claim_id") or "") == claim_id
+                and (not bundle_id or _bundle_id("mission", mission) == bundle_id)
+            ):
+                records["mission"] = mission
+
+        if "brief" not in records and bundle_id:
+            related_brief_value = (claim or {}).get("related_brief")
+            related_brief_id = str(
+                related_brief_value.get("brief_id")
+                if isinstance(related_brief_value, dict)
+                else ""
+            )
+            related_brief = self.get_brief(related_brief_id) if related_brief_id else None
+            if (
+                related_brief
+                and related_brief.get("scope") == scope
+                and _bundle_id("brief", related_brief) == bundle_id
+            ):
+                records["brief"] = related_brief
+            else:
+                brief_candidates = [
+                    record
+                    for record in self._brief_records(scope)
+                    if _bundle_id("brief", record) == bundle_id
+                ]
+                brief = brief_candidates[0] if len(brief_candidates) == 1 else None
+                if brief:
+                    records["brief"] = brief
+
+        if "memory" not in records and bundle_id:
+            memory_candidates = [
+                record
+                for record in self._memory_records(scope)
+                if _bundle_id("memory", record) == bundle_id
+            ]
+            memory = memory_candidates[0] if len(memory_candidates) == 1 else None
+            if memory:
+                records["memory"] = memory
+
+        mission = records.get("mission")
+        action = records.get("action")
+        mission_id = str((mission or {}).get("mission_id") or "")
+        action_id = str((action or {}).get("action_id") or "")
+        if mission_id and action_id and claim_id:
+            required_refs = {f"action:{action_id}", f"claim:{claim_id}"}
+            trajectory = _latest(
+                [
+                    record
+                    for record in self._trajectory_records(scope)
+                    if str(record.get("mission_id") or "") == mission_id
+                    and required_refs.issubset(
+                        {str(ref) for ref in record.get("evidence_refs", []) if isinstance(ref, str)}
+                    )
+                ]
+            )
+            if trajectory:
+                lesson = _latest(
+                    [
+                        record
+                        for record in self._lesson_candidate_records(scope)
+                        if str(record.get("trajectory_id") or "") == str(trajectory.get("trajectory_id") or "")
+                    ]
+                )
+                if lesson:
+                    records["lesson"] = lesson
+
+        artifact_ids = {
+            str(ref).split(":", 1)[1]
+            for record_kind, record in records.items()
+            if record_kind in {"brief", "claim", "memory", "mission", "action"}
+            for ref in (
+                record.get("evidence_bundle", {}).get("artifact_refs", [])
+                if record_kind in {"brief", "claim"}
+                else record.get("source", {}).get("artifact_refs", [])
+                if record_kind == "memory"
+                else record.get("evidence", {}).get("artifact_refs", [])
+            )
+            if isinstance(ref, str) and ref.startswith("artifact:")
+        }
+        conversation = _latest(
+            [
+                record
+                for record in self._conversation_records(scope)
+                if str(record.get("source_artifact_id") or "") in artifact_ids
+            ]
+        )
+        if conversation:
+            records["conversation"] = conversation
+
+        resolved = {
+            f"{record_kind}_id": str(record.get(id_keys.get(record_kind, f"{record_kind}_id")) or "")
+            for record_kind, record in records.items()
+            if record_kind in {"conversation", "brief", "claim", "memory", "mission", "action", "lesson"}
+        }
+        return {
+            "status": "resolved",
+            "selected_ref": f"{kind}:{selected_id}",
+            "scope": scope,
+            "refs": {key: value for key, value in resolved.items() if value},
+        }
+
+    def project_product_loop_for_record(
+        self,
+        scope: dict[str, str],
+        *,
+        selected_kind: str,
+        selected_id: str,
+    ) -> dict[str, Any]:
+        resolution = self.resolve_product_loop_refs(
+            scope,
+            selected_kind=selected_kind,
+            selected_id=selected_id,
+        )
+        if resolution.get("status") != "resolved":
+            return resolution
+        result = self._project_product_loop_view(scope, **resolution["refs"])
+        result.pop("_prior_journey_audit_refs", None)
+        result["selection"] = {
+            "selected_ref": resolution["selected_ref"],
+            "resolved_refs": resolution["refs"],
+            "read_only": True,
+        }
+        return result
+
+    def _project_product_loop_view(
         self,
         scope: dict[str, str],
         *,
@@ -4576,6 +4859,24 @@ class LocalRuntimeStore:
                 "shared_artifact_refs": shared_artifact_refs,
             }
         )
+        scoped_audit_events = [
+            event
+            for event in self._all_audit_events()
+            if all(event.get(key) == value for key, value in scope.items())
+            and isinstance(event.get("subject"), dict)
+        ]
+        requested_typed_refs = {f"{kind}:{record_id}" for kind, record_id in refs.items()}
+        prior_journey_audit_ref = next(
+            (
+                f"audit:{event['event_id']}"
+                for event in reversed(scoped_audit_events)
+                if event.get("event_type") == "product.loop.viewed"
+                and set(event.get("details", {}).get("validated_refs", [])) == requested_typed_refs
+                and event.get("event_id")
+            ),
+            "",
+        )
+        journey_audit_refs = [prior_journey_audit_ref] if prior_journey_audit_ref else []
         def _stage_status(kind: str, record: dict[str, Any] | None) -> str:
             if kind == "inbox":
                 return "ready"
@@ -4604,14 +4905,41 @@ class LocalRuntimeStore:
             refs.extend(_artifact_refs(kind, record))
             return list(dict.fromkeys(ref for ref in refs if ref))
 
-        def _stage_audit_refs(record: dict[str, Any] | None) -> list[str]:
-            if not record:
-                return []
+        def _stage_audit_refs(kind: str, record: dict[str, Any] | None) -> list[str]:
             refs: list[str] = []
-            for key in ("audit_refs", "activity_refs", "approval_audit_refs", "policy_decision_refs"):
-                value = record.get(key)
-                if isinstance(value, list):
-                    refs.extend(str(ref) for ref in value if isinstance(ref, str) and ref)
+            if record:
+                scalar_audit_ref = record.get("audit_ref")
+                if isinstance(scalar_audit_ref, str) and scalar_audit_ref:
+                    refs.append(scalar_audit_ref)
+                for key in ("audit_refs", "activity_refs", "approval_audit_refs", "policy_decision_refs"):
+                    value = record.get(key)
+                    if isinstance(value, list):
+                        refs.extend(str(ref) for ref in value if isinstance(ref, str) and ref)
+                record_id = str(
+                    record.get(f"{kind}_id")
+                    or record.get("conversation_id")
+                    or record.get("brief_id")
+                    or record.get("claim_id")
+                    or record.get("memory_id")
+                    or record.get("action_id")
+                    or record.get("lesson_id")
+                    or record.get("connected_outcome_id")
+                    or ""
+                )
+                if record_id:
+                    latest_record_audit_ref = next(
+                        (
+                            f"audit:{event['event_id']}"
+                            for event in reversed(scoped_audit_events)
+                            if str(event.get("subject", {}).get("id") or "") == record_id
+                            and event.get("event_id")
+                        ),
+                        "",
+                    )
+                    if latest_record_audit_ref:
+                        refs.append(latest_record_audit_ref)
+            if record is not None or kind == "inbox":
+                refs.extend(journey_audit_refs)
             return list(dict.fromkeys(refs))
 
         def _stage_row(
@@ -4633,7 +4961,7 @@ class LocalRuntimeStore:
                 "description": description,
                 "record_refs": [ref for ref in [ref, native_ref] if ref],
                 "evidence_refs": _stage_evidence_refs(kind, record),
-                "audit_refs": _stage_audit_refs(record),
+                "audit_refs": _stage_audit_refs(kind, record),
                 "scope": scope,
                 "continue_target": continue_target,
                 "review_required": kind in {"claim", "memory", "action", "learn"},
@@ -4706,12 +5034,52 @@ class LocalRuntimeStore:
         loop_id = f"productloop_{_json_hash(loop_base)[:16]}"
         loop = dict(loop_base)
         loop["loop_id"] = loop_id
+        return {"product_loop": loop, "_prior_journey_audit_refs": journey_audit_refs}
+
+    def product_loop_view(
+        self,
+        scope: dict[str, str],
+        *,
+        conversation_id: str = "",
+        brief_id: str = "",
+        claim_id: str = "",
+        memory_id: str = "",
+        mission_id: str = "",
+        action_id: str = "",
+        outcome_id: str = "",
+        lesson_id: str = "",
+    ) -> dict[str, Any]:
+        result = self._project_product_loop_view(
+            scope,
+            conversation_id=conversation_id,
+            brief_id=brief_id,
+            claim_id=claim_id,
+            memory_id=memory_id,
+            mission_id=mission_id,
+            action_id=action_id,
+            outcome_id=outcome_id,
+            lesson_id=lesson_id,
+        )
+        loop = result.get("product_loop")
+        if not isinstance(loop, dict):
+            return result
+        prior_journey_audit_refs = set(result.pop("_prior_journey_audit_refs", []))
+        if prior_journey_audit_refs:
+            for stage in loop.get("stages", []):
+                if isinstance(stage, dict):
+                    stage["audit_refs"] = [
+                        ref for ref in stage.get("audit_refs", []) if ref not in prior_journey_audit_refs
+                    ]
+        loop_id = str(loop["loop_id"])
         _write_json(self.product_surface_path(loop_id), loop)
         event = self.append_audit(
             "product.loop.viewed",
             scope,
             {"type": "product_loop", "id": loop_id},
-            {"visible_stage_count": len([stage for stage in loop["stages"] if stage["visible"]])},
+            {
+                "visible_stage_count": len([stage for stage in loop["stages"] if stage["visible"]]),
+                "validated_refs": loop.get("loop_validation", {}).get("validated_refs", []),
+            },
         )
         loop_audit_ref = f"audit:{event['event_id']}"
         for stage in loop.get("stages", []):

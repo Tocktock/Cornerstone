@@ -50,6 +50,7 @@ from cornerstone_cli.acceptance import (
     _json_value_sha256,
     _release_manifest_content_payload,
     _source_snapshot,
+    _vs4_journey_matches_runtime,
     _vs4_product_journey_timeline_evidence,
     collect_release_evidence,
     finalize_release_evidence,
@@ -15019,6 +15020,8 @@ class ScaffoldCliTests(unittest.TestCase):
   data-vs4-journey-stage-ref="{ref}"
   data-vs4-journey-evidence-refs="evidence_bundle:bundle_1"
   data-vs4-journey-audit-refs="audit:audit_{index}"
+  data-vs4-journey-runtime-status="needs_review"
+  data-vs4-journey-description="Review this stage."
 ><strong>{stage}</strong><span>Review this stage.</span><code>{ref}</code><details><summary>Evidence and activity refs</summary></details></article>
 """
             for index, (stage, ref) in enumerate(stages, start=1)
@@ -15041,6 +15044,23 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertTrue(all(value == 0 for value in evidence["negative_evidence"].values()))
         self.assertEqual(evidence["details"]["stage_labels"], [stage for stage, _ in stages])
         self.assertEqual(evidence["details"]["progressive_detail_count"], 6)
+        runtime_loop = {
+            "stages": [
+                {
+                    "stage": stage,
+                    "record_refs": [ref] if ref else [],
+                    "evidence_refs": ["evidence_bundle:bundle_1"],
+                    "audit_refs": [f"audit:audit_{index}"],
+                    "status": "needs_review",
+                    "description": "Review this stage.",
+                }
+                for index, (stage, ref) in enumerate(stages, start=1)
+            ]
+        }
+        self.assertTrue(_vs4_journey_matches_runtime(evidence["details"], runtime_loop))
+        swapped = json.loads(json.dumps(evidence["details"]))
+        swapped["stages"][1]["record_refs"] = ["claim:claim_1"]
+        self.assertFalse(_vs4_journey_matches_runtime(swapped, runtime_loop))
 
     def test_vs4_filtered_gate_checks_journey_timeline_when_selected_rows_depend_on_it(self) -> None:
         def tamper(report: dict[str, Any]) -> None:

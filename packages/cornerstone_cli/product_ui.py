@@ -110,6 +110,7 @@ def render_product_page(
         active = "/actions"
     elif route == "/inbox":
         title = "Inbox"
+        _load_selected_product_loop(ctx)
         content = _inbox_page(ctx)
         active = "/inbox"
     else:
@@ -255,6 +256,7 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
     claims = [record for record in claims if id(record) not in internal_record_objects]
     actions = [record for record in actions if id(record) not in internal_record_objects]
     memories = [record for record in memories if id(record) not in internal_record_objects]
+    inbox = _inbox_items(briefs, claims, actions, memories, scope=scope)
     return {
         "store": store,
         "scope": scope,
@@ -268,8 +270,27 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
         "internal_lineage_refs": internal_lineage_refs,
         "load_errors": list(dict.fromkeys(load_errors)),
         "suggestions": _suggestions(artifacts, briefs, claims),
-        "inbox": _inbox_items(briefs, claims, actions, memories, scope=scope),
+        "inbox": inbox,
+        "selected_product_loop": None,
     }
+
+
+def _load_selected_product_loop(ctx: dict[str, Any]) -> None:
+    inbox = ctx.get("inbox") if isinstance(ctx.get("inbox"), list) else []
+    if not inbox:
+        return
+    selected = inbox[0]
+    try:
+        ctx["selected_product_loop"] = ctx["store"].project_product_loop_for_record(
+            ctx["scope"],
+            selected_kind=str(selected.get("record_kind") or ""),
+            selected_id=str(selected.get("record_id") or ""),
+        )
+    except Exception:
+        errors = ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else []
+        if "work journey" not in errors:
+            errors.append("work journey")
+        ctx["load_errors"] = errors
 
 
 def _safe_records(read: Any, errors: list[str] | None = None, label: str = "workspace records") -> list[dict[str, Any]]:
@@ -800,6 +821,9 @@ def _inbox_items(
                 "owner": owner_label,
                 "type": "Brief",
                 "icon": "B",
+                "record_kind": "brief",
+                "record_id": str(brief.get("brief_id") or ""),
+                "record_ref": f"brief:{brief.get('brief_id')}" if brief.get("brief_id") else "",
             }
         )
     for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"][:2]:
@@ -819,6 +843,9 @@ def _inbox_items(
                 "owner": owner_label,
                 "type": "Claim",
                 "icon": "C",
+                "record_kind": "claim",
+                "record_id": str(claim.get("claim_id") or ""),
+                "record_ref": f"claim:{claim.get('claim_id')}" if claim.get("claim_id") else "",
             }
         )
     pending_actions = [action for action in actions if _action_lifecycle(action)["stage"] != "executed"]
@@ -856,6 +883,9 @@ def _inbox_items(
                 "owner": owner_label,
                 "type": "Action",
                 "icon": "A",
+                "record_kind": "action",
+                "record_id": str(action.get("action_id") or ""),
+                "record_ref": f"action:{action.get('action_id')}" if action.get("action_id") else "",
             }
         )
     draft_memories = [
@@ -884,6 +914,9 @@ def _inbox_items(
                 "owner": owner_label,
                 "type": "Memory",
                 "icon": "M",
+                "record_kind": "memory",
+                "record_id": str(memory.get("memory_id") or ""),
+                "record_ref": f"memory:{memory.get('memory_id')}" if memory.get("memory_id") else "",
             }
         )
     return _recent(items, limit=8)
@@ -2223,6 +2256,102 @@ button, input, textarea {{ font: inherit; }}
   line-height: var(--cs-typography-label-lineHeight);
 }}
 .cs-inbox-preview-note p {{ margin: 0; color: var(--cs-color-text-secondary); }}
+.cs-journey-timeline {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-3);
+  min-width: 0;
+}}
+.cs-journey-timeline.is-recovery {{
+  border-color: var(--cs-state-underReview-border);
+  background: var(--cs-state-underReview-bg);
+}}
+.cs-journey-header {{
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--cs-space-3);
+  flex-wrap: wrap;
+  min-width: 0;
+}}
+.cs-journey-header h3 {{
+  margin: 0;
+  font-size: var(--cs-typography-sectionTitle-fontSize);
+  line-height: var(--cs-typography-sectionTitle-lineHeight);
+}}
+.cs-journey-header p {{ margin: var(--cs-space-1) 0 0; color: var(--cs-color-text-secondary); }}
+.cs-journey-stage-list {{
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}}
+.cs-journey-stage-list > li {{ min-width: 0; }}
+.cs-journey-stage {{
+  border-left: 3px solid var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-sm);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  min-width: 0;
+}}
+.cs-journey-stage.is-ready {{
+  border-left-color: var(--cs-state-saved-border);
+  background: var(--cs-state-saved-bg);
+}}
+.cs-journey-stage.is-needs-review {{
+  border-left-color: var(--cs-state-underReview-border);
+  background: var(--cs-state-underReview-bg);
+}}
+.cs-journey-stage.is-blocked {{
+  border-left-color: var(--cs-state-policyBlocked-border);
+  background: var(--cs-state-policyBlocked-bg);
+}}
+.cs-journey-stage.is-ready .cs-dot {{ background: var(--cs-state-saved-fg); }}
+.cs-journey-stage.is-needs-review .cs-dot {{ background: var(--cs-state-underReview-fg); }}
+.cs-journey-stage.is-blocked .cs-dot {{ background: var(--cs-state-policyBlocked-fg); }}
+.cs-journey-stage-body {{ display: grid; gap: var(--cs-space-2); min-width: 0; }}
+.cs-journey-stage-body p {{ margin: 0; color: var(--cs-color-text-secondary); overflow-wrap: anywhere; }}
+.cs-journey-stage-heading {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--cs-space-2);
+  flex-wrap: wrap;
+}}
+.cs-journey-ref-grid {{
+  margin: var(--cs-space-2) 0 0;
+  display: grid;
+  grid-template-columns: minmax(88px, auto) minmax(0, 1fr);
+  gap: var(--cs-space-1) var(--cs-space-2);
+}}
+.cs-journey-ref-grid dt {{ color: var(--cs-color-text-muted); }}
+.cs-journey-ref-grid dd {{ margin: 0; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }}
+.cs-journey-ref-grid code {{ display: inline-block; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }}
+.cs-journey-recovery {{ border-top: 1px solid var(--cs-color-border-default); padding-top: var(--cs-space-2); }}
+.cs-journey-recovery summary {{
+  cursor: pointer;
+  min-height: 32px;
+  padding: var(--cs-space-1) 0;
+  color: var(--cs-color-primary-700);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-journey-recovery summary:focus-visible,
+.cs-journey-stage summary:focus-visible {{
+  outline: 2px solid var(--cs-color-border-focus);
+  outline-offset: 2px;
+}}
+.cs-journey-recovery-list {{ display: grid; gap: var(--cs-space-2); margin-top: var(--cs-space-2); }}
+.cs-journey-recovery-list > div {{
+  border-left: 2px solid var(--cs-state-underReview-border);
+  padding-left: var(--cs-space-2);
+  display: grid;
+  gap: var(--cs-space-1);
+  color: var(--cs-color-text-secondary);
+}}
+.cs-journey-recovery-list strong {{ color: var(--cs-color-text-primary); }}
 .cs-inbox-linked-list {{
   display: grid;
   gap: var(--cs-space-2);
@@ -4149,6 +4278,7 @@ button, input, textarea {{ font: inherit; }}
   .cs-ask-bar {{ grid-template-columns: 1fr; }}
   .cs-suggestion-row {{ grid-template-columns: 1fr; }}
   .cs-inbox-lane-summary {{ align-items: flex-start; }}
+  .cs-journey-ref-grid {{ grid-template-columns: 1fr; }}
   .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
   .cs-empty-actions .cs-button {{ justify-content: center; }}
   .cs-detail-actions {{ justify-content: flex-start; }}
@@ -5512,7 +5642,11 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
 def _inbox_page(ctx: dict[str, Any]) -> str:
     items = ctx["inbox"]
     rows = "".join(_inbox_table_row(item, index == 0) for index, item in enumerate(items)) or _inbox_empty()
-    detail = _inbox_detail_panel(items[0] if items else None)
+    detail = _inbox_detail_panel(
+        items[0] if items else None,
+        ctx.get("selected_product_loop") if isinstance(ctx.get("selected_product_loop"), dict) else None,
+        ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {},
+    )
     counts = _inbox_counts(items)
     lane_summary = _inbox_lane_summary(counts)
     item_range = f"1-{len(items)} of {len(items)} items" if items else "0 of 0 items"
@@ -5618,7 +5752,11 @@ def _inbox_table_row(item: dict[str, Any], selected: bool = False) -> str:
 """
 
 
-def _inbox_detail_panel(item: dict[str, Any] | None) -> str:
+def _inbox_detail_panel(
+    item: dict[str, Any] | None,
+    product_loop_result: dict[str, Any] | None = None,
+    scope: dict[str, str] | None = None,
+) -> str:
     if not item:
         return f"""
 <aside class="cs-panel flat">
@@ -5637,6 +5775,7 @@ def _inbox_detail_panel(item: dict[str, Any] | None) -> str:
 """
     reason = _inbox_waiting_reason(item)
     linked_sources = _inbox_linked_sources(item)
+    journey_timeline = _inbox_journey_timeline(product_loop_result, scope or {})
     return f"""
 <aside class="cs-panel flat cs-inbox-detail">
   <div class="cs-inbox-detail-title">
@@ -5658,6 +5797,7 @@ def _inbox_detail_panel(item: dict[str, Any] | None) -> str:
       <dt>Queue</dt><dd>{h(item.get("queue") or "Needs review")}</dd>
     </dl>
   </section>
+  {journey_timeline}
   <section class="cs-inbox-action-panel">
     <h2 class="cs-section-title">Next actions</h2>
     <div class="cs-inbox-actions">
@@ -5687,6 +5827,171 @@ def _inbox_detail_panel(item: dict[str, Any] | None) -> str:
     </div>
   </section>
 </aside>
+"""
+
+
+def _inbox_journey_timeline(
+    product_loop_result: dict[str, Any] | None,
+    scope: dict[str, str],
+) -> str:
+    loop = product_loop_result.get("product_loop") if isinstance(product_loop_result, dict) else None
+    validation = loop.get("loop_validation") if isinstance(loop, dict) else None
+    stages = loop.get("stages") if isinstance(loop, dict) else None
+    expected_stages = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
+    loop_scope = loop.get("scope") if isinstance(loop, dict) else None
+    selection = product_loop_result.get("selection") if isinstance(product_loop_result, dict) else None
+    selected_ref = str(selection.get("selected_ref") or "") if isinstance(selection, dict) else ""
+    stage_refs = {
+        str(ref)
+        for stage in stages or []
+        if isinstance(stage, dict)
+        for ref in stage.get("record_refs", [])
+        if isinstance(ref, str) and ref
+    }
+    valid = (
+        isinstance(loop, dict)
+        and isinstance(validation, dict)
+        and validation.get("status") == "validated"
+        and isinstance(stages, list)
+        and [stage.get("stage") for stage in stages if isinstance(stage, dict)] == expected_stages
+        and loop_scope == scope
+        and (not selected_ref or selected_ref in stage_refs)
+    )
+    if not valid:
+        return f"""
+<section class="cs-journey-timeline is-recovery" data-product-state="failed-with-recovery">
+  <div class="cs-journey-header">
+    <div>
+      <div class="cs-kicker">Work journey</div>
+      <h3>Journey details unavailable</h3>
+      <p>CornerStone kept this item in the current workspace, but its linked work could not be shown safely.</p>
+    </div>
+    {_chip("Review safely", "underReview")}
+  </div>
+  {_inbox_journey_recovery_details()}
+</section>
+"""
+
+    stage_html = "".join(_inbox_journey_stage(stage) for stage in stages if isinstance(stage, dict))
+    return f"""
+<section
+  class="cs-journey-timeline"
+  aria-labelledby="cs-journey-title"
+  data-vs4-ops-inbox-journey-timeline="runtime-loop-view"
+  data-vs4-loop-recovery-no-authority-expansion="true"
+  data-vs4-loop-recovery-no-live-writeback="true"
+>
+  <div class="cs-journey-header">
+    <div>
+      <div class="cs-kicker">Work journey</div>
+      <h3 id="cs-journey-title">Inbox to review outcome</h3>
+      <p>See where this work came from and what still needs review.</p>
+    </div>
+    <span class="cs-chip cs-chip-searchable">Current saved journey</span>
+  </div>
+  <p class="cs-meta">Workspace: {h(_scope_label(scope))}</p>
+  <ol class="cs-timeline cs-journey-stage-list">{stage_html}</ol>
+  {_inbox_journey_recovery_details()}
+</section>
+"""
+
+
+def _inbox_journey_stage(stage: dict[str, Any]) -> str:
+    label = str(stage.get("stage") or "Stage")
+    runtime_status = str(stage.get("status") or "not_requested")
+    status_label, status_chip, status_state = _inbox_journey_status(stage)
+    description = str(stage.get("description") or "Review this part of the journey before continuing.")
+    record_refs = _string_refs(stage.get("record_refs"))
+    evidence_refs = _string_refs(stage.get("evidence_refs"))
+    audit_refs = [ref for ref in _string_refs(stage.get("audit_refs")) if ref.startswith("audit:")]
+    primary_refs = " | ".join(record_refs)
+    evidence_attr = " | ".join(evidence_refs)
+    audit_attr = " | ".join(audit_refs)
+    next_cues = {
+        "Inbox": "Next: open the selected review item.",
+        "Brief": "Next: check findings, gaps, and source support.",
+        "Claim": "Next: review the candidate before any approval.",
+        "Memory/Wiki": "Next: keep this knowledge candidate in review.",
+        "Action": "Next: inspect the preview and approval boundary.",
+        "Learn": "Next: review the outcome lesson before broader use.",
+    }
+
+    def _ref_detail(title: str, refs: list[str], empty: str) -> str:
+        values = " ".join(f"<code>{h(ref)}</code>" for ref in refs) if refs else h(empty)
+        return f"<dt>{h(title)}</dt><dd>{values}</dd>"
+
+    return f"""
+<li>
+  <article
+    class="cs-timeline-item cs-journey-stage is-{h(status_state)}"
+    data-vs4-journey-stage="{h(label)}"
+    data-vs4-journey-stage-status="{h(status_state)}"
+    data-vs4-journey-runtime-status="{h(runtime_status)}"
+    data-vs4-journey-description="{h(description)}"
+    data-vs4-journey-stage-ref="{h(primary_refs)}"
+    data-vs4-journey-evidence-refs="{h(evidence_attr)}"
+    data-vs4-journey-audit-refs="{h(audit_attr)}"
+  >
+    <span class="cs-dot" aria-hidden="true"></span>
+    <div class="cs-journey-stage-body">
+      <div class="cs-journey-stage-heading">
+        <strong>{h(label)}</strong>
+        {_chip(status_label, status_chip)}
+      </div>
+      <p>{h(description)}</p>
+      <span class="cs-meta">{h(next_cues.get(label, "Next: continue review."))}</span>
+      <details class="cs-audit-detail">
+        <summary>Evidence and activity refs</summary>
+        <dl class="cs-journey-ref-grid">
+          {_ref_detail("Work record", record_refs, "Not linked yet")}
+          {_ref_detail("Evidence", evidence_refs, "No evidence ref available")}
+          {_ref_detail("Activity", audit_refs, "No activity ref available")}
+        </dl>
+      </details>
+    </div>
+  </article>
+</li>
+"""
+
+
+def _string_refs(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    return list(dict.fromkeys(str(ref) for ref in value if isinstance(ref, str) and ref))
+
+
+def _inbox_journey_status(stage: dict[str, Any]) -> tuple[str, str, str]:
+    status = str(stage.get("status") or "not_requested").lower().replace("-", "_")
+    if any(marker in status for marker in ("blocked", "denied", "failed", "mismatch")):
+        return "Blocked / recovery", "policyBlocked", "blocked"
+    if status == "not_requested":
+        return "Not linked yet", "underReview", "needs-review"
+    if bool(stage.get("review_required")) or any(
+        marker in status for marker in ("draft", "review", "pending", "required", "candidate")
+    ):
+        return "Needs review", "underReview", "needs-review"
+    return "Ready", "saved", "ready"
+
+
+def _inbox_journey_recovery_details() -> str:
+    return """
+<details class="cs-journey-recovery">
+  <summary>Safe recovery behavior</summary>
+  <div class="cs-journey-recovery-list">
+    <div data-vs4-loop-recovery-state="missing-ref" data-vs4-loop-recovery-status="blocked-safe">
+      <strong>Missing work item</strong>
+      <span>CornerStone could not find one requested work item. Nothing new was approved or sent.</span>
+    </div>
+    <div data-vs4-loop-recovery-state="cross-scope" data-vs4-loop-recovery-status="blocked-safe">
+      <strong>Outside workspace</strong>
+      <span>Work from another workspace stays outside this journey. Workspace scope stayed unchanged.</span>
+    </div>
+    <div data-vs4-loop-recovery-state="lineage-mismatch" data-vs4-loop-recovery-status="blocked-safe">
+      <strong>Different journey</strong>
+      <span>CornerStone did not combine unrelated evidence-backed work. No new journey or activity record was created.</span>
+    </div>
+  </div>
+</details>
 """
 
 

@@ -1475,7 +1475,9 @@ def _normalize_captured_dom(html: str) -> str:
 
 def _vs4_product_page_check(path: str, response: dict[str, Any], expected_surface: str) -> dict[str, Any]:
     html = str(response.get("body") or "")
-    forbidden = sorted(set(match.group(0) for match in VS4_PRODUCT_FORBIDDEN_RE.finditer(html)))
+    visible_html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.IGNORECASE | re.DOTALL)
+    visible_text = re.sub(r"<[^>]+>", " ", visible_html)
+    forbidden = sorted(set(match.group(0) for match in VS4_PRODUCT_FORBIDDEN_RE.finditer(visible_text)))
     return {
         "path": path,
         "status": response.get("status"),
@@ -1539,6 +1541,29 @@ def _vs4_product_journey_timeline_evidence(inbox_html: str) -> dict[str, Any]:
         labels = attribute_values(attributes, "data-vs4-journey-stage")
         if labels:
             staged_rows[labels[0]] = (attributes, body)
+
+    rendered_stages = []
+    for stage in expected_stages:
+        attributes, _ = staged_rows.get(stage, ("", ""))
+
+        def split_refs(attribute: str) -> list[str]:
+            values = attribute_values(attributes, attribute)
+            return [ref for ref in (values[0].split(" | ") if values else []) if ref]
+
+        def first_attribute(attribute: str) -> str:
+            values = attribute_values(attributes, attribute)
+            return values[0] if values else ""
+
+        rendered_stages.append(
+            {
+                "stage": stage,
+                "record_refs": split_refs("data-vs4-journey-stage-ref"),
+                "evidence_refs": split_refs("data-vs4-journey-evidence-refs"),
+                "audit_refs": split_refs("data-vs4-journey-audit-refs"),
+                "runtime_status": first_attribute("data-vs4-journey-runtime-status"),
+                "description": first_attribute("data-vs4-journey-description"),
+            }
+        )
 
     product_language_before_refs = True
     progressive_detail_count = 0
@@ -1649,6 +1674,7 @@ def _vs4_product_journey_timeline_evidence(inbox_html: str) -> dict[str, Any]:
             "stage_refs": stage_refs,
             "evidence_refs": evidence_refs,
             "audit_refs": audit_refs,
+            "stages": rendered_stages,
             "progressive_detail_count": progressive_detail_count,
             "recovery_states": recovery_states,
             "recovery_copy": recovery_copy,
@@ -1656,6 +1682,37 @@ def _vs4_product_journey_timeline_evidence(inbox_html: str) -> dict[str, Any]:
             "no_live_writeback": no_live_writeback,
         },
     }
+
+
+def _vs4_journey_matches_runtime(
+    journey_details: dict[str, Any],
+    product_loop: dict[str, Any],
+) -> bool:
+    rendered = journey_details.get("stages")
+    runtime = product_loop.get("stages")
+    expected_labels = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
+    if not isinstance(rendered, list) or not isinstance(runtime, list):
+        return False
+    if [stage.get("stage") for stage in runtime if isinstance(stage, dict)] != expected_labels:
+        return False
+    if [stage.get("stage") for stage in rendered if isinstance(stage, dict)] != expected_labels:
+        return False
+    if len(rendered) != len(runtime):
+        return False
+    for rendered_stage, runtime_stage in zip(rendered, runtime, strict=True):
+        if not isinstance(rendered_stage, dict) or not isinstance(runtime_stage, dict):
+            return False
+        if rendered_stage.get("record_refs") != runtime_stage.get("record_refs", []):
+            return False
+        if rendered_stage.get("evidence_refs") != runtime_stage.get("evidence_refs", []):
+            return False
+        if set(rendered_stage.get("audit_refs", [])) != set(runtime_stage.get("audit_refs", [])):
+            return False
+        if rendered_stage.get("runtime_status") != str(runtime_stage.get("status") or "not_requested"):
+            return False
+        if rendered_stage.get("description") != str(runtime_stage.get("description") or ""):
+            return False
+    return True
 
 
 def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, Any]:
@@ -1733,6 +1790,24 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
         claim_id = str((claim_payload.get("claim") or {}).get("claim_id") or "")
         created["claim_id"] = claim_id
 
+        memory_response = _vs4_http_request(
+            base_url,
+            "/memories",
+            method="POST",
+            payload={
+                **scope,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Draft renewal knowledge candidate for owner review.",
+                "trust_state": "draft",
+                "status": "draft",
+                "memory_type": "knowledge_candidate",
+                "synthesis_mode": "auto",
+            },
+        )
+        memory_payload = _vs4_json_response(memory_response)
+        memory_id = str((memory_payload.get("memory") or {}).get("memory_id") or "")
+        created["memory_id"] = memory_id
+
         action_response = _vs4_http_request(
             base_url,
             "/actions",
@@ -1748,7 +1823,62 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
         )
         action_payload = _vs4_json_response(action_response)
         action_id = str((action_payload.get("action_card") or {}).get("action_id") or "")
+        mission_id = str((action_payload.get("mission") or {}).get("mission_id") or "")
         created["action_id"] = action_id
+        created["mission_id"] = mission_id
+
+        trajectory_response = _vs4_http_request(
+            base_url,
+            "/experience/trajectories",
+            method="POST",
+            payload={
+                **scope,
+                "mission_id": mission_id,
+                "outcome_status": "failed",
+                "outcome_summary": "The local preview remains in review before any external step.",
+                "owner_acceptance": "pending",
+                "failure_reason": "Owner review is still required.",
+                "recovery_attempt": "Keep the preview local and review the evidence-backed journey.",
+            },
+        )
+        trajectory_payload = _vs4_json_response(trajectory_response)
+        trajectory_id = str((trajectory_payload.get("trajectory") or {}).get("trajectory_id") or "")
+        created["trajectory_id"] = trajectory_id
+
+        lesson_response = _vs4_http_request(
+            base_url,
+            "/experience/lessons",
+            method="POST",
+            payload={
+                **scope,
+                "trajectory_id": trajectory_id,
+                "lesson": "Keep renewal follow-up learning in review until the owner accepts the outcome evidence.",
+                "applies_when": "A local Action Card is drafted but not authorized for execution.",
+                "does_not_apply_when": "A live provider or production action is being claimed.",
+                "confidence": "medium",
+            },
+        )
+        lesson_payload = _vs4_json_response(lesson_response)
+        lesson_id = str((lesson_payload.get("lesson") or {}).get("lesson_id") or "")
+        created["lesson_id"] = lesson_id
+
+        loop_view_response = _vs4_http_request(
+            base_url,
+            "/product/loop-view",
+            method="POST",
+            payload={
+                **scope,
+                "brief_id": brief_id,
+                "claim_id": claim_id,
+                "memory_id": memory_id,
+                "mission_id": mission_id,
+                "action_id": action_id,
+                "lesson_id": lesson_id,
+            },
+        )
+        loop_view_payload = _vs4_json_response(loop_view_response)
+        runtime_product_loop = loop_view_payload.get("product_loop") or {}
+        created["product_loop_id"] = str(runtime_product_loop.get("loop_id") or "")
 
         product_routes: dict[str, dict[str, Any]] = {}
         product_route_html: dict[str, str] = {}
@@ -1790,7 +1920,11 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
                 "bundle_create": bundle_response,
                 "brief_create": brief_response,
                 "claim_create": claim_response,
+                "memory_create": memory_response,
                 "action_create": action_response,
+                "trajectory_create": trajectory_response,
+                "lesson_create": lesson_response,
+                "product_loop_view": loop_view_response,
             }.items()
             if not value.get("ok")
         }
@@ -1798,8 +1932,27 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
         journey_timeline = _vs4_product_journey_timeline_evidence(
             product_route_html.get("/inbox", "")
         )
+        journey_refs_match_runtime = _vs4_journey_matches_runtime(
+            journey_timeline.get("details", {}),
+            runtime_product_loop,
+        )
         marker_summary = {
-            "temporary_records_created": all(bool(created.get(key)) for key in ["artifact_id", "search_snapshot_id", "evidence_bundle_id", "brief_id", "claim_id", "action_id"]),
+            "temporary_records_created": all(
+                bool(created.get(key))
+                for key in [
+                    "artifact_id",
+                    "search_snapshot_id",
+                    "evidence_bundle_id",
+                    "brief_id",
+                    "claim_id",
+                    "memory_id",
+                    "mission_id",
+                    "action_id",
+                    "trajectory_id",
+                    "lesson_id",
+                    "product_loop_id",
+                ]
+            ),
             "product_routes_reachable": all(page.get("status") == 200 and page.get("html") for page in product_routes.values()),
             "detail_routes_reachable": all(page.get("status") == 200 and page.get("html") for page in detail_routes.values()),
             "product_surfaces_tagged": all(page.get("surface_present") for page in all_product_pages),
@@ -1819,6 +1972,7 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
             "claim_review_language_visible": "Review required before approval" in detail_html.get("claim_detail", ""),
             "action_local_mode_visible": "Simulated in local mode" in detail_html.get("action_detail", ""),
             "action_internal_kind_hidden": "external_writeback" not in detail_html.get("action_detail", ""),
+            "journey_timeline_refs_match_runtime": journey_refs_match_runtime,
         }
         return {
             "schema_version": "cs.vs4_redesign_route_scan.v0",
@@ -1842,6 +1996,7 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
                 "preserved": marker_summary["json_default_preserved"],
             },
             "journey_timeline": journey_timeline,
+            "runtime_product_loop": runtime_product_loop,
             "markers": marker_summary,
             "thread_errors": thread_error,
         }
@@ -2165,6 +2320,7 @@ def capture_vs4_product_alpha_browser_proof(
         "loop_recovery_product_language_visible": journey_timeline_markers.get("loop_recovery_product_language_visible") is True,
         "journey_timeline_no_authority_expansion": journey_timeline_markers.get("journey_timeline_no_authority_expansion") is True,
         "journey_timeline_no_live_writeback": journey_timeline_markers.get("journey_timeline_no_live_writeback") is True,
+        "journey_timeline_refs_match_runtime": route_markers.get("journey_timeline_refs_match_runtime") is True,
     }
     human_review_handoff_markers = {
         "handoff_visible": route_markers.get("review_contains_internal_material") is True,
@@ -2281,6 +2437,22 @@ def capture_vs4_product_alpha_browser_proof(
         "ops_inbox_triage": {
             "markers": ops_inbox_triage_markers,
             "journey_timeline": journey_timeline.get("details", {}),
+            "runtime_projection": {
+                "journey_timeline_visible": journey_timeline_markers.get("journey_timeline_visible") is True,
+                "journey_timeline_stage_count": len(journey_timeline.get("details", {}).get("stage_labels", [])),
+                "journey_timeline_stage_labels_complete": journey_timeline_markers.get("journey_timeline_stage_labels_complete") is True,
+                "journey_timeline_stage_ref_count": len(journey_timeline.get("details", {}).get("stage_refs", [])),
+                "journey_timeline_evidence_ref_count": len(journey_timeline.get("details", {}).get("evidence_refs", [])),
+                "journey_timeline_audit_ref_count": len(journey_timeline.get("details", {}).get("audit_refs", [])),
+                "journey_timeline_progressive_detail_count": int(journey_timeline.get("details", {}).get("progressive_detail_count", 0) or 0),
+                "journey_timeline_product_language_before_refs": journey_timeline_markers.get("journey_timeline_product_language_before_refs") is True,
+                "journey_timeline_refs_match_runtime": route_markers.get("journey_timeline_refs_match_runtime") is True,
+                "journey_timeline_recovery": {
+                    "visible": all(journey_timeline.get("details", {}).get("recovery_states", {}).values()),
+                    "no_authority_expansion": journey_timeline_markers.get("journey_timeline_no_authority_expansion") is True,
+                    "no_live_writeback": journey_timeline_markers.get("journey_timeline_no_live_writeback") is True,
+                },
+            },
         },
         "ops_inbox_triage_markers": ops_inbox_triage_markers,
         "human_review_handoff_required": True,

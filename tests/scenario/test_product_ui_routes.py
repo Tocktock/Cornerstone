@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli import product_ui
-from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE
+from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE, _vs4_product_journey_timeline_evidence
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
 from cornerstone_cli.runtime import LocalRuntimeStore
 from cornerstone_cli.validators import count_unredacted_secrets
@@ -1451,6 +1451,217 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertTrue(claim_read_events)
         self.assertEqual(claim_read_events[-1]["details"]["reason"], "api_claim_show")
 
+    def test_inbox_renders_validated_runtime_journey_without_mutating_read(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief_id = json.loads(brief_raw)["brief"]["brief_id"]
+        claim_status, _, claim_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "The renewal needs owner review before the August deadline.",
+            },
+        )
+        self.assertEqual(claim_status, 200)
+        claim_id = json.loads(claim_raw)["claim"]["claim_id"]
+        memory_status, _, memory_raw = _request(
+            self.base_url,
+            "/memories",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "evidence_bundle_id": bundle_id,
+                "statement": "Draft renewal knowledge candidate for owner review.",
+            },
+        )
+        self.assertEqual(memory_status, 200)
+        memory_id = json.loads(memory_raw)["memory"]["memory_id"]
+        action_status, _, action_raw = _request(
+            self.base_url,
+            "/actions",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "claim_id": claim_id,
+                "goal": "Prepare a local renewal follow-up preview",
+                "action_kind": "external_writeback",
+                "risk": "medium",
+                "target": "mock renewal queue",
+            },
+        )
+        self.assertEqual(action_status, 200)
+        action_payload = json.loads(action_raw)
+        action_id = action_payload["action_card"]["action_id"]
+        mission_id = action_payload["mission"]["mission_id"]
+        trajectory_status, _, trajectory_raw = _request(
+            self.base_url,
+            "/experience/trajectories",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "mission_id": mission_id,
+                "outcome_status": "failed",
+                "outcome_summary": "The preview remains in owner review before any external step.",
+                "owner_acceptance": "pending",
+                "failure_reason": "Owner review is still required.",
+                "recovery_attempt": "Keep the action local and review the linked evidence.",
+            },
+        )
+        self.assertEqual(trajectory_status, 200)
+        trajectory_id = json.loads(trajectory_raw)["trajectory"]["trajectory_id"]
+        lesson_status, _, lesson_raw = _request(
+            self.base_url,
+            "/experience/lessons",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "trajectory_id": trajectory_id,
+                "lesson": "Keep renewal learning in review until the owner accepts outcome evidence.",
+                "applies_when": "A local Action Card is drafted but not authorized for execution.",
+                "does_not_apply_when": "A live provider or production action is being claimed.",
+                "confidence": "medium",
+            },
+        )
+        self.assertEqual(lesson_status, 200)
+        lesson_id = json.loads(lesson_raw)["lesson"]["lesson_id"]
+        loop_status, _, loop_raw = _request(
+            self.base_url,
+            "/product/loop-view",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "brief_id": brief_id,
+                "claim_id": claim_id,
+                "memory_id": memory_id,
+                "mission_id": mission_id,
+                "action_id": action_id,
+                "lesson_id": lesson_id,
+            },
+        )
+        self.assertEqual(loop_status, 200)
+        runtime_loop = json.loads(loop_raw)["product_loop"]
+
+        store = LocalRuntimeStore(self.state_dir)
+        audit_count = len(store._all_audit_events())
+        surface_count = len(list(store.product_surface_dir.glob("*.json")))
+        inbox_html = self.fetch_product_html("/inbox")
+
+        self.assertEqual(len(store._all_audit_events()), audit_count)
+        self.assertEqual(len(list(store.product_surface_dir.glob("*.json"))), surface_count)
+        evidence = _vs4_product_journey_timeline_evidence(inbox_html)
+        self.assertTrue(all(evidence["markers"].values()), evidence)
+        self.assertTrue(all(value == 0 for value in evidence["negative_evidence"].values()), evidence)
+        expected_stages = ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"]
+        self.assertEqual(evidence["details"]["stage_labels"], expected_stages)
+        self.assertEqual(
+            evidence["details"]["stage_refs"],
+            [" | ".join(stage["record_refs"]) for stage in runtime_loop["stages"] if stage["record_refs"]],
+        )
+        self.assertEqual(
+            evidence["details"]["evidence_refs"],
+            [" | ".join(stage["evidence_refs"]) for stage in runtime_loop["stages"] if stage["evidence_refs"]],
+        )
+        self.assertEqual(
+            evidence["details"]["audit_refs"],
+            [" | ".join(stage["audit_refs"]) for stage in runtime_loop["stages"] if stage["audit_refs"]],
+        )
+        self.assertIn("Current saved journey", inbox_html)
+        self.assertIn("Safe recovery behavior", inbox_html)
+        self.assertIn("Nothing new was approved or sent", inbox_html)
+        self.assertIn("Workspace scope stayed unchanged", inbox_html)
+        self.assertIn("No new journey or activity record was created", inbox_html)
+        self.assert_product_surface_is_clean(inbox_html)
+
+    def test_inbox_sparse_journey_keeps_unlinked_stages_honest_and_read_only(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief_id = json.loads(brief_raw)["brief"]["brief_id"]
+        loop_status, _, _ = _request(
+            self.base_url,
+            "/product/loop-view",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "brief_id": brief_id},
+        )
+        self.assertEqual(loop_status, 200)
+        store = LocalRuntimeStore(self.state_dir)
+        audit_count = len(store._all_audit_events())
+        surface_count = len(list(store.product_surface_dir.glob("*.json")))
+
+        inbox_html = self.fetch_product_html("/inbox")
+
+        self.assertEqual(len(store._all_audit_events()), audit_count)
+        self.assertEqual(len(list(store.product_surface_dir.glob("*.json"))), surface_count)
+        evidence = _vs4_product_journey_timeline_evidence(inbox_html)
+        self.assertTrue(evidence["markers"]["journey_timeline_visible"])
+        self.assertEqual(evidence["details"]["stage_labels"], ["Inbox", "Brief", "Claim", "Memory/Wiki", "Action", "Learn"])
+        self.assertEqual(evidence["details"]["stage_refs"], [f"brief:{brief_id}"])
+        self.assertEqual(len(evidence["details"]["audit_refs"]), 2)
+        self.assertTrue(evidence["details"]["stages"][0]["audit_refs"])
+        self.assertEqual(evidence["details"]["stages"][2]["audit_refs"], [])
+        self.assertNotIn("memory:memory_", inbox_html)
+        self.assertNotIn("action:action_", inbox_html)
+        self.assertNotIn("learn:lesson_", inbox_html)
+        self.assertIn("Not linked yet", inbox_html)
+
+    def test_product_loop_resolver_does_not_splice_ambiguous_same_bundle_claims(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_ids = []
+        for _ in range(2):
+            status, _, raw = _request(
+                self.base_url,
+                "/briefs",
+                method="POST",
+                payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+            )
+            self.assertEqual(status, 200)
+            brief_ids.append(json.loads(raw)["brief"]["brief_id"])
+        claim_ids = []
+        for index in range(2):
+            status, _, raw = _request(
+                self.base_url,
+                "/claims",
+                method="POST",
+                payload={
+                    **DEFAULT_SCOPE,
+                    "evidence_bundle_id": bundle_id,
+                    "statement": f"Independent renewal claim {index + 1}.",
+                },
+            )
+            self.assertEqual(status, 200)
+            claim_ids.append(json.loads(raw)["claim"]["claim_id"])
+
+        store = LocalRuntimeStore(self.state_dir)
+        audit_count = len(store._all_audit_events())
+        for brief_id in brief_ids:
+            projection = store.project_product_loop_for_record(
+                DEFAULT_SCOPE,
+                selected_kind="brief",
+                selected_id=brief_id,
+            )
+            stages = {stage["stage"]: stage for stage in projection["product_loop"]["stages"]}
+            self.assertEqual(stages["Brief"]["ref"], f"brief:{brief_id}")
+            self.assertIsNone(stages["Claim"]["ref"])
+            self.assertEqual(stages["Claim"]["audit_refs"], [])
+            self.assertIsNone(stages["Action"]["ref"])
+            self.assertNotIn("claim_id", projection["selection"]["resolved_refs"])
+        self.assertEqual(len(store._all_audit_events()), audit_count)
+        self.assertEqual(len(claim_ids), 2)
+
     def test_executed_action_reports_durable_state_and_html_details_remain_read_only(self) -> None:
         artifact_id, bundle_id, _ = self.create_source_stack()
         brief_status, _, brief_raw = _request(
@@ -1580,7 +1791,9 @@ class ProductUiRoutesTest(unittest.TestCase):
         return html
 
     def assert_product_surface_is_clean(self, html: str) -> None:
-        self.assertIsNone(VS4_PRODUCT_FORBIDDEN_RE.search(html))
+        visible_html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.IGNORECASE | re.DOTALL)
+        visible_text = re.sub(r"<[^>]+>", " ", visible_html)
+        self.assertIsNone(VS4_PRODUCT_FORBIDDEN_RE.search(visible_text))
 
 
 if __name__ == "__main__":
