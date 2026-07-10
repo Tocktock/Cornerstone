@@ -933,14 +933,26 @@ class ScaffoldCliTests(unittest.TestCase):
             )
             screenshot_path = required_role_paths["browser_screenshot"]
             dom_path = required_role_paths["browser_dom_snapshot"]
+            route_specs = [
+                ("/", "home"),
+                ("/inbox", "inbox"),
+                ("/briefs/brief_fixture?view=html", "brief-detail"),
+                ("/artifacts/art_fixture?view=html", "artifact-detail"),
+                ("/search?q=alpha-evidence-anchor", "search"),
+                ("/claims/claim_fixture?view=html", "claim-detail"),
+                ("/actions/action_fixture?view=html", "action-detail"),
+                ("/audit", "audit"),
+            ]
             required_role_paths["browser_proof_manifest"].write_text(
                 json.dumps(
                     {
                         "schema_version": "cs.browser_proof.v0",
                         "status": "passed",
-                        "route": "/review",
+                        "route": "/",
+                        "proof_mode": "route-aware-product-surfaces",
                         "clean_browser_exit": True,
                         "production_overclaim_absent": True,
+                        "human_ux_overclaim_absent": True,
                         "surface_presence": {
                             surface: True
                             for surface in (
@@ -954,10 +966,31 @@ class ScaffoldCliTests(unittest.TestCase):
                             )
                         },
                         "readiness_labels_present": {
-                            "local_scenario_ready=true": True,
-                            "vs0_runtime_ready=true": True,
-                            "production_release_ready=false": True,
-                            "real_external_http_calls=0": True,
+                            "local_scenario_ready=true": False,
+                            "vs0_runtime_ready=true": False,
+                            "production_release_ready=false": False,
+                            "real_external_http_calls=0": False,
+                        },
+                        "product_markers": {
+                            "product_shell_present": True,
+                            "product_surface_present": True,
+                            "product_tokens_present": True,
+                        },
+                        "route_checks": {
+                            path: {
+                                "path": path,
+                                "expected_surface": surface,
+                                "ready_state": "complete",
+                                "product_shell_present": True,
+                                "product_surface_present": True,
+                                "production_overclaim_absent": True,
+                                "human_ux_overclaim_absent": True,
+                                "body_length": 1024,
+                                "load_event_seen": True,
+                                "navigation_error": None,
+                                "passed": True,
+                            }
+                            for path, surface in route_specs
                         },
                         "screenshot_path": str(screenshot_path.relative_to(ROOT)),
                         "screenshot_sha256": hashlib.sha256(
@@ -12935,6 +12968,24 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["summary"]["human_required"], 2)
         self.assertFalse(payload["runtime_evidence"]["readiness"]["production_release_ready"])
         self.assertEqual(payload["negative_evidence"]["real_external_http_calls"], 0)
+        rows = {row["id"]: row for row in payload["scenario_results"]}
+        self.assertEqual(rows["VS0-RT-001"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-008"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-R04"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-H02"]["status"], "HUMAN_REQUIRED")
+        ui_summary = payload["ui_summary"]
+        self.assertEqual(ui_summary["proof_mode"], "route-aware-product-surfaces")
+        self.assertTrue(ui_summary["shell_loaded"])
+        self.assertTrue(all(ui_summary["surface_presence"].values()))
+        self.assertTrue(all(check["passed"] for check in ui_summary["route_checks"].values()))
+        self.assertTrue(ui_summary["owner_review"]["passed"])
+        self.assertTrue(ui_summary["readiness_label_presence"]["local_scenario_ready=true"])
+        self.assertTrue(ui_summary["readiness_label_presence"]["vs0_runtime_ready=true"])
+        self.assertFalse(ui_summary["readiness_label_presence"]["production_release_ready=false"])
+        self.assertFalse(ui_summary["readiness_label_presence"]["real_external_http_calls=0"])
+        self.assertFalse(ui_summary["readiness_labels_present"])
+        self.assertTrue(ui_summary["production_overclaim_absent"])
+        self.assertTrue(ui_summary["human_ux_overclaim_absent"])
 
     def test_vs0_runtime_acceptance_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-runtime-acceptance", "--json")
@@ -12947,6 +12998,28 @@ class ScaffoldCliTests(unittest.TestCase):
         self.assertEqual(payload["browser_proof"]["status"], "passed")
         self.assertGreater(payload["browser_proof"]["screenshot_bytes"], 0)
         self.assertTrue(all(payload["browser_proof"]["surface_presence"].values()))
+        self.assertEqual(payload["browser_proof"]["route"], "/")
+        self.assertEqual(payload["browser_proof"]["proof_mode"], "route-aware-product-surfaces")
+        self.assertTrue(all(check["passed"] for check in payload["browser_proof"]["route_checks"].values()))
+        self.assertEqual(
+            {
+                check["expected_surface"]
+                for check in payload["browser_proof"]["route_checks"].values()
+            },
+            {
+                "home",
+                "inbox",
+                "brief-detail",
+                "artifact-detail",
+                "search",
+                "claim-detail",
+                "action-detail",
+                "audit",
+            },
+        )
+        self.assertFalse(any(payload["browser_proof"]["readiness_labels_present"].values()))
+        self.assertTrue(payload["browser_proof"]["production_overclaim_absent"])
+        self.assertTrue(payload["browser_proof"]["human_ux_overclaim_absent"])
         self.assertFalse(payload["acceptance_evidence"]["readiness"]["production_release_ready"])
         impact = payload["acceptance_evidence"]["dry_run_expected_impact"]
         self.assertEqual(impact["expected_connector_calls"], 1)

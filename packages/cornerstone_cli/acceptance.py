@@ -1011,6 +1011,126 @@ def capture_vs1_ontology_browser_proof(
     return proof
 
 
+def vs0_runtime_ui_surface_routes(
+    *,
+    artifact_id: str,
+    brief_id: str,
+    claim_id: str,
+    action_id: str,
+) -> dict[str, list[dict[str, str]]]:
+    def detail_route(kind: str, record_id: str) -> str:
+        encoded_id = parse.quote(record_id, safe="") if record_id else "__missing__"
+        return f"/{kind}/{encoded_id}?view=html"
+
+    return {
+        "Home/Ops Inbox": [
+            {"path": "/", "expected_surface": "home"},
+            {"path": "/inbox", "expected_surface": "inbox"},
+        ],
+        "Brief Detail": [
+            {
+                "path": detail_route("briefs", brief_id),
+                "expected_surface": "brief-detail",
+            }
+        ],
+        "Artifact Viewer": [
+            {
+                "path": detail_route("artifacts", artifact_id),
+                "expected_surface": "artifact-detail",
+            }
+        ],
+        "Search": [
+            {"path": "/search?q=alpha-evidence-anchor", "expected_surface": "search"}
+        ],
+        "Claim candidate": [
+            {
+                "path": detail_route("claims", claim_id),
+                "expected_surface": "claim-detail",
+            }
+        ],
+        "Action Card": [
+            {
+                "path": detail_route("actions", action_id),
+                "expected_surface": "action-detail",
+            }
+        ],
+        "Audit Detail": [
+            {"path": "/audit", "expected_surface": "audit"}
+        ],
+    }
+
+
+def _capture_product_route_checks(
+    page: _CDPClient,
+    *,
+    base_url: str,
+    surface_routes: dict[str, list[dict[str, str]]],
+) -> dict[str, dict[str, Any]]:
+    route_checks: dict[str, dict[str, Any]] = {}
+    for requirements in surface_routes.values():
+        for requirement in requirements:
+            path = str(requirement.get("path") or "")
+            expected_surface = str(requirement.get("expected_surface") or "")
+            if path in route_checks:
+                continue
+            navigation_error: str | None = None
+            load_event_seen = False
+            evidence: dict[str, Any] = {}
+            try:
+                navigation = page.command("Page.navigate", {"url": f"{base_url}{path}"})
+                navigation_error = str(navigation.get("errorText") or "") or None
+                try:
+                    page.wait_event("Page.loadEventFired", timeout=10)
+                    load_event_seen = True
+                except TimeoutError:
+                    pass
+                for _ in range(100):
+                    evidence = _runtime_eval(
+                        page,
+                        f"""(() => {{
+                          const expectedSurface = {json.dumps(expected_surface)};
+                          const html = document.documentElement.outerHTML;
+                          return {{
+                            ready_state: document.readyState,
+                            product_shell_present: Boolean(document.querySelector("[data-product-shell='cornerstone']")),
+                            product_surface_present: Boolean(document.querySelector(`[data-product-surface="${{expectedSurface}}"]`)),
+                            production_overclaim_absent: !html.includes("production_release_ready=true"),
+                            human_ux_overclaim_absent: !html.includes('data-vs4-human-ux-claimed="true"'),
+                            body_length: html.length,
+                          }};
+                        }})()""",
+                        timeout=5,
+                    ) or {}
+                    if evidence.get("ready_state") == "complete" and evidence.get("product_surface_present") is True:
+                        break
+                    time.sleep(0.1)
+            except Exception as error:  # pragma: no cover - defensive browser route boundary
+                navigation_error = str(error)
+
+            passed = bool(
+                navigation_error is None
+                and evidence.get("ready_state") == "complete"
+                and evidence.get("product_shell_present") is True
+                and evidence.get("product_surface_present") is True
+                and evidence.get("production_overclaim_absent") is True
+                and evidence.get("human_ux_overclaim_absent") is True
+            )
+            route_checks[path] = {
+                "path": path,
+                "expected_surface": expected_surface,
+                "ready_state": evidence.get("ready_state"),
+                "product_shell_present": evidence.get("product_shell_present") is True,
+                "product_surface_present": evidence.get("product_surface_present") is True,
+                "production_overclaim_absent": evidence.get("production_overclaim_absent") is True,
+                "human_ux_overclaim_absent": evidence.get("human_ux_overclaim_absent") is True,
+                "body_length": int(evidence.get("body_length") or 0),
+                "load_event_seen": load_event_seen,
+                "navigation_error": navigation_error,
+                "passed": passed,
+            }
+    return route_checks
+
+
 def capture_browser_proof(
     root: Path,
     *,
@@ -1019,6 +1139,7 @@ def capture_browser_proof(
     window_size: str = "1280,900",
     route: str = "/",
     after_load_script: str | None = None,
+    product_surface_routes: dict[str, list[dict[str, str]]] | None = None,
 ) -> dict[str, Any]:
     output_dir.mkdir(parents=True, exist_ok=True)
     chrome = find_chrome()
@@ -1043,6 +1164,7 @@ def capture_browser_proof(
     host, port = server.server_address
     url = f"http://{host}:{port}{route}"
     thread_error: list[str] = []
+    route_checks: dict[str, dict[str, Any]] = {}
 
     import threading
 
@@ -1123,6 +1245,12 @@ def capture_browser_proof(
                 )
                 screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
                 screenshot_path.write_bytes(base64.b64decode(str(screenshot.get("data", ""))))
+                if product_surface_routes:
+                    route_checks = _capture_product_route_checks(
+                        page,
+                        base_url=f"http://{host}:{port}",
+                        surface_routes=product_surface_routes,
+                    )
                 try:
                     browser.command("Browser.close", timeout=5)
                 except Exception:
@@ -1176,7 +1304,19 @@ def capture_browser_proof(
         thread.join(timeout=5)
 
     dom = dom_path.read_text() if dom_path.exists() else ""
-    surface_presence = {surface: surface in dom for surface in UI_SURFACES}
+    if product_surface_routes:
+        surface_presence = {
+            surface: bool(requirements)
+            and all(
+                route_checks.get(str(requirement.get("path") or ""), {}).get("passed") is True
+                and route_checks.get(str(requirement.get("path") or ""), {}).get("expected_surface")
+                == requirement.get("expected_surface")
+                for requirement in requirements
+            )
+            for surface, requirements in product_surface_routes.items()
+        }
+    else:
+        surface_presence = {surface: surface in dom for surface in UI_SURFACES}
     readiness_labels = [
         "local_scenario_ready=true",
         "vs0_runtime_ready=true",
@@ -1199,11 +1339,21 @@ def capture_browser_proof(
     }
     legacy_surface_ready = all(surface_presence.values()) and all(label in dom for label in readiness_labels)
     product_surface_ready = all(product_markers.values())
+    route_surface_ready = bool(product_surface_routes) and all(surface_presence.values()) and all(
+        check.get("passed") is True for check in route_checks.values()
+    )
+    production_overclaim_absent = "production_release_ready=true" not in dom and all(
+        check.get("production_overclaim_absent") is True for check in route_checks.values()
+    )
+    human_ux_overclaim_absent = 'data-vs4-human-ux-claimed="true"' not in dom and all(
+        check.get("human_ux_overclaim_absent") is True for check in route_checks.values()
+    )
     screenshot_exists = screenshot_path.exists() and screenshot_path.stat().st_size > 0
     proof_status = (
         screenshot_exists
-        and (legacy_surface_ready or product_surface_ready)
-        and "production_release_ready=true" not in dom
+        and (route_surface_ready if product_surface_routes else legacy_surface_ready or product_surface_ready)
+        and production_overclaim_absent
+        and human_ux_overclaim_absent
         and not screenshot_timeout
         and not browser_error
         and not thread_error
@@ -1220,6 +1370,7 @@ def capture_browser_proof(
         },
         "url": url,
         "route": route,
+        "proof_mode": "route-aware-product-surfaces" if product_surface_routes else "single-route",
         "runtime_evidence": runtime_evidence,
         "screenshot_path": relative_to_root(root, screenshot_path),
         "screenshot_sha256": sha256_file(screenshot_path) if screenshot_exists else None,
@@ -1227,9 +1378,12 @@ def capture_browser_proof(
         "dom_path": relative_to_root(root, dom_path),
         "dom_sha256": sha256_file(dom_path) if dom_path.exists() else None,
         "surface_presence": surface_presence,
+        "surface_routes": product_surface_routes or {},
+        "route_checks": route_checks,
         "readiness_labels_present": {label: label in dom for label in readiness_labels},
         "product_markers": product_markers,
-        "production_overclaim_absent": "production_release_ready=true" not in dom,
+        "production_overclaim_absent": production_overclaim_absent,
+        "human_ux_overclaim_absent": human_ux_overclaim_absent,
         "chrome_exit_codes": {
             "screenshot": screenshot_result.returncode,
         },
@@ -3339,25 +3493,73 @@ def _finalize_release_evidence(
             if isinstance(browser_data, dict)
             else None
         )
+        route_checks = (
+            browser_data.get("route_checks")
+            if isinstance(browser_data, dict)
+            else None
+        )
+        product_markers = (
+            browser_data.get("product_markers")
+            if isinstance(browser_data, dict)
+            else None
+        )
         expected_readiness_labels = {
             "local_scenario_ready=true",
             "vs0_runtime_ready=true",
             "production_release_ready=false",
             "real_external_http_calls=0",
         }
+        expected_route_surfaces = {
+            "home",
+            "inbox",
+            "brief-detail",
+            "artifact-detail",
+            "search",
+            "claim-detail",
+            "action-detail",
+            "audit",
+        }
         if (
             not isinstance(browser_data, dict)
             or browser_data.get("schema_version") != "cs.browser_proof.v0"
             or browser_data.get("status") != "passed"
+            or browser_data.get("route") != "/"
+            or browser_data.get("proof_mode") != "route-aware-product-surfaces"
             or browser_data.get("errors") != []
             or browser_data.get("clean_browser_exit") is not True
             or browser_data.get("production_overclaim_absent") is not True
+            or browser_data.get("human_ux_overclaim_absent") is not True
             or not isinstance(surface_presence, dict)
             or set(surface_presence) != expected_surfaces
             or any(value is not True for value in surface_presence.values())
             or not isinstance(readiness_labels, dict)
             or set(readiness_labels) != expected_readiness_labels
-            or any(value is not True for value in readiness_labels.values())
+            or any(value is not False for value in readiness_labels.values())
+            or not isinstance(product_markers, dict)
+            or any(product_markers.get(key) is not True for key in (
+                "product_shell_present",
+                "product_surface_present",
+                "product_tokens_present",
+            ))
+            or not isinstance(route_checks, dict)
+            or {
+                route_check.get("expected_surface")
+                for route_check in route_checks.values()
+                if isinstance(route_check, dict)
+            }
+            != expected_route_surfaces
+            or any(
+                not isinstance(route_check, dict)
+                or route_check.get("path") != path
+                or route_check.get("ready_state") != "complete"
+                or route_check.get("product_shell_present") is not True
+                or route_check.get("product_surface_present") is not True
+                or route_check.get("production_overclaim_absent") is not True
+                or route_check.get("human_ux_overclaim_absent") is not True
+                or route_check.get("navigation_error") is not None
+                or route_check.get("passed") is not True
+                for path, route_check in route_checks.items()
+            )
             or browser_data.get("screenshot_path") != screenshot_entry.get("path")
             or browser_data.get("screenshot_sha256") != screenshot_entry.get("sha256")
             or browser_data.get("screenshot_bytes") != screenshot_entry.get("bytes")

@@ -47,6 +47,7 @@ from cornerstone_cli.acceptance import (
     relative_to_root,
     run_evux_quickstart,
     validate_runtime_acceptance_quickstart_report,
+    vs0_runtime_ui_surface_routes,
 )
 from cornerstone_cli.connector import (
     GITHUB_PROVIDER_FAILURE_MODES,
@@ -56,7 +57,7 @@ from cornerstone_cli.connector import (
     provider_internal_findings,
 )
 from cornerstone_cli.local_test import LocalTestProvider
-from cornerstone_cli.product_runtime import UI_SURFACES, make_server
+from cornerstone_cli.product_runtime import make_server
 from cornerstone_cli.runtime import DEFAULT_EMBEDDING_MODEL, DEFAULT_GENERATION_MODEL, LocalRuntimeStore
 from cornerstone_cli.validators import (
     ValidationIssue,
@@ -829,6 +830,107 @@ def _http_text(base_url: str, path: str) -> dict[str, Any]:
             "body": "",
             "error": str(error),
         }
+
+
+def _product_surface_trace(base_url: str, path: str, expected_surface: str) -> dict[str, Any]:
+    trace = _http_text(base_url, path)
+    body = str(trace.get("body") or "")
+    check = {
+        "path": path,
+        "expected_surface": expected_surface,
+        "status_code": trace.get("status_code"),
+        "body_length": len(body),
+        "product_shell_present": 'data-product-shell="cornerstone"' in body,
+        "product_surface_present": f'data-product-surface="{expected_surface}"' in body,
+        "production_overclaim_absent": "production_release_ready=true" not in body,
+        "human_ux_overclaim_absent": 'data-vs4-human-ux-claimed="true"' not in body,
+    }
+    check["passed"] = bool(
+        check["status_code"] == 200
+        and check["product_shell_present"]
+        and check["product_surface_present"]
+        and check["production_overclaim_absent"]
+        and check["human_ux_overclaim_absent"]
+    )
+    return check
+
+
+def _vs0_runtime_ui_trace_summary(
+    base_url: str,
+    surface_routes: dict[str, list[dict[str, str]]],
+) -> dict[str, Any]:
+    route_checks: dict[str, dict[str, Any]] = {}
+    for requirements in surface_routes.values():
+        for requirement in requirements:
+            path = str(requirement.get("path") or "")
+            if path not in route_checks:
+                route_checks[path] = _product_surface_trace(
+                    base_url,
+                    path,
+                    str(requirement.get("expected_surface") or ""),
+                )
+
+    surface_presence = {
+        surface: bool(requirements)
+        and all(
+            route_checks.get(str(requirement.get("path") or ""), {}).get("passed") is True
+            and route_checks.get(str(requirement.get("path") or ""), {}).get("expected_surface")
+            == requirement.get("expected_surface")
+            for requirement in requirements
+        )
+        for surface, requirements in surface_routes.items()
+    }
+    owner_trace = _http_text(base_url, "/review")
+    owner_body = str(owner_trace.get("body") or "")
+    readiness_labels = [
+        "local_scenario_ready=true",
+        "vs0_runtime_ready=true",
+        "production_release_ready=false",
+        "real_external_http_calls=0",
+    ]
+    readiness_label_presence = {label: label in owner_body for label in readiness_labels}
+    owner_review = {
+        "path": "/review",
+        "status_code": owner_trace.get("status_code"),
+        "body_length": len(owner_body),
+        "owner_surface_present": 'data-product-surface="owner-review"' in owner_body,
+        "human_ux_unclaimed": 'data-vs4-human-ux-claimed="false"' in owner_body,
+        "local_runtime_labels_present": all(
+            readiness_label_presence[label]
+            for label in ["local_scenario_ready=true", "vs0_runtime_ready=true"]
+        ),
+        "production_overclaim_absent": "production_release_ready=true" not in owner_body,
+    }
+    owner_review["passed"] = bool(
+        owner_review["status_code"] == 200
+        and owner_review["owner_surface_present"]
+        and owner_review["human_ux_unclaimed"]
+        and owner_review["local_runtime_labels_present"]
+        and owner_review["production_overclaim_absent"]
+    )
+    home_check = route_checks.get("/", {})
+    production_overclaim_absent = all(
+        check.get("production_overclaim_absent") is True for check in route_checks.values()
+    ) and owner_review["production_overclaim_absent"] is True
+    human_ux_overclaim_absent = all(
+        check.get("human_ux_overclaim_absent") is True for check in route_checks.values()
+    ) and owner_review["human_ux_unclaimed"] is True
+    return {
+        "schema_version": "cs.ui_trace_summary.v0",
+        "proof_mode": "route-aware-product-surfaces",
+        "path": "/",
+        "status_code": home_check.get("status_code"),
+        "body_length": home_check.get("body_length", 0),
+        "shell_loaded": home_check.get("passed") is True,
+        "surface_presence": surface_presence,
+        "surface_routes": surface_routes,
+        "route_checks": route_checks,
+        "owner_review": owner_review,
+        "production_overclaim_absent": production_overclaim_absent,
+        "human_ux_overclaim_absent": human_ux_overclaim_absent,
+        "readiness_labels_present": all(readiness_label_presence.values()),
+        "readiness_label_presence": readiness_label_presence,
+    }
 
 
 SCOPE_FIELDS = ["tenant_id", "owner_id", "namespace_id", "workspace_id"]
@@ -23988,6 +24090,19 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
     transcripts["bundle_show"] = (
         _run_cli_json(root, ["evidence", "bundle", "show", bundle_id, "--state-dir", state_rel, "--json"]) if bundle_id else {}
     )
+    transcripts["brief_create"] = (
+        _run_cli_json(
+            root,
+            ["brief", "create", "--evidence-bundle-id", bundle_id, "--state-dir", state_rel, "--json"],
+        )
+        if bundle_id
+        else {}
+    )
+    brief = _payload(transcripts["brief_create"]).get("brief", {})
+    brief_id = brief.get("brief_id", "")
+    transcripts["brief_show"] = (
+        _run_cli_json(root, ["brief", "show", brief_id, "--state-dir", state_rel, "--json"]) if brief_id else {}
+    )
     transcripts["claim_create"] = (
         _run_cli_json(
             root,
@@ -24139,20 +24254,15 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
     try:
         api_transcripts["health"] = _http_json(base_url, "GET", "/health")
         api_transcripts["ready"] = _http_json(base_url, "GET", "/ready")
-        ui_trace = _http_text(base_url, "/review")
-        body = ui_trace.get("body", "")
-        ui_summary = {
-            "schema_version": "cs.ui_trace_summary.v0",
-            "path": "/review",
-            "status_code": ui_trace.get("status_code"),
-            "body_length": len(body),
-            "surface_presence": {surface: surface in body for surface in UI_SURFACES},
-            "production_overclaim_absent": "production_release_ready=true" not in body,
-            "readiness_labels_present": all(
-                label in body
-                for label in ["local_scenario_ready=true", "vs0_runtime_ready=true", "production_release_ready=false", "real_external_http_calls=0"]
+        ui_summary = _vs0_runtime_ui_trace_summary(
+            base_url,
+            vs0_runtime_ui_surface_routes(
+                artifact_id=str(artifact_id),
+                brief_id=str(brief_id),
+                claim_id=str(claim_id),
+                action_id=str(action_id),
             ),
-        }
+        )
         api_transcripts["artifact_ingest"] = _http_json(base_url, "POST", "/artifacts", {"path": input_path, "trust": "untrusted"})
         api_artifact = (api_transcripts["artifact_ingest"].get("stdout_json") or {}).get("artifact", {})
         api_artifact_id = api_artifact.get("artifact_id", "")
@@ -24234,11 +24344,17 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         and api_ready.get("vs0_runtime_ready") is True
         and api_ready.get("production_release_ready") is False
     )
-    ui_ok = (
+    ui_shell_ok = (
         ui_summary.get("status_code") == 200
+        and ui_summary.get("shell_loaded") is True
+        and ui_summary.get("production_overclaim_absent") is True
+        and ui_summary.get("human_ux_overclaim_absent") is True
+    )
+    ui_ok = (
+        ui_shell_ok
         and all(ui_summary.get("surface_presence", {}).values())
         and ui_summary.get("production_overclaim_absent") is True
-        and ui_summary.get("readiness_labels_present") is True
+        and ui_summary.get("human_ux_overclaim_absent") is True
     )
 
     artifact_show = _payload(transcripts["artifact_show"]).get("artifact", {})
@@ -24380,9 +24496,9 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         _row(
             "VS0-RT-001",
             "MUST_PASS",
-            "PASS" if ready_ok and api_health_ok and api_ready_ok and ui_ok else "FAIL",
-            ["cornerstone ready --json", "GET /health", "GET /ready", "GET /review"],
-            "Readiness truthfully separates local scenario readiness, VS0 runtime readiness, and production release readiness; API health and owner review shell load.",
+            "PASS" if ready_ok and api_health_ok and api_ready_ok and ui_shell_ok else "FAIL",
+            ["cornerstone ready --json", "GET /health", "GET /ready", "GET /"],
+            "Readiness truthfully separates local scenario readiness, VS0 runtime readiness, and production release readiness; API health and the normal-user Home shell load.",
         ),
         _row(
             "VS0-RT-002",
@@ -24430,8 +24546,14 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "VS0-RT-008",
             "MUST_PASS",
             "PASS" if ui_ok else "FAIL",
-            ["GET /review", "UI surface assertions"],
-            "Owner review UI preserves structural Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail checks without production overclaim.",
+            [
+                "GET / and /inbox",
+                "GET /search",
+                "GET /artifacts/{id}?view=html and /briefs/{id}?view=html",
+                "GET /claims/{id}?view=html and /actions/{id}?view=html",
+                "GET /audit",
+            ],
+            "Normal-user product routes expose Home/Ops Inbox, Artifact Viewer, Search, Claim Builder, Action Card, and Audit Detail without readiness or human-acceptance overclaim.",
         ),
         _row(
             "VS0-RT-R01",
@@ -24630,7 +24752,29 @@ def verify_vs0_runtime_acceptance(
     readiness = ready_payload.get("readiness", {})
     last_runtime_report = readiness.get("last_successful_runtime_scenario", {})
 
-    browser_proof = capture_browser_proof(root, state_dir=state_path, output_dir=browser_proof_dir, route="/review")
+    runtime_cli_transcripts = product_runtime_payload.get("cli_transcripts", {})
+    runtime_artifact_id = _artifact(runtime_cli_transcripts.get("ingest", {})).get("artifact_id", "")
+    runtime_brief_id = _payload(runtime_cli_transcripts.get("brief_create", {})).get("brief", {}).get("brief_id", "")
+    runtime_claim_id = _payload(runtime_cli_transcripts.get("claim_create", {})).get("claim", {}).get("claim_id", "")
+    runtime_action_id = _payload(runtime_cli_transcripts.get("action_propose", {})).get("action_card", {}).get("action_id", "")
+    runtime_state_rel = str(product_runtime_payload.get("state_dir") or "")
+    runtime_state_path = state_path
+    if runtime_state_rel:
+        candidate_runtime_state_path = (root / runtime_state_rel).resolve()
+        if root.resolve() in candidate_runtime_state_path.parents:
+            runtime_state_path = candidate_runtime_state_path
+    browser_proof = capture_browser_proof(
+        root,
+        state_dir=runtime_state_path,
+        output_dir=browser_proof_dir,
+        route="/",
+        product_surface_routes=vs0_runtime_ui_surface_routes(
+            artifact_id=str(runtime_artifact_id),
+            brief_id=str(runtime_brief_id),
+            claim_id=str(runtime_claim_id),
+            action_id=str(runtime_action_id),
+        ),
+    )
     dry_run_impact = (
         product_runtime_payload.get("cli_transcripts", {})
         .get("action_dry_run", {})
@@ -24666,10 +24810,17 @@ def verify_vs0_runtime_acceptance(
     )
     browser_ok = (
         browser_proof.get("status") == "passed"
+        and browser_proof.get("proof_mode") == "route-aware-product-surfaces"
         and browser_proof.get("screenshot_bytes", 0) > 0
+        and browser_proof.get("clean_browser_exit") is True
+        and bool(browser_proof.get("route_checks"))
+        and all(
+            route_check.get("passed") is True
+            for route_check in browser_proof.get("route_checks", {}).values()
+        )
         and all(browser_proof.get("surface_presence", {}).values())
-        and all(browser_proof.get("readiness_labels_present", {}).values())
         and browser_proof.get("production_overclaim_absent") is True
+        and browser_proof.get("human_ux_overclaim_absent") is True
     )
     quickstart_ok = _exit_ok(transcripts["quickstart_verify"]) and quickstart_validation.get("ok") is True
     production_overclaim_ok = (
