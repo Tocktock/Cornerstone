@@ -7921,6 +7921,12 @@ class LocalRuntimeStore:
     def derived_text_preview(self, artifact: dict[str, Any], limit: int = 500) -> str:
         return self._derived_text(artifact)[:limit].replace("\n", " ").strip()
 
+    def derived_text_content(self, artifact: dict[str, Any], limit: int = 50_000) -> tuple[str, bool]:
+        """Return a line-preserving source preview and whether it was truncated."""
+
+        text = self._derived_text(artifact)
+        return text[:limit], len(text) > limit
+
     def _ontology_label_key(self, value: str) -> str:
         normalized = re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
         return normalized or "unnamed"

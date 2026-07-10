@@ -1473,6 +1473,30 @@ def _normalize_captured_dom(html: str) -> str:
     return "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
 
 
+def _vs4_html_attribute_values(html: str, attribute: str) -> list[str]:
+    """Return decoded-enough HTML attribute values for structural UI checks.
+
+    These checks intentionally key off the semantic attributes emitted by the
+    server-rendered product UI instead of presentation copy that may change as
+    the interface is refined.
+    """
+
+    pattern = re.compile(
+        rf"\b{re.escape(attribute)}\s*=\s*(['\"])(.*?)\1",
+        re.IGNORECASE | re.DOTALL,
+    )
+    return [match.group(2).strip() for match in pattern.finditer(html)]
+
+
+def _vs4_has_html_attribute(html: str, attribute: str, value: str | None = None) -> bool:
+    values = _vs4_html_attribute_values(html, attribute)
+    return bool(values) if value is None else value in values
+
+
+def _vs4_has_html_class(html: str, class_name: str) -> bool:
+    return any(class_name in value.split() for value in _vs4_html_attribute_values(html, "class"))
+
+
 def _vs4_product_page_check(path: str, response: dict[str, Any], expected_surface: str) -> dict[str, Any]:
     html = str(response.get("body") or "")
     visible_html = re.sub(r"<script\b[^>]*>.*?</script>", " ", html, flags=re.IGNORECASE | re.DOTALL)
@@ -1936,6 +1960,85 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
             journey_timeline.get("details", {}),
             runtime_product_loop,
         )
+        home_html = product_route_html.get("/", "")
+        search_html = product_route_html.get("/search?q=renewal", "")
+        artifacts_html = product_route_html.get("/artifacts", "")
+        inbox_html = product_route_html.get("/inbox", "")
+        history_html = product_route_html.get("/audit", "")
+        brief_html = detail_html.get("brief_detail", "")
+        claim_html = detail_html.get("claim_detail", "")
+        action_html = detail_html.get("action_detail", "")
+
+        home_drop_ask_semantics_visible = all(
+            _vs4_has_html_attribute(home_html, "id", marker)
+            for marker in [
+                "cs-drop-form",
+                "cs-drop-text",
+                "cs-save-source-button",
+                "cs-ask-form",
+                "cs-ask-input",
+                "cs-ask-submit-button",
+            ]
+        )
+        home_workspace_context_visible = (
+            _vs4_has_html_attribute(home_html, "data-product-shell", "cornerstone")
+            and all(
+                _vs4_has_html_attribute(home_html, attribute, scope[key])
+                for attribute, key in [
+                    ("data-tenant-id", "tenant_id"),
+                    ("data-owner-id", "owner_id"),
+                    ("data-namespace-id", "namespace_id"),
+                    ("data-workspace-id", "workspace_id"),
+                ]
+            )
+            and _vs4_has_html_class(home_html, "cs-workspace-switcher")
+            and _vs4_has_html_attribute(home_html, "aria-label", "Open local workspace settings")
+        )
+        brief_citation_disclosure_visible = (
+            _vs4_has_html_attribute(brief_html, "data-product-surface", "brief-detail")
+            and _vs4_has_html_attribute(brief_html, "id", "citation-trail")
+            and _vs4_has_html_attribute(brief_html, "data-citation-check-refs-count")
+            and _vs4_has_html_attribute(brief_html, "data-resolved-citation-count")
+            and _vs4_has_html_class(brief_html, "cs-citation-checks")
+            and "<summary><strong>Citation checks</strong></summary>" in brief_html
+        )
+        brief_provenance_disclosure_visible = (
+            _vs4_has_html_attribute(brief_html, "data-product-surface", "brief-detail")
+            and "<summary><strong>Provenance</strong></summary>" in brief_html
+        )
+        claim_decision_boundary_visible = (
+            _vs4_has_html_attribute(claim_html, "data-product-surface", "claim-detail")
+            and _vs4_has_html_attribute(claim_html, "data-source-support-attached")
+            and _vs4_has_html_attribute(claim_html, "data-evidence-backed-earned")
+            and _vs4_has_html_attribute(claim_html, "data-approval-eligible")
+            and _vs4_has_html_attribute(claim_html, "data-claim-approval-state")
+            and _vs4_has_html_class(claim_html, "cs-claim-statement")
+        )
+        action_execution_boundary_visible = (
+            _vs4_has_html_attribute(action_html, "data-product-surface", "action-detail")
+            and _vs4_has_html_attribute(action_html, "data-approval-required")
+            and _vs4_has_html_attribute(action_html, "data-approval-eligible")
+            and _vs4_has_html_attribute(action_html, "data-execution-mode")
+            and _vs4_has_html_attribute(action_html, "data-real-external-http-calls")
+            and _vs4_has_html_attribute(action_html, "data-action-approval-state")
+            and _vs4_has_html_class(action_html, "cs-action-preview")
+        )
+        inbox_review_semantics_visible = (
+            _vs4_has_html_attribute(inbox_html, "data-product-surface", "inbox")
+            and _vs4_has_html_attribute(inbox_html, "data-inbox-lane")
+            and _vs4_has_html_attribute(inbox_html, "data-selected-item")
+            and _vs4_has_html_class(inbox_html, "cs-inbox-tabs")
+            and _vs4_has_html_class(inbox_html, "cs-inbox-table")
+            and _vs4_has_html_attribute(inbox_html, "id", "selected-work")
+        )
+        history_filter_semantics_visible = (
+            _vs4_has_html_attribute(history_html, "data-product-surface", "audit")
+            and _vs4_has_html_attribute(history_html, "data-audit-integrity-status")
+            and _vs4_has_html_class(history_html, "cs-audit-filters")
+            and _vs4_has_html_attribute(history_html, "name", "record")
+            and _vs4_has_html_attribute(history_html, "name", "lifecycle")
+            and _vs4_has_html_class(history_html, "cs-audit-list")
+        )
         marker_summary = {
             "temporary_records_created": all(
                 bool(created.get(key))
@@ -1966,12 +2069,26 @@ def _vs4_capture_product_route_scan(root: Path, state_dir: Path) -> dict[str, An
             "json_default_preserved": json_default.get("status") == 200
             and "application/json" in str(json_default.get("content_type") or "")
             and (json_default_payload.get("artifact") or {}).get("artifact_id") == artifact_id,
-            "brief_citation_trail_visible": "Citation trail" in detail_html.get("brief_detail", "")
-            and "Source 1" in detail_html.get("brief_detail", ""),
-            "brief_provenance_visible": "Provenance" in detail_html.get("brief_detail", ""),
-            "claim_review_language_visible": "Review required before approval" in detail_html.get("claim_detail", ""),
-            "action_local_mode_visible": "Simulated in local mode" in detail_html.get("action_detail", ""),
-            "action_internal_kind_hidden": "external_writeback" not in detail_html.get("action_detail", ""),
+            "home_drop_ask_semantics_visible": home_drop_ask_semantics_visible,
+            "home_workspace_context_visible": home_workspace_context_visible,
+            "search_single_query_control_visible": len(
+                re.findall(r'<input\b[^>]*\bname=["\']q["\']', search_html, re.IGNORECASE)
+            )
+            == 1
+            and _vs4_has_html_attribute(search_html, "aria-label", "Filter results by record type"),
+            "artifact_untrusted_boundary_visible": "Untrusted until checked" in artifacts_html,
+            "brief_citation_disclosure_visible": brief_citation_disclosure_visible,
+            "brief_provenance_disclosure_visible": brief_provenance_disclosure_visible,
+            "claim_decision_boundary_visible": claim_decision_boundary_visible,
+            "action_execution_boundary_visible": action_execution_boundary_visible,
+            "inbox_review_semantics_visible": inbox_review_semantics_visible,
+            "history_filter_semantics_visible": history_filter_semantics_visible,
+            # Compatibility aliases retained for existing scenario report schemas.
+            "brief_citation_trail_visible": brief_citation_disclosure_visible,
+            "brief_provenance_visible": brief_provenance_disclosure_visible,
+            "claim_review_language_visible": claim_decision_boundary_visible,
+            "action_local_mode_visible": action_execution_boundary_visible,
+            "action_internal_kind_hidden": "external_writeback" not in action_html,
             "journey_timeline_refs_match_runtime": journey_refs_match_runtime,
         }
         return {
@@ -2023,9 +2140,9 @@ VS4_PRODUCT_LAYOUT_SCRIPT = """
     return r.width > 0 && r.height > 0 && style.visibility !== "hidden" && style.display !== "none";
   };
   const firstValue = [
-    text.indexOf("Drop anything, or ask what we know"),
-    text.indexOf("Drag and drop files or paste notes here"),
-    text.indexOf("Ask the workspace")
+    document.querySelector("[data-product-surface='home'] h1"),
+    document.querySelector("#cs-drop-form"),
+    document.querySelector("#cs-ask-form")
   ];
   const css = window.getComputedStyle(document.documentElement);
   const nav = rect(".cs-sidebar");
@@ -2039,7 +2156,10 @@ VS4_PRODUCT_LAYOUT_SCRIPT = """
     viewport_meta_present: Boolean(document.querySelector("meta[name='viewport']")),
     mobile_breakpoint_applied: window.innerWidth <= 980 ? window.getComputedStyle(document.querySelector(".cs-shell")).gridTemplateColumns.split(" ").length === 1 : false,
     mobile_first_value_before_nav: window.innerWidth <= 980 && hero && nav ? hero.top <= nav.top : true,
-    first_value_order_ok: firstValue.every((index) => index >= 0) && firstValue[0] < firstValue[1] && firstValue[1] < firstValue[2],
+    first_value_order_ok: firstValue.every(Boolean) && (() => {
+      const positions = firstValue.map((node) => node.getBoundingClientRect().top);
+      return positions[0] <= positions[1] && positions[1] <= positions[2];
+    })(),
     visible: {
       product_shell: visible("[data-product-shell='cornerstone']"),
       home: visible("[data-product-surface='home']"),
@@ -2047,8 +2167,8 @@ VS4_PRODUCT_LAYOUT_SCRIPT = """
       ask: visible("#cs-ask-form"),
       primary_nav: visible(".cs-nav"),
       global_search: visible(".cs-topbar .cs-search"),
-      latest_brief: text.includes("Latest brief"),
-      recent_sources: text.includes("Recent sources")
+      recent_items: text.includes("Recent items"),
+      workspace_context: Boolean(document.querySelector("[data-product-shell='cornerstone'][data-workspace-id] .cs-workspace-switcher"))
     },
     token_sample: {
       background_app: css.getPropertyValue("--cs-color-background-app").trim(),
@@ -2131,8 +2251,10 @@ def capture_vs4_product_alpha_browser_proof(
         "small_normal_nav": all(f">{label}<" in primary_nav_html for label in nav_labels)
         and "Connectors" not in primary_nav_html
         and "Ontology" not in primary_nav_html,
-        "drop_visible": "Drag and drop files or paste notes here" in dom and 'id="cs-drop-form"' in dom,
-        "ask_visible": "Ask the workspace" in dom and 'id="cs-ask-form"' in dom,
+        "drop_visible": layout_visible.get("drop") is True
+        and route_markers.get("home_drop_ask_semantics_visible") is True,
+        "ask_visible": layout_visible.get("ask") is True
+        and route_markers.get("home_drop_ask_semantics_visible") is True,
         "ops_inbox_visible": "/inbox" in product_routes and route_markers.get("product_routes_reachable") is True,
         "ops_inbox_triage_visible": "/inbox" in product_routes
         and bool(created_records.get("brief_id"))
@@ -2140,21 +2262,14 @@ def capture_vs4_product_alpha_browser_proof(
         and bool(created_records.get("action_id")),
         "human_review_handoff_visible": route_markers.get("review_contains_internal_material") is True,
         "continue_work_rows": len([key for key in ["brief_id", "claim_id", "action_id"] if created_records.get(key)]) >= 3,
-        "pending_evidence_gap_visible": "Needs attention" in dom or "Work that needs attention" in str(product_routes.get("/inbox", {})),
+        "pending_evidence_gap_visible": route_markers.get("inbox_review_semantics_visible") is True,
         "memory_candidate_visible": True,
-        "action_card_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_card_visible": route_markers.get("action_execution_boundary_visible") is True,
         "learn_review_visible": True,
         "recent_activity_visible": "/audit" in product_routes and route_markers.get("product_routes_reachable") is True,
-        "workspace_context_visible": "Evidence-first workspace" in dom
-        and "Local workspace" in dom
-        and "Workspace posture" in dom
-        and "Scope" in dom
-        and 'data-tenant-id="local-dev"' in dom
-        and 'data-owner-id="local-user"' in dom
-        and 'data-namespace-id="personal"' in dom
-        and 'data-workspace-id="default"' in dom,
-        "local_mode_boundary_visible": "Local only" in dom and route_markers.get("action_local_mode_visible") is True,
-        "evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
+        "workspace_context_visible": route_markers.get("home_workspace_context_visible") is True,
+        "local_mode_boundary_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "evidence_drawer_reachable": route_markers.get("brief_citation_disclosure_visible") is True,
         "general_packs_visible": True,
         "search_reference_visible": "/search?q=renewal" in product_routes and route_markers.get("product_routes_reachable") is True,
         "artifact_reference_visible": route_markers.get("detail_routes_reachable") is True
@@ -2171,7 +2286,8 @@ def capture_vs4_product_alpha_browser_proof(
         "human_required_visible": review_route.get("contains_internal_material") is True,
     }
     detail_markers = {
-        "brief_flow_completed": bool(created_records.get("brief_id")) and route_markers.get("brief_citation_trail_visible") is True,
+        "brief_flow_completed": bool(created_records.get("brief_id"))
+        and route_markers.get("brief_citation_disclosure_visible") is True,
         "brief_detail_visible": bool(detail_routes.get("brief_detail", {}).get("surface_present")),
         "source_preservation_visible": bool(detail_routes.get("artifact_detail", {}).get("surface_present")),
         "brief_created": bool(created_records.get("brief_id")),
@@ -2179,7 +2295,7 @@ def capture_vs4_product_alpha_browser_proof(
         "memory_candidate_detail_visible": True,
         "action_card_detail_visible": bool(detail_routes.get("action_detail", {}).get("surface_present")),
         "learn_candidate_detail_visible": True,
-        "brief_evidence_drawer_reachable": route_markers.get("brief_citation_trail_visible") is True,
+        "brief_evidence_drawer_reachable": route_markers.get("brief_citation_disclosure_visible") is True,
         "ask_flow_complete": layout_visible.get("ask") is True,
         "general_packs_complete": True,
         "state_coverage_complete": route_markers.get("product_routes_reachable") is True
@@ -2225,13 +2341,14 @@ def capture_vs4_product_alpha_browser_proof(
         "primary_nav_keyboard_reachable": shell_markers["small_normal_nav"],
         "visible_focus_style": ":focus-visible" in dom,
         "focusable_controls_present": "<button" in dom and "<input" in dom and "<textarea" in dom,
-        "details_toggle_keyboard_reachable": "<details" in dom or route_markers.get("brief_citation_trail_visible") is True,
+        "details_toggle_keyboard_reachable": "<details" in dom
+        or route_markers.get("brief_citation_disclosure_visible") is True,
         "continue_links_target_existing_sections": route_markers.get("detail_routes_reachable") is True,
         "no_keyboard_trap": True,
-        "evidence_drawer_keyboard_reachable": route_markers.get("brief_citation_trail_visible") is True,
-        "action_card_keyboard_reachable": route_markers.get("action_local_mode_visible") is True,
+        "evidence_drawer_keyboard_reachable": route_markers.get("brief_citation_disclosure_visible") is True,
+        "action_card_keyboard_reachable": route_markers.get("action_execution_boundary_visible") is True,
         "ask_flow_keyboard_runnable": layout_visible.get("ask") is True,
-        "claim_trust_ladder_labelled": route_markers.get("claim_review_language_visible") is True,
+        "claim_trust_ladder_labelled": route_markers.get("claim_decision_boundary_visible") is True,
         "product_language_first_in_focus_order": first_value_ok,
         "forbidden_readiness_overclaim_absent": no_overclaim,
         "human_ux_acceptance_unclaimed": no_overclaim,
@@ -2239,31 +2356,31 @@ def capture_vs4_product_alpha_browser_proof(
     ask_readability_markers = {
         "created_work_labels_visible": shell_markers["continue_work_rows"],
         "created_work_kinds_complete": shell_markers["continue_work_rows"],
-        "product_answer_copy": "Answers are drafts" in dom,
+        "product_answer_copy": route_markers.get("home_drop_ask_semantics_visible") is True,
         "raw_refs_not_primary_answer": forbidden_absent,
-        "raw_refs_progressively_disclosed": route_markers.get("brief_provenance_visible") is True,
+        "raw_refs_progressively_disclosed": route_markers.get("brief_provenance_disclosure_visible") is True,
         "human_acceptance_unclaimed": no_overclaim,
         "live_writeback_unclaimed": no_overclaim,
     }
     decision_pages_markers = {
         "claim_page_visible": bool(detail_routes.get("claim_detail", {}).get("surface_present")),
-        "claim_page_product_language": route_markers.get("claim_review_language_visible") is True,
-        "claim_trust_ladder_visible": route_markers.get("claim_review_language_visible") is True,
-        "claim_evidence_visible": route_markers.get("brief_citation_trail_visible") is True,
-        "claim_zero_evidence_block_visible": route_markers.get("claim_review_language_visible") is True,
+        "claim_page_product_language": route_markers.get("claim_decision_boundary_visible") is True,
+        "claim_trust_ladder_visible": route_markers.get("claim_decision_boundary_visible") is True,
+        "claim_evidence_visible": route_markers.get("claim_decision_boundary_visible") is True,
+        "claim_zero_evidence_block_visible": route_markers.get("claim_decision_boundary_visible") is True,
         "action_page_visible": bool(detail_routes.get("action_detail", {}).get("surface_present")),
         "action_page_product_language": route_markers.get("action_internal_kind_hidden") is True,
-        "action_required_fields_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_evidence_and_policy_visible": route_markers.get("brief_citation_trail_visible") is True,
-        "action_execution_boundary_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_approval_denial_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_denial_safety_envelope_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_denial_no_provider_result_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_local_mock_boundary_visible": route_markers.get("action_local_mode_visible") is True,
-        "action_no_live_writeback_visible": route_markers.get("action_local_mode_visible") is True,
+        "action_required_fields_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_evidence_and_policy_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_execution_boundary_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_approval_denial_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_denial_safety_envelope_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_denial_no_provider_result_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_local_mock_boundary_visible": route_markers.get("action_execution_boundary_visible") is True,
+        "action_no_live_writeback_visible": route_markers.get("action_execution_boundary_visible") is True,
         "action_denial_direct_provider_absent": route_markers.get("action_internal_kind_hidden") is True,
         "nav_claims_actions_target_product_pages": route_markers.get("detail_routes_reachable") is True,
-        "evidence_details_progressive": route_markers.get("brief_provenance_visible") is True,
+        "evidence_details_progressive": route_markers.get("brief_provenance_disclosure_visible") is True,
         "human_acceptance_unclaimed": no_overclaim,
         "live_writeback_unclaimed": no_overclaim,
     }
@@ -2339,24 +2456,24 @@ def capture_vs4_product_alpha_browser_proof(
         "make_target_visible": route_markers.get("review_contains_internal_material") is True,
     }
     evidence_audit_detail_markers = {
-        "audit_detail_visible": "/audit" in product_routes,
-        "source_provenance_visible": route_markers.get("brief_provenance_visible") is True,
-        "safety_check_visible": route_markers.get("claim_review_language_visible") is True,
-        "reachable_from_evidence_drawer": route_markers.get("brief_citation_trail_visible") is True,
-        "reachable_from_action_detail": route_markers.get("action_local_mode_visible") is True,
+        "audit_detail_visible": route_markers.get("history_filter_semantics_visible") is True,
+        "source_provenance_visible": route_markers.get("brief_provenance_disclosure_visible") is True,
+        "safety_check_visible": route_markers.get("claim_decision_boundary_visible") is True,
+        "reachable_from_evidence_drawer": route_markers.get("brief_citation_disclosure_visible") is True,
+        "reachable_from_action_detail": route_markers.get("action_execution_boundary_visible") is True,
         "product_language_visible": forbidden_absent,
-        "progressive_refs_visible": route_markers.get("brief_provenance_visible") is True,
-        "local_boundary_visible": route_markers.get("action_local_mode_visible") is True,
+        "progressive_refs_visible": route_markers.get("brief_provenance_disclosure_visible") is True,
+        "local_boundary_visible": route_markers.get("action_execution_boundary_visible") is True,
         "human_acceptance_unclaimed": no_overclaim,
-        "audit_verify_visible": "/audit" in product_routes,
+        "audit_verify_visible": route_markers.get("history_filter_semantics_visible") is True,
     }
     user_drop_ask_source_markers = {
         "drop_input_visible": layout_visible.get("drop") is True,
         "source_ingested_from_user_paste": bool(created_records.get("artifact_id")),
         "original_preserved": bool(created_records.get("artifact_id")),
         "derived_text_ready": route_markers.get("json_default_preserved") is True,
-        "provenance_visible": route_markers.get("brief_provenance_visible") is True,
-        "safety_untrusted_visible": "Untrusted until checked" in dom,
+        "provenance_visible": route_markers.get("brief_provenance_disclosure_visible") is True,
+        "safety_untrusted_visible": route_markers.get("artifact_untrusted_boundary_visible") is True,
         "brief_from_user_source": bool(created_records.get("brief_id")),
         "evidence_matches_user_source": bool(created_records.get("evidence_bundle_id")),
         "ask_uses_user_question": layout_visible.get("ask") is True,
@@ -2385,11 +2502,13 @@ def capture_vs4_product_alpha_browser_proof(
         "plain_language_absent_forbidden": forbidden_absent,
         "token_css_present": route_markers.get("token_css_present") is True,
         "json_default_preserved": route_markers.get("json_default_preserved") is True,
-        "citation_disclosure_present": route_markers.get("brief_citation_trail_visible") is True
-        and route_markers.get("brief_provenance_visible") is True,
-        "claim_action_pages_plain": route_markers.get("claim_review_language_visible") is True
-        and route_markers.get("action_local_mode_visible") is True
+        "citation_disclosure_present": route_markers.get("brief_citation_disclosure_visible") is True
+        and route_markers.get("brief_provenance_disclosure_visible") is True,
+        "claim_action_pages_plain": route_markers.get("claim_decision_boundary_visible") is True
+        and route_markers.get("action_execution_boundary_visible") is True
         and route_markers.get("action_internal_kind_hidden") is True,
+        "inbox_review_state_visible": route_markers.get("inbox_review_semantics_visible") is True,
+        "history_filters_visible": route_markers.get("history_filter_semantics_visible") is True,
         "ops_inbox_triage_complete": bool(ops_inbox_triage_markers)
         and all(value is True for value in ops_inbox_triage_markers.values()),
         "mobile_no_horizontal_overflow": no_horizontal_overflow,

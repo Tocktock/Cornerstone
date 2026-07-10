@@ -8,6 +8,10 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+from cornerstone_cli.ui.icons import icon
+from cornerstone_cli.ui.language import record_action, record_icon
+from cornerstone_cli.ui.styles import render_styles as _token_css
+
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
 PRODUCT_SEARCH_TYPES = [
     ("all", "All"),
@@ -16,13 +20,29 @@ PRODUCT_SEARCH_TYPES = [
     ("claims", "Claims"),
     ("actions", "Actions"),
 ]
+INBOX_LANES = [
+    ("needs-review", "Needs review"),
+    ("evidence-gaps", "Evidence gaps"),
+    ("approval-requests", "Approval requests"),
+    ("policy-blocked", "Policy blocked"),
+    ("failed-runs", "Failed runs"),
+]
+AUDIT_LIFECYCLES = [
+    ("all", "All activity"),
+    ("created", "Created"),
+    ("opened", "Opened"),
+    ("approved", "Approved"),
+    ("blocked", "Blocked or denied"),
+    ("executed", "Executed"),
+    ("other", "Other"),
+]
 PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "memories", "actions"}
 
 REFERENCE_IMAGE_ROWS = [
     ("cornerstone-reference-01-vendor-detail.png", "Vendor object detail", "Dormant direction", "Entity/object explorer structure only; do not add this surface during the VS5 scope freeze."),
     ("cornerstone-reference-02-operations-inbox.png", "Operations inbox", "Active surface", "Lane tabs, triage table, selected preview, and next actions."),
     ("cornerstone-reference-03-admin-connectors.png", "Admin connectors", "Owner-only direction", "Connector governance stays contained in the owner area."),
-    ("cornerstone-reference-04-search-results.png", "Search results", "Active surface", "Universal search, scoped filters, result receipts, and suggested follow-ups."),
+    ("cornerstone-reference-04-search-results.png", "Search results", "Active surface", "Universal search, scoped filters, traceable results, and suggested follow-ups."),
     ("cornerstone-reference-05-claim-draft-supporting-evidence.png", "Claim draft", "Active surface", "Claim statement, trust ladder, supporting evidence, and review controls."),
     ("cornerstone-reference-06-artifact-viewer.png", "Artifact viewer", "Active surface", "Original artifact primary, source metadata, derived keywords, linked work, and provenance."),
     ("cornerstone-reference-07-home-upload-ask.png", "Home workspace", "Active surface", "Drop zone, ask box, recent items, knowledge states, and next steps."),
@@ -111,12 +131,23 @@ def render_product_page(
         active = "/actions"
     elif route == "/inbox":
         title = "Inbox"
-        _load_selected_product_loop(ctx)
-        content = _inbox_page(ctx)
+        requested_lane = (query.get("lane") or [""])[-1].strip().lower()
+        requested_item = (query.get("item") or [""])[-1].strip()
+        lane, lane_items, selected_item = _select_inbox_item(ctx["inbox"], requested_lane, requested_item)
+        ctx["selected_inbox_item"] = selected_item
+        _load_selected_product_loop(ctx, selected_item)
+        content = _inbox_page(ctx, lane, lane_items)
         active = "/inbox"
     else:
         title = "Audit"
-        content = _audit_page(ctx)
+        record_filter = (query.get("record") or [""])[-1].strip()
+        requested_lifecycle = (query.get("lifecycle") or ["all"])[-1].strip().lower()
+        lifecycle_filter = requested_lifecycle if requested_lifecycle in {value for value, _ in AUDIT_LIFECYCLES} else "all"
+        try:
+            page = max(1, int((query.get("page") or ["1"])[-1]))
+        except ValueError:
+            page = 1
+        content = _audit_page(ctx, record_filter, lifecycle_filter, page)
         active = "/audit"
     return _page(root, title, active, content, ctx, q)
 
@@ -234,14 +265,14 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
     claims = _recent(_safe_records(lambda: store._claim_records(scope), load_errors, "claims"))
     actions = _recent(_safe_records(lambda: store._action_records(scope), load_errors, "action drafts"))
     memories = _recent(_safe_records(lambda: store._memory_records(scope), load_errors, "memory drafts"))
-    audit = _recent(
+    audit_all = _recent(
         [
             event
-            for event in _safe_records(lambda: store._all_audit_events(), load_errors, "activity receipts")
+            for event in _safe_records(lambda: store._all_audit_events(), load_errors, "activity history")
             if _same_scope(event.get("scope") if isinstance(event.get("scope"), dict) else event, scope)
-        ],
-        limit=80,
+        ]
     )
+    audit = audit_all[:80]
     try:
         audit_integrity = store.verify_audit()
     except Exception:
@@ -262,6 +293,7 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
     actions = [record for record in actions if id(record) not in internal_record_objects]
     memories = [record for record in memories if id(record) not in internal_record_objects]
     inbox = _inbox_items(briefs, claims, actions, memories, scope=scope)
+    inbox_total = _inbox_open_count(briefs, claims, actions, memories)
     return {
         "store": store,
         "scope": scope,
@@ -271,20 +303,20 @@ def _build_context(store: Any, scope: dict[str, str]) -> dict[str, Any]:
         "actions": actions,
         "memories": memories,
         "audit": audit,
+        "audit_all": audit_all,
         "audit_integrity": audit_integrity,
         "internal_lineage_refs": internal_lineage_refs,
         "load_errors": list(dict.fromkeys(load_errors)),
         "suggestions": _suggestions(artifacts, briefs, claims),
         "inbox": inbox,
+        "inbox_total": inbox_total,
         "selected_product_loop": None,
     }
 
 
-def _load_selected_product_loop(ctx: dict[str, Any]) -> None:
-    inbox = ctx.get("inbox") if isinstance(ctx.get("inbox"), list) else []
-    if not inbox:
+def _load_selected_product_loop(ctx: dict[str, Any], selected: dict[str, Any] | None = None) -> None:
+    if selected is None:
         return
-    selected = inbox[0]
     try:
         ctx["selected_product_loop"] = ctx["store"].project_product_loop_for_record(
             ctx["scope"],
@@ -296,6 +328,35 @@ def _load_selected_product_loop(ctx: dict[str, Any]) -> None:
         if "work journey" not in errors:
             errors.append("work journey")
         ctx["load_errors"] = errors
+
+
+def _inbox_lane_items(items: list[dict[str, Any]], lane: str) -> list[dict[str, Any]]:
+    queue = dict(INBOX_LANES).get(lane)
+    if lane == "evidence-gaps":
+        return [item for item in items if int(item.get("evidence_gap_count", 0) or 0) > 0]
+    return [item for item in items if item.get("queue") == queue]
+
+
+def _select_inbox_item(
+    items: list[dict[str, Any]],
+    requested_lane: str,
+    requested_item: str,
+) -> tuple[str, list[dict[str, Any]], dict[str, Any] | None]:
+    valid_lanes = {value for value, _ in INBOX_LANES}
+    explicit_lane = requested_lane in valid_lanes
+    lane = requested_lane if explicit_lane else "needs-review"
+    lane_items = _inbox_lane_items(items, lane)
+    if not lane_items and not explicit_lane:
+        for candidate, _ in INBOX_LANES:
+            candidate_items = _inbox_lane_items(items, candidate)
+            if candidate_items:
+                lane, lane_items = candidate, candidate_items
+                break
+    selected = next(
+        (item for item in lane_items if str(item.get("record_ref") or "") == requested_item),
+        lane_items[0] if lane_items else None,
+    )
+    return lane, lane_items, selected
 
 
 def _safe_records(read: Any, errors: list[str] | None = None, label: str = "workspace records") -> list[dict[str, Any]]:
@@ -321,6 +382,20 @@ def _safe_preview(
         if errors is not None:
             errors.append(label)
         return ""
+
+
+def _safe_source_text(
+    store: Any,
+    artifact: dict[str, Any],
+    limit: int = 50_000,
+    errors: list[str] | None = None,
+) -> tuple[str, bool]:
+    try:
+        return store.derived_text_content(artifact, limit)
+    except Exception:
+        if errors is not None:
+            errors.append("source text")
+        return "", False
 
 
 def _same_scope(value: Any, scope: dict[str, str]) -> bool:
@@ -510,6 +585,8 @@ def _plain_event(event_type: str) -> str:
         "claim.draft.created": "Claim drafted",
         "claim.read": "Claim opened",
         "claim.approve": "Claim approved",
+        "claim.approved": "Claim approved",
+        "claim.approval.denied": "Claim approval blocked",
         "memory.draft.created": "Memory candidate drafted",
         "memory.owner_approved.created": "Owner-approved memory recorded",
         "memory.candidate.creation.denied": "Memory authority request blocked",
@@ -520,11 +597,16 @@ def _plain_event(event_type: str) -> str:
         "action.dry_run": "Action previewed",
         "action.dry_run.read": "Action preview opened",
         "action.approve": "Action approved",
+        "action.approved": "Action approved",
+        "action.approval.denied": "Action approval blocked",
         "action.execute": "Action executed",
+        "action.executed": "Action executed",
         "action.execution.denied": "Action execution blocked",
         "action.preview.creation.denied": "Action preview boundary blocked",
         "conversation.start": "Ask started",
+        "conversation.started": "Ask started",
         "conversation.answer": "Draft answer saved",
+        "conversation.answer.created": "Draft answer saved",
         "product.mission_control.viewed": "Review queue opened",
         "product.loop.viewed": "Work journey opened",
         "mission.contract.created": "Decision path prepared",
@@ -534,24 +616,6 @@ def _plain_event(event_type: str) -> str:
     if event_type in labels:
         return labels[event_type]
     return "Recorded activity"
-
-
-def _audit_icon(event_type: str) -> str:
-    if event_type.startswith("artifact."):
-        return "S"
-    if event_type.startswith("search.") or event_type.startswith("evidence_bundle."):
-        return "E"
-    if event_type.startswith("brief."):
-        return "B"
-    if event_type.startswith("claim."):
-        return "C"
-    if event_type.startswith("action."):
-        return "A"
-    if event_type.startswith("mission.") or event_type.startswith("workspace."):
-        return "D"
-    if event_type.startswith("conversation."):
-        return "Q"
-    return "L"
 
 
 def _audit_subject_label(event: dict[str, Any]) -> str:
@@ -584,29 +648,6 @@ def _audit_family(event_type: str) -> str:
     if event_type.startswith("conversation."):
         return "Ask"
     return "Ledger"
-
-
-def _audit_receipt_card(label: str, value: int | str, detail: str) -> str:
-    return f"""
-<div class="cs-audit-receipt">
-  <span class="cs-meta">{h(label)}</span>
-  <strong>{h(str(value))}</strong>
-  <span class="cs-meta">{h(detail)}</span>
-</div>
-"""
-
-
-def _audit_lifecycle_card(title: str, count: int, detail: str, state: str) -> str:
-    return f"""
-<div class="cs-audit-lane">
-  <div class="cs-audit-lane-head">
-    <strong>{h(title)}</strong>
-    <span class="cs-audit-lane-count">{h(str(count))}</span>
-  </div>
-  <p>{h(detail)}</p>
-  {_chip("Present" if count else "Waiting", state)}
-</div>
-"""
 
 
 def _audit_detail(event: dict[str, Any], position: int) -> str:
@@ -743,12 +784,23 @@ def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
     execution_status = str(execution.get("status") or "not_started").lower()
     result_status = str(result.get("status") or "").lower()
     record_status = str(record.get("status") or "").lower()
+    dry_run = record.get("dry_run") if isinstance(record.get("dry_run"), dict) else {}
+    policy = record.get("policy_decision") if isinstance(record.get("policy_decision"), dict) else {}
+    if not policy and isinstance(dry_run.get("policy_decision"), dict):
+        policy = dry_run["policy_decision"]
+    policy_decision = str(policy.get("decision") or "").lower()
+    policy_requires_approval = policy.get("approval_required") is True or policy_decision in {
+        "requires_approval",
+        "require_approval",
+        "escalate",
+    }
     if execution_status == "executed":
         stage = "executed"
     elif execution_status in {"failed", "error"} or result_status in {"failed", "error"}:
         stage = "failed"
     elif (
         record_status in {"policy_blocked", "blocked", "denied"}
+        or policy_decision in {"deny", "denied", "blocked", "policy_blocked", "escalate", "escalated"}
         or execution_status.startswith("blocked")
         or execution_status in {"denied", "policy_denied"}
         or result_status in {"blocked", "denied", "policy_denied"}
@@ -756,7 +808,7 @@ def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
         stage = "blocked"
     elif approval_status == "approved" or execution_status == "ready_to_execute":
         stage = "approved"
-    elif approval_status in {"pending", "not_approved", "required"}:
+    elif approval_status in {"pending", "not_approved", "required"} or policy_requires_approval:
         stage = "pending"
     else:
         stage = "draft"
@@ -797,11 +849,11 @@ def _suggestions(
 ) -> list[str]:
     suggestions: list[str] = []
     if briefs:
-        suggestions.append(f'What supports "{_brief_title(briefs[0])}"?')
+        suggestions.append("What evidence supports the latest Brief?")
     if artifacts:
         suggestions.append("What changed in the latest saved source?")
     if claims:
-        suggestions.append("Which claims still need support?")
+        suggestions.append("Which Claims still need source support?")
     return suggestions[:3]
 
 
@@ -881,7 +933,7 @@ def _inbox_items(
             else "Needs review"
         )
         detail = (
-            "Inspect the failed run and recovery receipt before retrying."
+            "Inspect the failed run and recovery record before retrying."
             if stage == "failed"
             else "Resolve the policy block before any execution attempt."
             if stage == "blocked"
@@ -941,3467 +993,31 @@ def _inbox_items(
     return _recent(items, limit=8)
 
 
+def _inbox_open_count(
+    briefs: list[dict[str, Any]],
+    claims: list[dict[str, Any]],
+    actions: list[dict[str, Any]],
+    memories: list[dict[str, Any]],
+) -> int:
+    open_claims = sum(1 for claim in claims if str(claim.get("status") or "").lower() != "approved")
+    open_actions = sum(1 for action in actions if _action_lifecycle(action)["stage"] != "executed")
+    open_memories = sum(
+        1
+        for memory in memories
+        if str(memory.get("status") or "draft").lower() != "owner_approved"
+        and not bool(
+            memory.get("canonicality", {}).get("owner_approved")
+            if isinstance(memory.get("canonicality"), dict)
+            else False
+        )
+    )
+    return len(briefs) + open_claims + open_actions + open_memories
+
+
 def _detail_href(kind: str, record_id: Any) -> str:
     if not record_id:
         return f"/{kind}"
     return f"/{kind}/{quote(str(record_id))}?view=html"
-
-
-def _token_css(root: Path) -> str:
-    token_path = root / "docs" / "design" / "tokens" / "cornerstone_design_tokens_v0_3.json"
-    tokens = json.loads(token_path.read_text())
-    variables: list[tuple[str, str]] = []
-
-    def flatten(prefix: list[str], value: Any) -> None:
-        if isinstance(value, dict):
-            for key, child in value.items():
-                flatten([*prefix, _css_name(key)], child)
-        elif isinstance(value, list):
-            variables.append(("--cs-" + "-".join(prefix), ", ".join(str(item) for item in value)))
-        else:
-            variables.append(("--cs-" + "-".join(prefix), str(value)))
-
-    flatten([], tokens)
-    aliases = {
-        "--cs-color-evidence-600": "var(--cs-color-evidence-700)",
-        "--cs-color-surface-primary": "var(--cs-color-background-surface)",
-        "--cs-color-surface-subtle": "var(--cs-color-background-subtle)",
-        "--cs-radius-xs": "var(--cs-radius-sm)",
-        "--cs-shadow-sm": "var(--cs-shadow-card)",
-        "--cs-state-draft-text": "var(--cs-state-draft-fg)",
-        "--cs-state-evidenceBacked-text": "var(--cs-state-evidenceBacked-fg)",
-        "--cs-state-searchable-text": "var(--cs-state-searchable-fg)",
-        "--cs-state-underReview-text": "var(--cs-state-underReview-fg)",
-        "--cs-typography-weight-bold": "var(--cs-typography-display-fontWeight)",
-        "--cs-typography-weight-medium": "500",
-        "--cs-typography-weight-semibold": "var(--cs-typography-label-fontWeight)",
-    }
-    variables.extend(aliases.items())
-    var_block = "\n".join(f"  {name}: {value};" for name, value in variables)
-    return f"""
-:root {{
-{var_block}
-}}
-* {{ box-sizing: border-box; }}
-html {{ min-height: 100%; background: var(--cs-color-background-app); }}
-body {{
-  margin: 0;
-  min-height: 100%;
-  background: var(--cs-color-background-app);
-  color: var(--cs-color-text-primary);
-  font-family: var(--cs-typography-fontFamily);
-  font-size: var(--cs-typography-body-fontSize);
-  line-height: var(--cs-typography-body-lineHeight);
-}}
-a {{ color: inherit; text-decoration: none; }}
-button, input, textarea {{ font: inherit; }}
-.cs-shell {{
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: var(--cs-layout-sidebarWidth) minmax(0, 1fr);
-}}
-.cs-skip-link {{
-  position: fixed;
-  left: var(--cs-space-4);
-  top: var(--cs-space-4);
-  z-index: 10;
-  transform: translateY(-160%);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-primary-600);
-  color: var(--cs-color-text-inverse);
-  padding: var(--cs-space-2) var(--cs-space-4);
-}}
-.cs-skip-link:focus-visible {{ transform: translateY(0); outline: 3px solid var(--cs-color-primary-100); }}
-.cs-sidebar {{
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  border-right: 1px solid var(--cs-color-border-default);
-  background:
-    linear-gradient(180deg, var(--cs-color-surface-primary), color-mix(in srgb, var(--cs-color-surface-subtle) 68%, var(--cs-color-surface-primary)));
-  padding: var(--cs-space-6) var(--cs-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--cs-space-5);
-}}
-.cs-brand {{
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: center;
-}}
-.cs-brand-mark {{
-  width: 38px;
-  height: 38px;
-  border-radius: var(--cs-radius-md);
-  background:
-    linear-gradient(135deg, var(--cs-color-primary-600), var(--cs-color-primary-700));
-  color: var(--cs-color-text-inverse);
-  display: grid;
-  place-items: center;
-  font-weight: var(--cs-typography-weight-bold);
-  box-shadow: 0 10px 24px rgba(37, 87, 209, .18);
-}}
-.cs-brand-name {{ font-weight: var(--cs-typography-weight-bold); font-size: var(--cs-typography-sectionTitle-fontSize); }}
-.cs-brand-sub {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-shell-note {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-  max-width: 18ch;
-}}
-.cs-nav {{ display: grid; gap: var(--cs-space-4); }}
-.cs-nav-group {{ display: grid; gap: var(--cs-space-2); }}
-.cs-nav-label {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-  font-weight: var(--cs-typography-weight-semibold);
-  text-transform: uppercase;
-}}
-.cs-nav a {{
-  min-height: 40px;
-  border-radius: var(--cs-radius-md);
-  padding: var(--cs-space-2) var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-  display: grid;
-  grid-template-columns: 26px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--cs-space-2);
-  font-weight: var(--cs-typography-weight-medium);
-  transition: background .18s ease, color .18s ease, box-shadow .18s ease;
-}}
-.cs-nav a:hover, .cs-nav a:focus-visible {{ background: var(--cs-color-surface-primary); outline: none; box-shadow: var(--cs-shadow-sm); }}
-.cs-nav a[aria-current="page"] {{
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
-}}
-.cs-nav-mark {{
-  width: 26px;
-  height: 26px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 72%, var(--cs-color-surface-subtle));
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-nav a[aria-current="page"] .cs-nav-mark {{
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-primary-700);
-}}
-.cs-nav-count {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-variant-numeric: tabular-nums;
-}}
-.cs-sidebar-status {{
-  margin-top: auto;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-sidebar-status-row {{
-  display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-sidebar-status-row strong {{ color: var(--cs-color-text-primary); font-variant-numeric: tabular-nums; }}
-.cs-main {{ min-width: 0; }}
-.cs-topbar {{
-  min-height: var(--cs-layout-headerHeight);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 92%, transparent);
-  backdrop-filter: blur(12px);
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-4);
-  justify-content: space-between;
-  padding: var(--cs-space-4) var(--cs-layout-contentGutter);
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}}
-.cs-command {{
-  flex: 1 1 auto;
-  max-width: 860px;
-  min-width: 280px;
-}}
-.cs-search {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2) var(--cs-space-3);
-  width: 100%;
-  min-height: 48px;
-}}
-.cs-search span[aria-hidden="true"] {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-search input {{ border: 0; outline: 0; min-width: 0; flex: 1; color: var(--cs-color-text-primary); background: transparent; }}
-.cs-search button, .cs-button {{
-  border: 1px solid var(--cs-color-primary-600);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-primary-600);
-  color: var(--cs-color-text-inverse);
-  padding: var(--cs-space-2) var(--cs-space-4);
-  min-height: 44px;
-  font-weight: var(--cs-typography-weight-semibold);
-  cursor: pointer;
-  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}}
-.cs-search button:hover, .cs-button:hover {{ box-shadow: var(--cs-shadow-sm); transform: translateY(-1px); }}
-.cs-search button:active, .cs-button:active {{ transform: translateY(0); }}
-.cs-topbar-actions {{
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-icon-button {{
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-text-secondary);
-  display: grid;
-  place-items: center;
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-avatar {{
-  min-width: 44px;
-  height: 44px;
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-surface-subtle);
-  border: 1px solid var(--cs-color-border-default);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-text-primary);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-button.secondary {{
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-text-primary);
-  border-color: var(--cs-color-border-strong);
-}}
-.cs-button.ghost {{
-  background: transparent;
-  color: var(--cs-color-text-secondary);
-  border-color: transparent;
-}}
-.cs-kicker {{ color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); font-size: var(--cs-typography-label-fontSize); }}
-.cs-content {{ padding: var(--cs-layout-contentGutter); max-width: 1360px; }}
-.cs-page-head {{ display: grid; gap: var(--cs-space-2); margin-bottom: var(--cs-space-6); max-width: 760px; }}
-.cs-page-head h1, .cs-hero h1 {{
-  margin: 0;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
-  letter-spacing: 0;
-}}
-.cs-hero h1 {{ font-size: var(--cs-typography-display-fontSize); line-height: var(--cs-typography-display-lineHeight); }}
-.cs-page-head p, .cs-hero p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 760px; }}
-.cs-grid-hero {{ display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(320px, .55fr); gap: var(--cs-space-6); align-items: start; }}
-.cs-grid-two {{ display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); gap: var(--cs-space-6); align-items: start; }}
-.cs-stack {{ display: grid; gap: var(--cs-space-4); }}
-.cs-panel {{
-  background: var(--cs-color-surface-primary);
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  box-shadow: var(--cs-shadow-sm);
-  padding: var(--cs-layout-cardPadding);
-}}
-.cs-panel.flat {{ box-shadow: none; }}
-.cs-panel-header {{ display: flex; align-items: flex-start; justify-content: space-between; gap: var(--cs-space-4); margin-bottom: var(--cs-space-4); }}
-.cs-panel-header h2, .cs-section-title {{
-  margin: 0;
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-muted {{ color: var(--cs-color-text-muted); }}
-.cs-meta {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); line-height: var(--cs-typography-metadata-lineHeight); }}
-.cs-home-intro {{
-  min-height: calc(100vh - var(--cs-layout-headerHeight) - (var(--cs-layout-contentGutter) * 2));
-  align-content: start;
-}}
-.cs-home-canvas {{
-  padding: var(--cs-space-3) var(--cs-space-4) var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-home-canvas .cs-panel-header {{ margin-bottom: 0; flex-wrap: wrap; }}
-.cs-home-canvas p {{ max-width: 62ch; }}
-.cs-home-workspace {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-home-source-row {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  align-items: center;
-  justify-content: center;
-}}
-.cs-home-paste-row {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  align-items: stretch;
-}}
-.cs-home-source-note {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-  text-align: center;
-}}
-.cs-drop {{
-  min-height: 166px;
-  border: 1px dashed var(--cs-color-border-strong);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-primary-50) 34%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary));
-  display: grid;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-4);
-  align-content: center;
-}}
-.cs-drop.is-hot {{ border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }}
-.cs-drop textarea, .cs-field {{
-  width: 100%;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-text-primary);
-  padding: var(--cs-space-3);
-  outline: none;
-}}
-.cs-drop textarea {{ min-height: 130px; resize: vertical; }}
-.cs-drop textarea:focus, .cs-field:focus {{ border-color: var(--cs-color-border-focus); box-shadow: 0 0 0 3px var(--cs-color-primary-50); }}
-.cs-drop-target {{
-  display: grid;
-  gap: var(--cs-space-2);
-  place-items: center;
-  text-align: center;
-  padding: 0;
-}}
-.cs-drop-mark {{
-  width: 46px;
-  height: 46px;
-  border-radius: var(--cs-radius-pill);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-  border: 1px solid var(--cs-color-primary-100);
-  font-size: 18px;
-}}
-.cs-drop textarea.cs-drop-input {{
-  min-height: 44px;
-  background: var(--cs-color-surface-primary);
-}}
-.cs-or-divider {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--cs-space-3);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-or-divider::before, .cs-or-divider::after {{
-  content: "";
-  height: 1px;
-  background: var(--cs-color-border-default);
-}}
-.cs-ask-bar {{
-  border: 1px solid var(--cs-color-border-focus);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2) var(--cs-space-3);
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--cs-space-3);
-  box-shadow: var(--cs-shadow-sm);
-}}
-.cs-ask-mark {{
-  width: 34px;
-  height: 34px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-ask-bar .cs-field {{
-  border: 0;
-  padding: var(--cs-space-2);
-  box-shadow: none;
-}}
-.cs-ask-bar .cs-field:focus {{ box-shadow: none; }}
-.cs-suggestion-row {{ display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--cs-space-2); }}
-.cs-suggestion-row .cs-button {{ min-width: 0; justify-content: center; white-space: normal; }}
-.cs-home-loop-inline {{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--cs-space-2);
-  max-width: 460px;
-}}
-.cs-home-loop-inline span {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-text-secondary);
-  padding: var(--cs-space-1) var(--cs-space-2);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-  font-weight: var(--cs-typography-weight-medium);
-  white-space: nowrap;
-}}
-.cs-home-loop-inline span:first-child {{
-  border-color: var(--cs-color-primary-100);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-}}
-.cs-home-loop-inline strong {{
-  color: var(--cs-color-text-primary);
-}}
-.cs-home-item-list {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  overflow: hidden;
-  background: var(--cs-color-surface-primary);
-}}
-.cs-home-item {{
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-  min-height: 72px;
-  padding: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-home-item:last-child {{ border-bottom: 0; }}
-.cs-home-item:hover {{ background: var(--cs-color-surface-subtle); }}
-.cs-home-item-icon {{
-  width: 30px;
-  height: 30px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-home-item h3 {{ margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
-.cs-home-item p {{ margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-activity-list {{
-  display: grid;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  overflow: hidden;
-  background: var(--cs-color-surface-primary);
-}}
-.cs-activity-row {{
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-  min-height: 74px;
-  padding: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-activity-row:last-child {{ border-bottom: 0; }}
-.cs-activity-icon {{
-  width: 30px;
-  height: 30px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-activity-row strong, .cs-activity-row p {{ margin: 0; }}
-.cs-next-step-list {{ display: grid; gap: var(--cs-space-2); }}
-.cs-next-step {{
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-  padding: var(--cs-space-3);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-}}
-.cs-next-step strong {{ font-size: var(--cs-typography-body-fontSize); }}
-.cs-row {{ display: flex; align-items: center; gap: var(--cs-space-3); flex-wrap: wrap; }}
-.cs-module-grid {{ display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(280px, .95fr); gap: var(--cs-space-4); }}
-.cs-list {{ display: grid; gap: var(--cs-space-3); }}
-.cs-list-row {{
-  min-height: var(--cs-layout-listRowHeight);
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-list-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
-.cs-list-row h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
-.cs-list-row p {{ margin: 0; color: var(--cs-color-text-secondary); }}
-.cs-list-row.compact {{ padding: var(--cs-space-3); min-height: auto; }}
-.cs-search-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
-  gap: var(--cs-space-5);
-  align-items: start;
-}}
-.cs-search-main {{
-  display: grid;
-  gap: var(--cs-space-4);
-  min-width: 0;
-}}
-.cs-search-canvas {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-search-command {{
-  display: grid;
-  gap: var(--cs-space-2);
-  align-items: start;
-}}
-.cs-search-back {{
-  color: var(--cs-color-primary-700);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-search-copy {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-search-titleline {{
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-}}
-.cs-search-copy h1 {{
-  margin: 0;
-  max-width: 34ch;
-  font-size: 26px;
-  line-height: 1.18;
-  text-wrap: balance;
-}}
-.cs-search-mode {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-search-hero {{
-  border: 1px solid var(--cs-color-border-focus);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  box-shadow: var(--cs-shadow-focus);
-  padding: var(--cs-space-2);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--cs-space-2);
-  align-items: center;
-}}
-.cs-search-lens {{
-  min-width: 42px;
-  min-height: 42px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-search-hero input {{
-  min-height: 50px;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: var(--cs-color-text-primary);
-  padding: 0 var(--cs-space-2);
-  font-size: 15px;
-}}
-.cs-search-submit {{
-  min-width: 44px;
-  min-height: 44px;
-  justify-content: center;
-}}
-.cs-search-tabs, .cs-filter-row {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-}}
-.cs-search-tab, .cs-filter-chip {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  min-height: 34px;
-  border-radius: var(--cs-radius-md);
-  border: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-primary);
-  color: var(--cs-color-text-secondary);
-  padding: 0 var(--cs-space-3);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-medium);
-}}
-.cs-search-tab {{ min-height: 44px; }}
-.cs-search-tab.is-active {{
-  background: var(--cs-color-primary-50);
-  border-color: var(--cs-color-primary-100);
-  color: var(--cs-color-primary-700);
-}}
-.cs-search-filterbar {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-}}
-.cs-search-context {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-search-context h2 {{
-  margin: 0;
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-  color: var(--cs-color-text-muted);
-}}
-.cs-result-list {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-result-list-header {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-result-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) minmax(150px, 210px);
-  gap: var(--cs-space-3);
-  align-items: center;
-}}
-.cs-result-row:hover {{ border-color: var(--cs-color-border-strong); box-shadow: var(--cs-shadow-sm); }}
-.cs-result-icon {{
-  width: 34px;
-  min-height: 38px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-size: 11px;
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-result-icon.is-source {{ background: var(--cs-color-primary-50); color: var(--cs-color-primary-700); }}
-.cs-result-icon.is-brief {{ background: var(--cs-state-underReview-bg); color: var(--cs-state-underReview-text); }}
-.cs-result-icon.is-claim {{ background: var(--cs-state-searchable-bg); color: var(--cs-state-searchable-text); }}
-.cs-result-icon.is-action {{ background: var(--cs-state-draft-bg); color: var(--cs-state-draft-text); }}
-.cs-result-body {{ display: grid; gap: var(--cs-space-1); }}
-.cs-result-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
-.cs-result-body h3 a {{ color: var(--cs-color-text-primary); }}
-.cs-result-body h3 a:hover, .cs-result-body h3 a:focus-visible {{ color: var(--cs-color-primary-700); outline: none; }}
-.cs-result-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 78ch; }}
-.cs-result-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-result-type {{
-  color: var(--cs-color-text-secondary);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-result-support {{
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-result-support .cs-meta {{
-  line-height: 1.35;
-  text-align: right;
-  max-width: 180px;
-}}
-.cs-result-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-}}
-.cs-result-actions .cs-button {{ min-height: 44px; padding: var(--cs-space-1) var(--cs-space-3); }}
-.cs-search-rail {{
-  position: sticky;
-  top: calc(var(--cs-space-4) + 72px);
-}}
-.cs-right-stat {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-  padding: var(--cs-space-2) 0;
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-right-stat:last-child {{ border-bottom: 0; }}
-.cs-right-stat-label {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-right-stat-icon {{
-  width: 24px;
-  height: 24px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-size: 10px;
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-suggested-query {{
-  display: grid;
-  grid-template-columns: 22px minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  align-items: start;
-  color: var(--cs-color-text-secondary);
-  padding: var(--cs-space-2) 0;
-}}
-.cs-suggested-query span:first-child {{
-  width: 20px;
-  height: 20px;
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  display: grid;
-  place-items: center;
-  font-weight: var(--cs-typography-weight-semibold);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-artifact-hero {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: start;
-  margin-bottom: var(--cs-space-5);
-}}
-.cs-artifact-title {{ display: grid; gap: var(--cs-space-2); }}
-.cs-artifact-title h1 {{
-  margin: 0;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
-}}
-.cs-artifact-actions {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); justify-content: flex-end; }}
-.cs-artifact-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 400px);
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-artifact-compact-hero {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-  padding-bottom: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-artifact-compact-hero > * {{
-  min-width: 0;
-}}
-.cs-artifact-compact-hero .cs-artifact-title h1 {{
-  max-width: 44ch;
-  font-size: 27px;
-  line-height: 1.12;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}}
-.cs-artifact-compact-hero .cs-artifact-actions {{
-  justify-content: flex-start;
-  max-width: 100%;
-}}
-.cs-artifact-breadcrumb {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  align-items: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  min-width: 0;
-}}
-.cs-artifact-breadcrumb a {{
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-artifact-breadcrumb span:last-child {{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}}
-.cs-artifact-title-row {{
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-artifact-file-mark {{
-  width: 46px;
-  height: 46px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-600);
-  color: var(--cs-color-text-inverse);
-  font-size: var(--cs-typography-label-fontSize);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-metadata-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-5);
-}}
-.cs-metadata-item {{
-  border-left: 1px solid var(--cs-color-border-default);
-  padding-left: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-metadata-strip.is-artifact {{
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  border-bottom: 1px solid var(--cs-color-border-default);
-  padding: var(--cs-space-3) 0;
-  margin-bottom: 0;
-}}
-.cs-metadata-item strong {{
-  word-break: break-word;
-}}
-.cs-artifact-inspection-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-artifact-inspection-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-artifact-inspection-card strong {{
-  font-size: 18px;
-  line-height: 1.25;
-}}
-.cs-artifact-viewer {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  overflow: hidden;
-  box-shadow: var(--cs-shadow-sm);
-  margin-top: var(--cs-space-2);
-}}
-.cs-artifact-toolbar {{
-  min-height: 48px;
-  border-bottom: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-primary);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
-  padding: var(--cs-space-2) var(--cs-space-3);
-}}
-.cs-artifact-toolbar-label {{
-  display: grid;
-  gap: 2px;
-}}
-.cs-artifact-toolgroup {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-artifact-tool {{
-  min-width: 32px;
-  height: 32px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-artifact-tool.is-muted {{
-  color: var(--cs-color-text-muted);
-  background: var(--cs-color-surface-subtle);
-}}
-.cs-artifact-page-count {{
-  min-width: 72px;
-  height: 32px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-document-frame {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-4);
-}}
-.cs-document-frame.has-rail {{
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  min-height: 600px;
-}}
-.cs-artifact-page-rail {{
-  border-right: 1px solid var(--cs-color-border-default);
-  background: color-mix(in srgb, var(--cs-color-surface-subtle) 74%, var(--cs-color-surface-primary));
-  padding: var(--cs-space-3) var(--cs-space-2);
-  display: grid;
-  align-content: start;
-  gap: var(--cs-space-2);
-}}
-.cs-artifact-page-rail-label {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-artifact-thumb {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  min-height: 92px;
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: var(--cs-space-1);
-  color: var(--cs-color-text-muted);
-  font-size: 10px;
-}}
-.cs-artifact-thumb.is-active {{
-  border-color: var(--cs-color-primary-500);
-  box-shadow: var(--cs-shadow-focus);
-}}
-.cs-artifact-thumb-line {{
-  height: 5px;
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-border-default);
-}}
-.cs-artifact-thumb span {{
-  text-align: center;
-  margin-top: var(--cs-space-1);
-}}
-.cs-artifact-page-area {{
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--cs-color-surface-subtle) 72%, var(--cs-color-surface-primary)), var(--cs-color-surface-subtle));
-  padding: var(--cs-space-4);
-  overflow: auto;
-}}
-.cs-document-page {{
-  max-width: 760px;
-  min-height: 540px;
-  margin: 0 auto;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, .08);
-  padding: clamp(var(--cs-space-5), 5vw, var(--cs-space-8));
-}}
-.cs-document-heading {{
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-5);
-  padding-bottom: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-document-heading h3 {{
-  margin: 0;
-  font-size: 20px;
-  line-height: 1.35;
-}}
-.cs-artifact-source-note {{
-  display: flex;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-  align-items: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-document-page .cs-source-text {{
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-  line-height: 1.75;
-}}
-.cs-artifact-rail {{
-  position: sticky;
-  top: calc(var(--cs-space-4) + 72px);
-}}
-.cs-artifact-rail-tabs {{
-  display: flex;
-  gap: var(--cs-space-5);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-4);
-  overflow-x: auto;
-}}
-.cs-artifact-rail-tab {{
-  padding: 0 0 var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-  font-weight: var(--cs-typography-weight-semibold);
-  white-space: nowrap;
-}}
-.cs-artifact-rail-tab.is-active {{
-  color: var(--cs-color-primary-700);
-  border-bottom: 2px solid var(--cs-color-primary-600);
-}}
-.cs-artifact-panel-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-artifact-summary-lead {{
-  border: 1px solid var(--cs-color-primary-100);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-primary-50) 42%, var(--cs-color-surface-primary));
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-artifact-summary-lead strong {{
-  color: var(--cs-color-text-primary);
-  line-height: 1.35;
-}}
-.cs-artifact-summary-lead p {{
-  line-height: 1.65;
-}}
-.cs-artifact-side-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-artifact-side-card h2 {{
-  margin: 0;
-}}
-.cs-artifact-side-card p {{
-  margin: 0;
-}}
-.cs-artifact-side-card summary {{
-  cursor: pointer;
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-artifact-side-card[open] summary {{
-  margin-bottom: var(--cs-space-2);
-}}
-.cs-keyword-list {{ display: grid; gap: var(--cs-space-2); }}
-.cs-keyword-row {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--cs-space-3);
-}}
-.cs-inbox-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
-  gap: var(--cs-space-6);
-  align-items: start;
-}}
-.cs-inbox-lane-summary {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-}}
-.cs-inbox-summary-main {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-inbox-summary-main strong {{
-  color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-body-fontSize);
-  font-variant-numeric: tabular-nums;
-}}
-.cs-inbox-summary-pills {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-inbox-summary-pill {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-surface-primary);
-  padding: 4px var(--cs-space-2);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-inbox-summary-pill.is-active {{
-  border-color: var(--cs-color-border-focus);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-}}
-.cs-inbox-summary-pill strong {{
-  color: var(--cs-color-text-primary);
-  font-variant-numeric: tabular-nums;
-}}
-.cs-inbox-tabs {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-5);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-inbox-tab {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  min-height: 42px;
-  color: var(--cs-color-text-secondary);
-  border-bottom: 2px solid transparent;
-  font-weight: var(--cs-typography-weight-medium);
-}}
-.cs-inbox-tab.is-active {{
-  color: var(--cs-color-primary-700);
-  border-color: var(--cs-color-primary-600);
-}}
-.cs-inbox-toolbar {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-inbox-toolbar .cs-filter-row {{ margin-top: 0; }}
-.cs-inbox-filter-label {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  min-height: 34px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: 0 var(--cs-space-3);
-  color: var(--cs-color-text-primary);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-inbox-filter-label span {{
-  color: var(--cs-color-primary-700);
-}}
-.cs-inbox-table {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  overflow: hidden;
-}}
-.cs-inbox-head, .cs-inbox-row {{
-  display: grid;
-  grid-template-columns: 28px minmax(210px, 1.45fr) minmax(82px, .55fr) minmax(78px, .55fr) minmax(88px, .55fr) minmax(76px, .5fr) minmax(106px, .68fr);
-  gap: var(--cs-space-2);
-  align-items: center;
-}}
-.cs-inbox-head {{
-  padding: var(--cs-space-3) var(--cs-space-4);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-inbox-row {{
-  padding: var(--cs-space-4);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-inbox-row:last-child {{ border-bottom: 0; }}
-.cs-inbox-row:hover {{ background: var(--cs-color-surface-subtle); }}
-.cs-inbox-row.is-selected {{
-  background: var(--cs-color-primary-50);
-  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
-}}
-.cs-inbox-select {{
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--cs-color-border-strong);
-  border-radius: var(--cs-radius-xs);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-surface-primary);
-  font-size: 11px;
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-inbox-row.is-selected .cs-inbox-select {{
-  border-color: var(--cs-color-primary-600);
-  background: var(--cs-color-primary-600);
-}}
-.cs-inbox-item-title {{
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-inbox-icon {{
-  width: 30px;
-  height: 30px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-inbox-item-title strong {{ display: block; }}
-.cs-inbox-item-title .cs-meta {{ display: block; }}
-.cs-inbox-type-cell {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-secondary);
-}}
-.cs-inbox-type-mark {{
-  width: 20px;
-  height: 20px;
-  border-radius: var(--cs-radius-xs);
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-  color: var(--cs-color-primary-700);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-inbox-owner {{
-  display: inline-grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  align-items: center;
-  min-width: 0;
-}}
-.cs-inbox-owner-mark {{
-  width: 22px;
-  height: 22px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-surface-subtle);
-  border: 1px solid var(--cs-color-border-default);
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-inbox-detail {{
-  display: grid;
-  gap: var(--cs-space-4);
-}}
-.cs-inbox-detail h2 {{ margin: 0; font-size: var(--cs-typography-sectionTitle-fontSize); }}
-.cs-inbox-detail-title {{
-  display: grid;
-  grid-template-columns: 30px minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-inbox-close {{
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  color: var(--cs-color-text-muted);
-  background: var(--cs-color-surface-primary);
-}}
-.cs-inbox-action-panel {{
-  border: 1px solid var(--cs-color-border-focus);
-  border-radius: var(--cs-radius-md);
-  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-inbox-action-panel .cs-section-title {{ margin: 0; }}
-.cs-inbox-preview-note {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-inbox-preview-note h3 {{
-  margin: 0;
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-}}
-.cs-inbox-preview-note p {{ margin: 0; color: var(--cs-color-text-secondary); }}
-.cs-journey-timeline {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-  min-width: 0;
-}}
-.cs-journey-timeline.is-recovery {{
-  border-color: var(--cs-state-underReview-border);
-  background: var(--cs-state-underReview-bg);
-}}
-.cs-journey-header {{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-  min-width: 0;
-}}
-.cs-journey-header h3 {{
-  margin: 0;
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-journey-header p {{ margin: var(--cs-space-1) 0 0; color: var(--cs-color-text-secondary); }}
-.cs-journey-stage-list {{
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  min-width: 0;
-}}
-.cs-journey-stage-list > li {{ min-width: 0; }}
-.cs-journey-stage {{
-  border-left: 3px solid var(--cs-color-border-strong);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  min-width: 0;
-}}
-.cs-journey-stage.is-ready {{
-  border-left-color: var(--cs-state-saved-border);
-  background: var(--cs-state-saved-bg);
-}}
-.cs-journey-stage.is-needs-review {{
-  border-left-color: var(--cs-state-underReview-border);
-  background: var(--cs-state-underReview-bg);
-}}
-.cs-journey-stage.is-blocked {{
-  border-left-color: var(--cs-state-policyBlocked-border);
-  background: var(--cs-state-policyBlocked-bg);
-}}
-.cs-journey-stage.is-ready .cs-dot {{ background: var(--cs-state-saved-fg); }}
-.cs-journey-stage.is-needs-review .cs-dot {{ background: var(--cs-state-underReview-fg); }}
-.cs-journey-stage.is-blocked .cs-dot {{ background: var(--cs-state-policyBlocked-fg); }}
-.cs-journey-stage-body {{ display: grid; gap: var(--cs-space-2); min-width: 0; }}
-.cs-journey-stage-body p {{ margin: 0; color: var(--cs-color-text-secondary); overflow-wrap: anywhere; }}
-.cs-journey-stage-heading {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-journey-ref-grid {{
-  margin: var(--cs-space-2) 0 0;
-  display: grid;
-  grid-template-columns: minmax(88px, auto) minmax(0, 1fr);
-  gap: var(--cs-space-1) var(--cs-space-2);
-}}
-.cs-journey-ref-grid dt {{ color: var(--cs-color-text-muted); }}
-.cs-journey-ref-grid dd {{ margin: 0; min-width: 0; overflow-wrap: anywhere; word-break: break-word; }}
-.cs-journey-ref-grid code {{ display: inline-block; max-width: 100%; overflow-wrap: anywhere; word-break: break-word; }}
-.cs-journey-recovery {{ border-top: 1px solid var(--cs-color-border-default); padding-top: var(--cs-space-2); }}
-.cs-journey-recovery summary {{
-  cursor: pointer;
-  min-height: 32px;
-  padding: var(--cs-space-1) 0;
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-journey-recovery summary:focus-visible,
-.cs-journey-stage summary:focus-visible {{
-  outline: 2px solid var(--cs-color-border-focus);
-  outline-offset: 2px;
-}}
-.cs-journey-recovery-list {{ display: grid; gap: var(--cs-space-2); margin-top: var(--cs-space-2); }}
-.cs-journey-recovery-list > div {{
-  border-left: 2px solid var(--cs-state-underReview-border);
-  padding-left: var(--cs-space-2);
-  display: grid;
-  gap: var(--cs-space-1);
-  color: var(--cs-color-text-secondary);
-}}
-.cs-journey-recovery-list strong {{ color: var(--cs-color-text-primary); }}
-.cs-inbox-linked-list {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-inbox-linked-row {{
-  display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  align-items: start;
-  color: var(--cs-color-text-secondary);
-}}
-.cs-inbox-linked-row strong {{
-  display: block;
-  color: var(--cs-color-text-primary);
-}}
-.cs-inbox-receipt-strip {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-inbox-receipt {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-}}
-.cs-inbox-receipt strong {{ font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-inbox-receipt span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-inbox-actions {{ display: grid; gap: var(--cs-space-2); }}
-.cs-inbox-actions .cs-button {{ justify-content: center; text-align: center; }}
-.cs-inbox-foot {{
-  padding: var(--cs-space-3) var(--cs-space-4);
-  border-top: 1px solid var(--cs-color-border-default);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-collection-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: var(--cs-space-6);
-  align-items: start;
-}}
-.cs-collection-summary {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-collection-stat {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-collection-stat strong {{
-  font-size: 22px;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}}
-.cs-collection-toolbar {{
-  display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-collection-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-collection-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) minmax(176px, auto);
-  gap: var(--cs-space-4);
-  align-items: start;
-  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
-}}
-.cs-collection-row:hover {{
-  border-color: var(--cs-color-border-strong);
-  box-shadow: var(--cs-shadow-sm);
-  transform: translateY(-1px);
-}}
-.cs-collection-icon {{
-  width: 32px;
-  height: 32px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-collection-body {{ display: grid; gap: var(--cs-space-2); }}
-.cs-collection-body h3 {{ margin: 0; font-size: 16px; line-height: 1.35; }}
-.cs-collection-body p {{ margin: 0; color: var(--cs-color-text-secondary); max-width: 82ch; }}
-.cs-collection-meta {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-collection-actions {{
-  display: grid;
-  gap: var(--cs-space-3);
-  justify-items: end;
-  align-content: start;
-}}
-.cs-collection-actions .cs-row {{ justify-content: flex-end; }}
-.cs-collection-cta {{
-  min-height: 32px;
-  border-radius: var(--cs-radius-sm);
-  border: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-  padding: 6px 10px;
-  color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-collection-footrail {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-  margin-top: var(--cs-space-1);
-}}
-.cs-collection-stage {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}}
-.cs-collection-stage strong {{
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-  color: var(--cs-color-text-primary);
-}}
-.cs-collection-stage span {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  overflow-wrap: anywhere;
-}}
-.cs-queue-focus {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-  margin-bottom: var(--cs-space-3);
-}}
-.cs-queue-focus-head {{
-  display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-  align-items: center;
-}}
-.cs-queue-focus h2 {{
-  margin: 0;
-  font-size: 17px;
-  line-height: 1.35;
-}}
-.cs-queue-focus p {{
-  margin: 2px 0 0;
-  color: var(--cs-color-text-secondary);
-  max-width: 72ch;
-}}
-.cs-queue-lanes {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-  padding-top: var(--cs-space-2);
-  border-top: 1px solid var(--cs-color-border-default);
-}}
-.cs-queue-lane {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-color-surface-subtle);
-  padding: 4px var(--cs-space-2);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-secondary);
-}}
-.cs-queue-lane strong {{
-  color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-body-fontSize);
-  font-variant-numeric: tabular-nums;
-}}
-.cs-queue-lane span {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-empty {{
-  border: 1px dashed var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  padding: var(--cs-space-6);
-  color: var(--cs-color-text-muted);
-  background: var(--cs-color-surface-subtle);
-}}
-.cs-empty-state {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
-  padding: var(--cs-space-6);
-  display: grid;
-  gap: var(--cs-space-4);
-  color: var(--cs-color-text-primary);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.68);
-}}
-.cs-empty-state-main {{
-  display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-empty-mark {{
-  width: 44px;
-  height: 44px;
-  border-radius: var(--cs-radius-lg);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-empty-copy {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-empty-copy h2 {{
-  margin: 0;
-  font-size: 20px;
-  line-height: 1.3;
-  text-wrap: balance;
-}}
-.cs-empty-copy p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  max-width: 64ch;
-  text-wrap: pretty;
-}}
-.cs-empty-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-}}
-.cs-empty-steps {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-empty-step {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 72%, var(--cs-color-surface-subtle));
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-empty-briefing {{
-  border-top: 1px solid var(--cs-color-border-default);
-  padding-top: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-empty-briefing h3 {{
-  margin: 0 0 var(--cs-space-2);
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-}}
-.cs-empty-receipts {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-empty-receipt {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-}}
-.cs-empty-receipt strong {{
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-}}
-.cs-empty-receipt span {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-chip {{
-  display: inline-flex;
-  align-items: center;
-  min-height: 26px;
-  border-radius: var(--cs-radius-pill);
-  border: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-  color: var(--cs-color-text-secondary);
-  padding: 0 var(--cs-space-2);
-  font-size: var(--cs-typography-label-fontSize);
-  line-height: var(--cs-typography-label-lineHeight);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-chip-saved {{ background: var(--cs-state-saved-bg); border-color: var(--cs-state-saved-border); color: var(--cs-state-saved-fg); }}
-.cs-chip-searchable {{ background: var(--cs-state-searchable-bg); border-color: var(--cs-state-searchable-border); color: var(--cs-state-searchable-fg); }}
-.cs-chip-draft {{ background: var(--cs-state-draft-bg); border-color: var(--cs-state-draft-border); color: var(--cs-state-draft-fg); }}
-.cs-chip-evidenceBacked {{ background: var(--cs-state-evidenceBacked-bg); border-color: var(--cs-state-evidenceBacked-border); color: var(--cs-state-evidenceBacked-fg); }}
-.cs-chip-underReview {{ background: var(--cs-state-underReview-bg); border-color: var(--cs-state-underReview-border); color: var(--cs-state-underReview-fg); }}
-.cs-chip-approved {{ background: var(--cs-state-approved-bg); border-color: var(--cs-state-approved-border); color: var(--cs-state-approved-fg); }}
-.cs-chip-executed {{ background: var(--cs-state-executed-bg); border-color: var(--cs-state-executed-border); color: var(--cs-state-executed-fg); }}
-.cs-chip-failed {{ background: var(--cs-state-failed-bg); border-color: var(--cs-state-failed-border); color: var(--cs-state-failed-fg); }}
-.cs-chip-policyBlocked {{ background: var(--cs-state-policyBlocked-bg); border-color: var(--cs-state-policyBlocked-border); color: var(--cs-state-policyBlocked-fg); }}
-.cs-detail-orientation {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: center;
-}}
-.cs-detail-context {{
-  display: grid;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-detail-path {{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-detail-path a {{
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-detail-path span[aria-hidden="true"] {{ color: var(--cs-color-text-muted); }}
-.cs-detail-summary {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-detail-summary-head {{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--cs-space-2);
-}}
-.cs-detail-current {{
-  color: var(--cs-color-text-primary);
-  font-weight: var(--cs-typography-weight-semibold);
-  overflow-wrap: anywhere;
-}}
-.cs-detail-summary p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  max-width: 68ch;
-  text-wrap: pretty;
-}}
-.cs-detail-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  justify-content: flex-end;
-}}
-.cs-source-text {{
-  white-space: pre-wrap;
-  word-break: break-word;
-  border-radius: var(--cs-radius-md);
-  border: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-4);
-}}
-.cs-detail-grid {{
-  display: grid;
-  grid-template-columns: 140px minmax(0, 1fr);
-  gap: var(--cs-space-2) var(--cs-space-3);
-  margin-top: var(--cs-space-4);
-}}
-.cs-detail-grid dt {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-detail-grid dd {{ margin: 0; color: var(--cs-color-text-secondary); min-width: 0; word-break: break-word; }}
-.cs-finding-list {{ display: grid; gap: var(--cs-space-3); margin: 0; padding: 0; list-style: none; }}
-.cs-finding {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-finding-head {{
-  display: flex;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  align-items: flex-start;
-}}
-.cs-finding-index {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-variant-numeric: tabular-nums;
-}}
-.cs-citation-rail {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-citation-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 82%, var(--cs-color-primary-50));
-  overflow: hidden;
-}}
-.cs-citation-card summary {{
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-3);
-}}
-.cs-citation-card summary::-webkit-details-marker {{ display: none; }}
-.cs-citation-title {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-citation-title strong {{
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}}
-.cs-citation-action {{
-  color: var(--cs-color-primary-700);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-semibold);
-  flex: 0 0 auto;
-}}
-.cs-citation-body {{
-  border-top: 1px solid var(--cs-color-border-default);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-citation-snippet {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  text-wrap: pretty;
-}}
-.cs-citation-meta {{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-citation-meta div {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-citation-meta strong {{
-  display: block;
-  overflow-wrap: anywhere;
-}}
-.cs-citation-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-}}
-.cs-brief-hero {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: start;
-  margin-bottom: var(--cs-space-5);
-}}
-.cs-brief-title {{ display: grid; gap: var(--cs-space-2); }}
-.cs-brief-title h1 {{
-  margin: 0;
-  font-size: var(--cs-typography-pageTitle-fontSize);
-  line-height: var(--cs-typography-pageTitle-lineHeight);
-}}
-.cs-brief-meta {{ display: flex; flex-wrap: wrap; gap: var(--cs-space-2); color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-brief-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: var(--cs-space-2);
-}}
-.cs-brief-hero.is-stacked {{
-  grid-template-columns: 1fr;
-  gap: var(--cs-space-3);
-}}
-.cs-brief-hero.is-stacked .cs-brief-actions {{ justify-content: flex-start; }}
-.cs-brief-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  gap: var(--cs-space-6);
-  align-items: start;
-}}
-.cs-brief-workbench > *, .cs-brief-workbench .cs-stack, .cs-brief-titlebar, .cs-brief-titlebar > *, .cs-brief-heading-row {{
-  min-width: 0;
-  max-width: 100%;
-}}
-.cs-brief-titlebar {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-2);
-  align-items: start;
-  padding-bottom: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-3);
-}}
-.cs-brief-titlebar .cs-brief-actions {{
-  justify-content: flex-start;
-}}
-.cs-brief-breadcrumb {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  align-items: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  min-width: 0;
-}}
-.cs-brief-breadcrumb a {{
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-brief-breadcrumb span:last-child {{
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}}
-.cs-brief-heading-row {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-}}
-.cs-brief-titlebar h1 {{
-  margin: 0;
-  flex: 1 1 24rem;
-  min-width: 0;
-  max-width: 58ch;
-  font-size: 28px;
-  line-height: 1.16;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}}
-.cs-brief-titlebar p {{
-  max-width: 68ch;
-}}
-.cs-brief-fact-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-brief-fact {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-}}
-.cs-brief-fact strong {{ font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
-.cs-brief-receipt-panel {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 50%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 58%);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-3);
-}}
-.cs-brief-lead-grid {{
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(260px, .75fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-brief-answer-card, .cs-brief-receipt-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 88%, white);
-  padding: var(--cs-space-3);
-  display: grid;
-  align-content: start;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-brief-answer-card.is-primary {{
-  min-height: 100%;
-  border-color: var(--cs-color-primary-100);
-  background: var(--cs-color-surface-primary);
-}}
-.cs-brief-answer-card p, .cs-brief-receipt-card p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  line-height: 1.55;
-  text-wrap: pretty;
-}}
-.cs-brief-answer-card p {{
-  color: var(--cs-color-text-primary);
-  font-size: 16px;
-  line-height: 1.65;
-}}
-.cs-brief-receipt-stack {{
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-brief-receipt-card strong {{
-  color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-body-fontSize);
-  line-height: var(--cs-typography-body-lineHeight);
-  overflow-wrap: anywhere;
-}}
-.cs-summary-card {{
-  background: color-mix(in srgb, var(--cs-color-primary-50) 48%, var(--cs-color-surface-primary));
-  border-color: var(--cs-color-primary-100);
-}}
-.cs-summary-card p {{
-  margin: 0;
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--cs-color-text-primary);
-}}
-.cs-brief-note-grid {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--cs-space-4);
-}}
-.cs-brief-note-list {{
-  margin: 0;
-  padding-left: var(--cs-space-5);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-stat-list {{ display: grid; gap: var(--cs-space-3); }}
-.cs-stat-row {{
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--cs-space-3);
-}}
-.cs-stat-icon {{
-  width: 34px;
-  height: 34px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-surface-subtle);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-source-card summary {{
-  cursor: pointer;
-  color: var(--cs-color-text-primary);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-source-card[open] summary {{ margin-bottom: var(--cs-space-3); }}
-.cs-provenance {{
-  border-top: 1px solid var(--cs-color-border-default);
-  margin-top: var(--cs-space-3);
-  padding-top: var(--cs-space-3);
-}}
-.cs-trust-ladder {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin: var(--cs-space-4) 0;
-}}
-.cs-trust-step {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-trust-step strong {{ display: flex; align-items: center; gap: var(--cs-space-2); }}
-.cs-trust-step strong::before {{
-  content: "";
-  width: 10px;
-  height: 10px;
-  border-radius: var(--cs-radius-pill);
-  border: 2px solid var(--cs-color-border-strong);
-  background: var(--cs-color-surface-primary);
-}}
-.cs-trust-step.is-active {{
-  border-color: var(--cs-state-evidenceBacked-border);
-  background: var(--cs-state-evidenceBacked-bg);
-}}
-.cs-trust-step.is-active strong::before {{ border-color: var(--cs-state-evidenceBacked-fg); background: var(--cs-state-evidenceBacked-fg); }}
-.cs-trust-step.is-locked {{ opacity: .76; }}
-.cs-claim-workbench {{
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
-}}
-.cs-claim-workbench, .cs-claim-workbench > *, .cs-claim-workbench .cs-stack, .cs-claim-hero, .cs-claim-hero > *, .cs-claim-titlebar, .cs-claim-titlebar > *, .cs-claim-heading-row {{
-  min-width: 0;
-  max-width: 100%;
-}}
-.cs-claim-hero, .cs-claim-titlebar, .cs-claim-titlebar > *, .cs-claim-actions {{
-  width: 100%;
-}}
-.cs-claim-workbench .cs-stack, .cs-claim-hero, .cs-claim-titlebar, .cs-claim-titlebar .cs-brief-title {{
-  grid-template-columns: minmax(0, 1fr);
-}}
-.cs-claim-hero {{
-  display: grid;
-  gap: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-claim-hero.is-compact {{
-  padding-bottom: var(--cs-space-4);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-claim-breadcrumb {{
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  min-width: 0;
-}}
-.cs-claim-breadcrumb a {{ color: var(--cs-color-primary-700); font-weight: var(--cs-typography-weight-semibold); }}
-.cs-claim-breadcrumb span:last-child {{
-  flex: 1 1 180px;
-  min-width: 0;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}}
-.cs-claim-titlebar {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-claim-heading-row {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-3);
-  flex-wrap: wrap;
-}}
-.cs-claim-titlebar h1 {{
-  margin: 0;
-  flex: 1 1 22rem;
-  min-width: 0;
-  max-width: 44ch;
-  font-size: 28px;
-  line-height: 1.16;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}}
-.cs-claim-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  justify-content: flex-end;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-}}
-.cs-button.is-disabled {{
-  cursor: not-allowed;
-  opacity: .68;
-  background: var(--cs-color-surface-subtle);
-  color: var(--cs-color-text-muted);
-  border-color: var(--cs-color-border-default);
-  box-shadow: none;
-}}
-.cs-button.is-disabled:hover {{ transform: none; box-shadow: none; }}
-.cs-claim-progress {{
-  position: relative;
-  border: 0;
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3) var(--cs-space-4);
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-claim-progress::before {{
-  content: "";
-  position: absolute;
-  left: var(--cs-space-8);
-  right: var(--cs-space-8);
-  top: 24px;
-  border-top: 1px dashed var(--cs-color-border-strong);
-}}
-.cs-claim-progress-step {{
-  position: relative;
-  z-index: 1;
-  display: grid;
-  justify-items: center;
-  gap: var(--cs-space-2);
-  text-align: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-claim-dot {{
-  width: 16px;
-  height: 16px;
-  border-radius: var(--cs-radius-pill);
-  border: 2px solid var(--cs-color-border-strong);
-  background: var(--cs-color-surface-primary);
-}}
-.cs-claim-progress-step.is-active {{ color: var(--cs-color-text-primary); font-weight: var(--cs-typography-weight-semibold); }}
-.cs-claim-progress-step.is-active .cs-claim-dot {{
-  border-color: var(--cs-color-primary-600);
-  background: var(--cs-color-primary-600);
-  box-shadow: 0 0 0 4px var(--cs-color-primary-100);
-}}
-.cs-claim-pathbar {{
-  display: grid;
-  grid-template-columns: minmax(170px, .32fr) minmax(0, 1fr);
-  gap: var(--cs-space-4);
-  align-items: center;
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-claim-pathbar-title {{
-  display: grid;
-  gap: var(--cs-space-1);
-  min-width: 0;
-}}
-.cs-claim-pathbar-title strong {{
-  color: var(--cs-color-text-primary);
-  font-size: var(--cs-typography-body-fontSize);
-  line-height: var(--cs-typography-body-lineHeight);
-}}
-.cs-claim-pathbar .cs-claim-progress {{
-  background: transparent;
-  border-radius: 0;
-  padding: var(--cs-space-1) 0;
-}}
-.cs-claim-pathbar .cs-claim-progress::before {{
-  left: 8%;
-  right: 8%;
-  top: 14px;
-}}
-.cs-claim-pathbar .cs-claim-progress-step {{
-  gap: var(--cs-space-1);
-}}
-.cs-claim-pathbar .cs-claim-dot {{
-  width: 14px;
-  height: 14px;
-}}
-.cs-claim-tabs {{
-  display: flex;
-  gap: var(--cs-space-5);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin-bottom: var(--cs-space-4);
-  overflow-x: auto;
-}}
-.cs-claim-tab {{
-  padding: 0 0 var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-  font-weight: var(--cs-typography-weight-semibold);
-  white-space: nowrap;
-}}
-.cs-claim-tab.is-active {{
-  color: var(--cs-color-primary-700);
-  border-bottom: 2px solid var(--cs-color-primary-600);
-}}
-.cs-claim-form-card {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-claim-review-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-top: var(--cs-space-3);
-}}
-.cs-claim-review-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-claim-review-card strong {{
-  font-size: var(--cs-typography-body-fontSize);
-  line-height: var(--cs-typography-body-lineHeight);
-}}
-.cs-claim-field {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-claim-field.is-primary {{
-  border-color: var(--cs-color-primary-100);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cs-color-primary-500) 18%, transparent);
-}}
-.cs-claim-field-head {{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-  align-items: center;
-}}
-.cs-claim-text {{
-  margin: 0;
-  color: var(--cs-color-text-primary);
-  font-size: 15px;
-  line-height: 1.7;
-}}
-.cs-claim-text.is-statement {{
-  font-size: 16px;
-  line-height: 1.75;
-}}
-.cs-claim-field-foot {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  text-align: right;
-}}
-.cs-claim-taxonomy {{
-  display: grid;
-  grid-template-columns: minmax(180px, .42fr) minmax(0, 1fr);
-  gap: var(--cs-space-3);
-}}
-.cs-claim-frameworks {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  min-height: 42px;
-  padding: var(--cs-space-2) var(--cs-space-3);
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-claim-select, .cs-claim-tags {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  min-height: 42px;
-  padding: var(--cs-space-2) var(--cs-space-3);
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-}}
-.cs-claim-footrail {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-claim-footrail div {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-claim-footrail strong {{
-  color: var(--cs-color-text-primary);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-claim-save-note {{
-  display: inline-flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-  color: var(--cs-state-evidenceBacked-text);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-medium);
-}}
-.cs-claim-save-note::before {{
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: var(--cs-radius-pill);
-  background: var(--cs-state-evidenceBacked-fg);
-}}
-.cs-claim-control-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-claim-control-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-claim-control-mark {{
-  width: 26px;
-  height: 26px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-surface-subtle);
-  color: var(--cs-color-text-secondary);
-  border: 1px solid var(--cs-color-border-default);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-claim-control-row.is-ready .cs-claim-control-mark {{
-  background: var(--cs-state-evidenceBacked-bg);
-  color: var(--cs-state-evidenceBacked-fg);
-  border-color: var(--cs-state-evidenceBacked-border);
-}}
-.cs-claim-control-row.is-review .cs-claim-control-mark {{
-  background: var(--cs-state-underReview-bg);
-  color: var(--cs-state-underReview-fg);
-  border-color: var(--cs-state-underReview-border);
-}}
-.cs-claim-control-row strong, .cs-claim-control-row p {{ margin: 0; }}
-.cs-form-surface {{
-  display: grid;
-  gap: var(--cs-space-4);
-}}
-.cs-field-block {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-field-block p {{ margin: 0; }}
-.cs-evidence-picker {{ display: grid; gap: var(--cs-space-3); }}
-.cs-evidence-toolbar {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
-  flex-wrap: wrap;
-  margin-bottom: var(--cs-space-3);
-}}
-.cs-evidence-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-evidence-row.is-selected {{
-  background: color-mix(in srgb, var(--cs-state-underReview-bg) 42%, var(--cs-color-surface-primary));
-  border-color: var(--cs-state-underReview-border);
-}}
-.cs-checkmark {{
-  width: 20px;
-  height: 20px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--cs-color-primary-600);
-  background: var(--cs-color-primary-600);
-  color: var(--cs-color-text-inverse);
-  font-size: 12px;
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-review-box {{
-  border-top: 1px solid var(--cs-color-border-default);
-  padding-top: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-action-summary {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-action-workbench {{
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 400px);
-}}
-.cs-action-hero {{
-  display: grid;
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-3);
-  padding-bottom: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-action-breadcrumb {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  align-items: center;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-action-breadcrumb a {{
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-action-titlebar {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-action-titlebar h1 {{
-  margin: 0;
-  max-width: 44ch;
-  font-size: 28px;
-  line-height: 1.14;
-  text-wrap: balance;
-}}
-.cs-action-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  justify-content: flex-end;
-}}
-.cs-action-rail {{
-  position: sticky;
-  top: calc(var(--cs-space-4) + 72px);
-}}
-.cs-action-review-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin: var(--cs-space-3) 0 0;
-}}
-.cs-action-review-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-action-review-card strong {{ font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
-.cs-action-receipt-panel {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 46%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-4);
-}}
-.cs-action-receipt-grid {{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-action-receipt-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 90%, white);
-  padding: var(--cs-space-3);
-  display: grid;
-  align-content: start;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-action-receipt-card strong {{
-  color: var(--cs-color-text-primary);
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}}
-.cs-action-receipt-card p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  line-height: 1.55;
-  text-wrap: pretty;
-}}
-.cs-action-mini-diff {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  overflow: hidden;
-  display: grid;
-}}
-.cs-action-mini-diff div {{
-  display: grid;
-  gap: var(--cs-space-1);
-  padding: var(--cs-space-2);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-action-mini-diff div:last-child {{ border-bottom: 0; }}
-.cs-action-route-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-top: var(--cs-space-3);
-}}
-.cs-action-route-step {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-action-route-step.is-current {{
-  border-color: var(--cs-color-border-focus);
-  background: linear-gradient(180deg, var(--cs-color-primary-50), var(--cs-color-surface-primary));
-  box-shadow: inset 3px 0 0 var(--cs-color-primary-600);
-}}
-.cs-action-route-top {{
-  display: flex;
-  gap: var(--cs-space-2);
-  align-items: center;
-}}
-.cs-action-route-index {{
-  width: 24px;
-  height: 24px;
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  display: grid;
-  place-items: center;
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-action-route-step p {{
-  margin: 0;
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: 1.35;
-}}
-.cs-owner-overview {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  margin-bottom: var(--cs-space-5);
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  overflow: hidden;
-}}
-.cs-owner-tabs {{
-  display: flex;
-  gap: var(--cs-space-5);
-  border-bottom: 1px solid var(--cs-color-border-default);
-  margin: var(--cs-space-4) 0 var(--cs-space-5);
-  overflow-x: auto;
-}}
-.cs-owner-tab {{
-  padding: 0 0 var(--cs-space-3);
-  color: var(--cs-color-text-secondary);
-  font-weight: var(--cs-typography-weight-semibold);
-  white-space: nowrap;
-}}
-.cs-owner-tab.is-active {{
-  color: var(--cs-color-primary-700);
-  border-bottom: 2px solid var(--cs-color-primary-600);
-}}
-.cs-owner-metric {{
-  border-right: 1px solid var(--cs-color-border-default);
-  background: linear-gradient(180deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
-  padding: var(--cs-space-3) var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-owner-metric:last-child {{ border-right: 0; }}
-.cs-owner-metric strong {{
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-reference-grid {{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cs-space-4);
-}}
-.cs-reference-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  overflow: hidden;
-  display: grid;
-  min-width: 0;
-}}
-.cs-reference-card img {{
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  object-position: top left;
-  border-bottom: 1px solid var(--cs-color-border-default);
-  background: var(--cs-color-surface-subtle);
-}}
-.cs-reference-body {{
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-reference-body h2 {{
-  margin: 0;
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-reference-body p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-}}
-.cs-connector-grid {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
-  gap: var(--cs-space-4);
-  align-items: start;
-}}
-.cs-owner-main-stack, .cs-connector-list, .cs-admin-stack, .cs-policy-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-admin-stack {{
-  position: sticky;
-  top: calc(var(--cs-space-4) + 72px);
-}}
-.cs-connector-table-head {{
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
-  gap: var(--cs-space-3);
-  padding: 0 var(--cs-space-3) var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-connector-card {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, .7fr) minmax(0, .8fr) minmax(0, .9fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-}}
-.cs-connector-card h3 {{ margin: 0 0 var(--cs-space-1); font-size: var(--cs-typography-body-fontSize); }}
-.cs-connector-card p {{ margin: 0; color: var(--cs-color-text-secondary); font-size: var(--cs-typography-metadata-fontSize); line-height: 1.45; }}
-.cs-connector-source {{
-  display: grid;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-connector-title {{
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-}}
-.cs-connector-icon {{
-  width: 34px;
-  height: 34px;
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  display: grid;
-  place-items: center;
-  font-weight: var(--cs-typography-weight-bold);
-  font-size: var(--cs-typography-metadata-fontSize);
-  flex: 0 0 auto;
-}}
-.cs-connector-cell {{
-  display: grid;
-  gap: var(--cs-space-1);
-  min-width: 0;
-}}
-.cs-connector-cell span, .cs-connector-cell strong {{
-  display: block;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}}
-.cs-policy-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-policy-row strong, .cs-policy-row p {{
-  margin: 0;
-}}
-.cs-policy-row p {{
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: 1.5;
-}}
-.cs-owner-scope-table {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  overflow: hidden;
-}}
-.cs-owner-scope-row {{
-  display: grid;
-  grid-template-columns: minmax(150px, .45fr) minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-owner-scope-row:last-child {{ border-bottom: 0; }}
-.cs-owner-scope-row strong, .cs-owner-scope-row span {{ min-width: 0; word-break: break-word; }}
-.cs-admin-note {{
-  border: 1px solid var(--cs-state-underReview-border);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-state-underReview-bg);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-action-metric {{
-  display: grid;
-  gap: var(--cs-space-1);
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  padding: var(--cs-space-3);
-  background: var(--cs-color-surface-subtle);
-}}
-.cs-action-object-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: var(--cs-space-3);
-}}
-.cs-action-object-icon {{
-  width: 30px;
-  height: 30px;
-  border-radius: var(--cs-radius-sm);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-diff-view {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  overflow: hidden;
-  background: var(--cs-color-surface-primary);
-}}
-.cs-action-preview-frame {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-action-preview-meta {{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-diff-line {{
-  display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  gap: var(--cs-space-3);
-  padding: var(--cs-space-3);
-  border-bottom: 1px solid var(--cs-color-border-default);
-}}
-.cs-diff-line:last-child {{ border-bottom: 0; }}
-.cs-diff-line.before {{ background: color-mix(in srgb, var(--cs-state-failed-bg) 58%, var(--cs-color-surface-primary)); }}
-.cs-diff-line.after {{ background: color-mix(in srgb, var(--cs-state-evidenceBacked-bg) 62%, var(--cs-color-surface-primary)); }}
-.cs-call-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: center;
-}}
-.cs-call-facts {{
-  margin-top: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-call-fact {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-}}
-.cs-call-fact strong {{ font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-call-fact span {{ color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
-.cs-approval-note {{
-  border: 1px solid var(--cs-state-underReview-border);
-  background: var(--cs-state-underReview-bg);
-  border-radius: var(--cs-radius-md);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-policy-card {{
-  border: 1px solid var(--cs-state-underReview-border);
-  background: var(--cs-state-underReview-bg);
-  border-radius: var(--cs-radius-md);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-2);
-}}
-.cs-policy-checks {{
-  display: grid;
-  gap: var(--cs-space-2);
-  margin-top: var(--cs-space-3);
-}}
-.cs-policy-check {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-policy-check-mark {{
-  width: 24px;
-  height: 24px;
-  border-radius: var(--cs-radius-sm);
-  background: var(--cs-state-underReview-bg);
-  color: var(--cs-state-underReview-fg);
-  border: 1px solid var(--cs-state-underReview-border);
-  display: grid;
-  place-items: center;
-  font-weight: var(--cs-typography-weight-bold);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-timeline {{ display: grid; gap: var(--cs-space-3); }}
-.cs-timeline-item {{ display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--cs-space-3); }}
-.cs-dot {{ width: 10px; height: 10px; margin-top: 7px; border-radius: var(--cs-radius-pill); background: var(--cs-color-evidence-600); }}
-.cs-audit-workbench {{
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px);
-  gap: var(--cs-space-5);
-  align-items: start;
-}}
-.cs-audit-hero {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, var(--cs-color-surface-primary), var(--cs-color-surface-subtle));
-  padding: var(--cs-space-6);
-  margin-bottom: var(--cs-space-4);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--cs-space-5);
-  align-items: end;
-}}
-.cs-audit-hero h1 {{
-  margin: 0;
-  font-size: 34px;
-  line-height: 1.12;
-  text-wrap: balance;
-}}
-.cs-audit-hero p {{
-  max-width: 72ch;
-  text-wrap: pretty;
-}}
-.cs-audit-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  justify-content: flex-end;
-}}
-.cs-audit-status-strip {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-  margin-bottom: var(--cs-space-4);
-}}
-.cs-audit-overview {{
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr);
-  gap: var(--cs-space-4);
-  margin-bottom: var(--cs-space-4);
-  align-items: stretch;
-}}
-.cs-audit-latest {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-lg);
-  background:
-    linear-gradient(135deg, color-mix(in srgb, var(--cs-color-primary-50) 44%, var(--cs-color-surface-primary)), var(--cs-color-surface-primary) 62%);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-  min-width: 0;
-}}
-.cs-audit-latest h2 {{
-  margin: 0;
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-audit-latest-title {{
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-audit-latest-title p {{
-  margin: var(--cs-space-1) 0 0;
-  color: var(--cs-color-text-secondary);
-  text-wrap: pretty;
-}}
-.cs-audit-latest-actions {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-}}
-.cs-audit-overview-side {{
-  display: grid;
-  gap: var(--cs-space-3);
-  min-width: 0;
-}}
-.cs-audit-summary {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-audit-receipt {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: 2px;
-}}
-.cs-audit-receipt strong {{
-  font-size: 18px;
-  line-height: 1.15;
-  font-variant-numeric: tabular-nums;
-}}
-.cs-audit-lifecycle {{
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--cs-space-2);
-}}
-.cs-audit-lane {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: color-mix(in srgb, var(--cs-color-surface-primary) 78%, var(--cs-color-surface-subtle));
-  padding: var(--cs-space-2);
-  display: grid;
-  gap: var(--cs-space-2);
-  min-width: 0;
-}}
-.cs-audit-lane-head {{
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--cs-space-2);
-}}
-.cs-audit-lane-count {{
-  font-variant-numeric: tabular-nums;
-  font-weight: var(--cs-typography-weight-bold);
-  color: var(--cs-color-primary-700);
-}}
-.cs-audit-lane p {{
-  margin: 0;
-  color: var(--cs-color-text-secondary);
-  font-size: var(--cs-typography-metadata-fontSize);
-  line-height: var(--cs-typography-metadata-lineHeight);
-}}
-.cs-audit-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-audit-list-panel {{
-  scroll-margin-top: 92px;
-}}
-.cs-audit-row {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-4);
-  display: grid;
-  gap: var(--cs-space-3);
-}}
-.cs-audit-row:hover {{
-  border-color: var(--cs-color-border-strong);
-  box-shadow: var(--cs-shadow-sm);
-}}
-.cs-audit-row-main {{
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: var(--cs-space-3);
-  align-items: start;
-}}
-.cs-audit-row-top {{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--cs-space-3);
-}}
-.cs-audit-row-position {{
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}}
-.cs-audit-icon {{
-  width: 36px;
-  height: 36px;
-  border-radius: var(--cs-radius-md);
-  display: grid;
-  place-items: center;
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-bold);
-}}
-.cs-audit-row h2 {{
-  margin: 0;
-  font-size: var(--cs-typography-sectionTitle-fontSize);
-  line-height: var(--cs-typography-sectionTitle-lineHeight);
-}}
-.cs-audit-row-meta {{
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--cs-space-2);
-  margin-top: var(--cs-space-2);
-  color: var(--cs-color-text-muted);
-  font-size: var(--cs-typography-metadata-fontSize);
-}}
-.cs-audit-row-note {{
-  margin: var(--cs-space-2) 0 0;
-  max-width: 64ch;
-  color: var(--cs-color-text-secondary);
-}}
-.cs-audit-side-list {{
-  display: grid;
-  gap: var(--cs-space-3);
-  margin-top: var(--cs-space-3);
-}}
-.cs-audit-side-item {{
-  border-left: 1px solid var(--cs-color-border-default);
-  padding-left: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-audit-detail {{
-  border-top: 1px solid var(--cs-color-border-default);
-  padding-top: var(--cs-space-3);
-}}
-.cs-audit-detail summary {{
-  cursor: pointer;
-  color: var(--cs-color-primary-700);
-  font-weight: var(--cs-typography-weight-semibold);
-}}
-.cs-audit-raw-grid {{
-  margin-top: var(--cs-space-3);
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-audit-raw-item {{
-  border-left: 1px solid var(--cs-color-border-default);
-  padding-left: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-audit-empty {{
-  border: 1px dashed var(--cs-color-border-strong);
-  border-radius: var(--cs-radius-lg);
-  background: var(--cs-color-surface-primary);
-  padding: var(--cs-space-6);
-  display: grid;
-  gap: var(--cs-space-4);
-}}
-.cs-audit-empty-steps {{
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--cs-space-3);
-}}
-.cs-audit-empty-step {{
-  border: 1px solid var(--cs-color-border-default);
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-surface-subtle);
-  padding: var(--cs-space-3);
-  display: grid;
-  gap: var(--cs-space-1);
-}}
-.cs-status {{
-  min-height: 34px;
-  border: 1px solid var(--cs-color-border-default);
-  border-left-width: 3px;
-  border-radius: var(--cs-radius-md);
-  color: var(--cs-color-text-secondary);
-  padding: var(--cs-space-2) var(--cs-space-3);
-  background: var(--cs-color-surface-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--cs-space-2);
-}}
-.cs-status::before {{
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: var(--cs-radius-pill);
-  background: currentColor;
-  flex: 0 0 auto;
-}}
-.cs-status.is-idle {{
-  border-left-color: var(--cs-color-primary-600);
-  background: var(--cs-color-primary-50);
-  color: var(--cs-color-primary-700);
-}}
-.cs-status.is-loading {{
-  border-left-color: var(--cs-state-underReview-fg);
-  background: var(--cs-state-underReview-bg);
-  color: var(--cs-state-underReview-fg);
-}}
-.cs-status.is-success {{
-  border-left-color: var(--cs-state-evidenceBacked-fg);
-  background: var(--cs-state-evidenceBacked-bg);
-  color: var(--cs-state-evidenceBacked-fg);
-}}
-.cs-status.is-error {{
-  border-left-color: var(--cs-state-failed-fg);
-  background: var(--cs-state-failed-bg);
-  color: var(--cs-state-failed-fg);
-}}
-.cs-button:disabled {{
-  cursor: progress;
-  opacity: .72;
-  transform: none;
-}}
-@media (max-width: 980px) {{
-  .cs-shell {{ grid-template-columns: 1fr; padding-bottom: 68px; }}
-  .cs-main {{ order: 1; display: flex; flex-direction: column; }}
-  .cs-sidebar {{
-    order: 3;
-    position: static;
-    height: 0;
-    border-right: 0;
-    border-bottom: 0;
-    padding: 0;
-    overflow: visible;
-  }}
-  .cs-sidebar > .cs-brand, .cs-sidebar > .cs-shell-note, .cs-nav > .cs-sidebar-status {{ display: none; }}
-  .cs-nav {{
-    position: fixed;
-    inset: auto 0 0;
-    z-index: 5;
-    display: block;
-    border-top: 1px solid var(--cs-color-border-default);
-    background: color-mix(in srgb, var(--cs-color-surface-primary) 96%, transparent);
-    backdrop-filter: blur(12px);
-    padding: var(--cs-space-1) var(--cs-space-2);
-  }}
-  .cs-nav-group {{ grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--cs-space-1); }}
-  .cs-nav-label {{ display: none; }}
-  .cs-nav a {{
-    min-height: 58px;
-    grid-template-columns: 1fr;
-    justify-items: center;
-    align-content: center;
-    gap: 0;
-    padding: var(--cs-space-1);
-    text-align: center;
-    font-size: var(--cs-typography-metadata-fontSize);
-  }}
-  .cs-nav a[aria-current="page"] {{ box-shadow: inset 0 3px 0 var(--cs-color-primary-600); }}
-  .cs-nav-mark {{ width: 22px; height: 22px; }}
-  .cs-nav-count {{ display: none; }}
-  .cs-topbar {{
-    order: 1;
-    position: static;
-    min-height: 64px;
-    padding: var(--cs-space-2) var(--cs-space-3);
-    align-items: center;
-    flex-direction: row;
-    gap: var(--cs-space-2);
-  }}
-  .cs-command {{
-    flex: 1 1 auto;
-    max-width: none;
-    min-width: 0;
-  }}
-  .cs-topbar-actions {{ flex: 0 0 auto; justify-content: flex-start; flex-wrap: nowrap; }}
-  .cs-topbar-actions > :not(:first-child) {{ display: none; }}
-  .cs-topbar-actions .cs-chip {{ white-space: nowrap; }}
-  .cs-search {{ max-width: none; min-height: 48px; flex-basis: auto; padding: var(--cs-space-1) var(--cs-space-2); }}
-  .cs-search span[aria-hidden="true"] {{ display: none; }}
-  .cs-content {{ order: 2; padding: var(--cs-space-3); }}
-  .cs-grid-hero, .cs-grid-two, .cs-module-grid, .cs-detail-orientation, .cs-brief-hero, .cs-brief-workbench, .cs-brief-titlebar, .cs-brief-lead-grid, .cs-search-workbench, .cs-search-command, .cs-artifact-hero, .cs-artifact-workbench, .cs-artifact-compact-hero, .cs-artifact-title-row, .cs-metadata-strip, .cs-metadata-strip.is-artifact, .cs-artifact-inspection-strip, .cs-inbox-workbench, .cs-inbox-lane-summary, .cs-inbox-receipt-strip, .cs-collection-workbench, .cs-collection-summary, .cs-collection-footrail, .cs-queue-lanes, .cs-empty-state-main, .cs-empty-steps, .cs-empty-briefing, .cs-brief-fact-strip, .cs-brief-note-grid, .cs-action-workbench, .cs-action-titlebar, .cs-action-review-strip, .cs-action-receipt-grid, .cs-action-route-strip, .cs-call-facts, .cs-audit-hero, .cs-audit-overview, .cs-audit-workbench, .cs-audit-status-strip, .cs-audit-summary, .cs-audit-lifecycle, .cs-audit-empty-steps, .cs-audit-raw-grid, .cs-owner-overview, .cs-reference-grid, .cs-connector-grid, .cs-connector-card, .cs-policy-row, .cs-owner-scope-row, .cs-claim-workbench, .cs-claim-titlebar, .cs-claim-pathbar, .cs-claim-progress, .cs-claim-review-strip, .cs-claim-taxonomy, .cs-claim-footrail {{ grid-template-columns: 1fr; }}
-  .cs-owner-metric {{ border-right: 0; border-bottom: 1px solid var(--cs-color-border-default); }}
-  .cs-owner-metric:last-child {{ border-bottom: 0; }}
-  .cs-connector-table-head {{ display: none; }}
-  .cs-page-head {{ margin-bottom: var(--cs-space-3); }}
-  .cs-hero h1 {{ font-size: var(--cs-typography-pageTitle-fontSize); line-height: var(--cs-typography-pageTitle-lineHeight); }}
-  .cs-home-intro .cs-page-head p {{ display: none; }}
-  .cs-home-intro {{ min-height: auto; }}
-  .cs-home-canvas {{ padding: var(--cs-space-3); gap: var(--cs-space-2); }}
-  .cs-home-canvas > .cs-panel-header {{ gap: var(--cs-space-2); }}
-  .cs-home-canvas > .cs-panel-header p {{ display: none; }}
-  .cs-home-source-row {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }}
-  .cs-home-source-row .cs-button {{ justify-content: center; padding-inline: var(--cs-space-2); }}
-  .cs-home-item, .cs-next-step, .cs-home-paste-row {{ grid-template-columns: 1fr; }}
-  .cs-home-loop-inline {{ display: none; }}
-  .cs-home-source-note {{ display: none; }}
-  .cs-drop {{ min-height: auto; padding: var(--cs-space-2); gap: var(--cs-space-2); }}
-  .cs-drop-target {{ grid-template-columns: auto minmax(0, 1fr); place-items: center start; text-align: left; }}
-  .cs-drop-target p {{ display: none; }}
-  .cs-drop-mark {{ width: 40px; height: 40px; font-size: 15px; }}
-  .cs-drop textarea.cs-drop-input {{ min-height: 64px; }}
-  .cs-ask-bar {{ grid-template-columns: auto minmax(0, 1fr); gap: var(--cs-space-2); }}
-  .cs-ask-bar .cs-field, .cs-ask-bar .cs-button {{ grid-column: 1 / -1; }}
-  .cs-suggestion-row {{ grid-template-columns: 1fr; }}
-  .cs-inbox-lane-summary {{ align-items: flex-start; }}
-  .cs-journey-ref-grid {{ grid-template-columns: 1fr; }}
-  .cs-empty-actions {{ flex-direction: column; align-items: stretch; }}
-  .cs-empty-actions .cs-button {{ justify-content: center; }}
-  .cs-detail-actions {{ justify-content: flex-start; }}
-  .cs-brief-actions {{ justify-content: flex-start; }}
-  .cs-brief-titlebar h1 {{ font-size: 26px; }}
-  .cs-brief-actions {{
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-  }}
-  .cs-brief-fact-strip {{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }}
-  .cs-brief-actions .cs-button {{
-    justify-content: center;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-align: center;
-  }}
-  .cs-claim-actions {{ justify-content: flex-start; }}
-  .cs-action-actions {{ justify-content: flex-start; }}
-  .cs-action-rail {{ position: static; }}
-  .cs-audit-actions {{ justify-content: flex-start; }}
-  .cs-admin-stack {{ position: static; }}
-  .cs-claim-progress::before {{ display: none; }}
-  .cs-trust-ladder, .cs-action-summary, .cs-citation-meta {{ grid-template-columns: 1fr; }}
-  .cs-diff-line, .cs-call-row, .cs-result-row, .cs-inbox-head, .cs-inbox-row, .cs-collection-row, .cs-action-object-row, .cs-connector-card, .cs-claim-control-row {{ grid-template-columns: 1fr; }}
-  .cs-collection-actions {{ justify-items: start; }}
-  .cs-collection-actions .cs-row {{ justify-content: flex-start; }}
-  .cs-inbox-head {{ display: none; }}
-  .cs-artifact-compact-hero .cs-artifact-title h1 {{ font-size: 26px; }}
-  .cs-artifact-compact-hero .cs-artifact-actions {{ padding-top: 0; }}
-  .cs-artifact-actions {{ justify-content: flex-start; }}
-  .cs-artifact-rail {{ position: static; }}
-  .cs-artifact-toolbar {{ align-items: stretch; flex-direction: column; }}
-  .cs-document-frame.has-rail {{ grid-template-columns: 1fr; min-height: auto; }}
-  .cs-artifact-page-rail {{ display: none; }}
-  .cs-artifact-page-area {{ padding: var(--cs-space-3); }}
-  .cs-search-rail {{ position: static; }}
-  .cs-search-titleline {{ align-items: start; flex-direction: column; }}
-  .cs-search-mode {{ min-width: 0; width: 100%; }}
-  .cs-claim-breadcrumb {{
-    display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr);
-    align-items: center;
-  }}
-  .cs-claim-breadcrumb span:last-child {{
-    grid-column: 1 / -1;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }}
-  .cs-claim-actions {{
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    justify-content: stretch;
-  }}
-  .cs-claim-actions .cs-button {{
-    justify-content: center;
-    width: 100%;
-    min-width: 0;
-    max-width: 100%;
-    white-space: normal;
-    overflow-wrap: anywhere;
-    text-align: center;
-  }}
-  .cs-claim-actions .is-disabled {{ grid-column: auto; }}
-  .cs-result-support {{ justify-items: start; text-align: left; }}
-  .cs-audit-row-main {{ grid-template-columns: auto minmax(0, 1fr); }}
-  .cs-audit-row-main .cs-chip {{ justify-self: start; }}
-  .cs-audit-row-top {{ align-items: flex-start; flex-direction: column; gap: var(--cs-space-1); }}
-  .cs-document-page {{ min-height: auto; }}
-  .cs-list-row {{ grid-template-columns: 1fr; }}
-  .cs-detail-grid {{ grid-template-columns: 1fr; }}
-}}
-"""
-
-
-def _css_name(value: str) -> str:
-    return re.sub(r"[^a-zA-Z0-9]+", "-", value).strip("-")
 
 
 def _degraded_notice(load_errors: list[str]) -> str:
@@ -4448,14 +1064,13 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
     data-workspace-id="{h(scope.get('workspace_id') or 'default')}"
   >
     <aside class="cs-sidebar" aria-label="CornerStone navigation">
-      <div class="cs-brand">
-        <div class="cs-brand-mark">CS</div>
+      <a class="cs-brand" href="/" aria-label="CornerStone Home">
+        <div class="cs-brand-mark">{icon("shield-check")}</div>
         <div>
           <div class="cs-brand-name">CornerStone</div>
-          <div class="cs-brand-sub">Evidence-first workspace</div>
+          <div class="cs-brand-sub">Calm evidence desk</div>
         </div>
-      </div>
-      <div class="cs-shell-note">Drop, ask, decide, and audit with visible receipts.</div>
+      </a>
       {nav}
     </aside>
     <main class="cs-main" id="main-content" tabindex="-1">
@@ -4499,46 +1114,53 @@ def _nav(active: str, ctx: dict[str, Any]) -> str:
 
 def _nav_link(href: str, label: str, active: str, count: int) -> str:
     current = ' aria-current="page"' if href == active else ""
-    mark = label[:1].upper()
-    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark" aria-hidden="true">{h(mark)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(str(count))}</span></a>'
+    icon_name = {
+        "/": "home",
+        "/search": "search",
+        "/artifacts": "document",
+        "/claims": "shield-check",
+        "/actions": "action",
+    }.get(href, "document")
+    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark">{icon(icon_name)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(str(count))}</span></a>'
 
 
 def _sidebar_status(ctx: dict[str, Any]) -> str:
-    review_count = len(ctx["inbox"])
     source_count = len(ctx["artifacts"])
-    decision_count = len(ctx["claims"]) + len(ctx["actions"])
-    scope_label = _scope_label(ctx.get("scope"), include_owner=True)
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    workspace = str(scope.get("workspace_id") or "default")
+    namespace = str(scope.get("namespace_id") or "personal")
     return f"""
-<section class="cs-sidebar-status" aria-label="Workspace posture">
-  <div class="cs-sidebar-status-row"><span>Scope</span><strong>{h(scope_label)}</strong></div>
-  <div class="cs-sidebar-status-row"><span>Sources</span><strong>{h(source_count)}</strong></div>
-  <div class="cs-sidebar-status-row"><span>Decisions</span><strong>{h(decision_count)}</strong></div>
-  <div class="cs-sidebar-status-row"><span>Review queue</span><strong>{h(review_count)}</strong></div>
-</section>
+<a class="cs-workspace-switcher" href="/review" aria-label="Open local workspace settings">
+  <span class="cs-workspace-icon">{icon("document")}</span>
+  <span><strong>{h(workspace)}</strong><small>{h(namespace)} · {h(source_count)} source{"s" if source_count != 1 else ""}</small></span>
+  {icon("chevron-right", class_name="cs-icon is-small")}
+</a>
 """
 
 
 def _topbar(q: str, ctx: dict[str, Any]) -> str:
-    count = len(ctx["artifacts"])
-    label = f"{count} saved source" + ("" if count == 1 else "s")
+    review_count = int(ctx.get("inbox_total", len(ctx["inbox"])))
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
     owner = str(scope.get("owner_id") or "local-user")
-    workspace_label = f"Workspace: {scope.get('workspace_id') or 'default'}"
     return f"""
 <header class="cs-topbar">
-  <div class="cs-command" aria-label="Global search">
-    <form class="cs-search" action="/search" method="get">
-      <span aria-hidden="true">Search</span>
-      <input name="q" value="{h(q)}" aria-label="Search the active workspace" placeholder="Search across saved sources, claims, briefs, and action drafts">
-      <button type="submit">Go</button>
+  <div class="cs-command">
+    <form class="cs-search" action="/search" method="get" role="search" aria-label="Global search">
+      <span class="cs-search-icon">{icon("search")}</span>
+      <input name="q" value="{h(q)}" aria-label="Search the active workspace" placeholder="Search sources, Briefs, decisions, and actions">
+      <button type="submit" aria-label="Search">{icon("search", class_name="cs-icon is-inverse")}<span class="cs-sr-only">Search</span></button>
     </form>
   </div>
-  <div class="cs-topbar-actions" aria-label="Workspace status">
-    {_chip(label, "saved")}
-    {_chip(f"Owner: {owner}", "searchable")}
-    {_chip(workspace_label, "searchable")}
-    {_chip("Receipts required", "underReview")}
-    <span class="cs-icon-button" aria-label="Help">?</span>
+  <div class="cs-topbar-actions" aria-label="Workspace tools">
+    <a class="cs-review-link" href="/inbox" aria-label="Open Review inbox with {h(review_count)} item{"s" if review_count != 1 else ""}">{icon("review")}<span>Review</span><strong>{h(review_count)}</strong></a>
+    <details class="cs-help-menu">
+      <summary class="cs-icon-button" aria-label="Help">{icon("help")}</summary>
+      <div class="cs-help-popover">
+        <strong>Start with Drop or Ask</strong>
+        <p>Save a source, ask a question, then open the Brief and its sources before making a decision.</p>
+        <a href="/">Go to Home</a>
+      </div>
+    </details>
     <a class="cs-avatar" href="/review" aria-label="Open owner area for {h(owner)}">{h(_owner_initials(scope))}</a>
   </div>
 </header>
@@ -4550,41 +1172,26 @@ def _home(ctx: dict[str, Any]) -> str:
         f'<button class="cs-button secondary" type="button" data-ask-suggestion="{h(item)}">{h(item)}</button>'
         for item in ctx["suggestions"]
     )
-    suggestions = suggestions or '<span class="cs-meta">Suggestions appear after sources or briefs exist.</span>'
-    latest_brief = _latest_brief_block(ctx)
     recent = _recent_items_block(ctx)
-    knowledge = _knowledge_states_block(ctx)
-    next_steps = _suggested_next_steps_block(ctx)
-    activity = _recent_activity_block(ctx)
+    activity = _recent_activity_block(ctx) if ctx.get("audit") else ""
+    layout_class = "cs-home-layout has-activity" if activity else "cs-home-layout"
     return f"""
-<section class="cs-grid-hero cs-home-intro" data-product-surface="home">
-  <div class="cs-stack">
-    <div class="cs-hero cs-page-head">
-      <div class="cs-kicker">Local workspace · Local only</div>
-      <h1>Drop anything, or ask what we know</h1>
-      <p>Save messy input, find what is already in the workspace, and shape a brief only when the sources are visible.</p>
-    </div>
-    <section class="cs-panel cs-home-canvas" aria-labelledby="home-workbench-title">
-      <div class="cs-panel-header">
-        <div>
-          <h2 id="home-workbench-title">Start with a source or a question</h2>
-          <p class="cs-muted">CornerStone keeps the original source visible, then lets drafts point back to what supports them.</p>
-        </div>
-        <div class="cs-home-loop-inline" aria-label="Daily loop handoff">
-          <span><strong>1</strong> Original source kept</span>
-          <span><strong>2</strong> Draft from saved sources</span>
-          <span><strong>3</strong> Receipts before decisions</span>
-          <span><strong>4</strong> Work leaves a trail</span>
-        </div>
-        {_chip("Untrusted until checked", "underReview")}
+<section class="cs-home-intro" data-product-surface="home">
+  <div class="{layout_class}">
+    <div class="cs-stack cs-home-primary">
+      <div class="cs-hero cs-page-head">
+        <h1>Drop anything, or ask what we know</h1>
+        <p>Bring the messy input. Leave with a Brief you can trace back to the source.</p>
       </div>
+      <section class="cs-home-canvas" aria-labelledby="home-workbench-title">
+        <h2 class="cs-sr-only" id="home-workbench-title">Start with a source or a question</h2>
       <div class="cs-home-workspace">
         <form class="cs-drop" id="cs-drop-form">
           <div class="cs-drop-target">
-            <div class="cs-drop-mark" aria-hidden="true">In</div>
+            <div class="cs-drop-mark">{icon("upload")}</div>
             <div>
-              <strong>Drag and drop files or paste notes here</strong>
-              <p class="cs-muted">Local files and pasted text become saved sources with the original content preserved.</p>
+              <strong>Drop a file or paste notes</strong>
+              <p class="cs-muted">The original stays saved and visible.</p>
             </div>
           </div>
           <div class="cs-home-source-row">
@@ -4593,72 +1200,32 @@ def _home(ctx: dict[str, Any]) -> str:
             <input id="cs-file-input" type="file" hidden>
           </div>
           <div class="cs-home-paste-row" aria-label="Paste text source">
+            <label class="cs-sr-only" for="cs-drop-text">Paste source text</label>
             <textarea class="cs-drop-input" id="cs-drop-text" placeholder="Paste notes, an email, a renewal clause, or any text source"></textarea>
-            <div class="cs-home-source-note">Dropped files are read locally by the browser before saving. Paste is optional until you save.</div>
           </div>
-          <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite">Ready for a source.</div>
+          <div class="cs-status is-idle" id="cs-drop-status" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden>Ready for a source.</div>
         </form>
         <div class="cs-or-divider">or ask a question</div>
         <form class="cs-stack" id="cs-ask-form">
           <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
-            <span class="cs-ask-mark" aria-hidden="true">?</span>
+            <span class="cs-ask-mark">{icon("chat")}</span>
             <div>
               <strong>Ask the workspace</strong>
-              <div class="cs-meta">Answers are drafts. Open sources before a decision.</div>
+              <div class="cs-meta">Answers stay connected to saved sources.</div>
             </div>
+            <label class="cs-sr-only" for="cs-ask-input">Ask a question about saved sources</label>
             <input class="cs-field" id="cs-ask-input" placeholder="Ask about saved sources">
             <button class="cs-button" id="cs-ask-submit-button" type="submit">Ask</button>
           </div>
-          <div class="cs-suggestion-row">{suggestions}</div>
-          <div class="cs-status is-idle" id="cs-ask-status" data-state="idle" role="status" aria-live="polite">No answer requested yet.</div>
+          {f'<div class="cs-suggestion-row">{suggestions}</div>' if suggestions else ''}
+          <div class="cs-status is-idle" id="cs-ask-status" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden>No answer requested yet.</div>
         </form>
       </div>
-    </section>
-    <div class="cs-module-grid">
+      </section>
       {recent}
-      <div class="cs-stack">
-        {knowledge}
-        {next_steps}
-      </div>
     </div>
+    {f'<aside class="cs-stack cs-home-activity">{activity}</aside>' if activity else ''}
   </div>
-  <aside class="cs-stack">
-    {activity}
-    {latest_brief}
-    {_attention_block(ctx)}
-  </aside>
-</section>
-"""
-
-
-def _latest_brief_block(ctx: dict[str, Any]) -> str:
-    if not ctx["briefs"]:
-        return """
-<section class="cs-panel flat">
-  <div class="cs-panel-header"><h2>Latest brief</h2></div>
-  <div class="cs-empty">No brief has been drafted from saved sources yet.</div>
-</section>
-"""
-    brief = ctx["briefs"][0]
-    label, state = _brief_label(brief)
-    href = _detail_href("briefs", brief.get("brief_id"))
-    summary = str(brief.get("summary") or "")
-    if not summary and isinstance(brief.get("key_points"), list) and brief["key_points"]:
-        summary = str(brief["key_points"][0])
-    return f"""
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Latest brief</h2>
-    {_chip(label, state)}
-  </div>
-  <a class="cs-list-row" href="{h(href)}">
-    <div>
-      <h3>{h(_brief_title(brief))}</h3>
-      <p>{h(_truncate(summary or "Open the brief to review source support.", 180))}</p>
-      <div class="cs-meta">{h(_display_date(brief))}</div>
-    </div>
-    <span class="cs-meta">Open</span>
-  </a>
 </section>
 """
 
@@ -4669,7 +1236,6 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
         items.append(
             {
                 "kind": "Source",
-                "icon": "S",
                 "title": _artifact_title(artifact),
                 "detail": f"{_display_date(artifact)} - Original text preserved",
                 "href": _detail_href("artifacts", artifact.get("artifact_id")),
@@ -4682,7 +1248,6 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
         items.append(
             {
                 "kind": "Brief",
-                "icon": "B",
                 "title": _brief_title(brief),
                 "detail": f"{_display_date(brief)} - Draft from visible sources",
                 "href": _detail_href("briefs", brief.get("brief_id")),
@@ -4695,7 +1260,6 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
         items.append(
             {
                 "kind": "Claim",
-                "icon": "C",
                 "title": _claim_title(claim),
                 "detail": f"{_display_date(claim)} - Review source support",
                 "href": _detail_href("claims", claim.get("claim_id")),
@@ -4708,7 +1272,6 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
         items.append(
             {
                 "kind": "Action",
-                "icon": "A",
                 "title": _action_title(action),
                 "detail": f"{_display_date(action)} - Preview before approval",
                 "href": _detail_href("actions", action.get("action_id")),
@@ -4727,7 +1290,7 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
     rows = "".join(
         f"""
 <a class="cs-home-item" href="{h(str(item["href"]))}">
-  <span class="cs-home-item-icon" aria-hidden="true">{h(str(item["icon"]))}</span>
+  <span class="cs-home-item-icon">{icon(record_icon(str(item["kind"])))}</span>
   <span>
     <p>{h(str(item["kind"]))}</p>
     <h3>{h(str(item["title"]))}</h3>
@@ -4749,74 +1312,6 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
 """
 
 
-def _knowledge_states_block(ctx: dict[str, Any]) -> str:
-    source_count = len(ctx["artifacts"])
-    searchable_count = len(ctx["artifacts"])
-    supported_count = sum(
-        1
-        for record in ctx["briefs"]
-        if _brief_label_state(record)[1] == "evidenceBacked"
-    ) + sum(1 for record in ctx["claims"] if _claim_evidence_backed_earned(record))
-    return f"""
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Knowledge states</h2>
-    <span class="cs-meta">{h(_scope_label(ctx.get("scope")))}</span>
-  </div>
-  <div class="cs-stat-list">
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">S</span>
-      <div><strong>Saved</strong><div class="cs-meta">Original sources preserved</div></div>
-      {_chip(str(source_count), "saved")}
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">Q</span>
-      <div><strong>Searchable</strong><div class="cs-meta">Ready for keyword search</div></div>
-      {_chip(str(searchable_count), "searchable")}
-    </div>
-    <div class="cs-stat-row">
-      <span class="cs-stat-icon">E</span>
-      <div><strong>Source-backed</strong><div class="cs-meta">Outputs that earned the label</div></div>
-      {_chip(str(supported_count), "evidenceBacked")}
-    </div>
-  </div>
-</section>
-"""
-
-
-def _suggested_next_steps_block(ctx: dict[str, Any]) -> str:
-    steps: list[tuple[str, str, str, str]] = []
-    if ctx["artifacts"]:
-        steps.append(("S", "Ask about the latest source", "/search", "Search saved source text"))
-    else:
-        steps.append(("S", "Save your first source", "/", "Start with pasted notes or a text file"))
-    if ctx["claims"]:
-        steps.append(("C", "Review claims with source support", "/claims", "Check statements before approval"))
-    if ctx["actions"]:
-        steps.append(("A", "Review action previews", "/actions", "Confirm dry-run and approval state"))
-    if ctx["inbox"]:
-        steps.append(("I", "Open work that needs attention", "/inbox", "Triage review and approval items"))
-    rows = "".join(
-        f"""
-<a class="cs-next-step" href="{h(href)}">
-  <span class="cs-stat-icon" aria-hidden="true">{h(icon)}</span>
-  <span><strong>{h(title)}</strong><span class="cs-meta">{h(detail)}</span></span>
-  <span class="cs-meta">Open</span>
-</a>
-"""
-        for icon, title, href, detail in steps[:3]
-    )
-    return f"""
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Suggested next steps</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
-  </div>
-  <div class="cs-next-step-list">{rows}</div>
-</section>
-"""
-
-
 def _recent_activity_block(ctx: dict[str, Any]) -> str:
     rows = []
     for event in ctx["audit"][:5]:
@@ -4824,7 +1319,7 @@ def _recent_activity_block(ctx: dict[str, Any]) -> str:
         rows.append(
             f"""
 <div class="cs-activity-row">
-  <span class="cs-activity-icon" aria-hidden="true">{h(_audit_icon(event_type))}</span>
+  <span class="cs-activity-icon">{icon(_audit_icon_asset(event))}</span>
   <div>
     <strong>{h(_plain_event(event_type))}</strong>
     <p class="cs-meta">{h(_audit_subject_label(event))} / {h(_display_date(event))}</p>
@@ -4840,26 +1335,6 @@ def _recent_activity_block(ctx: dict[str, Any]) -> str:
     <a class="cs-meta" href="/audit">View audit</a>
   </div>
   {content}
-</section>
-"""
-
-
-def _attention_block(ctx: dict[str, Any]) -> str:
-    if not ctx["inbox"]:
-        return """
-<section class="cs-panel flat">
-  <div class="cs-panel-header"><h2>Needs attention</h2></div>
-  <div class="cs-empty">Nothing is waiting on your decision.</div>
-</section>
-"""
-    rows = "".join(_inbox_row(item) for item in ctx["inbox"][:3])
-    return f"""
-<section class="cs-panel flat">
-  <div class="cs-panel-header">
-    <h2>Needs attention</h2>
-    <a class="cs-meta" href="/inbox">Open inbox</a>
-  </div>
-  <div class="cs-list">{rows}</div>
 </section>
 """
 
@@ -4885,55 +1360,27 @@ def _search_page(ctx: dict[str, Any], q: str, search_type: str = "all") -> str:
         f'{" aria-current=\"page\"" if value == search_type else ""}>{h(label)} <strong>{h(counts_by_label.get(label, 0))}</strong></a>'
         for value, label in PRODUCT_SEARCH_TYPES
     )
-    right_rail = _search_right_rail(counts, q)
     scope_label = _scope_label(ctx.get("scope"))
+    heading = f'Results for “{q}”' if q.strip() else "Search saved work"
+    guidance = (
+        "Keyword matches across saved sources and derived work. Open the source before using a draft in a decision."
+        if q.strip()
+        else "Use the search field above to find saved sources, Briefs, decisions, and action drafts."
+    )
     return f"""
-<section data-product-surface="search">
-  <div class="cs-search-workbench">
-    <div class="cs-search-main">
-      <section class="cs-search-canvas" aria-label="Search workspace">
-        <div class="cs-search-command">
-          <div class="cs-search-copy">
-            <a class="cs-search-back" href="/">&#8592; Search</a>
-            <div class="cs-search-titleline">
-              <div>
-                <div class="cs-kicker">Workspace search</div>
-                <h1>Search the workspace</h1>
-              </div>
-              <span class="cs-filter-chip">Current search context</span>
-            </div>
-            <p class="cs-muted">Keyword search over saved sources and drafts. Open the receipts before using a result for a decision.</p>
-          </div>
-        </div>
-        <form class="cs-search-hero" action="/search" method="get">
-          <span class="cs-search-lens" aria-hidden="true">Search</span>
-          <input name="q" value="{h(q)}" aria-label="Search saved workspace records" placeholder="Search saved sources, claims, action drafts, and briefs">
-          <input type="hidden" name="type" value="{h(search_type)}">
-          <button class="cs-button cs-search-submit" type="submit" aria-label="Run search">Go</button>
-        </form>
-        <div class="cs-search-tabs" aria-label="Filter results by record type">{count_tabs}</div>
-        <div class="cs-search-filterbar">
-          <div class="cs-filter-row" aria-label="Search result context">
-            <span class="cs-filter-chip">Date range: all saved time</span>
-            <span class="cs-filter-chip">Sources: all visible</span>
-          </div>
-          <span class="cs-filter-chip">Order: keyword match</span>
-        </div>
-        <div class="cs-search-mode" aria-label="Current search context">
-          <div class="cs-filter-row">
-            <span class="cs-filter-chip">Search mode: local keyword</span>
-            <span class="cs-filter-chip">Scope: {h(scope_label)}</span>
-            <span class="cs-filter-chip">Type: {h(selected_type_label)}</span>
-            <span class="cs-filter-chip">Result receipt required</span>
-          </div>
-        </div>
-      </section>
-      <div class="cs-result-list">
-        <div class="cs-result-list-header"><span>{total} results</span><span>Receipt-first results</span></div>
-        {rows}
-      </div>
+<section class="cs-search-page" data-product-surface="search">
+  <header class="cs-page-head">
+    <div class="cs-kicker">Search</div>
+    <h1>{h(heading)}</h1>
+    <p>{h(guidance)}</p>
+  </header>
+  <nav class="cs-search-tabs" aria-label="Filter results by record type">{count_tabs}</nav>
+  <div class="cs-result-list" aria-live="polite">
+    <div class="cs-result-list-header">
+      <strong>{h(str(total))} result{"s" if total != 1 else ""} · {h(selected_type_label)}</strong>
+      <span>Workspace: {h(scope_label)}</span>
     </div>
-    {right_rail}
+    {rows}
   </div>
 </section>
 """
@@ -4953,7 +1400,6 @@ def _search_records(ctx: dict[str, Any], q: str, search_type: str = "all") -> li
                     score,
                     _search_result_row(
                         "Source",
-                        "TXT",
                         _artifact_title(artifact),
                         str(artifact.get("_preview") or "Open to inspect the saved source."),
                         _detail_href("artifacts", artifact.get("artifact_id")),
@@ -4968,7 +1414,7 @@ def _search_records(ctx: dict[str, Any], q: str, search_type: str = "all") -> li
         score = _score(text, query)
         if score > 0 and search_type in {"all", "briefs"}:
             label, state = _brief_label(brief)
-            rows.append((score, _search_result_row("Brief", "BRF", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
+            rows.append((score, _search_result_row("Brief", _brief_title(brief), str(brief.get("summary") or "Brief draft"), _detail_href("briefs", brief.get("brief_id")), label, state, _display_date(brief))))
     for claim in ctx["claims"]:
         text = _claim_title(claim).lower()
         score = _score(text, query)
@@ -4980,14 +1426,14 @@ def _search_records(ctx: dict[str, Any], q: str, search_type: str = "all") -> li
                 if visible_source_count
                 else "Claim draft; no visible supporting source is attached."
             )
-            rows.append((score, _search_result_row("Claim", "CLM", _claim_title(claim), detail, _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
+            rows.append((score, _search_result_row("Claim", _claim_title(claim), detail, _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim))))
     for action in ctx["actions"]:
         dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
         text = _action_search_text(action)
         score = _score(text, query)
         if score > 0 and search_type in {"all", "actions"}:
             label, state = _action_label(action)
-            rows.append((score, _search_result_row("Action", "ACT", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
+            rows.append((score, _search_result_row("Action", _action_title(action), str(dry_run.get("goal") or "Action draft"), _detail_href("actions", action.get("action_id")), label, state, _display_date(action))))
     rows.sort(key=lambda item: item[0], reverse=True)
     return [row for _, row in rows[:20]]
 
@@ -5035,7 +1481,7 @@ def _search_counts(ctx: dict[str, Any], q: str) -> list[tuple[str, int]]:
     ]
 
 
-def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
+def _search_result_row(kind: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
     icon_class = {
         "Source": "is-source",
         "Brief": "is-brief",
@@ -5044,7 +1490,7 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
     }.get(kind, "is-source")
     return f"""
 <article class="cs-result-row">
-  <span class="cs-result-icon {h(icon_class)}" aria-hidden="true">{h(icon)}</span>
+  <span class="cs-result-icon {h(icon_class)}">{icon(record_icon(kind))}</span>
   <span class="cs-result-body">
     <span class="cs-result-meta"><span class="cs-result-type">{h(kind)}</span><span>{h(date)}</span><span>Keyword match</span></span>
     <h3><a href="{h(href)}">{h(title)}</a></h3>
@@ -5052,56 +1498,12 @@ def _search_result_row(kind: str, icon: str, title: str, detail: str, href: str,
   </span>
   <span class="cs-result-support">
     {_chip(label, state)}
-    <span class="cs-meta">Local record receipt</span>
     <span class="cs-result-actions">
-      <a class="cs-button secondary" href="{h(href)}">Open receipt</a>
+      <a class="cs-button secondary" href="{h(href)}">{h(record_action(kind))}</a>
     </span>
   </span>
 </article>
 """
-
-
-def _search_right_rail(counts: list[tuple[str, int]], q: str) -> str:
-    stat_rows = "".join(
-        f'<div class="cs-right-stat"><span class="cs-right-stat-label"><span class="cs-right-stat-icon" aria-hidden="true">{h(label[:1])}</span><span>{h(label)}</span></span><strong>{h(count)}</strong></div>'
-        for label, count in counts[1:]
-    )
-    suggestions = _search_followups(q, counts)
-    suggestion_rows = "".join(
-        f'<a class="cs-suggested-query" href="/search?q={quote(item)}"><span>Q</span><span>{h(item)}</span></a>'
-        for item in suggestions
-    )
-    return f"""
-<aside class="cs-stack cs-search-rail">
-  <section class="cs-panel flat">
-    <div class="cs-panel-header"><h2>What we found</h2>{_chip(str(counts[0][1] if counts else 0), "searchable")}</div>
-    {stat_rows or '<div class="cs-empty">Run a search to see available receipt types.</div>'}
-  </section>
-  <section class="cs-panel flat">
-    <h2 class="cs-section-title">Suggested follow-ups</h2>
-    <div class="cs-stack">{suggestion_rows}</div>
-  </section>
-  <section class="cs-panel flat">
-    <h2 class="cs-section-title">Receipt coverage</h2>
-    <p class="cs-muted">Results are local keyword matches. Use the source and provenance panels before treating a draft as supported.</p>
-  </section>
-</aside>
-"""
-
-
-def _search_followups(q: str, counts: list[tuple[str, int]]) -> list[str]:
-    query = q.strip() or "latest source"
-    by_label = {label: count for label, count in counts}
-    items = [
-        f"What sources mention {query}?",
-        f"Which claims depend on {query}?",
-        f"Show action drafts related to {query}",
-    ]
-    if by_label.get("Briefs", 0):
-        items.append(f"Open briefs that summarize {query}")
-    if by_label.get("Sources", 0):
-        items.append(f"Find provenance for {query}")
-    return items[:5]
 
 
 def _search_empty(
@@ -5146,7 +1548,7 @@ def _search_empty(
             "/",
             mark="?",
             receipts=[
-                ("Search receipt", "Only local keyword matches are shown."),
+                ("Search match", "Only local keyword matches are shown."),
                 ("Source path", "Save a source before broadening the query."),
                 ("Decision safety", "No unsupported result is created."),
             ],
@@ -5162,7 +1564,7 @@ def _search_empty(
         mark="?",
         receipts=[
             ("Saved source", "Search begins after Home preserves input."),
-            ("Result receipt", "Matches link back to a local record."),
+            ("Result link", "Matches link back to a local record."),
             ("Follow-up", "Suggested queries stay inside workspace scope."),
         ],
     )
@@ -5181,6 +1583,16 @@ def _empty_state(
     steps: list[tuple[str, str]] | None = None,
     receipts: list[tuple[str, str]] | None = None,
 ) -> str:
+    mark_icon = {
+        "S": "document",
+        "B": "brief",
+        "C": "shield-check",
+        "A": "action",
+        "I": "review",
+        "T": "history",
+        "H": "history",
+        "?": "search",
+    }.get(mark[:1], "document")
     secondary = ""
     if secondary_label and secondary_href:
         secondary = f'<a class="cs-button secondary" href="{h(secondary_href)}">{h(secondary_label)}</a>'
@@ -5214,7 +1626,7 @@ def _empty_state(
       {steps_html or '<p class="cs-muted">Start from Home, save work, then open the generated records from the product lists.</p>'}
     </div>
     <div>
-      <h3>First receipts</h3>
+      <h3>What will appear</h3>
       <div class="cs-empty-receipts">{receipt_rows}</div>
     </div>
   </div>
@@ -5222,7 +1634,7 @@ def _empty_state(
     return f"""
 <article class="cs-empty-state">
   <div class="cs-empty-state-main">
-    <span class="cs-empty-mark" aria-hidden="true">{h(mark[:2])}</span>
+    <span class="cs-empty-mark">{icon(mark_icon)}</span>
     <div class="cs-empty-copy">
       <div class="cs-kicker">{h(kicker)}</div>
       <h2>{h(title)}</h2>
@@ -5251,52 +1663,8 @@ def _collection_summary(stats: list[tuple[str, int]]) -> str:
     return f'<div class="cs-collection-summary" aria-label="Collection summary">{cards}</div>'
 
 
-def _collection_toolbar(label: str, count: int, filters: list[str]) -> str:
-    chips = "".join(f'<span class="cs-filter-chip">{h(item)}</span>' for item in filters)
-    return f"""
-<div class="cs-collection-toolbar">
-  <div>
-    <strong>{h(label)}</strong>
-    <div class="cs-meta">{h(count)} visible item{"s" if count != 1 else ""}</div>
-  </div>
-  <div class="cs-filter-row" style="margin-top: 0;">{chips}</div>
-</div>
-"""
-
-
-def _queue_focus(title: str, detail: str, lanes: list[tuple[str, int | str, str, str]]) -> str:
-    total = sum(int(value) for _, value, _, _ in lanes if isinstance(value, int))
-    lane_cards = "".join(
-        f"""
-<span class="cs-queue-lane">
-  <span>{h(label)}</span>
-  <strong>{h(value)}</strong>
-  <span>{h(note)}</span>
-</span>
-"""
-        for label, value, note, _ in lanes
-    )
-    lane_chips = "".join(_chip(label, state) for label, _, _, state in lanes)
-    return f"""
-<section class="cs-queue-focus" aria-label="Decision queue">
-  <div class="cs-queue-focus-head">
-    <div>
-      <div class="cs-kicker">Decision queue</div>
-      <h2>{h(title)}</h2>
-      <p>{h(detail)}</p>
-    </div>
-    <div class="cs-row">{lane_chips}</div>
-  </div>
-  <div class="cs-queue-lanes" aria-label="Review lanes">
-    <span class="cs-meta"><strong>{h(total)}</strong> visible queue item{"s" if total != 1 else ""}</span>
-    <span class="cs-row">{lane_cards}</span>
-  </div>
-</section>
-"""
-
-
 def _collection_row(
-    icon: str,
+    icon_key: str,
     title: str,
     detail: str,
     href: str,
@@ -5306,6 +1674,12 @@ def _collection_row(
     footer: list[tuple[str, str]] | None = None,
     action_label: str = "Open",
 ) -> str:
+    icon_name = {
+        "S": "document",
+        "B": "brief",
+        "C": "shield-check",
+        "A": "action",
+    }.get(icon_key, "document")
     meta_row = "".join(f"<span>{h(label)}</span>" for label, _ in meta)
     chip_row = "".join(_chip(label, state) for label, state in chips)
     footer_row = ""
@@ -5325,7 +1699,7 @@ def _collection_row(
         )
     return f"""
 <a class="cs-collection-row" href="{h(href)}">
-  <span class="cs-collection-icon" aria-hidden="true">{h(icon)}</span>
+  <span class="cs-collection-icon">{icon(icon_name)}</span>
   <span class="cs-collection-body">
     <span class="cs-collection-meta">{meta_row}</span>
     <h3>{h(title)}</h3>
@@ -5368,7 +1742,7 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
         ],
         receipts=[
             ("Original source", "Preserved text, date, and local scope."),
-            ("Search receipt", "Source becomes available to keyword search."),
+            ("Search match", "Source becomes available to keyword search."),
             ("Linked use", "Briefs and claims can reference this source."),
         ],
     )
@@ -5383,7 +1757,6 @@ def _artifact_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Saved sources", len(artifacts)), ("Linked refs", linked_count), ("Searchable", len(artifacts))])}
-      {_collection_toolbar("Source register", len(artifacts), [f"Scope: {_scope_label(ctx.get('scope'))}", "Type: all sources", "Sort: newest first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5413,7 +1786,6 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
     briefs = ctx["briefs"]
     with_sources = sum(1 for brief in briefs if _brief_source_count(brief))
     source_ref_count = sum(_brief_source_count(brief) for brief in briefs)
-    needs_sources = max(len(briefs) - with_sources, 0)
     rows = ""
     for brief in briefs:
         label, state = _brief_label(brief)
@@ -5468,8 +1840,6 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Briefs", len(briefs)), ("With sources", with_sources), ("Source refs", source_ref_count)])}
-      {_queue_focus("Brief reading queue", "Review lanes keep drafted answers, source coverage, and next use visible before a brief becomes decision material.", [("Ready to read", with_sources, "Source links visible", "searchable"), ("Needs source check", needs_sources, "Do not use in decisions yet", "draft"), ("Can feed decision", with_sources, "Review before claim or action", "saved")])}
-      {_collection_toolbar("Brief queue", len(briefs), [f"Scope: {_scope_label(ctx.get('scope'))}", "State: drafts and source-backed", "Sort: newest first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5508,7 +1878,6 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
     supported_count = sum(1 for claim in claims if _evidence_refs(claim))
     evidence_backed_count = sum(1 for claim in claims if _claim_evidence_backed_earned(claim))
     approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
-    needs_support = max(len(claims) - supported_count, 0)
     rows = ""
     for claim in claims:
         label, state = _claim_label(claim)
@@ -5557,8 +1926,6 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Evidence-backed", evidence_backed_count), ("Approved", approved_count)])}
-      {_queue_focus("Claim review lanes", "Move statements from draft to source support, then to evidence-backed only after citation checks, then approved.", [("Draft lane", needs_support, "Needs source support", "draft"), ("Source-support lane", supported_count, "Support attached", "searchable"), ("Evidence-backed locked", evidence_backed_count, "Citation checks required", "underReview"), ("Approved lane", approved_count, "Decision-ready after review", "saved")])}
-      {_collection_toolbar("Claim review queue", len(claims), [f"Scope: {_scope_label(ctx.get('scope'))}", "State: open and approved", "Sort: needs review first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5644,7 +2011,6 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
         ],
     )
     executed_count = sum(1 for action in actions if _action_lifecycle(action)["stage"] == "executed")
-    preview_count = max(len(actions) - executed_count, 0)
     return f"""
 <section data-product-surface="actions">
   <div class="cs-page-head">
@@ -5655,8 +2021,6 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
   <div class="cs-collection-workbench">
     <div>
       {_collection_summary([("Records", len(actions)), ("Need approval", approval_count), ("Executed", executed_count)])}
-      {_queue_focus("Action approval lanes", "Dry-run, risk, policy, and approval stay in the queue before any external step is available.", [("Preview lane", preview_count, "Inspect impact first", "searchable"), ("Approval lane", approval_count, "Owner review required", "underReview"), ("Executed lane", executed_count, "Audit after send", "saved")])}
-      {_collection_toolbar("Action preview queue", len(actions), [f"Scope: {_scope_label(ctx.get('scope'))}", "Mode: dry-run first", "Sort: approval risk first"])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
@@ -5665,7 +2029,7 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
         <p class="cs-muted">Actions stay as previews until policy, approval, source support, and auditability are clear.</p>
         <div class="cs-review-box">
           <a class="cs-button" href="/inbox">Review approvals</a>
-          <a class="cs-button secondary" href="/audit">Open audit trail</a>
+          <a class="cs-button secondary" href="/audit">Open History</a>
         </div>
       </section>
       <section class="cs-panel flat">
@@ -5682,60 +2046,65 @@ def _action_list_page(ctx: dict[str, Any]) -> str:
 """
 
 
-def _inbox_page(ctx: dict[str, Any]) -> str:
-    items = ctx["inbox"]
-    rows = "".join(_inbox_table_row(item, index == 0) for index, item in enumerate(items)) or _inbox_empty()
+def _inbox_page(ctx: dict[str, Any], lane: str, lane_items: list[dict[str, Any]]) -> str:
+    all_items = ctx["inbox"]
+    active_label = dict(INBOX_LANES).get(lane, "Needs review")
+    selected = ctx.get("selected_inbox_item") if isinstance(ctx.get("selected_inbox_item"), dict) else None
+    selected_ref = str(selected.get("record_ref") or "") if selected else ""
+    rows = "".join(
+        _inbox_table_row(item, lane, str(item.get("record_ref") or "") == selected_ref)
+        for item in lane_items
+    )
+    if not rows:
+        rows = (
+            f'<div class="cs-empty">No items are waiting in {h(active_label.lower())}.</div>'
+            if all_items
+            else _inbox_empty()
+        )
     detail = _inbox_detail_panel(
-        items[0] if items else None,
+        selected,
         ctx.get("selected_product_loop") if isinstance(ctx.get("selected_product_loop"), dict) else None,
         ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {},
     )
-    counts = _inbox_counts(items)
-    lane_summary = _inbox_lane_summary(counts)
-    item_range = f"1-{len(items)} of {len(items)} items" if items else "0 of 0 items"
-    scope_label = _scope_label(ctx.get("scope"))
-    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
-    owner_label = str(scope.get("owner_id") or "local-user")
-    recent_activity = _recent_activity_block(ctx)
+    counts = _inbox_counts(all_items)
+    count_keys = {
+        "needs-review": "needs_review",
+        "evidence-gaps": "evidence_gaps",
+        "approval-requests": "approval_requests",
+        "policy-blocked": "policy_blocked",
+        "failed-runs": "failed",
+    }
+    lane_tab_rows: list[str] = []
+    for slug, lane_label in INBOX_LANES:
+        active_class = " is-active" if slug == lane else ""
+        current = ' aria-current="page"' if slug == lane else ""
+        lane_tab_rows.append(
+            f'<a class="cs-inbox-tab{active_class}" href="/inbox?lane={h(slug)}"{current}>'
+            f'{h(lane_label)}<strong>{h(str(counts[count_keys[slug]]))}</strong></a>'
+        )
+    lane_tabs = "".join(lane_tab_rows)
     return f"""
-<section data-product-surface="inbox">
+<section data-product-surface="inbox" data-inbox-lane="{h(lane)}" data-selected-item="{h(selected_ref)}">
   <div class="cs-page-head">
-    <div class="cs-kicker">Operations</div>
+    <div class="cs-kicker">Review</div>
     <h1>Work that needs attention</h1>
-    <p>Review drafts, source support, and action previews from one triage queue.</p>
+    <p>Choose a lane, inspect one item, then continue in the source, Brief, Claim, or action record.</p>
   </div>
+  <nav class="cs-inbox-tabs" aria-label="Review lanes">{lane_tabs}</nav>
   <div class="cs-inbox-workbench">
-    <div>
-      <div class="cs-inbox-tabs" aria-label="Inbox queues">
-        <span class="cs-inbox-tab is-active">Needs review {_chip(str(counts["needs_review"]), "underReview")}</span>
-        <span class="cs-inbox-tab">Evidence gaps {_chip(str(counts["evidence_gaps"]), "insufficientEvidence")}</span>
-        <span class="cs-inbox-tab">Approval requests {_chip(str(counts["approval_requests"]), "draft")}</span>
-        <span class="cs-inbox-tab">Policy blocked {_chip(str(counts["policy_blocked"]), "policyBlocked")}</span>
-        <span class="cs-inbox-tab">Failed runs {_chip(str(counts["failed"]), "failed")}</span>
-      </div>
-      {lane_summary}
-      <div class="cs-inbox-toolbar">
-        <div class="cs-filter-row">
-          <span class="cs-inbox-filter-label"><span>F</span> Filters</span>
-          <span class="cs-filter-chip">Type: all visible</span>
-          <span class="cs-filter-chip">Owner: {h(owner_label)}</span>
-          <span class="cs-filter-chip">Scope: {h(scope_label)}</span>
-          <span class="cs-filter-chip">Priority: open first</span>
-          <span class="cs-filter-chip">Trust/risk: visible labels</span>
+    <section aria-labelledby="cs-inbox-list-title">
+      <div class="cs-inbox-list-heading">
+        <div>
+          <h2 id="cs-inbox-list-title">{h(active_label)}</h2>
+          <p class="cs-muted">{h(str(len(lane_items)))} open item{"s" if len(lane_items) != 1 else ""} in this lane.</p>
         </div>
-        <span class="cs-meta">Showing {h(len(items))} open item{"s" if len(items) != 1 else ""}</span>
       </div>
-      <div class="cs-inbox-table" role="list" aria-label="Operational inbox items">
-        <div class="cs-inbox-head" aria-hidden="true">
-          <span></span><span>Item</span><span>Type</span><span>Owner</span><span>Time</span><span>Priority</span><span>Trust / risk</span>
-        </div>
+      <div class="cs-inbox-table" role="list" aria-label="{h(active_label)} items">
         {rows}
-        <div class="cs-inbox-foot">{h(item_range)}</div>
       </div>
-    </div>
+    </section>
     {detail}
   </div>
-  <div class="cs-inbox-activity" aria-label="Inbox recent activity">{recent_activity}</div>
 </section>
 """
 
@@ -5746,51 +2115,25 @@ def _inbox_counts(items: list[dict[str, Any]]) -> dict[str, int]:
         "approval_requests": sum(1 for item in items if item.get("queue") == "Approval requests"),
         "policy_blocked": sum(1 for item in items if item.get("queue") == "Policy blocked"),
         "failed": sum(1 for item in items if item.get("queue") == "Failed runs"),
-        "evidence_gaps": sum(int(item.get("evidence_gap_count", 0) or 0) for item in items),
+        "evidence_gaps": sum(1 for item in items if int(item.get("evidence_gap_count", 0) or 0) > 0),
     }
 
 
-def _inbox_lane_summary(counts: dict[str, int]) -> str:
-    lanes = [
-        ("Needs review", counts["needs_review"], True),
-        ("Evidence gaps", counts["evidence_gaps"], False),
-        ("Approval requests", counts["approval_requests"], False),
-        ("Policy blocked", counts["policy_blocked"], False),
-        ("Failed runs", counts["failed"], False),
-    ]
-    total = counts["needs_review"] + counts["approval_requests"] + counts["policy_blocked"] + counts["failed"]
-    pills = "".join(
-        f"""
-<span class="cs-inbox-summary-pill{" is-active" if active else ""}">{h(label)} <strong>{h(count)}</strong></span>
-"""
-        for label, count, active in lanes
-    )
-    return f"""
-<section class="cs-inbox-lane-summary" aria-label="Triage summary">
-  <span class="cs-inbox-summary-main"><strong>{h(total)}</strong> open review items across one queue</span>
-  <span class="cs-inbox-summary-pills">{pills}</span>
-</section>
-"""
-
-
-def _inbox_table_row(item: dict[str, Any], selected: bool = False) -> str:
+def _inbox_table_row(item: dict[str, Any], lane: str, selected: bool = False) -> str:
     selected_class = " is-selected" if selected else ""
     priority_state = "failed" if item.get("priority") == "High" else "underReview" if item.get("priority") == "Medium" else "draft"
+    item_ref = str(item.get("record_ref") or "")
+    selection_href = f"/inbox?lane={quote(lane, safe='')}&amp;item={quote(item_ref, safe='')}#selected-work"
+    current = ' aria-current="true"' if selected else ""
     return f"""
-<a class="cs-inbox-row{selected_class}" href="{h(item["href"])}" role="listitem">
-  <span class="cs-inbox-select" aria-hidden="true"></span>
+<a class="cs-inbox-row{selected_class}" href="{selection_href}" role="listitem"{current}>
+  <span class="cs-inbox-icon">{icon(record_icon(str(item.get("kind") or "")))}</span>
   <span class="cs-inbox-item-title">
-    <span class="cs-inbox-icon" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>
-    <span>
-      <strong>{h(item["title"])}</strong>
-      <span class="cs-meta">{h(item["detail"])}</span>
-    </span>
+    <strong>{h(item["title"])}</strong>
+    <span class="cs-meta">{h(item.get("type") or item["kind"])} · {h(item["date"])}</span>
+    <span class="cs-muted">{h(item["detail"])}</span>
   </span>
-  <span class="cs-inbox-type-cell"><span class="cs-inbox-type-mark" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>{h(item.get("type") or item["kind"])}</span>
-  <span class="cs-inbox-owner"><span class="cs-inbox-owner-mark" aria-hidden="true">O</span><span>{h(item.get("owner") or "Owner")}</span></span>
-  <span class="cs-meta">{h(item["date"])}</span>
-  <span>{_chip(item.get("priority") or "Medium", priority_state)}</span>
-  <span>{_chip(item["label"], item["state"])}</span>
+  <span class="cs-inbox-row-state">{_chip(item.get("priority") or "Medium", priority_state)}{_chip(item["label"], item["state"])}</span>
 </a>
 """
 
@@ -5802,15 +2145,15 @@ def _inbox_detail_panel(
 ) -> str:
     if not item:
         return f"""
-<aside class="cs-panel flat">
+<aside class="cs-panel flat" id="selected-work">
   <h2 class="cs-section-title">Selected item</h2>
   {_empty_state(
         "Queue empty",
         "No selected work",
-        "Save a source, draft a claim, or preview an action to create reviewable work.",
+        "Save a source, draft a Claim, or preview an action to create reviewable work.",
         "Start from Home",
         "/",
-        "Open briefs",
+        "Open Briefs",
         "/briefs",
         mark="I",
     )}
@@ -5819,56 +2162,40 @@ def _inbox_detail_panel(
     reason = _inbox_waiting_reason(item)
     linked_sources = _inbox_linked_sources(item)
     journey_timeline = _inbox_journey_timeline(product_loop_result, scope or {})
+    record_ref = str(item.get("record_ref") or "")
     return f"""
-<aside class="cs-panel flat cs-inbox-detail">
+<aside class="cs-panel flat cs-inbox-detail" id="selected-work">
   <div class="cs-inbox-detail-title">
-    <span class="cs-inbox-icon" aria-hidden="true">{h(item.get("icon") or item["kind"][:1])}</span>
+    <span class="cs-inbox-icon">{icon(record_icon(str(item.get("kind") or "")))}</span>
     <div>
       <div class="cs-kicker">Selected item</div>
       <h2>{h(item["title"])}</h2>
       <p class="cs-muted">{h(item["detail"])}</p>
     </div>
-    <span class="cs-inbox-close" aria-hidden="true">x</span>
   </div>
   <div class="cs-row">{_chip(item.get("queue") or "Needs review", "underReview")}{_chip(item.get("priority") or "Medium", "underReview")}{_chip(item["label"], item["state"])}</div>
-  <section>
-    <h2 class="cs-section-title">Overview</h2>
-    <dl class="cs-detail-grid">
-      <dt>Type</dt><dd>{h(item.get("type") or item["kind"])}</dd>
-      <dt>Owner</dt><dd>{h(item.get("owner") or "Owner")}</dd>
-      <dt>Updated</dt><dd>{h(item["date"])}</dd>
-      <dt>Queue</dt><dd>{h(item.get("queue") or "Needs review")}</dd>
-    </dl>
-  </section>
-  {journey_timeline}
+  <dl class="cs-detail-grid">
+    <dt>Type</dt><dd>{h(item.get("type") or item["kind"])}</dd>
+    <dt>Owner</dt><dd>{h(item.get("owner") or "Owner")}</dd>
+    <dt>Updated</dt><dd>{h(item["date"])}</dd>
+  </dl>
   <section class="cs-inbox-action-panel">
-    <h2 class="cs-section-title">Next actions</h2>
+    <h3 class="cs-section-title">Continue review</h3>
     <div class="cs-inbox-actions">
-      <a class="cs-button" href="{h(item["href"])}">Continue review</a>
-      <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Review sources</a>
-      <a class="cs-button secondary" href="/audit">Open audit trail</a>
+      <a class="cs-button" href="{h(item["href"])}">{h(record_action(str(item.get("kind") or "")))}</a>
+      <a class="cs-button secondary" href="/search?q={quote(item["title"])}">Find related sources</a>
+      <a class="cs-button secondary" href="/audit?record={quote(record_ref, safe='')}">Open item history</a>
     </div>
   </section>
-  <section class="cs-inbox-preview-note">
-    <h3>Linked sources</h3>
-    <div class="cs-inbox-linked-list">{linked_sources}</div>
-  </section>
-  <section class="cs-inbox-preview-note">
-    <h3>Why this is here</h3>
+  <details class="cs-inbox-context">
+    <summary><strong>Why this is here and linked sources</strong></summary>
     <p>{h(reason)}</p>
-  </section>
-  <section class="cs-inbox-preview-note">
-    <h3>Safety state</h3>
-    <p>Opening inbox work stays inside CornerStone. External writes still require the action approval path.</p>
-  </section>
-  <section>
-    <h2 class="cs-section-title">Inbox receipt</h2>
-    <div class="cs-inbox-receipt-strip">
-      <div class="cs-inbox-receipt"><strong>Record</strong><span>{h(item.get("type") or item["kind"])}</span></div>
-      <div class="cs-inbox-receipt"><strong>Evidence path</strong><span>Search sources</span></div>
-      <div class="cs-inbox-receipt"><strong>Audit path</strong><span>Open trail</span></div>
-    </div>
-  </section>
+    <div class="cs-inbox-linked-list">{linked_sources}</div>
+  </details>
+  <details class="cs-inbox-context">
+    <summary><strong>Related journey</strong></summary>
+    {journey_timeline}
+  </details>
 </aside>
 """
 
@@ -6045,12 +2372,12 @@ def _inbox_linked_sources(item: dict[str, Any]) -> str:
         source_label = "Dry-run impact"
     return f"""
 <a class="cs-inbox-linked-row" href="/search?q={quote(title)}">
-  <span class="cs-inbox-type-mark" aria-hidden="true">S</span>
+  <span class="cs-inbox-type-mark">{icon("search", class_name="cs-icon is-small")}</span>
   <span><strong>{h(source_label)}</strong><span class="cs-meta">Search matching local records before deciding.</span></span>
 </a>
 <a class="cs-inbox-linked-row" href="/audit">
-  <span class="cs-inbox-type-mark" aria-hidden="true">A</span>
-  <span><strong>Audit trail</strong><span class="cs-meta">Open the local receipt history for this work.</span></span>
+  <span class="cs-inbox-type-mark">{icon("history", class_name="cs-icon is-small")}</span>
+  <span><strong>History</strong><span class="cs-meta">Open the local event history for this work.</span></span>
 </a>
 """
 
@@ -6075,7 +2402,7 @@ def _inbox_empty() -> str:
         "When a brief, claim, or action preview needs review, it will appear here with a clear next step.",
         "Start from Home",
         "/",
-        "Open audit trail",
+        "Open History",
         "/audit",
         mark="I",
         steps=[
@@ -6091,189 +2418,221 @@ def _inbox_empty() -> str:
     )
 
 
-def _audit_page(ctx: dict[str, Any]) -> str:
-    events = ctx["audit"]
+def _audit_lifecycle_key(event_type: str) -> str:
+    value = event_type.lower()
+    if ".approved" in value or value.endswith(".approve") or "owner_approved" in value:
+        return "approved"
+    if any(marker in value for marker in (".denied", ".blocked", "policy_blocked", "failed")):
+        return "blocked"
+    if ".executed" in value or value.endswith(".execute"):
+        return "executed"
+    if any(marker in value for marker in (".created", ".create", ".ingested", ".ingest", ".draft", ".proposed")):
+        return "created"
+    if any(marker in value for marker in (".read", ".opened", ".viewed")):
+        return "opened"
+    return "other"
+
+
+def _audit_record_ref(event: dict[str, Any]) -> str:
+    subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+    subject_type = str(subject.get("type") or "").strip()
+    subject_id = str(subject.get("id") or "").strip()
+    return f"{subject_type}:{subject_id}" if subject_type and subject_id else ""
+
+
+def _audit_icon_asset(event: dict[str, Any]) -> str:
+    subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
+    subject_type = str(subject.get("type") or "").lower()
+    return {
+        "artifact": "document",
+        "brief": "brief",
+        "claim": "shield-check",
+        "action": "action",
+        "conversation": "chat",
+    }.get(subject_type, "history")
+
+
+def _audit_page(
+    ctx: dict[str, Any],
+    record_filter: str = "",
+    lifecycle_filter: str = "all",
+    page: int = 1,
+) -> str:
+    events = ctx.get("audit_all") if isinstance(ctx.get("audit_all"), list) else ctx["audit"]
     integrity = ctx.get("audit_integrity") if isinstance(ctx.get("audit_integrity"), dict) else {}
     integrity_status = str(integrity.get("status") or "not_verified")
     if integrity_status == "success":
-        integrity_label = "Hash chain verified"
-        integrity_state = "searchable"
+        integrity_label, integrity_state = "Hash chain verified", "searchable"
     elif integrity_status == "failed":
-        integrity_label = "Integrity failed"
-        integrity_state = "failed"
+        integrity_label, integrity_state = "Integrity failed", "failed"
     else:
-        integrity_label = "Integrity unavailable"
-        integrity_state = "underReview"
-    event_count = len(events)
-    visible_count = min(event_count, 40)
-    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
-    workspace = str(scope.get("workspace_id") or "default")
-    owner = str(scope.get("owner_id") or "local-user")
-    source_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Source")
-    evidence_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Evidence")
-    decision_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Decision")
-    action_count = sum(1 for event in events if _audit_family(str(event.get("event_type") or "")) == "Action")
-    latest_activity = _display_date(events[0]) if events else "No activity yet"
-    first_activity = _display_date(events[-1]) if events else "No activity yet"
-    latest_event = events[0] if events else None
-    latest_title = _plain_event(str(latest_event.get("event_type") or "")) if latest_event else "No receipt yet"
-    latest_family = _audit_family(str(latest_event.get("event_type") or "")) if latest_event else "Ledger"
-    latest_note = (
-        f"Readable receipt for {_audit_subject_label(latest_event)}. Raw event detail remains one step below the row."
-        if latest_event
-        else "Save a source or create work to start the local activity trail."
-    )
-    receipt_summary = f"""
-<div class="cs-audit-summary" aria-label="Receipt summary">
-  {_audit_receipt_card("Activity receipts", visible_count, f"{event_count} total scoped records")}
-  {_audit_receipt_card("Source receipts", source_count, "Saved or opened sources")}
-  {_audit_receipt_card("Evidence receipts", evidence_count, "Search, evidence, and brief work")}
-  {_audit_receipt_card("Action receipts", action_count, "Preview, approval, or execution records")}
-</div>
-"""
-    lifecycle = f"""
-<section class="cs-audit-lifecycle" aria-label="Audit lifecycle">
-  {_audit_lifecycle_card("Source saved", source_count, "Original inputs and source opens start the chain.", "searchable" if source_count else "draft")}
-  {_audit_lifecycle_card("Supporting evidence prepared", evidence_count, "Search and brief receipts show source-linked work.", "evidenceBacked" if evidence_count else "draft")}
-  {_audit_lifecycle_card("Decision recorded", decision_count, "Claims, workspace mode, and mission events explain decisions.", "underReview" if decision_count else "draft")}
-  {_audit_lifecycle_card("Action proposed", action_count, "Action drafts stay inspectable before execution.", "underReview" if action_count else "draft")}
-</section>
-"""
-    audit_overview = f"""
-<section class="cs-audit-overview" aria-label="Audit status">
-  <article class="cs-audit-latest">
-    <div class="cs-audit-latest-title">
-      <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(latest_event.get("event_type") or "") if latest_event else ""))}</span>
-      <div>
-        <span class="cs-meta">Audit status</span>
-        <h2>Latest readable receipt</h2>
-        <p><strong>{h(latest_title)}</strong> · {h(latest_note)}</p>
-      </div>
-      {_chip(latest_family, "searchable")}
-    </div>
-    <div class="cs-brief-fact-strip">
-      <div class="cs-brief-fact"><span class="cs-meta">Latest receipt</span><strong>{h(latest_activity)}</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Scope</span><strong>{h(workspace)}</strong></div>
-      <div class="cs-brief-fact"><span class="cs-meta">Chain status</span><strong>{h(integrity_label if events else "Ready")}</strong></div>
-    </div>
-    <div class="cs-audit-latest-actions">
-      <a class="cs-button secondary" href="#activity-receipts">Read activity receipts</a>
-      <a class="cs-button secondary" href="/artifacts">Open source register</a>
-    </div>
-  </article>
-  <div class="cs-audit-overview-side">
-    {receipt_summary}
-    {lifecycle}
-  </div>
-</section>
-"""
-    if not ctx["audit"]:
-        rows = _empty_state(
-            "Audit ready",
-            "No activity recorded yet",
-            "Save a source, ask a question, draft a brief, or review a decision to start the local activity trail.",
-            "Start from Home",
-            "/",
-            "Open artifacts",
-            "/artifacts",
-            mark="T",
-            steps=[
-                ("1. Save source", "Original input creates the first record."),
-                ("2. Create work", "Searches, briefs, claims, and actions add readable events."),
-                ("3. Inspect detail", "Raw event detail appears behind each row."),
-            ],
-            receipts=[
-                ("Source receipt", "Original input starts the local ledger."),
-                ("Decision receipt", "Claims and reviews explain why work moved."),
-                ("Action receipt", "Previews and approvals stay inspectable."),
-            ],
+        integrity_label, integrity_state = "Integrity unavailable", "underReview"
+
+    filtered = [
+        event
+        for event in events
+        if (not record_filter or _audit_record_ref(event) == record_filter)
+        and (lifecycle_filter == "all" or _audit_lifecycle_key(str(event.get("event_type") or "")) == lifecycle_filter)
+    ]
+    page_size = 40
+    page_count = max(1, (len(filtered) + page_size - 1) // page_size)
+    current_page = min(max(page, 1), page_count)
+    offset = (current_page - 1) * page_size
+    visible_events = filtered[offset : offset + page_size]
+
+    record_labels: dict[str, str] = {}
+    for event in events:
+        record_ref = _audit_record_ref(event)
+        if record_ref and record_ref not in record_labels:
+            subject_id = record_ref.split(":", 1)[1]
+            record_labels[record_ref] = f"{_audit_subject_label(event)} · {_short_ref(subject_id, 18)}"
+    record_options = ['<option value="">All records</option>']
+    if record_filter and record_filter not in record_labels:
+        record_options.append(
+            f'<option value="{h(record_filter)}" selected>'
+            f'Unavailable record · {h(_short_ref(record_filter, 24))}</option>'
         )
-    else:
-        rows = "".join(
+    record_options.extend(
+        f'<option value="{h(ref)}"{" selected" if ref == record_filter else ""}>{h(label)}</option>'
+        for ref, label in sorted(record_labels.items(), key=lambda item: item[1].lower())
+    )
+    lifecycle_options = []
+    for value, label in AUDIT_LIFECYCLES:
+        selected = " selected" if value == lifecycle_filter else ""
+        lifecycle_options.append(f'<option value="{h(value)}"{selected}>{h(label)}</option>')
+
+    positions = {
+        str(event.get("event_id") or id(event)): len(events) - index
+        for index, event in enumerate(events)
+    }
+    if visible_events:
+        row_html = "".join(
             f"""
 <article class="cs-audit-row">
   <div class="cs-audit-row-main">
-    <span class="cs-audit-icon" aria-hidden="true">{h(_audit_icon(str(event.get("event_type") or "")))}</span>
+    <span class="cs-audit-icon">{icon(_audit_icon_asset(event))}</span>
     <div>
       <div class="cs-audit-row-top">
         <h2>{h(_plain_event(str(event.get("event_type") or "")))}</h2>
-        <span class="cs-audit-row-position">Receipt {index} of {visible_count}</span>
+        <span class="cs-audit-row-position">{h(_audit_subject_label(event))}</span>
       </div>
-      <p class="cs-audit-row-note">Readable receipt for {h(_audit_subject_label(event))}. Open raw event detail only when checking hashes, scope, or stored fields.</p>
       <div class="cs-audit-row-meta">
         <span>{h(_audit_family(str(event.get("event_type") or "")))}</span>
         <span>{h(_display_date(event))}</span>
-        <span>Ledger position {index}</span>
-        <span>{h(str(event.get("workspace_id") or workspace))}</span>
+        <span>{h(_audit_record_ref(event) or "No subject reference")}</span>
       </div>
     </div>
-    {_chip(integrity_label, integrity_state)}
   </div>
-  {_audit_detail(event, index)}
+  {_audit_detail(event, positions[str(event.get("event_id") or id(event))])}
 </article>
 """
-            for index, event in enumerate(ctx["audit"][:40], start=1)
+            for event in visible_events
         )
-        rows = f'<div class="cs-audit-list">{rows}</div>'
+        rows = f'<div class="cs-audit-list">{row_html}</div>'
+    elif events:
+        rows = """
+<div class="cs-empty">
+  No history matches these filters. Clear the filters to return to the full workspace history.
+</div>
+"""
+    else:
+        rows = _empty_state(
+            "History ready",
+            "No activity recorded yet",
+            "Save a source, ask a question, or record a decision to start the workspace history.",
+            "Start from Home",
+            "/",
+            "Open saved sources",
+            "/artifacts",
+            mark="H",
+        )
+
+    def page_href(target_page: int) -> str:
+        params: list[str] = []
+        if record_filter:
+            params.append(f"record={quote(record_filter, safe='')}")
+        if lifecycle_filter != "all":
+            params.append(f"lifecycle={quote(lifecycle_filter, safe='')}")
+        if target_page > 1:
+            params.append(f"page={target_page}")
+        return "/audit" + (f"?{'&amp;'.join(params)}" if params else "")
+
+    pagination = ""
+    if page_count > 1:
+        previous = (
+            f'<a class="cs-button secondary" href="{page_href(current_page - 1)}">Previous</a>'
+            if current_page > 1
+            else ""
+        )
+        following = (
+            f'<a class="cs-button secondary" href="{page_href(current_page + 1)}">Next</a>'
+            if current_page < page_count
+            else ""
+        )
+        pagination = f'<nav class="cs-audit-pagination" aria-label="History pages">{previous}<span>Page {current_page} of {page_count}</span>{following}</nav>'
+
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    workspace = str(scope.get("workspace_id") or "default")
+    showing_start = offset + 1 if visible_events else 0
+    showing_end = offset + len(visible_events)
+    has_filters = bool(record_filter or lifecycle_filter != "all")
+    clear_link = '<a class="cs-button ghost" href="/audit">Clear</a>' if has_filters else ""
     return f"""
 <section data-product-surface="audit" data-audit-integrity-status="{h(integrity_status)}">
-  <header class="cs-audit-hero" aria-label="Audit receipt workspace">
+  <header class="cs-audit-hero">
     <div class="cs-brief-title">
       <div class="cs-kicker">Audit</div>
-      <h1>Activity trail</h1>
-      <p>Follow source, evidence, decision, and action receipts in one inspectable local ledger. The page reads like a product history first; raw event detail stays available for provenance checks.</p>
+      <h1>History</h1>
+      <p>See what happened in plain language. Event hashes, exact types, scope, and stored fields stay behind each raw-detail disclosure.</p>
       <div class="cs-brief-meta">
         <span>Workspace: {h(workspace)}</span>
-        <span>Latest: {h(latest_activity)}</span>
-        <span>First receipt: {h(first_activity)}</span>
-        <span>Reading order: newest first</span>
+        <span>{h(str(len(events)))} total events</span>
+        <span>{h(integrity_label)} across the full local ledger</span>
       </div>
     </div>
     <div class="cs-audit-actions">
-      {_chip("Local ledger", "searchable")}
-      {_chip("Readable receipts", "searchable")}
       {_chip(integrity_label, integrity_state)}
-      <a class="cs-button secondary" href="/artifacts">Open source register</a>
-      <a class="cs-button secondary" href="/">Back to Home</a>
+      <a class="cs-button secondary" href="/artifacts">Open saved sources</a>
     </div>
   </header>
-  {audit_overview}
+  <form class="cs-audit-filters" action="/audit" method="get" aria-label="Filter history">
+    <label>
+      <span>Record</span>
+      <select name="record">{''.join(record_options)}</select>
+    </label>
+    <label>
+      <span>Lifecycle</span>
+      <select name="lifecycle">{''.join(lifecycle_options)}</select>
+    </label>
+    <button class="cs-button" type="submit">Apply filters</button>
+    {clear_link}
+  </form>
   <div class="cs-audit-workbench">
-    <section class="cs-panel flat cs-audit-list-panel" id="activity-receipts">
+    <section class="cs-panel flat cs-audit-list-panel">
       <div class="cs-panel-header">
         <div>
-          <h2>Activity receipts</h2>
-          <p class="cs-muted">Event stream. Showing {visible_count} of {event_count} scoped records as readable receipts.</p>
+          <h2>Workspace history</h2>
+          <p class="cs-muted">Showing {showing_start}-{showing_end} of {h(str(len(filtered)))} matching events, newest first.</p>
         </div>
-        {_chip("Local ledger", "searchable")}
       </div>
       {rows}
+      {pagination}
     </section>
     <aside class="cs-stack">
       <section class="cs-panel flat">
-        <h2 class="cs-section-title">Audit posture</h2>
+        <h2 class="cs-section-title">Ledger integrity</h2>
+        <p class="cs-muted">{h(integrity_label)} applies to the full local ledger; active workspace rows are filtered below.</p>
         <dl class="cs-detail-grid">
-          <dt>Visible records</dt><dd>{visible_count}</dd>
-          <dt>Decision receipts</dt><dd>{decision_count}</dd>
+          <dt>Scoped events</dt><dd>{h(str(len(events)))}</dd>
+          <dt>Matching events</dt><dd>{h(str(len(filtered)))}</dd>
           <dt>Reading order</dt><dd>Newest first</dd>
-          <dt>Disclosure</dt><dd>Raw event detail</dd>
-          <dt>Scope</dt><dd>{h(workspace)}</dd>
+          <dt>Raw detail</dt><dd>Closed by default</dd>
         </dl>
       </section>
       <section class="cs-panel flat">
-        <h2 class="cs-section-title">Integrity chain</h2>
-        <p class="cs-muted">Each row keeps its event hash, previous hash, subject, event type, and ledger position behind Raw event detail.</p>
-        <div class="cs-audit-side-list" aria-label="Audit integrity checks">
-          <div class="cs-audit-side-item"><strong>{h(integrity_label)}</strong><span class="cs-muted">Event hash and previous hash are verified before this page claims chain integrity.</span></div>
-          <div class="cs-audit-side-item"><strong>Scoped ledger</strong><span class="cs-muted">Receipts are shown for the current local workspace.</span></div>
-          <div class="cs-audit-side-item"><strong>Readable first</strong><span class="cs-muted">Plain labels stay above raw fields.</span></div>
-        </div>
-      </section>
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Scope and recovery</h2>
-        <p class="cs-muted">Use Audit to check what happened, then return to the source register or Home to continue the local workflow.</p>
-        <div class="cs-empty-actions">
-          <a class="cs-button secondary" href="/artifacts">Open source register</a>
+        <h2 class="cs-section-title">Continue</h2>
+        <div class="cs-review-box">
+          <a class="cs-button secondary" href="/artifacts">Open saved sources</a>
           <a class="cs-button ghost" href="/">Back to Home</a>
         </div>
       </section>
@@ -6308,12 +2667,6 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
       {_chip("External calls locked", "policyBlocked")}
     </div>
   </div>
-  <nav class="cs-owner-tabs" aria-label="Owner review sections">
-    <span class="cs-owner-tab is-active">Sources</span>
-    <span class="cs-owner-tab">Policies</span>
-    <span class="cs-owner-tab">Access roles</span>
-    <span class="cs-owner-tab">Namespace</span>
-  </nav>
   <div class="cs-owner-overview" aria-label="Admin containment">
     {_owner_metric("Connected source posture", f"{len(ctx['artifacts'])} saved", "Local artifacts and pasted sources only.")}
     {_owner_metric("Policy controls", "Dry-run first", "Actions require policy and approval before execution.")}
@@ -6353,7 +2706,7 @@ def _owner_review_page(ctx: dict[str, Any], readiness: dict[str, Any]) -> str:
           {_owner_scope_row("Workspace", str(scope.get("workspace_id") or "default"))}
           {_owner_scope_row("Owner", str(scope.get("owner_id") or "local-user"))}
           {_owner_scope_row("Isolation", "Logical isolation, workspace scoped")}
-          {_owner_scope_row("Retention", "Artifacts and audit receipts remain local review input")}
+          {_owner_scope_row("Retention", "Artifacts and audit history remain local review input")}
         </div>
       </section>
     </div>
@@ -6652,14 +3005,6 @@ def _owner_role_row(label: str, detail: str, count: str) -> str:
 """
 
 
-def _source_row(artifact: dict[str, Any], compact: bool = False) -> str:
-    title = _artifact_title(artifact)
-    preview = str(artifact.get("_preview") or "Open to inspect the saved source.")
-    href = _detail_href("artifacts", artifact.get("artifact_id"))
-    detail = _truncate(preview, 130 if compact else 220)
-    return _generic_row("Source", title, detail, href, "Searchable", "searchable", _display_date(artifact))
-
-
 def _generic_row(kind: str, title: str, detail: str, href: str, label: str, state: str, date: str) -> str:
     return f"""
 <a class="cs-list-row" href="{h(href)}">
@@ -6674,51 +3019,11 @@ def _generic_row(kind: str, title: str, detail: str, href: str, label: str, stat
 """
 
 
-def _inbox_row(item: dict[str, str]) -> str:
-    return _generic_row(item["kind"], item["title"], item["detail"], item["href"], item["label"], item["state"], item["date"])
-
-
-def _detail_orientation(
-    *,
-    parent_href: str,
-    parent_label: str,
-    current_label: str,
-    summary: str,
-    chip_label: str,
-    chip_state: str,
-    actions: list[tuple[str, str, str]] | None = None,
-) -> str:
-    action_links = "".join(
-        f'<a class="cs-button {h(style)}" href="{h(href)}">{h(label)}</a>'
-        for label, href, style in actions or []
-    )
-    return f"""
-<header class="cs-detail-orientation">
-  <div class="cs-detail-context">
-    <nav class="cs-detail-path" aria-label="Detail path">
-      <span class="cs-meta">Detail path</span>
-      <a href="{h(parent_href)}">{h(parent_label)}</a>
-      <span aria-hidden="true">/</span>
-      <span>{h(current_label)}</span>
-    </nav>
-    <div class="cs-detail-summary">
-      <div class="cs-detail-summary-head">
-        <span class="cs-detail-current">{h(current_label)}</span>
-        {_chip(chip_label, chip_state)}
-      </div>
-      <p>{h(summary)}</p>
-    </div>
-  </div>
-  <div class="cs-detail-actions" aria-label="Detail page actions">
-    {action_links}
-  </div>
-</header>
-"""
-
-
 def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) -> str:
     title = _artifact_title(artifact)
-    text = _safe_preview(store, artifact, 5000, ctx.get("load_errors"), "source preview") or "No readable text preview is available for this source."
+    text, truncated = _safe_source_text(store, artifact, errors=ctx.get("load_errors"))
+    if not text:
+        text = "No readable text preview is available for this source."
     linked = _linked_records(ctx, artifact.get("artifact_id"))
     source = artifact.get("source") if isinstance(artifact.get("source"), dict) else {}
     fingerprint = _fingerprint(artifact.get("checksum_sha256") or artifact.get("original_storage_ref"))
@@ -6731,9 +3036,9 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
         f'<div class="cs-keyword-row"><span>{h(keyword)}</span>{_chip(str(count), "searchable")}</div>'
         for keyword, count in keywords
     )
-    summary = _truncate(text, 300)
     source_query = quote(title)
-    linked_count = linked.count("cs-list-row")
+    artifact_id = str(artifact.get("artifact_id") or "")
+    preview_note = "Showing the first 50,000 characters. The saved original remains unchanged." if truncated else "Line breaks are preserved from the saved source text."
     return f"""
 <section class="cs-artifact-workbench" data-product-surface="artifact-detail" aria-label="Source inspection workspace">
   <div class="cs-stack">
@@ -6746,131 +3051,51 @@ def _artifact_detail(ctx: dict[str, Any], store: Any, artifact: dict[str, Any]) 
           <span>{h(_truncate(title, 80))}</span>
         </nav>
         <div class="cs-artifact-title-row">
-          <span class="cs-artifact-file-mark" aria-hidden="true">TXT</span>
+          <span class="cs-artifact-file-mark">{icon("document")}</span>
           <div>
             <h1>{h(title)}</h1>
-            <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}{_chip("Untrusted until checked", "underReview")}</div>
+            <div class="cs-row">{_chip("Saved", "saved")}{_chip("Searchable", "searchable")}</div>
           </div>
         </div>
       </div>
       <div class="cs-artifact-actions">
         <a class="cs-button" href="/search?q={h(source_query)}">Search this source</a>
-        <a class="cs-button secondary" href="#linked-work">View linked work</a>
         <a class="cs-button ghost" href="/artifacts">Back to saved sources</a>
       </div>
     </header>
-    <div class="cs-metadata-strip is-artifact" aria-label="Source metadata">
-      <div class="cs-metadata-item"><span class="cs-meta">Saved source</span><strong>{h(source_label)}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Ingested</span><strong>{h(_display_date(artifact))}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">File type</span><strong>{h(media_type)}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Workspace</span><strong>{h(workspace)}</strong></div>
-      <div class="cs-metadata-item"><span class="cs-meta">Trust state</span><strong>Untrusted until checked</strong></div>
-    </div>
     <section class="cs-artifact-viewer" aria-label="Original source document viewer">
       <div class="cs-artifact-toolbar">
-        <div class="cs-artifact-toolgroup">
-          <div class="cs-artifact-toolbar-label">
-            <strong>Original source</strong>
-            <span class="cs-meta">Plain text preview from the saved source</span>
-          </div>
+        <div class="cs-artifact-toolbar-label">
+          <strong>Source text</strong>
+          <span class="cs-meta">{h(preview_note)}</span>
         </div>
-        <div class="cs-artifact-toolgroup">
-          <span class="cs-artifact-page-count">1 text source</span>
-          <a class="cs-button ghost" href="#source-text">Source text</a>
-        </div>
+        <span class="cs-artifact-page-count">{h(media_type)}</span>
       </div>
-      <div class="cs-document-frame has-rail">
-        <nav class="cs-artifact-page-rail" aria-label="Source outline">
-          <span class="cs-artifact-page-rail-label">Source outline</span>
-          <a class="cs-artifact-thumb is-active" aria-current="page" href="#source-text">
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span>Source text</span>
-          </a>
-          <a class="cs-artifact-thumb" href="#keywords">
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span>Keywords</span>
-          </a>
-          <a class="cs-artifact-thumb" href="#linked-work">
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span class="cs-artifact-thumb-line"></span>
-            <span>Linked work</span>
-          </a>
-        </nav>
-        <div class="cs-artifact-page-area">
-          <article class="cs-document-page" aria-label="Original artifact preview" id="source-text">
-            <header class="cs-document-heading">
-              <span class="cs-meta">Original source preview · Plain text</span>
-              <h3>{h(title)}</h3>
-              <div class="cs-artifact-source-note">
-                <span>{h(source_label)}</span>
-                <span>/</span>
-                <span>{h(_display_date(artifact))}</span>
-                <span>/</span>
-                <span>Original content primary</span>
-              </div>
-            </header>
-            <div class="cs-source-text">{h(text)}</div>
-          </article>
-        </div>
+      <div class="cs-artifact-page-area">
+        <article class="cs-document-page" aria-label="Saved source text preview" id="source-text">
+          <div class="cs-source-text">{h(text)}</div>
+        </article>
       </div>
     </section>
   </div>
   <aside class="cs-stack cs-artifact-rail">
-    <nav class="cs-artifact-rail-tabs" aria-label="Artifact detail tabs">
-      <a class="cs-artifact-rail-tab is-active" href="#source-reading" aria-current="page">Details</a>
-      <a class="cs-artifact-rail-tab" href="#keywords">Keywords ({len(keywords)})</a>
-    </nav>
-    <section class="cs-artifact-side-card" id="source-reading" aria-label="Source reading preview">
-      <div class="cs-panel-header"><h2>Source reading preview</h2>{_chip("Original primary", "saved")}</div>
-      <div class="cs-artifact-summary-lead">
-        <span class="cs-meta">Original source excerpt</span>
-        <strong>{h(_truncate(title, 110))}</strong>
-        <p class="cs-muted">{h(summary)}</p>
-      </div>
-      <div class="cs-row">{_chip("Original content primary", "saved")}{_chip(f"{linked_count} linked drafts", "searchable")}</div>
-    </section>
-    <section class="cs-artifact-side-card" aria-label="Artifact inspection summary">
-      <div class="cs-panel-header"><h2>Artifact inspection summary</h2>{_chip("Evidence links", "searchable")}</div>
-      <div class="cs-artifact-panel-list">
-        <div class="cs-artifact-inspection-card"><span class="cs-meta">Original preserved</span><strong>Yes</strong><span class="cs-muted">Derived drafts stay secondary.</span></div>
-        <div class="cs-artifact-inspection-card"><span class="cs-meta">Preview mode</span><strong>Plain text preview</strong><span class="cs-muted">No simulated PDF controls.</span></div>
-        <div class="cs-artifact-inspection-card"><span class="cs-meta">Linked drafts</span><strong>{linked_count}</strong><span class="cs-muted">Briefs or claims using this source.</span></div>
-        <div class="cs-artifact-inspection-card"><span class="cs-meta">Fingerprint</span><strong>{h(fingerprint)}</strong><span class="cs-muted">Shown before reuse.</span></div>
-      </div>
-    </section>
-    <section class="cs-artifact-side-card" id="keywords">
-      <h2 class="cs-section-title">Source excerpt</h2>
-      <p class="cs-muted">{h(summary)}</p>
-    </section>
     <section class="cs-artifact-side-card">
-      <div class="cs-panel-header"><h2>Frequent local terms</h2>{_chip(str(len(keywords)), "searchable")}</div>
-      <div class="cs-keyword-list">{keyword_rows or '<div class="cs-empty">No keyword preview is available.</div>'}</div>
-    </section>
-    {linked}
-    <section class="cs-artifact-side-card">
-      <h2 class="cs-section-title">Source state</h2>
-      <div class="cs-row">{_chip("Saved", "saved")}{_chip("Untrusted until checked", "underReview")}</div>
+      <h2 class="cs-section-title">Source details</h2>
       <dl class="cs-detail-grid">
         <dt>Saved</dt><dd>{h(_display_date(artifact))}</dd>
         <dt>Source</dt><dd>{h(source_label)}</dd>
+        <dt>File type</dt><dd>{h(media_type)}</dd>
+        <dt>Workspace</dt><dd>{h(workspace)}</dd>
         <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
       </dl>
-      <p class="cs-muted">Keep this source visible before relying on derived drafts.</p>
+      <p class="cs-muted">The fingerprint identifies the saved content. Derived work remains separate.</p>
     </section>
-    <section class="cs-artifact-side-card">
-      <h2 class="cs-section-title">Provenance</h2>
-      <dl class="cs-detail-grid">
-        <dt>Ingested from</dt><dd>{h(source_label)}</dd>
-        <dt>Ingested</dt><dd>{h(_display_date(artifact))}</dd>
-        <dt>Fingerprint</dt><dd>{h(fingerprint)}</dd>
-      </dl>
-      <a class="cs-meta" href="/audit">Open audit trail</a>
-    </section>
+    {linked}
+    <details class="cs-artifact-side-card" id="keywords">
+      <summary><strong>Frequent local terms</strong> <span class="cs-meta">{len(keywords)}</span></summary>
+      <div class="cs-keyword-list">{keyword_rows or '<div class="cs-empty">No keyword preview is available.</div>'}</div>
+    </details>
+    <a class="cs-button secondary" href="/audit?record=artifact:{h(artifact_id)}">Open source history</a>
   </aside>
 </section>
 """
@@ -6913,19 +3138,19 @@ def _record_activity_panel(ctx: dict[str, Any], record_kind: str, record_id: str
         if str(subject.get("type") or "") == record_kind and str(subject.get("id") or "") == record_id:
             events.append(event)
     rows = "".join(
-        f'<div class="cs-stat-row"><span class="cs-stat-icon">A</span><div><strong>{h(_plain_event(str(event.get("event_type") or "recorded")))}</strong><div class="cs-meta">{h(_display_date(event))}</div></div>{_chip("Receipt", "searchable")}</div>'
+        f'<div class="cs-stat-row"><span class="cs-stat-icon">{icon("history")}</span><div><strong>{h(_plain_event(str(event.get("event_type") or "recorded")))}</strong><div class="cs-meta">{h(_display_date(event))}</div></div></div>'
         for event in events[:5]
     )
     refs = "".join(f"<li><code>{h(ref)}</code></li>" for ref in audit_refs[:5])
     if not rows:
-        rows = '<div class="cs-empty">No record-specific activity receipt is visible yet.</div>'
+        rows = '<div class="cs-empty">No record-specific history is visible yet.</div>'
     return f"""
 <section class="cs-artifact-side-card" data-record-activity="{h(record_kind)}:{h(record_id)}">
-  <h2 class="cs-section-title">Activity</h2>
+  <h2 class="cs-section-title">History</h2>
   <div class="cs-stat-list">{rows}</div>
   <details class="cs-audit-detail">
-    <summary>Audit refs</summary>
-    <ul>{refs or '<li>No audit ref recorded.</li>'}</ul>
+    <summary>Audit references</summary>
+    <ul>{refs or '<li>No audit reference recorded.</li>'}</ul>
   </details>
 </section>
 """
@@ -6933,7 +3158,6 @@ def _record_activity_panel(ctx: dict[str, Any], record_kind: str, record_id: str
 
 def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     brief_id = str(brief.get("brief_id") or "")
-    bundle_id = _evidence_bundle_id(brief)
     claims = [
         claim
         for claim in ctx.get("claims", [])
@@ -6941,35 +3165,23 @@ def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     ]
     claim_ids = {str(claim.get("claim_id") or "") for claim in claims}
     actions = [action for action in ctx.get("actions", []) if str(action.get("source_claim_id") or "") in claim_ids]
-    memories = [
-        memory
-        for memory in ctx.get("memories", [])
-        if bundle_id and any(str(ref) == f"evidence_bundle:{bundle_id}" for ref in memory.get("evidence_refs", []))
-    ]
     claim_rows = "".join(
         f'<a class="cs-list-row" href="{h(_detail_href("claims", claim.get("claim_id")))}"><span class="cs-meta">Claim candidate</span><strong>{h(_claim_title(claim))}</strong></a>'
         for claim in claims[:4]
     ) or '<div class="cs-empty">No Claim candidate has been created from this Brief yet.</div>'
-    memory_rows = "".join(
-        f'<a class="cs-list-row" href="{h(_detail_href("memories", memory.get("memory_id")))}"><span class="cs-meta">Memory/Wiki candidate</span><strong>{h(_truncate(str(memory.get("title") or memory.get("statement") or "Knowledge draft"), 96))}</strong></a>'
-        for memory in memories[:4]
-    ) or '<div class="cs-empty">No Memory/Wiki candidate has been created. Saving a knowledge draft remains review-only.</div>'
     action_rows = "".join(
         f'<a class="cs-list-row" href="{h(_detail_href("actions", action.get("action_id")))}"><span class="cs-meta">Action preview</span><strong>{h(_action_title(action))}</strong></a>'
         for action in actions[:4]
     )
     if not action_rows:
-        suggestions = [_plain_runtime_text(item) for item in brief.get("recommended_next_steps", []) if isinstance(item, str)]
-        action_rows = "".join(f'<div class="cs-list-row"><span class="cs-meta">Suggested action</span><strong>{h(item)}</strong></div>' for item in suggestions[:3])
-        action_rows = action_rows or '<div class="cs-empty">No suggested action is recorded.</div>'
+        action_rows = '<div class="cs-empty">No persisted action preview is linked to this Brief.</div>'
     return f"""
 <section class="cs-panel" aria-label="Related Brief work">
-  <div class="cs-panel-header"><div><h2>Related work</h2><p class="cs-muted">Only persisted records are shown as candidates; suggestions remain clearly labelled.</p></div></div>
+  <div class="cs-panel-header"><div><h2>Related decisions and actions</h2><p class="cs-muted">Only persisted records are shown here. Draft suggestions remain in the next-steps section above.</p></div></div>
   <div class="cs-brief-note-grid">
     <div><h3>Claim candidates</h3>{claim_rows}</div>
-    <div><h3>Memory/Wiki candidates</h3>{memory_rows}</div>
+    <div><h3>Action previews</h3>{action_rows}</div>
   </div>
-  <div><h3>Suggested actions</h3>{action_rows}</div>
 </section>
 """
 
@@ -6991,7 +3203,6 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     next_rows = "".join(f"<li>{h(item)}</li>" for item in next_steps[:4]) or "<li>Review the visible sources before requesting review.</li>"
     provenance = _brief_provenance(brief)
     source_count = len(source_items)
-    mode = _plain_output_mode(str(brief.get("output_mode") or "draft"))
     finding_count = len(key_points) + len(findings)
     brief_title = _brief_title(brief)
     label_state = _brief_label_state(brief)[0]
@@ -7004,8 +3215,8 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     else:
         decision_snapshot = "Draft — source check needed"
     citation_ready = citation_receipt["citation_refs_count"] > 0 and citation_receipt["unresolved_citation_count"] == 0 and citation_receipt["citation_check_refs_count"] > 0
-    receipt_chip = _chip("Checked receipt" if citation_ready else "Source check", "searchable" if citation_ready else "underReview")
-    receipt_note = (
+    check_chip = _chip("Citations checked" if citation_ready else "Source check needed", "searchable" if citation_ready else "underReview")
+    check_note = (
         "Citation checks and visible source spans agree for the recorded references."
         if citation_ready
         else "Unsupported or unresolved citation work remains; use this as a draft until source spans are checked."
@@ -7056,40 +3267,21 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
       <div class="cs-brief-actions">
         <a class="cs-button secondary" href="/briefs">Back to briefs</a>
         <a class="cs-button secondary" href="#citation-trail">Review sources</a>
-        <a class="cs-button secondary" href="/audit">Open audit trail</a>
       </div>
     </header>
-    <section class="cs-brief-receipt-panel" aria-label="Receipt summary">
-      <div class="cs-panel-header">
+    <section class="cs-brief-answer-panel" aria-labelledby="brief-answer-title">
+      <div class="cs-brief-answer-head">
         <div>
-          <span class="cs-meta">Receipt summary</span>
-          <h2>Brief answer and receipt</h2>
-          <p class="cs-muted">Read the answer, source support, and label state before promoting any finding.</p>
+          <div class="cs-kicker">Brief answer</div>
+          <h2 id="brief-answer-title">What we know</h2>
         </div>
-        {receipt_chip}
+        {check_chip}
       </div>
-      <div class="cs-brief-lead-grid">
-        <div class="cs-brief-answer-card is-primary">
-          <span class="cs-meta">What we found</span>
-          <p>{h(summary_text)}</p>
-          <div class="cs-brief-fact-strip" aria-label="Brief status">
-            <div class="cs-brief-fact"><span class="cs-meta">Decision snapshot</span><strong>{h(decision_snapshot)}</strong></div>
-            <div class="cs-brief-fact"><span class="cs-meta">Source coverage</span><strong>{h(source_count)} visible</strong></div>
-            <div class="cs-brief-fact"><span class="cs-meta">Drafted findings</span><strong>{h(finding_count)}</strong></div>
-          </div>
-        </div>
-        <div class="cs-brief-receipt-stack">
-          <div class="cs-brief-receipt-card">
-            <span class="cs-meta">Citation receipt</span>
-            <strong>{h(citation_receipt["resolved_citation_count"])} / {h(citation_receipt["citation_refs_count"])} resolved</strong>
-            <p>{h(receipt_note)}</p>
-          </div>
-          <div class="cs-brief-receipt-card">
-            <span class="cs-meta">Label state</span>
-            <strong>{h(label_state)}</strong>
-            <p>{h(str(citation_receipt["citation_check_refs_count"]))} citation check ref{"s" if citation_receipt["citation_check_refs_count"] != 1 else ""}; {h(citation_receipt["citation_ref_kind"])} refs.</p>
-          </div>
-        </div>
+      <p class="cs-brief-answer-text">{h(summary_text)}</p>
+      <div class="cs-brief-answer-meta" aria-label="Brief status">
+        <span><strong>{h(decision_snapshot)}</strong> decision state</span>
+        <span><strong>{h(source_count)}</strong> visible source{"s" if source_count != 1 else ""}</span>
+        <span><strong>{h(finding_count)}</strong> drafted finding{"s" if finding_count != 1 else ""}</span>
       </div>
     </section>
     <section class="cs-panel">
@@ -7116,27 +3308,32 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     {related_work}
   </div>
   <aside class="cs-stack">
-    <nav class="cs-artifact-rail-tabs" aria-label="Brief detail tabs">
-      <span class="cs-artifact-rail-tab is-active">Sources</span>
-      <span class="cs-artifact-rail-tab">Provenance</span>
-    </nav>
     <section class="cs-artifact-side-card" id="citation-trail">
       <div class="cs-panel-header"><h2>Sources used</h2>{_chip(str(source_count), "searchable")}</div>
-      <p class="cs-muted">Citation trail. Open a source before promoting a finding.</p>
+      <p class="cs-muted">Open the exact source before promoting a finding.</p>
       {source_list}
     </section>
-    <section class="cs-artifact-side-card">
-      <h2 class="cs-section-title">Provenance</h2>
+    <details class="cs-artifact-side-card cs-citation-checks">
+      <summary><strong>Citation checks</strong></summary>
+      <p>{h(check_note)}</p>
+      <dl class="cs-detail-grid">
+        <dt>Resolved</dt><dd>{h(citation_receipt["resolved_citation_count"])} / {h(citation_receipt["citation_refs_count"])}</dd>
+        <dt>Check records</dt><dd>{h(citation_receipt["citation_check_refs_count"])}</dd>
+        <dt>Reference kind</dt><dd>{h(citation_receipt["citation_ref_kind"])}</dd>
+        <dt>Label state</dt><dd>{h(label_state)}</dd>
+      </dl>
+    </details>
+    <details class="cs-artifact-side-card">
+      <summary><strong>Provenance</strong></summary>
       {provenance}
-    </section>
+    </details>
     <section class="cs-artifact-side-card">
-      <h2 class="cs-section-title">Use this brief</h2>
+      <h2 class="cs-section-title">Continue to a decision</h2>
       <div class="cs-review-box">
-        {f'<button class="cs-button" type="button" id="cs-create-claim-button" data-brief-id="{h(brief_id)}" data-statement="{h(claim_statement)}">Draft claim from finding</button>' if can_create_claim else '<span class="cs-button is-disabled" aria-disabled="true">Claim draft needs source evidence</span>'}
-        <a class="cs-button secondary" href="/actions">Review action previews</a>
-        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+        {f'<button class="cs-button" type="button" id="cs-create-claim-button" data-brief-id="{h(brief_id)}" data-statement="{h(claim_statement)}">Draft Claim from finding</button>' if can_create_claim else '<p class="cs-muted">A Claim can be drafted after this Brief has a source-linked finding.</p>'}
+        <a class="cs-button secondary" href="/audit?record=brief:{h(brief_id)}">Open Brief history</a>
       </div>
-      <div id="cs-claim-create-status" class="cs-status is-idle" data-state="idle" role="status">No Claim candidate created yet.</div>
+      <div id="cs-claim-create-status" class="cs-status is-idle" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden>No Claim candidate created yet.</div>
       <p class="cs-muted">Use this as a draft until each important statement is matched to a source span.</p>
     </section>
     {activity}
@@ -7148,34 +3345,16 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
 def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     label, state = _claim_label(claim)
     source_items = _source_items(ctx, claim)
-    source_list = _evidence_picker_from_items(source_items)
+    source_list = _source_links_from_items(source_items)
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
     has_sources = bool(source_items)
     is_approved = str(claim.get("status") or "").lower() == "approved"
     evidence_backed_earned = _claim_evidence_backed_earned(claim)
-    approval_note = (
-        "Owner approval is recorded; autonomous action remains outside this Claim record."
-        if is_approved
-        else "Approval stays locked until review is recorded."
-        if has_sources
-        else "Approval stays locked until supporting evidence is attached."
-    )
-    rationale = _plain_runtime_text(claim.get("rationale") or "").strip() or "No separate rationale has been drafted yet. Use the source rail before asking for review."
+    approval_eligible = not is_approved and authority.get("can_be_approved") is True
+    rationale = _plain_runtime_text(claim.get("rationale") or "").strip() or "No separate rationale was recorded for this Claim."
     claim_title = _claim_title(claim)
     claim_statement = str(claim.get("statement") or claim_title)
-    status_label = str(claim.get("status") or "draft").replace("_", " ").title()
-    confidence_label = "Medium" if has_sources else "Needs evidence"
     source_label = f"{len(source_items)} source{'s' if len(source_items) != 1 else ''}"
-    approved_stage = "is-active" if is_approved else ""
-    source_stage = "is-active" if has_sources else ""
-    evidence_stage = "is-active" if evidence_backed_earned else ""
-    category = "Decision support"
-    tags = [
-        "Evidence review",
-        "Owner approval",
-        "Audit-ready",
-    ]
-    review_class = "is-ready" if has_sources else "is-review"
     claim_id = str(claim.get("claim_id") or "")
     related_brief_id = _related_brief_id(claim)
     related_brief = (
@@ -7184,7 +3363,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         else '<span class="cs-muted">No source Brief lineage is recorded.</span>'
     )
     gaps = [_plain_runtime_text(value) for value in claim.get("gaps", []) if isinstance(value, str)]
-    gap_rows = "".join(f"<li>{h(value)}</li>" for value in gaps[:6]) or "<li>No separate gaps were recorded; inspect source coverage before authority use.</li>"
+    gap_rows = "".join(f"<li>{h(value)}</li>" for value in gaps[:6]) or "<li>No separate gaps were recorded. Inspect the source support before approval.</li>"
     denial_events = []
     for event in ctx.get("audit", []):
         subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
@@ -7194,13 +3373,13 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     if denial_events:
         denied = denial_events[0]
         details = denied.get("details") if isinstance(denied.get("details"), dict) else {}
-        audit_ref = f"audit:{denied.get('event_id')}" if denied.get("event_id") else "Audit receipt unavailable"
+        audit_ref = f"audit:{denied.get('event_id')}" if denied.get("event_id") else "Audit reference unavailable"
         denial_panel = f"""
 <section class="cs-panel" data-claim-approval-denial="true">
   <div class="cs-panel-header"><div><h2>Approval blocked</h2><p class="cs-muted">The Claim remains a draft.</p></div>{_chip("Evidence required", "insufficientEvidence")}</div>
   <p><strong>Cause:</strong> {h(_plain_runtime_text(details.get("reason") or "Supporting source evidence is missing."))}</p>
-  <p><strong>Recovery:</strong> Attach supporting evidence with at least one saved source, then retry approval.</p>
-  <details class="cs-audit-detail"><summary>Denial receipt</summary><p><code>{h(audit_ref)}</code></p><p>{h(_plain_runtime_text(details.get("required") or "Supporting evidence is required before approval."))}</p></details>
+  <p><strong>Recovery:</strong> Return to the source Brief and create a Claim from a citation-checked finding.</p>
+  <details class="cs-audit-detail"><summary>Denial detail</summary><p><code>{h(audit_ref)}</code></p><p>{h(_plain_runtime_text(details.get("required") or "Supporting evidence is required before approval."))}</p></details>
 </section>
 """
     activity = _record_activity_panel(
@@ -7209,33 +3388,57 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         claim_id,
         [str(ref) for ref in claim.get("audit_refs", []) if isinstance(ref, str)],
     )
-    lifecycle_name = "Approved claim" if is_approved else "Claim draft"
-    workspace_title = "Approved claim workspace" if is_approved else "Claim draft workspace"
-    workspace_note = (
-        "Review the approved statement, its source support, and its audit receipt together."
-        if is_approved
-        else "Draft the claim beside its source support, then request review before a decision uses it."
+    approved_at = _display_date({"created_at": claim.get("approved_at")}) if claim.get("approved_at") else "Approval time not recorded"
+    blocked_reason = _plain_runtime_text(
+        authority.get("blocked_reason")
+        or "The exact Claim statement needs current citation-checked source support before approval."
     )
-    heading_chips = _chip(label, state) + (_chip("Source support", "searchable") if has_sources else "")
-    top_actions = (
-        '<a class="cs-button" href="/audit">Open approval receipt</a><a class="cs-button secondary" href="/claims">Back to claims</a>'
-        if is_approved
-        else '<a class="cs-button secondary" href="/claims">Save draft</a><a class="cs-button" href="/inbox">Request review</a><span class="cs-button is-disabled" aria-disabled="true">Decision save locked</span><a class="cs-button secondary" href="/claims">Back to claims</a><a class="cs-button secondary" href="/inbox">Open inbox</a>'
-    )
-    review_controls = (
-        '<a class="cs-button" href="/audit">Open approval receipt</a><a class="cs-button secondary" href="/claims">Back to claims</a>'
-        if is_approved
-        else '<a class="cs-button secondary" href="/claims">Save draft</a><a class="cs-button" href="/inbox">Request review</a><span class="cs-button is-disabled" aria-disabled="true">Decision save locked</span>'
-    )
+    if is_approved:
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-claim-approval-state="approved">
+  <div class="cs-panel-header"><div><h2>Approval recorded</h2><p class="cs-muted">Recorded {h(approved_at)}. This does not authorize an external action.</p></div>{_chip("Approved", "approved")}</div>
+  <a class="cs-button secondary" href="/audit?record=claim:{h(claim_id)}">Open Claim history</a>
+</section>
+"""
+    elif approval_eligible:
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-claim-approval-state="eligible">
+  <div class="cs-panel-header"><div><h2>Ready for an owner decision</h2><p class="cs-muted">Current statement-level source support allows approval. Approval records shared truth; it does not start an action.</p></div>{_chip("Ready", "underReview")}</div>
+  <button class="cs-button" type="button" id="cs-approve-claim-button" data-claim-id="{h(claim_id)}">Approve Claim</button>
+  <div class="cs-status is-idle" id="cs-claim-approval-status" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+  <dialog class="cs-confirm-dialog" id="cs-claim-approval-dialog" aria-labelledby="cs-claim-approval-title">
+    <form method="dialog">
+      <div class="cs-confirm-dialog-copy">
+        <div class="cs-kicker">Confirm decision</div>
+        <h2 id="cs-claim-approval-title">Approve this Claim?</h2>
+        <p>{h(_truncate(claim_statement, 220))}</p>
+        <p class="cs-muted">This records approval for shared truth. It does not execute or authorize an external action.</p>
+      </div>
+      <div class="cs-confirm-dialog-actions">
+        <button class="cs-button secondary" value="cancel">Cancel</button>
+        <button class="cs-button" value="confirm" id="cs-confirm-claim-approval">Approve Claim</button>
+      </div>
+    </form>
+  </dialog>
+</section>
+"""
+    else:
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-claim-approval-state="blocked">
+  <div class="cs-panel-header"><div><h2>Approval is not available</h2><p class="cs-muted">{h(blocked_reason)}</p></div>{_chip("Source support needed", "insufficientEvidence")}</div>
+  <div class="cs-review-box">{related_brief}</div>
+</section>
+"""
     return f"""
 <section
   class="cs-grid-two cs-claim-workbench"
   data-product-surface="claim-detail"
   data-source-support-attached="{str(has_sources).lower()}"
   data-evidence-backed-earned="{str(evidence_backed_earned).lower()}"
+  data-approval-eligible="{str(approval_eligible).lower()}"
 >
   <div class="cs-stack">
-    <div class="cs-claim-hero is-compact">
+    <header class="cs-claim-hero is-compact">
       <div class="cs-claim-titlebar">
         <div class="cs-brief-title">
           <nav class="cs-claim-breadcrumb" aria-label="Detail path">
@@ -7246,115 +3449,33 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
           </nav>
           <div class="cs-claim-heading-row">
             <h1>{h(claim_title)}</h1>
-            {heading_chips}
+            {_chip(label, state)}
           </div>
           <div class="cs-brief-meta">
-            <span>{h(lifecycle_name)}</span>
             <span>Created {h(_display_date(claim))}</span>
             <span>{h(source_label)} attached</span>
           </div>
         </div>
-        <div class="cs-claim-actions" aria-label="Claim review actions">
-          {top_actions}
+        <div class="cs-claim-actions" aria-label="Claim actions">
+          <a class="cs-button secondary" href="/claims">Back to Claims</a>
+          <a class="cs-button secondary" href="/audit?record=claim:{h(claim_id)}">Open history</a>
         </div>
       </div>
-      <div class="cs-row">{_chip(label, state)}{_chip("Owner approval recorded", "approved") if is_approved else _chip("Review required before approval", "underReview")}</div>
-    </div>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>{h(workspace_title)}</h2>
-          <p class="cs-muted">{h(workspace_note)}</p>
-        </div>
-      </div>
-      <div class="cs-claim-pathbar" aria-label="Evidence-to-decision path">
-        <div class="cs-claim-pathbar-title">
-          <span class="cs-meta">Trust ladder</span>
-          <strong>Evidence-to-decision path</strong>
-          <span class="cs-muted">{"Owner approval is recorded; citation integrity and autonomous action remain separate gates." if is_approved else "Decision use stays locked until source and owner review are recorded."}</span>
-        </div>
-        <div class="cs-claim-progress" aria-label="Trust ladder">
-          <div class="cs-claim-progress-step is-active">
-            <span class="cs-claim-dot" aria-hidden="true"></span>
-            <span>Draft</span>
-          </div>
-          <div class="cs-claim-progress-step {source_stage}">
-            <span class="cs-claim-dot" aria-hidden="true"></span>
-            <span>Source support</span>
-          </div>
-          <div class="cs-claim-progress-step {evidence_stage}">
-            <span class="cs-claim-dot" aria-hidden="true"></span>
-            <span>Evidence-backed locked</span>
-          </div>
-          <div class="cs-claim-progress-step {approved_stage}">
-            <span class="cs-claim-dot" aria-hidden="true"></span>
-            <span>Approved</span>
-          </div>
-        </div>
-      </div>
-      <div class="cs-claim-tabs" aria-label="Claim workspace overview">
-        <span class="cs-claim-tab is-active">Claim</span>
-        <span class="cs-claim-tab">Supporting evidence</span>
-        <span class="cs-claim-tab">Counter evidence</span>
-        <span class="cs-claim-tab">Impacted objects</span>
-        <span class="cs-claim-tab">Discussion</span>
-      </div>
-      <div class="cs-claim-form-card">
-        <div class="cs-claim-field is-primary">
-          <div class="cs-claim-field-head">
-            <div>
-              <strong>Claim statement</strong>
-              <p class="cs-muted">Provide a clear statement that can be traced to sources.</p>
-            </div>
-            {_chip(confidence_label, "underReview" if has_sources else "insufficientEvidence")}
-          </div>
-          <p class="cs-claim-text is-statement">{h(claim_statement)}</p>
-          <div class="cs-claim-field-foot">{h(str(len(claim_statement)))} / 500</div>
-        </div>
-        <div class="cs-claim-field">
-          <div class="cs-claim-field-head">
-            <div>
-              <strong>Rationale</strong>
-              <p class="cs-muted">Why does this claim matter for the next decision?</p>
-            </div>
-          </div>
-          <p class="cs-claim-text">{h(rationale)}</p>
-          <div class="cs-claim-field-foot">{h(str(len(rationale)))} / 1000</div>
-        </div>
-        <div class="cs-claim-taxonomy">
-          <div class="cs-claim-select">
-            <span class="cs-meta">Claim category</span>
-            <strong>{h(category)}</strong>
-          </div>
-          <div class="cs-claim-tags" aria-label="Claim tags">
-            <span class="cs-meta">Tags</span>
-            {"".join(_chip(tag, "draft") for tag in tags)}
-          </div>
-        </div>
-        <div class="cs-claim-frameworks" aria-label="Related frameworks">
-          <span class="cs-meta">Related frameworks</span>
-          <strong>No framework selected</strong>
-        </div>
-        <span class="cs-claim-save-note">Saved locally</span>
-      </div>
-      <div class="cs-claim-review-strip" aria-label="Claim review summary">
-        <div class="cs-claim-review-card"><span class="cs-meta">Claim state</span><strong>{h(label)}</strong><span class="cs-meta">{"Owner approval recorded" if is_approved else "Review before approval"}</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong><span class="cs-meta">Visible local sources</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Evidence-backed gate</span><strong>{"Earned" if evidence_backed_earned else "Locked"}</strong><span class="cs-meta">Citation checks required</span></div>
-        <div class="cs-claim-review-card"><span class="cs-meta">Decision gate</span><strong>{"Approved" if is_approved else "Locked"}</strong><span class="cs-meta">{"Owner approval recorded" if is_approved else "Owner review required"}</span></div>
+    </header>
+    <section class="cs-panel cs-claim-statement">
+      <div class="cs-kicker">Decision statement</div>
+      <h2>{h(claim_statement)}</h2>
+      <div class="cs-claim-rationale">
+        <span class="cs-meta">Rationale</span>
+        <p>{h(rationale)}</p>
       </div>
     </section>
+    {approval_panel}
     {denial_panel}
     <section class="cs-panel">
       <div class="cs-panel-header"><div><h2>Brief lineage and gaps</h2><p class="cs-muted">The source Brief stays separate from this Claim record.</p></div></div>
       <div class="cs-review-box">{related_brief}</div>
       <ul class="cs-brief-note-list">{gap_rows}</ul>
-    </section>
-    <section class="cs-claim-footrail" aria-label="Claim provenance">
-      <div><span class="cs-meta">Record</span><strong>{"Approved local claim" if is_approved else "Local draft"}</strong></div>
-      <div><span class="cs-meta">Source support</span><strong>{h(source_label)}</strong></div>
-      <div><span class="cs-meta">Status</span><strong>{h(status_label)}</strong></div>
-      <div><span class="cs-meta">Last activity</span><strong>{h(_display_date(claim))}</strong></div>
     </section>
   </div>
   <aside class="cs-stack">
@@ -7366,60 +3487,12 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         </div>
         {_chip(str(len(source_items)), "searchable")}
       </div>
-      <div class="cs-evidence-toolbar" aria-label="Supporting source link order">
-        <span class="cs-filter-chip">Visible sources</span>
-        <span class="cs-filter-chip">Source order</span>
-      </div>
       {source_list}
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Review controls</h2>
-      <div class="cs-review-box">
-        {review_controls}
-        <p class="cs-muted">{h(approval_note)}</p>
-      </div>
-    </section>
-    <section class="cs-panel flat">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Decision gate</h2>
-          <p class="cs-muted">{"Owner approval is recorded; source support, citation integrity, audit, and action authority remain separately visible." if is_approved else "Source support, owner review, and audit records stay separate before decision use."}</p>
-        </div>
-      </div>
-      <div class="cs-claim-control-list">
-        <div class="cs-claim-control-row {review_class}">
-          <span class="cs-claim-control-mark" aria-hidden="true">1</span>
-          <div>
-            <strong>Source support</strong>
-            <p class="cs-muted">{h(source_label)} visible in this workspace.</p>
-          </div>
-        </div>
-        <div class="cs-claim-control-row {"is-ready" if is_approved else "is-review"}">
-          <span class="cs-claim-control-mark" aria-hidden="true">2</span>
-          <div>
-            <strong>Citation checks</strong>
-            <p class="cs-muted">Evidence-backed stays locked until checks prove source coverage and citation integrity.</p>
-          </div>
-        </div>
-        <div class="cs-claim-control-row is-review">
-          <span class="cs-claim-control-mark" aria-hidden="true">3</span>
-          <div>
-            <strong>Owner review</strong>
-            <p class="cs-muted">{"Owner approval is recorded for this Claim." if is_approved else "Review required before approval or shared truth."}</p>
-          </div>
-        </div>
-        <div class="cs-claim-control-row">
-          <span class="cs-claim-control-mark" aria-hidden="true">4</span>
-          <div>
-            <strong>No autonomous action</strong>
-            <p class="cs-muted">This claim cannot trigger external work from this page.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <section class="cs-panel flat">
       <h2 class="cs-section-title">Authority</h2>
-      <p class="cs-muted">{h(_plain_runtime_text(authority.get("blocked_reason") or "Owner approval is required before this claim becomes shared truth or drives autonomous action."))}</p>
+      <p class="cs-muted">{h(blocked_reason)}</p>
+      <p class="cs-muted">A Claim never starts an external action from this page.</p>
     </section>
     {activity}
   </aside>
@@ -7474,7 +3547,7 @@ def _memory_detail(ctx: dict[str, Any], memory: dict[str, Any]) -> str:
       </div>
       <div class="cs-brief-actions">
         <a class="cs-button secondary" href="/inbox">Back to inbox</a>
-        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+        <a class="cs-button secondary" href="/audit">Open History</a>
       </div>
     </header>
     <section class="cs-panel">
@@ -7510,7 +3583,7 @@ def _memory_detail(ctx: dict[str, Any], memory: dict[str, Any]) -> str:
       <h2 class="cs-section-title">Review controls</h2>
       <div class="cs-review-box">
         <a class="cs-button" href="/search?q={quote(statement)}">Review matching sources</a>
-        <a class="cs-button secondary" href="/audit">Open audit trail</a>
+        <a class="cs-button secondary" href="/audit">Open History</a>
         <a class="cs-button secondary" href="/inbox">Continue in Ops Inbox</a>
       </div>
     </section>
@@ -7523,256 +3596,90 @@ def _memory_detail(ctx: dict[str, Any], memory: dict[str, Any]) -> str:
 def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     label, state = _action_label(action)
     lifecycle = _action_lifecycle(action)
-    lifecycle_stage = str(lifecycle["stage"])
-    is_executed = lifecycle_stage == "executed"
-    is_failed = lifecycle_stage == "failed"
-    is_blocked = lifecycle_stage == "blocked"
-    is_approved_stage = lifecycle_stage == "approved"
+    stage = str(lifecycle["stage"])
     approval = lifecycle["approval"]
-    approval_status_raw = str(lifecycle["approval_status"])
-    approval_recorded = approval_status_raw == "approved"
+    approval_status = str(lifecycle["approval_status"])
+    approval_recorded = approval_status == "approved"
     execution = lifecycle["execution"]
     execution_result = lifecycle["result"]
-    execution_status_raw = str(lifecycle["execution_status"])
-    has_execution_attempt = is_executed or is_failed
-    has_recorded_outcome = has_execution_attempt or is_blocked
     dry_run = action.get("dry_run") if isinstance(action.get("dry_run"), dict) else {}
     diff = dry_run.get("diff") if isinstance(dry_run.get("diff"), dict) else {}
     impact = dry_run.get("expected_impact") if isinstance(dry_run.get("expected_impact"), dict) else {}
-    source_items = _source_items(ctx, action)
-    source_list = _source_links_from_items(source_items)
     policy = action.get("policy_decision") if isinstance(action.get("policy_decision"), dict) else {}
     if not policy and isinstance(dry_run.get("policy_decision"), dict):
         policy = dry_run["policy_decision"]
-    decision_label = _plain_policy_decision(str(policy.get("decision") or ""))
-    if is_blocked and not policy.get("decision"):
-        decision_label = "Not recorded"
+    policy_decision_raw = str(policy.get("decision") or "").lower()
+    policy_requires_approval = policy.get("approval_required") is True or policy_decision_raw in {
+        "requires_approval",
+        "require_approval",
+        "escalate",
+    }
+    approval_record_requires = approval.get("required") is True
+    approval_required = approval_record_requires or policy_requires_approval
+    approval_allowed = (
+        approval_record_requires
+        and not approval_recorded
+        and stage in {"draft", "pending"}
+        and policy_decision_raw not in {"deny", "denied", "blocked", "policy_blocked", "escalate", "escalated"}
+    )
+    connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
+    source_items = _source_items(ctx, action)
+    source_list = _source_links_from_items(source_items)
+    action_id = str(action.get("action_id") or "")
+    action_title = _action_title(action)
+    goal = _plain_runtime_text(dry_run.get("goal") or action.get("goal") or action_title)
+    target = _plain_runtime_text(impact.get("target") or dry_run.get("target") or "Target not recorded")
+    risk_label = str(impact.get("risk") or action.get("risk") or "review").replace("_", " ").title()
+    decision_label = _plain_policy_decision(str(policy.get("decision") or "Not recorded"))
+    policy_reason = _plain_runtime_text(policy.get("reason") or "No separate policy reason is recorded.")
     workspace_mode = str(policy.get("workspace_mode") or "local").replace("_", " ").title()
-    planned_real_external_calls = int(impact.get("real_external_http_calls", 0) or 0)
+    execution_mode = (
+        "Local / Mock result"
+        if connector.get("mocked") is True and stage in {"executed", "failed"}
+        else "Local / Mock / Draft"
+        if connector.get("mocked") is True
+        else f"{workspace_mode} / Governed"
+    )
+    planned_external_calls = int(impact.get("real_external_http_calls", 0) or 0)
     expected_connector_calls = int(impact.get("expected_connector_calls", 0) or 0)
-    raw_observed_external_calls = execution_result.get("external_http_calls")
+    raw_observed_calls = execution_result.get("external_http_calls")
     try:
         observed_external_calls = (
-            int(raw_observed_external_calls)
-            if raw_observed_external_calls is not None and not isinstance(raw_observed_external_calls, bool)
+            int(raw_observed_calls)
+            if raw_observed_calls is not None and not isinstance(raw_observed_calls, bool)
             else None
         )
     except (TypeError, ValueError):
         observed_external_calls = None
     if observed_external_calls is not None and observed_external_calls < 0:
         observed_external_calls = None
+    has_recorded_outcome = stage in {"executed", "failed", "blocked"}
     displayed_external_calls: int | str = (
         observed_external_calls
         if has_recorded_outcome and observed_external_calls is not None
         else "not-recorded"
         if has_recorded_outcome
-        else planned_real_external_calls
+        else planned_external_calls
     )
-    observed_call_note = (
-        "External HTTP call count not recorded"
-        if observed_external_calls is None
-        else "No external HTTP calls recorded"
-        if observed_external_calls == 0
-        else f"{observed_external_calls} external HTTP call{'s' if observed_external_calls != 1 else ''} recorded"
-    )
-    call_label = (
-        "Local mock execution recorded"
-        if is_executed and action.get("connector_boundary", {}).get("mocked") is True
-        else "Governed execution recorded"
-        if is_executed
-        else "Failed attempt recorded"
-        if is_failed
-        else "Blocked state recorded"
-        if is_blocked
-        else "Simulated in local mode"
-        if planned_real_external_calls == 0
-        else "Provider send planned"
-    )
-    connector = action.get("connector_boundary") if isinstance(action.get("connector_boundary"), dict) else {}
-    execution_mode = (
-        "Local / Mock / Draft"
-        if connector.get("mocked") is True and not has_execution_attempt
-        else "Local / Mock result"
-        if connector.get("mocked") is True and has_execution_attempt
-        else f"{workspace_mode} / Governed"
-    )
-    connector_label = "Connector-mediated path" if connector.get("direct_provider_access") is False else "Provider access needs review"
-    approval_required = bool(approval.get("required") or "approval" in decision_label.lower())
-    approval_label = "Approval recorded" if approval_recorded else "Approval required" if approval_required else "Approval not required"
-    risk_label = str(impact.get("risk") or action.get("risk") or "review").title()
-    target = str(impact.get("target") or "Local preview only.")
-    goal = str(dry_run.get("goal") or action.get("goal") or _action_title(action))
-    action_title = _action_title(action)
-    approval_status = approval_status_raw.replace("_", " ").title()
-    execution_status = execution_status_raw.replace("_", " ").title()
-    result_status = str(execution_result.get("status") or "recorded").replace("_", " ").title()
-    result_message = _plain_runtime_text(
-        execution_result.get("message") or "The governed local execution result is recorded."
-    )
-    reason = _plain_runtime_text(
-        approval.get("required_reason")
-        or policy.get("reason")
-        or "A reason is required before approval can move this preview toward execution."
-    )
-    policy_reason = _plain_runtime_text(
-        policy.get("reason")
-        or "This action is permitted only after review confirms the source, target, and risk."
-    )
-    raw_block_reason = policy.get("reason") or execution.get("reason") or execution.get("message")
-    if not raw_block_reason and is_blocked and execution_status_raw not in {"", "not_started"}:
-        raw_block_reason = execution_status_raw.replace("_", " ").capitalize()
-    blocked_reason = _plain_runtime_text(raw_block_reason or "No block cause is recorded on this action.")
-    raw_block_recovery = execution.get("recovery_path") or policy.get("resolution_path")
-    if isinstance(raw_block_recovery, list):
-        raw_block_recovery = " ".join(str(value) for value in raw_block_recovery if isinstance(value, str))
-    blocked_recovery = _plain_runtime_text(
-        raw_block_recovery
-        or "Review the recorded state, source, target, and approval boundary before creating a new preview."
-    )
-    displayed_policy_reason = blocked_reason if is_blocked else policy_reason
-    rail_reason_label = "Recorded cause" if is_blocked else "Required reason"
-    rail_reason = blocked_reason if is_blocked else reason
-    lifecycle_note = (
-        f"A governed execution result is recorded. {observed_call_note}."
-        if is_executed
-        else f"The recorded attempt failed. Review the cause and recovery path before creating a new preview. {observed_call_note}."
-        if is_failed
-        else "This action is blocked. Resolve the recorded cause before creating a new preview."
-        if is_blocked
-        else "Approval is recorded; execution has not been recorded."
-        if is_approved_stage
-        else "Preview impact, policy, and approval history before any external step."
-    )
-    if is_executed:
-        lifecycle_meta = "Executed result"
-    elif is_failed:
-        lifecycle_meta = "Failed with recovery"
-    elif is_blocked:
-        lifecycle_meta = "Policy blocked"
-    elif is_approved_stage:
-        lifecycle_meta = "Approved action"
-    else:
-        lifecycle_meta = "Dry-run first"
-    external_meta = observed_call_note if has_recorded_outcome else "No external send yet"
-    risk_chip = _chip(f"{risk_label} risk", "underReview")
-    if is_executed:
-        action_controls = f'{_chip(label, state)}{_chip(approval_label, "approved") if approval_recorded else ""}{risk_chip}'
-    elif is_failed:
-        action_controls = (
-            f'{_chip("Failed with recovery", "failed")}{_chip(approval_label, "approved") if approval_recorded else ""}{risk_chip}'
-            '<a class="cs-button" href="/inbox">Review recovery</a>'
-        )
-    elif is_blocked:
-        action_controls = (
-            f'{_chip("Policy blocked", "policyBlocked")}{risk_chip}'
-            '<a class="cs-button" href="/audit">Review block receipt</a>'
-        )
-    elif is_approved_stage:
-        action_controls = f'{_chip(label, state)}{_chip(approval_label, "approved")}{risk_chip}'
-    else:
-        action_controls = (
-            f'{_chip("Preview (dry run)", "searchable")}'
-            f'{_chip(approval_label, "underReview")}{risk_chip}'
-            '<a class="cs-button" href="/inbox">Request approval</a>'
-        )
-    rail_control = (
-        '<a class="cs-button" href="/inbox">Review recovery</a>'
-        if is_failed
-        else '<a class="cs-button" href="/audit">Review block receipt</a>'
-        if is_blocked
-        else '<a class="cs-button" href="/audit">Open approval receipt</a>'
-        if approval_recorded
-        else '<a class="cs-button" href="/inbox">Request approval</a>'
-    )
-    rail_note = (
-        "Review the failed attempt before deciding whether a new preview is safe."
-        if is_failed
-        else "Resolve the policy block before creating a new preview."
-        if is_blocked
-        else "Approval and execution are recorded as separate lifecycle steps."
-        if is_executed
-        else "Approval is recorded; execution remains pending."
-        if is_approved_stage
-        else "Execution is not shown as the primary action until approval is satisfied."
-    )
-    if approval_recorded:
-        approval_history = f"""
-<div class="cs-stat-row">
-  <span class="cs-stat-icon">A</span>
-  <div>
-    <strong>Approved by {h(str(approval.get("approver") or "owner"))}</strong>
-    <div class="cs-meta">{h(str(approval.get("approved_at") or _display_date(action)))}</div>
-  </div>
-  {_chip("Recorded", "approved")}
-</div>
-"""
-    else:
-        approval_history = '<div class="cs-empty">No approvals have been recorded yet.</div>'
-    execution_panel = ""
-    if is_executed:
-        execution_panel = f"""
-<section class="cs-panel" data-action-execution-result="true">
-  <div class="cs-panel-header">
-    <div><h2>Execution result</h2><p class="cs-muted">Durable lifecycle state from this Action record.</p></div>
-    {_chip(result_status, "executed")}
-  </div>
-  <p>{h(result_message)}</p>
-  <dl class="cs-detail-grid">
-    <dt>Execution</dt><dd>{h(execution_status)}</dd>
-    <dt>Result</dt><dd>{h(result_status)}</dd>
-    <dt>Boundary</dt><dd>{h(_plain_runtime_text(execution_result.get("side_effect_boundary") or "governed local record"))}</dd>
-    <dt>External HTTP calls</dt><dd>{h(str(displayed_external_calls))}</dd>
-  </dl>
-</section>
-"""
-    raw_recovery = execution_result.get("recovery_path") or execution.get("recovery_path") or action.get("recovery_path")
-    if isinstance(raw_recovery, list):
-        raw_recovery = " ".join(str(value) for value in raw_recovery if isinstance(value, str))
-    failure_reason = _plain_runtime_text(
-        execution_result.get("message")
-        or execution.get("message")
-        or execution.get("reason")
-        or "The recorded action attempt failed."
-    )
-    failure_recovery = _plain_runtime_text(
-        raw_recovery
-        or "Review the failure receipt and supporting sources in Inbox before creating a new action preview."
-    )
-    failure_panel = ""
-    if is_failed:
-        safety_note = (
-            "External HTTP call count is not recorded; inspect the execution and audit receipts before retrying."
-            if observed_external_calls is None
-            else
-            "No external HTTP call was recorded."
-            if observed_external_calls == 0
-            else f"{observed_external_calls} external HTTP call{'s were' if observed_external_calls != 1 else ' was'} recorded; review the audit receipt before retrying."
-        )
-        failure_panel = f"""
-<section class="cs-panel" data-action-failure-recovery="true" data-product-state="failed-with-recovery">
-  <div class="cs-panel-header">
-    <div><h2>Action failed</h2><p class="cs-muted">The failed attempt remains a reviewable record; it is not presented as a new preview.</p></div>
-    {_chip("Failed with recovery", "failed")}
-  </div>
-  <p><strong>Cause:</strong> {h(failure_reason)}</p>
-  <p><strong>Recovery:</strong> {h(failure_recovery)}</p>
-  <dl class="cs-detail-grid">
-    <dt>Execution state</dt><dd>{h(execution_status)}</dd>
-    <dt>Observed external calls</dt><dd>{h(str(displayed_external_calls))}</dd>
-    <dt>What stayed safe</dt><dd>{h(safety_note)}</dd>
-  </dl>
-  <div class="cs-empty-actions">
-    <a class="cs-button" href="/inbox">Open recovery queue</a>
-    <a class="cs-button secondary" href="/audit">Open failure receipt</a>
-  </div>
-</section>
-"""
-    action_id = str(action.get("action_id") or "")
     source_claim_id = str(action.get("source_claim_id") or "")
     source_claim_link = (
         f'<a class="cs-button secondary" href="{h(_detail_href("claims", source_claim_id))}">Open supporting Claim</a>'
         if source_claim_id
-        else '<span class="cs-muted">No supporting Claim lineage is recorded.</span>'
+        else '<p class="cs-muted">No supporting Claim lineage is recorded.</p>'
+    )
+    before = _plain_runtime_text(diff.get("before") or "No prior state was recorded.")
+    after = _plain_runtime_text(diff.get("after") or "No proposed state was recorded.")
+    result_message = _plain_runtime_text(
+        execution_result.get("message")
+        or execution.get("message")
+        or "No execution message was recorded."
+    )
+    recovery_value = execution_result.get("recovery_path") or execution.get("recovery_path")
+    if isinstance(recovery_value, list):
+        recovery_value = " ".join(str(item) for item in recovery_value if isinstance(item, str))
+    recovery = _plain_runtime_text(
+        recovery_value
+        or "Review the source, target, policy, and approval state before creating a new preview."
     )
     denial_events = []
     for event in ctx.get("audit", []):
@@ -7783,30 +3690,125 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
     if denial_events:
         denial = denial_events[0]
         denial_details = denial.get("details") if isinstance(denial.get("details"), dict) else {}
-        resolution_values = denial_details.get("resolution_path") if isinstance(denial_details.get("resolution_path"), list) else []
-        resolution = " ".join(str(value) for value in resolution_values if isinstance(value, str)) or "Review approval, source evidence, and the local safety boundary before retrying."
+        resolution_value = denial_details.get("resolution_path")
+        if isinstance(resolution_value, list):
+            resolution_value = " ".join(str(item) for item in resolution_value if isinstance(item, str))
         denial_panel = f"""
-<section class="cs-panel" data-action-execution-denial="true">
-  <div class="cs-panel-header"><div><h2>Execution blocked</h2><p class="cs-muted">The Action remains non-executed and no external write is claimed.</p></div>{_chip("Policy blocked", "policyBlocked")}</div>
+<section class="cs-panel cs-action-outcome" data-action-execution-denial="true">
+  <div class="cs-panel-header"><div><div class="cs-kicker">Safety boundary</div><h2>Execution blocked</h2></div>{_chip("Policy blocked", "policyBlocked")}</div>
   <p><strong>Cause:</strong> {h(_plain_runtime_text(denial_details.get("reason") or "The safety gate denied execution."))}</p>
-  <p><strong>Recovery:</strong> {h(_plain_runtime_text(resolution))}</p>
-  <details class="cs-audit-detail"><summary>Safety receipt</summary><dl class="cs-detail-grid"><dt>Reason code</dt><dd>{h(str(denial_details.get("reason_code") or "Not recorded"))}</dd><dt>Safety envelope</dt><dd>{h(str(denial_details.get("action_safety_envelope_id") or "Not recorded"))}</dd><dt>External HTTP calls</dt><dd>{h(str(denial_details.get("external_http_calls", 0)))}</dd></dl></details>
+  <p><strong>Recovery:</strong> {h(_plain_runtime_text(resolution_value or "Review approval, source evidence, and the local safety boundary before retrying."))}</p>
+  <details class="cs-audit-detail">
+    <summary>Technical denial detail</summary>
+    <dl class="cs-detail-grid">
+      <dt>Reason code</dt><dd>{h(str(denial_details.get("reason_code") or "Not recorded"))}</dd>
+      <dt>Safety envelope</dt><dd>{h(str(denial_details.get("action_safety_envelope_id") or "Not recorded"))}</dd>
+      <dt>External HTTP calls</dt><dd>{h(str(denial_details.get("external_http_calls", 0)))}</dd>
+    </dl>
+  </details>
 </section>
 """
-    blocked_state_panel = ""
-    if is_blocked and not denial_events:
-        blocked_state_panel = f"""
-<section class="cs-panel" data-action-policy-blocked="true" data-product-state="policy-blocked">
-  <div class="cs-panel-header">
-    <div><h2>Action blocked</h2><p class="cs-muted">The recorded blocked state remains visible until its cause is resolved.</p></div>
-    {_chip("Policy blocked", "policyBlocked")}
+    if stage == "executed":
+        lifecycle_panel = f"""
+<section class="cs-panel cs-action-outcome" data-action-execution-result="true">
+  <div class="cs-panel-header"><div><div class="cs-kicker">Recorded outcome</div><h2>Execution result</h2></div>{_chip(label, state)}</div>
+  <p>{h(result_message)}</p>
+  <dl class="cs-detail-grid">
+    <dt>Execution state</dt><dd>{h(str(lifecycle["execution_status"]).replace("_", " ").title())}</dd>
+    <dt>Result</dt><dd>{h(str(execution_result.get("status") or "recorded").replace("_", " ").title())}</dd>
+    <dt>External HTTP calls</dt><dd>{h(str(displayed_external_calls))}</dd>
+  </dl>
+</section>
+"""
+    elif stage == "failed":
+        lifecycle_panel = f"""
+<section class="cs-panel cs-action-outcome" data-action-failure-recovery="true" data-product-state="failed-with-recovery">
+  <div class="cs-panel-header"><div><div class="cs-kicker">Recorded outcome</div><h2>Action failed</h2></div>{_chip("Failed with recovery", "failed")}</div>
+  <p><strong>Cause:</strong> {h(result_message)}</p>
+  <p><strong>Recovery:</strong> {h(recovery)}</p>
+  <dl class="cs-detail-grid"><dt>External HTTP calls</dt><dd>{h(str(displayed_external_calls))}</dd></dl>
+</section>
+"""
+    elif stage == "blocked":
+        execution_status_reason = ""
+        if lifecycle["execution_status"] not in {"", "not_started"}:
+            execution_status_reason = str(lifecycle["execution_status"]).replace("_", " ").capitalize()
+        block_reason = _plain_runtime_text(
+            policy.get("reason")
+            or execution.get("reason")
+            or execution.get("message")
+            or execution_status_reason
+            or "The recorded policy state blocks this action."
+        )
+        lifecycle_panel = f"""
+<section class="cs-panel cs-action-outcome" data-action-policy-blocked="true" data-product-state="policy-blocked">
+  <div class="cs-panel-header"><div><div class="cs-kicker">Recorded outcome</div><h2>Action blocked</h2></div>{_chip("Policy blocked", "policyBlocked")}</div>
+  <p><strong>Cause:</strong> {h(block_reason)}</p>
+  <p><strong>Recovery:</strong> {h(recovery)}</p>
+  <dl class="cs-detail-grid"><dt>External HTTP calls</dt><dd>{h(str(displayed_external_calls))}</dd></dl>
+</section>
+"""
+    else:
+        lifecycle_panel = f"""
+<section class="cs-panel cs-action-preview" data-action-preview="true">
+  <div class="cs-panel-header"><div><div class="cs-kicker">Proposed change</div><h2>{h(goal)}</h2><p class="cs-muted">This is a dry-run preview. Nothing is executed from this page.</p></div>{_chip(label, state)}</div>
+  <div class="cs-action-change-grid">
+    <div class="cs-action-change"><span class="cs-meta">Before</span><p>{h(before)}</p></div>
+    <div class="cs-action-change"><span class="cs-meta">After</span><p>{h(after)}</p></div>
   </div>
-  <p><strong>Cause:</strong> {h(blocked_reason)}</p>
-  <p><strong>Recovery:</strong> {h(blocked_recovery)}</p>
-  <div class="cs-empty-actions">
-    <a class="cs-button" href="/inbox">Open review queue</a>
-    <a class="cs-button secondary" href="/audit">Open block receipt</a>
-  </div>
+  <dl class="cs-detail-grid">
+    <dt>Target</dt><dd>{h(target)}</dd>
+    <dt>Risk</dt><dd>{h(risk_label)}</dd>
+    <dt>Policy</dt><dd>{h(decision_label)}</dd>
+  </dl>
+</section>
+"""
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    owner = str(scope.get("owner_id") or "local-user")
+    if approval_recorded:
+        approved_at = str(approval.get("approved_at") or "Approval time not recorded")
+        approver = str(approval.get("approver") or "Approver not recorded")
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-action-approval-state="approved">
+  <div class="cs-panel-header"><div><h2>Approval recorded</h2><p class="cs-muted">Approved by {h(approver)} at {h(approved_at)}. Execution remains a separate step.</p></div>{_chip("Approved", "approved")}</div>
+</section>
+"""
+    elif approval_allowed:
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-action-approval-state="eligible">
+  <div class="cs-panel-header"><div><h2>Approval required</h2><p class="cs-muted">Review the target, risk, source, and policy before recording approval.</p></div>{_chip("Needs approval", "underReview")}</div>
+  <button class="cs-button" type="button" id="cs-approve-action-button" data-action-id="{h(action_id)}" data-approver="{h(owner)}">Approve action</button>
+  <div class="cs-status is-idle" id="cs-action-approval-status" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+  <dialog class="cs-confirm-dialog" id="cs-action-approval-dialog" aria-labelledby="cs-action-approval-title">
+    <form method="dialog">
+      <div class="cs-confirm-dialog-copy">
+        <div class="cs-kicker">Confirm approval</div>
+        <h2 id="cs-action-approval-title">Approve this action preview?</h2>
+        <p><strong>Target:</strong> {h(target)}</p>
+        <p><strong>Risk:</strong> {h(risk_label)}</p>
+        <p class="cs-muted">This records approval only. It does not execute the action.</p>
+      </div>
+      <div class="cs-confirm-dialog-actions">
+        <button class="cs-button secondary" value="cancel">Cancel</button>
+        <button class="cs-button" value="confirm" id="cs-confirm-action-approval">Approve action</button>
+      </div>
+    </form>
+  </dialog>
+</section>
+"""
+    else:
+        reason = (
+            "Resolve the recorded blocked or failed state before creating a new action preview."
+            if stage in {"blocked", "failed"}
+            else "Policy requires approval, but this record has no matching approval contract. Create a fresh preview before proceeding."
+            if approval_required and not approval_record_requires
+            else "This action does not require a separate approval record."
+            if not approval_required
+            else "Approval is not available for this lifecycle state."
+        )
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-action-approval-state="unavailable">
+  <div class="cs-panel-header"><div><h2>Approval</h2><p class="cs-muted">{h(reason)}</p></div>{_chip("Not available", "draft")}</div>
 </section>
 """
     activity = _record_activity_panel(
@@ -7815,49 +3817,16 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
         action_id,
         [str(action.get("audit_ref"))] if action.get("audit_ref") else [],
     )
-    summary_note = (
-        "This durable result follows the original dry-run and approval record."
-        if is_executed
-        else "This failed attempt follows the original dry-run and recorded approval state."
-        if is_failed
-        else "This blocked record preserves the original preview and recorded cause."
-        if is_blocked
-        else "This is the proposed change, not an execution result."
-    )
-    impacted_label, impacted_state = (
-        ("Execution recorded", "executed")
-        if is_executed
-        else ("Failed attempt recorded", "failed")
-        if is_failed
-        else ("Blocked", "policyBlocked")
-        if is_blocked
-        else ("Will be reviewed", "underReview")
-    )
-    proposed_change_note = (
-        "The original before/after preview is retained with the execution result."
-        if is_executed
-        else "The original before/after preview is retained with the failed attempt."
-        if is_failed
-        else "The original preview is retained with the blocked state."
-        if is_blocked
-        else "Preview the before and after state before requesting approval."
-    )
-    external_calls_note = (
-        f"The recorded result reports: {observed_call_note.lower()}."
-        if has_execution_attempt
-        else "This blocked state does not itself prove whether a provider call occurred."
-        if is_blocked
-        else "Provider writes remain simulated until approval is clear."
-    )
     return f"""
 <section
   class="cs-grid-two cs-action-workbench"
   data-product-surface="action-detail"
   data-approval-required="{str(approval_required).lower()}"
+  data-approval-eligible="{str(approval_allowed).lower()}"
   data-execution-mode="{h(execution_mode)}"
   data-real-external-http-calls="{h(displayed_external_calls)}"
   data-expected-connector-calls="{h(expected_connector_calls)}"
-  data-product-state="{h(lifecycle_stage)}"
+  data-product-state="{h(stage)}"
 >
   <div class="cs-stack">
     <header class="cs-action-hero">
@@ -7869,309 +3838,54 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
       </nav>
       <div class="cs-action-titlebar">
         <div>
-          <div class="cs-kicker">{"Action result" if is_executed else "Action failed" if is_failed else "Action blocked" if is_blocked else "Approved action" if is_approved_stage else "Action preview"}</div>
+          <div class="cs-kicker">{"Action result" if stage == "executed" else "Failed action" if stage == "failed" else "Blocked action" if stage == "blocked" else "Action preview"}</div>
           <h1>{h(action_title)}</h1>
           <div class="cs-brief-meta">
-            <span>{h(lifecycle_meta)}</span>
             <span>{h(_display_date(action))}</span>
-            <span>{h(external_meta)}</span>
+            <span>{h(risk_label)} risk</span>
+            <span>{h(label)}</span>
           </div>
-          <p class="cs-muted">{h(lifecycle_note)}</p>
         </div>
         <div class="cs-action-actions">
-          <a class="cs-button secondary" href="/actions">Back to actions</a>
-          <a class="cs-button secondary" href="/audit">Open audit trail</a>
+          <a class="cs-button secondary" href="/actions">Back to Actions</a>
+          <a class="cs-button secondary" href="/audit?record=action:{h(action_id)}">Open history</a>
         </div>
-      </div>
-      <div class="cs-brief-actions">
-        {action_controls}
       </div>
     </header>
-    {_action_approval_receipt(goal, diff, target, decision_label, approval_label, approval_status, risk_label, call_label, expected_connector_calls, planned_real_external_calls, displayed_policy_reason, lifecycle_stage=lifecycle_stage, approval_recorded=approval_recorded, observed_external_calls=observed_external_calls)}
-    {execution_panel}
-    {failure_panel}
+    {lifecycle_panel}
     {denial_panel}
-    {blocked_state_panel}
+    {approval_panel}
     <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Summary</h2>
-          <p class="cs-muted">{h(summary_note)}</p>
-        </div>
-        {_chip(label, state)}
-      </div>
-      <p>{h(goal)}</p>
-      <div class="cs-action-summary">
-        <div class="cs-action-metric"><span class="cs-meta">Trigger</span><span>Manual review</span></div>
-        <div class="cs-action-metric"><span class="cs-meta">Target</span><span>{h(target)}</span></div>
-        <div class="cs-action-metric"><span class="cs-meta">Policy</span><span>{h(decision_label)}</span></div>
-      </div>
-      <div class="cs-action-review-strip" aria-label="Action review status">
-        <div class="cs-action-review-card"><span class="cs-meta">Risk level</span><strong>{h(risk_label)}</strong></div>
-        <div class="cs-action-review-card"><span class="cs-meta">Approval</span><strong>{h(approval_label)}</strong></div>
-        <div class="cs-action-review-card"><span class="cs-meta">External calls</span><strong>{h(call_label)}</strong></div>
-        <div class="cs-action-review-card"><span class="cs-meta">Status</span><strong>{h(approval_status)}</strong></div>
-      </div>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><div><h2>Why this action</h2><p class="cs-muted">The proposal stays linked to the Claim and evidence that justify reviewing it.</p></div>{_chip("Source-linked", "searchable") if source_claim_id else _chip("Lineage missing", "insufficientEvidence")}</div>
-      <p>{h(displayed_policy_reason)}</p>
+      <div class="cs-panel-header"><div><h2>Why this action</h2><p class="cs-muted">The proposal stays linked to the Claim and evidence that justify reviewing it.</p></div></div>
+      <p>{h(policy_reason)}</p>
       <div class="cs-review-box">{source_claim_link}</div>
     </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><h2>Impacted objects</h2>{_chip(impacted_label, impacted_state)}</div>
-      <div class="cs-action-object-row">
-        <span class="cs-action-object-icon" aria-hidden="true">A</span>
-        <span>
-          <strong>{h(target)}</strong>
-          <span class="cs-meta">{h(connector_label)} / {h(call_label)}</span>
-        </span>
-        {_chip(impacted_label, impacted_state)}
-      </div>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><div><h2>Expected impact</h2><p class="cs-muted">This is the original dry-run expectation, not the observed execution receipt.</p></div>{_chip(execution_mode, state)}</div>
-      <dl class="cs-detail-grid">
-        <dt>Execution mode</dt><dd>{h(execution_mode)}</dd>
-        <dt>Workspace mode</dt><dd>{h(workspace_mode)}</dd>
-        <dt>Target</dt><dd>{h(target)}</dd>
-        <dt>Planned connector calls</dt><dd>{h(expected_connector_calls)}</dd>
-        <dt>Planned real external HTTP calls</dt><dd>{h(planned_real_external_calls)}</dd>
-      </dl>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Proposed changes</h2>
-          <p class="cs-muted">{h(proposed_change_note)}</p>
-        </div>
-        {_chip("Diff preview", "searchable")}
-      </div>
-      {_action_diff_view(diff, target, is_executed=has_execution_attempt, approval_recorded=approval_recorded)}
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>External calls</h2>
-          <p class="cs-muted">{h(external_calls_note)}</p>
-        </div>
-        {_chip(call_label, state)}
-      </div>
-      {_action_external_calls(impact, connector_label, call_label, lifecycle_stage=lifecycle_stage, approval_recorded=approval_recorded, result=execution_result, observed_external_calls=observed_external_calls)}
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header">
-        <div>
-          <h2>Policy decision</h2>
-          <p class="cs-muted">Policy is visible before approval or execution.</p>
-        </div>
-        {_chip(decision_label, "underReview")}
-      </div>
-      <div class="cs-policy-card">
-        <strong>{h(decision_label)}</strong>
-        <span>{h(displayed_policy_reason)}</span>
-      </div>
-      {_action_policy_checks(bool(source_items), approval_label, call_label, lifecycle_stage=lifecycle_stage, approval_recorded=approval_recorded)}
-      <details class="cs-audit-detail"><summary>Policy receipt</summary><p><code>{h(str(policy.get("id") or "No policy ref recorded"))}</code></p></details>
-    </section>
-    <section class="cs-panel">
-      <div class="cs-panel-header"><div><h2>Safety check</h2><p class="cs-muted">Connector mediation, credentials, and live-call evidence remain explicit.</p></div>{_chip("Local mock" if connector.get("mocked") is True else "Review boundary", "searchable")}</div>
-      <dl class="cs-detail-grid">
-        <dt>Connector mediated</dt><dd>{"Yes" if connector.get("direct_provider_access") is False else "Needs review"}</dd>
-        <dt>Credentials exposed</dt><dd>{"No" if connector.get("credentials_exposed_to_agent") is False else "Needs review"}</dd>
-        <dt>Mocked</dt><dd>{"Yes" if connector.get("mocked") is True else "No"}</dd>
-        <dt>Live writes observed</dt><dd>{h(displayed_external_calls)}</dd>
-      </dl>
-    </section>
-    {_action_route_strip(approval_label, call_label, lifecycle_stage=lifecycle_stage, approval_recorded=approval_recorded)}
   </div>
   <aside class="cs-stack cs-action-rail">
-    <section class="cs-panel flat">
-      <h2 class="cs-section-title">{"Risk and lifecycle" if is_failed or is_blocked else "Risk and approval"}</h2>
-      <dl class="cs-detail-grid">
-        <dt>Risk level</dt><dd>{h(risk_label)}</dd>
-        <dt>Approval</dt><dd>{h(approval_label)}</dd>
-        <dt>Status</dt><dd>{h(approval_status)}</dd>
-      </dl>
-      <div class="cs-review-box">
-        {rail_control}
-        <div class="cs-approval-note">
-          <strong>{h(rail_reason_label)}</strong>
-          <span>{h(rail_reason)}</span>
-        </div>
-        <p class="cs-muted">{h(rail_note)}</p>
-      </div>
-    </section>
-    <section class="cs-panel flat">
-      <h2 class="cs-section-title">Approval history</h2>
-      {approval_history}
-    </section>
     <section class="cs-panel flat">
       <h2 class="cs-section-title">Sources</h2>
       {source_list}
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Auditability</h2>
-      <p class="cs-muted">Dry-run, policy, approval, and execution records remain separately inspectable.</p>
+      <h2 class="cs-section-title">Policy and boundary</h2>
+      <dl class="cs-detail-grid">
+        <dt>Decision</dt><dd>{h(decision_label)}</dd>
+        <dt>Workspace mode</dt><dd>{h(workspace_mode)}</dd>
+        <dt>Planned connector calls</dt><dd>{h(str(expected_connector_calls))}</dd>
+        <dt>Planned external calls</dt><dd>{h(str(planned_external_calls))}</dd>
+      </dl>
+      <details class="cs-audit-detail">
+        <summary>Technical boundary</summary>
+        <dl class="cs-detail-grid">
+          <dt>Connector mediated</dt><dd>{"Yes" if connector.get("direct_provider_access") is False else "Needs review"}</dd>
+          <dt>Credentials exposed</dt><dd>{"No" if connector.get("credentials_exposed_to_agent") is False else "Needs review"}</dd>
+          <dt>Mocked</dt><dd>{"Yes" if connector.get("mocked") is True else "No"}</dd>
+          <dt>Observed external calls</dt><dd>{h(str(displayed_external_calls))}</dd>
+        </dl>
+      </details>
     </section>
     {activity}
   </aside>
-</section>
-"""
-
-
-def _action_approval_receipt(
-    goal: str,
-    diff: dict[str, Any],
-    target: str,
-    decision_label: str,
-    approval_label: str,
-    approval_status: str,
-    risk_label: str,
-    call_label: str,
-    expected_connector_calls: int,
-    planned_real_external_calls: int,
-    policy_reason: str,
-    *,
-    lifecycle_stage: str = "draft",
-    approval_recorded: bool = False,
-    observed_external_calls: int | None = None,
-) -> str:
-    before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
-    after = _plain_runtime_text(diff.get("after") or "No provider send has been performed.")
-    has_execution_attempt = lifecycle_stage in {"executed", "failed"}
-    call_note = (
-        "The execution receipt does not record an external HTTP call count."
-        if has_execution_attempt and observed_external_calls is None
-        else "The execution receipt records no external HTTP calls."
-        if has_execution_attempt and observed_external_calls == 0
-        else f"{observed_external_calls} external HTTP call{'s were' if observed_external_calls != 1 else ' was'} recorded; inspect the audit receipt before any retry."
-        if has_execution_attempt
-        else "The blocked record does not include an external HTTP call count."
-        if lifecycle_stage == "blocked" and observed_external_calls is None
-        else f"The blocked record reports {observed_external_calls} external HTTP call{'s' if observed_external_calls != 1 else ''}."
-        if lifecycle_stage == "blocked"
-        else "No provider send has run in this local workspace."
-        if planned_real_external_calls == 0
-        else "A provider send still requires the approval record and audit trail."
-    )
-    receipt_title = "Action lifecycle receipt" if lifecycle_stage in {"executed", "failed", "blocked"} else "Dry-run approval receipt"
-    receipt_note = (
-        "The original preview, policy, approval, and durable execution result remain visible together."
-        if lifecycle_stage == "executed"
-        else "The original preview, approval state, and failed execution receipt remain visible together."
-        if lifecycle_stage == "failed"
-        else "The original preview and recorded block remain visible together."
-        if lifecycle_stage == "blocked"
-        else "Preview only. Impact, proposed change, provider call plan, policy, and approval gate are visible before execution."
-    )
-    receipt_chip = (
-        _chip("Executed", "executed")
-        if lifecycle_stage == "executed"
-        else _chip("Failed", "failed")
-        if lifecycle_stage == "failed"
-        else _chip("Blocked", "policyBlocked")
-        if lifecycle_stage == "blocked"
-        else _chip("Approved", "approved")
-        if approval_recorded
-        else _chip("Dry-run", "draft")
-    )
-    call_heading = "External call evidence" if has_execution_attempt else "External call plan"
-    return f"""
-<section class="cs-action-receipt-panel" aria-label="{h(receipt_title)}">
-  <div class="cs-panel-header">
-    <div>
-      <h2>{h(receipt_title)}</h2>
-      <p class="cs-muted">{h(receipt_note)}</p>
-    </div>
-    {receipt_chip}
-  </div>
-  <div class="cs-action-receipt-grid">
-    <div class="cs-action-receipt-card">
-      <span class="cs-meta">Proposed change</span>
-      <strong>{h(goal)}</strong>
-      <p>Target: {h(target)}</p>
-    </div>
-    <div class="cs-action-receipt-card">
-      <span class="cs-meta">Proposed change preview</span>
-      <div class="cs-action-mini-diff">
-        <div><span class="cs-meta">Before</span><strong>{h(before)}</strong></div>
-        <div><span class="cs-meta">After</span><strong>{h(after)}</strong></div>
-      </div>
-    </div>
-    <div class="cs-action-receipt-card">
-      <span class="cs-meta">{h(call_heading)}</span>
-      <strong>{h(expected_connector_calls)} connector call{"s" if expected_connector_calls != 1 else ""}</strong>
-      <p>{h(call_label)}. {h(call_note)}</p>
-    </div>
-    <div class="cs-action-receipt-card">
-      <span class="cs-meta">Approval gate</span>
-      <strong>{h(approval_label)}</strong>
-      <p>{h(risk_label)} risk / {h(approval_status)}. Policy: {h(decision_label)}.</p>
-    </div>
-  </div>
-  <p class="cs-muted">Policy reason: {h(policy_reason)}</p>
-</section>
-"""
-
-
-def _action_route_strip(
-    approval_label: str,
-    call_label: str,
-    *,
-    lifecycle_stage: str = "draft",
-    approval_recorded: bool = False,
-) -> str:
-    if lifecycle_stage == "executed":
-        steps = [
-            ("1", "Dry-run recorded", "The original proposed change remains inspectable.", "searchable", False),
-            ("2", "Impact reviewed", "The affected object and before/after state remain visible.", "saved", False),
-            ("3", approval_label, "Owner approval is recorded separately from execution.", "approved", False),
-            ("4", "Execution and audit", f"{call_label}; the durable result is inspectable.", "executed", True),
-        ]
-    elif lifecycle_stage == "failed":
-        steps = [
-            ("1", "Dry-run retained", "The original proposed change remains inspectable.", "searchable", False),
-            ("2", approval_label, "The approval record remains separate from execution." if approval_recorded else "No approval is recorded.", "approved" if approval_recorded else "underReview", False),
-            ("3", "Failed attempt", f"{call_label}; review the execution receipt.", "failed", True),
-            ("4", "Recovery and audit", "Inspect the failure and audit receipts before retrying.", "underReview", False),
-        ]
-    elif lifecycle_stage == "blocked":
-        steps = [
-            ("1", "Dry-run retained", "The original proposed change remains inspectable.", "searchable", False),
-            ("2", approval_label, "Approval remains separately recorded." if approval_recorded else "No approval is recorded.", "approved" if approval_recorded else "underReview", False),
-            ("3", "Blocked state", "Resolve the recorded cause before creating a new preview.", "policyBlocked", True),
-            ("4", "Block receipt", "The block and recovery path remain inspectable.", "underReview", False),
-        ]
-    else:
-        steps = [
-            ("1", "Dry-run sequence", "Preview the proposed change before any provider write.", "searchable", True),
-            ("2", "Impact review", "Check the affected object and the before/after state.", "underReview", False),
-            (
-                "3",
-                approval_label,
-                "Owner approval is recorded; execution is still pending." if approval_recorded else "Approval stays explicit before execution can appear.",
-                "approved" if approval_recorded else "underReview",
-                approval_recorded,
-            ),
-            ("4", "Audit trail", f"{call_label}; records stay inspectable.", "draft", False),
-        ]
-    cards = "".join(
-        f"""
-<div class="cs-action-route-step{" is-current" if active else ""}">
-  <div class="cs-action-route-top">
-    <span class="cs-action-route-index" aria-hidden="true">{h(index)}</span>
-    <strong>{h(title)}</strong>
-  </div>
-  <p>{h(description)}</p>
-  {_chip(title if index == "1" else index, state)}
-</div>
-"""
-        for index, title, description, state, active in steps
-    )
-    return f"""
-<section class="cs-action-route-strip" aria-label="{'Action lifecycle' if lifecycle_stage in {'executed', 'failed', 'blocked'} else 'Dry-run sequence'}">
-  {cards}
 </section>
 """
 
@@ -8205,210 +3919,11 @@ def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_appr
 """
 
 
-def _action_diff_view(
-    diff: dict[str, Any],
-    target: str,
-    *,
-    is_executed: bool = False,
-    approval_recorded: bool = False,
-) -> str:
-    before = _plain_runtime_text(diff.get("before") or "No side effect applied.")
-    after = _plain_runtime_text(diff.get("after") or "No external write has been performed.")
-    return f"""
-<div class="cs-action-preview-frame">
-  <div class="cs-action-preview-meta">
-    <span>Target: {h(target)}</span>
-    <span>{"Original dry-run preview retained" if is_executed or approval_recorded else "Before approval: preview only"}</span>
-  </div>
-<div class="cs-diff-view" aria-label="Dry-run diff preview">
-  <div class="cs-diff-line before"><span class="cs-meta">Before</span><span>{h(before)}</span></div>
-  <div class="cs-diff-line after"><span class="cs-meta">After</span><span>{h(after)}</span></div>
-</div>
-  <p class="cs-meta">{"Execution is recorded separately from this original preview." if is_executed else "Preview shown. Exact downstream formatting may vary after approval."}</p>
-</div>
-"""
-
-
-def _action_external_calls(
-    impact: dict[str, Any],
-    connector_label: str,
-    call_label: str,
-    *,
-    lifecycle_stage: str = "draft",
-    approval_recorded: bool = False,
-    result: dict[str, Any] | None = None,
-    observed_external_calls: int | None = None,
-) -> str:
-    expected = int(impact.get("expected_connector_calls", 0) or 0)
-    target = str(impact.get("target") or "Local preview only.")
-    result = result or {}
-    if lifecycle_stage in {"executed", "failed"}:
-        boundary = _plain_runtime_text(result.get("side_effect_boundary") or "Not recorded")
-        observed = "Not recorded" if observed_external_calls is None else str(observed_external_calls)
-        result_state = "executed" if lifecycle_stage == "executed" else "failed"
-        result_label = "Execution recorded" if lifecycle_stage == "executed" else "Failed attempt recorded"
-        return f"""
-<div class="cs-call-row">
-  <div>
-    <strong>{h(call_label)}</strong>
-    <p class="cs-muted">The execution receipt records the boundary and observed call count; missing telemetry is not treated as zero.</p>
-  </div>
-  {_chip(result_label, result_state)}
-</div>
-<div class="cs-call-facts" aria-label="Call result">
-  <div class="cs-call-fact"><strong>Planned connector calls</strong><span>{h(expected)}</span></div>
-  <div class="cs-call-fact"><strong>Recorded HTTP calls</strong><span>{h(observed)}</span></div>
-  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(boundary)}</span></div>
-</div>
-"""
-    if lifecycle_stage == "blocked":
-        observed = "Not recorded" if observed_external_calls is None else str(observed_external_calls)
-        return f"""
-<div class="cs-call-row">
-  <div>
-    <strong>{h(call_label)}</strong>
-    <p class="cs-muted">The blocked state is recorded separately from any provider-call evidence.</p>
-  </div>
-  {_chip("Blocked", "policyBlocked")}
-</div>
-<div class="cs-call-facts" aria-label="Call result">
-  <div class="cs-call-fact"><strong>Planned connector calls</strong><span>{h(expected)}</span></div>
-  <div class="cs-call-fact"><strong>Recorded HTTP calls</strong><span>{h(observed)}</span></div>
-  <div class="cs-call-fact"><strong>Boundary</strong><span>Inspect block receipt</span></div>
-</div>
-"""
-    if approval_recorded:
-        return f"""
-<div class="cs-call-row">
-  <div>
-    <strong>{h(connector_label)}</strong>
-    <p class="cs-muted">The connector plan is approved but no execution result is recorded yet for {h(target)}.</p>
-  </div>
-  {_chip("Execution pending", "underReview")}
-</div>
-<div class="cs-call-facts" aria-label="Call preview">
-  <div class="cs-call-fact"><strong>Provider calls</strong><span>{h(expected)} approved</span></div>
-  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
-  <div class="cs-call-fact"><strong>Boundary</strong><span>Governed execution pending</span></div>
-</div>
-"""
-    if expected <= 0:
-        return f"""
-<div class="cs-call-row">
-  <div>
-    <strong>No external connector call planned</strong>
-    <p class="cs-muted">This preview records the policy and audit envelope without a provider send.</p>
-  </div>
-  {_chip(call_label, "draft")}
-</div>
-<div class="cs-call-facts" aria-label="Call preview">
-  <div class="cs-call-fact"><strong>Provider calls</strong><span>0 planned</span></div>
-  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
-  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(call_label)}</span></div>
-</div>
-"""
-    return f"""
-<div class="cs-call-row">
-  <div>
-    <strong>{h(connector_label)}</strong>
-    <p class="cs-muted">Would create or update {h(target)} after approval. Simulated in local mode.</p>
-  </div>
-  {_chip(call_label, "draft")}
-</div>
-<div class="cs-call-facts" aria-label="Call preview">
-  <div class="cs-call-fact"><strong>Provider calls</strong><span>{h(expected)} planned</span></div>
-  <div class="cs-call-fact"><strong>Target</strong><span>{h(target)}</span></div>
-  <div class="cs-call-fact"><strong>Boundary</strong><span>{h(call_label)}</span></div>
-</div>
-"""
-
-
-def _action_policy_checks(
-    has_sources: bool,
-    approval_label: str,
-    call_label: str,
-    *,
-    lifecycle_stage: str = "draft",
-    approval_recorded: bool = False,
-) -> str:
-    source_state = "Source visible" if has_sources else "Source not linked"
-    source_note = "At least one local source is visible near this action." if has_sources else "Open sources before requesting approval."
-    checks = [
-        ("1", source_state, source_note, "searchable" if has_sources else "underReview"),
-        (
-            "2",
-            approval_label,
-            "Owner approval is recorded." if approval_recorded else "Request approval before this preview can move further.",
-            "approved" if approval_recorded else "underReview",
-        ),
-        (
-            "3",
-            call_label,
-            "The recorded execution remains inspectable through the governed Action path."
-            if lifecycle_stage == "executed"
-            else "The failed attempt and its call evidence remain inspectable."
-            if lifecycle_stage == "failed"
-            else "The blocked state remains inspectable before another preview."
-            if lifecycle_stage == "blocked"
-            else "External effects are still bounded by the action approval path.",
-            "executed"
-            if lifecycle_stage == "executed"
-            else "failed"
-            if lifecycle_stage == "failed"
-            else "policyBlocked"
-            if lifecycle_stage == "blocked"
-            else "draft",
-        ),
-    ]
-    rows = "".join(
-        f"""
-<div class="cs-policy-check">
-  <span class="cs-policy-check-mark" aria-hidden="true">{h(index)}</span>
-  <div>
-    <strong>{h(title)}</strong>
-    <p class="cs-muted">{h(note)}</p>
-  </div>
-  {_chip(title, state)}
-</div>
-"""
-        for index, title, note, state in checks
-    )
-    return f"""
-<div class="cs-policy-checks" aria-label="Policy checkpoints">
-  {rows}
-</div>
-"""
-
-
-def _source_links(ctx: dict[str, Any], refs: list[str]) -> str:
-    return _source_links_from_items(_source_items_from_refs(ctx, refs))
-
-
 def _source_links_from_items(items: list[dict[str, str]]) -> str:
     if not items:
         return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
     rows = "".join(_source_card(item) for item in items[:8])
     return f'<div class="cs-list">{rows}</div>'
-
-
-def _evidence_picker_from_items(items: list[dict[str, str]]) -> str:
-    if not items:
-        return '<div class="cs-empty">No linked source is visible in this workspace.</div>'
-    rows = []
-    for item in items[:6]:
-        rows.append(
-            f"""
-<a class="cs-evidence-row" href="{h(item["href"])}">
-  <span class="cs-checkmark" aria-hidden="true">S</span>
-  <span>
-    <strong>{h(item["title"])}</strong>
-    <span class="cs-meta">{h(item["label"])} / {h(item["date"])} / {h(item["fingerprint"])}</span>
-    <span class="cs-muted">{h(_truncate(item["snippet"], 120))}</span>
-  </span>
-</a>
-"""
-        )
-    return f'<div class="cs-evidence-picker" aria-label="Supporting source links">{"".join(rows)}</div>'
 
 
 def _source_card(item: dict[str, str]) -> str:
@@ -8421,7 +3936,7 @@ def _source_card(item: dict[str, str]) -> str:
   <p><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
   <div class="cs-row">
     <a class="cs-button secondary" href="{h(item["href"])}">Inspect source</a>
-    <a class="cs-button ghost" href="/audit">Audit trail</a>
+    <a class="cs-button ghost" href="/audit">History</a>
     {_chip("Searchable", "searchable")}
   </div>
   <div class="cs-provenance" aria-label="Full provenance">
@@ -8533,7 +4048,7 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
     record = record or {}
     brief_id = str(record.get("brief_id") or "")
     audit_refs = [str(ref) for ref in record.get("audit_refs", []) if isinstance(ref, str)]
-    receipt_ref = audit_refs[0] if audit_refs else "No creation audit ref recorded"
+    audit_ref = audit_refs[0] if audit_refs else "No creation audit reference recorded"
     items: list[dict[str, str]] = []
     unresolved: list[str] = []
     for ref in refs:
@@ -8566,11 +4081,11 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
       <div><span class="cs-meta">Saved</span><strong>{h(item["date"])}</strong></div>
       <div><span class="cs-meta">Fingerprint</span><strong>{h(item["fingerprint"])}</strong></div>
       <div><span class="cs-meta">Related object</span><strong>{h(f'Brief {brief_id}' if brief_id else 'Brief draft')}</strong></div>
-      <div><span class="cs-meta">Audit receipt</span><strong>{h(receipt_ref)}</strong></div>
+      <div><span class="cs-meta">Audit reference</span><strong>{h(audit_ref)}</strong></div>
     </div>
     <div class="cs-citation-actions">
       <a class="cs-button secondary" href="{h(item["href"])}">Open source</a>
-      <a class="cs-button ghost" href="/audit">Audit trail</a>
+      <a class="cs-button ghost" href="/audit">History</a>
     </div>
   </div>
 </details>
@@ -8898,9 +4413,18 @@ def _home_script(scope: dict[str, Any]) -> str:
   const askButton = document.getElementById("cs-ask-submit-button");
   const claimButton = document.getElementById("cs-create-claim-button");
   const claimStatus = document.getElementById("cs-claim-create-status");
+  const approveClaimButton = document.getElementById("cs-approve-claim-button");
+  const approveClaimDialog = document.getElementById("cs-claim-approval-dialog");
+  const confirmClaimApproval = document.getElementById("cs-confirm-claim-approval");
+  const claimApprovalStatus = document.getElementById("cs-claim-approval-status");
+  const approveActionButton = document.getElementById("cs-approve-action-button");
+  const approveActionDialog = document.getElementById("cs-action-approval-dialog");
+  const confirmActionApproval = document.getElementById("cs-confirm-action-approval");
+  const actionApprovalStatus = document.getElementById("cs-action-approval-status");
   function setStatus(node, message, state) {
     if (!node) return;
     const status = state || "idle";
+    node.hidden = false;
     node.textContent = message;
     node.dataset.state = status;
     node.classList.remove("is-idle", "is-loading", "is-success", "is-error");
@@ -9003,6 +4527,65 @@ def _home_script(scope: dict[str, Any]) -> str:
       } catch (error) {
         setStatus(claimStatus, error.message, "error");
         claimButton.disabled = false;
+      }
+    });
+  }
+  if (approveClaimButton && approveClaimDialog) {
+    approveClaimButton.addEventListener("click", function () {
+      if (typeof approveClaimDialog.showModal === "function") approveClaimDialog.showModal();
+      else approveClaimDialog.setAttribute("open", "");
+    });
+  }
+  if (approveClaimButton && confirmClaimApproval) {
+    confirmClaimApproval.addEventListener("click", async function (event) {
+      event.preventDefault();
+      const claimId = approveClaimButton.getAttribute("data-claim-id") || "";
+      if (!claimId) {
+        setStatus(claimApprovalStatus, "Claim approval is unavailable because the record ID is missing.", "error");
+        return;
+      }
+      if (approveClaimDialog && typeof approveClaimDialog.close === "function") approveClaimDialog.close();
+      approveClaimButton.disabled = true;
+      confirmClaimApproval.disabled = true;
+      setStatus(claimApprovalStatus, "Recording approval...", "loading");
+      try {
+        await postJson("/claims/" + encodeURIComponent(claimId) + "/approve", {});
+        setStatus(claimApprovalStatus, "Approval recorded. Reloading Claim...", "success");
+        window.location.href = scopedUrl("/claims/" + encodeURIComponent(claimId) + "?view=html");
+      } catch (error) {
+        setStatus(claimApprovalStatus, error.message, "error");
+        approveClaimButton.disabled = false;
+        confirmClaimApproval.disabled = false;
+      }
+    });
+  }
+  if (approveActionButton && approveActionDialog) {
+    approveActionButton.addEventListener("click", function () {
+      if (typeof approveActionDialog.showModal === "function") approveActionDialog.showModal();
+      else approveActionDialog.setAttribute("open", "");
+    });
+  }
+  if (approveActionButton && confirmActionApproval) {
+    confirmActionApproval.addEventListener("click", async function (event) {
+      event.preventDefault();
+      const actionId = approveActionButton.getAttribute("data-action-id") || "";
+      const approver = approveActionButton.getAttribute("data-approver") || scope.owner_id;
+      if (!actionId) {
+        setStatus(actionApprovalStatus, "Action approval is unavailable because the record ID is missing.", "error");
+        return;
+      }
+      if (approveActionDialog && typeof approveActionDialog.close === "function") approveActionDialog.close();
+      approveActionButton.disabled = true;
+      confirmActionApproval.disabled = true;
+      setStatus(actionApprovalStatus, "Recording approval...", "loading");
+      try {
+        await postJson("/actions/" + encodeURIComponent(actionId) + "/approve", {approver});
+        setStatus(actionApprovalStatus, "Approval recorded. Reloading action...", "success");
+        window.location.href = scopedUrl("/actions/" + encodeURIComponent(actionId) + "?view=html");
+      } catch (error) {
+        setStatus(actionApprovalStatus, error.message, "error");
+        approveActionButton.disabled = false;
+        confirmActionApproval.disabled = false;
       }
     });
   }
