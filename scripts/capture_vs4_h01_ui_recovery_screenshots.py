@@ -45,43 +45,117 @@ FORBIDDEN_PRODUCT_RE = re.compile(
 )
 
 DESKTOP_ROUTES = [
-    {"name": "home-desktop", "route": "/", "surface": "home", "required": ["Evidence-first workspace", "Global search", "Search across saved sources, claims, briefs, and action drafts", "Local workspace", "Receipts required", "Drop anything, or ask what we know", "Drag and drop files or paste notes here", "Paste text source", "Browse files", "Ask the workspace", "Daily loop handoff", "Original source kept", "Draft from saved sources", "Receipts before decisions", "Work leaves a trail", "Recent items", "Knowledge states", "Suggested next steps", "Recent activity"]},
-    {"name": "search-desktop", "route": "/search?q=vendor%20renewal", "surface": "search", "required": ["Workspace search", "Search the workspace", "Current search context", "Order: keyword match", "Search mode: local keyword", "Receipt-first results", "Local record receipt", "Open receipt", "What we found", "Suggested follow-ups"]},
-    {"name": "artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Saved sources", "Collection summary", "Source register"]},
-    {"name": "briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Brief workspace", "Decision queue", "Brief reading queue", "Review lanes", "visible queue item", "Brief queue", "Source coverage", "Use next", "Brief posture"]},
-    {"name": "claims-desktop", "route": "/claims", "surface": "claims", "required": ["Claims that need source support", "Decision queue", "Claim review lanes", "visible queue item", "Source-support lane", "Evidence-backed locked", "Claim review queue", "Review posture"]},
-    {"name": "actions-desktop", "route": "/actions", "surface": "actions", "required": ["Action records", "Decision queue", "Action approval lanes", "visible queue item", "Approval lane", "Action preview queue", "Dry-run posture"]},
-    {"name": "inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["Work that needs attention", "Triage summary", "open review items across one queue", "Filters", "Showing 3 open items", "1-3 of 3 items", "Owner", "Linked sources", "Next actions", "Selected item", "Review sources", "Open audit trail"]},
-    {"name": "audit-desktop", "route": "/audit", "surface": "audit", "required": ["Audit receipt workspace", "Activity trail", "Audit status", "Latest readable receipt", "Read activity receipts", "Receipt summary", "Audit lifecycle", "Activity receipts", "Readable receipts", "Event stream", "Audit posture", "Audit integrity checks", "Integrity chain", "Scope and recovery", "Raw event detail"]},
+    {
+        "name": "home-desktop",
+        "route": "/",
+        "surface": "home",
+        "required_text": ["Drop anything, or ask what we know", "Drop a file or paste notes", "Ask the workspace", "Recent items"],
+        "required_selectors": [
+            "[data-product-shell='cornerstone'][data-workspace-id]",
+            ".cs-workspace-switcher[aria-label='Open local workspace settings']",
+            "form[role='search'][aria-label='Global search']",
+            "#cs-drop-form #cs-drop-text",
+            "#cs-drop-form #cs-save-source-button",
+            "#cs-ask-form #cs-ask-input",
+            "#cs-ask-form #cs-ask-submit-button",
+        ],
+    },
+    {
+        "name": "search-desktop",
+        "route": "/search?q=vendor%20renewal",
+        "surface": "search",
+        "required_text": ["Results for", "Keyword match"],
+        "required_selectors": [
+            "[data-product-surface='search']",
+            ".cs-search-tabs[aria-label='Filter results by record type']",
+            ".cs-result-list[aria-live='polite']",
+            ".cs-result-row",
+        ],
+    },
+    {
+        "name": "artifacts-desktop",
+        "route": "/artifacts",
+        "surface": "artifacts",
+        "required_text": ["Saved sources", "Collection summary", "Untrusted until checked"],
+        "required_selectors": ["[data-product-surface='artifacts']", ".cs-collection-workbench", ".cs-collection-list"],
+    },
+    {
+        "name": "briefs-desktop",
+        "route": "/briefs",
+        "surface": "briefs",
+        "required_text": ["Brief workspace", "Source coverage", "Use next"],
+        "required_selectors": ["[data-product-surface='briefs']", ".cs-collection-workbench", ".cs-collection-list"],
+    },
+    {
+        "name": "claims-desktop",
+        "route": "/claims",
+        "surface": "claims",
+        "required_text": ["Claims that need source support", "Review posture", "Trust ladder"],
+        "required_selectors": ["[data-product-surface='claims']", ".cs-collection-workbench", ".cs-collection-list"],
+    },
+    {
+        "name": "actions-desktop",
+        "route": "/actions",
+        "surface": "actions",
+        "required_text": ["Action records", "Dry-run posture", "Action safeguards"],
+        "required_selectors": ["[data-product-surface='actions']", ".cs-collection-workbench", ".cs-collection-list"],
+    },
+    {
+        "name": "inbox-desktop",
+        "route": "/inbox",
+        "surface": "inbox",
+        "required_text": ["Work that needs attention", "Selected item", "Continue review", "Related journey"],
+        "required_selectors": [
+            "[data-product-surface='inbox'][data-inbox-lane][data-selected-item]",
+            ".cs-inbox-tabs[aria-label='Review lanes']",
+            ".cs-inbox-table[role='list']",
+            "#selected-work",
+        ],
+    },
+    {
+        "name": "audit-desktop",
+        "route": "/audit",
+        "surface": "audit",
+        "required_text": ["History", "Workspace history", "Ledger integrity", "Apply filters"],
+        "required_selectors": [
+            "[data-product-surface='audit'][data-audit-integrity-status]",
+            "form.cs-audit-filters[aria-label='Filter history']",
+            "form.cs-audit-filters [name='record']",
+            "form.cs-audit-filters [name='lifecycle']",
+            ".cs-audit-list",
+        ],
+    },
     {
         "name": "owner-admin-desktop",
         "route": "/review",
         "surface": "owner-review",
-        "required": ["Connector governance console", "Connected source posture", "Activity / scope", "Policy controls", "Access roles", "Namespace settings", "Admin containment", "Recent connector activity"],
+        "required_text": ["Connector governance console", "Connected source posture", "Policy controls", "Namespace settings", "Admin containment"],
+        "required_selectors": ["[data-product-surface='owner-review']", ".cs-owner-overview[aria-label='Admin containment']"],
         "allow_internal_terms": True,
     },
     {
         "name": "reference-gallery-desktop",
         "route": "/review/reference-images",
         "surface": "owner-review",
-        "required": ["Reference image gallery", "Implementation boundary", "Vendor object detail", "Operations inbox", "Home workspace", "Action dry-run"],
+        "required_text": ["Reference image gallery", "Implementation boundary"],
+        "required_selectors": ["[data-product-surface='owner-review']", ".cs-reference-grid[aria-label='CornerStone UI reference images']"],
         "allow_internal_terms": True,
     },
 ]
 
 DAY_ZERO_ROUTES = [
-    {"name": "day-zero-search-desktop", "route": "/search", "surface": "search", "required": ["Search starts with saved work", "Save a source", "Open artifacts", "Startup path", "First receipts"]},
-    {"name": "day-zero-artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required": ["Start with a source", "Go to Home", "Search workspace", "Startup path", "First receipts"]},
-    {"name": "day-zero-briefs-desktop", "route": "/briefs", "surface": "briefs", "required": ["Create the first brief", "Save a source", "Open artifacts", "Startup path", "First receipts"]},
-    {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required": ["No claims need review", "Open briefs", "Check sources", "Startup path", "First receipts"]},
-    {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required": ["No action previews yet", "Open claims", "Open briefs", "Startup path", "First receipts"]},
-    {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required": ["No work waiting", "No selected work", "Start from Home", "Startup path", "First receipts"]},
-    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required": ["No activity recorded yet", "Start from Home", "Open artifacts", "Startup path", "First receipts"]},
+    {"name": "day-zero-search-desktop", "route": "/search", "surface": "search", "required_text": ["Search starts with saved work", "Save a source", "Open artifacts", "Startup path", "What will appear"]},
+    {"name": "day-zero-artifacts-desktop", "route": "/artifacts", "surface": "artifacts", "required_text": ["Start with a source", "Go to Home", "Search workspace", "Startup path", "What will appear"]},
+    {"name": "day-zero-briefs-desktop", "route": "/briefs", "surface": "briefs", "required_text": ["Create the first brief", "Save a source", "Open artifacts", "Startup path", "What will appear"]},
+    {"name": "day-zero-claims-desktop", "route": "/claims", "surface": "claims", "required_text": ["No claims need review", "Open briefs", "Check sources", "Startup path", "What will appear"]},
+    {"name": "day-zero-actions-desktop", "route": "/actions", "surface": "actions", "required_text": ["No action previews yet", "Open claims", "Open briefs", "Startup path", "What will appear"]},
+    {"name": "day-zero-inbox-desktop", "route": "/inbox", "surface": "inbox", "required_text": ["No work waiting", "No selected work", "Start from Home", "Startup path", "What will appear"]},
+    {"name": "day-zero-audit-desktop", "route": "/audit", "surface": "audit", "required_text": ["History ready", "No activity recorded yet", "Start from Home", "Open saved sources", "Ledger integrity"]},
 ]
 
 NOT_FOUND_ROUTES = [
-    {"name": "not-found-page-desktop", "route": "/missing-product-route", "surface": "not-found", "required": ["We could not find that page", "Search workspace", "Useful places"]},
-    {"name": "not-found-source-desktop", "route": "/artifacts/missing-source?view=html", "surface": "not-found", "required": ["This source is not available", "Search workspace", "Brief workspace"]},
+    {"name": "not-found-page-desktop", "route": "/missing-product-route", "surface": "not-found", "required_text": ["We could not find that page", "Search workspace", "Useful places"]},
+    {"name": "not-found-source-desktop", "route": "/artifacts/missing-source?view=html", "surface": "not-found", "required_text": ["This source is not available", "Search workspace", "Brief workspace"]},
 ]
 
 INTERACTION_ROUTES = [
@@ -89,22 +163,62 @@ INTERACTION_ROUTES = [
         "name": "home-validation-desktop",
         "route": "/",
         "surface": "home",
-        "required": ["Paste text before saving.", "Enter a question first."],
+        "required_text": ["Paste text before saving.", "Enter a question first."],
         "interaction": "home-validation",
     },
 ]
 
 DETAIL_ROUTES = [
-    {"name": "artifact-detail-desktop", "kind": "artifacts", "id_key": "artifact_id", "surface": "artifact-detail", "required": ["Source inspection workspace", "Detail path", "Back to saved sources", "Original source", "Original source document viewer", "Original artifact preview", "Source outline", "Source metadata", "Source reading preview", "Original source excerpt", "Artifact inspection summary", "Evidence links", "Preview mode", "Plain text preview", "Original content primary", "Details", "Keywords", "Source state", "Frequent local terms", "Provenance", "Open audit trail"]},
-    {"name": "brief-detail-desktop", "kind": "briefs", "id_key": "brief_id", "surface": "brief-detail", "required": ["Brief reading workspace", "Detail path", "Back to briefs", "Open audit trail", "Receipt summary", "Brief answer and receipt", "Decision snapshot", "What we found", "Drafted findings", "Citation receipt", "Label state", "Findings with citations", "What this brief cannot confirm", "Suggested next steps", "Sources used", "Citation disclosure", "Source snippet", "Full provenance", "Audit trail", "Use this brief"]},
+    {
+        "name": "artifact-detail-desktop",
+        "kind": "artifacts",
+        "id_key": "artifact_id",
+        "surface": "artifact-detail",
+        "required_text": ["Source text", "Source details", "Frequent local terms", "Linked work", "Open source history"],
+        "required_selectors": [
+            "[data-product-surface='artifact-detail'][aria-label='Source inspection workspace']",
+            "[aria-label='Original source document viewer']",
+            "#source-text .cs-source-text",
+            "#keywords",
+        ],
+    },
+    {
+        "name": "brief-detail-desktop",
+        "kind": "briefs",
+        "id_key": "brief_id",
+        "surface": "brief-detail",
+        "required_text": ["What we know", "Findings with citations", "Sources used", "Citation checks", "Provenance"],
+        "required_selectors": [
+            "[data-product-surface='brief-detail'][data-citation-check-refs-count][data-resolved-citation-count]",
+            "#brief-answer-title",
+            "#citation-trail",
+            "details.cs-citation-checks",
+        ],
+    },
     {
         "name": "claim-detail-desktop",
         "kind": "claims",
         "id_key": "claim_id",
         "surface": "claim-detail",
-        "required": ["Detail path", "Back to claims", "Open inbox", "Claim draft workspace", "Evidence-to-decision path", "Claim review summary", "Claim statement", "Supporting evidence", "Review controls", "Decision gate", "Source support", "Evidence-backed locked", "Citation checks", "Impacted objects", "Related frameworks", "Saved locally"],
+        "required_text": ["Decision statement", "Supporting evidence", "Authority", "Brief lineage and gaps"],
+        "required_selectors": [
+            "[data-product-surface='claim-detail'][data-source-support-attached][data-evidence-backed-earned][data-approval-eligible]",
+            ".cs-claim-statement",
+            "[data-claim-approval-state]",
+        ],
     },
-    {"name": "action-detail-desktop", "kind": "actions", "id_key": "action_id", "surface": "action-detail", "required": ["Detail path", "Action preview", "Dry-run approval receipt", "Proposed change preview", "External call plan", "Approval gate", "Action review status", "Summary", "Impacted objects", "Dry-run sequence", "Proposed changes", "External calls", "Call preview", "Policy decision", "Policy checkpoints", "Risk and approval", "Request approval", "Approval history"]},
+    {
+        "name": "action-detail-desktop",
+        "kind": "actions",
+        "id_key": "action_id",
+        "surface": "action-detail",
+        "required_text": ["Action preview", "Proposed change", "Why this action", "Policy and boundary"],
+        "required_selectors": [
+            "[data-product-surface='action-detail'][data-execution-mode][data-real-external-http-calls]",
+            "[data-action-preview='true']",
+            "[data-action-approval-state]",
+        ],
+    },
 ]
 
 MOBILE_ROUTE_NAMES = {
@@ -260,6 +374,25 @@ def json_payload(response: dict[str, Any]) -> dict[str, Any]:
     return json.loads(str(response.get("body") or "{}"))
 
 
+def source_revision() -> dict[str, Any]:
+    def git(*args: str) -> str:
+        result = subprocess.run(
+            ["git", *args],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return result.stdout.strip()
+
+    status_lines = [line for line in git("status", "--porcelain=v1").splitlines() if line]
+    return {
+        "git_sha": git("rev-parse", "HEAD"),
+        "dirty": bool(status_lines),
+        "changed_path_count": len(status_lines),
+    }
+
+
 def create_fixture_stack(base_url: str) -> dict[str, str]:
     scope = dict(DEFAULT_SCOPE)
     source_text = (
@@ -406,6 +539,7 @@ def capture_page(
     exit_code: int | None = None
     layout: dict[str, Any] = {}
     interaction: dict[str, Any] = {}
+    selector_presence: dict[str, bool] = {}
     visible_text = ""
     try:
         process = _launch_cdp_chrome(chrome, profile_dir, debug_port, window_size)
@@ -458,6 +592,15 @@ def capture_page(
             interaction = _runtime_eval(page, HOME_VALIDATION_SCRIPT, timeout=10) or {}
         layout = _runtime_eval(page, LAYOUT_SCRIPT, timeout=10) or {}
         visible_text = str(_runtime_eval(page, "document.body ? document.body.innerText : ''", timeout=5) or "")
+        required_selectors = [str(selector) for selector in spec.get("required_selectors", [])]
+        selector_presence = _runtime_eval(
+            page,
+            f"""(() => {{
+              const selectors = {json.dumps(required_selectors)};
+              return Object.fromEntries(selectors.map((selector) => [selector, Boolean(document.querySelector(selector))]));
+            }})()""",
+            timeout=5,
+        ) or {}
         dom = normalize_captured_dom(str(_runtime_eval(page, "document.documentElement.outerHTML", timeout=5) or ""))
         dom_path.write_text(dom)
         screenshot = page.command("Page.captureScreenshot", {"format": "png", "fromSurface": True}, timeout=10)
@@ -486,7 +629,12 @@ def capture_page(
 
     dom_text = dom_path.read_text() if dom_path.exists() else ""
     forbidden = [] if spec.get("allow_internal_terms") else sorted(set(match.group(0) for match in FORBIDDEN_PRODUCT_RE.finditer(visible_text)))
-    required_missing = [text for text in spec.get("required", []) if text not in dom_text]
+    required_missing = [text for text in spec.get("required_text", []) if text not in visible_text]
+    selector_missing = [
+        selector
+        for selector in spec.get("required_selectors", [])
+        if selector_presence.get(selector) is not True
+    ]
     screenshot_bytes = screenshot_path.stat().st_size if screenshot_path.exists() else 0
     checks = {
         "screenshot_present": screenshot_bytes > 0,
@@ -496,6 +644,7 @@ def capture_page(
         "no_horizontal_overflow": layout.get("horizontal_overflow") is False,
         "token_css_present": layout.get("token_css_present") is True,
         "required_text_present": not required_missing,
+        "required_selectors_present": not selector_missing,
         "forbidden_terms_absent": not forbidden,
         "mobile_first_value_before_nav": layout.get("mobile_first_value_before_nav") is True,
         "home_drop_ask_ordered": layout.get("home_drop_ask_ordered") is True,
@@ -520,6 +669,8 @@ def capture_page(
         "status": status,
         "checks": checks,
         "required_missing": required_missing,
+        "selector_missing": selector_missing,
+        "selector_presence": selector_presence,
         "forbidden_terms": forbidden,
         "layout": layout,
         "interaction": interaction,
@@ -555,6 +706,7 @@ def build_owner_package(output_dir: Path, manifest: dict[str, Any]) -> None:
         "## Evidence Files",
         "",
         f"- `screenshot-pack-manifest.json`",
+        f"- Source revision: `{manifest['source_revision']['git_sha']}`; dirty: `{str(manifest['source_revision']['dirty']).lower()}`.",
         f"- `screenshots/` ({desktop_count} desktop, {mobile_count} mobile captures, including day-zero, not-found, and Home validation states)",
         "- `dom/` captured HTML for each screenshot route",
         "",
@@ -651,6 +803,7 @@ def main() -> int:
         "state_dir": relative_to_root(ROOT, state_dir),
         "base_url": base_url,
         "fixture_ids": ids,
+        "source_revision": source_revision(),
         "source_fingerprint": {
             relative_to_root(ROOT, path): sha256_file(path)
             for path in (
@@ -675,6 +828,9 @@ def main() -> int:
             "forbidden_lexicon_pages": sum(1 for page in pages if not page["checks"]["forbidden_terms_absent"]),
             "product_shell_missing_pages": sum(1 for page in pages if not page["checks"]["product_shell_present"]),
             "surface_mismatch_pages": sum(1 for page in pages if not page["checks"]["surface_matches"]),
+            "semantic_selector_missing_pages": sum(
+                1 for page in pages if not page["checks"]["required_selectors_present"]
+            ),
             "owner_acceptance_claimed": 0,
             "production_readiness_claimed": 0,
         },

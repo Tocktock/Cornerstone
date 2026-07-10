@@ -5422,6 +5422,16 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_svg(self, path: Path) -> None:
+        data = path.read_bytes()
+        self.send_response(200)
+        self.send_header("content-type", "image/svg+xml; charset=utf-8")
+        self.send_header("content-length", str(len(data)))
+        self.send_header("cache-control", "public, max-age=86400")
+        self.send_header("x-content-type-options", "nosniff")
+        self.end_headers()
+        self.wfile.write(data)
+
     def _body(self) -> dict[str, Any]:
         length = int(self.headers.get("content-length", "0") or "0")
         if length <= 0:
@@ -5471,6 +5481,21 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parts = self._path_parts()
         query = self._query()
+        if len(parts) == 3 and parts[:2] == ["assets", "icons"]:
+            icon_name = parts[2]
+            icon_path = (self.root / "packages" / "cornerstone_cli" / "ui" / "static" / "icons" / icon_name).resolve()
+            icon_root = (self.root / "packages" / "cornerstone_cli" / "ui" / "static" / "icons").resolve()
+            if icon_path.parent == icon_root and icon_path.suffix == ".svg" and icon_path.exists():
+                self._send_svg(icon_path)
+                return
+            self._send_json(
+                _json_response(
+                    "not_found",
+                    errors=[{"code": "CS_UI_ICON_NOT_FOUND", "message": "UI icon not found."}],
+                ),
+                404,
+            )
+            return
         if not parts:
             if query.get("scenario"):
                 readiness = build_readiness_report(self.root)["readiness"]
