@@ -12963,6 +12963,7 @@ def command_action_approve(args: argparse.Namespace) -> int:
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
     card = result["action_card"]
+    payload["approval_status"] = result.get("status") or "approved"
     payload["action_card"] = card
     payload["ids"].update({"action_id": card["action_id"]})
     payload["evidence_refs"].append(f"action:{card['action_id']}")
@@ -13005,6 +13006,7 @@ def command_action_execute(args: argparse.Namespace) -> int:
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
     card = result["action_card"]
+    payload["execution_status"] = result.get("status")
     payload["action_card"] = card
     payload["ids"].update({"action_id": card["action_id"], "mission_id": card["mission_id"]})
     payload["evidence_refs"].append(f"action:{card['action_id']}")

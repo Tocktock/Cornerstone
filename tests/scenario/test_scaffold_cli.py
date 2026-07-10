@@ -12975,6 +12975,10 @@ class ScaffoldCliTests(unittest.TestCase):
         rows = {row["id"]: row for row in payload["scenario_results"]}
         self.assertEqual(rows["VS0-RT-001"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-004"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-005"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-006"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-007"]["status"], "PASS")
+        self.assertEqual(rows["VS0-RT-R01"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-R03"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-008"]["status"], "PASS")
         self.assertEqual(rows["VS0-RT-R04"]["status"], "PASS")
@@ -13009,6 +13013,49 @@ class ScaffoldCliTests(unittest.TestCase):
         )
         self.assertIn("non-empty Evidence Bundle", api_empty_claim_error["message"])
         self.assertNotIn("claim", api_empty_claim["stdout_json"])
+        dry_run = payload["cli_transcripts"]["action_dry_run"]["stdout_json"]["dry_run"]
+        recovery = dry_run["rollback_or_compensation"]
+        self.assertFalse(recovery["dry_run_side_effects_applied"])
+        self.assertFalse(recovery["rollback_required_for_dry_run"])
+        self.assertFalse(recovery["automatic_rollback_available"])
+        self.assertTrue(recovery["separate_governed_compensation_required_after_execution"])
+        self.assertIn("separate governed compensation Action", recovery["note"])
+        first_execution = payload["cli_transcripts"]["action_execute"]["stdout_json"]
+        replay_execution = payload["cli_transcripts"]["action_execute_replay"]["stdout_json"]
+        self.assertEqual(first_execution["execution_status"], "executed")
+        self.assertEqual(replay_execution["execution_status"], "replayed")
+        self.assertEqual(
+            first_execution["action_result"]["action_result_id"],
+            replay_execution["action_result"]["action_result_id"],
+        )
+        self.assertEqual(
+            first_execution["workflow_run"]["workflow_run_id"],
+            replay_execution["workflow_run"]["workflow_run_id"],
+        )
+        self.assertEqual(replay_execution["action_result"]["duplicate_side_effect_count"], 0)
+        self.assertEqual(
+            payload["cli_transcripts"]["action_approve_after_execute"]["stdout_json"]["approval_status"],
+            "already_executed",
+        )
+        state_path = ROOT / payload["state_dir"]
+        workflow_run_id = first_execution["workflow_run"]["workflow_run_id"]
+        action_result_id = first_execution["action_result"]["action_result_id"]
+        self.assertTrue((state_path / "workflow_runs" / f"{workflow_run_id}.json").is_file())
+        self.assertTrue((state_path / "action_results" / f"{action_result_id}.json").is_file())
+        api_first_execution = payload["api_transcripts"]["action_execute"]["stdout_json"]
+        api_replay_execution = payload["api_transcripts"]["action_execute_replay"]["stdout_json"]
+        self.assertEqual(api_first_execution["execution_status"], "executed")
+        self.assertEqual(api_replay_execution["execution_status"], "replayed")
+        self.assertEqual(
+            api_first_execution["action_result"]["action_result_id"],
+            api_replay_execution["action_result"]["action_result_id"],
+        )
+        self.assertEqual(
+            api_first_execution["workflow_run"]["workflow_run_id"],
+            api_replay_execution["workflow_run"]["workflow_run_id"],
+        )
+        event_types = {event["event_type"] for event in payload["cli_transcripts"]["audit_list"]["stdout_json"]["audit_events"]}
+        self.assertIn("action.execution.replayed", event_types)
 
     def test_vs0_runtime_acceptance_verify(self) -> None:
         result = run_cli("scenario", "verify", "vs0-runtime-acceptance", "--json")
@@ -15404,6 +15451,72 @@ class ScaffoldCliTests(unittest.TestCase):
             self.assertEqual(audit_payload["status"], "failed")
             self.assertEqual(audit_payload["errors"][0]["code"], "CS_AUDIT_INTEGRITY_FAILED")
         finally:
+            shutil.rmtree(state_dir, ignore_errors=True)
+
+    def test_concurrent_audit_appends_preserve_hash_chain(self) -> None:
+        state_dir = ROOT / "tmp/test-audit-concurrent"
+        shutil.rmtree(state_dir, ignore_errors=True)
+        start_path = state_dir / "start"
+        script = """
+import sys
+import time
+from pathlib import Path
+from cornerstone_cli.runtime import LocalRuntimeStore
+
+state_dir = Path(sys.argv[1])
+start_path = Path(sys.argv[2])
+worker_id = sys.argv[3]
+while not start_path.exists():
+    time.sleep(0.005)
+scope = {
+    "tenant_id": "local",
+    "owner_id": "local-owner",
+    "namespace_id": "personal",
+    "workspace_id": "default",
+}
+LocalRuntimeStore(state_dir).append_audit(
+    "audit.concurrent.test",
+    scope,
+    {"type": "worker", "id": worker_id},
+    {"worker_id": worker_id},
+)
+"""
+        workers: list[subprocess.Popen[str]] = []
+        try:
+            state_dir.mkdir(parents=True)
+            env = dict(os.environ)
+            env["PYTHONPATH"] = str(ROOT / "packages")
+            workers = [
+                subprocess.Popen(
+                    [sys.executable, "-c", script, str(state_dir), str(start_path), str(index)],
+                    cwd=ROOT,
+                    env=env,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                for index in range(24)
+            ]
+            start_path.write_text("go")
+            operator_status = run_cli("observe", "status", "--state-dir", "tmp/test-audit-concurrent", "--json")
+            self.assertEqual(operator_status.returncode, 0, operator_status.stdout + operator_status.stderr)
+            operator_payload = json.loads(operator_status.stdout)
+            self.assertEqual(operator_payload["operator_status"]["signals"]["audit_integrity"]["status"], "success")
+            for worker in workers:
+                stdout, stderr = worker.communicate(timeout=15)
+                self.assertEqual(worker.returncode, 0, stdout + stderr)
+
+            audit = run_cli("audit", "verify", "--state-dir", "tmp/test-audit-concurrent", "--json")
+            self.assertEqual(audit.returncode, 0, audit.stdout + audit.stderr)
+            audit_payload = json.loads(audit.stdout)
+            self.assertEqual(audit_payload["audit_integrity"]["status"], "success")
+            self.assertEqual(audit_payload["audit_integrity"]["event_count"], 25)
+            self.assertEqual(audit_payload["audit_integrity"]["errors"], [])
+        finally:
+            for worker in workers:
+                if worker.poll() is None:
+                    worker.kill()
+                    worker.wait()
             shutil.rmtree(state_dir, ignore_errors=True)
 
     def test_prompt_injection_ingest_records_policy_denial(self) -> None:

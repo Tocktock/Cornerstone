@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
@@ -648,47 +649,58 @@ class LocalRuntimeStore:
         if self.state_dir.exists():
             shutil.rmtree(self.state_dir)
 
-    def _last_audit_hash(self) -> str:
-        if not self.audit_path.exists():
-            return "0" * 64
-        last = ""
-        for line in self.audit_path.read_text().splitlines():
-            if line.strip():
-                last = line
-        if not last:
-            return "0" * 64
-        return json.loads(last)["event_hash"]
-
     def append_audit(self, event_type: str, scope: dict[str, str], subject: dict[str, str], details: dict[str, Any]) -> dict[str, Any]:
         self.audit_path.parent.mkdir(parents=True, exist_ok=True)
-        event_without_hash = {
-            "schema_version": "cs.audit_event.v0",
-            "event_type": event_type,
-            "occurred_at": utc_now(),
-            "tenant_id": scope["tenant_id"],
-            "owner_id": scope["owner_id"],
-            "namespace_id": scope["namespace_id"],
-            "workspace_id": scope["workspace_id"],
-            "subject": subject,
-            "details": details,
-            "previous_hash": self._last_audit_hash(),
-        }
-        event_hash = _json_hash(event_without_hash)
-        event = dict(event_without_hash)
-        event["event_id"] = f"audit_{event_hash[:16]}"
-        event["event_hash"] = event_hash
-        with self.audit_path.open("a") as file:
-            file.write(json.dumps(event, sort_keys=True) + "\n")
-        return event
+        with self.audit_path.open("a+") as file:
+            fcntl.flock(file.fileno(), fcntl.LOCK_EX)
+            try:
+                file.seek(0)
+                previous_hash = "0" * 64
+                for line in file.read().splitlines():
+                    if line.strip():
+                        previous_hash = json.loads(line)["event_hash"]
+                event_without_hash = {
+                    "schema_version": "cs.audit_event.v0",
+                    "event_type": event_type,
+                    "occurred_at": utc_now(),
+                    "tenant_id": scope["tenant_id"],
+                    "owner_id": scope["owner_id"],
+                    "namespace_id": scope["namespace_id"],
+                    "workspace_id": scope["workspace_id"],
+                    "subject": subject,
+                    "details": details,
+                    "previous_hash": previous_hash,
+                }
+                event_hash = _json_hash(event_without_hash)
+                event = dict(event_without_hash)
+                event["event_id"] = f"audit_{event_hash[:16]}"
+                event["event_hash"] = event_hash
+                file.seek(0, os.SEEK_END)
+                file.write(json.dumps(event, sort_keys=True) + "\n")
+                file.flush()
+                return event
+            finally:
+                fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+
+    def _audit_snapshot_lines(self) -> list[str]:
+        try:
+            with self.audit_path.open() as file:
+                fcntl.flock(file.fileno(), fcntl.LOCK_SH)
+                try:
+                    return file.read().splitlines()
+                finally:
+                    fcntl.flock(file.fileno(), fcntl.LOCK_UN)
+        except FileNotFoundError:
+            return []
 
     def verify_audit(self) -> dict[str, Any]:
+        return self._verify_audit_lines(self._audit_snapshot_lines())
+
+    def _verify_audit_lines(self, lines: list[str]) -> dict[str, Any]:
         previous_hash = "0" * 64
         event_count = 0
         errors: list[dict[str, str]] = []
-        if not self.audit_path.exists():
-            return {"status": "success", "event_count": 0, "errors": []}
-
-        for line_no, line in enumerate(self.audit_path.read_text().splitlines(), start=1):
+        for line_no, line in enumerate(lines, start=1):
             if not line.strip():
                 continue
             event_count += 1
@@ -1510,10 +1522,8 @@ class LocalRuntimeStore:
         return [_read_json(path) for path in sorted(self.namespace_promotion_dir.glob("*.json"))]
 
     def _all_audit_events(self) -> list[dict[str, Any]]:
-        if not self.audit_path.exists():
-            return []
         events = []
-        for line in self.audit_path.read_text().splitlines():
+        for line in self._audit_snapshot_lines():
             if line.strip():
                 events.append(json.loads(line))
         return events
@@ -10934,6 +10944,16 @@ class LocalRuntimeStore:
                 "ontology_object_refs": ontology_refs,
                 "ontology_impact_visible": bool(ontology_refs),
             },
+            "rollback_or_compensation": {
+                "dry_run_side_effects_applied": False,
+                "rollback_required_for_dry_run": False,
+                "automatic_rollback_available": False,
+                "separate_governed_compensation_required_after_execution": action_kind == "external_writeback",
+                "note": (
+                    "Dry-run applies no side effect. If a recorded execution needs correction, create a separate "
+                    "governed compensation Action; no automatic rollback is implied."
+                ),
+            },
             "policy_decision": policy,
             "created_at": utc_now(),
         }
@@ -11240,12 +11260,27 @@ class LocalRuntimeStore:
             return decision, self._action_safety_envelope(action, scope, status="denied", reason_code=decision["reason_code"], policy_decision=decision, preflight=preflight)
         return None, None
 
+    def _action_lock_path(self, action_id: str) -> Path:
+        return self.state_dir / "locks" / "actions" / f"{sha256_bytes(action_id.encode('utf-8'))}.lock"
+
     def approve_action(self, action_id: str, scope: dict[str, str], approver: str = "owner") -> dict[str, Any]:
+        lock_path = self._action_lock_path(action_id)
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with lock_path.open("a+") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                return self._approve_action_locked(action_id, scope, approver)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def _approve_action_locked(self, action_id: str, scope: dict[str, str], approver: str) -> dict[str, Any]:
         action = self.get_action(action_id)
         if action is None:
             return {"status": "not_found"}
         if action.get("scope") != scope:
             return {"status": "scope_denied", "resource_scope": action.get("scope")}
+        if action.get("execution", {}).get("status") == "executed":
+            return {"status": "already_executed", "action_card": action}
         if not action.get("approval", {}).get("required"):
             return {"status": "approval_not_required", "action_card": action}
         if not self._is_authorized_action_approver(approver, scope):
@@ -11677,7 +11712,132 @@ class LocalRuntimeStore:
             "bundle_audit_event": bundle_result["audit_event"],
         }
 
+    def _mock_action_execution_records(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+        policy: dict[str, Any],
+    ) -> dict[str, Any]:
+        action_id = str(action.get("action_id") or "")
+        previous_result = action.get("execution", {}).get("result")
+        if not isinstance(previous_result, dict):
+            previous_result = {}
+        previous_action_result_id = str(previous_result.get("action_result_id") or "")
+        previous_workflow_run_id = str(previous_result.get("workflow_run_id") or "")
+        if previous_action_result_id and previous_workflow_run_id:
+            result_path = self.action_result_path(previous_action_result_id)
+            workflow_path = self.workflow_run_path(previous_workflow_run_id)
+            if result_path.exists() and workflow_path.exists():
+                existing_result = _read_json(result_path)
+                existing_workflow = _read_json(workflow_path)
+                if (
+                    existing_result.get("action_id") == action_id
+                    and existing_result.get("workflow_run_id") == previous_workflow_run_id
+                    and existing_workflow.get("action_id") == action_id
+                    and existing_workflow.get("workflow_run_id") == previous_workflow_run_id
+                ):
+                    return {
+                        "action_card": action,
+                        "action_result": existing_result,
+                        "workflow_run": existing_workflow,
+                    }
+        executed_at = str(previous_result.get("executed_at") or utc_now())
+        target = action.get("dry_run", {}).get("expected_impact", {}).get("target")
+        external = action.get("action_kind") == "external_writeback"
+        mock_connector_calls = 1 if external else 0
+        policy_ref = str(previous_result.get("policy_ref") or f"policy:{policy.get('id')}")
+        workflow_base = {
+            "schema_version": "cs.workflow_run.v0",
+            "status": "succeeded",
+            "scope": scope,
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "claim_id": action.get("source_claim_id"),
+            "execution_adapter": "ConnectorHub/mock_connector" if external else "Workflow/local_internal_state",
+            "connector_id": "mock_connector" if external else None,
+            "policy_ref": policy_ref,
+            "approval": action.get("approval", {}),
+            "action_type": action.get("action_kind"),
+            "target": target,
+            "direct_provider_access": False,
+            "credentials_exposed_to_agent": False,
+            "external_http_calls": 0,
+            "mock_connector_calls": mock_connector_calls,
+            "workflow_run_started": True,
+            "created_at": executed_at,
+        }
+        workflow_run_id = previous_workflow_run_id or f"wrun_{_json_hash(workflow_base)[:16]}"
+        workflow_run = dict(workflow_base)
+        workflow_run["workflow_run_id"] = workflow_run_id
+
+        action_result_base = {
+            "schema_version": "cs.action_result.v0",
+            "status": "success",
+            "action_id": action_id,
+            "mission_id": action.get("mission_id"),
+            "workflow_run_id": workflow_run_id,
+            "policy_ref": policy_ref,
+            "side_effect_boundary": "mocked_connector" if external else "local_internal_state",
+            "connectorhub_mediated": external,
+            "direct_provider_access": False,
+            "credentials_exposed_to_agent": False,
+            "external_http_calls": 0,
+            "mock_connector_calls": mock_connector_calls,
+            "duplicate_side_effect_count": 0,
+            "retry_status": {
+                "status": "completed_replayable",
+                "process_restart_replay_safe": True,
+                "same_action_returns_existing_result": True,
+            },
+            "compensation": {
+                "expectation_visible": True,
+                "automatic_rollback_available": False,
+                "automatic_compensation_executed": False,
+                "separate_governed_action_required": external,
+                "expectation": (
+                    "No real provider side effect occurred. If the recorded result needs correction, create a "
+                    "separate governed compensation Action."
+                ),
+            },
+            "message": (
+                "Action execution was recorded through the governed mock ConnectorHub path."
+                if external
+                else "Action execution was recorded through the governed local Workflow/Action path."
+            ),
+            "executed_at": executed_at,
+        }
+        action_result_id = previous_action_result_id or f"ares_{_json_hash(action_result_base)[:16]}"
+        action_result = dict(action_result_base)
+        action_result["action_result_id"] = action_result_id
+
+        _write_json(self.workflow_run_path(workflow_run_id), workflow_run)
+        _write_json(self.action_result_path(action_result_id), action_result)
+        executed = dict(action)
+        executed["execution"] = {
+            "status": "executed",
+            "can_execute_now": False,
+            "result": action_result,
+            "workflow_run_ref": f"workflow_run:{workflow_run_id}",
+            "duplicate_side_effect_count": 0,
+        }
+        _write_json(self.action_path(action_id), executed)
+        return {
+            "action_card": executed,
+            "action_result": action_result,
+            "workflow_run": workflow_run,
+        }
+
     def execute_action(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        lock_path = self._action_lock_path(action_id)
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with lock_path.open("a+") as lock_file:
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+            try:
+                return self._execute_action_locked(action_id, scope)
+            finally:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def _execute_action_locked(self, action_id: str, scope: dict[str, str]) -> dict[str, Any]:
         action = self.get_action(action_id)
         if action is None:
             return {"status": "not_found"}
@@ -11694,6 +11854,27 @@ class LocalRuntimeStore:
             scope,
             action.get("connector_boundary", {}).get("connector", "mock_connector"),
         )
+        mock_connector = action.get("connector_boundary", {}).get("connector") == "mock_connector"
+        if mock_connector and action.get("execution", {}).get("status") == "executed":
+            records = self._mock_action_execution_records(action, scope, policy)
+            event = self.append_audit(
+                "action.execution.replayed",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "workflow_run_id": records["workflow_run"]["workflow_run_id"],
+                    "action_result_id": records["action_result"]["action_result_id"],
+                    "mock_connector_calls": 0,
+                    "duplicate_side_effect_count": 0,
+                    "external_http_calls": 0,
+                },
+            )
+            return {
+                "status": "replayed",
+                **records,
+                "audit_event": event,
+            }
         safety_denial, safety_envelope = self._validate_action_execution_safety(action, scope, policy)
         if safety_denial is not None:
             event = self.append_audit(
@@ -11874,36 +12055,22 @@ class LocalRuntimeStore:
                 "audit_event": event,
             }
 
-        result_record = {
-            "schema_version": "cs.action_result.v0",
-            "status": "success",
-            "action_id": action_id,
-            "mission_id": action.get("mission_id"),
-            "side_effect_boundary": "mocked_connector" if external else "local_internal_state",
-            "external_http_calls": 0,
-            "mock_connector_calls": 1 if external else 0,
-            "message": "Action execution was recorded through the governed Workflow/Action path.",
-            "executed_at": utc_now(),
-        }
-        executed = dict(action)
-        executed["execution"] = {
-            "status": "executed",
-            "can_execute_now": False,
-            "result": result_record,
-        }
-        _write_json(self.action_path(action_id), executed)
+        records = self._mock_action_execution_records(action, scope, policy)
         event = self.append_audit(
             "action.executed",
             scope,
             {"type": "action", "id": action_id},
             {
-                "mission_id": executed.get("mission_id"),
-                "action_kind": executed.get("action_kind"),
+                "mission_id": action.get("mission_id"),
+                "action_kind": action.get("action_kind"),
+                "workflow_run_id": records["workflow_run"]["workflow_run_id"],
+                "action_result_id": records["action_result"]["action_result_id"],
                 "external_http_calls": 0,
-                "mock_connector_calls": result_record["mock_connector_calls"],
+                "mock_connector_calls": records["action_result"]["mock_connector_calls"],
+                "duplicate_side_effect_count": 0,
             },
         )
-        return {"status": "executed", "action_card": executed, "action_result": result_record, "audit_event": event}
+        return {"status": "executed", **records, "audit_event": event}
 
     def deny_direct_connector_write(
         self,
@@ -12768,12 +12935,9 @@ class LocalRuntimeStore:
         return {"retention_explanation": record, "audit_event": event}
 
     def operator_status_report(self, scope: dict[str, str]) -> dict[str, Any]:
-        audit = self.verify_audit()
-        event_types = []
-        if self.audit_path.exists():
-            for line in self.audit_path.read_text().splitlines():
-                if line.strip():
-                    event_types.append(json.loads(line).get("event_type"))
+        audit_lines = self._audit_snapshot_lines()
+        audit = self._verify_audit_lines(audit_lines)
+        event_types = [json.loads(line).get("event_type") for line in audit_lines if line.strip()]
         status_base = {
             "schema_version": "cs.operator_status_report.v0",
             "status": "ready",

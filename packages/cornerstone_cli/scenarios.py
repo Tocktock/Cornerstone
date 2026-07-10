@@ -24248,6 +24248,12 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
     transcripts["action_execute"] = _run_cli_json(root, ["action", "execute", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
     executed_action = _payload(transcripts["action_execute"]).get("action_card", {})
     action_result = _payload(transcripts["action_execute"]).get("action_result", {})
+    transcripts["action_approve_after_execute"] = (
+        _run_cli_json(root, ["action", "approve", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    )
+    transcripts["action_execute_replay"] = (
+        _run_cli_json(root, ["action", "execute", action_id, "--state-dir", state_rel, "--json"]) if action_id else {}
+    )
     transcripts["audit_list"] = _run_cli_json(root, ["audit", "list", "--state-dir", state_rel, "--json"])
     transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
     transcripts["prompt_injection_ingest"] = _run_cli_json(
@@ -24383,6 +24389,12 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         api_transcripts["action_execute"] = (
             _http_json(base_url, "POST", f"/actions/{api_action_id}/execute", {}) if api_action_id else {}
         )
+        api_transcripts["action_approve_after_execute"] = (
+            _http_json(base_url, "POST", f"/actions/{api_action_id}/approve", {"approver": "owner"}) if api_action_id else {}
+        )
+        api_transcripts["action_execute_replay"] = (
+            _http_json(base_url, "POST", f"/actions/{api_action_id}/execute", {}) if api_action_id else {}
+        )
         api_transcripts["audit_events"] = _http_json(base_url, "GET", "/audit-events")
         api_transcripts["audit_verify"] = _http_json(base_url, "POST", "/audit/verify", {})
     finally:
@@ -24502,6 +24514,7 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
     )
 
     dry_run = _payload(transcripts["action_dry_run"]).get("dry_run", {})
+    recovery = dry_run.get("rollback_or_compensation", {})
     action_policy = action.get("policy_decision", {})
     action_dry_run_ok = (
         _exit_ok(transcripts["action_propose"])
@@ -24512,34 +24525,103 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         and action.get("connector_boundary", {}).get("direct_provider_access") is False
         and dry_run.get("diff")
         and dry_run.get("expected_impact")
+        and recovery.get("dry_run_side_effects_applied") is False
+        and recovery.get("rollback_required_for_dry_run") is False
+        and recovery.get("automatic_rollback_available") is False
+        and recovery.get("separate_governed_compensation_required_after_execution") is True
+        and bool(recovery.get("note"))
         and action_policy.get("decision") == "requires_approval"
         and action.get("approval", {}).get("status") == "pending"
         and _payload(transcripts["action_dry_run"]).get("policy_decision_refs")
         and _payload(transcripts["action_dry_run"]).get("audit_refs")
     )
+    api_dry_run = (api_transcripts["action_dry_run"].get("stdout_json") or {}).get("dry_run", {})
+    api_recovery = api_dry_run.get("rollback_or_compensation", {})
     api_action_dry_run_ok = (
         api_transcripts["action_create"].get("status_code") == 200
         and api_transcripts["action_dry_run"].get("status_code") == 200
-        and (api_transcripts["action_dry_run"].get("stdout_json") or {}).get("dry_run", {}).get("diff")
+        and api_dry_run.get("diff")
+        and api_recovery.get("dry_run_side_effects_applied") is False
+        and api_recovery.get("rollback_required_for_dry_run") is False
+        and api_recovery.get("automatic_rollback_available") is False
+        and api_recovery.get("separate_governed_compensation_required_after_execution") is True
+        and bool(api_recovery.get("note"))
     )
 
-    api_action_result = (api_transcripts["action_execute"].get("stdout_json") or {}).get("action_result", {})
+    action_execute_payload = _payload(transcripts["action_execute"])
+    action_replay_payload = _payload(transcripts["action_execute_replay"])
+    workflow_run = action_execute_payload.get("workflow_run", {})
+    replay_workflow_run = action_replay_payload.get("workflow_run", {})
+    replay_action_result = action_replay_payload.get("action_result", {})
+    workflow_run_id = workflow_run.get("workflow_run_id", "")
+    action_result_id = action_result.get("action_result_id", "")
+    workflow_run_record = _read_json_file(state_path / "workflow_runs" / f"{workflow_run_id}.json") if workflow_run_id else {}
+    action_result_record = _read_json_file(state_path / "action_results" / f"{action_result_id}.json") if action_result_id else {}
+    api_action_execute_payload = api_transcripts["action_execute"].get("stdout_json") or {}
+    api_action_replay_payload = api_transcripts["action_execute_replay"].get("stdout_json") or {}
+    api_action_result = api_action_execute_payload.get("action_result", {})
+    api_workflow_run = api_action_execute_payload.get("workflow_run", {})
+    api_replay_action_result = api_action_replay_payload.get("action_result", {})
+    api_replay_workflow_run = api_action_replay_payload.get("workflow_run", {})
+    api_action_result_id = api_action_result.get("action_result_id", "")
+    api_workflow_run_id = api_workflow_run.get("workflow_run_id", "")
+    api_workflow_run_record = (
+        _read_json_file(state_path / "workflow_runs" / f"{api_workflow_run_id}.json") if api_workflow_run_id else {}
+    )
+    api_action_result_record = (
+        _read_json_file(state_path / "action_results" / f"{api_action_result_id}.json") if api_action_result_id else {}
+    )
     execution_ok = (
         _action_policy_blocked(transcripts["action_execute_before_approval"])
         and _exit_ok(transcripts["action_approve"])
         and _exit_ok(transcripts["action_execute"])
+        and action_execute_payload.get("execution_status") == "executed"
         and action_result.get("status") == "success"
+        and bool(action_result_id)
+        and bool(workflow_run_id)
+        and action_result.get("workflow_run_id") == workflow_run_id
+        and workflow_run.get("action_id") == action_id
+        and workflow_run_record.get("workflow_run_id") == workflow_run_id
+        and action_result_record.get("action_result_id") == action_result_id
+        and action_result_record.get("workflow_run_id") == workflow_run_id
         and executed_action.get("execution", {}).get("status") == "executed"
         and action_result.get("side_effect_boundary") == "mocked_connector"
         and action_result.get("external_http_calls") == 0
         and action_result.get("mock_connector_calls") == 1
         and executed_action.get("connector_boundary", {}).get("credentials_exposed_to_agent") is False
+        and _exit_ok(transcripts["action_approve_after_execute"])
+        and _payload(transcripts["action_approve_after_execute"]).get("approval_status") == "already_executed"
+        and _payload(transcripts["action_approve_after_execute"])
+        .get("action_card", {})
+        .get("execution", {})
+        .get("status")
+        == "executed"
+        and _exit_ok(transcripts["action_execute_replay"])
+        and action_replay_payload.get("execution_status") == "replayed"
+        and replay_action_result.get("action_result_id") == action_result_id
+        and replay_workflow_run.get("workflow_run_id") == workflow_run_id
+        and replay_action_result.get("duplicate_side_effect_count") == 0
     )
     api_execution_ok = (
         api_transcripts["action_approve"].get("status_code") == 200
         and api_transcripts["action_execute"].get("status_code") == 200
+        and api_action_execute_payload.get("execution_status") == "executed"
         and api_action_result.get("status") == "success"
+        and bool(api_action_result_id)
+        and bool(api_workflow_run_id)
+        and api_action_result.get("workflow_run_id") == api_workflow_run_id
+        and api_workflow_run.get("action_id") == api_action_id
+        and api_workflow_run_record.get("workflow_run_id") == api_workflow_run_id
+        and api_action_result_record.get("action_result_id") == api_action_result_id
         and api_action_result.get("external_http_calls") == 0
+        and api_transcripts["action_approve_after_execute"].get("status_code") == 200
+        and (api_transcripts["action_approve_after_execute"].get("stdout_json") or {}).get("approval_status")
+        == "already_executed"
+        and api_transcripts["action_execute_replay"].get("status_code") == 200
+        and api_action_replay_payload.get("execution_status") == "replayed"
+        and api_replay_action_result.get("action_result_id") == api_action_result_id
+        and api_replay_workflow_run.get("workflow_run_id") == api_workflow_run_id
+        and api_replay_action_result.get("duplicate_side_effect_count") == 0
     )
 
     audit_events_payload = _payload(transcripts["audit_list"]).get("audit_events", [])
@@ -24552,6 +24634,7 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
         "action.card.proposed",
         "action.approved",
         "action.executed",
+        "action.execution.replayed",
     }
     audit_ok = (
         _exit_ok(transcripts["audit_list"])
@@ -24615,14 +24698,14 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "MUST_PASS",
             "PASS" if action_dry_run_ok and api_action_dry_run_ok else "FAIL",
             ["cornerstone action propose ... --json", "cornerstone action dry-run <action_id> --json", "POST /actions/{id}/dry-run"],
-            "Action Card dry-run exposes diff, expected impact, policy decision, risk, approval state, connector boundary, and audit refs.",
+            "Action Card dry-run exposes diff, expected impact, recovery/compensation guidance, policy decision, risk, approval state, connector boundary, and audit refs.",
         ),
         _row(
             "VS0-RT-006",
             "MUST_PASS",
             "PASS" if execution_ok and api_execution_ok else "FAIL",
             ["cornerstone action approve <action_id> --json", "cornerstone action execute <action_id> --json", "POST /actions/{id}/execute"],
-            "Approved local/mock ConnectorHub-style execution records a result with zero external HTTP calls and no credential exposure.",
+            "Approved local/mock ConnectorHub-style execution records durable WorkflowRun/ActionResult evidence and replays without a duplicate side effect.",
         ),
         _row(
             "VS0-RT-007",
@@ -24720,7 +24803,11 @@ def verify_vs0_product_runtime(root: Path) -> dict[str, Any]:
             "claim_id": claim_id,
             "mission_id": mission_id,
             "action_id": action_id,
+            "workflow_run_id": workflow_run_id,
+            "action_result_id": action_result_id,
             "api_action_id": ((api_transcripts.get("action_create", {}).get("stdout_json") or {}).get("action_card", {}) or {}).get("action_id"),
+            "api_workflow_run_id": api_workflow_run_id,
+            "api_action_result_id": api_action_result_id,
             "audit_event_count": len(audit_events_payload),
             "audit_event_types": sorted(str(event_type) for event_type in event_types if event_type),
             "readiness": ready_readiness,

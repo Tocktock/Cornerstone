@@ -5167,7 +5167,7 @@ Search phrase: alpha-evidence-anchor.</code>
         risk: card.risk,
         approval_state: card.approval && card.approval.status,
         mock_local_boundary: card.connector_boundary && card.connector_boundary.mocked === true && card.connector_boundary.direct_provider_access === false,
-        rollback_note: "Mock/local action only: no real external side effect. Compensate by recording a correcting Claim/Action and audit entry."
+        rollback_note: (dryRun.rollback_or_compensation && dryRun.rollback_or_compensation.note) || "Recovery guidance unavailable; keep execution blocked."
       }};
       setText("evux-action-id", card.action_id);
       setText("ui-action-diff", (dryRun.diff && dryRun.diff.before) + " -> " + (dryRun.diff && dryRun.diff.after));
@@ -6448,7 +6448,15 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 403,
             )
             return
-        self._send_json(_json_response("success", action_card=result["action_card"], evidence_refs=[f"action:{action_id}"], audit_refs=refs))
+        self._send_json(
+            _json_response(
+                "success",
+                approval_status=result.get("status") or "approved",
+                action_card=result["action_card"],
+                evidence_refs=[f"action:{action_id}"],
+                audit_refs=refs,
+            )
+        )
 
     def _product_mission_control(self, body: dict[str, Any]) -> None:
         scope = _scope_from_body(body)
@@ -6651,12 +6659,21 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 403,
             )
             return
+        evidence_refs = [f"action:{action_id}"]
+        workflow_run = result.get("workflow_run") or {}
+        action_result = result["action_result"]
+        if workflow_run.get("workflow_run_id"):
+            evidence_refs.append(f"workflow_run:{workflow_run['workflow_run_id']}")
+        if action_result.get("action_result_id"):
+            evidence_refs.append(f"action_result:{action_result['action_result_id']}")
         self._send_json(
             _json_response(
                 "success",
+                execution_status=result.get("status"),
                 action_card=result["action_card"],
-                action_result=result["action_result"],
-                evidence_refs=[f"action:{action_id}"],
+                action_result=action_result,
+                workflow_run=workflow_run or None,
+                evidence_refs=evidence_refs,
                 audit_refs=[f"audit:{result['audit_event']['event_id']}"],
             )
         )
