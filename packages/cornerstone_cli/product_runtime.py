@@ -37,7 +37,6 @@ DEFAULT_SCOPE = {
     "namespace_id": "personal",
     "workspace_id": "default",
 }
-
 API_ROUTES = [
     "GET /health",
     "GET /ready",
@@ -2784,7 +2783,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const descriptions = {{
         "Inbox": "Return to the selected work item from Ops Inbox.",
         "Brief": "Review findings, gaps, and supporting evidence.",
-        "Claim": "Keep the claim candidate evidence-backed before approval.",
+        "Claim": "Keep the Claim as a Draft until source support and statement-level semantic review are complete.",
         "Memory/Wiki": "Review memory or wiki candidate before durable use.",
         "Action": "Preview local/mock action and approval boundary.",
         "Learn": "Keep outcomes and corrections as review candidates."
@@ -2823,7 +2822,7 @@ Search phrase: alpha-evidence-anchor.</code>
       const mismatchVisible = setRecoveryRow(
         "lineage-mismatch",
         "Different journey",
-        mismatch.product_message || "Loop View did not combine work items from different evidence-backed journeys.",
+        mismatch.product_message || "Loop View did not combine work items from different source-linked journeys.",
         "No new journey or activity record was created."
       );
       container.dataset.vs4LoopRecoveryStates = "visible";
@@ -5893,16 +5892,52 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."}]), 403)
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                            "message": "Artifact record failed content-identity verification.",
+                            "artifact_id": artifact_id,
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         artifact = result["record"]
+        if not self.store.original_available(artifact):
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                            "message": "Artifact original failed content-identity verification.",
+                            "artifact_id": artifact_id,
+                            "reason": "artifact_original_identity_mismatch",
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         event = result["audit_event"]
         detail = dict(artifact)
         detail["derived_text_preview"] = self.store.derived_text_preview(artifact)
         detail["ontology_context"] = self.store.ontology_context_for_artifact(artifact_id, scope)
+        derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+        refs = [f"artifact:{artifact_id}", f"storage:{artifact.get('original_storage_ref')}"]
+        if derived_ref:
+            refs.append(str(derived_ref))
         self._send_json(
             _json_response(
                 "success",
                 artifact=detail,
-                evidence_refs=[f"artifact:{artifact_id}"],
+                evidence_refs=refs,
                 audit_refs=[f"audit:{event['event_id']}"],
             )
         )
@@ -5915,6 +5950,22 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             return
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Search snapshot is outside the requested scope."}]), 403)
+            return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_SEARCH_SNAPSHOT_INTEGRITY_FAILED",
+                            "message": "Search snapshot failed revision-integrity verification.",
+                            "search_snapshot_id": snapshot_id,
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
             return
         snapshot = result["snapshot"]
         event = result["audit_event"]
@@ -5936,12 +5987,36 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Evidence bundle is outside the requested scope."}]), 403)
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_EVIDENCE_BUNDLE_INTEGRITY_FAILED",
+                            "message": "Evidence Bundle failed revision or source-integrity verification.",
+                            "evidence_bundle_id": bundle_id,
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         bundle = result["bundle"]
+        refs = [f"evidence_bundle:{bundle_id}", f"search_snapshot:{bundle['search_snapshot_id']}"]
+        refs.extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+        refs.extend(
+            str(item["derived_representation_ref"])
+            for item in bundle.get("evidence_items", [])
+            if isinstance(item, dict) and item.get("derived_representation_ref")
+        )
         self._send_json(
             _json_response(
                 "success",
                 evidence_bundle=bundle,
-                evidence_refs=[f"evidence_bundle:{bundle_id}", f"search_snapshot:{bundle['search_snapshot_id']}"],
+                evidence_refs=list(dict.fromkeys(refs)),
                 audit_refs=[f"audit:{result['audit_event']['event_id']}"],
             )
         )
@@ -5963,6 +6038,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if evidence.get("search_snapshot_id"):
             refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(evidence.get("derived_representation_refs", []))
         self._send_json(
             _json_response(
                 "success",
@@ -5981,7 +6057,19 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Claim is outside the requested scope."}]), 403)
             return
-        self._send_json(_json_response("success", claim=result["record"], evidence_refs=[f"claim:{claim_id}"], audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
+        claim = result["record"]
+        evidence = claim.get("evidence_bundle") if isinstance(claim.get("evidence_bundle"), dict) else {}
+        support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+        refs = [f"claim:{claim_id}"]
+        if evidence.get("evidence_bundle_id"):
+            refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+        if evidence.get("search_snapshot_id"):
+            refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
+        refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(evidence.get("derived_representation_refs", []))
+        refs.extend(support.get("citation_refs", []))
+        refs.extend(support.get("citation_check_refs", []))
+        self._send_json(_json_response("success", claim=claim, evidence_refs=list(dict.fromkeys(refs)), audit_refs=[f"audit:{result['audit_event']['event_id']}"]))
 
     def _show_memory(self, memory_id: str) -> None:
         scope = self._query_scope()
@@ -6037,7 +6125,27 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 scope,
                 source_ref=str(body.get("source_ref", "home.drop_text")),
             )
+            if result.get("status") == "integrity_failed":
+                self._send_json(
+                    _json_response(
+                        "failed",
+                        errors=[
+                            {
+                                "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                                "message": "An existing Artifact record failed content-identity verification.",
+                                "artifact_id": result.get("artifact_id"),
+                                "reason": result.get("reason"),
+                            }
+                        ],
+                    ),
+                    409,
+                )
+                return
             artifact = result["artifact"]
+            derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+            evidence_refs = [f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"]
+            if derived_ref:
+                evidence_refs.append(str(derived_ref))
             self._send_json(
                 _json_response(
                     "success",
@@ -6046,7 +6154,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                     text_ingest=True,
                     trust_forced_untrusted=result.get("trust_forced_untrusted", False),
                     trust_downgraded=result.get("trust_downgraded", False),
-                    evidence_refs=[f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"],
+                    evidence_refs=evidence_refs,
                     audit_refs=[f"audit:{result['audit_event']['event_id']}"],
                     policy_decision_refs=[],
                 )
@@ -6069,14 +6177,34 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             trust=str(body.get("trust", "untrusted")),
             lineage_from=body.get("lineage_from") if isinstance(body.get("lineage_from"), str) else None,
         )
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                            "message": "An existing Artifact record failed content-identity verification.",
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         artifact = result["artifact"]
         policy_decisions = result.get("policy_decisions", [])
+        derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+        evidence_refs = [f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"]
+        if derived_ref:
+            evidence_refs.append(str(derived_ref))
         self._send_json(
             _json_response(
                 "success",
                 artifact=artifact,
                 deduplicated=result.get("deduplicated", False),
-                evidence_refs=[f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"],
+                evidence_refs=evidence_refs,
                 audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [result["audit_event"]])],
                 policy_decision_refs=[f"policy:{decision['id']}" for decision in policy_decisions],
                 policy_decisions=policy_decisions,
@@ -6098,14 +6226,34 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 error.status_code,
             )
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                            "message": "An existing Artifact record failed content-identity verification.",
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         artifact = result["artifact"]
+        derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+        evidence_refs = [f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"]
+        if derived_ref:
+            evidence_refs.append(str(derived_ref))
         self._send_json(
             _json_response(
                 "success",
                 artifact=artifact,
                 deduplicated=result.get("deduplicated", False),
                 file_ingest=True,
-                evidence_refs=[f"artifact:{artifact['artifact_id']}", f"storage:{artifact['original_storage_ref']}"],
+                evidence_refs=evidence_refs,
                 audit_refs=[f"audit:{event['event_id']}" for event in result.get("audit_events", [result["audit_event"]])],
                 policy_decision_refs=[f"policy:{decision['id']}" for decision in result.get("policy_decisions", [])],
             )
@@ -6150,6 +6298,22 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_MESSAGE_REQUIRED", "message": "Conversation message is required."}]), 400)
             return
         result = self.store.start_conversation(message, scope)
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                            "message": "The conversation source could not be saved because an existing Artifact record failed content-identity verification.",
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         conversation = result["conversation"]
         artifact = result["artifact"]
         self._send_json(
@@ -6223,6 +6387,24 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                     errors=[{"code": "CS_CONVERSATION_PROMOTION_EVIDENCE_REQUIRED", "message": "Conversation promotion requires an Evidence Bundle."}],
                 ),
                 400,
+            )
+            return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_CONVERSATION_PROMOTION_EVIDENCE_INTEGRITY_FAILED",
+                            "message": "Conversation promotion requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                            "conversation_id": conversation_id,
+                            "evidence_bundle_id": body.get("evidence_bundle_id"),
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
             )
             return
         if result.get("status") == "unsafe_source_denied":
@@ -6325,6 +6507,22 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if result.get("status") == "scope_denied":
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Search snapshot is outside the requested scope."}]), 403)
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_SEARCH_SNAPSHOT_INTEGRITY_FAILED",
+                            "message": "Search snapshot failed revision-integrity verification.",
+                            "snapshot_id": body.get("snapshot_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         if result.get("status") != "success":
             self._send_json(
                 _json_response(
@@ -6386,8 +6584,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                     errors=[
                         {
                             "code": "CS_EVIDENCE_ARTIFACT_INTEGRITY_FAILED",
-                            "message": "Evidence Bundle creation requires every source original to pass integrity checks.",
+                            "message": "Evidence Bundle creation requires the complete Search, original, and Derived Representation chain to pass integrity checks.",
                             "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
                         }
                     ],
                 ),
@@ -6395,11 +6594,18 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
             return
         bundle = result["bundle"]
+        refs = [f"evidence_bundle:{bundle['evidence_bundle_id']}", f"search_snapshot:{bundle['search_snapshot_id']}"]
+        refs.extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+        refs.extend(
+            str(item["derived_representation_ref"])
+            for item in bundle.get("evidence_items", [])
+            if isinstance(item, dict) and item.get("derived_representation_ref")
+        )
         self._send_json(
             _json_response(
                 "success",
                 evidence_bundle=bundle,
-                evidence_refs=[f"evidence_bundle:{bundle['evidence_bundle_id']}", f"search_snapshot:{bundle['search_snapshot_id']}"],
+                evidence_refs=list(dict.fromkeys(refs)),
                 audit_refs=[f"audit:{result['audit_event']['event_id']}"],
             )
         )
@@ -6422,6 +6628,23 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 400,
             )
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_BRIEF_EVIDENCE_INTEGRITY_FAILED",
+                            "message": "Brief creation requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                            "evidence_bundle_id": body.get("evidence_bundle_id"),
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         brief = result["brief"]
         evidence = brief.get("evidence_bundle", {})
         refs = [f"brief:{brief['brief_id']}"]
@@ -6430,6 +6653,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if evidence.get("search_snapshot_id"):
             refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(evidence.get("derived_representation_refs", []))
         self._send_json(
             _json_response(
                 "success",
@@ -6480,6 +6704,24 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 400,
             )
             return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED",
+                            "message": "Claim creation requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                            "brief_id": brief_id,
+                            "evidence_bundle_id": bundle_id,
+                            "artifact_id": result.get("artifact_id"),
+                            "reason": result.get("reason"),
+                        }
+                    ],
+                ),
+                409,
+            )
+            return
         claim = result["claim"]
         refs = [f"claim:{claim['claim_id']}"]
         evidence = claim.get("evidence_bundle", {})
@@ -6489,6 +6731,7 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if related_brief.get("brief_id"):
             refs.append(f"brief:{related_brief['brief_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(evidence.get("derived_representation_refs", []))
         support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
         refs.extend(support.get("citation_refs", []))
         refs.extend(support.get("citation_check_refs", []))
@@ -6618,6 +6861,57 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                     ],
                 ),
                 400,
+            )
+            return
+        if result.get("status") == "semantic_support_required":
+            claim = result["claim"]
+            evidence = claim.get("evidence_bundle") if isinstance(claim.get("evidence_bundle"), dict) else {}
+            support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+            refs = [f"claim:{claim_id}"]
+            if evidence.get("evidence_bundle_id"):
+                refs.append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+            if evidence.get("search_snapshot_id"):
+                refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
+            refs.extend(evidence.get("artifact_refs", []))
+            refs.extend(evidence.get("derived_representation_refs", []))
+            refs.extend(support.get("citation_refs", []))
+            refs.extend(support.get("citation_check_refs", []))
+            self._send_json(
+                _json_response(
+                    "failed",
+                    claim=claim,
+                    evidence_refs=list(dict.fromkeys(refs)),
+                    audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED",
+                            "message": "Claim approval requires statement-level semantic support for the exact cited Evidence Bundle revision.",
+                            "resolution_path": [
+                                "Review the exact Claim statement against every cited span.",
+                                "Record semantic support separately from the later owner approval decision.",
+                                "Keep the Claim as Draft / Source supported until that review Interface exists.",
+                            ],
+                        }
+                    ],
+                ),
+                400,
+            )
+            return
+        if result.get("status") == "integrity_failed":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    claim=result["claim"],
+                    audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+                    errors=[
+                        {
+                            "code": "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED",
+                            "message": "Claim approval requires the exact revision-bound evidence chain to pass integrity verification.",
+                            "reason": result["claim"].get("evidence_integrity", {}).get("reason"),
+                        }
+                    ],
+                ),
+                409,
             )
             return
         support = result["claim"].get("statement_support") if isinstance(result["claim"].get("statement_support"), dict) else {}

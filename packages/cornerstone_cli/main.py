@@ -858,6 +858,18 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
             payload["errors"].append({"code": "CS_ARTIFACT_STORAGE_ERROR", "message": str(error)})
             print_payload(payload, args.json)
             return EXIT_RUNTIME_FAILURE
+        if result.get("status") == "integrity_failed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                    "message": "An existing Artifact record failed content-identity verification.",
+                    "artifact_id": result.get("artifact_id"),
+                    "reason": result.get("reason"),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_RUNTIME_FAILURE
         artifact = result["artifact"]
         audit_event = result["audit_event"]
         audit_events = result.get("audit_events", [audit_event])
@@ -896,6 +908,19 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
             print_payload(payload, args.json)
             return EXIT_RUNTIME_FAILURE
 
+        if result.get("status") == "integrity_failed":
+            payload["status"] = "failed"
+            payload["errors"].append(
+                {
+                    "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                    "message": "An existing Artifact record failed content-identity verification.",
+                    "artifact_id": result.get("artifact_id"),
+                    "reason": result.get("reason"),
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_RUNTIME_FAILURE
+
         artifact = result["artifact"]
         audit_event = result["audit_event"]
         audit_events = result.get("audit_events", [audit_event])
@@ -916,6 +941,9 @@ def command_artifact_ingest(args: argparse.Namespace) -> int:
             f"storage:{artifact['original_storage_ref']}",
         ]
     )
+    derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+    if derived_ref:
+        payload["evidence_refs"].append(str(derived_ref))
     payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in audit_events)
     payload["policy_decision_refs"].extend(f"policy:{decision['id']}" for decision in policy_decisions)
     if policy_decisions:
@@ -954,7 +982,31 @@ def command_artifact_show(args: argparse.Namespace) -> int:
         payload["errors"].append({"code": "CS_SCOPE_DENIED", "message": "Artifact is outside the requested scope."})
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                "message": "Artifact record failed content-identity verification.",
+                "artifact_id": args.artifact_id,
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
     artifact = result["record"]
+    if not store.original_available(artifact):
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                "message": "Artifact original failed content-identity verification.",
+                "artifact_id": args.artifact_id,
+                "reason": "artifact_original_identity_mismatch",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
     audit_event = result["audit_event"]
     artifact_detail = dict(artifact)
     artifact_detail["derived_text_preview"] = store.derived_text_preview(artifact)
@@ -969,7 +1021,12 @@ def command_artifact_show(args: argparse.Namespace) -> int:
         }
     )
     payload["artifact"] = artifact_detail
-    payload["evidence_refs"].append(f"artifact:{artifact['artifact_id']}")
+    payload["evidence_refs"].extend(
+        [f"artifact:{artifact['artifact_id']}", f"storage:{artifact.get('original_storage_ref')}"]
+    )
+    derived_ref = artifact.get("derived", {}).get("derived_representation_ref") or artifact.get("derived", {}).get("representation_ref")
+    if derived_ref:
+        payload["evidence_refs"].append(str(derived_ref))
     payload["evidence_refs"].extend(f"claim:{claim['claim_id']}" for claim in artifact_detail["related_claims"])
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
@@ -9616,6 +9673,18 @@ def command_search_snapshot_show(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SEARCH_SNAPSHOT_INTEGRITY_FAILED",
+                "message": "Search snapshot failed revision-integrity verification.",
+                "search_snapshot_id": args.search_snapshot_id,
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
     snapshot = result["snapshot"]
     audit_event = result["audit_event"]
     payload["search_snapshot"] = snapshot
@@ -9671,8 +9740,9 @@ def command_evidence_bundle_create(args: argparse.Namespace) -> int:
         payload["errors"].append(
             {
                 "code": "CS_EVIDENCE_ARTIFACT_INTEGRITY_FAILED",
-                "message": "Evidence Bundle creation requires every source original to pass integrity checks.",
+                "message": "Evidence Bundle creation requires the complete Search, original, and Derived Representation chain to pass integrity checks.",
                 "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
             }
         )
         print_payload(payload, args.json)
@@ -9696,6 +9766,11 @@ def command_evidence_bundle_create(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+    payload["evidence_refs"].extend(
+        str(item["derived_representation_ref"])
+        for item in bundle.get("evidence_items", [])
+        if isinstance(item, dict) and item.get("derived_representation_ref")
+    )
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -9731,6 +9806,19 @@ def command_evidence_bundle_show(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_BUNDLE_INTEGRITY_FAILED",
+                "message": "Evidence Bundle failed revision or source-integrity verification.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
     bundle = result["bundle"]
     audit_event = result["audit_event"]
@@ -9750,6 +9838,11 @@ def command_evidence_bundle_show(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in bundle.get("evidence_items", []))
+    payload["evidence_refs"].extend(
+        str(item["derived_representation_ref"])
+        for item in bundle.get("evidence_items", [])
+        if isinstance(item, dict) and item.get("derived_representation_ref")
+    )
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -9784,6 +9877,19 @@ def command_evidence_view(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_EVIDENCE_VIEW_INTEGRITY_FAILED",
+                "message": "Evidence Viewer could not verify the bound Bundle, original, or Derived Representation.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
     viewer = result["viewer"]
     audit_event = result["audit_event"]
@@ -9805,6 +9911,11 @@ def command_evidence_view(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(f"artifact:{item['artifact_id']}" for item in viewer.get("viewer_items", []))
+    payload["evidence_refs"].extend(
+        str(item.get("derived", {}).get("metadata", {}).get("derived_representation_ref"))
+        for item in viewer.get("viewer_items", [])
+        if item.get("derived", {}).get("metadata", {}).get("derived_representation_ref")
+    )
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -9852,6 +9963,19 @@ def command_brief_create(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_BRIEF_EVIDENCE_INTEGRITY_FAILED",
+                "message": "Brief creation requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
     brief = result["brief"]
     audit_event = result["audit_event"]
@@ -9878,6 +10002,7 @@ def command_brief_create(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(evidence.get("derived_representation_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -9934,6 +10059,7 @@ def command_brief_show(args: argparse.Namespace) -> int:
         ]
     )
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(evidence.get("derived_representation_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -9999,6 +10125,20 @@ def command_claim_create(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED",
+                "message": "Claim creation requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                "brief_id": args.brief_id,
+                "evidence_bundle_id": args.evidence_bundle_id,
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
     claim = result["claim"]
     audit_event = result["audit_event"]
@@ -10021,6 +10161,7 @@ def command_claim_create(args: argparse.Namespace) -> int:
     if related_brief.get("brief_id"):
         payload["evidence_refs"].append(f"brief:{related_brief['brief_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(evidence.get("derived_representation_refs", []))
     statement_support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
     payload["evidence_refs"].extend(statement_support.get("citation_refs", []))
     payload["evidence_refs"].extend(statement_support.get("citation_check_refs", []))
@@ -10071,6 +10212,16 @@ def command_claim_approve(args: argparse.Namespace) -> int:
         payload["ids"]["search_snapshot_id"] = evidence["search_snapshot_id"]
     payload["claim"] = claim
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
+    payload["evidence_refs"].append(f"claim:{claim['claim_id']}")
+    if evidence.get("evidence_bundle_id"):
+        payload["evidence_refs"].append(f"evidence_bundle:{evidence['evidence_bundle_id']}")
+    if evidence.get("search_snapshot_id"):
+        payload["evidence_refs"].append(f"search_snapshot:{evidence['search_snapshot_id']}")
+    payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(evidence.get("derived_representation_refs", []))
+    support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+    payload["evidence_refs"].extend(support.get("citation_refs", []))
+    payload["evidence_refs"].extend(support.get("citation_check_refs", []))
     if result.get("status") == "evidence_required":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -10101,18 +10252,33 @@ def command_claim_approve(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "semantic_support_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED",
+                "message": "Claim approval requires statement-level semantic support for the exact cited Evidence Bundle revision.",
+                "resolution_path": [
+                    "Review the exact Claim statement against every cited span.",
+                    "Record semantic support separately from the later owner approval decision.",
+                    "Keep the Claim as Draft / Source supported until that review Interface exists.",
+                ],
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED",
+                "message": "Claim approval requires the exact revision-bound evidence chain to pass integrity verification.",
+                "reason": claim.get("evidence_integrity", {}).get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
 
-    payload["evidence_refs"].extend(
-        [
-            f"claim:{claim['claim_id']}",
-            f"evidence_bundle:{evidence['evidence_bundle_id']}",
-            f"search_snapshot:{evidence['search_snapshot_id']}",
-        ]
-    )
-    payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
-    support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
-    payload["evidence_refs"].extend(support.get("citation_refs", []))
-    payload["evidence_refs"].extend(support.get("citation_check_refs", []))
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -10163,6 +10329,10 @@ def command_claim_show(args: argparse.Namespace) -> int:
     if evidence.get("search_snapshot_id"):
         payload["evidence_refs"].append(f"search_snapshot:{evidence['search_snapshot_id']}")
     payload["evidence_refs"].extend(evidence.get("artifact_refs", []))
+    payload["evidence_refs"].extend(evidence.get("derived_representation_refs", []))
+    support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
+    payload["evidence_refs"].extend(support.get("citation_refs", []))
+    payload["evidence_refs"].extend(support.get("citation_check_refs", []))
     payload["audit_refs"].append(f"audit:{audit_event['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
@@ -10175,7 +10345,7 @@ def command_claim_basis_export(args: argparse.Namespace) -> int:
     result = store.export_claim_basis(args.claim_id, requested_scope)
     payload = base_response("cornerstone claim basis-export", "success", root)
     payload.update(requested_scope)
-    if result.get("status") in {"not_found", "scope_denied", "evidence_required"}:
+    if result.get("status") in {"not_found", "scope_denied", "evidence_required", "integrity_failed"}:
         exit_code = _record_command_failure(payload, result, resource_label="CLAIM_BASIS")
         print_payload(payload, args.json)
         return exit_code
@@ -10220,11 +10390,22 @@ def _record_command_failure(payload: dict[str, Any], result: dict[str, Any], *, 
         payload["errors"].append(
             {
                 "code": f"CS_{resource_label}_EVIDENCE_REQUIRED",
-                "message": "This record requires evidence-backed source material.",
+                "message": "This record requires revision-bound source material.",
                 "resource": result.get("resource"),
             }
         )
         return EXIT_EVIDENCE_MISSING
+    if status == "integrity_failed":
+        payload["errors"].append(
+            {
+                "code": f"CS_{resource_label}_INTEGRITY_FAILED",
+                "message": "The revision-bound source chain failed integrity verification.",
+                "resource": result.get("resource"),
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        return EXIT_RUNTIME_FAILURE
     payload["errors"].append(
         {
             "code": f"CS_{resource_label}_INVALID",
@@ -15708,11 +15889,23 @@ def command_conversation_start(args: argparse.Namespace) -> int:
     root = repo_root()
     store = LocalRuntimeStore(state_dir(root, args))
     requested_scope = scope_args(args)
-    result = store.start_conversation(args.message, requested_scope)
-    conversation = result["conversation"]
-    artifact = result["artifact"]
     payload = base_response("cornerstone conversation start", "success", root)
     payload.update(requested_scope)
+    result = store.start_conversation(args.message, requested_scope)
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+                "message": "The conversation source could not be saved because an existing Artifact record failed content-identity verification.",
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
+    conversation = result["conversation"]
+    artifact = result["artifact"]
     payload["conversation"] = conversation
     payload["artifact"] = artifact
     payload["ids"].update(
@@ -15767,6 +15960,31 @@ def command_conversation_promote(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_SCOPE_DENIED
+    if result.get("status") == "evidence_required":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_PROMOTION_EVIDENCE_REQUIRED",
+                "message": "Conversation promotion requires a non-empty Evidence Bundle.",
+                "evidence_bundle_id": args.evidence_bundle_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "integrity_failed":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_PROMOTION_EVIDENCE_INTEGRITY_FAILED",
+                "message": "Conversation promotion requires a revision-bound Evidence Bundle with verified originals and Derived Representations.",
+                "conversation_id": args.conversation_id,
+                "evidence_bundle_id": args.evidence_bundle_id,
+                "artifact_id": result.get("artifact_id"),
+                "reason": result.get("reason"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
     if result.get("status") == "unsafe_source_denied":
         policy_decision = result.get("policy_decision", {})
         conversation = result.get("conversation", {})
@@ -24930,7 +25148,7 @@ def build_parser() -> argparse.ArgumentParser:
     claim_create.add_argument("--json", action="store_true", help="Emit JSON output")
     claim_create.set_defaults(func=command_claim_create)
 
-    claim_approve = claim_sub.add_parser("approve", help="Approve an evidence-backed claim")
+    claim_approve = claim_sub.add_parser("approve", help="Check a claim for owner-approval eligibility")
     claim_approve.add_argument("claim_id", help="Claim ID")
     add_state_argument(claim_approve)
     add_scope_arguments(claim_approve)

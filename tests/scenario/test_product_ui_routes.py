@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+import io
 import json
 import re
 import shutil
@@ -12,6 +13,7 @@ import unittest
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import redirect_stdout
 from pathlib import Path
 from typing import Any
 from unittest import mock
@@ -31,6 +33,7 @@ from cornerstone_cli.artifacts import (
 )
 from cornerstone_cli.acceptance import VS4_PRODUCT_FORBIDDEN_RE, _vs4_product_journey_timeline_evidence
 from cornerstone_cli.briefing import RuntimeModelConfig
+from cornerstone_cli.main import main as cli_main
 from cornerstone_cli.product_access import ProductAccessApplication, SearchRequest
 from cornerstone_cli.product_runtime import DEFAULT_SCOPE, make_server
 from cornerstone_cli.runtime import LocalRuntimeStore
@@ -196,7 +199,11 @@ class ProductUiRoutesTest(unittest.TestCase):
                 self.assertIn("Global search", html)
                 self.assertIn("Search sources, Briefs, decisions, and actions", html)
                 self.assertIn('aria-label="Search the active workspace"', html)
-                self.assertIn('aria-label="Open Review inbox with 0 items"', html)
+                if route in {"/", "/inbox"}:
+                    self.assertIn('aria-label="Open Review inbox with 0 items"', html)
+                else:
+                    self.assertIn('aria-label="Open Review inbox"', html)
+                    self.assertNotIn('aria-label="Open Review inbox with 0 items"', html)
                 self.assertIn('<details class="cs-help-menu">', html)
                 self.assertIn('aria-label="Open help"', html)
                 self.assertIn('<span class="cs-help-glyph" aria-hidden="true">?</span>', html)
@@ -446,8 +453,128 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertNotIn(secret, html)
         self.assertNotIn(secret, reused)
         self.assertIn("[REDACTED]", html)
-        self.assertNotIn("Search snapshot unavailable", reused)
+        self.assertIn("Search snapshot unavailable", reused)
         self.assertNotIn(secret, LocalRuntimeStore(self.state_dir).audit_path.read_text())
+
+    def test_snapshot_reuse_binds_to_exact_query_hash_and_fails_closed_without_revision_binding(self) -> None:
+        store = LocalRuntimeStore(self.state_dir)
+        access = ProductAccessApplication(store)
+        first_secret = "sk-snapshotfirst12345678"
+        second_secret = "sk-snapshotsecond12345678"
+
+        created = access.search(
+            SearchRequest(query=first_secret, scope=dict(DEFAULT_SCOPE), mode="workspace")
+        )
+        snapshot = created["search_snapshot"]
+        snapshot_id = snapshot["search_snapshot_id"]
+        self.assertEqual(snapshot["query"], "[REDACTED]")
+
+        exact = access.search(
+            SearchRequest(
+                query=first_secret,
+                scope=dict(DEFAULT_SCOPE),
+                mode="workspace",
+                snapshot_id=snapshot_id,
+            )
+        )
+        collided_redaction = access.search(
+            SearchRequest(
+                query=second_secret,
+                scope=dict(DEFAULT_SCOPE),
+                mode="workspace",
+                snapshot_id=snapshot_id,
+            )
+        )
+        self.assertEqual(exact["status"], "success")
+        self.assertEqual(collided_redaction["status"], "snapshot_query_mismatch")
+
+        secret_legacy_path = store.search_snapshot_path(snapshot_id)
+        secret_legacy = dict(snapshot)
+        secret_legacy.pop("query_sha256")
+        secret_legacy_path.write_text(json.dumps(secret_legacy, indent=2, sort_keys=True) + "\n")
+        unverifiable_legacy_secret = access.search(
+            SearchRequest(
+                query=first_secret,
+                scope=dict(DEFAULT_SCOPE),
+                mode="workspace",
+                snapshot_id=snapshot_id,
+            )
+        )
+        self.assertEqual(unverifiable_legacy_secret["status"], "integrity_failed")
+
+        legacy = access.search(
+            SearchRequest(query="legacy exact query", scope=dict(DEFAULT_SCOPE), mode="workspace")
+        )["search_snapshot"]
+        legacy_path = store.search_snapshot_path(legacy["search_snapshot_id"])
+        legacy.pop("query_sha256")
+        legacy_path.write_text(json.dumps(legacy, indent=2, sort_keys=True) + "\n")
+        legacy_exact = access.search(
+            SearchRequest(
+                query="legacy exact query",
+                scope=dict(DEFAULT_SCOPE),
+                mode="workspace",
+                snapshot_id=legacy["search_snapshot_id"],
+            )
+        )
+        legacy_mismatch = access.search(
+            SearchRequest(
+                query="legacy different query",
+                scope=dict(DEFAULT_SCOPE),
+                mode="workspace",
+                snapshot_id=legacy["search_snapshot_id"],
+            )
+        )
+        self.assertEqual(legacy_exact["status"], "integrity_failed")
+        self.assertEqual(legacy_mismatch["status"], "integrity_failed")
+
+    def test_tampered_evidence_readers_return_structured_http_integrity_failures(self) -> None:
+        store = LocalRuntimeStore(self.state_dir)
+        self.create_source_stack()
+        snapshot = store.search("vendor renewal", **DEFAULT_SCOPE)["snapshot"]
+        snapshot_path = store.search_snapshot_path(snapshot["search_snapshot_id"])
+        tampered_snapshot = json.loads(snapshot_path.read_text())
+        tampered_snapshot["results"][0]["snippet"] = "forged snapshot"
+        snapshot_path.write_text(json.dumps(tampered_snapshot, indent=2, sort_keys=True) + "\n")
+
+        snapshot_status, _, snapshot_raw = _request(
+            self.base_url,
+            f"/search-snapshots/{snapshot['search_snapshot_id']}?{urlencode(DEFAULT_SCOPE)}",
+            headers={"accept": "application/json"},
+        )
+        self.assertEqual(snapshot_status, 409)
+        self.assertEqual(
+            json.loads(snapshot_raw)["errors"][0]["code"],
+            "CS_SEARCH_SNAPSHOT_INTEGRITY_FAILED",
+        )
+
+        clean_snapshot = store.search("vendor renewal", **DEFAULT_SCOPE)["snapshot"]
+        bundle = store.create_evidence_bundle(clean_snapshot["search_snapshot_id"], dict(DEFAULT_SCOPE))["bundle"]
+        bundle_path = store.evidence_bundle_path(bundle["evidence_bundle_id"])
+        tampered_bundle = json.loads(bundle_path.read_text())
+        tampered_bundle["evidence_items"][0]["snippet"] = "forged bundle"
+        bundle_path.write_text(json.dumps(tampered_bundle, indent=2, sort_keys=True) + "\n")
+
+        bundle_status, _, bundle_raw = _request(
+            self.base_url,
+            f"/evidence-bundles/{bundle['evidence_bundle_id']}?{urlencode(DEFAULT_SCOPE)}",
+            headers={"accept": "application/json"},
+        )
+        self.assertEqual(bundle_status, 409)
+        self.assertEqual(
+            json.loads(bundle_raw)["errors"][0]["code"],
+            "CS_EVIDENCE_BUNDLE_INTEGRITY_FAILED",
+        )
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle["evidence_bundle_id"]},
+        )
+        self.assertEqual(brief_status, 409)
+        self.assertEqual(
+            json.loads(brief_raw)["errors"][0]["code"],
+            "CS_BRIEF_EVIDENCE_INTEGRITY_FAILED",
+        )
 
     def test_icon_assets_have_explicit_success_and_not_found_contracts(self) -> None:
         status, content_type, body = _request_bytes(
@@ -514,6 +641,181 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(event["details"]["filters"], {})
         self.assertIn(f'data-page-audit-ref="audit:{event["event_id"]}"', html)
         self.assertNotIn(secret, store.audit_path.read_text())
+
+    def test_collection_routes_only_read_the_record_families_they_project(self) -> None:
+        class ProjectionSpyStore:
+            def __init__(self) -> None:
+                self.core_reads: list[str] = []
+
+            def _artifact_records(self, _: dict[str, str]) -> list[dict[str, Any]]:
+                self.core_reads.append("artifact")
+                return []
+
+            def _brief_records(self, _: dict[str, str]) -> list[dict[str, Any]]:
+                self.core_reads.append("brief")
+                return []
+
+            def _claim_records(self, _: dict[str, str]) -> list[dict[str, Any]]:
+                self.core_reads.append("claim")
+                return []
+
+            def _action_records(self, _: dict[str, str]) -> list[dict[str, Any]]:
+                self.core_reads.append("action")
+                return []
+
+            def _memory_records(self, _: dict[str, str]) -> list[dict[str, Any]]:
+                self.core_reads.append("memory")
+                return []
+
+            def _all_audit_events(self) -> list[dict[str, Any]]:
+                return []
+
+            def verify_audit(self) -> dict[str, Any]:
+                return {"status": "success", "event_count": 0, "errors": []}
+
+            def append_audit(
+                self,
+                _event_type: str,
+                _scope: dict[str, str],
+                _subject: dict[str, str],
+                _details: dict[str, Any],
+            ) -> dict[str, str]:
+                return {"event_id": "audit_projection"}
+
+        expected_reads = {
+            "/": {"artifact", "brief", "claim", "action", "memory"},
+            "/search": set(),
+            "/artifacts": {"artifact", "brief", "claim", "action"},
+            "/briefs": {"artifact", "brief"},
+            "/claims": {"artifact", "brief", "claim"},
+            "/actions": {"artifact", "brief", "claim", "action"},
+            "/inbox": {"artifact", "brief", "claim", "action", "memory"},
+            "/audit": set(),
+        }
+        for route, expected in expected_reads.items():
+            with self.subTest(route=route):
+                store = ProjectionSpyStore()
+                html = product_ui.render_product_page(ROOT, store, DEFAULT_SCOPE, route, {})
+                self.assertEqual(set(store.core_reads), expected)
+                self.assertEqual(len(store.core_reads), len(expected))
+                self.assertIn('data-product-shell="cornerstone"', html)
+
+    def test_detail_read_returns_non_disclosing_503_when_audit_receipt_fails(self) -> None:
+        secret = "Detail record text must never render after its read audit fails."
+        created = LocalRuntimeStore(self.state_dir).ingest_text_artifact(
+            secret,
+            DEFAULT_SCOPE,
+            source_type="user_paste",
+            source_ref="detail-audit-failure",
+            trust="untrusted",
+        )["artifact"]
+
+        with mock.patch.object(LocalRuntimeStore, "append_audit", side_effect=OSError("ledger offline")):
+            status, content_type, html = _request(
+                self.base_url,
+                f"/artifacts/{created['artifact_id']}?view=html",
+                headers={"accept": "text/html"},
+            )
+
+        self.assertEqual(status, 503)
+        self.assertIn("text/html", content_type)
+        self.assertIn('data-product-state="access-audit-unavailable"', html)
+        self.assertIn("Access unavailable", html)
+        self.assertNotIn(secret, html)
+        self.assertNotIn(str(created["artifact_id"]), html)
+        self.assertNotIn("ledger offline", html)
+
+    def test_surface_integrity_failures_are_structured_for_artifact_and_conversation_paths(self) -> None:
+        store = LocalRuntimeStore(self.state_dir)
+
+        identity_text = "Surface adapters must reject altered Artifact identity metadata."
+        artifact = store.ingest_text_artifact(
+            identity_text,
+            DEFAULT_SCOPE,
+            source_type="user_paste",
+            source_ref="surface-integrity",
+            trust="untrusted",
+        )["artifact"]
+        artifact_path = store.artifact_path(artifact["artifact_id"], DEFAULT_SCOPE)
+        altered_artifact = json.loads(artifact_path.read_text())
+        altered_artifact["original_size_bytes"] += 1
+        artifact_path.write_text(json.dumps(altered_artifact, indent=2, sort_keys=True) + "\n")
+
+        api_status, _, api_raw = _request(self.base_url, f"/artifacts/{artifact['artifact_id']}")
+        self.assertEqual(api_status, 409)
+        self.assertEqual(
+            json.loads(api_raw)["errors"][0]["code"],
+            "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED",
+        )
+
+        def run_cli(*arguments: str) -> tuple[int, dict[str, Any]]:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                exit_code = cli_main([*arguments, "--state-dir", str(self.state_dir), "--json"])
+            return exit_code, json.loads(output.getvalue())
+
+        show_exit, show_payload = run_cli("artifact", "show", artifact["artifact_id"])
+        self.assertEqual(show_exit, 5)
+        self.assertEqual(show_payload["errors"][0]["code"], "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED")
+
+        start_exit, start_payload = run_cli("conversation", "start", "--message", identity_text)
+        self.assertEqual(start_exit, 5)
+        self.assertEqual(start_payload["errors"][0]["code"], "CS_ARTIFACT_IDENTITY_INTEGRITY_FAILED")
+
+        source = store.ingest_text_artifact(
+            "Conversation promotion needs verified renewal evidence.",
+            DEFAULT_SCOPE,
+            source_type="user_paste",
+            source_ref="conversation-promotion-integrity",
+            trust="untrusted",
+        )["artifact"]
+        snapshot = store.search("verified renewal evidence", **DEFAULT_SCOPE)["snapshot"]
+        bundle = store.create_evidence_bundle(snapshot["search_snapshot_id"], dict(DEFAULT_SCOPE))["bundle"]
+        claim = store.create_claim_from_evidence_bundle(
+            bundle["evidence_bundle_id"],
+            "Conversation promotion needs verified renewal evidence.",
+            dict(DEFAULT_SCOPE),
+        )["claim"]
+        conversation = store.start_conversation("Clean promotion request", dict(DEFAULT_SCOPE))["conversation"]
+        derived_path = store.artifact_dir / bundle["evidence_items"][0]["derived_storage_ref"]
+        derived_path.write_text("forged derived text")
+
+        approve_exit, approve_payload = run_cli("claim", "approve", claim["claim_id"])
+        self.assertEqual(approve_exit, 5)
+        self.assertEqual(approve_payload["errors"][0]["code"], "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED")
+
+        promote_args = (
+            "conversation",
+            "promote",
+            conversation["conversation_id"],
+            "--statement",
+            "Conversation promotion needs verified renewal evidence.",
+            "--evidence-bundle-id",
+            bundle["evidence_bundle_id"],
+        )
+        promote_exit, promote_payload = run_cli(*promote_args)
+        self.assertEqual(promote_exit, 5)
+        self.assertEqual(
+            promote_payload["errors"][0]["code"],
+            "CS_CONVERSATION_PROMOTION_EVIDENCE_INTEGRITY_FAILED",
+        )
+
+        promote_status, _, promote_raw = _request(
+            self.base_url,
+            f"/conversations/{conversation['conversation_id']}/promote",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "statement": "Conversation promotion needs verified renewal evidence.",
+                "evidence_bundle_id": bundle["evidence_bundle_id"],
+            },
+        )
+        self.assertEqual(promote_status, 409)
+        self.assertEqual(
+            json.loads(promote_raw)["errors"][0]["code"],
+            "CS_CONVERSATION_PROMOTION_EVIDENCE_INTEGRITY_FAILED",
+        )
+        self.assertEqual(source["artifact_id"], bundle["evidence_items"][0]["artifact_id"])
 
     def test_browser_file_upload_preserves_exact_bytes_and_content_identity(self) -> None:
         scope_query = urlencode(DEFAULT_SCOPE)
@@ -1035,11 +1337,13 @@ class ProductUiRoutesTest(unittest.TestCase):
 
         artifacts_html = self.fetch_product_html("/artifacts")
         briefs_html = self.fetch_product_html("/briefs")
+        inbox_html = self.fetch_product_html("/inbox")
         artifact_detail = self.fetch_product_html(f"/artifacts/{artifact['artifact_id']}?view=html")
         brief_detail = self.fetch_product_html(f"/briefs/{brief['brief_id']}?view=html")
 
         self.assertNotIn(source_text, artifacts_html)
         self.assertNotIn(brief_title, briefs_html)
+        self.assertNotIn(brief_title, inbox_html)
         self.assertIn('data-product-surface="owner-record"', artifact_detail)
         self.assertIn('data-product-surface="owner-record"', brief_detail)
         self.assertNotIn(source_text, artifact_detail)
@@ -1186,6 +1490,28 @@ class ProductUiRoutesTest(unittest.TestCase):
         not_found_names = {spec["name"] for spec in not_found_specs}
         interaction_specs = capture_vs4.interaction_route_specs()
         interaction_names = {spec["name"] for spec in interaction_specs}
+        specs_by_name = {spec["name"]: spec for spec in specs}
+
+        self.assertEqual(
+            specs_by_name["claims-desktop"]["required_text"],
+            ["Claims under review", "Semantic review needed", "Review posture", "Trust ladder"],
+        )
+        self.assertEqual(
+            specs_by_name["action-detail-desktop"]["required_text"],
+            ["Blocked action", "Action blocked", "Why this action", "Policy and boundary"],
+        )
+        self.assertIn(
+            "[data-action-policy-blocked='true']",
+            specs_by_name["action-detail-desktop"]["required_selectors"],
+        )
+        self.assertNotIn(
+            "[data-action-preview='true']",
+            specs_by_name["action-detail-desktop"]["required_selectors"],
+        )
+        long_ref = "artifact:art_" + ("a" * 64)
+        breakable_ref = product_ui._breakable_ref(long_ref)
+        self.assertIn("<wbr>", breakable_ref)
+        self.assertEqual(breakable_ref.replace("<wbr>", ""), long_ref)
 
         for route in [
             "/",
@@ -1510,12 +1836,12 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Back to Claims", claim_html)
         self.assertIn("Decision statement", claim_html)
         self.assertIn('data-source-support-attached="true"', claim_html)
-        self.assertIn('data-approval-eligible="true"', claim_html)
+        self.assertIn('data-approval-eligible="false"', claim_html)
         self.assertIn("Supporting evidence", claim_html)
-        self.assertIn("Ready for an owner decision", claim_html)
-        self.assertIn('id="cs-approve-claim-button"', claim_html)
-        self.assertIn('id="cs-claim-approval-dialog"', claim_html)
-        self.assertIn(f'postJson("/claims/" + encodeURIComponent(claimId) + "/approve"', claim_html)
+        self.assertIn("Approval is not available", claim_html)
+        self.assertIn("Semantic review required", claim_html)
+        self.assertNotIn('id="cs-approve-claim-button"', claim_html)
+        self.assertNotIn('id="cs-claim-approval-dialog"', claim_html)
         self.assertNotIn('href="/inbox">Request review', claim_html)
         self.assertNotRegex(claim_html, r'<a[^>]*>\s*Save\s*</a>')
         self.assert_product_surface_is_clean(claim_html)
@@ -1526,15 +1852,15 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Back to Actions", action_html)
         self.assertIn("Open history", action_html)
         self.assertNotIn('href="/claims">Back to claims', action_html)
-        self.assertIn("Action preview", action_html)
+        self.assertIn("Blocked action", action_html)
         self.assertIn('data-approval-required="true"', action_html)
-        self.assertIn('data-approval-eligible="true"', action_html)
-        self.assertIn('data-real-external-http-calls="0"', action_html)
-        self.assertIn("Proposed change", action_html)
-        self.assertIn("Approval required", action_html)
-        self.assertIn('id="cs-approve-action-button"', action_html)
-        self.assertIn('id="cs-action-approval-dialog"', action_html)
-        self.assertIn(f'postJson("/actions/" + encodeURIComponent(actionId) + "/approve"', action_html)
+        self.assertIn('data-approval-eligible="false"', action_html)
+        self.assertIn('data-real-external-http-calls="not-recorded"', action_html)
+        self.assertIn("Action blocked", action_html)
+        self.assertIn("Policy blocked", action_html)
+        self.assertIn("Approval", action_html)
+        self.assertNotIn('id="cs-approve-action-button"', action_html)
+        self.assertNotIn('id="cs-action-approval-dialog"', action_html)
         self.assertIn("Sources", action_html)
         self.assertIn("Policy and boundary", action_html)
         self.assertNotIn('href="/inbox">Request approval</a>', action_html)
@@ -1549,9 +1875,11 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assert_product_surface_is_clean(artifacts_html)
 
         claims_html = self.fetch_product_html("/claims")
-        self.assertIn("Claims that need source support", claims_html)
+        self.assertIn("Claims under review", claims_html)
         self.assertIn("Review posture", claims_html)
         self.assertIn("Trust ladder", claims_html)
+        self.assertIn("Semantic review", claims_html)
+        self.assertNotIn("Evidence-backed", claims_html)
         self.assert_product_surface_is_clean(claims_html)
 
         actions_html = self.fetch_product_html("/actions")
@@ -1605,14 +1933,14 @@ class ProductUiRoutesTest(unittest.TestCase):
         audit_count = len(store._all_audit_events())
 
         html = self.fetch_product_html(
-            f"/inbox?lane=approval-requests&item=action%3A{action_id}"
+            f"/inbox?lane=policy-blocked&item=action%3A{action_id}"
         )
 
         self.assertEqual(len(store._all_audit_events()), audit_count + 1)
-        self.assertIn('data-inbox-lane="approval-requests"', html)
+        self.assertIn('data-inbox-lane="policy-blocked"', html)
         self.assertIn(f'data-selected-item="action:{action_id}"', html)
-        self.assertIn('class="cs-inbox-tab is-active" href="/inbox?lane=approval-requests" aria-current="page"', html)
-        self.assertIn(f'href="/inbox?lane=approval-requests&amp;item=action%3A{action_id}#selected-work"', html)
+        self.assertIn('class="cs-inbox-tab is-active" href="/inbox?lane=policy-blocked" aria-current="page"', html)
+        self.assertIn(f'href="/inbox?lane=policy-blocked&amp;item=action%3A{action_id}#selected-work"', html)
         self.assertIn("Prepare the renewal decision follow-up", html)
         self.assertIn("Continue review", html)
         self.assertIn(f'href="/actions/{action_id}?view=html"', html)
@@ -1667,33 +1995,40 @@ class ProductUiRoutesTest(unittest.TestCase):
     def test_home_ask_prepares_fallback_brief_from_non_conversation_sources(self) -> None:
         artifact_id, _, _ = self.create_source_stack()
         home = self.fetch_product_html("/")
-        self.assertIn('excluded_source_types: ["conversation_turn"]', home)
-        self.assertLess(home.index('postJson("/search"'), home.index('postJson("/conversations"'))
+        self.assertNotIn('postJson("/search"', home)
+        self.assertIn("const sourceSnapshot = answered.search_snapshot || {};", home)
         self.assertIn("Keyword-summary Brief prepared", home)
         self.assertIn("Brief preparation was blocked because the Ask text contained unsafe instructions", home)
 
+        snapshots_before = {
+            path.name for path in (self.state_dir / "search" / "snapshots").glob("*.json")
+        }
         conversation_status, _, conversation_raw = _request(
             self.base_url,
             "/conversations",
             method="POST",
-            payload={**DEFAULT_SCOPE, "message": "What does the vendor renewal source say?"},
+            payload={**DEFAULT_SCOPE, "message": "vendor renewal"},
         )
         self.assertEqual(conversation_status, 200)
         conversation = json.loads(conversation_raw)["conversation"]
         conversation_artifact_id = conversation["source_artifact_id"]
 
-        search_status, _, search_raw = _request(
+        answer_status, _, answer_raw = _request(
             self.base_url,
-            "/search",
+            f"/conversations/{conversation['conversation_id']}/answers",
             method="POST",
-            payload={
-                **DEFAULT_SCOPE,
-                "query": "vendor renewal",
-                "excluded_source_types": ["conversation_turn"],
-            },
+            payload={**DEFAULT_SCOPE, "question": "vendor renewal"},
         )
-        self.assertEqual(search_status, 200)
-        snapshot = json.loads(search_raw)["search_snapshot"]
+        self.assertEqual(answer_status, 200)
+        answer_payload = json.loads(answer_raw)
+        snapshot = answer_payload["search_snapshot"]
+        snapshots_after = {
+            path.name for path in (self.state_dir / "search" / "snapshots").glob("*.json")
+        }
+        self.assertEqual(
+            snapshots_after - snapshots_before,
+            {f"{snapshot['search_snapshot_id']}.json"},
+        )
         result_artifact_ids = {row.get("artifact_id") for row in snapshot["results"]}
         self.assertEqual(snapshot["excluded_source_types"], ["conversation_turn"])
         self.assertIn(artifact_id, result_artifact_ids)
@@ -2069,12 +2404,14 @@ class ProductUiRoutesTest(unittest.TestCase):
 
         action_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
         self.assertIn('data-execution-mode="Local / Mock / Draft"', action_html)
+        self.assertIn('data-product-state="blocked"', action_html)
         self.assertIn("Why this action", action_html)
         self.assertIn("Open supporting Claim", action_html)
-        self.assertIn("Proposed change", action_html)
+        self.assertIn("Action blocked", action_html)
+        self.assertIn("Policy blocked", action_html)
         self.assertIn("Policy and boundary", action_html)
         self.assertIn("Planned external calls", action_html)
-        self.assertIn('id="cs-approve-action-button"', action_html)
+        self.assertNotIn('id="cs-approve-action-button"', action_html)
         self.assertNotIn('href="/inbox">Request approval</a>', action_html)
 
         denied_status, _, denied_raw = _request(
@@ -2086,6 +2423,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(denied_status, 403)
         denial = json.loads(denied_raw)
         self.assertEqual(denial["status"], "denied")
+        self.assertEqual(denial["errors"][0]["code"], "CS_ACTION_POLICY_DENIED")
+        self.assertEqual(denial["errors"][0]["reason_code"], "CS_ACTION_CLAIM_AUTHORITY_REQUIRED")
         self.assertTrue(denial["errors"][0]["resolution_path"])
 
         denied_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
@@ -2283,7 +2622,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Open source Brief", claim_html)
         self.assertIn("History", claim_html)
 
-    def test_claim_approval_denial_and_approved_page_report_durable_state(self) -> None:
+    def test_claim_approval_denials_report_evidence_and_semantic_boundaries(self) -> None:
         unsupported_status, _, unsupported_raw = _request(
             self.base_url,
             "/claims",
@@ -2338,25 +2677,32 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(claim_status, 200)
         supported_claim = json.loads(claim_raw)["claim"]
         claim_id = supported_claim["claim_id"]
-        self.assertEqual(supported_claim["trust_state"], "evidence_backed")
-        self.assertEqual(supported_claim["statement_support"]["status"], "passed")
+        self.assertEqual(supported_claim["status"], "draft")
+        self.assertEqual(supported_claim["trust_state"], "draft")
+        self.assertEqual(supported_claim["statement_support"]["status"], "source_supported")
+        self.assertEqual(supported_claim["statement_support"]["source_support_state"], "passed")
         self.assertEqual(supported_claim["statement_support"]["citation_integrity_state"], "passed")
         self.assertTrue(supported_claim["statement_support"]["citation_refs"])
         self.assertTrue(supported_claim["statement_support"]["citation_check_refs"])
         self.assertEqual(supported_claim["statement_support"]["semantic_faithfulness_state"], "human_required")
-        approve_status, _, _ = _request(
+        self.assertFalse(supported_claim["statement_support"]["semantic_support_verified"])
+        self.assertFalse(supported_claim["authority"]["can_be_approved"])
+        approve_status, _, approve_raw = _request(
             self.base_url,
             f"/claims/{claim_id}/approve",
             method="POST",
             payload=dict(DEFAULT_SCOPE),
         )
-        self.assertEqual(approve_status, 200)
-        approved_html = self.fetch_product_html(f"/claims/{claim_id}?view=html")
-        self.assertIn("Approval recorded", approved_html)
-        self.assertIn('data-claim-approval-state="approved"', approved_html)
-        self.assertIn("Open Claim history", approved_html)
-        self.assertIn("This does not authorize an external action", approved_html)
-        self.assertNotIn('id="cs-approve-claim-button"', approved_html)
+        self.assertEqual(approve_status, 400)
+        approval = json.loads(approve_raw)
+        self.assertEqual(approval["errors"][0]["code"], "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED")
+        blocked_html = self.fetch_product_html(f"/claims/{claim_id}?view=html")
+        self.assertIn("Approval blocked", blocked_html)
+        self.assertIn('data-claim-approval-state="blocked"', blocked_html)
+        self.assertIn("Semantic review required", blocked_html)
+        self.assertIn("Semantic support and owner approval remain separate decisions", blocked_html)
+        self.assertNotIn("<h2>Approval recorded</h2>", blocked_html)
+        self.assertNotIn('id="cs-approve-claim-button"', blocked_html)
 
         show_status, show_content_type, _ = _request(self.base_url, f"/claims/{claim_id}", headers={"accept": "application/json"})
         self.assertEqual(show_status, 200)
@@ -2447,7 +2793,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         )
         self.assertEqual(create_status, 200, create_raw)
         claim = json.loads(create_raw)["claim"]
-        self.assertEqual(claim["statement_support"]["status"], "passed")
+        self.assertEqual(claim["statement_support"]["status"], "source_supported")
 
         store = LocalRuntimeStore(self.state_dir)
         tampered = dict(claim)
@@ -2460,9 +2806,9 @@ class ProductUiRoutesTest(unittest.TestCase):
             method="POST",
             payload=dict(DEFAULT_SCOPE),
         )
-        self.assertEqual(approve_status, 400, approve_raw)
+        self.assertEqual(approve_status, 409, approve_raw)
         approval = json.loads(approve_raw)
-        self.assertEqual(approval["errors"][0]["code"], "CS_CLAIM_SUPPORT_REQUIRED")
+        self.assertEqual(approval["errors"][0]["code"], "CS_CLAIM_EVIDENCE_INTEGRITY_FAILED")
         persisted = store.get_claim(claim["claim_id"])
         self.assertEqual(persisted["status"], "draft")
         denial_events = [
@@ -2471,7 +2817,7 @@ class ProductUiRoutesTest(unittest.TestCase):
             if event.get("event_type") == "claim.approval.denied"
             and event.get("subject", {}).get("id") == claim["claim_id"]
         ]
-        self.assertEqual(denial_events[-1]["details"]["reason"], "statement_support_missing_or_stale")
+        self.assertEqual(denial_events[-1]["details"]["reason"], "claim_evidence_integrity_failed")
 
     def test_inbox_renders_validated_runtime_journey_without_mutating_read(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
@@ -2684,7 +3030,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(len(store._all_audit_events()), audit_count)
         self.assertEqual(len(claim_ids), 2)
 
-    def test_executed_action_reports_durable_state_and_html_details_are_audited(self) -> None:
+    def test_claim_blocked_action_reports_durable_denial_and_html_details_are_audited(self) -> None:
         artifact_id, bundle_id, _ = self.create_source_stack()
         brief_status, _, brief_raw = _request(
             self.base_url,
@@ -2717,22 +3063,30 @@ class ProductUiRoutesTest(unittest.TestCase):
         )
         self.assertEqual(action_status, 200)
         action_id = json.loads(action_raw)["action_card"]["action_id"]
-        approve_status, _, _ = _request(
+        approve_status, _, approve_raw = _request(
             self.base_url,
             f"/actions/{action_id}/approve",
             method="POST",
             payload={**DEFAULT_SCOPE, "approver": "owner"},
         )
-        self.assertEqual(approve_status, 200)
+        self.assertEqual(approve_status, 403)
+        approve_error = json.loads(approve_raw)["errors"][0]
+        self.assertEqual(approve_error["code"], "CS_ACTION_APPROVAL_DENIED")
+        self.assertEqual(approve_error["reason_code"], "CS_ACTION_CLAIM_AUTHORITY_REQUIRED")
         execute_status, _, execute_raw = _request(
             self.base_url,
             f"/actions/{action_id}/execute",
             method="POST",
             payload=dict(DEFAULT_SCOPE),
         )
-        self.assertEqual(execute_status, 200, execute_raw)
+        self.assertEqual(execute_status, 403, execute_raw)
+        execute_error = json.loads(execute_raw)["errors"][0]
+        self.assertEqual(execute_error["code"], "CS_ACTION_POLICY_DENIED")
+        self.assertEqual(execute_error["reason_code"], "CS_ACTION_CLAIM_AUTHORITY_REQUIRED")
 
         store = LocalRuntimeStore(self.state_dir)
+        self.assertFalse(store.workflow_run_dir.exists())
+        self.assertFalse(store.action_result_dir.exists())
         audit_count_before_detail_reads = len(store._all_audit_events())
         detail_paths = [
             f"/artifacts/{artifact_id}?view=html",
@@ -2753,11 +3107,11 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.fetch_product_html(f"/briefs/{brief_id}?view=html")
         self.fetch_product_html(f"/claims/{claim_id}?view=html")
         action_html = self.fetch_product_html(f"/actions/{action_id}?view=html")
-        self.assertIn("Action result", action_html)
-        self.assertIn("Execution result", action_html)
-        self.assertIn('data-product-state="executed"', action_html)
-        self.assertIn('data-real-external-http-calls="0"', action_html)
-        self.assertIn("Approved by owner", action_html)
+        self.assertIn("Action blocked", action_html)
+        self.assertIn("Execution blocked", action_html)
+        self.assertIn('data-product-state="blocked"', action_html)
+        self.assertIn('data-real-external-http-calls="not-recorded"', action_html)
+        self.assertNotIn("Approved by owner", action_html)
         self.assertIn("Policy and boundary", action_html)
         self.assertIn("History", action_html)
         self.assertNotIn("Request approval", action_html)
@@ -2768,12 +3122,14 @@ class ProductUiRoutesTest(unittest.TestCase):
         actions_html = self.fetch_product_html("/actions")
         self.assertIn("Action records", actions_html)
         self.assertIn("Records", actions_html)
-        self.assertIn("Open result", actions_html)
-        self.assertIn("Recorded result", actions_html)
+        self.assertIn("Policy blocked", actions_html)
+        self.assertNotIn("Open result", actions_html)
+        self.assertNotIn("Recorded result", actions_html)
 
-        inbox_html = self.fetch_product_html("/inbox")
-        self.assertNotIn(f"/actions/{action_id}?view=html", inbox_html)
-        self.assertNotIn("Record a renewal follow-up", inbox_html)
+        inbox_html = self.fetch_product_html("/inbox?lane=policy-blocked")
+        self.assertIn(f"/actions/{action_id}?view=html", inbox_html)
+        self.assertIn("Record a renewal follow-up", inbox_html)
+        self.assertIn("Policy blocked", inbox_html)
 
         events_after_detail_reads = store._all_audit_events()
         detail_read_events = [
