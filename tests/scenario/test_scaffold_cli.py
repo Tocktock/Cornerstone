@@ -16350,19 +16350,38 @@ LocalRuntimeStore(state_dir).append_audit(
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs0-claim-evidence")
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["pass"], 2)
+        self.assertEqual(payload["summary"]["pass"], 1)
         self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_CLAIM_EVIDENCE_ONLY")
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        row_statuses = {row["id"]: row["status"] for row in payload["scenario_results"]}
+        self.assertEqual(row_statuses, {"CS-CLAIM-006": "PASS", "CS-CLAIM-007": "HUMAN_REQUIRED"})
         evidence = payload["claim_evidence"]
         self.assertEqual(evidence["unsupported_claim_trust_state"], "draft")
         self.assertEqual(evidence["unsupported_claim_show_evidence_refs"], [f"claim:{evidence['unsupported_claim_id']}"])
         self.assertEqual(evidence["unsupported_approval_exit_code"], 4)
         self.assertIn("CS_CLAIM_EVIDENCE_REQUIRED", evidence["unsupported_approval_error_codes"])
         self.assertTrue(evidence["unsupported_resolution_path"])
-        self.assertEqual(evidence["evidence_claim_trust_state"], "evidence_backed")
-        self.assertEqual(evidence["approved_claim_status"], "approved")
-        self.assertEqual(evidence["approved_claim_trust_state"], "approved")
-        self.assertFalse(evidence["approved_claim_authority"]["can_drive_autonomous_action"])
+        self.assertEqual(evidence["source_supported_claim_status"], "draft")
+        self.assertEqual(evidence["source_supported_claim_trust_state"], "draft")
+        support = evidence["source_supported_claim_statement_support"]
+        self.assertEqual(support["status"], "source_supported")
+        self.assertEqual(support["statement_support_state"], "source_supported")
+        self.assertEqual(support["source_support_state"], "passed")
+        self.assertEqual(support["semantic_faithfulness_state"], "human_required")
+        self.assertFalse(support["semantic_support_verified"])
+        self.assertFalse(support["approval_eligible"])
+        self.assertEqual(evidence["semantic_approval_exit_code"], 4)
+        self.assertIn("CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED", evidence["semantic_approval_error_codes"])
+        self.assertEqual(evidence["post_approval_attempt_claim_status"], "draft")
+        self.assertEqual(evidence["post_approval_attempt_claim_trust_state"], "draft")
+        for authority in (
+            evidence["source_supported_claim_authority"],
+            evidence["post_approval_attempt_claim_authority"],
+        ):
+            self.assertFalse(authority["can_be_approved"])
+            self.assertFalse(authority["can_publish_shared_truth"])
+            self.assertFalse(authority["can_drive_autonomous_action"])
+        self.assertEqual(payload["human_required"][0]["status"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -16397,11 +16416,31 @@ LocalRuntimeStore(state_dir).append_audit(
         self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_REGRESSION_GUARDRAILS_ONLY")
         self.assertEqual({row["id"] for row in payload["scenario_results"]}, {"CS-REG-016", "CS-REG-017", "CS-REG-018"})
         summaries = payload["component_summaries"]
-        self.assertEqual(summaries["claim_evidence"]["trust_states"], {"unsupported": "draft", "evidence_backed": "evidence_backed", "approved": "approved"})
-        self.assertIn("claim.approved", summaries["audit_ledger"]["event_types"])
+        claim_summary = summaries["claim_evidence"]
+        self.assertEqual(
+            claim_summary["claim_states"],
+            {
+                "unsupported_draft": "draft",
+                "source_supported_draft": "draft",
+                "post_semantic_gate_draft": "draft",
+            },
+        )
+        self.assertEqual(claim_summary["source_support_status"], "source_supported")
+        self.assertEqual(claim_summary["semantic_support_state"], "human_required")
+        self.assertFalse(claim_summary["semantic_support_verified"])
+        self.assertIn("CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED", claim_summary["approval_error_codes"])
+        for authority in (
+            claim_summary["source_supported_authority"],
+            claim_summary["post_approval_attempt_authority"],
+        ):
+            self.assertFalse(authority["can_be_approved"])
+            self.assertFalse(authority["can_publish_shared_truth"])
+            self.assertFalse(authority["can_drive_autonomous_action"])
+        self.assertIn("claim.approval.denied", summaries["audit_ledger"]["event_types"])
         self.assertIn("policy.egress.denied", summaries["audit_ledger"]["event_types"])
         self.assertEqual(summaries["security_policy"]["egress_external_http_calls"], 0)
         self.assertEqual(set(summaries["security_policy"]["sandbox_cases"]), {"sandbox_environment", "sandbox_filesystem", "sandbox_host", "sandbox_shell"})
+        self.assertEqual(payload["human_required"][0]["status"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -16483,12 +16522,14 @@ LocalRuntimeStore(state_dir).append_audit(
         payload = json.loads(result.stdout)
         self.assertEqual(payload["scenario_set"], "vs0-detail-surfaces")
         self.assertEqual(payload["summary"]["blocking"], 0)
-        self.assertEqual(payload["summary"]["pass"], 5)
+        self.assertEqual(payload["summary"]["pass"], 4)
         self.assertEqual(payload["summary"]["product_feature_claims"], "PARTIAL_VS0_DETAIL_SURFACES_ONLY")
         self.assertEqual(
             {row["id"] for row in payload["scenario_results"]},
             {"CS-UND-004", "CS-CLAIM-005", "CS-CLAIM-008", "CS-NS-002", "CS-SEC-005"},
         )
+        row_statuses = {row["id"]: row["status"] for row in payload["scenario_results"]}
+        self.assertEqual(row_statuses["CS-CLAIM-005"], "HUMAN_REQUIRED")
         evidence = payload["detail_surface_evidence"]
         self.assertIn("personal / default", evidence["workspace_labels"]["personal"])
         self.assertIn("organization / ops", evidence["workspace_labels"]["organization"])
@@ -16499,20 +16540,46 @@ LocalRuntimeStore(state_dir).append_audit(
         self.assertEqual(evidence["artifact_derived_status"], "ready")
         self.assertTrue(evidence["artifact_original_storage_ref"].startswith("sha256:"))
         self.assertEqual(
-            evidence["trust_states"],
-            {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"},
+            evidence["claim_states"],
+            {
+                "unsupported_draft": "draft",
+                "source_supported_draft": "draft",
+                "post_semantic_gate_draft": "draft",
+            },
         )
-        self.assertTrue(evidence["trust_authority"]["draft"]["can_be_approved"] is False)
-        self.assertTrue(evidence["trust_authority"]["evidence_backed"]["can_be_approved"])
-        self.assertTrue(evidence["trust_authority"]["approved"]["can_publish_shared_truth"])
+        for authority in evidence["claim_authority"].values():
+            self.assertFalse(authority["can_be_approved"])
+            self.assertFalse(authority["can_publish_shared_truth"])
+            self.assertFalse(authority["can_drive_autonomous_action"])
+        support = evidence["source_supported_statement_support"]
+        self.assertEqual(support["status"], "source_supported")
+        self.assertEqual(support["semantic_faithfulness_state"], "human_required")
+        self.assertFalse(support["semantic_support_verified"])
+        self.assertFalse(support["approval_eligible"])
+        self.assertEqual(evidence["semantic_approval_exit_code"], 4)
+        self.assertIn("CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED", evidence["semantic_approval_error_codes"])
+        self.assertEqual(evidence["action_policy"]["decision"], "deny")
+        self.assertEqual(evidence["action_policy"]["reason_code"], "CS_ACTION_CLAIM_AUTHORITY_REQUIRED")
+        self.assertEqual(evidence["action_policy"]["execution_status"], "blocked_by_claim_authority")
+        self.assertFalse(evidence["action_policy"]["can_execute_now"])
+        self.assertEqual(evidence["action_approval_exit_code"], 8)
+        self.assertEqual(evidence["action_execution_exit_code"], 8)
         self.assertTrue(evidence["evidence_viewer_id"].startswith("viewer_"))
         self.assertEqual(evidence["evidence_viewer_item_count"], 1)
         self.assertIn("alpha-evidence-anchor", evidence["evidence_viewer_first_item"]["derived"]["text_preview"])
         self.assertEqual(
             {example["error_code"] for example in evidence["denial_examples"].values()},
-            {"CS_EGRESS_DENIED", "CS_SANDBOX_ACCESS_DENIED", "CS_CLAIM_EVIDENCE_REQUIRED", "CS_ACTION_POLICY_DENIED"},
+            {
+                "CS_EGRESS_DENIED",
+                "CS_SANDBOX_ACCESS_DENIED",
+                "CS_CLAIM_EVIDENCE_REQUIRED",
+                "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED",
+                "CS_ACTION_APPROVAL_DENIED",
+                "CS_ACTION_POLICY_DENIED",
+            },
         )
         self.assertTrue(all(example["resolution_path"] for example in evidence["denial_examples"].values()))
+        self.assertEqual(payload["human_required"][0]["status"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 
@@ -16540,7 +16607,19 @@ LocalRuntimeStore(state_dir).append_audit(
         self.assertEqual(evidence["brief_trust_label"], "extractive_fallback")
         self.assertFalse(evidence["brief_presented_as_fact"])
         self.assertTrue(evidence["promoted_claim_id"].startswith("claim_"))
-        self.assertEqual(evidence["promoted_claim_trust_state"], "evidence_backed")
+        self.assertEqual(evidence["promoted_claim_status"], "draft")
+        self.assertEqual(evidence["promoted_claim_trust_state"], "draft")
+        support = evidence["promoted_claim_statement_support"]
+        self.assertEqual(support["status"], "source_supported")
+        self.assertEqual(support["statement_support_state"], "source_supported")
+        self.assertEqual(support["source_support_state"], "passed")
+        self.assertEqual(support["semantic_faithfulness_state"], "human_required")
+        self.assertFalse(support["semantic_support_verified"])
+        self.assertFalse(support["approval_eligible"])
+        authority = evidence["promoted_claim_authority"]
+        self.assertFalse(authority["can_be_approved"])
+        self.assertFalse(authority["can_publish_shared_truth"])
+        self.assertFalse(authority["can_drive_autonomous_action"])
         self.assertEqual(evidence["promoted_claim_source_conversation"]["conversation_id"], evidence["conversation_id"])
         self.assertEqual(evidence["promoted_claim_source_conversation"]["source_artifact_ref"], f"artifact:{evidence['source_artifact_id']}")
         self.assertEqual(evidence["promoted_claim_provenance"]["created_from"], "conversation.promote")
@@ -16558,6 +16637,7 @@ LocalRuntimeStore(state_dir).append_audit(
         self.assertIn("budget", evidence["unsupported_answer_meaningful_question_terms"])
         self.assertEqual(evidence["unsupported_answer_matched_terms"], [])
         self.assertLessEqual(evidence["first_use_duration_ms"], 5000)
+        self.assertEqual(payload["human_required"][0]["status"], "HUMAN_REQUIRED")
         for value in payload["negative_evidence"].values():
             self.assertEqual(value, 0)
 

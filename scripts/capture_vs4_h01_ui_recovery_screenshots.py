@@ -108,7 +108,7 @@ DESKTOP_ROUTES = [
         "name": "claims-desktop",
         "route": "/claims",
         "surface": "claims",
-        "required_text": ["Claims that need source support", "Review posture", "Trust ladder"],
+        "required_text": ["Claims under review", "Semantic review needed", "Review posture", "Trust ladder"],
         "required_selectors": ["[data-product-surface='claims']", ".cs-collection-workbench", ".cs-collection-list"],
     },
     {
@@ -230,10 +230,10 @@ DETAIL_ROUTES = [
         "kind": "actions",
         "id_key": "action_id",
         "surface": "action-detail",
-        "required_text": ["Action preview", "Proposed change", "Why this action", "Policy and boundary"],
+        "required_text": ["Blocked action", "Action blocked", "Why this action", "Policy and boundary"],
         "required_selectors": [
             "[data-product-surface='action-detail'][data-execution-mode][data-real-external-http-calls]",
-            "[data-action-preview='true']",
+            "[data-action-policy-blocked='true']",
             "[data-action-approval-state]",
         ],
     },

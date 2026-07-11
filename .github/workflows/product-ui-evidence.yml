@@ -4,47 +4,57 @@ on:
   pull_request:
     paths:
       - ".github/workflows/product-ui-evidence.yml"
-      - "docs/design/reference-images/**"
-      - "docs/design/tokens/**"
-      - "packages/cornerstone_cli/__init__.py"
-      - "packages/cornerstone_cli/acceptance.py"
-      - "packages/cornerstone_cli/artifacts.py"
-      - "packages/cornerstone_cli/briefing.py"
-      - "packages/cornerstone_cli/main.py"
-      - "packages/cornerstone_cli/product_access.py"
-      - "packages/cornerstone_cli/product_runtime.py"
-      - "packages/cornerstone_cli/product_ui.py"
-      - "packages/cornerstone_cli/product_visibility.py"
-      - "packages/cornerstone_cli/runtime.py"
-      - "packages/cornerstone_cli/ui/**"
-      - "packages/cornerstone_cli/validators.py"
+      - "Makefile"
+      - "README.md"
+      - "AGENTS.md"
+      - "cornerstone"
+      - "docs/adr/**"
+      - "docs/agent/**"
+      - "docs/design/**"
+      - "docs/handoff/**"
+      - "docs/scenario-contracts/**"
+      - "docs/sot/**"
+      - "docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md"
+      - "docs/verification-reports/template.md"
+      - "fixtures/vs0/**"
+      - "packages/cornerstone_cli/**"
+      - "run.sh"
       - "scripts/capture_vs4_h01_ui_recovery_screenshots.py"
+      - "scripts/verify_cli_native_first_docs.sh"
       - "scripts/verify_design_system_docs.sh"
-      - "tests/scenario/test_product_ui_routes.py"
-      - "tests/scenario/test_scaffold_cli.py"
+      - "scripts/verify_local_verification_plane_docs.sh"
+      - "scripts/verify_scenario_matrix.py"
+      - "scripts/verify_sot_docs.sh"
+      - "scripts/verify_vs0_scaffold_readiness_docs.sh"
+      - "tests/scenario/**"
   push:
     branches:
       - main
     paths:
       - ".github/workflows/product-ui-evidence.yml"
-      - "docs/design/reference-images/**"
-      - "docs/design/tokens/**"
-      - "packages/cornerstone_cli/__init__.py"
-      - "packages/cornerstone_cli/acceptance.py"
-      - "packages/cornerstone_cli/artifacts.py"
-      - "packages/cornerstone_cli/briefing.py"
-      - "packages/cornerstone_cli/main.py"
-      - "packages/cornerstone_cli/product_access.py"
-      - "packages/cornerstone_cli/product_runtime.py"
-      - "packages/cornerstone_cli/product_ui.py"
-      - "packages/cornerstone_cli/product_visibility.py"
-      - "packages/cornerstone_cli/runtime.py"
-      - "packages/cornerstone_cli/ui/**"
-      - "packages/cornerstone_cli/validators.py"
+      - "Makefile"
+      - "README.md"
+      - "AGENTS.md"
+      - "cornerstone"
+      - "docs/adr/**"
+      - "docs/agent/**"
+      - "docs/design/**"
+      - "docs/handoff/**"
+      - "docs/scenario-contracts/**"
+      - "docs/sot/**"
+      - "docs/verification-reports/VS0_SCAFFOLD_READINESS_REPORT_V0.md"
+      - "docs/verification-reports/template.md"
+      - "fixtures/vs0/**"
+      - "packages/cornerstone_cli/**"
+      - "run.sh"
       - "scripts/capture_vs4_h01_ui_recovery_screenshots.py"
+      - "scripts/verify_cli_native_first_docs.sh"
       - "scripts/verify_design_system_docs.sh"
-      - "tests/scenario/test_product_ui_routes.py"
-      - "tests/scenario/test_scaffold_cli.py"
+      - "scripts/verify_local_verification_plane_docs.sh"
+      - "scripts/verify_scenario_matrix.py"
+      - "scripts/verify_sot_docs.sh"
+      - "scripts/verify_vs0_scaffold_readiness_docs.sh"
+      - "tests/scenario/**"
   workflow_dispatch:
 
 permissions:
@@ -58,6 +68,8 @@ jobs:
   verify-product-ui:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      PYTHONPATH: packages
 
     steps:
       - name: Check out source
@@ -68,37 +80,50 @@ jobs:
         with:
           python-version: "3.14"
 
-      - name: Compile the product UI slice
+      - name: Compile the CornerStone Python package
         run: |
-          python -m py_compile \
-            packages/cornerstone_cli/__init__.py \
-            packages/cornerstone_cli/acceptance.py \
-            packages/cornerstone_cli/artifacts.py \
-            packages/cornerstone_cli/briefing.py \
-            packages/cornerstone_cli/main.py \
-            packages/cornerstone_cli/product_access.py \
-            packages/cornerstone_cli/product_runtime.py \
-            packages/cornerstone_cli/product_ui.py \
-            packages/cornerstone_cli/product_visibility.py \
-            packages/cornerstone_cli/runtime.py \
-            packages/cornerstone_cli/ui/__init__.py \
-            packages/cornerstone_cli/ui/icons.py \
-            packages/cornerstone_cli/ui/language.py \
-            packages/cornerstone_cli/ui/styles.py \
-            scripts/capture_vs4_h01_ui_recovery_screenshots.py
+          python -m compileall -q packages/cornerstone_cli
+          python -m py_compile scripts/capture_vs4_h01_ui_recovery_screenshots.py
 
-      - name: Verify design-system inputs
-        run: scripts/verify_design_system_docs.sh
+      - name: Verify product authority and scenario documents
+        run: |
+          scripts/verify_sot_docs.sh
+          python scripts/verify_scenario_matrix.py
 
-      - name: Run focused product UI tests
+      - name: Run product UI route regressions
         run: python -m unittest tests.scenario.test_product_ui_routes
 
-      - name: Run focused CLI parity tests
+      - name: Run deterministic active-spine CLI regressions
         run: |
           python -m unittest \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_runtime_model_config_is_immutable_and_loopback_only \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_citation_chunk_ids_reject_path_traversal_before_disk_access \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_statement_source_anchor_scopes_negation_and_numeric_tokens \
             tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_briefing_application_applies_one_config_to_brief_and_ask \
             tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_artifact_ingest_show_and_audit_verify \
-            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_search_query_and_evidence_bundle
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_audit_verify_rejects_tampering \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_prompt_injection_ingest_records_policy_denial \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_search_query_and_evidence_bundle \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_claim_create_from_brief_preserves_cli_lineage \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_empty_evidence_bundle_cannot_create_evidence_backed_claim \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_universal_core_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_claim_evidence_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_briefing_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_detail_surfaces_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs0_conversation_onboarding_verify \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_runtime_acceptance_quickstart_executes_only_the_active_structural_spine
+
+      - name: Run deterministic VS5 citation-integrity regressions
+        run: |
+          python -m unittest \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs5_brief_rejects_a_valid_plus_fabricated_model_citation \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs5_brief_keeps_real_but_unrelated_citation_in_draft \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs5_brief_rejects_valid_same_scope_citation_outside_current_retrieval \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs5_ask_rejects_a_valid_plus_fabricated_model_citation \
+            tests.scenario.test_scaffold_cli.ScaffoldCliTests.test_vs5_ask_rejects_valid_same_scope_citation_outside_current_retrieval
+
+      - name: Run deterministic trust-foundation regressions
+        run: python -m unittest tests.scenario.test_trust_foundation_runtime
 
       - name: Capture current-revision browser evidence
         run: |

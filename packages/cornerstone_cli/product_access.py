@@ -80,11 +80,23 @@ class ProductAccessApplication:
                 return loaded
             snapshot = loaded["snapshot"]
             audit_event = loaded["audit_event"]
-            query_matches = str(snapshot.get("query") or "") == redact_text(query)
-            if snapshot.get("query_sha256"):
-                query_matches = query_matches or str(snapshot.get("query_sha256")) == hashlib.sha256(
-                    query.encode("utf-8")
-                ).hexdigest()
+            persisted_query = str(snapshot.get("query") or "")
+            query_digest = str(snapshot.get("query_sha256") or "").strip().lower()
+            if query_digest:
+                # Current snapshots bind pagination to the exact raw query.  The
+                # redacted display value is deliberately not an identity key:
+                # two different secrets can both persist as ``[REDACTED]``.
+                query_matches = query_digest == hashlib.sha256(query.encode("utf-8")).hexdigest()
+            else:
+                # Legacy snapshots predate query_sha256.  Reuse is safe only
+                # when redaction did not alter the query, so equality remains
+                # exact rather than collapsing secret-bearing inputs.
+                redacted_query = redact_text(query)
+                query_matches = (
+                    query == redacted_query
+                    and "[REDACTED]" not in persisted_query
+                    and persisted_query == query
+                )
             if not query_matches:
                 return {"status": "snapshot_query_mismatch", "search_snapshot": snapshot}
             if str(snapshot.get("search_mode") or "evidence") != mode:

@@ -6,17 +6,33 @@ import json
 import os
 import re
 import shutil
+import threading
+from copy import deepcopy
 import urllib.error
 import urllib.request
 from datetime import datetime, timezone
-from functools import lru_cache
 from time import perf_counter
 from pathlib import Path
 from typing import Any
 
 from cornerstone_cli.artifacts import normalize_media_type
+from cornerstone_cli.archive_integrity import (
+    read_verified_content_file,
+    store_content_atomically,
+    verify_content_file,
+)
 from cornerstone_cli.product_visibility import context_only_artifact, internal_product_lineage
 from cornerstone_cli.validators import redact_text
+
+
+_ARTIFACT_THREAD_LOCKS: dict[str, threading.RLock] = {}
+_ARTIFACT_THREAD_LOCKS_GUARD = threading.Lock()
+
+
+def _artifact_thread_lock(lock_path: Path) -> threading.RLock:
+    key = str(lock_path.resolve())
+    with _ARTIFACT_THREAD_LOCKS_GUARD:
+        return _ARTIFACT_THREAD_LOCKS.setdefault(key, threading.RLock())
 
 
 UNSAFE_INSTRUCTION_PATTERNS = [
@@ -111,8 +127,12 @@ OLLAMA_TIMEOUT_SECONDS = 180
 EVIDENCE_CHUNK_MAX_CHARS = 1200
 EVIDENCE_CHUNK_OVERLAP_CHARS = 160
 EVIDENCE_CHUNK_LIMIT = 5
-EVIDENCE_CHUNK_ID_RE = re.compile(r"^chunk_[0-9a-f]{16}$")
-EVIDENCE_CHUNK_REF_RE = re.compile(r"^evidence_chunk:(chunk_[0-9a-f]{16})$")
+EVIDENCE_CHUNK_ID_RE = re.compile(r"^chunk_(?:[0-9a-f]{16}|[0-9a-f]{64})$")
+EVIDENCE_CHUNK_REF_RE = re.compile(r"^evidence_chunk:(chunk_(?:[0-9a-f]{16}|[0-9a-f]{64}))$")
+DERIVED_REPRESENTATION_ID_RE = re.compile(r"^drv_[0-9a-f]{64}$")
+DERIVED_REPRESENTATION_TYPE = "extracted_text"
+DERIVED_EXTRACTOR = "cornerstone.text.redact"
+DERIVED_EXTRACTOR_VERSION = "1"
 
 STRUCTURE_LABELS = {
     "person": ("object", "person"),
@@ -124,26 +144,6 @@ STRUCTURE_LABELS = {
     "claim": ("fact", "claim"),
     "fact": ("fact", "fact"),
 }
-
-
-@lru_cache(maxsize=1024)
-def _original_file_matches(
-    path_value: str,
-    modified_ns: int,
-    size_bytes: int,
-    checksum: str,
-) -> bool:
-    del modified_ns
-    path = Path(path_value)
-    digest = hashlib.sha256()
-    try:
-        with path.open("rb") as handle:
-            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                digest.update(chunk)
-        actual_size = path.stat().st_size
-    except OSError:
-        return False
-    return actual_size == size_bytes and digest.hexdigest() == checksum
 
 
 def _vs5_value_plane_metadata(
@@ -554,6 +554,30 @@ def _json_hash(payload: dict[str, Any]) -> str:
     return sha256_bytes(encoded)
 
 
+def _search_result_revision_sha256(snapshot: dict[str, Any]) -> str:
+    return _json_hash(
+        {
+            "query_sha256": snapshot.get("query_sha256"),
+            "filters": snapshot.get("filters"),
+            "search_mode": snapshot.get("search_mode"),
+            "result_types": snapshot.get("result_types", []),
+            "results": snapshot.get("results", []),
+        }
+    )
+
+
+def _evidence_bundle_revision_sha256(bundle: dict[str, Any]) -> str:
+    return _json_hash(
+        {
+            "search_snapshot_id": bundle.get("search_snapshot_id"),
+            "query_sha256": bundle.get("query_sha256"),
+            "search_result_revision_sha256": bundle.get("search_result_revision_sha256"),
+            "filters": bundle.get("filters"),
+            "evidence_items": bundle.get("evidence_items", []),
+        }
+    )
+
+
 def action_preflight_binding_for_action(action: dict[str, Any]) -> dict[str, Any]:
     artifact_refs = action.get("evidence", {}).get("artifact_refs", [])
     if not isinstance(artifact_refs, list):
@@ -574,12 +598,34 @@ def action_preflight_binding_for_action(action: dict[str, Any]) -> dict[str, Any
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+    encoded = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
+    store_content_atomically(path, encoded, checksum_sha256=sha256_bytes(encoded))
 
 
 def _read_json(path: Path) -> dict[str, Any]:
-    return json.loads(path.read_text())
+    payload = json.loads(path.read_text())
+    if not isinstance(payload, dict):
+        raise ValueError(f"Expected a JSON object in {path}")
+    return payload
+
+
+def _short_content_address_matches(
+    record: dict[str, Any],
+    *,
+    id_key: str,
+    prefix: str,
+    normalized_fields: dict[str, Any] | None = None,
+) -> bool:
+    """Verify the 16-hex record ID that was derived from the persisted payload."""
+
+    record_id = str(record.get(id_key) or "")
+    if not re.fullmatch(rf"{re.escape(prefix)}[0-9a-f]{{16}}", record_id):
+        return False
+    identity_payload = deepcopy(record)
+    identity_payload.pop(id_key, None)
+    for key, value in (normalized_fields or {}).items():
+        identity_payload[key] = deepcopy(value)
+    return record_id == f"{prefix}{_json_hash(identity_payload)[:16]}"
 
 
 def detect_unsafe_instructions(text: str) -> list[str]:
@@ -762,6 +808,8 @@ class LocalRuntimeStore:
         self.artifact_dir = state_dir / "artifacts"
         self.original_dir = self.artifact_dir / "originals"
         self.record_dir = self.artifact_dir / "records"
+        self.derived_content_dir = self.artifact_dir / "derived" / "content" / "sha256"
+        self.derived_representation_dir = self.artifact_dir / "derived" / "representations"
         self.workspace_dir = state_dir / "workspaces"
         self.conversation_dir = state_dir / "conversations"
         self.mission_dir = state_dir / "missions"
@@ -942,15 +990,28 @@ class LocalRuntimeStore:
         return {"status": "success" if not errors else "failed", "event_count": event_count, "errors": errors}
 
     def artifact_path(self, artifact_id: str, scope: dict[str, str] | None = None) -> Path:
-        if scope is None:
-            return self.record_dir / f"{artifact_id}.json"
-        return self.record_dir / scope_key(scope) / f"{artifact_id}.json"
+        base = self.record_dir if scope is None else self.record_dir / scope_key(scope)
+        return self._safe_record_path(base, artifact_id)
+
+    def _safe_record_path(self, base: Path, record_id: str) -> Path:
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,200}", record_id):
+            raise ValueError("Invalid record id.")
+        resolved_base = base.resolve()
+        path = (resolved_base / f"{record_id}.json").resolve()
+        if path.parent != resolved_base:
+            raise ValueError("Record path escapes its storage directory.")
+        return path
+
+    def derived_representation_path(self, representation_id: str) -> Path:
+        if not DERIVED_REPRESENTATION_ID_RE.fullmatch(representation_id):
+            raise ValueError("Invalid derived representation id.")
+        return self.derived_representation_dir / f"{representation_id}.json"
 
     def search_snapshot_path(self, snapshot_id: str) -> Path:
-        return self.state_dir / "search" / "snapshots" / f"{snapshot_id}.json"
+        return self._safe_record_path(self.state_dir / "search" / "snapshots", snapshot_id)
 
     def evidence_bundle_path(self, bundle_id: str) -> Path:
-        return self.state_dir / "evidence" / "bundles" / f"{bundle_id}.json"
+        return self._safe_record_path(self.state_dir / "evidence" / "bundles", bundle_id)
 
     def evidence_chunk_path(self, chunk_id: str) -> Path:
         if not EVIDENCE_CHUNK_ID_RE.fullmatch(chunk_id):
@@ -962,25 +1023,25 @@ class LocalRuntimeStore:
         return path
 
     def citation_check_path(self, check_id: str) -> Path:
-        return self.citation_check_dir / f"{check_id}.json"
+        return self._safe_record_path(self.citation_check_dir, check_id)
 
     def brief_path(self, brief_id: str) -> Path:
-        return self.state_dir / "briefs" / f"{brief_id}.json"
+        return self._safe_record_path(self.state_dir / "briefs", brief_id)
 
     def claim_path(self, claim_id: str) -> Path:
-        return self.state_dir / "claims" / f"{claim_id}.json"
+        return self._safe_record_path(self.state_dir / "claims", claim_id)
 
     def conversation_path(self, conversation_id: str) -> Path:
-        return self.conversation_dir / f"{conversation_id}.json"
+        return self._safe_record_path(self.conversation_dir, conversation_id)
 
     def workspace_path(self, scope: dict[str, str]) -> Path:
         return self.workspace_dir / f"{scope_key(scope)}.json"
 
     def mission_path(self, mission_id: str) -> Path:
-        return self.mission_dir / f"{mission_id}.json"
+        return self._safe_record_path(self.mission_dir, mission_id)
 
     def action_path(self, action_id: str) -> Path:
-        return self.action_dir / f"{action_id}.json"
+        return self._safe_record_path(self.action_dir, action_id)
 
     def workflow_run_path(self, workflow_run_id: str) -> Path:
         return self.workflow_run_dir / f"{workflow_run_id}.json"
@@ -998,10 +1059,10 @@ class LocalRuntimeStore:
         return self.connector_provider_receipt_dir / f"{receipt_id}.json"
 
     def answer_path(self, answer_id: str) -> Path:
-        return self.answer_dir / f"{answer_id}.json"
+        return self._safe_record_path(self.answer_dir, answer_id)
 
     def memory_path(self, memory_id: str) -> Path:
-        return self.memory_dir / f"{memory_id}.json"
+        return self._safe_record_path(self.memory_dir, memory_id)
 
     def memory_conflict_path(self, conflict_id: str) -> Path:
         return self.memory_conflict_dir / f"{conflict_id}.json"
@@ -1267,7 +1328,13 @@ class LocalRuntimeStore:
     def release_report_path(self, report_id: str) -> Path:
         return self.release_report_dir / f"{report_id}.json"
 
-    def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
+    def _get_artifact_unchecked(
+        self,
+        artifact_id: str,
+        scope: dict[str, str] | None = None,
+    ) -> dict[str, Any] | None:
+        if not re.fullmatch(r"art_(?:[0-9a-f]{16}|[0-9a-f]{64})", artifact_id):
+            return None
         if scope is not None:
             scoped_path = self.artifact_path(artifact_id, scope)
             if scoped_path.exists():
@@ -1287,11 +1354,78 @@ class LocalRuntimeStore:
             return None
         return _read_json(candidate_paths[0])
 
-    def get_search_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
+    def _artifact_identity_error(
+        self,
+        artifact: dict[str, Any],
+        artifact_id: str,
+        scope: dict[str, str] | None = None,
+    ) -> str | None:
+        if artifact.get("artifact_id") != artifact_id:
+            return "artifact_id_mismatch"
+        if scope is not None and artifact.get("scope") != scope:
+            return "artifact_scope_mismatch"
+
+        # Current and legacy content-addressed Artifact IDs must both remain
+        # bound to the same checksum. Arbitrary path labels are not Artifact
+        # identities and therefore fail closed on every active read.
+        canonical_match = re.fullmatch(r"art_([0-9a-f]{64})", artifact_id)
+        legacy_match = re.fullmatch(r"art_([0-9a-f]{16})", artifact_id)
+        if canonical_match is None and legacy_match is None:
+            return "artifact_id_format_invalid"
+
+        checksum = str(artifact.get("checksum_sha256") or "")
+        expected_size = artifact.get("original_size_bytes")
+        if not re.fullmatch(r"[0-9a-f]{64}", checksum):
+            return "artifact_checksum_invalid"
+        if canonical_match is not None and canonical_match.group(1) != checksum:
+            return "canonical_artifact_checksum_mismatch"
+        if legacy_match is not None and not checksum.startswith(legacy_match.group(1)):
+            return "legacy_artifact_checksum_mismatch"
+        if artifact.get("content_identity") != {"algorithm": "sha256", "value": checksum}:
+            return "artifact_content_identity_mismatch"
+        if artifact.get("original_storage_ref") != f"sha256:{checksum}":
+            return "artifact_original_storage_ref_mismatch"
+        if not isinstance(expected_size, int) or isinstance(expected_size, bool) or expected_size < 0:
+            return "artifact_original_size_invalid"
+        return None
+
+    def get_artifact(self, artifact_id: str, scope: dict[str, str] | None = None) -> dict[str, Any] | None:
+        try:
+            artifact = self._get_artifact_unchecked(artifact_id, scope)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if artifact is None or self._artifact_identity_error(artifact, artifact_id, scope) is not None:
+            return None
+        return artifact
+
+    def _load_search_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
         path = self.search_snapshot_path(snapshot_id)
         if not path.exists():
             return None
         return _read_json(path)
+
+    def _search_snapshot_identity_error(self, snapshot: dict[str, Any], snapshot_id: str) -> str | None:
+        if snapshot.get("search_snapshot_id") != snapshot_id:
+            return "search_snapshot_id_mismatch"
+        if not _short_content_address_matches(
+            snapshot,
+            id_key="search_snapshot_id",
+            prefix="search_",
+        ):
+            return "search_snapshot_record_changed"
+        revision = str(snapshot.get("result_revision_sha256") or "")
+        if not re.fullmatch(r"[0-9a-f]{64}", revision) or revision != _search_result_revision_sha256(snapshot):
+            return "search_snapshot_result_revision_missing_or_changed"
+        return None
+
+    def get_search_snapshot(self, snapshot_id: str) -> dict[str, Any] | None:
+        try:
+            snapshot = self._load_search_snapshot(snapshot_id)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if snapshot is None or self._search_snapshot_identity_error(snapshot, snapshot_id) is not None:
+            return None
+        return snapshot
 
     def read_search_snapshot(
         self,
@@ -1300,11 +1434,25 @@ class LocalRuntimeStore:
         *,
         reason: str,
     ) -> dict[str, Any]:
-        snapshot = self.get_search_snapshot(snapshot_id)
+        try:
+            snapshot = self._load_search_snapshot(snapshot_id)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return {
+                "status": "integrity_failed",
+                "record_kind": "search_snapshot",
+                "reason": "search_snapshot_record_unreadable",
+            }
         if snapshot is None:
             return {"status": "not_found", "record_kind": "search_snapshot"}
         if snapshot.get("filters") != scope:
             return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+        identity_error = self._search_snapshot_identity_error(snapshot, snapshot_id)
+        if identity_error is not None:
+            return {
+                "status": "integrity_failed",
+                "record_kind": "search_snapshot",
+                "reason": identity_error,
+            }
         event = self.append_audit(
             "search.snapshot.read",
             scope,
@@ -1317,11 +1465,34 @@ class LocalRuntimeStore:
         )
         return {"snapshot": snapshot, "audit_event": event}
 
-    def get_evidence_bundle(self, bundle_id: str) -> dict[str, Any] | None:
+    def _load_evidence_bundle(self, bundle_id: str) -> dict[str, Any] | None:
         path = self.evidence_bundle_path(bundle_id)
         if not path.exists():
             return None
         return _read_json(path)
+
+    def _evidence_bundle_identity_error(self, bundle: dict[str, Any], bundle_id: str) -> str | None:
+        if bundle.get("evidence_bundle_id") != bundle_id:
+            return "evidence_bundle_id_mismatch"
+        if not _short_content_address_matches(
+            bundle,
+            id_key="evidence_bundle_id",
+            prefix="evb_",
+        ):
+            return "evidence_bundle_record_changed"
+        revision = str(bundle.get("evidence_revision_sha256") or "")
+        if not re.fullmatch(r"[0-9a-f]{64}", revision) or revision != _evidence_bundle_revision_sha256(bundle):
+            return "evidence_bundle_revision_changed"
+        return None
+
+    def get_evidence_bundle(self, bundle_id: str) -> dict[str, Any] | None:
+        try:
+            bundle = self._load_evidence_bundle(bundle_id)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if bundle is None or self._evidence_bundle_identity_error(bundle, bundle_id) is not None:
+            return None
+        return bundle
 
     def get_evidence_chunk(self, chunk_id: str) -> dict[str, Any] | None:
         try:
@@ -1331,33 +1502,420 @@ class LocalRuntimeStore:
         if not path.exists():
             return None
         try:
-            return _read_json(path)
+            chunk = _read_json(path)
         except (OSError, ValueError, json.JSONDecodeError):
             return None
+        if not isinstance(chunk, dict) or chunk.get("evidence_chunk_id") != chunk_id:
+            return None
+        # Legacy 16-hex chunk IDs were mutable path labels. They remain
+        # display-only historical data and cannot enter citation authority.
+        if not re.fullmatch(r"chunk_[0-9a-f]{64}", chunk_id):
+            return None
+        chunk_base = deepcopy(chunk)
+        chunk_base.pop("evidence_chunk_id", None)
+        evidence_refs = chunk_base.get("evidence_refs")
+        if not isinstance(evidence_refs, list):
+            return None
+        self_ref = f"evidence_chunk:{chunk_id}"
+        chunk_base["evidence_refs"] = [ref for ref in evidence_refs if ref != self_ref]
+        if f"chunk_{_json_hash(chunk_base)}" != chunk_id:
+            return None
+        return chunk
 
     def get_citation_check(self, check_id: str) -> dict[str, Any] | None:
-        path = self.citation_check_path(check_id)
+        try:
+            path = self.citation_check_path(check_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            check = _read_json(path)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
+        if check.get("citation_check_id") != check_id:
+            return None
+        if not _short_content_address_matches(check, id_key="citation_check_id", prefix="citecheck_"):
+            return None
+        return check
+
+    def _claim_record_identity_error(self, claim: dict[str, Any]) -> str | None:
+        claim_id = str(claim.get("claim_id") or "")
+        if not re.fullmatch(r"claim_[0-9a-f]{16}", claim_id):
+            return None
+        normalized: dict[str, Any] = {}
+        if "activity_refs" in claim:
+            normalized["activity_refs"] = []
+        if "audit_refs" in claim:
+            normalized["audit_refs"] = []
+        if not _short_content_address_matches(
+            claim,
+            id_key="claim_id",
+            prefix="claim_",
+            normalized_fields=normalized,
+        ):
+            return "claim_record_changed"
+        return None
+
+    def _brief_record_identity_error(self, brief: dict[str, Any]) -> str | None:
+        brief_id = str(brief.get("brief_id") or "")
+        if not re.fullmatch(r"brief_[0-9a-f]{16}", brief_id):
+            if (
+                brief.get("presented_as_fact") is True
+                or str(brief.get("trust_label") or "").lower()
+                in {"evidence_backed", "corroborated"}
+            ):
+                return "authoritative_brief_id_not_content_addressed"
+            return None
+        normalized = {"audit_refs": []} if "audit_refs" in brief else {}
+        if not _short_content_address_matches(
+            brief,
+            id_key="brief_id",
+            prefix="brief_",
+            normalized_fields=normalized,
+        ):
+            return "brief_record_changed"
+        return None
+
+    def _citation_set_integrity(
+        self,
+        *,
+        citation_refs: Any,
+        citation_check_refs: Any,
+        scope: dict[str, str],
+        output_kind: str,
+    ) -> tuple[list[dict[str, Any]], str | None]:
+        if not isinstance(citation_refs, list) or not citation_refs or not all(
+            isinstance(ref, str) for ref in citation_refs
+        ):
+            return [], "citation_refs_missing_or_invalid"
+        if not isinstance(citation_check_refs, list) or not citation_check_refs or not all(
+            isinstance(ref, str) for ref in citation_check_refs
+        ):
+            return [], "citation_check_refs_missing_or_invalid"
+
+        chunks: list[dict[str, Any]] = []
+        for ref in sorted(set(citation_refs)):
+            _, chunk, error_code = self._validate_citation_ref(ref, scope)
+            if error_code is not None or chunk is None:
+                return [], f"citation_ref_not_current:{error_code or 'unresolved'}"
+            chunks.append(chunk)
+
+        checked_refs: set[str] = set()
+        for ref in citation_check_refs:
+            if not ref.startswith("citation_check:"):
+                return [], "citation_check_ref_invalid"
+            check = self.get_citation_check(ref.split(":", 1)[1])
+            if (
+                check is None
+                or check.get("scope") != scope
+                or check.get("output_kind") != output_kind
+                or check.get("status") != "passed"
+                or not isinstance(check.get("citation_refs"), list)
+            ):
+                return [], "citation_check_missing_or_changed"
+            checked_refs.update(str(value) for value in check["citation_refs"] if isinstance(value, str))
+        if checked_refs != set(citation_refs):
+            return [], "citation_check_binding_mismatch"
+        return chunks, None
+
+    def _effective_claim_record(self, stored: dict[str, Any]) -> dict[str, Any]:
+        """Project stored Claims through the current semantic-authority ceiling.
+
+        Option 1 intentionally introduces no semantic-attestation Interface.
+        Therefore no legacy or manually edited record can earn authority from a
+        lexical support flag or a bare boolean.
+        """
+
+        claim = deepcopy(stored)
+        recorded_status = claim.get("status")
+        recorded_trust_state = claim.get("trust_state")
+        recorded_authority = deepcopy(claim.get("authority")) if isinstance(claim.get("authority"), dict) else {}
+        invalid_support_shape = "statement_support" in claim and not isinstance(claim.get("statement_support"), dict)
+        support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {} if invalid_support_shape else None
+        canonical_claim_id = bool(re.fullmatch(r"claim_[0-9a-f]{16}", str(claim.get("claim_id") or "")))
+        legacy_support_unverified = bool(
+            support is not None
+            and not canonical_claim_id
+            and support.get("status") in {"passed", "source_supported"}
+        )
+        evidence = claim.get("evidence_bundle") if isinstance(claim.get("evidence_bundle"), dict) else {}
+        bundle_id = str(evidence.get("evidence_bundle_id") or "")
+        artifact_refs = evidence.get("artifact_refs") if isinstance(evidence.get("artifact_refs"), list) else []
+        evidence_item_count = evidence.get("evidence_item_count")
+        has_evidence = bool(
+            bundle_id
+            and isinstance(evidence_item_count, int)
+            and evidence_item_count > 0
+            and artifact_refs
+        )
+        record_identity_error = self._claim_record_identity_error(claim)
+        integrity_error: dict[str, Any] | None = (
+            {"status": "integrity_failed", "reason": record_identity_error}
+            if record_identity_error is not None
+            else {"status": "integrity_failed", "reason": "claim_statement_support_invalid"}
+            if invalid_support_shape
+            else None
+        )
+        if has_evidence and integrity_error is None:
+            bundle = self.get_evidence_bundle(bundle_id)
+            if bundle is None:
+                integrity_error = {
+                    "status": "integrity_failed",
+                    "reason": "claim_evidence_bundle_missing_or_changed",
+                }
+            else:
+                _, integrity_error = self._validated_evidence_bundle_items(
+                    bundle,
+                    claim.get("scope") if isinstance(claim.get("scope"), dict) else {},
+                )
+                expected_bindings = (
+                    evidence.get("representation_bindings")
+                    if isinstance(evidence.get("representation_bindings"), list)
+                    else []
+                )
+                current_bindings = [
+                    {
+                        "artifact_id": item.get("artifact_id"),
+                        "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                        "derived_representation_id": item.get("derived_representation_id"),
+                        "derived_representation_ref": item.get("derived_representation_ref"),
+                        "derived_content_sha256": item.get("derived_content_sha256"),
+                        "derived_content_size_bytes": item.get("derived_content_size_bytes"),
+                    }
+                    for item in bundle.get("evidence_items", [])
+                    if isinstance(item, dict)
+                ]
+                if integrity_error is None and (
+                    evidence.get("evidence_revision_sha256") != bundle.get("evidence_revision_sha256")
+                    or expected_bindings != current_bindings
+                ):
+                    integrity_error = {
+                        "status": "integrity_failed",
+                        "reason": "claim_evidence_revision_missing_or_changed",
+                    }
+        if (
+            integrity_error is None
+            and support is not None
+            and not legacy_support_unverified
+            and support.get("status") in {"passed", "source_supported"}
+        ):
+            statement = str(claim.get("statement") or "")
+            if support.get("statement_sha256") != _claim_statement_sha256(statement):
+                integrity_error = {
+                    "status": "integrity_failed",
+                    "reason": "claim_statement_support_missing_or_changed",
+                }
+            else:
+                chunks, citation_error = self._citation_set_integrity(
+                    citation_refs=support.get("citation_refs"),
+                    citation_check_refs=support.get("citation_check_refs"),
+                    scope=claim.get("scope") if isinstance(claim.get("scope"), dict) else {},
+                    output_kind="claim_statement",
+                )
+                anchor = _statement_source_anchor(
+                    statement,
+                    [str(chunk.get("text") or "") for chunk in chunks],
+                ) if citation_error is None else {"status": "failed"}
+                if citation_error is not None or anchor.get("status") != "passed":
+                    integrity_error = {
+                        "status": "integrity_failed",
+                        "reason": citation_error or "claim_statement_anchor_changed",
+                    }
+        if support is not None:
+            if legacy_support_unverified:
+                support["status"] = "not_verified"
+                support["statement_support_state"] = "not_verified"
+                support["source_support_state"] = "not_verified"
+                support["citation_integrity_state"] = "not_verified"
+                support["citations_bound_to_evidence_revision"] = False
+            elif support.get("status") == "passed":
+                support["status"] = "source_supported"
+            if support.get("statement_support_state") == "deterministic_anchor_passed":
+                support["statement_support_state"] = "source_supported"
+            if support.get("status") == "source_supported":
+                support["source_support_state"] = "passed"
+            if integrity_error is not None:
+                support["status"] = "integrity_failed"
+                support["statement_support_state"] = "integrity_failed"
+                support["source_support_state"] = "failed"
+                support["citation_integrity_state"] = "failed"
+                support["citations_bound_to_evidence_revision"] = False
+                support["semantic_faithfulness_state"] = "not_verified"
+                support["integrity_error"] = integrity_error.get("reason")
+            else:
+                support["semantic_faithfulness_state"] = "human_required"
+            support["semantic_support_verified"] = False
+            support["semantic_review_required"] = True
+            support["approval_eligible"] = False
+            claim["statement_support"] = support
+        claim["status"] = "draft"
+        claim["trust_state"] = "draft"
+        blocked_reason = (
+            "Evidence Bundle is required before this Claim can gain authority."
+            if not has_evidence
+            else "The Claim evidence chain failed integrity verification and must be repaired before review."
+            if integrity_error is not None
+            else "Statement-level semantic support is required before this Claim can gain authority."
+            if support is not None and support.get("status") == "source_supported"
+            else "The exact Claim statement needs current source support before semantic review and owner approval."
+        )
+        claim["authority"] = {
+            "can_be_approved": False,
+            "can_publish_shared_truth": False,
+            "can_drive_autonomous_action": False,
+            "blocked_reason": blocked_reason,
+        }
+        claim["evidence_integrity"] = {
+            "status": "failed" if integrity_error is not None else "passed" if has_evidence else "not_attached",
+            "reason": integrity_error.get("reason") if integrity_error is not None else None,
+        }
+        if (
+            recorded_status != "draft"
+            or recorded_trust_state != "draft"
+            or any(recorded_authority.get(key) is True for key in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action"))
+        ):
+            claim["effective_authority_migration"] = {
+                "recorded_status": recorded_status,
+                "recorded_trust_state": recorded_trust_state,
+                "recorded_authority": recorded_authority,
+                "effective_status": "draft",
+                "effective_trust_state": "draft",
+                "reason": "legacy_claim_lacks_statement_level_semantic_attestation",
+                "persisted_record_mutated": False,
+            }
+        return claim
+
+    def _effective_brief_record(self, stored: dict[str, Any]) -> dict[str, Any]:
+        brief = deepcopy(stored)
+        evidence = brief.get("evidence_bundle") if isinstance(brief.get("evidence_bundle"), dict) else {}
+        bundle_id = str(evidence.get("evidence_bundle_id") or "")
+        record_identity_error = self._brief_record_identity_error(brief)
+        integrity_error: dict[str, Any] | None = (
+            {"reason": record_identity_error} if record_identity_error is not None else None
+        )
+        if not bundle_id:
+            brief["evidence_integrity"] = {"status": "not_attached", "reason": None}
+            if integrity_error is None and brief.get("presented_as_fact") is not True and str(brief.get("trust_label") or "").lower() not in {
+                "evidence_backed",
+                "corroborated",
+            }:
+                return brief
+            integrity_error = {"reason": "brief_evidence_bundle_missing"}
+        elif integrity_error is None:
+            bundle = self.get_evidence_bundle(bundle_id)
+            if bundle is None:
+                integrity_error = {"reason": "brief_evidence_bundle_missing_or_changed"}
+            else:
+                _, integrity_error = self._validated_evidence_bundle_items(
+                    bundle,
+                    brief.get("scope") if isinstance(brief.get("scope"), dict) else {},
+                )
+                if (
+                    integrity_error is None
+                    and evidence.get("evidence_revision_sha256") != bundle.get("evidence_revision_sha256")
+                ):
+                    integrity_error = {"reason": "brief_evidence_revision_missing_or_changed"}
+        evidence_backed = bool(
+            str(brief.get("trust_label") or "").lower() in {"evidence_backed", "corroborated"}
+            or brief.get("presented_as_fact") is True
+        )
+        if integrity_error is None and evidence_backed:
+            chunks, citation_error = self._citation_set_integrity(
+                citation_refs=brief.get("citation_refs"),
+                citation_check_refs=brief.get("citation_check_refs"),
+                scope=brief.get("scope") if isinstance(brief.get("scope"), dict) else {},
+                output_kind="brief",
+            )
+            rows = brief.get("key_point_citations")
+            key_points = brief.get("key_points")
+            if citation_error is not None:
+                integrity_error = {"reason": citation_error}
+            elif (
+                not isinstance(rows, list)
+                or not isinstance(key_points, list)
+                or [row.get("statement") for row in rows if isinstance(row, dict)] != key_points
+            ):
+                integrity_error = {"reason": "brief_key_point_binding_missing_or_changed"}
+            else:
+                chunks_by_ref = {
+                    f"evidence_chunk:{chunk.get('evidence_chunk_id')}": chunk
+                    for chunk in chunks
+                }
+                for row in rows:
+                    row_refs = row.get("citation_refs") if isinstance(row, dict) else None
+                    if not isinstance(row_refs, list) or not row_refs:
+                        integrity_error = {"reason": "brief_key_point_citation_missing"}
+                        break
+                    anchor = _statement_source_anchor(
+                        str(row.get("statement") or ""),
+                        [
+                            str(chunks_by_ref[ref].get("text") or "")
+                            for ref in row_refs
+                            if ref in chunks_by_ref
+                        ],
+                    )
+                    if anchor.get("status") != "passed":
+                        integrity_error = {"reason": "brief_key_point_anchor_changed"}
+                        break
+        if integrity_error is None:
+            brief["evidence_integrity"] = {"status": "passed", "reason": None}
+            return brief
+
+        brief["status"] = "integrity_failed"
+        brief["trust_label"] = "draft"
+        brief["presented_as_fact"] = False
+        label_check = deepcopy(brief.get("label_check")) if isinstance(brief.get("label_check"), dict) else {}
+        label_check["earned_evidence_backed"] = False
+        label_check["integrity_failed"] = True
+        brief["label_check"] = label_check
+        brief["evidence_integrity"] = {
+            "status": "failed",
+            "reason": integrity_error.get("reason"),
+        }
+        return brief
 
     def get_claim(self, claim_id: str) -> dict[str, Any] | None:
-        path = self.claim_path(claim_id)
+        try:
+            path = self.claim_path(claim_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            stored = _read_json(path)
+            if stored.get("claim_id") != claim_id:
+                return None
+            return self._effective_claim_record(stored)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_brief(self, brief_id: str) -> dict[str, Any] | None:
-        path = self.brief_path(brief_id)
+        try:
+            path = self.brief_path(brief_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            stored = _read_json(path)
+            if stored.get("brief_id") != brief_id:
+                return None
+            return self._effective_brief_record(stored)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_conversation(self, conversation_id: str) -> dict[str, Any] | None:
-        path = self.conversation_path(conversation_id)
+        try:
+            path = self.conversation_path(conversation_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            return _read_json(path)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def conversation_source_safety(self, conversation: dict[str, Any], scope: dict[str, str]) -> dict[str, Any]:
         safety = conversation.get("safety")
@@ -1369,16 +1927,29 @@ class LocalRuntimeStore:
         return artifact_safety if isinstance(artifact_safety, dict) else {}
 
     def get_mission(self, mission_id: str) -> dict[str, Any] | None:
-        path = self.mission_path(mission_id)
+        try:
+            path = self.mission_path(mission_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            return _read_json(path)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_action(self, action_id: str) -> dict[str, Any] | None:
-        path = self.action_path(action_id)
+        try:
+            path = self.action_path(action_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            action = _read_json(path)
+            return action if action.get("action_id") == action_id else None
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_agent_role(self, role_id: str) -> dict[str, Any] | None:
         path = self.agent_role_path(role_id)
@@ -1402,10 +1973,17 @@ class LocalRuntimeStore:
         return _read_json(path)
 
     def get_memory(self, memory_id: str) -> dict[str, Any] | None:
-        path = self.memory_path(memory_id)
+        try:
+            path = self.memory_path(memory_id)
+        except ValueError:
+            return None
         if not path.exists():
             return None
-        return _read_json(path)
+        try:
+            memory = _read_json(path)
+            return memory if memory.get("memory_id") == memory_id else None
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None
 
     def get_memory_conflict(self, conflict_id: str) -> dict[str, Any] | None:
         path = self.memory_conflict_path(conflict_id)
@@ -1600,7 +2178,7 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(claim_dir.glob("*.json")):
-            record = _read_json(path)
+            record = self._effective_claim_record(_read_json(path))
             if record.get("scope") == scope:
                 records.append(record)
         return records
@@ -1611,7 +2189,7 @@ class LocalRuntimeStore:
             return []
         records = []
         for path in sorted(brief_dir.glob("*.json")):
-            record = _read_json(path)
+            record = self._effective_brief_record(_read_json(path))
             if record.get("scope") == scope:
                 records.append(record)
         return records
@@ -5279,7 +5857,7 @@ class LocalRuntimeStore:
                     kind="claim",
                     ref=f"claim:{claim_id}" if claim_id else None,
                     record=records.get("claim"),
-                    description="Keep the claim candidate evidence-backed before approval.",
+                    description="Keep the Claim as a Draft until source support and statement-level semantic review are complete.",
                     continue_target="#claim-builder",
                 ),
                 _stage_row(
@@ -6422,21 +7000,82 @@ class LocalRuntimeStore:
         snapshot_id = evidence.get("search_snapshot_id")
         bundle = self.get_evidence_bundle(bundle_id) if bundle_id else None
         snapshot = self.get_search_snapshot(snapshot_id) if snapshot_id else None
+        if not isinstance(bundle, dict):
+            return {
+                "status": "integrity_failed",
+                "claim_id": claim_id,
+                "reason": "claim_basis_evidence_bundle_missing_or_changed",
+            }
+        resolved_items, integrity_error = self._validated_evidence_bundle_items(bundle, scope)
+        if integrity_error is not None:
+            return {
+                **integrity_error,
+                "claim_id": claim_id,
+            }
+        expected_bindings = evidence.get("representation_bindings") if isinstance(evidence.get("representation_bindings"), list) else []
+        current_bindings = [
+            {
+                "artifact_id": item.get("artifact_id"),
+                "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                "derived_representation_id": item.get("derived_representation_id"),
+                "derived_representation_ref": item.get("derived_representation_ref"),
+                "derived_content_sha256": item.get("derived_content_sha256"),
+                "derived_content_size_bytes": item.get("derived_content_size_bytes"),
+            }
+            for item in (bundle.get("evidence_items", []) if isinstance(bundle, dict) else [])
+            if isinstance(item, dict)
+        ]
+        lineage_current = bool(
+            snapshot
+            and bundle.get("evidence_revision_sha256") == evidence.get("evidence_revision_sha256")
+            and bundle.get("search_result_revision_sha256") == snapshot.get("result_revision_sha256")
+            and expected_bindings == current_bindings
+        )
+        if not lineage_current:
+            return {
+                "status": "integrity_failed",
+                "claim_id": claim_id,
+                "reason": "claim_basis_evidence_revision_missing_or_changed",
+            }
         artifact_records = []
+        resolved_by_artifact = {
+            str(resolved["item"].get("artifact_id") or ""): resolved
+            for resolved in resolved_items
+        }
         for artifact_ref in evidence.get("artifact_refs", []):
             artifact_id = str(artifact_ref).split("artifact:", 1)[-1]
-            artifact = self.get_artifact(artifact_id, scope)
-            if artifact is not None:
-                artifact_records.append(
-                    {
-                        "artifact_id": artifact_id,
-                        "scope": artifact.get("scope"),
-                        "source": artifact.get("source"),
-                        "original_storage_ref": artifact.get("original_storage_ref"),
-                        "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
-                        "provenance": artifact.get("provenance"),
-                    }
-                )
+            resolved = resolved_by_artifact.get(artifact_id)
+            if resolved is None:
+                return {
+                    "status": "integrity_failed",
+                    "artifact_id": artifact_id,
+                    "reason": "claim_basis_representation_binding_missing_or_changed",
+                }
+            binding = resolved["item"]
+            artifact_records.append(
+                {
+                    "artifact_id": artifact_id,
+                    "scope": binding.get("scope", scope),
+                    "source": binding.get("source"),
+                    "original_storage_ref": binding.get("original_storage_ref"),
+                    "original_checksum_sha256": binding.get("artifact_checksum_sha256"),
+                    "original_size_bytes": binding.get(
+                        "original_size_bytes",
+                        resolved["artifact"].get("original_size_bytes"),
+                    ),
+                    "media_type": binding.get("media_type", resolved["artifact"].get("media_type")),
+                    "raw_original_access": binding.get(
+                        "raw_original_access",
+                        resolved["artifact"].get("raw_original_access"),
+                    ),
+                    "derived_text_ref": binding.get("derived_storage_ref"),
+                    "derived_representation_id": binding.get("derived_representation_id"),
+                    "derived_representation_ref": binding.get("derived_representation_ref"),
+                    "derived_content_sha256": binding.get("derived_content_sha256"),
+                    "derived_content_size_bytes": binding.get("derived_content_size_bytes"),
+                    "provenance": binding.get("provenance"),
+                }
+            )
 
         audit_events = [
             event
@@ -6463,6 +7102,8 @@ class LocalRuntimeStore:
                 "evidence_bundle_id": bundle_id,
                 "evidence_item_count": len(bundle.get("evidence_items", [])) if bundle else 0,
                 "artifact_refs": evidence.get("artifact_refs", []),
+                "derived_representation_refs": evidence.get("derived_representation_refs", []),
+                "evidence_revision_sha256": evidence.get("evidence_revision_sha256"),
             },
             "transformations": [
                 {
@@ -6470,6 +7111,8 @@ class LocalRuntimeStore:
                     "status": "preserved",
                     "artifact_id": artifact["artifact_id"],
                     "derived_text_ref": artifact.get("derived_text_ref"),
+                    "derived_representation_ref": artifact.get("derived_representation_ref"),
+                    "derived_content_sha256": artifact.get("derived_content_sha256"),
                 }
                 for artifact in artifact_records
             ],
@@ -6488,7 +7131,11 @@ class LocalRuntimeStore:
             "freshness": {
                 "status": "current",
                 "validity_state": "inspectable",
-                "reproducible_from_archive": bool(bundle and snapshot and artifact_records),
+                "reproducible_from_archive": bool(
+                    snapshot
+                    and artifact_records
+                    and len(artifact_records) == len(evidence.get("artifact_refs", []))
+                ),
             },
             "created_at": utc_now(),
         }
@@ -7985,40 +8632,304 @@ class LocalRuntimeStore:
         )
         return {"experience_export": export, "audit_event": event}
 
-    def _derived_text_path(self, artifact: dict[str, Any]) -> Path | None:
-        text_ref = artifact.get("derived", {}).get("text_ref")
-        if not text_ref:
+    def _derived_representation_identity(
+        self,
+        *,
+        artifact_id: str,
+        artifact_checksum_sha256: str,
+        content_checksum_sha256: str,
+    ) -> str:
+        identity = {
+            "artifact_id": artifact_id,
+            "artifact_checksum_sha256": artifact_checksum_sha256,
+            "content_checksum_sha256": content_checksum_sha256,
+            "representation_type": DERIVED_REPRESENTATION_TYPE,
+            "extractor": DERIVED_EXTRACTOR,
+            "extractor_version": DERIVED_EXTRACTOR_VERSION,
+        }
+        return f"drv_{_json_hash(identity)}"
+
+    def _create_derived_representation(
+        self,
+        *,
+        artifact_id: str,
+        artifact_checksum_sha256: str,
+        text: str,
+        redacted: bool,
+    ) -> dict[str, Any]:
+        content = text.encode("utf-8")
+        content_checksum = sha256_bytes(content)
+        representation_id = self._derived_representation_identity(
+            artifact_id=artifact_id,
+            artifact_checksum_sha256=artifact_checksum_sha256,
+            content_checksum_sha256=content_checksum,
+        )
+        storage_ref = f"derived/content/sha256/{content_checksum}.txt"
+        content_path = self.artifact_dir / storage_ref
+        store_content_atomically(content_path, content, checksum_sha256=content_checksum)
+
+        record_path = self.derived_representation_path(representation_id)
+        expected_identity = {
+            "schema_version": "cs.derived_representation.v1",
+            "derived_representation_id": representation_id,
+            "artifact_id": artifact_id,
+            "artifact_checksum_sha256": artifact_checksum_sha256,
+            "content_checksum_sha256": content_checksum,
+            "content_size_bytes": len(content),
+            "representation_type": DERIVED_REPRESENTATION_TYPE,
+            "extractor": DERIVED_EXTRACTOR,
+            "extractor_version": DERIVED_EXTRACTOR_VERSION,
+            "storage_ref": storage_ref,
+            "status": "ready",
+            "media_type": "text/plain",
+            "redacted": redacted,
+        }
+        existing: dict[str, Any] | None = None
+        if record_path.is_file() and not record_path.is_symlink():
+            try:
+                candidate = _read_json(record_path)
+            except (OSError, ValueError, TypeError):
+                candidate = {}
+            if all(candidate.get(key) == value for key, value in expected_identity.items()):
+                existing = candidate
+        if existing is not None:
+            record = existing
+        else:
+            record = {
+                **expected_identity,
+                "created_at": utc_now(),
+            }
+            encoded = (json.dumps(record, indent=2, sort_keys=True) + "\n").encode("utf-8")
+            store_content_atomically(
+                record_path,
+                encoded,
+                checksum_sha256=sha256_bytes(encoded),
+            )
+        return {
+            "status": "ready",
+            "media_type": "text/plain",
+            "text_ref": storage_ref,
+            "storage_ref": storage_ref,
+            "derived_representation_id": representation_id,
+            "representation_ref": f"derived_representation:{representation_id}",
+            "derived_representation_ref": f"derived_representation:{representation_id}",
+            "artifact_checksum_sha256": artifact_checksum_sha256,
+            "content_checksum_sha256": content_checksum,
+            "content_size_bytes": len(content),
+            "representation_type": DERIVED_REPRESENTATION_TYPE,
+            "extractor": DERIVED_EXTRACTOR,
+            "extractor_version": DERIVED_EXTRACTOR_VERSION,
+            "redacted": redacted,
+        }
+
+    def _legacy_derived_representation(
+        self,
+        artifact: dict[str, Any],
+    ) -> tuple[dict[str, Any], Path] | None:
+        derived = artifact.get("derived") if isinstance(artifact.get("derived"), dict) else {}
+        text_ref = str(derived.get("text_ref") or "")
+        checksum = str(artifact.get("checksum_sha256") or "")
+        if not text_ref or not re.fullmatch(r"[0-9a-f]{64}", checksum):
             return None
         root = self.artifact_dir.resolve()
-        path = (root / str(text_ref)).resolve()
-        if root not in path.parents or not path.is_file():
+        path = (root / text_ref).resolve()
+        if root not in path.parents or path.is_symlink() or not path.is_file():
             return None
-        return path
+        original = self._read_verified_original_bytes(artifact)
+        if original is None or not str(artifact.get("media_type") or "").startswith("text/"):
+            return None
+        expected_text = redact_text(original.decode("utf-8", errors="replace"))
+        expected_content = expected_text.encode("utf-8")
+        content_checksum = sha256_bytes(expected_content)
+        if not verify_content_file(
+            path,
+            checksum_sha256=content_checksum,
+            size_bytes=len(expected_content),
+        ):
+            return None
+        representation_id = self._derived_representation_identity(
+            artifact_id=str(artifact.get("artifact_id") or ""),
+            artifact_checksum_sha256=checksum,
+            content_checksum_sha256=content_checksum,
+        )
+        return (
+            {
+                "schema_version": "cs.derived_representation.legacy.v1",
+                "derived_representation_id": representation_id,
+                "artifact_id": artifact.get("artifact_id"),
+                "artifact_checksum_sha256": checksum,
+                "content_checksum_sha256": content_checksum,
+                "content_size_bytes": len(expected_content),
+                "representation_type": DERIVED_REPRESENTATION_TYPE,
+                "extractor": DERIVED_EXTRACTOR,
+                "extractor_version": "legacy-verified",
+                "storage_ref": text_ref,
+                "status": "ready",
+                "media_type": "text/plain",
+                "redacted": expected_text != original.decode("utf-8", errors="replace"),
+                "created_at": artifact.get("provenance", {}).get("created_at"),
+            },
+            path,
+        )
+
+    def _resolved_derived_representation(
+        self,
+        artifact: dict[str, Any],
+        *,
+        expected: dict[str, Any] | None = None,
+    ) -> tuple[dict[str, Any], Path] | None:
+        derived = artifact.get("derived") if isinstance(artifact.get("derived"), dict) else {}
+        expected_representation_id = str((expected or {}).get("derived_representation_id") or "")
+        representation_id = expected_representation_id or str(derived.get("derived_representation_id") or "")
+        resolved: tuple[dict[str, Any], Path] | None = None
+        if representation_id:
+            try:
+                record = _read_json(self.derived_representation_path(representation_id))
+            except (OSError, ValueError, TypeError):
+                record = {}
+            checksum = str(record.get("content_checksum_sha256") or "")
+            size_bytes = record.get("content_size_bytes")
+            artifact_checksum = str(artifact.get("checksum_sha256") or "")
+            storage_ref = str(record.get("storage_ref") or "")
+            canonical_storage_ref = f"derived/content/sha256/{checksum}.txt"
+            calculated_representation_id = (
+                self._derived_representation_identity(
+                    artifact_id=str(artifact.get("artifact_id") or ""),
+                    artifact_checksum_sha256=artifact_checksum,
+                    content_checksum_sha256=checksum,
+                )
+                if re.fullmatch(r"[0-9a-f]{64}", artifact_checksum)
+                and re.fullmatch(r"[0-9a-f]{64}", checksum)
+                else ""
+            )
+            identity_matches = bool(
+                record.get("schema_version") == "cs.derived_representation.v1"
+                and record.get("status") == "ready"
+                and record.get("derived_representation_id") == representation_id
+                and calculated_representation_id == representation_id
+                and record.get("artifact_id") == artifact.get("artifact_id")
+                and record.get("artifact_checksum_sha256") == artifact_checksum
+                and record.get("representation_type") == DERIVED_REPRESENTATION_TYPE
+                and record.get("extractor") == DERIVED_EXTRACTOR
+                and record.get("extractor_version") == DERIVED_EXTRACTOR_VERSION
+                and record.get("media_type") == "text/plain"
+                and isinstance(record.get("redacted"), bool)
+                and re.fullmatch(r"[0-9a-f]{64}", checksum)
+                and isinstance(size_bytes, int)
+                and size_bytes >= 0
+                and storage_ref == canonical_storage_ref
+            )
+            if identity_matches and not expected_representation_id:
+                identity_matches = bool(
+                    derived.get("content_checksum_sha256") == checksum
+                    and derived.get("content_size_bytes") == size_bytes
+                    and (derived.get("storage_ref") or derived.get("text_ref")) == storage_ref
+                )
+            path = self.artifact_dir / canonical_storage_ref
+            if identity_matches and verify_content_file(
+                path,
+                checksum_sha256=checksum,
+                size_bytes=int(size_bytes),
+            ):
+                resolved = (record, path)
+        elif not expected_representation_id:
+            resolved = self._legacy_derived_representation(artifact)
+
+        if resolved is None:
+            return None
+        record, path = resolved
+        if expected:
+            expected_fields = {
+                "derived_representation_id": expected.get("derived_representation_id"),
+                "artifact_checksum_sha256": expected.get("artifact_checksum_sha256"),
+                "content_checksum_sha256": expected.get("derived_content_sha256")
+                or expected.get("content_checksum_sha256"),
+                "content_size_bytes": expected.get("derived_content_size_bytes")
+                if "derived_content_size_bytes" in expected
+                else expected.get("content_size_bytes"),
+                "storage_ref": expected.get("derived_storage_ref") or expected.get("storage_ref"),
+            }
+            for key, value in expected_fields.items():
+                if value is not None and record.get(key) != value:
+                    return None
+        return record, path
+
+    def _derived_representation_binding(self, artifact: dict[str, Any]) -> dict[str, Any] | None:
+        resolved = self._resolved_derived_representation(artifact)
+        if resolved is None:
+            return None
+        record, _ = resolved
+        if record.get("schema_version") == "cs.derived_representation.legacy.v1":
+            derived = self._create_derived_representation(
+                artifact_id=str(artifact.get("artifact_id") or ""),
+                artifact_checksum_sha256=str(artifact.get("checksum_sha256") or ""),
+                text=self._derived_text(artifact),
+                redacted=bool(record.get("redacted")),
+            )
+            record = _read_json(
+                self.derived_representation_path(str(derived["derived_representation_id"]))
+            )
+        return {
+            "derived_representation_id": record["derived_representation_id"],
+            "derived_representation_ref": f"derived_representation:{record['derived_representation_id']}",
+            "artifact_checksum_sha256": record["artifact_checksum_sha256"],
+            "derived_content_sha256": record["content_checksum_sha256"],
+            "derived_content_size_bytes": record["content_size_bytes"],
+            "derived_storage_ref": record["storage_ref"],
+            "representation_type": record["representation_type"],
+            "extractor": record["extractor"],
+            "extractor_version": record["extractor_version"],
+        }
+
+    def _derived_text_path(self, artifact: dict[str, Any]) -> Path | None:
+        resolved = self._resolved_derived_representation(artifact)
+        return resolved[1] if resolved is not None else None
 
     def derived_text_available(self, artifact: dict[str, Any]) -> bool:
         return self._derived_text_path(artifact) is not None
 
+    def _read_resolved_derived_text(
+        self,
+        resolved: tuple[dict[str, Any], Path],
+    ) -> str | None:
+        record, path = resolved
+        content = read_verified_content_file(
+            path,
+            checksum_sha256=str(record.get("content_checksum_sha256") or ""),
+            size_bytes=int(record.get("content_size_bytes", -1)),
+        )
+        return content.decode("utf-8", errors="replace") if content is not None else None
+
     def _derived_text(self, artifact: dict[str, Any]) -> str:
-        path = self._derived_text_path(artifact)
-        if path is None:
+        resolved = self._resolved_derived_representation(artifact)
+        if resolved is None:
             return ""
-        return path.read_text(encoding="utf-8", errors="replace")
+        return self._read_resolved_derived_text(resolved) or ""
+
+    def _derived_text_from_binding(
+        self,
+        artifact: dict[str, Any],
+        binding: dict[str, Any],
+    ) -> str | None:
+        resolved = self._resolved_derived_representation(artifact, expected=binding)
+        if resolved is None:
+            return None
+        return self._read_resolved_derived_text(resolved)
 
     def derived_text_preview(self, artifact: dict[str, Any], limit: int = 500) -> str:
-        path = self._derived_text_path(artifact)
-        if path is None:
+        resolved = self._resolved_derived_representation(artifact)
+        if resolved is None:
             return ""
-        with path.open(encoding="utf-8", errors="replace") as handle:
-            return handle.read(max(0, limit)).replace("\n", " ").strip()
+        text = self._read_resolved_derived_text(resolved)
+        return (text or "")[: max(0, limit)].replace("\n", " ").strip()
 
     def derived_text_content(self, artifact: dict[str, Any], limit: int = 50_000) -> tuple[str, bool]:
         """Return a line-preserving source preview and whether it was truncated."""
 
-        path = self._derived_text_path(artifact)
-        if path is None:
+        resolved = self._resolved_derived_representation(artifact)
+        if resolved is None:
             return "", False
-        with path.open(encoding="utf-8", errors="replace") as handle:
-            text = handle.read(max(0, limit) + 1)
+        text = self._read_resolved_derived_text(resolved) or ""
         return text[:limit], len(text) > limit
 
     def _ontology_label_key(self, value: str) -> str:
@@ -8982,6 +9893,15 @@ class LocalRuntimeStore:
         return {"ontology_object": updated, "ontology_change_set": change_set, "audit_event": event}
 
     def _evidence_items_from_snapshot(self, snapshot: dict[str, Any], scope: dict[str, str]) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+        stored_result_revision = str(snapshot.get("result_revision_sha256") or "")
+        if (
+            not re.fullmatch(r"[0-9a-f]{64}", stored_result_revision)
+            or stored_result_revision != _search_result_revision_sha256(snapshot)
+        ):
+            return [], {
+                "status": "integrity_failed",
+                "reason": "search_snapshot_result_revision_missing_or_changed",
+            }
         evidence_items = []
         for result in snapshot.get("results", []):
             artifact_id = result.get("artifact_id")
@@ -8994,7 +9914,13 @@ class LocalRuntimeStore:
                 return [], {"status": "scope_denied", "resource_scope": artifact.get("scope")}
             if not self.original_available(artifact):
                 return [], {"status": "integrity_failed", "artifact_id": artifact_id}
-            derived_text = self._derived_text(artifact)
+            derived_text = self._derived_text_from_binding(artifact, result)
+            if derived_text is None:
+                return [], {
+                    "status": "integrity_failed",
+                    "artifact_id": artifact_id,
+                    "reason": "derived_representation_missing_or_changed",
+                }
             snippet = result.get("snippet") or derived_text[:180].replace("\n", " ").strip()
             if not snippet:
                 continue
@@ -9002,9 +9928,22 @@ class LocalRuntimeStore:
                 {
                     "artifact_id": artifact["artifact_id"],
                     "search_snapshot_id": snapshot["search_snapshot_id"],
+                    "search_result_revision_sha256": snapshot.get("result_revision_sha256"),
                     "snippet": snippet,
                     "original_storage_ref": artifact.get("original_storage_ref"),
-                    "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
+                    "derived_text_ref": result.get("derived_storage_ref") or result.get("derived_text_ref"),
+                    "derived_representation_id": result.get("derived_representation_id"),
+                    "derived_representation_ref": result.get("derived_representation_ref"),
+                    "artifact_checksum_sha256": result.get("artifact_checksum_sha256"),
+                    "derived_content_sha256": result.get("derived_content_sha256"),
+                    "derived_content_size_bytes": result.get("derived_content_size_bytes"),
+                    "derived_storage_ref": result.get("derived_storage_ref"),
+                    "representation_type": result.get("representation_type"),
+                    "extractor": result.get("extractor"),
+                    "extractor_version": result.get("extractor_version"),
+                    "media_type": artifact.get("media_type"),
+                    "raw_original_access": artifact.get("raw_original_access"),
+                    "original_size_bytes": artifact.get("original_size_bytes"),
                     "source": artifact.get("source"),
                     "provenance": artifact.get("provenance"),
                     "scope": scope,
@@ -9019,6 +9958,7 @@ class LocalRuntimeStore:
         *,
         query: str,
         evidence_bundle_id: str | None = None,
+        evidence_revision_sha256: str | None = None,
         model_provider: str = DEFAULT_MODEL_PROVIDER,
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
         ollama_base_url: str | None = None,
@@ -9043,7 +9983,26 @@ class LocalRuntimeStore:
             artifact = self.get_artifact(str(item.get("artifact_id")), scope)
             if artifact is None or artifact.get("scope") != scope:
                 continue
-            derived_text = self._derived_text(artifact)
+            if not self.original_available(artifact):
+                return {
+                    "status": "integrity_failed",
+                    "error": "Evidence Bundle references an unavailable original Artifact.",
+                    "artifact_id": item.get("artifact_id"),
+                    "chunks": [],
+                    "embedding_status": "not_requested",
+                    "embedding_model": embedding_model if use_embeddings else None,
+                }
+            derived_text = self._derived_text_from_binding(artifact, item)
+            if derived_text is None:
+                return {
+                    "status": "integrity_failed",
+                    "error": "Evidence Bundle references a missing or changed Derived Representation.",
+                    "artifact_id": item.get("artifact_id"),
+                    "chunks": [],
+                    "embedding_status": "not_requested",
+                    "embedding_model": embedding_model if use_embeddings else None,
+                }
+            chunk_evidence_revision = evidence_revision_sha256 or item.get("search_result_revision_sha256")
             for index, span in enumerate(_text_chunks(derived_text)):
                 text = str(span.get("text", ""))
                 if not text:
@@ -9073,6 +10032,7 @@ class LocalRuntimeStore:
                     "artifact_id": artifact["artifact_id"],
                     "artifact_ref": f"artifact:{artifact['artifact_id']}",
                     "evidence_bundle_id": evidence_bundle_id,
+                    "evidence_revision_sha256": chunk_evidence_revision,
                     "search_snapshot_id": item.get("search_snapshot_id"),
                     "span": {"char_start": span["char_start"], "char_end": span["char_end"]},
                     "text": text,
@@ -9080,7 +10040,13 @@ class LocalRuntimeStore:
                     "prompt_role": "quoted_evidence",
                     "untrusted_evidence": artifact.get("trust_state") == "untrusted",
                     "original_storage_ref": artifact.get("original_storage_ref"),
-                    "derived_text_ref": artifact.get("derived", {}).get("text_ref"),
+                    "derived_text_ref": item.get("derived_storage_ref") or item.get("derived_text_ref"),
+                    "derived_representation_id": item.get("derived_representation_id"),
+                    "derived_representation_ref": item.get("derived_representation_ref"),
+                    "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                    "derived_content_sha256": item.get("derived_content_sha256"),
+                    "derived_content_size_bytes": item.get("derived_content_size_bytes"),
+                    "derived_storage_ref": item.get("derived_storage_ref"),
                     "embedding": {
                         "model": embedding_model if use_embeddings else None,
                         "status": "embedded" if query_embedding is not None else "not_requested",
@@ -9088,15 +10054,25 @@ class LocalRuntimeStore:
                         "dimensions": embedding_dimensions,
                     },
                     "score": score,
-                    "source": artifact.get("source"),
+                    "source": item.get("source"),
                     "safety": artifact.get("safety", {}),
-                    "evidence_refs": [f"artifact:{artifact['artifact_id']}", f"storage:{artifact.get('original_storage_ref')}"],
+                    "evidence_refs": [
+                        f"artifact:{artifact['artifact_id']}",
+                        f"storage:{artifact.get('original_storage_ref')}",
+                        str(item.get("derived_representation_ref") or ""),
+                    ],
                 }
-                chunk_id = f"chunk_{_json_hash({'artifact_id': artifact['artifact_id'], 'index': index, 'span': chunk_base['span'], 'text': text})[:16]}"
+                chunk_id = f"chunk_{_json_hash(chunk_base)}"
                 chunk = dict(chunk_base)
                 chunk["evidence_chunk_id"] = chunk_id
+                chunk["evidence_refs"] = [ref for ref in chunk["evidence_refs"] if ref]
                 chunk["evidence_refs"].append(f"evidence_chunk:{chunk_id}")
-                _write_json(self.evidence_chunk_path(chunk_id), chunk)
+                encoded_chunk = (json.dumps(chunk, indent=2, sort_keys=True) + "\n").encode("utf-8")
+                store_content_atomically(
+                    self.evidence_chunk_path(chunk_id),
+                    encoded_chunk,
+                    checksum_sha256=sha256_bytes(encoded_chunk),
+                )
                 chunks.append(chunk)
 
         chunks.sort(key=lambda row: (-float(row.get("score", 0)), str(row.get("artifact_id")), int(row.get("span", {}).get("char_start", 0))))
@@ -9106,6 +10082,99 @@ class LocalRuntimeStore:
             "embedding_status": "embedded" if query_embedding is not None else "not_requested",
             "embedding_model": embedding_model if use_embeddings else None,
         }
+
+    def _validate_citation_ref(
+        self,
+        ref: str,
+        scope: dict[str, str],
+    ) -> tuple[dict[str, Any] | None, dict[str, Any] | None, str | None]:
+        """Resolve one immutable citation without persisting a new check record."""
+
+        if not ref.startswith("evidence_chunk:"):
+            return None, None, "UNSUPPORTED_CITATION_REF"
+        ref_match = EVIDENCE_CHUNK_REF_RE.fullmatch(ref)
+        if ref_match is None:
+            return None, None, "INVALID_CITATION_REF"
+        chunk = self.get_evidence_chunk(ref_match.group(1))
+        if chunk is None:
+            return None, None, "UNRESOLVED_CITATION_REF"
+        if chunk.get("scope") != scope:
+            return None, chunk, "CROSS_SCOPE_CITATION_REF"
+        artifact = self.get_artifact(str(chunk.get("artifact_id") or ""), scope)
+        if artifact is None:
+            return None, chunk, "CITATION_ARTIFACT_NOT_FOUND"
+        if not self.original_available(artifact):
+            return None, chunk, "CITATION_ORIGINAL_INTEGRITY_FAILED"
+
+        evidence_bundle_id = str(chunk.get("evidence_bundle_id") or "")
+        if evidence_bundle_id:
+            bundle = self.get_evidence_bundle(evidence_bundle_id)
+            snapshot = (
+                self.get_search_snapshot(str(bundle.get("search_snapshot_id") or ""))
+                if bundle is not None
+                else None
+            )
+            representation_bound = bool(
+                bundle is not None
+                and bundle.get("filters") == scope
+                and bundle.get("evidence_revision_sha256") == chunk.get("evidence_revision_sha256")
+                and snapshot is not None
+                and snapshot.get("result_revision_sha256") == bundle.get("search_result_revision_sha256")
+                and any(
+                    isinstance(item, dict)
+                    and item.get("artifact_id") == chunk.get("artifact_id")
+                    and item.get("derived_representation_id") == chunk.get("derived_representation_id")
+                    and item.get("derived_content_sha256") == chunk.get("derived_content_sha256")
+                    for item in bundle.get("evidence_items", [])
+                )
+            )
+        else:
+            snapshot = self.get_search_snapshot(str(chunk.get("search_snapshot_id") or ""))
+            representation_bound = bool(
+                snapshot
+                and snapshot.get("filters") == scope
+                and snapshot.get("result_revision_sha256") == chunk.get("evidence_revision_sha256")
+                and any(
+                    isinstance(item, dict)
+                    and item.get("artifact_id") == chunk.get("artifact_id")
+                    and item.get("derived_representation_id") == chunk.get("derived_representation_id")
+                    and item.get("derived_content_sha256") == chunk.get("derived_content_sha256")
+                    for item in snapshot.get("results", [])
+                )
+            )
+        if not representation_bound:
+            return None, chunk, "CITATION_EVIDENCE_REVISION_MISMATCH"
+
+        source_text = self._derived_text_from_binding(artifact, chunk)
+        if source_text is None:
+            return None, chunk, "CITATION_DERIVED_REPRESENTATION_MISMATCH"
+        span = chunk.get("span")
+        if not isinstance(span, dict):
+            return None, chunk, "SPAN_IN_SOURCE_MISMATCH"
+        start = span.get("char_start")
+        end = span.get("char_end")
+        if (
+            not isinstance(start, int)
+            or isinstance(start, bool)
+            or not isinstance(end, int)
+            or isinstance(end, bool)
+            or start < 0
+            or end < start
+            or source_text[start:end] != chunk.get("text")
+        ):
+            return None, chunk, "SPAN_IN_SOURCE_MISMATCH"
+        return (
+            {
+                "ref": ref,
+                "artifact_ref": f"artifact:{artifact['artifact_id']}",
+                "derived_representation_ref": chunk.get("derived_representation_ref"),
+                "derived_content_sha256": chunk.get("derived_content_sha256"),
+                "evidence_revision_sha256": chunk.get("evidence_revision_sha256"),
+                "span": {"char_start": start, "char_end": end},
+            },
+            chunk,
+            None,
+        )
 
     def _citation_check(
         self,
@@ -9129,38 +10198,17 @@ class LocalRuntimeStore:
             if not ref.startswith("evidence_chunk:"):
                 errors.append({"ref": ref, "code": "UNSUPPORTED_CITATION_REF"})
                 continue
-            ref_match = EVIDENCE_CHUNK_REF_RE.fullmatch(ref)
-            if ref_match is None:
+            if EVIDENCE_CHUNK_REF_RE.fullmatch(ref) is None:
                 errors.append({"ref": ref, "code": "INVALID_CITATION_REF"})
                 continue
             if retrieval_allowlist is not None and ref not in retrieval_allowlist:
                 errors.append({"ref": ref, "code": "OUT_OF_RETRIEVAL_CITATION_REF"})
                 continue
-            chunk = self.get_evidence_chunk(ref_match.group(1))
-            if chunk is None:
-                errors.append({"ref": ref, "code": "UNRESOLVED_CITATION_REF"})
+            resolved_citation, _, error_code = self._validate_citation_ref(ref, scope)
+            if error_code is not None:
+                errors.append({"ref": ref, "code": error_code})
                 continue
-            if chunk.get("scope") != scope:
-                errors.append({"ref": ref, "code": "CROSS_SCOPE_CITATION_REF"})
-                continue
-            artifact = self.get_artifact(str(chunk.get("artifact_id")), scope)
-            if artifact is None:
-                errors.append({"ref": ref, "code": "CITATION_ARTIFACT_NOT_FOUND"})
-                continue
-            source_text = self._derived_text(artifact)
-            span = chunk.get("span", {})
-            start = int(span.get("char_start", -1))
-            end = int(span.get("char_end", -1))
-            if start < 0 or end < start or source_text[start:end] != chunk.get("text"):
-                errors.append({"ref": ref, "code": "SPAN_IN_SOURCE_MISMATCH"})
-                continue
-            resolved.append(
-                {
-                    "ref": ref,
-                    "artifact_ref": f"artifact:{artifact['artifact_id']}",
-                    "span": {"char_start": start, "char_end": end},
-                }
-            )
+            resolved.append(resolved_citation)
         check_base = {
             "schema_version": "cs.citation_check.v0",
             "output_kind": output_kind,
@@ -9191,6 +10239,12 @@ class LocalRuntimeStore:
             "out_of_retrieval_citation_count": len(
                 [error for error in errors if error["code"] == "OUT_OF_RETRIEVAL_CITATION_REF"]
             ),
+            "evidence_revision_mismatch_count": len(
+                [error for error in errors if error["code"] == "CITATION_EVIDENCE_REVISION_MISMATCH"]
+            ),
+            "derived_representation_mismatch_count": len(
+                [error for error in errors if error["code"] == "CITATION_DERIVED_REPRESENTATION_MISMATCH"]
+            ),
             "errors": errors,
             "checked_at": utc_now(),
         }
@@ -9220,21 +10274,10 @@ class LocalRuntimeStore:
         statement = statement.strip()
         bundle_id = str(bundle.get("evidence_bundle_id") or "")
         evidence_items = bundle.get("evidence_items") if isinstance(bundle.get("evidence_items"), list) else []
-        evidence_revision = _json_hash(
-            {
-                "evidence_bundle_id": bundle_id,
-                "search_snapshot_id": bundle.get("search_snapshot_id"),
-                "artifact_refs": [
-                    f"artifact:{item.get('artifact_id')}"
-                    for item in evidence_items
-                    if isinstance(item, dict) and item.get("artifact_id")
-                ],
-                "snippets": [
-                    str(item.get("snippet") or "")
-                    for item in evidence_items
-                    if isinstance(item, dict)
-                ],
-            }
+        evidence_revision = str(bundle.get("evidence_revision_sha256") or "")
+        evidence_revision_current = bool(
+            re.fullmatch(r"[0-9a-f]{64}", evidence_revision)
+            and evidence_revision == _evidence_bundle_revision_sha256(bundle)
         )
         statement_sha256 = _claim_statement_sha256(statement)
         citation_refs: list[str] = []
@@ -9273,7 +10316,9 @@ class LocalRuntimeStore:
                         [
                             str(chunk.get("text") or "")
                             for chunk in cited_chunks
-                            if isinstance(chunk, dict) and chunk.get("evidence_bundle_id") == bundle_id
+                            if isinstance(chunk, dict)
+                            and chunk.get("evidence_bundle_id") == bundle_id
+                            and chunk.get("evidence_revision_sha256") == evidence_revision
                         ],
                     )
                     if anchor_validation.get("status") == "passed":
@@ -9286,6 +10331,7 @@ class LocalRuntimeStore:
                 scope,
                 query=statement,
                 evidence_bundle_id=bundle_id,
+                evidence_revision_sha256=str(bundle.get("evidence_revision_sha256") or ""),
                 model_provider="local_test",
             )
             chunks = [chunk for chunk in chunks_result.get("chunks", []) if isinstance(chunk, dict)]
@@ -9306,7 +10352,11 @@ class LocalRuntimeStore:
         citations_bound_to_bundle = bool(citation_refs)
         for ref in citation_refs:
             chunk = self.get_evidence_chunk(ref.split(":", 1)[1]) if ref.startswith("evidence_chunk:") else None
-            if chunk is None or chunk.get("evidence_bundle_id") != bundle_id:
+            if (
+                chunk is None
+                or chunk.get("evidence_bundle_id") != bundle_id
+                or chunk.get("evidence_revision_sha256") != evidence_revision
+            ):
                 citations_bound_to_bundle = False
                 break
         citation_integrity_passed = bool(
@@ -9314,14 +10364,15 @@ class LocalRuntimeStore:
             and citation_check.get("status") == "passed"
             and citations_bound_to_bundle
         )
-        support_passed = bool(
+        source_supported = bool(
             statement
+            and evidence_revision_current
             and anchor_validation.get("status") == "passed"
             and citation_integrity_passed
         )
         support_base = {
             "schema_version": "cs.claim_statement_support.v0",
-            "status": "passed" if support_passed else "not_verified",
+            "status": "source_supported" if source_supported else "not_verified",
             "statement_sha256": statement_sha256,
             "statement_revision": 1,
             "evidence_bundle_id": bundle_id,
@@ -9334,12 +10385,14 @@ class LocalRuntimeStore:
                 else []
             ),
             "citation_integrity_state": "passed" if citation_integrity_passed else "not_verified",
-            "citations_bound_to_evidence_revision": citations_bound_to_bundle,
-            "statement_support_state": "deterministic_anchor_passed" if support_passed else "not_verified",
+            "citations_bound_to_evidence_revision": citations_bound_to_bundle and evidence_revision_current,
+            "source_support_state": "passed" if source_supported else "not_verified",
+            "statement_support_state": "source_supported" if source_supported else "not_verified",
             "semantic_faithfulness_state": "human_required",
             "semantic_support_verified": False,
+            "semantic_review_required": True,
             "anchor_validation": anchor_validation,
-            "approval_eligible": support_passed,
+            "approval_eligible": False,
         }
         return {
             **support_base,
@@ -9453,9 +10506,14 @@ class LocalRuntimeStore:
             if source_type in excluded_source_types:
                 continue
             original_available = self.original_available(artifact)
-            if search_mode == "evidence" and not original_available:
+            derived_binding = self._derived_representation_binding(artifact)
+            if search_mode == "evidence" and (not original_available or derived_binding is None):
                 continue
-            text = self._derived_text(artifact)
+            text = (
+                self._derived_text_from_binding(artifact, derived_binding) or ""
+                if derived_binding is not None
+                else ""
+            )
             source_ref = str(source.get("ref") or "").strip()
             filename = str(source.get("filename") or "").strip()
             first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
@@ -9498,8 +10556,7 @@ class LocalRuntimeStore:
             start = text_haystack.find(first_term) if first_term and first_term in text_haystack else 0
             start = max(start, 0)
             snippet = text[start : start + 180].replace("\n", " ").strip()
-            results.append(
-                {
+            result = {
                     "result_type": "artifact",
                     "result_ref": f"artifact:{artifact['artifact_id']}",
                     "artifact_id": artifact["artifact_id"],
@@ -9520,7 +10577,10 @@ class LocalRuntimeStore:
                         f"storage:{artifact['original_storage_ref']}",
                     ],
                 }
-            )
+            if derived_binding is not None:
+                result.update(derived_binding)
+                result["evidence_refs"].append(derived_binding["derived_representation_ref"])
+            results.append(result)
         for ontology_object in self._ontology_object_records(scope) if "ontology_object" in selected_result_types else []:
             haystack_parts = [
                 str(ontology_object.get("label", "")),
@@ -9545,11 +10605,18 @@ class LocalRuntimeStore:
             evidence_refs = list(ontology_object.get("evidence_refs", []))
             artifact_ref = next((ref for ref in evidence_refs if str(ref).startswith("artifact:")), "")
             artifact_id = artifact_ref.split(":", 1)[1] if artifact_ref else None
+            ontology_artifact = self.get_artifact(str(artifact_id), scope) if artifact_id else None
+            derived_binding = (
+                self._derived_representation_binding(ontology_artifact)
+                if isinstance(ontology_artifact, dict) and self.original_available(ontology_artifact)
+                else None
+            )
+            if search_mode == "evidence" and artifact_id and derived_binding is None:
+                continue
             snippet = f"{ontology_object.get('seed_type')}: {ontology_object.get('label')}"
             if ontology_object.get("properties"):
                 snippet = f"{snippet} properties={json.dumps(ontology_object.get('properties'), sort_keys=True)[:160]}"
-            results.append(
-                {
+            result = {
                     "result_type": "ontology_object",
                     "result_ref": f"ontology_object:{ontology_object['ontology_object_id']}",
                     "ontology_object_id": ontology_object["ontology_object_id"],
@@ -9561,7 +10628,12 @@ class LocalRuntimeStore:
                     "match_reasons": match_reasons,
                     "evidence_refs": [f"ontology_object:{ontology_object['ontology_object_id']}", *evidence_refs],
                 }
-            )
+            if derived_binding is not None:
+                result.update(derived_binding)
+                result["derived_text_ref"] = derived_binding["derived_storage_ref"]
+                result["original_storage_ref"] = ontology_artifact.get("original_storage_ref")
+                result["evidence_refs"].append(derived_binding["derived_representation_ref"])
+            results.append(result)
         for brief in brief_records:
             key_points = brief.get("key_points") if isinstance(brief.get("key_points"), list) else []
             uncertainty = brief.get("uncertainty") if isinstance(brief.get("uncertainty"), list) else []
@@ -9684,15 +10756,26 @@ class LocalRuntimeStore:
             ]
         duration_ms = round((perf_counter() - started) * 1000, 3)
         persisted_query = redact_text(query)
+        query_sha256 = sha256_bytes(query.encode("utf-8"))
+        result_revision_sha256 = _search_result_revision_sha256(
+            {
+                "query_sha256": query_sha256,
+                "filters": scope,
+                "search_mode": search_mode,
+                "result_types": sorted(selected_result_types),
+                "results": results,
+            }
+        )
         snapshot_base = {
             "schema_version": "cs.search_snapshot.v0",
             "query": persisted_query,
-            "query_sha256": sha256_bytes(query.encode("utf-8")),
+            "query_sha256": query_sha256,
             "filters": scope,
             "search_mode": search_mode,
             "result_types": sorted(selected_result_types),
             "result_count": len(results),
             "results": results,
+            "result_revision_sha256": result_revision_sha256,
             "created_at": utc_now(),
             "duration_ms": duration_ms,
         }
@@ -9717,11 +10800,17 @@ class LocalRuntimeStore:
         return {"snapshot": snapshot, "audit_event": event}
 
     def create_evidence_bundle(self, snapshot_id: str, scope: dict[str, str]) -> dict[str, Any]:
-        snapshot = self.get_search_snapshot(snapshot_id)
+        try:
+            snapshot = self._load_search_snapshot(snapshot_id)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return {"status": "integrity_failed", "reason": "search_snapshot_record_unreadable"}
         if snapshot is None:
             return {"status": "not_found"}
         if snapshot.get("filters") != scope:
             return {"status": "scope_denied", "resource_scope": snapshot.get("filters")}
+        identity_error = self._search_snapshot_identity_error(snapshot, snapshot_id)
+        if identity_error is not None:
+            return {"status": "integrity_failed", "reason": identity_error}
         if str(snapshot.get("search_mode") or "evidence") != "evidence":
             return {
                 "status": "invalid_search_mode",
@@ -9731,14 +10820,17 @@ class LocalRuntimeStore:
         evidence_items, evidence_error = self._evidence_items_from_snapshot(snapshot, scope)
         if evidence_error is not None:
             return evidence_error
-        bundle_base = {
+        bundle_base: dict[str, Any] = {
             "schema_version": "cs.evidence_bundle.v0",
             "search_snapshot_id": snapshot_id,
             "query": snapshot["query"],
+            "query_sha256": snapshot.get("query_sha256"),
+            "search_result_revision_sha256": snapshot.get("result_revision_sha256"),
             "filters": scope,
             "result_snapshot": {
                 "search_snapshot_id": snapshot_id,
                 "query": snapshot["query"],
+                "query_sha256": snapshot.get("query_sha256"),
                 "filters": scope,
                 "result_count": snapshot.get("result_count", 0),
                 "results": snapshot.get("results", []),
@@ -9746,6 +10838,9 @@ class LocalRuntimeStore:
             "evidence_items": evidence_items,
             "created_at": utc_now(),
         }
+        evidence_revision_sha256 = _evidence_bundle_revision_sha256(bundle_base)
+        bundle_base["evidence_revision_sha256"] = evidence_revision_sha256
+        bundle_base["result_snapshot"]["evidence_revision_sha256"] = evidence_revision_sha256
         bundle_id = f"evb_{_json_hash(bundle_base)[:16]}"
         bundle = dict(bundle_base)
         bundle["evidence_bundle_id"] = bundle_id
@@ -9758,12 +10853,115 @@ class LocalRuntimeStore:
         )
         return {"bundle": bundle, "audit_event": event}
 
-    def show_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
-        bundle = self.get_evidence_bundle(bundle_id)
+    def _validated_evidence_bundle_items(
+        self,
+        bundle: dict[str, Any],
+        scope: dict[str, str],
+    ) -> tuple[list[dict[str, Any]], dict[str, Any] | None]:
+        """Resolve one immutable Evidence Bundle chain without borrowing current metadata."""
+
+        bundle_id = str(bundle.get("evidence_bundle_id") or "")
+        identity_error = self._evidence_bundle_identity_error(bundle, bundle_id)
+        if identity_error is not None:
+            return [], {"status": "integrity_failed", "reason": identity_error}
+        revision = str(bundle.get("evidence_revision_sha256") or "")
+        if not re.fullmatch(r"[0-9a-f]{64}", revision) or revision != _evidence_bundle_revision_sha256(bundle):
+            return [], {"status": "integrity_failed", "reason": "evidence_bundle_revision_changed"}
+
+        snapshot_id = str(bundle.get("search_snapshot_id") or "")
+        snapshot = self.get_search_snapshot(snapshot_id) if snapshot_id else None
+        snapshot_revision = str((snapshot or {}).get("result_revision_sha256") or "")
+        if not (
+            snapshot
+            and snapshot.get("filters") == scope
+            and re.fullmatch(r"[0-9a-f]{64}", snapshot_revision)
+            and snapshot_revision == _search_result_revision_sha256(snapshot)
+            and bundle.get("search_result_revision_sha256") == snapshot_revision
+            and bundle.get("query_sha256") == snapshot.get("query_sha256")
+            and bundle.get("query") == snapshot.get("query")
+        ):
+            return [], {
+                "status": "integrity_failed",
+                "reason": "evidence_bundle_search_snapshot_missing_or_changed",
+                "search_snapshot_id": snapshot_id or None,
+            }
+
+        expected_result_snapshot = {
+            "search_snapshot_id": snapshot_id,
+            "query": snapshot.get("query"),
+            "query_sha256": snapshot.get("query_sha256"),
+            "filters": scope,
+            "result_count": snapshot.get("result_count", 0),
+            "results": snapshot.get("results", []),
+            "evidence_revision_sha256": revision,
+        }
+        if bundle.get("result_snapshot") != expected_result_snapshot:
+            return [], {
+                "status": "integrity_failed",
+                "reason": "evidence_bundle_result_snapshot_missing_or_changed",
+                "search_snapshot_id": snapshot_id,
+            }
+
+        evidence_items = bundle.get("evidence_items")
+        if not isinstance(evidence_items, list):
+            return [], {"status": "integrity_failed", "reason": "invalid_evidence_items"}
+
+        resolved_items: list[dict[str, Any]] = []
+        for item in evidence_items:
+            if not isinstance(item, dict) or not item.get("artifact_id"):
+                return [], {"status": "integrity_failed", "reason": "invalid_evidence_item"}
+            artifact_id = str(item["artifact_id"])
+            artifact = self.get_artifact(artifact_id, scope)
+            if artifact is None or artifact.get("scope") != scope:
+                return [], {
+                    "status": "integrity_failed",
+                    "reason": "evidence_artifact_missing_or_outside_scope",
+                    "artifact_id": artifact_id,
+                }
+            if (
+                item.get("artifact_checksum_sha256") != artifact.get("checksum_sha256")
+                or item.get("original_storage_ref") != artifact.get("original_storage_ref")
+                or not self.original_available(artifact)
+            ):
+                return [], {
+                    "status": "integrity_failed",
+                    "reason": "evidence_original_missing_or_changed",
+                    "artifact_id": artifact_id,
+                }
+            derived_text = self._derived_text_from_binding(artifact, item)
+            if derived_text is None:
+                return [], {
+                    "status": "integrity_failed",
+                    "reason": "derived_representation_missing_or_changed",
+                    "artifact_id": artifact_id,
+                }
+            resolved_items.append({"item": item, "artifact": artifact, "derived_text": derived_text})
+        return resolved_items, None
+
+    def _checked_evidence_bundle(
+        self,
+        bundle_id: str,
+        scope: dict[str, str],
+    ) -> tuple[dict[str, Any] | None, list[dict[str, Any]], dict[str, Any] | None]:
+        try:
+            bundle = self._load_evidence_bundle(bundle_id)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return None, [], {
+                "status": "integrity_failed",
+                "reason": "evidence_bundle_record_unreadable",
+            }
         if bundle is None:
-            return {"status": "not_found"}
+            return None, [], {"status": "not_found"}
         if bundle.get("filters") != scope:
-            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+            return bundle, [], {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        resolved_items, integrity_error = self._validated_evidence_bundle_items(bundle, scope)
+        return bundle, resolved_items, integrity_error
+
+    def show_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
+        bundle, _, error = self._checked_evidence_bundle(bundle_id, scope)
+        if error is not None:
+            return error
+        assert bundle is not None
         event = self.append_audit(
             "evidence_bundle.read",
             scope,
@@ -9773,37 +10971,42 @@ class LocalRuntimeStore:
         return {"bundle": bundle, "audit_event": event}
 
     def view_evidence_bundle(self, bundle_id: str, scope: dict[str, str]) -> dict[str, Any]:
-        bundle = self.get_evidence_bundle(bundle_id)
-        if bundle is None:
-            return {"status": "not_found"}
-        if bundle.get("filters") != scope:
-            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
-
+        bundle, resolved_items, error = self._checked_evidence_bundle(bundle_id, scope)
+        if error is not None:
+            return error
+        assert bundle is not None
         viewer_items = []
-        for item in bundle.get("evidence_items", []):
-            artifact = self.get_artifact(item["artifact_id"], scope)
-            if artifact is None:
-                return {"status": "not_found", "artifact_id": item["artifact_id"]}
-            if artifact.get("scope") != scope:
-                return {"status": "scope_denied", "resource_scope": artifact.get("scope")}
-            derived_text = self._derived_text(artifact)
+        for resolved in resolved_items:
+            item = resolved["item"]
+            artifact = resolved["artifact"]
+            derived_text = resolved["derived_text"]
             viewer_items.append(
                 {
                     "artifact_id": artifact["artifact_id"],
                     "original": {
-                        "storage_ref": artifact.get("original_storage_ref"),
-                        "media_type": artifact.get("media_type"),
-                        "source": artifact.get("source"),
-                        "raw_original_access": artifact.get("raw_original_access"),
-                        "size_bytes": artifact.get("original_size_bytes"),
+                        "storage_ref": item.get("original_storage_ref"),
+                        "media_type": item.get("media_type", artifact.get("media_type")),
+                        "source": item.get("source"),
+                        "raw_original_access": item.get("raw_original_access", artifact.get("raw_original_access")),
+                        "size_bytes": item.get("original_size_bytes", artifact.get("original_size_bytes")),
                     },
                     "derived": {
-                        "text_ref": artifact.get("derived", {}).get("text_ref"),
-                        "status": artifact.get("derived", {}).get("status"),
+                        "text_ref": item.get("derived_storage_ref") or item.get("derived_text_ref"),
+                        "status": "ready",
                         "text_preview": derived_text[:240].replace("\n", " ").strip(),
-                        "metadata": artifact.get("derived"),
+                        "metadata": {
+                            "derived_representation_id": item.get("derived_representation_id"),
+                            "derived_representation_ref": item.get("derived_representation_ref"),
+                            "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                            "content_checksum_sha256": item.get("derived_content_sha256"),
+                            "content_size_bytes": item.get("derived_content_size_bytes"),
+                            "storage_ref": item.get("derived_storage_ref"),
+                            "representation_type": item.get("representation_type"),
+                            "extractor": item.get("extractor"),
+                            "extractor_version": item.get("extractor_version"),
+                        },
                     },
-                    "provenance": artifact.get("provenance"),
+                    "provenance": item.get("provenance"),
                     "snippet": item.get("snippet"),
                 }
             )
@@ -9838,11 +11041,10 @@ class LocalRuntimeStore:
         embedding_model: str = DEFAULT_EMBEDDING_MODEL,
         ollama_base_url: str | None = None,
     ) -> dict[str, Any]:
-        bundle = self.get_evidence_bundle(bundle_id)
-        if bundle is None:
-            return {"status": "not_found"}
-        if bundle.get("filters") != scope:
-            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        bundle, resolved_items, bundle_error = self._checked_evidence_bundle(bundle_id, scope)
+        if bundle_error is not None:
+            return bundle_error
+        assert bundle is not None
 
         evidence_items = bundle.get("evidence_items", [])
         if not evidence_items:
@@ -9857,6 +11059,7 @@ class LocalRuntimeStore:
                 scope,
                 query=str(bundle.get("query") or ""),
                 evidence_bundle_id=bundle_id,
+                evidence_revision_sha256=str(bundle.get("evidence_revision_sha256") or ""),
                 model_provider=model_provider,
                 embedding_model=embedding_model,
                 ollama_base_url=ollama_base_url,
@@ -9942,6 +11145,9 @@ class LocalRuntimeStore:
                     "span": chunk.get("span"),
                     "original_storage_ref": chunk.get("original_storage_ref"),
                     "derived_text_ref": chunk.get("derived_text_ref"),
+                    "derived_representation_ref": chunk.get("derived_representation_ref"),
+                    "derived_content_sha256": chunk.get("derived_content_sha256"),
+                    "evidence_revision_sha256": chunk.get("evidence_revision_sha256"),
                 }
                 for chunk in chunks
             ]
@@ -9951,6 +11157,7 @@ class LocalRuntimeStore:
                     f"search_snapshot:{bundle.get('search_snapshot_id')}",
                     *[link["artifact_ref"] for link in evidence_links],
                     *[str(link.get("evidence_chunk_ref")) for link in evidence_links if link.get("evidence_chunk_ref")],
+                    *[str(link.get("derived_representation_ref")) for link in evidence_links if link.get("derived_representation_ref")],
                 }
             )
             prompt_boundary = self._prompt_boundary(
@@ -9995,6 +11202,9 @@ class LocalRuntimeStore:
                         "snippet": snippet,
                         "original_storage_ref": item.get("original_storage_ref"),
                         "derived_text_ref": item.get("derived_text_ref"),
+                        "derived_representation_ref": item.get("derived_representation_ref"),
+                        "derived_content_sha256": item.get("derived_content_sha256"),
+                        "evidence_revision_sha256": bundle.get("evidence_revision_sha256"),
                     }
                 )
             trust_label_reason = (
@@ -10012,6 +11222,11 @@ class LocalRuntimeStore:
                 embedding_model=embedding_model if model_provider == "ollama" else None,
             )
             evidence_refs = [link["artifact_ref"] for link in evidence_links]
+            evidence_refs.extend(
+                str(link.get("derived_representation_ref"))
+                for link in evidence_links
+                if link.get("derived_representation_ref")
+            )
             evidence_refs.extend(
                 [
                     f"evidence_bundle:{bundle_id}",
@@ -10061,8 +11276,28 @@ class LocalRuntimeStore:
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 "query": bundle.get("query"),
                 "filters": scope,
+                "evidence_revision_sha256": bundle.get("evidence_revision_sha256"),
                 "evidence_item_count": len(evidence_items),
                 "artifact_refs": [link["artifact_ref"] for link in evidence_links],
+                "derived_representation_refs": sorted(
+                    {
+                        str(item.get("derived_representation_ref"))
+                        for item in evidence_items
+                        if isinstance(item, dict) and item.get("derived_representation_ref")
+                    }
+                ),
+                "representation_bindings": [
+                    {
+                        "artifact_id": item.get("artifact_id"),
+                        "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                        "derived_representation_id": item.get("derived_representation_id"),
+                        "derived_representation_ref": item.get("derived_representation_ref"),
+                        "derived_content_sha256": item.get("derived_content_sha256"),
+                        "derived_content_size_bytes": item.get("derived_content_size_bytes"),
+                    }
+                    for item in evidence_items
+                    if isinstance(item, dict)
+                ],
             },
             **value_plane,
             "key_points": key_points,
@@ -10139,18 +11374,61 @@ class LocalRuntimeStore:
             "actions": "action",
             "memories": "memory",
         }.get(record_kind.lower(), record_kind.lower())
-        getters = {
-            "artifact": lambda value: self.get_artifact(value, scope),
-            "brief": self.get_brief,
-            "claim": self.get_claim,
-            "action": self.get_action,
-            "memory": self.get_memory,
-        }
-        getter = getters.get(normalized)
-        if getter is None:
+        if normalized == "artifact":
+            try:
+                record = self._get_artifact_unchecked(record_id, scope)
+            except (OSError, TypeError, ValueError, json.JSONDecodeError):
+                return {
+                    "status": "integrity_failed",
+                    "record_kind": "artifact",
+                    "reason": "artifact_record_unreadable",
+                }
+            if record is None:
+                return {"status": "not_found", "record_kind": "artifact"}
+            if record.get("scope") != scope:
+                return {
+                    "status": "scope_denied",
+                    "record_kind": "artifact",
+                    "resource_scope": record.get("scope"),
+                }
+            identity_error = self._artifact_identity_error(record, record_id, scope)
+            if identity_error is not None:
+                return {
+                    "status": "integrity_failed",
+                    "record_kind": "artifact",
+                    "reason": identity_error,
+                }
+        else:
+            getters = {
+                "brief": self.get_brief,
+                "claim": self.get_claim,
+                "action": self.get_action,
+                "memory": self.get_memory,
+            }
+            getter = getters.get(normalized)
+            if getter is None:
+                return {"status": "unsupported_kind", "record_kind": record_kind}
+            record = getter(record_id)
+        if normalized not in {"artifact", "brief", "claim", "action", "memory"}:
             return {"status": "unsupported_kind", "record_kind": record_kind}
-        record = getter(record_id)
         if record is None:
+            path_getters = {
+                "brief": self.brief_path,
+                "claim": self.claim_path,
+                "action": self.action_path,
+                "memory": self.memory_path,
+            }
+            path_getter = path_getters.get(normalized)
+            try:
+                record_path_exists = path_getter is not None and path_getter(record_id).exists()
+            except ValueError:
+                record_path_exists = False
+            if record_path_exists:
+                return {
+                    "status": "integrity_failed",
+                    "record_kind": normalized,
+                    "reason": f"{normalized}_record_unreadable_or_changed",
+                }
             return {"status": "not_found", "record_kind": normalized}
         if record.get("scope") != scope:
             return {"status": "scope_denied", "record_kind": normalized, "resource_scope": record.get("scope")}
@@ -10167,6 +11445,9 @@ class LocalRuntimeStore:
         return {"record": record, "audit_event": event}
 
     def original_available(self, artifact: dict[str, Any]) -> bool:
+        artifact_id = str(artifact.get("artifact_id") or "")
+        if self._artifact_identity_error(artifact, artifact_id) is not None:
+            return False
         checksum = str(artifact.get("checksum_sha256") or "")
         storage_ref = str(artifact.get("original_storage_ref") or "")
         expected_size = artifact.get("original_size_bytes")
@@ -10178,20 +11459,36 @@ class LocalRuntimeStore:
         ):
             return False
         original_root = self.original_dir.resolve()
-        original_path = (original_root / checksum).resolve()
-        if original_path.parent != original_root or not original_path.is_file():
-            return False
-        try:
-            stat = original_path.stat()
-        except OSError:
-            return False
-        if stat.st_size != expected_size:
-            return False
-        return _original_file_matches(
-            str(original_path),
-            stat.st_mtime_ns,
-            expected_size,
-            checksum,
+        original_path = self.original_dir / checksum
+        return bool(
+            original_path.parent.resolve() == original_root
+            and not original_path.is_symlink()
+            and verify_content_file(
+                original_path,
+                checksum_sha256=checksum,
+                size_bytes=expected_size,
+            )
+        )
+
+    def _read_verified_original_bytes(self, artifact: dict[str, Any]) -> bytes | None:
+        checksum = str(artifact.get("checksum_sha256") or "")
+        storage_ref = str(artifact.get("original_storage_ref") or "")
+        expected_size = artifact.get("original_size_bytes")
+        if (
+            not re.fullmatch(r"[0-9a-f]{64}", checksum)
+            or storage_ref != f"sha256:{checksum}"
+            or not isinstance(expected_size, int)
+            or expected_size < 0
+        ):
+            return None
+        original_root = self.original_dir.resolve()
+        original_path = self.original_dir / checksum
+        if original_path.parent.resolve() != original_root or original_path.is_symlink():
+            return None
+        return read_verified_content_file(
+            original_path,
+            checksum_sha256=checksum,
+            size_bytes=expected_size,
         )
 
     def read_artifact_original(
@@ -10201,7 +11498,14 @@ class LocalRuntimeStore:
         *,
         reason: str,
     ) -> dict[str, Any]:
-        artifact = self.get_artifact(artifact_id, scope)
+        try:
+            artifact = self._get_artifact_unchecked(artifact_id, scope)
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            return {
+                "status": "integrity_failed",
+                "record_kind": "artifact",
+                "reason": "artifact_record_unreadable",
+            }
         if artifact is None:
             return {"status": "not_found", "record_kind": "artifact"}
         if artifact.get("scope") != scope:
@@ -10210,21 +11514,25 @@ class LocalRuntimeStore:
                 "record_kind": "artifact",
                 "resource_scope": artifact.get("scope"),
             }
+        identity_error = self._artifact_identity_error(artifact, artifact_id, scope)
+        if identity_error is not None:
+            return {
+                "status": "integrity_failed",
+                "record_kind": "artifact",
+                "reason": identity_error,
+            }
         checksum = str(artifact.get("checksum_sha256") or "")
         storage_ref = str(artifact.get("original_storage_ref") or "")
         if not re.fullmatch(r"[0-9a-f]{64}", checksum) or storage_ref != f"sha256:{checksum}":
             return {"status": "integrity_failed", "reason": "invalid_original_storage_ref"}
         original_root = self.original_dir.resolve()
-        original_path = (original_root / checksum).resolve()
-        if original_path.parent != original_root:
+        original_path = self.original_dir / checksum
+        if original_path.parent.resolve() != original_root or original_path.is_symlink():
             return {"status": "integrity_failed", "reason": "invalid_original_path"}
         if not original_path.is_file():
             return {"status": "integrity_failed", "reason": "original_missing"}
-        content = original_path.read_bytes()
-        expected_size = artifact.get("original_size_bytes")
-        if not isinstance(expected_size, int) or expected_size < 0:
-            return {"status": "integrity_failed", "reason": "invalid_original_size"}
-        if sha256_bytes(content) != checksum or len(content) != expected_size:
+        content = self._read_verified_original_bytes(artifact)
+        if content is None:
             return {"status": "integrity_failed", "reason": "original_content_mismatch"}
         event = self.append_audit(
             "artifact.original.read",
@@ -10307,11 +11615,10 @@ class LocalRuntimeStore:
         ontology_object_refs: list[str] | None = None,
         related_brief: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        bundle = self.get_evidence_bundle(bundle_id)
-        if bundle is None:
-            return {"status": "not_found"}
-        if bundle.get("filters") != scope:
-            return {"status": "scope_denied", "resource_scope": bundle.get("filters")}
+        bundle, _, bundle_error = self._checked_evidence_bundle(bundle_id, scope)
+        if bundle_error is not None:
+            return bundle_error
+        assert bundle is not None
         evidence_items = bundle.get("evidence_items")
         if not isinstance(evidence_items, list) or not evidence_items:
             return {
@@ -10336,12 +11643,24 @@ class LocalRuntimeStore:
             scope=scope,
             related_brief=related_brief,
         )
-        support_passed = statement_support.get("status") == "passed"
+        source_supported = statement_support.get("status") == "source_supported"
+        representation_bindings = [
+            {
+                "artifact_id": item.get("artifact_id"),
+                "artifact_checksum_sha256": item.get("artifact_checksum_sha256"),
+                "derived_representation_id": item.get("derived_representation_id"),
+                "derived_representation_ref": item.get("derived_representation_ref"),
+                "derived_content_sha256": item.get("derived_content_sha256"),
+                "derived_content_size_bytes": item.get("derived_content_size_bytes"),
+            }
+            for item in evidence_items
+            if isinstance(item, dict)
+        ]
 
         claim_base = {
             "schema_version": "cs.claim.v0",
             "status": "draft",
-            "trust_state": "evidence_backed" if support_passed else "draft",
+            "trust_state": "draft",
             "statement": normalized_statement,
             "statement_support": statement_support,
             "rationale": (
@@ -10373,8 +11692,17 @@ class LocalRuntimeStore:
                 "search_snapshot_id": bundle.get("search_snapshot_id"),
                 "query": bundle.get("query"),
                 "filters": scope,
+                "evidence_revision_sha256": bundle.get("evidence_revision_sha256"),
                 "evidence_item_count": len(evidence_items),
                 "artifact_refs": [f"artifact:{item['artifact_id']}" for item in evidence_items],
+                "derived_representation_refs": sorted(
+                    {
+                        str(item.get("derived_representation_ref"))
+                        for item in evidence_items
+                        if isinstance(item, dict) and item.get("derived_representation_ref")
+                    }
+                ),
+                "representation_bindings": representation_bindings,
                 "result_refs": [
                     f"search_snapshot:{bundle.get('search_snapshot_id')}",
                     f"evidence_bundle:{bundle_id}",
@@ -10396,13 +11724,13 @@ class LocalRuntimeStore:
                 "usage_boundary": "context_only",
             },
             "authority": {
-                "can_be_approved": support_passed,
+                "can_be_approved": False,
                 "can_publish_shared_truth": False,
                 "can_drive_autonomous_action": False,
                 "blocked_reason": (
-                    "Owner approval is required before shared truth or autonomous action use."
-                    if support_passed
-                    else "The exact Claim statement needs a same-bundle source anchor before approval."
+                    "Source support is attached, but statement-level semantic review is required before approval."
+                    if source_supported
+                    else "The exact Claim statement needs same-revision source support and semantic review before approval."
                 ),
             },
             "activity_refs": [],
@@ -10425,6 +11753,10 @@ class LocalRuntimeStore:
                 "statement_sha256": statement_support.get("statement_sha256"),
                 "support_check_id": statement_support.get("support_check_id"),
                 "statement_support_state": statement_support.get("statement_support_state"),
+                "source_support_state": statement_support.get("source_support_state"),
+                "semantic_support_verified": False,
+                "approval_eligible": False,
+                "evidence_revision_sha256": bundle.get("evidence_revision_sha256"),
                 "citation_refs": statement_support.get("citation_refs", []),
                 "citation_check_refs": statement_support.get("citation_check_refs", []),
                 "ontology_context_refs": [f"ontology_object:{obj['ontology_object_id']}" for obj in ontology_context_objects],
@@ -10443,7 +11775,27 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": claim.get("scope")}
 
         evidence = claim.get("evidence_bundle", {})
-        evidence_item_count = int(evidence.get("evidence_item_count", 0) or 0)
+        evidence_integrity = claim.get("evidence_integrity") if isinstance(claim.get("evidence_integrity"), dict) else {}
+        if evidence_integrity.get("status") == "failed":
+            event = self.append_audit(
+                "claim.approval.denied",
+                scope,
+                {"type": "claim", "id": claim_id},
+                {
+                    "reason": "claim_evidence_integrity_failed",
+                    "required": "Restore the exact revision-bound Evidence Bundle, original, and Derived Representation before Claim review.",
+                    "integrity_reason": evidence_integrity.get("reason"),
+                    "semantic_support_verified": False,
+                    "approval_eligible": False,
+                },
+            )
+            return {"status": "integrity_failed", "claim": claim, "audit_event": event}
+        raw_evidence_item_count = evidence.get("evidence_item_count", 0)
+        evidence_item_count = (
+            raw_evidence_item_count
+            if isinstance(raw_evidence_item_count, int) and not isinstance(raw_evidence_item_count, bool)
+            else 0
+        )
         artifact_refs = evidence.get("artifact_refs", [])
         if evidence_item_count <= 0 or not artifact_refs:
             event = self.append_audit(
@@ -10472,64 +11824,53 @@ class LocalRuntimeStore:
             if bundle is not None and bundle.get("filters") == scope
             else {}
         )
-        support_is_current = bool(
-            stored_support.get("status") == "passed"
-            and current_support.get("status") == "passed"
+        source_support_is_current = bool(
+            stored_support.get("status") == "source_supported"
+            and current_support.get("status") == "source_supported"
             and stored_support.get("statement_sha256") == current_support.get("statement_sha256")
             and stored_support.get("evidence_revision_sha256") == current_support.get("evidence_revision_sha256")
             and stored_support.get("citation_refs") == current_support.get("citation_refs")
             and stored_support.get("citations_bound_to_evidence_revision") is True
             and current_support.get("citations_bound_to_evidence_revision") is True
         )
-        if not support_is_current:
+        if not source_support_is_current:
             event = self.append_audit(
                 "claim.approval.denied",
                 scope,
                 {"type": "claim", "id": claim_id},
                 {
-                    "reason": "statement_support_missing_or_stale",
+                    "reason": "statement_source_support_missing_or_stale",
                     "required": "Bind the exact Claim statement to citation-checked source text from the current Evidence Bundle revision.",
                     "statement_sha256": _claim_statement_sha256(str(claim.get("statement") or "")),
                     "stored_support_check_id": stored_support.get("support_check_id"),
                     "current_support_check_id": current_support.get("support_check_id"),
                     "stored_support_state": stored_support.get("statement_support_state"),
                     "current_support_state": current_support.get("statement_support_state"),
+                    "semantic_support_verified": False,
+                    "approval_eligible": False,
                 },
             )
             return {"status": "support_required", "claim": claim, "audit_event": event}
-
-        approved = dict(claim)
-        approved["status"] = "approved"
-        approved["trust_state"] = "approved"
-        approved["approved_at"] = utc_now()
-        approved["statement_support"] = {
-            **current_support,
-            "approval_revalidated_at": approved["approved_at"],
-            "approval_revalidated": True,
-        }
-        approved["authority"] = {
-            "can_be_approved": True,
-            "can_publish_shared_truth": True,
-            "can_drive_autonomous_action": False,
-            "blocked_reason": "Autonomous action still requires a governed action or mission path.",
-        }
-        _write_json(self.claim_path(claim_id), approved)
         event = self.append_audit(
-            "claim.approved",
+            "claim.approval.denied",
             scope,
             {"type": "claim", "id": claim_id},
             {
+                "reason": "semantic_support_review_required",
+                "required": "Record statement-level semantic support for the exact Claim, citations, and Evidence Bundle revision before owner approval.",
                 "evidence_bundle_id": evidence.get("evidence_bundle_id"),
                 "evidence_item_count": evidence_item_count,
                 "artifact_refs": artifact_refs,
-                "statement_sha256": current_support.get("statement_sha256"),
+                "statement_sha256": _claim_statement_sha256(str(claim.get("statement") or "")),
                 "evidence_revision_sha256": current_support.get("evidence_revision_sha256"),
-                "support_check_id": current_support.get("support_check_id"),
-                "citation_refs": current_support.get("citation_refs", []),
-                "citation_check_refs": current_support.get("citation_check_refs", []),
+                "stored_support_check_id": stored_support.get("support_check_id"),
+                "current_support_check_id": current_support.get("support_check_id"),
+                "source_support_is_current": source_support_is_current,
+                "semantic_support_verified": False,
+                "approval_eligible": False,
             },
         )
-        return {"status": "approved", "claim": approved, "audit_event": event}
+        return {"status": "semantic_support_required", "claim": claim, "audit_event": event}
 
     def show_claim(self, claim_id: str, scope: dict[str, str]) -> dict[str, Any]:
         result = self.read_product_record("claim", claim_id, scope, reason="cli_claim_show")
@@ -10546,6 +11887,7 @@ class LocalRuntimeStore:
         if evidence.get("search_snapshot_id"):
             refs.append(f"search_snapshot:{evidence['search_snapshot_id']}")
         refs.extend(evidence.get("artifact_refs", []))
+        refs.extend(evidence.get("derived_representation_refs", []))
         refs.extend(support.get("citation_refs", []))
         refs.extend(support.get("citation_check_refs", []))
         refs.extend(claim.get("ontology_context", {}).get("object_refs", []))
@@ -11769,6 +13111,26 @@ class LocalRuntimeStore:
             return {"status": "evidence_required"}
 
         policy = self._action_policy(mission, action_kind, risk, scope, connector)
+        if not (
+            claim.get("status") == "approved"
+            and claim.get("trust_state") == "approved"
+            and claim.get("statement_support", {}).get("semantic_support_verified") is True
+            and claim.get("authority", {}).get("can_drive_autonomous_action") is True
+        ):
+            policy = {
+                **policy,
+                "decision": "deny",
+                "policy": "action_source_claim_authority_required",
+                "reason_code": "CS_ACTION_CLAIM_AUTHORITY_REQUIRED",
+                "reason": "The Action can remain a review draft, but its source Claim has no semantic or action authority.",
+                "approval_required": True,
+                "can_execute_now": False,
+                "execution_status": "blocked_by_claim_authority",
+                "resolution_path": [
+                    "Review the Action Card without executing it.",
+                    "Complete statement-level semantic support review before granting Claim authority.",
+                ],
+            }
         expected_connector_calls = 1 if action_kind == "external_writeback" else 0
         ontology_refs = ontology_object_refs or claim.get("ontology_context", {}).get("object_refs", [])
         dry_run_base = {
@@ -12111,6 +13473,36 @@ class LocalRuntimeStore:
     def _action_lock_path(self, action_id: str) -> Path:
         return self.state_dir / "locks" / "actions" / f"{sha256_bytes(action_id.encode('utf-8'))}.lock"
 
+    def _action_claim_authority_denial(
+        self,
+        action: dict[str, Any],
+        scope: dict[str, str],
+    ) -> dict[str, Any] | None:
+        claim_id = str(action.get("source_claim_id") or "")
+        claim = self.get_claim(claim_id) if claim_id else None
+        claim_authorized = bool(
+            claim
+            and claim.get("scope") == scope
+            and claim.get("status") == "approved"
+            and claim.get("trust_state") == "approved"
+            and claim.get("statement_support", {}).get("semantic_support_verified") is True
+            and claim.get("authority", {}).get("can_drive_autonomous_action") is True
+        )
+        if claim_authorized:
+            return None
+        return self._action_execution_denial_policy(
+            action,
+            scope,
+            reason_code="CS_ACTION_CLAIM_AUTHORITY_REQUIRED",
+            policy="action_source_claim_authority_required",
+            reason="Action approval or execution requires a current semantically verified Claim with explicit action authority.",
+            resolution_path=[
+                "Keep this Action Card as a review draft.",
+                "Complete statement-level semantic support review before granting Claim authority.",
+                "Create a new governed Action only after the source Claim is currently authorized.",
+            ],
+        )
+
     def approve_action(self, action_id: str, scope: dict[str, str], approver: str = "owner") -> dict[str, Any]:
         lock_path = self._action_lock_path(action_id)
         lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -12129,6 +13521,27 @@ class LocalRuntimeStore:
             return {"status": "scope_denied", "resource_scope": action.get("scope")}
         if action.get("execution", {}).get("status") == "executed":
             return {"status": "already_executed", "action_card": action}
+        claim_authority_denial = self._action_claim_authority_denial(action, scope)
+        if claim_authority_denial is not None:
+            event = self.append_audit(
+                "action.approval.denied",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "reason_code": claim_authority_denial["reason_code"],
+                    "source_claim_id": action.get("source_claim_id"),
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
+                },
+            )
+            return {
+                "status": "policy_denied",
+                "reason_code": claim_authority_denial["reason_code"],
+                "policy_decision": claim_authority_denial,
+                "action_card": action,
+                "audit_event": event,
+            }
         if not action.get("approval", {}).get("required"):
             return {"status": "approval_not_required", "action_card": action}
         if not self._is_authorized_action_approver(approver, scope):
@@ -12691,6 +14104,40 @@ class LocalRuntimeStore:
             return {"status": "not_found"}
         if action.get("scope") != scope:
             return {"status": "scope_denied", "resource_scope": action.get("scope")}
+
+        claim_authority_denial = self._action_claim_authority_denial(action, scope)
+        if claim_authority_denial is not None:
+            safety_envelope = self._action_safety_envelope(
+                action,
+                scope,
+                status="denied",
+                reason_code=claim_authority_denial["reason_code"],
+                policy_decision=claim_authority_denial,
+            )
+            event = self.append_audit(
+                "action.execution.denied",
+                scope,
+                {"type": "action", "id": action_id},
+                {
+                    "mission_id": action.get("mission_id"),
+                    "source_claim_id": action.get("source_claim_id"),
+                    "policy": claim_authority_denial["policy"],
+                    "reason": claim_authority_denial["reason"],
+                    "reason_code": claim_authority_denial["reason_code"],
+                    "resolution_path": claim_authority_denial["resolution_path"],
+                    "action_safety_envelope_id": safety_envelope["action_safety_envelope_id"],
+                    "external_http_calls": 0,
+                    "provider_mutations": 0,
+                },
+            )
+            return {
+                "status": "policy_denied",
+                "reason_code": claim_authority_denial["reason_code"],
+                "policy_decision": claim_authority_denial,
+                "action_safety_envelope": safety_envelope,
+                "action_card": action,
+                "audit_event": event,
+            }
 
         mission = self.get_mission(action["mission_id"])
         if mission is None:
@@ -13894,7 +15341,90 @@ class LocalRuntimeStore:
         )
         return {"release_report_validation": report, "audit_event": event}
 
+    def _artifact_identity_for_ingest(
+        self,
+        checksum: str,
+        size_bytes: int,
+        scope: dict[str, str],
+    ) -> tuple[str, dict[str, Any] | None, dict[str, Any] | None]:
+        def record_identity_valid(record: dict[str, Any], artifact_id: str) -> bool:
+            return bool(
+                record.get("artifact_id") == artifact_id
+                and record.get("checksum_sha256") == checksum
+                and record.get("content_identity") == {"algorithm": "sha256", "value": checksum}
+                and record.get("original_storage_ref") == f"sha256:{checksum}"
+                and record.get("original_size_bytes") == size_bytes
+                and record.get("scope") == scope
+            )
+
+        canonical_id = f"art_{checksum}"
+        try:
+            canonical = self._get_artifact_unchecked(canonical_id, scope)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            return canonical_id, None, {
+                "status": "integrity_failed",
+                "reason": "canonical_artifact_record_unreadable",
+                "artifact_id": canonical_id,
+            }
+        if canonical is not None:
+            if not record_identity_valid(canonical, canonical_id):
+                return canonical_id, None, {
+                    "status": "integrity_failed",
+                    "reason": "canonical_artifact_identity_mismatch",
+                    "artifact_id": canonical_id,
+                }
+            return canonical_id, canonical, None
+
+        legacy_id = f"art_{checksum[:16]}"
+        try:
+            legacy = self._get_artifact_unchecked(legacy_id, scope)
+        except (OSError, ValueError, TypeError, json.JSONDecodeError):
+            return legacy_id, None, {
+                "status": "integrity_failed",
+                "reason": "legacy_artifact_record_unreadable",
+                "artifact_id": legacy_id,
+            }
+        if legacy is not None and legacy.get("checksum_sha256") == checksum:
+            if not record_identity_valid(legacy, legacy_id):
+                return legacy_id, None, {
+                    "status": "integrity_failed",
+                    "reason": "legacy_artifact_identity_mismatch",
+                    "artifact_id": legacy_id,
+                }
+            return legacy_id, legacy, None
+        return canonical_id, None, None
+
+    def _artifact_lock_path(self, checksum: str, scope: dict[str, str]) -> Path:
+        lock_key = sha256_bytes(f"{scope_key(scope)}:{checksum}".encode("utf-8"))
+        return self.state_dir / "locks" / "artifacts" / f"{lock_key}.lock"
+
     def ingest_text_artifact(
+        self,
+        text: str,
+        scope: dict[str, str],
+        *,
+        source_type: str,
+        source_ref: str,
+        trust: str = "untrusted",
+    ) -> dict[str, Any]:
+        checksum = sha256_bytes(text.encode("utf-8"))
+        lock_path = self._artifact_lock_path(checksum, scope)
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with _artifact_thread_lock(lock_path):
+            with lock_path.open("a+") as lock_file:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                try:
+                    return self._ingest_text_artifact_locked(
+                        text,
+                        scope,
+                        source_type=source_type,
+                        source_ref=source_ref,
+                        trust=trust,
+                    )
+                finally:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def _ingest_text_artifact_locked(
         self,
         text: str,
         scope: dict[str, str],
@@ -13905,7 +15435,9 @@ class LocalRuntimeStore:
     ) -> dict[str, Any]:
         data = text.encode("utf-8")
         checksum = sha256_bytes(data)
-        artifact_id = f"art_{checksum[:16]}"
+        artifact_id, existing, identity_error = self._artifact_identity_for_ingest(checksum, len(data), scope)
+        if identity_error is not None:
+            return identity_error
         original_storage_ref = f"sha256:{checksum}"
         raw_text = data.decode("utf-8", errors="replace")
         untrusted_text_sources = {"user_paste", "conversation_turn"}
@@ -13923,12 +15455,15 @@ class LocalRuntimeStore:
             "authority_expanded": False,
         }
         original_path = self.original_dir / checksum
-        self.original_dir.mkdir(parents=True, exist_ok=True)
-        if not original_path.exists():
-            original_path.write_bytes(data)
+        original_storage_status = store_content_atomically(
+            original_path,
+            data,
+            checksum_sha256=checksum,
+        )
 
-        existing = self.get_artifact(artifact_id, scope)
         if existing and existing.get("scope") == scope:
+            updated = dict(existing)
+            record_changed = False
             trust_downgraded = False
             if effective_trust == "untrusted" and (
                 existing.get("trust_state") != "untrusted"
@@ -13937,17 +15472,18 @@ class LocalRuntimeStore:
                 or existing.get("source", {}).get("type") != source_type
                 or existing.get("source", {}).get("ref") != source_ref
             ):
-                updated = dict(existing)
                 source_history = list(updated.get("source_history", [])) if isinstance(updated.get("source_history"), list) else []
                 if isinstance(updated.get("source"), dict):
                     source_history.append(updated["source"])
-                updated["trust_state"] = "untrusted"
-                updated["safety"] = safety
-                updated["source"] = {
+                source_observation = {
                     "type": source_type,
                     "ref": source_ref,
                     "ingested_at": utc_now(),
                 }
+                source_history.append(source_observation)
+                updated["trust_state"] = "untrusted"
+                updated["safety"] = safety
+                updated["source"] = source_observation
                 updated["source_history"] = source_history[-8:]
                 updated.setdefault("provenance", {}).setdefault("transformations", [])
                 transformations = updated["provenance"]["transformations"]
@@ -13955,9 +15491,33 @@ class LocalRuntimeStore:
                     transformations.append("trust_forced_untrusted")
                 if "source_rebound_to_untrusted_text" not in transformations:
                     transformations.append("source_rebound_to_untrusted_text")
+                trust_downgraded = True
+                record_changed = True
+            resolved_representation = self._resolved_derived_representation(updated)
+            legacy_representation = bool(
+                resolved_representation
+                and resolved_representation[0].get("schema_version") == "cs.derived_representation.legacy.v1"
+            )
+            if resolved_representation is None or legacy_representation:
+                redacted_text = redact_text(raw_text)
+                updated["derived"] = self._create_derived_representation(
+                    artifact_id=artifact_id,
+                    artifact_checksum_sha256=checksum,
+                    text=redacted_text,
+                    redacted=redacted_text != raw_text,
+                )
+                transformations = updated.setdefault("provenance", {}).setdefault("transformations", [])
+                transformation = (
+                    "derived_representation_migrated"
+                    if legacy_representation
+                    else "derived_representation_repaired"
+                )
+                if transformation not in transformations:
+                    transformations.append(transformation)
+                record_changed = True
+            if record_changed:
                 _write_json(self.artifact_path(artifact_id, scope), updated)
                 existing = updated
-                trust_downgraded = True
             event = self.append_audit(
                 "artifact.deduplicated",
                 scope,
@@ -13970,6 +15530,7 @@ class LocalRuntimeStore:
                     "trust_forced_untrusted": trust_forced_untrusted,
                     "trust_downgraded": trust_downgraded,
                     "unsafe_instruction_detected": safety["unsafe_instruction_detected"],
+                    "original_storage_status": original_storage_status,
                 },
             )
             return {
@@ -13982,10 +15543,12 @@ class LocalRuntimeStore:
 
         now = utc_now()
         redacted_text = redact_text(raw_text)
-        derived_text_ref = f"derived/{artifact_id}.txt"
-        derived_path = self.artifact_dir / derived_text_ref
-        derived_path.parent.mkdir(parents=True, exist_ok=True)
-        derived_path.write_text(redacted_text)
+        derived = self._create_derived_representation(
+            artifact_id=artifact_id,
+            artifact_checksum_sha256=checksum,
+            text=redacted_text,
+            redacted=redacted_text != raw_text,
+        )
         transformations = ["hash_calculated", "original_preserved", "derived_text_created"]
         if trust_forced_untrusted:
             transformations.append("trust_forced_untrusted")
@@ -14006,12 +15569,7 @@ class LocalRuntimeStore:
                 "ref": source_ref,
                 "ingested_at": now,
             },
-            "derived": {
-                "status": "ready",
-                "media_type": "text/plain",
-                "text_ref": derived_text_ref,
-                "redacted": redacted_text != raw_text,
-            },
+            "derived": derived,
             "provenance": {
                 "created_at": now,
                 "lineage_from": None,
@@ -14031,6 +15589,8 @@ class LocalRuntimeStore:
                 "unsafe_instruction_detected": safety["unsafe_instruction_detected"],
                 "effective_trust": effective_trust,
                 "trust_forced_untrusted": trust_forced_untrusted,
+                "derived_representation_id": derived.get("derived_representation_id"),
+                "original_storage_status": original_storage_status,
             },
         )
         return {
@@ -14063,6 +15623,8 @@ class LocalRuntimeStore:
             source_ref=conversation_id,
             trust="untrusted",
         )
+        if artifact_result.get("status") == "integrity_failed":
+            return artifact_result
         artifact = artifact_result["artifact"]
         artifact_safety = artifact.get("safety", {}) if isinstance(artifact, dict) else {}
         unsafe_instruction_detected = artifact_safety.get("unsafe_instruction_detected") is True
@@ -14277,6 +15839,7 @@ class LocalRuntimeStore:
                     scope,
                     query=question,
                     evidence_bundle_id=None,
+                    evidence_revision_sha256=str(snapshot.get("result_revision_sha256") or ""),
                     model_provider=model_provider,
                     embedding_model=embedding_model,
                     ollama_base_url=ollama_base_url,
@@ -14356,7 +15919,9 @@ class LocalRuntimeStore:
                         for ref in (
                             f"artifact:{chunk.get('artifact_id')}",
                             f"evidence_chunk:{chunk.get('evidence_chunk_id')}",
+                            str(chunk.get("derived_representation_ref") or ""),
                         )
+                        if ref
                     ],
                 }
             )
@@ -14504,21 +16069,71 @@ class LocalRuntimeStore:
         trust: str,
         lineage_from: str | None,
     ) -> dict[str, Any]:
-        media_type = normalize_media_type(media_type, filename)
-        checksum = sha256_bytes(data)
-        artifact_id = f"art_{checksum[:16]}"
-        original_storage_ref = f"sha256:{checksum}"
-        original_path = self.original_dir / checksum
-        self.original_dir.mkdir(parents=True, exist_ok=True)
-        if not original_path.exists():
-            original_path.write_bytes(data)
-
         scope = {
             "tenant_id": tenant_id,
             "owner_id": owner_id,
             "namespace_id": namespace_id,
             "workspace_id": workspace_id,
         }
+        lock_path = self._artifact_lock_path(sha256_bytes(data), scope)
+        lock_path.parent.mkdir(parents=True, exist_ok=True)
+        with _artifact_thread_lock(lock_path):
+            with lock_path.open("a+") as lock_file:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX)
+                try:
+                    return self._ingest_artifact_bytes_locked(
+                        data,
+                        filename=filename,
+                        tenant_id=tenant_id,
+                        owner_id=owner_id,
+                        namespace_id=namespace_id,
+                        workspace_id=workspace_id,
+                        source=source,
+                        source_ref=source_ref,
+                        source_path=source_path,
+                        media_type=media_type,
+                        derived_mode=derived_mode,
+                        trust=trust,
+                        lineage_from=lineage_from,
+                    )
+                finally:
+                    fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+
+    def _ingest_artifact_bytes_locked(
+        self,
+        data: bytes,
+        *,
+        filename: str,
+        tenant_id: str,
+        owner_id: str,
+        namespace_id: str,
+        workspace_id: str,
+        source: str,
+        source_ref: str | None = None,
+        source_path: str | None = None,
+        media_type: str,
+        derived_mode: str,
+        trust: str,
+        lineage_from: str | None,
+    ) -> dict[str, Any]:
+        media_type = normalize_media_type(media_type, filename)
+        checksum = sha256_bytes(data)
+        scope = {
+            "tenant_id": tenant_id,
+            "owner_id": owner_id,
+            "namespace_id": namespace_id,
+            "workspace_id": workspace_id,
+        }
+        artifact_id, existing, identity_error = self._artifact_identity_for_ingest(checksum, len(data), scope)
+        if identity_error is not None:
+            return identity_error
+        original_storage_ref = f"sha256:{checksum}"
+        original_path = self.original_dir / checksum
+        original_storage_status = store_content_atomically(
+            original_path,
+            data,
+            checksum_sha256=checksum,
+        )
         observed_at = utc_now()
         source_observation = {
             "type": source,
@@ -14543,7 +16158,6 @@ class LocalRuntimeStore:
             "external_http_calls": 0,
             "authority_expanded": False,
         }
-        existing = self.get_artifact(artifact_id, scope)
         if existing and existing.get("scope") == scope:
             updated = dict(existing)
             source_history = list(updated.get("source_history", [])) if isinstance(updated.get("source_history"), list) else []
@@ -14570,27 +16184,34 @@ class LocalRuntimeStore:
                     transformations.append("source_rebound_to_untrusted_upload")
             derived = updated.get("derived") if isinstance(updated.get("derived"), dict) else {}
             derived_status = str(derived.get("status") or "").lower()
-            if derived_status in {"deferred", "unsupported"} and media_type.startswith("text/"):
-                try:
-                    later_text = data.decode("utf-8")
-                except UnicodeDecodeError:
-                    later_text = ""
-                if later_text and "\x00" not in later_text:
-                    redacted_text = redact_text(later_text)
-                    derived_text_ref = f"derived/{artifact_id}.txt"
-                    derived_path = self.artifact_dir / derived_text_ref
-                    derived_path.parent.mkdir(parents=True, exist_ok=True)
-                    derived_path.write_text(redacted_text)
-                    updated["media_type"] = media_type
-                    updated["derived"] = {
-                        "status": "ready",
-                        "media_type": "text/plain",
-                        "text_ref": derived_text_ref,
-                        "redacted": redacted_text != later_text,
-                    }
-                    transformations = updated.setdefault("provenance", {}).setdefault("transformations", [])
-                    if "derived_text_created_from_later_observation" not in transformations:
-                        transformations.append("derived_text_created_from_later_observation")
+            resolved_representation = self._resolved_derived_representation(updated)
+            legacy_representation = bool(
+                resolved_representation
+                and resolved_representation[0].get("schema_version") == "cs.derived_representation.legacy.v1"
+            )
+            representation_missing = derived_status == "ready" and (
+                resolved_representation is None or legacy_representation
+            )
+            if (derived_status in {"deferred", "unsupported"} or representation_missing) and media_type.startswith("text/"):
+                later_text = data.decode("utf-8", errors="replace")
+                redacted_text = redact_text(later_text)
+                updated["media_type"] = media_type
+                updated["derived"] = self._create_derived_representation(
+                    artifact_id=artifact_id,
+                    artifact_checksum_sha256=checksum,
+                    text=redacted_text,
+                    redacted=redacted_text != later_text,
+                )
+                transformations = updated.setdefault("provenance", {}).setdefault("transformations", [])
+                transformation = (
+                    "derived_representation_migrated"
+                    if legacy_representation
+                    else "derived_representation_repaired"
+                    if representation_missing
+                    else "derived_text_created_from_later_observation"
+                )
+                if transformation not in transformations:
+                    transformations.append(transformation)
             _write_json(self.artifact_path(artifact_id, scope), updated)
             event = self.append_audit(
                 "artifact.deduplicated",
@@ -14607,6 +16228,8 @@ class LocalRuntimeStore:
                     "trust_downgraded": trust_downgraded,
                     "unsafe_instruction_detected": updated.get("safety", {}).get("unsafe_instruction_detected", False),
                     "derived_status": updated.get("derived", {}).get("status"),
+                    "derived_representation_id": updated.get("derived", {}).get("derived_representation_id"),
+                    "original_storage_status": original_storage_status,
                 },
             )
             audit_events = [event]
@@ -14663,16 +16286,12 @@ class LocalRuntimeStore:
         else:
             raw_text = data.decode("utf-8", errors="replace")
             redacted_text = redact_text(raw_text)
-            derived_text_ref = f"derived/{artifact_id}.txt"
-            derived_path = self.artifact_dir / derived_text_ref
-            derived_path.parent.mkdir(parents=True, exist_ok=True)
-            derived_path.write_text(redacted_text)
-            derived = {
-                "status": "ready",
-                "media_type": "text/plain",
-                "text_ref": derived_text_ref,
-                "redacted": redacted_text != raw_text,
-            }
+            derived = self._create_derived_representation(
+                artifact_id=artifact_id,
+                artifact_checksum_sha256=checksum,
+                text=redacted_text,
+                redacted=redacted_text != raw_text,
+            )
             transformations.append("derived_text_created")
 
         source_record = source_observation
@@ -14710,6 +16329,8 @@ class LocalRuntimeStore:
                 "media_type": media_type,
                 "size_bytes": len(data),
                 "source_type": source,
+                "derived_representation_id": derived.get("derived_representation_id"),
+                "original_storage_status": original_storage_status,
             },
         )
         audit_events = [event]

@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import threading
 import time
+from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -4490,6 +4491,23 @@ def _runtime_acceptance_ref_resolution(
             json_paths[reference] = state_path / "search" / "snapshots" / f"{reference.split(':', 1)[1]}.json"
         elif reference.startswith("evidence_bundle:"):
             json_paths[reference] = state_path / "evidence" / "bundles" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("derived_representation:"):
+            json_paths[reference] = (
+                state_path
+                / "artifacts"
+                / "derived"
+                / "representations"
+                / f"{reference.split(':', 1)[1]}.json"
+            )
+        elif reference.startswith("evidence_chunk:"):
+            json_paths[reference] = state_path / "evidence" / "chunks" / f"{reference.split(':', 1)[1]}.json"
+        elif reference.startswith("citation_check:"):
+            json_paths[reference] = (
+                state_path
+                / "evidence"
+                / "citation_checks"
+                / f"{reference.split(':', 1)[1]}.json"
+            )
         elif reference.startswith("brief:"):
             json_paths[reference] = state_path / "briefs" / f"{reference.split(':', 1)[1]}.json"
         elif reference.startswith("claim:"):
@@ -4846,10 +4864,14 @@ def _validate_runtime_acceptance_quickstart_report(
         if isinstance(artifact.get("content_identity"), dict)
         else {}
     )
+    accepted_artifact_ids = {
+        f"art_{fixture_sha256[:16]}",
+        f"art_{fixture_sha256}",
+    } if fixture_sha256 else set()
     if (
         fixture_value != "fixtures/vs0/packs/01_artifact_basic/input.txt"
         or fixture_sha256 is None
-        or artifact.get("artifact_id") != f"art_{fixture_sha256[:16]}"
+        or artifact.get("artifact_id") not in accepted_artifact_ids
         or artifact.get("checksum_sha256") != fixture_sha256
         or artifact.get("original_storage_ref") != f"sha256:{fixture_sha256}"
         or content_identity != {"algorithm": "sha256", "value": fixture_sha256}
@@ -5005,6 +5027,9 @@ def _validate_runtime_acceptance_quickstart_report(
         "artifact": "artifact_id",
         "search_snapshot": "search_snapshot_id",
         "evidence_bundle": "evidence_bundle_id",
+        "derived_representation": "derived_representation_id",
+        "evidence_chunk": "evidence_chunk_id",
+        "citation_check": "citation_check_id",
         "brief": "brief_id",
         "claim": "claim_id",
         "namespace_audit_export": "namespace_audit_export_id",
@@ -5020,6 +5045,8 @@ def _validate_runtime_acceptance_quickstart_report(
         f"claim:{claim.get('claim_id')}": claim,
         f"namespace_audit_export:{namespace_export.get('namespace_audit_export_id')}": namespace_export,
     }
+    artifact_derived = artifact.get("derived") if isinstance(artifact.get("derived"), dict) else {}
+    claim_support = claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}
     audit_semantics = {
         f"audit:{event.get('event_id')}": event
         for event in audit_events
@@ -5110,6 +5137,64 @@ def _validate_runtime_acceptance_quickstart_report(
                 ):
                     resolution_records_valid = False
             else:
+                resolution_records_valid = False
+        elif kind == "derived_representation":
+            identity = {
+                "artifact_id": record.get("artifact_id"),
+                "artifact_checksum_sha256": record.get("artifact_checksum_sha256"),
+                "content_checksum_sha256": record.get("content_checksum_sha256"),
+                "representation_type": record.get("representation_type"),
+                "extractor": record.get("extractor"),
+                "extractor_version": record.get("extractor_version"),
+            }
+            if (
+                identifier != f"drv_{_json_value_sha256(identity)}"
+                or record.get("schema_version") != "cs.derived_representation.v1"
+                or record.get("status") != "ready"
+                or record.get("artifact_id") != artifact.get("artifact_id")
+                or record.get("artifact_checksum_sha256") != artifact.get("checksum_sha256")
+                or record.get("content_checksum_sha256") != artifact_derived.get("content_checksum_sha256")
+                or record.get("content_size_bytes") != artifact_derived.get("content_size_bytes")
+                or f"derived_representation:{identifier}" != artifact_derived.get("derived_representation_ref")
+                or record.get("redacted") is not False
+                or record.get("content_checksum_sha256") != artifact.get("checksum_sha256")
+                or record.get("content_size_bytes") != artifact.get("original_size_bytes")
+            ):
+                resolution_records_valid = False
+        elif kind == "evidence_chunk":
+            chunk_base = deepcopy(record)
+            chunk_base.pop("evidence_chunk_id", None)
+            chunk_refs = chunk_base.get("evidence_refs")
+            if isinstance(chunk_refs, list):
+                chunk_base["evidence_refs"] = [
+                    reference
+                    for reference in chunk_refs
+                    if reference != f"evidence_chunk:{identifier}"
+                ]
+            else:
+                resolution_records_valid = False
+            if (
+                identifier != f"chunk_{_json_value_sha256(chunk_base)}"
+                or record.get("scope") != expected_scope
+                or record.get("artifact_id") != artifact.get("artifact_id")
+                or record.get("evidence_bundle_id") != bundle.get("evidence_bundle_id")
+                or record.get("search_snapshot_id") != snapshot.get("search_snapshot_id")
+                or record.get("evidence_revision_sha256") != bundle.get("evidence_revision_sha256")
+                or record.get("derived_representation_ref") != artifact_derived.get("derived_representation_ref")
+                or f"evidence_chunk:{identifier}" not in claim_support.get("citation_refs", [])
+            ):
+                resolution_records_valid = False
+        elif kind == "citation_check":
+            check_base = deepcopy(record)
+            check_base.pop("citation_check_id", None)
+            if (
+                identifier != f"citecheck_{_json_value_sha256(check_base)[:16]}"
+                or record.get("scope") != expected_scope
+                or record.get("status") != "passed"
+                or record.get("output_kind") != "claim_statement"
+                or record.get("citation_refs") != claim_support.get("citation_refs")
+                or f"citation_check:{identifier}" not in claim_support.get("citation_check_refs", [])
+            ):
                 resolution_records_valid = False
         else:
             record_scope = record.get("scope")

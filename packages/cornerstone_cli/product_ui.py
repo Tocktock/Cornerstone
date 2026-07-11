@@ -28,6 +28,26 @@ from cornerstone_cli.ui.styles import render_styles as _token_css, style_asset
 from cornerstone_cli.validators import redact_text
 
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
+PRODUCT_RECORD_FAMILIES = frozenset({"artifact", "brief", "claim", "action", "memory"})
+PRODUCT_ROUTE_RECORD_FAMILIES = {
+    "/": PRODUCT_RECORD_FAMILIES,
+    "/search": frozenset(),
+    "/artifacts": frozenset({"artifact", "brief", "claim", "action"}),
+    "/briefs": frozenset({"artifact", "brief"}),
+    "/claims": frozenset({"artifact", "brief", "claim"}),
+    "/actions": frozenset({"artifact", "brief", "claim", "action"}),
+    # Artifact visibility is the root of transitive fixture/owner-only lineage.
+    # Inbox needs it even though it does not render Artifact rows directly.
+    "/inbox": PRODUCT_RECORD_FAMILIES,
+    "/audit": frozenset(),
+}
+PRODUCT_DETAIL_RECORD_FAMILIES = {
+    "artifacts": frozenset({"artifact", "brief", "claim"}),
+    "briefs": frozenset({"artifact", "claim", "action"}),
+    "claims": frozenset({"artifact", "brief", "claim"}),
+    "memories": frozenset({"artifact", "memory"}),
+    "actions": frozenset({"artifact", "brief", "claim", "action"}),
+}
 PRODUCT_SEARCH_TYPES = [
     ("all", "All"),
     ("sources", "Sources"),
@@ -138,6 +158,7 @@ def render_product_page(
     ctx = _build_context(
         store,
         scope,
+        record_families=PRODUCT_ROUTE_RECORD_FAMILIES[route],
         include_audit=route in {"/", "/audit"},
         verify_audit_integrity=route == "/audit",
     )
@@ -254,7 +275,7 @@ def render_owner_reference_images_page(
     store: Any,
     scope: dict[str, str],
 ) -> str:
-    ctx = _build_context(store, scope)
+    ctx = _build_context(store, scope, record_families=frozenset())
     content = _owner_reference_images_page(root)
     return _page(root, "Reference Images", "/review", content, ctx, "")
 
@@ -264,7 +285,7 @@ def render_product_not_found(
     store: Any,
     scope: dict[str, str],
 ) -> str:
-    ctx = _build_context(store, scope)
+    ctx = _build_context(store, scope, record_families=frozenset())
     return _page(root, "Page not found", "/", _not_found("page"), ctx, "")
 
 
@@ -275,16 +296,36 @@ def render_product_detail(
     kind: str,
     record_id: str,
 ) -> tuple[int, str]:
-    ctx = _build_context(store, scope, include_audit=True)
-    access_result = ProductAccessApplication(store).read(
-        RecordReadRequest(
-            record_kind=kind,
-            record_id=record_id,
-            scope=scope,
-            reason="product_ui_detail",
+    try:
+        access_result = ProductAccessApplication(store).read(
+            RecordReadRequest(
+                record_kind=kind,
+                record_id=record_id,
+                scope=scope,
+                reason="product_ui_detail",
+            )
         )
-    )
+    except Exception:
+        # Detail pages have the same fail-closed audit contract as collections:
+        # if the read receipt cannot be recorded, do not render record data or
+        # reveal whether the requested identifier exists.
+        ctx = _build_context(store, scope, record_families=frozenset())
+        ctx["load_errors"].append("page access audit")
+        return 503, _page(
+            root,
+            "Access unavailable",
+            "/",
+            _access_audit_unavailable(),
+            ctx,
+            "",
+        )
     record = access_result.get("record") if isinstance(access_result.get("record"), dict) else None
+    ctx = _build_context(
+        store,
+        scope,
+        record_families=(PRODUCT_DETAIL_RECORD_FAMILIES.get(kind, frozenset()) if record else frozenset()),
+        include_audit=bool(record),
+    )
     audit_event = access_result.get("audit_event") if isinstance(access_result.get("audit_event"), dict) else None
     audit_ref = f"audit:{audit_event['event_id']}" if audit_event and audit_event.get("event_id") else ""
     evidence_kind = {
@@ -355,15 +396,40 @@ def _build_context(
     store: Any,
     scope: dict[str, str],
     *,
+    record_families: frozenset[str] | set[str] | None = None,
     include_audit: bool = False,
     verify_audit_integrity: bool = False,
 ) -> dict[str, Any]:
     load_errors: list[str] = []
-    artifacts = _recent(_safe_records(lambda: store._artifact_records(scope), load_errors, "saved sources"))
-    briefs = _recent(_safe_records(lambda: store._brief_records(scope), load_errors, "briefs"))
-    claims = _recent(_safe_records(lambda: store._claim_records(scope), load_errors, "claims"))
-    actions = _recent(_safe_records(lambda: store._action_records(scope), load_errors, "action drafts"))
-    memories = _recent(_safe_records(lambda: store._memory_records(scope), load_errors, "memory drafts"))
+    selected_families = PRODUCT_RECORD_FAMILIES if record_families is None else frozenset(record_families)
+    unsupported_families = selected_families - PRODUCT_RECORD_FAMILIES
+    if unsupported_families:
+        raise ValueError(f"Unsupported product record families: {sorted(unsupported_families)}")
+    artifacts = (
+        _recent(_safe_records(lambda: store._artifact_records(scope), load_errors, "saved sources"))
+        if "artifact" in selected_families
+        else []
+    )
+    briefs = (
+        _recent(_safe_records(lambda: store._brief_records(scope), load_errors, "briefs"))
+        if "brief" in selected_families
+        else []
+    )
+    claims = (
+        _recent(_safe_records(lambda: store._claim_records(scope), load_errors, "claims"))
+        if "claim" in selected_families
+        else []
+    )
+    actions = (
+        _recent(_safe_records(lambda: store._action_records(scope), load_errors, "action drafts"))
+        if "action" in selected_families
+        else []
+    )
+    memories = (
+        _recent(_safe_records(lambda: store._memory_records(scope), load_errors, "memory drafts"))
+        if "memory" in selected_families
+        else []
+    )
     audit_all = (
         _recent(
             [
@@ -395,7 +461,8 @@ def _build_context(
     actions = [record for record in actions if id(record) not in internal_record_objects]
     memories = [record for record in memories if id(record) not in internal_record_objects]
     inbox = _inbox_items(briefs, claims, actions, memories, scope=scope)
-    inbox_total = len(inbox)
+    inbox_families = {"brief", "claim", "action", "memory"}
+    inbox_total = len(inbox) if inbox_families <= selected_families else None
     return {
         "store": store,
         "scope": scope,
@@ -407,6 +474,7 @@ def _build_context(
         "audit": audit,
         "audit_all": audit_all,
         "audit_integrity": audit_integrity,
+        "loaded_record_families": sorted(selected_families),
         "internal_lineage_refs": internal_lineage_refs,
         "load_errors": list(dict.fromkeys(load_errors)),
         "suggestions": _suggestions(artifacts, briefs, claims),
@@ -617,6 +685,16 @@ def _short_ref(value: Any, length: int = 12) -> str:
     return f"{text[:length]}..."
 
 
+def _breakable_ref(value: Any, chunk_size: int = 16) -> str:
+    """Escape a technical reference while preserving mobile wrap points."""
+
+    text = str(value or "")
+    if not text:
+        return ""
+    size = max(4, chunk_size)
+    return "<wbr>".join(h(text[index : index + size]) for index in range(0, len(text), size))
+
+
 def _artifact_title(record: dict[str, Any] | None) -> str:
     if not record:
         return "Source"
@@ -750,7 +828,7 @@ def _audit_detail(event: dict[str, Any], position: int) -> str:
   <div class="cs-audit-raw-grid">
     <div class="cs-audit-raw-item"><span class="cs-meta">Ledger position</span><strong>{position}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event</span><strong>{h(event_id)}</strong></div>
-    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>{h(subject_ref)}</strong></div>
+    <div class="cs-audit-raw-item"><span class="cs-meta">Subject</span><strong>{_breakable_ref(subject_ref)}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event type</span><strong>{h(str(event.get("event_type") or "recorded"))}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Event hash</span><strong>{h(event_hash)}</strong></div>
     <div class="cs-audit-raw-item"><span class="cs-meta">Previous hash</span><strong>{h(previous_hash)}</strong></div>
@@ -762,6 +840,9 @@ def _audit_detail(event: dict[str, Any], position: int) -> str:
 
 
 def _brief_label(record: dict[str, Any]) -> tuple[str, str]:
+    evidence_integrity = record.get("evidence_integrity") if isinstance(record.get("evidence_integrity"), dict) else {}
+    if evidence_integrity.get("status") == "failed":
+        return "Integrity issue", "failed"
     output_mode = str(record.get("output_mode") or "").lower()
     trust = str(record.get("trust_label") or record.get("status") or "").lower()
     if output_mode in {"model_cited", "citation_grounded", "ollama_generated"} and trust in {"evidence_backed", "corroborated"}:
@@ -782,6 +863,9 @@ def _brief_source_count(record: dict[str, Any]) -> int:
 
 
 def _brief_label_state(record: dict[str, Any]) -> tuple[str, str]:
+    evidence_integrity = record.get("evidence_integrity") if isinstance(record.get("evidence_integrity"), dict) else {}
+    if evidence_integrity.get("status") == "failed":
+        return "Evidence integrity failed", "failed"
     label_check = record.get("label_check") if isinstance(record.get("label_check"), dict) else {}
     if record.get("presented_as_fact") is True and label_check.get("earned_evidence_backed") is True:
         return "Fact label earned", "evidenceBacked"
@@ -835,6 +919,9 @@ def _brief_summary_text(record: dict[str, Any]) -> str:
 
 
 def _claim_label(record: dict[str, Any]) -> tuple[str, str]:
+    evidence_integrity = record.get("evidence_integrity") if isinstance(record.get("evidence_integrity"), dict) else {}
+    if evidence_integrity.get("status") == "failed":
+        return "Integrity issue", "failed"
     status = str(record.get("status") or "").lower()
     if status == "approved":
         return "Approved", "approved"
@@ -859,6 +946,14 @@ def _claim_evidence_backed_earned(record: dict[str, Any]) -> bool:
         and support.get("approval_eligible") is True
     )
     return trust == "evidence_backed" and (legacy_label_earned or statement_support_earned)
+
+
+def _claim_semantic_support_verified(record: dict[str, Any]) -> bool:
+    support = record.get("statement_support") if isinstance(record.get("statement_support"), dict) else {}
+    return bool(
+        support.get("semantic_support_verified") is True
+        and support.get("semantic_faithfulness_state") == "passed"
+    )
 
 
 def _action_lifecycle(record: dict[str, Any]) -> dict[str, Any]:
@@ -984,11 +1079,23 @@ def _inbox_items(
         )
     for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"]:
         label, state = _claim_label(claim)
+        evidence_integrity = claim.get("evidence_integrity") if isinstance(claim.get("evidence_integrity"), dict) else {}
+        source_supported = str(
+            (claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}).get("status")
+            or ""
+        ) == "source_supported"
         items.append(
             {
                 "kind": "Claim",
                 "title": _claim_title(claim),
-                "detail": "Needs source support before it can be approved.",
+                "detail": (
+                    "The linked evidence chain failed integrity verification and must be repaired before review."
+                    if evidence_integrity.get("status") == "failed"
+                    else
+                    "Source support is attached; statement-level semantic review is required before owner approval."
+                    if source_supported
+                    else "Needs source support before semantic review and owner approval."
+                ),
                 "label": label,
                 "state": state,
                 "href": _detail_href("claims", claim.get("claim_id")),
@@ -1199,12 +1306,21 @@ def _page(root: Path, title: str, active: str, content: str, ctx: dict[str, Any]
 
 
 def _nav(active: str, ctx: dict[str, Any]) -> str:
+    loaded = (
+        set(ctx["loaded_record_families"])
+        if "loaded_record_families" in ctx
+        else set(PRODUCT_RECORD_FAMILIES)
+    )
     counts = {
-        "/": len(ctx["artifacts"]),
-        "/search": len(ctx["artifacts"]) + len(ctx["briefs"]) + len(ctx["claims"]) + len(ctx["actions"]),
-        "/artifacts": len(ctx["artifacts"]),
-        "/claims": len(ctx["claims"]),
-        "/actions": len(ctx["actions"]),
+        "/": len(ctx["artifacts"]) if "artifact" in loaded else None,
+        "/search": (
+            len(ctx["artifacts"]) + len(ctx["briefs"]) + len(ctx["claims"]) + len(ctx["actions"])
+            if {"artifact", "brief", "claim", "action"} <= loaded
+            else None
+        ),
+        "/artifacts": len(ctx["artifacts"]) if "artifact" in loaded else None,
+        "/claims": len(ctx["claims"]) if "claim" in loaded else None,
+        "/actions": len(ctx["actions"]) if "action" in loaded else None,
     }
     primary = [
         ("/", "Home"),
@@ -1224,7 +1340,7 @@ def _nav(active: str, ctx: dict[str, Any]) -> str:
 """
 
 
-def _nav_link(href: str, label: str, active: str, count: int) -> str:
+def _nav_link(href: str, label: str, active: str, count: int | None) -> str:
     current = ' aria-current="page"' if href == active else ""
     icon_name = {
         "/": "home",
@@ -1233,25 +1349,43 @@ def _nav_link(href: str, label: str, active: str, count: int) -> str:
         "/claims": "shield-check",
         "/actions": "action",
     }.get(href, "document")
-    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark">{icon(icon_name)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(str(count))}</span></a>'
+    count_text = "" if count is None else str(count)
+    return f'<a href="{h(href)}"{current}><span class="cs-nav-mark">{icon(icon_name)}</span><span>{h(label)}</span><span class="cs-nav-count">{h(count_text)}</span></a>'
 
 
 def _sidebar_status(ctx: dict[str, Any]) -> str:
-    source_count = len(ctx["artifacts"])
+    loaded = (
+        set(ctx["loaded_record_families"])
+        if "loaded_record_families" in ctx
+        else set(PRODUCT_RECORD_FAMILIES)
+    )
+    source_count = len(ctx["artifacts"]) if "artifact" in loaded else None
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
     workspace = str(scope.get("workspace_id") or "default")
     namespace = str(scope.get("namespace_id") or "personal")
+    source_summary = (
+        f'{source_count} source{"s" if source_count != 1 else ""}'
+        if source_count is not None
+        else "workspace"
+    )
     return f"""
 <a class="cs-workspace-switcher" href="/review" aria-label="Open local workspace settings">
   <span class="cs-workspace-icon">{icon("document")}</span>
-  <span><strong>{h(workspace)}</strong><small>{h(namespace)} · {h(source_count)} source{"s" if source_count != 1 else ""}</small></span>
+  <span><strong>{h(workspace)}</strong><small>{h(namespace)} · {h(source_summary)}</small></span>
   {icon("chevron-right", class_name="cs-icon is-small")}
 </a>
 """
 
 
 def _topbar(q: str, ctx: dict[str, Any]) -> str:
-    review_count = int(ctx.get("inbox_total", len(ctx["inbox"])))
+    raw_review_count = ctx.get("inbox_total", len(ctx["inbox"]))
+    review_count = int(raw_review_count) if raw_review_count is not None else None
+    review_label = (
+        f'Open Review inbox with {review_count} item{"s" if review_count != 1 else ""}'
+        if review_count is not None
+        else "Open Review inbox"
+    )
+    review_count_markup = "" if review_count is None else f"<strong>{h(review_count)}</strong>"
     scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
     owner = str(scope.get("owner_id") or "local-user")
     return f"""
@@ -1264,9 +1398,9 @@ def _topbar(q: str, ctx: dict[str, Any]) -> str:
     </form>
   </div>
   <div class="cs-topbar-actions" aria-label="Workspace tools">
-    <a class="cs-review-link" href="/inbox" aria-label="Open Review inbox with {h(review_count)} item{"s" if review_count != 1 else ""}">{icon("review")}<span>Review</span><strong>{h(review_count)}</strong></a>
+    <a class="cs-review-link" href="/inbox" aria-label="{h(review_label)}">{icon("review")}<span>Review</span>{review_count_markup}</a>
     <details class="cs-help-menu">
-      <summary class="cs-icon-button" aria-label="Help">{icon("help")}</summary>
+      <summary class="cs-icon-button" aria-label="Open help"><span class="cs-help-glyph" aria-hidden="true">?</span></summary>
       <div class="cs-help-popover">
         <strong>Start with Drop or Ask</strong>
         <p>Save a source, ask a question, then open the Brief and its sources before making a decision.</p>
@@ -2052,8 +2186,27 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
 
 def _claim_list_page(ctx: dict[str, Any]) -> str:
     claims = ctx["claims"]
-    supported_count = sum(1 for claim in claims if _evidence_refs(claim))
-    evidence_backed_count = sum(1 for claim in claims if _claim_evidence_backed_earned(claim))
+    supported_count = sum(
+        1
+        for claim in claims
+        if _evidence_refs(claim)
+        and not (
+            isinstance(claim.get("evidence_integrity"), dict)
+            and claim["evidence_integrity"].get("status") == "failed"
+        )
+    )
+    semantic_review_needed_count = sum(
+        1
+        for claim in claims
+        if _evidence_refs(claim)
+        and not (
+            isinstance(claim.get("evidence_integrity"), dict)
+            and claim["evidence_integrity"].get("status") == "failed"
+        )
+        and not _claim_semantic_support_verified(claim)
+        and str(claim.get("status") or "").lower() != "approved"
+    )
+    semantic_reviewed_count = sum(1 for claim in claims if _claim_semantic_support_verified(claim))
     approved_count = sum(1 for claim in claims if str(claim.get("status") or "").lower() == "approved")
     rows = ""
     for claim in claims:
@@ -2069,7 +2222,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             footer=[
                 ("Evidence refs", f"{source_count} source refs"),
                 ("Trust lane", label),
-                ("Next review step", "Citation checks before evidence-backed"),
+                ("Next review step", "Semantic review before owner approval"),
             ],
             action_label="Review claim",
         )
@@ -2089,7 +2242,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
         ],
         receipts=[
             ("Claim statement", "One decision-ready statement per row."),
-            ("Trust lane", "Draft, source support, evidence-backed after checks, then approved."),
+            ("Trust lane", "Draft, source support, then separate semantic review before owner approval."),
             ("Evidence picker", "Support must stay visible before approval."),
         ],
     )
@@ -2097,18 +2250,18 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
 <section data-product-surface="claims">
   <div class="cs-page-head">
     <div class="cs-kicker">Claims</div>
-    <h1>Claims that need source support</h1>
-    <p>Promote only statements that can be traced back to saved sources.</p>
+    <h1>Claims under review</h1>
+    <p>Trace each statement to saved sources, then review whether those sources actually support its meaning before owner approval.</p>
   </div>
   <div class="cs-collection-workbench">
     <div>
-      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Evidence-backed", evidence_backed_count), ("Approved", approved_count)])}
+      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Semantic review needed", semantic_review_needed_count), ("Approved", approved_count)])}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Review posture</h2>
-        <p class="cs-muted">Claims can show source support before review. The evidence-backed label stays locked until citation checks earn it.</p>
+        <p class="cs-muted">Claims can show source support, but they stay Draft until statement-level semantic review is recorded separately from owner approval.</p>
         <div class="cs-review-box">
           <a class="cs-button" href="/inbox">Open review inbox</a>
           <a class="cs-button secondary" href="/artifacts">Check sources</a>
@@ -2116,7 +2269,7 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
       </section>
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Trust ladder</h2>
-        {_claim_trust_ladder(bool(supported_count), bool(evidence_backed_count), bool(approved_count))}
+        {_claim_trust_ladder(bool(supported_count), bool(semantic_reviewed_count), bool(approved_count))}
       </section>
     </aside>
   </div>
@@ -2567,7 +2720,7 @@ def _inbox_journey_recovery_details() -> str:
     </div>
     <div data-vs4-loop-recovery-state="lineage-mismatch" data-vs4-loop-recovery-status="blocked-safe">
       <strong>Different journey</strong>
-      <span>CornerStone did not combine unrelated evidence-backed work. No new journey or activity record was created by the workflow; only this page view was added to History.</span>
+      <span>CornerStone did not combine unrelated source-linked work. No new journey or activity record was created by the workflow; only this page view was added to History.</span>
     </div>
   </div>
 </details>
@@ -2728,7 +2881,7 @@ def _audit_page(
       <div class="cs-audit-row-meta">
         <span>{h(_audit_family(str(event.get("event_type") or "")))}</span>
         <span>{h(_display_date(event))}</span>
-        <span>{h(_audit_record_ref(event) or "No subject reference")}</span>
+        <span>{_breakable_ref(_audit_record_ref(event) or "No subject reference")}</span>
       </div>
     </div>
   </div>
@@ -3581,6 +3734,8 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     source_items = _source_items(ctx, claim)
     source_list = _source_links_from_items(source_items)
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
+    evidence_integrity = claim.get("evidence_integrity") if isinstance(claim.get("evidence_integrity"), dict) else {}
+    integrity_failed = evidence_integrity.get("status") == "failed"
     has_sources = bool(source_items)
     is_approved = str(claim.get("status") or "").lower() == "approved"
     evidence_backed_earned = _claim_evidence_backed_earned(claim)
@@ -3608,11 +3763,18 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         denied = denial_events[0]
         details = denied.get("details") if isinstance(denied.get("details"), dict) else {}
         audit_ref = f"audit:{denied.get('event_id')}" if denied.get("event_id") else "Audit reference unavailable"
+        semantic_denial = str(details.get("reason") or "") == "semantic_support_review_required"
+        denial_chip = "Semantic review required" if semantic_denial else "Evidence required"
+        recovery = (
+            "Review the exact statement against every cited span. Semantic support and owner approval remain separate decisions."
+            if semantic_denial
+            else "Return to the source Brief and create a Claim from a citation-checked finding."
+        )
         denial_panel = f"""
 <section class="cs-panel" data-claim-approval-denial="true">
-  <div class="cs-panel-header"><div><h2>Approval blocked</h2><p class="cs-muted">The Claim remains a draft.</p></div>{_chip("Evidence required", "insufficientEvidence")}</div>
+  <div class="cs-panel-header"><div><h2>Approval blocked</h2><p class="cs-muted">The Claim remains a draft.</p></div>{_chip(denial_chip, "insufficientEvidence")}</div>
   <p><strong>Cause:</strong> {h(_plain_runtime_text(details.get("reason") or "Supporting source evidence is missing."))}</p>
-  <p><strong>Recovery:</strong> Return to the source Brief and create a Claim from a citation-checked finding.</p>
+  <p><strong>Recovery:</strong> {h(recovery)}</p>
   <details class="cs-audit-detail"><summary>Denial detail</summary><p><code>{h(audit_ref)}</code></p><p>{h(_plain_runtime_text(details.get("required") or "Supporting evidence is required before approval."))}</p></details>
 </section>
 """
@@ -3659,7 +3821,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     else:
         approval_panel = f"""
 <section class="cs-panel cs-decision-panel" data-claim-approval-state="blocked">
-  <div class="cs-panel-header"><div><h2>Approval is not available</h2><p class="cs-muted">{h(blocked_reason)}</p></div>{_chip("Source support needed", "insufficientEvidence")}</div>
+  <div class="cs-panel-header"><div><h2>Approval is not available</h2><p class="cs-muted">{h(blocked_reason)}</p></div>{_chip("Evidence integrity failed" if integrity_failed else "Semantic review required" if has_sources else "Source support needed", "failed" if integrity_failed else "insufficientEvidence")}</div>
   <div class="cs-review-box">{related_brief}</div>
 </section>
 """
@@ -4124,13 +4286,13 @@ def _action_detail(ctx: dict[str, Any], action: dict[str, Any]) -> str:
 """
 
 
-def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_approved: bool) -> str:
+def _claim_trust_ladder(has_sources: bool, semantic_support_verified: bool, is_approved: bool) -> str:
     source_class = "is-active" if has_sources else "is-locked"
-    evidence_class = "is-active" if evidence_backed_earned else "is-locked"
+    semantic_class = "is-active" if semantic_support_verified else "is-locked"
     approved_class = "is-active" if is_approved else "is-locked"
     source_note = "Supporting source is attached." if has_sources else "Attach at least one source."
-    evidence_note = "Citation checks earned this label." if evidence_backed_earned else "Locked until citation checks pass."
-    approved_note = "Owner approval recorded." if is_approved else "Requires review first."
+    semantic_note = "Statement-level semantic support is recorded." if semantic_support_verified else "Required before owner approval."
+    approved_note = "Owner approval recorded." if is_approved else "Requires semantic review first."
     return f"""
 <div class="cs-trust-ladder" aria-label="Claim trust ladder">
   <div class="cs-trust-step is-active">
@@ -4141,9 +4303,9 @@ def _claim_trust_ladder(has_sources: bool, evidence_backed_earned: bool, is_appr
     <strong>Source support</strong>
     <span class="cs-meta">{h(source_note)}</span>
   </div>
-  <div class="cs-trust-step {evidence_class}">
-    <strong>Evidence-backed</strong>
-    <span class="cs-meta">{h(evidence_note)}</span>
+  <div class="cs-trust-step {semantic_class}">
+    <strong>Semantic review</strong>
+    <span class="cs-meta">{h(semantic_note)}</span>
   </div>
   <div class="cs-trust-step {approved_class}">
     <strong>Approved</strong>
@@ -4882,14 +5044,13 @@ def _home_script(scope: dict[str, Any]) -> str:
       setBusy(askForm, askButton, true, "Checking", "Ask");
       try {
         setStatus(askStatus, "Checking saved sources...", "loading");
-        const searched = await postJson("/search", {query: question, excluded_source_types: ["conversation_turn"]});
-        const sourceSnapshot = searched.search_snapshot || {};
         const started = await postJson("/conversations", {message: question});
         const conversation = started.conversation || {};
         const id = conversation["conversation" + "_id"];
         if (!id) throw new Error("Conversation was not saved.");
         const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
         const answer = answered.answer || {};
+        const sourceSnapshot = answered.search_snapshot || {};
         const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
         const safety = conversation.safety || {};
         if (safety.unsafe_instruction_detected === true) {

@@ -15600,6 +15600,13 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         root,
         ["claim", "approve", claim_id, "--state-dir", state_rel, "--json"],
     ) if claim_id else {}
+    claim_approval_payload = _payload(transcripts["claim_approve"])
+    claim_approval_denied = (
+        transcripts["claim_approve"].get("exit_code") == 4
+        and claim_approval_payload.get("status") == "failed"
+        and "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED" in _error_codes(transcripts["claim_approve"])
+        and bool(claim_approval_payload.get("audit_refs"))
+    )
     transcripts["egress_test"] = _run_cli_json(
         root,
         ["egress", "test", "--url", "https://example.invalid/audit-denied", "--state-dir", state_rel, "--json"],
@@ -15622,7 +15629,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         "evidence_bundle.created",
         "brief.created",
         "claim.draft.created",
-        "claim.approved",
+        "claim.approval.denied",
         "policy.egress.denied",
         "policy.sandbox_access.denied",
     }
@@ -15654,7 +15661,7 @@ def verify_vs0_audit_ledger(root: Path) -> dict[str, Any]:
         and _exit_ok(transcripts["bundle_create"])
         and _exit_ok(transcripts["brief_create"])
         and _exit_ok(transcripts["claim_create"])
-        and _exit_ok(transcripts["claim_approve"])
+        and claim_approval_denied
         and _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
         and _policy_denied(transcripts["sandbox_test"], "CS_SANDBOX_ACCESS_DENIED")
         and clean_ok
@@ -15924,7 +15931,7 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         root,
         ["claim", "approve", evidence_claim_id, "--state-dir", state_rel, "--json"],
     ) if evidence_claim_id else {}
-    approved_claim = _payload(transcripts["evidence_claim_approve"]).get("claim", {})
+    post_approval_attempt_claim = _payload(transcripts["evidence_claim_approve"]).get("claim", {})
     transcripts["audit_verify"] = _run_cli_json(root, ["audit", "verify", "--state-dir", state_rel, "--json"])
 
     unsupported_approval_codes = _error_codes(transcripts["unsupported_claim_approve"])
@@ -15944,14 +15951,29 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         and "CS_CLAIM_SUPPORT_REQUIRED" in _error_codes(transcripts["unrelated_bundle_claim_approve"])
         and _payload(transcripts["unrelated_bundle_claim_approve"]).get("audit_refs")
     )
-    evidence_approved = (
-        _exit_ok(transcripts["evidence_claim_approve"])
-        and approved_claim.get("status") == "approved"
-        and approved_claim.get("trust_state") == "approved"
-        and approved_claim.get("authority", {}).get("can_publish_shared_truth") is True
-        and approved_claim.get("authority", {}).get("can_drive_autonomous_action") is False
-        and f"artifact:{artifact_id}" in approved_claim.get("evidence_bundle", {}).get("artifact_refs", [])
-        and _payload(transcripts["evidence_claim_approve"]).get("audit_refs")
+    evidence_approval_payload = _payload(transcripts["evidence_claim_approve"])
+    evidence_approval_codes = _error_codes(transcripts["evidence_claim_approve"])
+    evidence_support = (
+        evidence_claim.get("statement_support")
+        if isinstance(evidence_claim.get("statement_support"), dict)
+        else {}
+    )
+    post_approval_authority = (
+        post_approval_attempt_claim.get("authority")
+        if isinstance(post_approval_attempt_claim.get("authority"), dict)
+        else {}
+    )
+    semantic_approval_denied = (
+        transcripts["evidence_claim_approve"].get("exit_code") == 4
+        and evidence_approval_payload.get("status") == "failed"
+        and "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED" in evidence_approval_codes
+        and bool(evidence_approval_payload.get("audit_refs"))
+        and post_approval_attempt_claim.get("status") == "draft"
+        and post_approval_attempt_claim.get("trust_state") == "draft"
+        and all(
+            post_approval_authority.get(field) is False
+            for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+        )
     )
     audit_ok = _exit_ok(transcripts["audit_verify"]) and _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("status") == "success"
     claim_006_ok = (
@@ -15973,9 +15995,21 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         and _exit_ok(transcripts["search"])
         and _exit_ok(transcripts["bundle_create"])
         and _exit_ok(transcripts["evidence_claim_create"])
-        and evidence_claim.get("trust_state") == "evidence_backed"
+        and evidence_claim.get("status") == "draft"
+        and evidence_claim.get("trust_state") == "draft"
         and evidence_claim.get("evidence_bundle", {}).get("evidence_item_count", 0) > 0
-        and evidence_approved
+        and f"artifact:{artifact_id}" in evidence_claim.get("evidence_bundle", {}).get("artifact_refs", [])
+        and evidence_support.get("status") == "source_supported"
+        and evidence_support.get("statement_support_state") == "source_supported"
+        and evidence_support.get("source_support_state") == "passed"
+        and evidence_support.get("semantic_faithfulness_state") == "human_required"
+        and evidence_support.get("semantic_support_verified") is False
+        and evidence_support.get("approval_eligible") is False
+        and all(
+            evidence_claim.get("authority", {}).get(field) is False
+            for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+        )
+        and semantic_approval_denied
         and audit_ok
     )
 
@@ -15993,14 +16027,15 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
         _row(
             "CS-CLAIM-007",
             "MUST_PASS",
-            "PASS" if claim_007_ok else "FAIL",
+            "HUMAN_REQUIRED" if claim_007_ok else "FAIL",
             [
                 "cornerstone claim approve <unsupported_claim_id> --json",
                 "cornerstone evidence bundle create --search-snapshot-id <snapshot_id> --json",
                 "cornerstone claim create --evidence-bundle-id <bundle_id> --json",
                 "cornerstone claim approve <evidence_claim_id> --json",
             ],
-            "Claim approval requires both an Evidence Bundle and revision-bound statement support; missing support is denied and a source-anchored Claim can be approved.",
+            "Automated prerequisites prove revision-bound source support and safe denial, but the canonical evidence-backed/approved Claim outcome remains open until statement-level semantic review can be recorded separately.",
+            owner="Human" if claim_007_ok else "AI",
         ),
     ]
     blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
@@ -16025,25 +16060,43 @@ def verify_vs0_claim_evidence(root: Path) -> dict[str, Any]:
             "unsupported_resolution_path": (unsupported_approval_payload.get("errors") or [{}])[0].get("resolution_path", []),
             "artifact_id": artifact_id,
             "evidence_bundle_id": bundle_id,
-            "evidence_claim_id": evidence_claim_id,
-            "evidence_claim_trust_state": evidence_claim.get("trust_state"),
-            "evidence_claim_statement_support": evidence_claim.get("statement_support"),
+            "source_supported_claim_id": evidence_claim_id,
+            "source_supported_claim_status": evidence_claim.get("status"),
+            "source_supported_claim_trust_state": evidence_claim.get("trust_state"),
+            "source_supported_claim_statement_support": evidence_support,
+            "source_supported_claim_authority": evidence_claim.get("authority"),
             "unrelated_bundle_claim_id": unrelated_bundle_claim_id,
             "unrelated_bundle_claim_trust_state": unrelated_bundle_claim.get("trust_state"),
             "unrelated_bundle_claim_support_state": unrelated_bundle_claim.get("statement_support", {}).get("status"),
             "unrelated_bundle_approval_error_codes": _error_codes(transcripts["unrelated_bundle_claim_approve"]),
-            "approved_claim_status": approved_claim.get("status"),
-            "approved_claim_trust_state": approved_claim.get("trust_state"),
-            "approved_claim_authority": approved_claim.get("authority"),
+            "semantic_approval_exit_code": transcripts["evidence_claim_approve"].get("exit_code"),
+            "semantic_approval_error_codes": evidence_approval_codes,
+            "post_approval_attempt_claim_status": post_approval_attempt_claim.get("status"),
+            "post_approval_attempt_claim_trust_state": post_approval_attempt_claim.get("trust_state"),
+            "post_approval_attempt_claim_authority": post_approval_authority,
             "audit_event_count": _payload(transcripts["audit_verify"]).get("audit_integrity", {}).get("event_count"),
         },
         "negative_evidence": {
             "unsupported_approval_allowed": 0 if unsupported_denied else 1,
             "unrelated_bundle_claim_approved": 0 if unrelated_bundle_denied else 1,
-            "evidence_claim_approval_blocked": 0 if evidence_approved else 1,
-            "autonomous_action_allowed_from_claim": int(bool(approved_claim.get("authority", {}).get("can_drive_autonomous_action", True))),
+            "source_match_promoted_to_authority": 0
+            if all(
+                evidence_claim.get("authority", {}).get(field) is False
+                for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+            )
+            else 1,
+            "semantic_approval_allowed_without_review": 0 if semantic_approval_denied else 1,
+            "autonomous_action_allowed_from_claim": int(
+                bool(post_approval_authority.get("can_drive_autonomous_action", True))
+            ),
         },
-        "human_required": [],
+        "human_required": [
+            {
+                "id": "CS-CLAIM-007-SEMANTIC-REVIEW",
+                "status": "HUMAN_REQUIRED",
+                "required_evidence": "A reviewer must judge the exact Claim statement against its cited spans and Evidence Bundle revision before any later owner-approval Interface may grant authority.",
+            }
+        ],
     }
 
 
@@ -17070,7 +17123,7 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
             "claim",
             "create",
             "--statement",
-            "Unsupported draft statement for trust ladder inspection.",
+            "Unsupported draft statement for authority-gate inspection.",
             "--state-dir",
             state_rel,
             "--json",
@@ -17124,8 +17177,7 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
         root,
         ["claim", "approve", evidence_claim_id, "--state-dir", state_rel, "--json"],
     ) if evidence_claim_id else {}
-    approved_claim = _payload(transcripts["evidence_claim_approve"]).get("claim", {})
-    transcripts["approved_claim_show"] = _run_cli_json(
+    transcripts["post_approval_attempt_claim_show"] = _run_cli_json(
         root,
         ["claim", "show", evidence_claim_id, "--state-dir", state_rel, "--json"],
     ) if evidence_claim_id else {}
@@ -17173,6 +17225,10 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
     ) if mission_id and evidence_claim_id else {}
     high_action = _payload(transcripts["high_action_propose"]).get("action_card", {})
     high_action_id = high_action.get("action_id", "")
+    transcripts["high_action_approve"] = _run_cli_json(
+        root,
+        ["action", "approve", high_action_id, "--state-dir", state_rel, "--json"],
+    ) if high_action_id else {}
     transcripts["high_action_execute_before_approval"] = _run_cli_json(
         root,
         ["action", "execute", high_action_id, "--state-dir", state_rel, "--json"],
@@ -17203,23 +17259,58 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
     first_viewer_item = viewer_items[0] if viewer_items else {}
 
     unsupported_show_claim = _payload(transcripts["unsupported_claim_show"]).get("claim", {})
-    evidence_show_claim = _payload(transcripts["evidence_claim_show"]).get("claim", {})
-    approved_show_claim = _payload(transcripts["approved_claim_show"]).get("claim", {})
-    trust_states = {
-        "draft": unsupported_show_claim.get("trust_state"),
-        "evidence_backed": evidence_show_claim.get("trust_state"),
-        "approved": approved_show_claim.get("trust_state"),
+    source_supported_show_claim = _payload(transcripts["evidence_claim_show"]).get("claim", {})
+    post_approval_attempt_show_claim = _payload(transcripts["post_approval_attempt_claim_show"]).get("claim", {})
+    source_support = (
+        source_supported_show_claim.get("statement_support")
+        if isinstance(source_supported_show_claim.get("statement_support"), dict)
+        else {}
+    )
+    post_approval_support = (
+        post_approval_attempt_show_claim.get("statement_support")
+        if isinstance(post_approval_attempt_show_claim.get("statement_support"), dict)
+        else {}
+    )
+    claim_states = {
+        "unsupported_draft": unsupported_show_claim.get("trust_state"),
+        "source_supported_draft": source_supported_show_claim.get("trust_state"),
+        "post_semantic_gate_draft": post_approval_attempt_show_claim.get("trust_state"),
     }
-    trust_authority = {
-        "draft": unsupported_show_claim.get("authority"),
-        "evidence_backed": evidence_show_claim.get("authority"),
-        "approved": approved_show_claim.get("authority"),
+    claim_authority = {
+        "unsupported_draft": unsupported_show_claim.get("authority"),
+        "source_supported_draft": source_supported_show_claim.get("authority"),
+        "post_semantic_gate_draft": post_approval_attempt_show_claim.get("authority"),
     }
+    semantic_approval_payload = _payload(transcripts["evidence_claim_approve"])
+    semantic_approval_denied = (
+        transcripts["evidence_claim_approve"].get("exit_code") == 4
+        and semantic_approval_payload.get("status") == "failed"
+        and "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED" in _error_codes(transcripts["evidence_claim_approve"])
+        and bool(semantic_approval_payload.get("audit_refs"))
+    )
+    action_policy = high_action.get("policy_decision") if isinstance(high_action.get("policy_decision"), dict) else {}
+    action_approval_payload = _payload(transcripts["high_action_approve"])
+    action_approval_errors = action_approval_payload.get("errors", [])
+    action_approval_denied = (
+        transcripts["high_action_approve"].get("exit_code") == 8
+        and action_approval_payload.get("status") == "denied"
+        and isinstance(action_approval_errors, list)
+        and any(
+            error.get("code") == "CS_ACTION_APPROVAL_DENIED"
+            and error.get("reason_code") == "CS_ACTION_CLAIM_AUTHORITY_REQUIRED"
+            for error in action_approval_errors
+            if isinstance(error, dict)
+        )
+        and bool(action_approval_payload.get("policy_decision_refs"))
+        and bool(action_approval_payload.get("audit_refs"))
+    )
 
     denial_transcript_names = [
         "egress_test",
         "sandbox_test",
         "unsupported_claim_approve",
+        "evidence_claim_approve",
+        "high_action_approve",
         "high_action_execute_before_approval",
     ]
     denial_examples: dict[str, dict[str, Any]] = {}
@@ -17276,19 +17367,35 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
     claim_005_ok = (
         _exit_ok(transcripts["unsupported_claim_show"])
         and _exit_ok(transcripts["evidence_claim_show"])
-        and _exit_ok(transcripts["approved_claim_show"])
-        and trust_states == {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"}
-        and trust_authority["draft"].get("can_be_approved") is False
-        and trust_authority["evidence_backed"].get("can_be_approved") is True
-        and trust_authority["evidence_backed"].get("can_publish_shared_truth") is False
-        and trust_authority["approved"].get("can_publish_shared_truth") is True
-        and trust_authority["approved"].get("can_drive_autonomous_action") is False
+        and _exit_ok(transcripts["post_approval_attempt_claim_show"])
+        and claim_states
+        == {
+            "unsupported_draft": "draft",
+            "source_supported_draft": "draft",
+            "post_semantic_gate_draft": "draft",
+        }
+        and source_supported_show_claim.get("status") == "draft"
+        and source_support.get("status") == "source_supported"
+        and source_support.get("statement_support_state") == "source_supported"
+        and source_support.get("semantic_faithfulness_state") == "human_required"
+        and source_support.get("semantic_support_verified") is False
+        and source_support.get("approval_eligible") is False
+        and post_approval_support.get("status") == "source_supported"
+        and post_approval_support.get("semantic_faithfulness_state") == "human_required"
+        and post_approval_attempt_show_claim.get("status") == "draft"
+        and semantic_approval_denied
+        and all(isinstance(authority, dict) for authority in claim_authority.values())
+        and all(
+            authority.get(field) is False
+            for authority in claim_authority.values()
+            for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+        )
     )
     claim_008_ok = (
         _exit_ok(transcripts["evidence_claim_show"])
         and _exit_ok(transcripts["evidence_view"])
-        and evidence_show_claim.get("evidence_bundle", {}).get("evidence_bundle_id") == bundle_id
-        and f"artifact:{artifact_id}" in evidence_show_claim.get("evidence_bundle", {}).get("artifact_refs", [])
+        and source_supported_show_claim.get("evidence_bundle", {}).get("evidence_bundle_id") == bundle_id
+        and f"artifact:{artifact_id}" in source_supported_show_claim.get("evidence_bundle", {}).get("artifact_refs", [])
         and first_viewer_item.get("artifact_id") == artifact_id
         and first_viewer_item.get("original", {}).get("storage_ref", "").startswith("sha256:")
         and first_viewer_item.get("derived", {}).get("text_ref", "").startswith("derived/")
@@ -17300,6 +17407,12 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
         _policy_denied(transcripts["egress_test"], "CS_EGRESS_DENIED")
         and _policy_denied(transcripts["sandbox_test"], "CS_SANDBOX_ACCESS_DENIED")
         and transcripts["unsupported_claim_approve"].get("exit_code") == 4
+        and semantic_approval_denied
+        and action_policy.get("decision") == "deny"
+        and action_policy.get("reason_code") == "CS_ACTION_CLAIM_AUTHORITY_REQUIRED"
+        and action_policy.get("execution_status") == "blocked_by_claim_authority"
+        and action_policy.get("can_execute_now") is False
+        and action_approval_denied
         and _action_policy_blocked(transcripts["high_action_execute_before_approval"])
         and missing_resolution_paths == 0
         and denial_without_audit == 0
@@ -17316,13 +17429,14 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
         _row(
             "CS-CLAIM-005",
             "MUST_PASS",
-            "PASS" if claim_005_ok and audit_ok else "FAIL",
+            "HUMAN_REQUIRED" if claim_005_ok and audit_ok else "FAIL",
             [
-                "cornerstone claim show <draft_claim_id> --json",
-                "cornerstone claim show <evidence_backed_claim_id> --json",
-                "cornerstone claim show <approved_claim_id> --json",
+                "cornerstone claim show <unsupported_draft_claim_id> --json",
+                "cornerstone claim show <source_supported_draft_claim_id> --json",
+                "cornerstone claim approve <source_supported_draft_claim_id> --json",
             ],
-            "Claim detail examples show Draft, Evidence-backed, and Approved trust states with authority limits for each state.",
+            "Current Claim detail safely distinguishes unsupported and source-supported Drafts, but the canonical Draft/Evidence-backed/Approved examples remain open until semantic review and later owner approval can be recorded.",
+            owner="Human" if claim_005_ok and audit_ok else "AI",
         ),
         _row(
             "CS-CLAIM-008",
@@ -17346,9 +17460,11 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
                 "cornerstone egress test --json",
                 "cornerstone sandbox test --json",
                 "cornerstone claim approve <unsupported_claim_id> --json",
+                "cornerstone claim approve <source_supported_claim_id> --json",
+                "cornerstone action approve <claim_blocked_action_id> --json",
                 "cornerstone action execute <high_risk_action_id> --json",
             ],
-            "Denied egress, sandbox access, unsupported claim approval, and high-risk action execution all include cause, safe resolution path, and audit evidence.",
+            "Denied egress, sandbox access, unsupported or semantically unreviewed Claim approval, and Claim-blocked Action approval/execution all include cause, safe resolution path, and audit evidence.",
         ),
     ]
     blocking = [row for row in rows if row["status"] != "PASS" and row["owner"] != "Human"]
@@ -17378,8 +17494,15 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
             "artifact_related_mission_ids": [item.get("mission_id") for item in related_missions if isinstance(item, dict)],
             "artifact_derived_status": artifact_detail.get("derived", {}).get("status"),
             "artifact_original_storage_ref": artifact_detail.get("original_storage_ref"),
-            "trust_states": trust_states,
-            "trust_authority": trust_authority,
+            "claim_states": claim_states,
+            "claim_authority": claim_authority,
+            "source_supported_statement_support": source_support,
+            "post_approval_attempt_statement_support": post_approval_support,
+            "semantic_approval_exit_code": transcripts["evidence_claim_approve"].get("exit_code"),
+            "semantic_approval_error_codes": _error_codes(transcripts["evidence_claim_approve"]),
+            "action_policy": action_policy,
+            "action_approval_exit_code": transcripts["high_action_approve"].get("exit_code"),
+            "action_execution_exit_code": transcripts["high_action_execute_before_approval"].get("exit_code"),
             "evidence_viewer_id": evidence_viewer.get("evidence_viewer_id"),
             "evidence_viewer_item_count": len(viewer_items),
             "evidence_viewer_first_item": first_viewer_item,
@@ -17391,12 +17514,39 @@ def verify_vs0_detail_surfaces(root: Path) -> dict[str, Any]:
             + int(bool(org_boundary.get("implicit_cross_namespace_context"))),
             "artifact_detail_missing_related_claims": 0 if related_claims else 1,
             "artifact_detail_missing_related_missions": 0 if related_missions else 1,
-            "trust_ladder_missing_states": 0 if trust_states == {"draft": "draft", "evidence_backed": "evidence_backed", "approved": "approved"} else 1,
+            "legacy_authority_state_exposed": 0
+            if claim_states
+            == {
+                "unsupported_draft": "draft",
+                "source_supported_draft": "draft",
+                "post_semantic_gate_draft": "draft",
+            }
+            and all(isinstance(authority, dict) for authority in claim_authority.values())
+            and all(
+                authority.get(field) is False
+                for authority in claim_authority.values()
+                for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+            )
+            else 1,
+            "source_match_promoted_to_authority": 0
+            if source_support.get("status") == "source_supported"
+            and source_supported_show_claim.get("trust_state") == "draft"
+            and source_support.get("approval_eligible") is False
+            else 1,
+            "claim_blocked_action_approval_or_execution_allowed": 0
+            if action_approval_denied and _action_policy_blocked(transcripts["high_action_execute_before_approval"])
+            else 1,
             "evidence_viewer_missing_sources": 0 if claim_008_ok else 1,
             "policy_denials_missing_resolution_path": missing_resolution_paths,
             "policy_denials_without_audit": denial_without_audit,
         },
-        "human_required": [],
+        "human_required": [
+            {
+                "id": "CS-CLAIM-005-SEMANTIC-REVIEW",
+                "status": "HUMAN_REQUIRED",
+                "required_evidence": "Review the exact source-supported Claim statement against its cited spans before any future authority-granting Interface is used.",
+            }
+        ],
     }
 
 
@@ -17486,6 +17636,14 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
     promoted_scope = promoted_claim.get("scope", {})
     promoted_source = promoted_claim.get("source_conversation", {})
     promoted_provenance = promoted_claim.get("provenance", {})
+    promoted_support = (
+        promoted_claim.get("statement_support")
+        if isinstance(promoted_claim.get("statement_support"), dict)
+        else {}
+    )
+    promoted_authority = (
+        promoted_claim.get("authority") if isinstance(promoted_claim.get("authority"), dict) else {}
+    )
     answer = _payload(transcripts["unsupported_answer"]).get("answer", {})
     required_setup = conversation.get("required_setup", {})
     suggested_outputs = conversation.get("suggested_outputs", [])
@@ -17518,7 +17676,12 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
         and first_use_duration_ms <= 5000
         and setup_required_count == 0
         and brief_id.startswith("brief_")
-        and promoted_claim.get("trust_state") == "evidence_backed"
+        and promoted_claim.get("status") == "draft"
+        and promoted_claim.get("trust_state") == "draft"
+        and promoted_support.get("status") == "source_supported"
+        and promoted_support.get("semantic_faithfulness_state") == "human_required"
+        and promoted_support.get("semantic_support_verified") is False
+        and promoted_support.get("approval_eligible") is False
     )
     claim_001_ok = (
         common_path_ok
@@ -17549,7 +17712,19 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
         and promoted_source.get("source_artifact_ref") == f"artifact:{source_artifact_id}"
         and promoted_evidence.get("evidence_bundle_id") == bundle_id
         and _scope_complete(promoted_scope)
-        and promoted_claim.get("trust_state") == "evidence_backed"
+        and promoted_claim.get("status") == "draft"
+        and promoted_claim.get("trust_state") == "draft"
+        and promoted_support.get("status") == "source_supported"
+        and promoted_support.get("statement_support_state") == "source_supported"
+        and promoted_support.get("source_support_state") == "passed"
+        and promoted_support.get("semantic_faithfulness_state") == "human_required"
+        and promoted_support.get("semantic_support_verified") is False
+        and promoted_support.get("approval_eligible") is False
+        and bool(promoted_authority)
+        and all(
+            promoted_authority.get(field) is False
+            for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+        )
         and promoted_provenance.get("created_from") == "conversation.promote"
         and _payload(transcripts["conversation_promote_claim"]).get("audit_refs")
     )
@@ -17574,7 +17749,7 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
                 "cornerstone brief create --evidence-bundle-id <id> --json",
                 "cornerstone conversation promote <conversation_id> --kind claim --json",
             ],
-            "The first useful path starts from messy conversation input, reaches a source-linked fallback brief, and manually promotes a draft/evidence-backed claim without connector, model-provider, ontology, or organization setup.",
+            "The first useful path starts from messy conversation input, reaches a source-linked fallback brief, and manually promotes a source-supported Draft Claim without connector, model-provider, ontology, or organization setup; semantic authority remains human-required.",
         ),
         _row(
             "CS-CLAIM-001",
@@ -17595,7 +17770,7 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
             "MUST_PASS",
             "PASS" if claim_004_ok else "FAIL",
             ["cornerstone conversation promote <conversation_id> --kind claim --evidence-bundle-id <id> --json"],
-            "Manual conversation promotion creates a durable claim with source conversation ref, source artifact ref, evidence bundle, owner namespace, trust state, provenance, and audit refs.",
+            "Manual conversation promotion creates a durable source-supported Draft Claim with source conversation ref, source artifact ref, evidence bundle, owner namespace, provenance, audit refs, and no semantic/action authority.",
         ),
         _row(
             "CS-CLAIM-009",
@@ -17631,7 +17806,10 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
             "brief_presented_as_fact": brief.get("presented_as_fact"),
             "brief_model_provider": brief.get("model_provider"),
             "promoted_claim_id": promoted_claim_id,
+            "promoted_claim_status": promoted_claim.get("status"),
             "promoted_claim_trust_state": promoted_claim.get("trust_state"),
+            "promoted_claim_statement_support": promoted_support,
+            "promoted_claim_authority": promoted_authority,
             "promoted_claim_source_conversation": promoted_source,
             "promoted_claim_provenance": promoted_provenance,
             "suggested_output_types": sorted(suggested_types),
@@ -17656,10 +17834,25 @@ def verify_vs0_conversation_onboarding(root: Path) -> dict[str, Any]:
             "brief_presented_as_fact": int(bool(brief.get("presented_as_fact"))),
             "promoted_objects_without_scope": 0 if _scope_complete(promoted_scope) else 1,
             "promoted_objects_without_evidence": 0 if promoted_evidence.get("evidence_bundle_id") and promoted_evidence.get("artifact_refs") else 1,
+            "promoted_source_match_granted_authority": 0
+            if promoted_support.get("status") == "source_supported"
+            and promoted_claim.get("trust_state") == "draft"
+            and bool(promoted_authority)
+            and all(
+                promoted_authority.get(field) is False
+                for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+            )
+            else 1,
             "unsupported_assertions_presented_as_fact": int(bool(answer.get("presented_as_fact", True))),
             "real_external_http_calls": 0,
         },
-        "human_required": [],
+        "human_required": [
+            {
+                "id": "CS-CLAIM-004-SEMANTIC-REVIEW",
+                "status": "HUMAN_REQUIRED",
+                "required_evidence": "Review the promoted Claim's exact statement against its cited spans and Evidence Bundle revision before any later authority grant.",
+            }
+        ],
     }
 
 
@@ -23957,6 +24150,14 @@ def _report_passes(report: dict[str, Any], scenario_ids: set[str]) -> bool:
     return report.get("status") == "success" and scenario_ids <= passed
 
 
+def _report_has_status(report: dict[str, Any], scenario_id: str, status: str) -> bool:
+    return any(
+        row.get("id") == scenario_id and row.get("status") == status
+        for row in report.get("scenario_results", [])
+        if isinstance(row, dict)
+    )
+
+
 def _negative_zero(report: dict[str, Any]) -> bool:
     negative = report.get("negative_evidence", {})
     return isinstance(negative, dict) and all(value == 0 for value in negative.values() if isinstance(value, int))
@@ -23973,14 +24174,32 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
     claim_evidence = claim_report.get("claim_evidence", {})
     audit_evidence = audit_report.get("audit_evidence", {})
     security_policy_evidence = security_policy_report.get("security_policy_evidence", {})
+    source_supported_support = claim_evidence.get("source_supported_claim_statement_support", {})
+    source_supported_authority = claim_evidence.get("source_supported_claim_authority", {})
+    post_approval_authority = claim_evidence.get("post_approval_attempt_claim_authority", {})
 
     reg_016_ok = (
-        _report_passes(claim_report, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        _report_passes(claim_report, {"CS-CLAIM-006"})
+        and _report_has_status(claim_report, "CS-CLAIM-007", "HUMAN_REQUIRED")
         and _report_passes(search_evidence_report, {"CS-ARCH-008", "CS-ARCH-009", "CS-UND-001"})
         and claim_evidence.get("unsupported_claim_trust_state") == "draft"
-        and claim_evidence.get("evidence_claim_trust_state") == "evidence_backed"
-        and claim_evidence.get("approved_claim_trust_state") == "approved"
+        and claim_evidence.get("source_supported_claim_status") == "draft"
+        and claim_evidence.get("source_supported_claim_trust_state") == "draft"
+        and source_supported_support.get("status") == "source_supported"
+        and source_supported_support.get("semantic_faithfulness_state") == "human_required"
+        and source_supported_support.get("semantic_support_verified") is False
+        and source_supported_support.get("approval_eligible") is False
+        and claim_evidence.get("post_approval_attempt_claim_status") == "draft"
+        and claim_evidence.get("post_approval_attempt_claim_trust_state") == "draft"
+        and bool(source_supported_authority)
+        and bool(post_approval_authority)
+        and all(
+            authority.get(field) is False
+            for authority in (source_supported_authority, post_approval_authority)
+            for field in ("can_be_approved", "can_publish_shared_truth", "can_drive_autonomous_action")
+        )
         and "CS_CLAIM_EVIDENCE_REQUIRED" in claim_evidence.get("unsupported_approval_error_codes", [])
+        and "CS_CLAIM_SEMANTIC_SUPPORT_REQUIRED" in claim_evidence.get("semantic_approval_error_codes", [])
         and _negative_zero(claim_report)
     )
     reg_017_ok = (
@@ -23993,7 +24212,8 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
         _report_passes(security_policy_report, {"CS-SEC-002", "CS-SEC-003"})
         and _report_passes(security_report, {"CS-SEC-007", "CS-SEC-008", "CS-REG-013"})
         and _report_passes(namespace_report, {"CS-NS-001", "CS-NS-003"})
-        and _report_passes(claim_report, {"CS-CLAIM-006", "CS-CLAIM-007"})
+        and _report_passes(claim_report, {"CS-CLAIM-006"})
+        and _report_has_status(claim_report, "CS-CLAIM-007", "HUMAN_REQUIRED")
         and security_policy_evidence.get("egress_external_http_calls") == 0
         and _negative_zero(security_policy_report)
         and _negative_zero(security_report)
@@ -24010,7 +24230,7 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
                 "cornerstone scenario verify vs0-claim-evidence --json",
                 "cornerstone scenario verify vs0-search-evidence --json",
             ],
-            "Evidence requirements and trust states remain visible through unsupported draft, evidence-backed claim, approved claim, and evidence bundle checks.",
+            "Evidence and authority gates remain visible: unsupported and source-supported Claims stay Draft, semantic review remains HUMAN_REQUIRED, and approval/shared-truth/action authority stays false.",
         ),
         _row(
             "CS-REG-017",
@@ -24038,11 +24258,17 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
             "status": claim_report.get("status"),
             "summary": claim_report.get("summary"),
             "negative_evidence": claim_report.get("negative_evidence"),
-            "trust_states": {
-                "unsupported": claim_evidence.get("unsupported_claim_trust_state"),
-                "evidence_backed": claim_evidence.get("evidence_claim_trust_state"),
-                "approved": claim_evidence.get("approved_claim_trust_state"),
+            "claim_states": {
+                "unsupported_draft": claim_evidence.get("unsupported_claim_trust_state"),
+                "source_supported_draft": claim_evidence.get("source_supported_claim_trust_state"),
+                "post_semantic_gate_draft": claim_evidence.get("post_approval_attempt_claim_trust_state"),
             },
+            "source_support_status": source_supported_support.get("status"),
+            "semantic_support_state": source_supported_support.get("semantic_faithfulness_state"),
+            "semantic_support_verified": source_supported_support.get("semantic_support_verified"),
+            "approval_error_codes": claim_evidence.get("semantic_approval_error_codes", []),
+            "source_supported_authority": source_supported_authority,
+            "post_approval_attempt_authority": post_approval_authority,
         },
         "audit_ledger": {
             "status": audit_report.get("status"),
@@ -24090,7 +24316,7 @@ def verify_vs0_regression_guardrails(root: Path) -> dict[str, Any]:
             "audit_guardrail_failed": 0 if reg_017_ok else 1,
             "security_guardrail_failed": 0 if reg_018_ok else 1,
         },
-        "human_required": [],
+        "human_required": claim_report.get("human_required", []),
     }
 
 

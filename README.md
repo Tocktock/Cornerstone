@@ -1,8 +1,8 @@
 # CornerStone
 
-**Date:** 2026-07-04
+**Date:** 2026-07-11
 **Owner:** JiYong / Tars
-**Status:** Product-value-first reset (see `docs/adr/ADR-0007-product-value-first-reset.md`). Local structural substrate is real and verified; the intelligence layer is the active build; next proof point is external.
+**Status:** Product-value-first reset (see `docs/adr/ADR-0007-product-value-first-reset.md`). The local structural substrate and model-backed application path exist; real-model quality and external product value remain unverified.
 **Canonical spelling:** Use **CornerStone** for product/project text.
 
 ## What CornerStone Is Becoming
@@ -21,7 +21,7 @@ Everything on the spine is active. Everything off the spine is dormant until use
 
 ## Current State, Honestly
 
-Reviewed and live-tested 2026-07-04 (`docs/adr/ADR-0007-product-value-first-reset.md`).
+Repository boundary reviewed 2026-07-11. The product direction remains governed by `docs/adr/ADR-0007-product-value-first-reset.md`.
 
 **Verified working (Plane 1 — structural):**
 
@@ -29,12 +29,16 @@ Reviewed and live-tested 2026-07-04 (`docs/adr/ADR-0007-product-value-first-rese
 - Hash-chained, tamper-evident audit ledger (`cornerstone audit verify`).
 - Evidence bundles linking briefs/claims to source artifacts; owner/namespace scoping on every record.
 - Local runtime with a calm web UI, full CLI parity (`--json`, evidence refs, audit refs), and real Chrome-CDP browser proofs.
-- Deterministic scenario verification harness across VS0–VS4 (27/28 VS4 rows structurally green; `VS4-H01` owner review still open).
+- Deterministic scenario verification harness across VS0–VS4 (27/28 VS4 rows structurally green; `VS4-H01` owner review was rejected and remains open).
 
-**Not yet real (the active build):**
+**Implemented, but not yet value-verified (the active build):**
 
-- **There is no model integration yet.** Briefs are currently extractive snippets of the user's own input plus fixed strings; Ask returns a canned deferral sentence. The Understand/Decide stages of the loop do not exist yet.
-- Four product-value scenarios are recorded as open **FAIL** against the current behavior (echo briefs, boilerplate uncertainty, unearned trust labels, non-answer Ask) in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`. They flip only with VS5 evidence.
+- Brief and Ask now share an immutable runtime model configuration and a local Ollama application path for `ornith:35b` generation plus `qwen3-embedding:0.6b` retrieval embeddings. The same path is exposed through the UI, HTTP surface, and existing native CLI families.
+- Deterministic Plane 1 tests exercise model configuration, scoped retrieval, quoted-evidence prompt boundaries, citation resolution and retrieval allow-lists, and fallback labeling. CI uses `local_test` and mocked model responses; it does not require Ollama or prove model quality.
+- Claim citations can establish source attachment, but lexical overlap cannot earn `evidence_backed` or approval authority. Semantic support remains a separate human-required gate.
+- Search Snapshots, Evidence Bundles, and short-ID Evidence Chunks created before revision binding are intentionally retired as unverified: reads fail closed instead of treating legacy `v0` records as current evidence. Re-run Search and recreate the Bundle and citations from the verified original; there is no silent trust migration.
+- Real runs against the pinned Ollama stack, human semantic-faithfulness review, and external-user usefulness/trust evidence remain **NOT_VERIFIED**. VS5 cannot earn a value verdict until those Plane 2 gates are satisfied.
+- The open product-value rows in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` remain authoritative. Implementing a model path does not by itself flip them to PASS.
 
 **Never claimed:** production readiness, live provider execution, real tenancy/security posture, on-prem readiness, external-user validation. No external user has used CornerStone yet; changing that is the point of the current milestone.
 
@@ -50,7 +54,7 @@ This is the VS5 stranger test (`VS5-EXT-001/002`), with a 3-minute unedited sess
 
 | Milestone | Focus | Verdict earned / targeted |
 |---|---|---|
-| VS0–VS4 (closed) | Structural substrate: artifacts, evidence, audit, policy records, UI shell, daily-loop skeleton, verification harness | `STRUCTURAL_READY` (strongest claim these can ever support; `VS4-H01` owner review still open) |
+| VS0–VS4 (structural work closed; human gate open) | Structural substrate: artifacts, evidence, audit, policy records, UI shell, daily-loop skeleton, verification harness | `STRUCTURAL_READY` only; `VS4-H01` owner review was rejected and remains open |
 | **VS5 (active)** | **Citation-grounded, model-backed Brief and Ask; earned trust labels; eval corpus; external stranger test** | targets `VALUE_VERIFIED_EXTERNAL` — `docs/scenario-contracts/VS5_CITATION_GROUNDED_BRIEF_CONTRACT.md` |
 | VS6 (next) | Daily loop: one read-only ingest source, self-filling inbox, morning digest, retrieval at volume, ~20 external users | `docs/scenario-contracts/VS6_DAILY_LOOP_CONTRACT.md` |
 | VS7 (then) | Wedge validation: design partners, willingness-to-pay evidence, keep/kill on off-spine surfaces, dormancy dispositions | `docs/scenario-contracts/VS7_WEDGE_VALIDATION_CONTRACT.md` |
@@ -64,7 +68,7 @@ Structural PASS counts can no longer support product-value claims. Authority: `d
 - **Plane 1 — Structural:** deterministic validators over records, boundaries, labels, audit chains, CLI transcripts. Judge: code. Supports at most `STRUCTURAL_READY`.
 - **Plane 2 — Product value:** grounding, zero fabricated citations, faithfulness, synthesis-beyond-extraction, honest uncertainty, earned trust labels, direct answers, external comprehension and trust (CS-VAL-001..010). Judges: deterministic citation-integrity checks + humans; local LLM judges are advisory only. Supports `VALUE_VERIFIED_LOCAL` / `VALUE_VERIFIED_EXTERNAL`.
 
-**Model assumptions (local-first):** generation `ornith:35b`, embeddings `qwen3-embedding:0.6b`, both via Ollama (verified installed). The deterministic `local_test` provider remains the Plane 1 CI baseline. External model providers are optional and future-facing, named per-scenario when assumed.
+**Model assumptions (local-first):** generation `ornith:35b`, embeddings `qwen3-embedding:0.6b`, both via Ollama. Availability is an operator/runtime prerequisite, not a repository claim. The deterministic `local_test` provider remains the Plane 1 CI baseline. External model providers are optional and future-facing, named per-scenario when assumed.
 
 ## Dormant Systems (honest register)
 
@@ -105,7 +109,7 @@ cornerstone claim create --evidence-bundle-id <id> --statement "..." --json
 
 `artifact download` is the scoped, audited read path for the immutable original. It writes bytes only to the required `--output` path, refuses to replace an existing path unless `--force` is explicit, and never writes binary data to stdout. This is a local read/export, not a product mutation or external action, so it has no dry-run; it does append an Artifact-read audit event. `--json` returns the schema version, tenant/owner/namespace/workspace scope, Artifact ID and checksum, size and media type, evidence refs, and audit refs. Exit codes are `0` success, `1` invalid input or an existing output, `3` original unavailable (missing or outside the requested scope, intentionally non-disclosing), and `5` integrity or output-write failure. The deterministic success, no-overwrite, force, cross-scope, write-failure, and audit transcript is exercised by `ScaffoldCliTests.test_artifact_ingest_show_and_audit_verify`.
 
-**What you will see today:** the full evidence/audit loop working structurally — and a brief that is still extractive (your own text back, labeled and linked). That gap is VS5. Do not demo this as an intelligent product yet.
+**What you will see today:** the evidence/audit loop plus a configured model-backed Brief/Ask path. When the pinned local Ollama stack is available, the product attempts citation-grounded generation; when it is unavailable, the output degrades with an explicit fallback or insufficient-evidence label. This repository state has not yet earned a real-Ollama Plane 2 or product-value verdict. Do not demo it as validated intelligence yet.
 
 ## VS0 Runtime Acceptance Quickstart
 
