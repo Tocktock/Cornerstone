@@ -33,11 +33,11 @@ Repository boundary reviewed 2026-07-11. The product direction remains governed 
 
 **Implemented, but not yet value-verified (the active build):**
 
-- Brief and Ask now share an immutable runtime model configuration and a local Ollama application path for `ornith:35b` generation plus `qwen3-embedding:0.6b` retrieval embeddings. The same path is exposed through the UI, HTTP surface, and existing native CLI families.
+- Brief and Ask now share an immutable runtime model configuration and a local Ollama application path for `ornith:9b` generation plus `qwen3-embedding:0.6b` retrieval embeddings. The same path is exposed through the UI, HTTP surface, and existing native CLI families.
 - Deterministic Plane 1 tests exercise model configuration, scoped retrieval, quoted-evidence prompt boundaries, citation resolution and retrieval allow-lists, and fallback labeling. CI uses `local_test` and mocked model responses; it does not require Ollama or prove model quality.
 - Claim citations can establish source attachment, but lexical overlap cannot earn `evidence_backed` or approval authority. Semantic support remains a separate human-required gate.
 - Search Snapshots, Evidence Bundles, and short-ID Evidence Chunks created before revision binding are intentionally retired as unverified: reads fail closed instead of treating legacy `v0` records as current evidence. Re-run Search and recreate the Bundle and citations from the verified original; there is no silent trust migration.
-- Real runs against the pinned Ollama stack, human semantic-faithfulness review, and external-user usefulness/trust evidence remain **NOT_VERIFIED**. VS5 cannot earn a value verdict until those Plane 2 gates are satisfied.
+- The canonical 2026-07-12 `ornith:9b` frozen-corpus run is `AI_VERIFIABLE_READY_HUMAN_GATES_PENDING`: 11 automated PASS, 0 FAIL, 25/25 Brief/Ask guards, and p95 23.133 seconds. Human semantic-faithfulness/usefulness review and external-user evidence remain unverified, so VS5 has not earned a value verdict.
 - The open product-value rows in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` remain authoritative. Implementing a model path does not by itself flip them to PASS.
 
 **Never claimed:** production readiness, live provider execution, real tenancy/security posture, on-prem readiness, external-user validation. No external user has used CornerStone yet; changing that is the point of the current milestone.
@@ -68,7 +68,7 @@ Structural PASS counts can no longer support product-value claims. Authority: `d
 - **Plane 1 — Structural:** deterministic validators over records, boundaries, labels, audit chains, CLI transcripts. Judge: code. Supports at most `STRUCTURAL_READY`.
 - **Plane 2 — Product value:** grounding, zero fabricated citations, faithfulness, synthesis-beyond-extraction, honest uncertainty, earned trust labels, direct answers, external comprehension and trust (CS-VAL-001..010). Judges: deterministic citation-integrity checks + humans; local LLM judges are advisory only. Supports `VALUE_VERIFIED_LOCAL` / `VALUE_VERIFIED_EXTERNAL`.
 
-**Model assumptions (local-first):** generation `ornith:35b`, embeddings `qwen3-embedding:0.6b`, both via Ollama. Availability is an operator/runtime prerequisite, not a repository claim. The deterministic `local_test` provider remains the Plane 1 CI baseline. External model providers are optional and future-facing, named per-scenario when assumed.
+**Model assumptions (local-first):** generation `ornith:9b`, embeddings `qwen3-embedding:0.6b`, both via Ollama. The larger `ornith:35b` is opt-in for tests that explicitly require it. Availability is an operator/runtime prerequisite, not a repository claim. The deterministic `local_test` provider remains the Plane 1 CI baseline. External model providers are optional and future-facing, named per-scenario when assumed.
 
 ## Dormant Systems (honest register)
 

@@ -159,6 +159,10 @@ from cornerstone_cli.runtime import (
     DEFAULT_OLLAMA_BASE_URL,
     LocalRuntimeStore,
 )
+from cornerstone_cli.vs5_verification import (
+    revalidate_vs5_human_evidence,
+    verify_vs5_citation_grounded_brief,
+)
 from cornerstone_cli.validators import count_unredacted_secrets
 from cornerstone_cli.vs2_security import run_vs2_local_security_proof
 from cornerstone_cli.vs2_production_like import REPORT_PATH as VS2_PRODUCTION_LIKE_REPORT_PATH
@@ -9963,6 +9967,17 @@ def command_brief_create(args: argparse.Namespace) -> int:
         )
         print_payload(payload, args.json)
         return EXIT_EVIDENCE_MISSING
+    if result.get("status") == "input_boundary_exceeded":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_VS5_INPUT_BOUNDARY_EXCEEDED",
+                "message": "Decision Brief input must contain one to five supported sources within the VS5 size boundary.",
+                **{key: result.get(key) for key in ("source_count", "max_source_count", "max_source_bytes", "total_source_bytes", "max_total_source_bytes")},
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
     if result.get("status") == "integrity_failed":
         payload["status"] = "failed"
         payload["errors"].append(
@@ -16056,6 +16071,7 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
         args.conversation_id,
         args.question,
         requested_scope,
+        artifact_ids=args.artifact_id,
     )
     payload = base_response("cornerstone conversation answer", "success", root)
     payload.update(requested_scope)
@@ -16083,6 +16099,25 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
         return EXIT_SCOPE_DENIED
     if result.get("status"):
         payload["status"] = "failed"
+        if result.get("status") == "input_boundary_exceeded":
+            payload["errors"].append(
+                {
+                    "code": "CS_VS5_INPUT_BOUNDARY_EXCEEDED",
+                    "message": "Decision Brief input must contain one to five supported sources within the VS5 size boundary.",
+                    **{key: result.get(key) for key in ("source_count", "max_source_count", "max_source_bytes", "total_source_bytes", "max_total_source_bytes")},
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_INVALID
+        if result.get("status") == "source_not_found":
+            payload["errors"].append(
+                {
+                    "code": "CS_VS5_SOURCE_NOT_FOUND",
+                    "message": "One or more selected sources were not found in the requested scope.",
+                }
+            )
+            print_payload(payload, args.json)
+            return EXIT_NOT_FOUND
         payload["errors"].append(
             {
                 "code": "CS_CONVERSATION_QUESTION_REQUIRED"
@@ -16120,6 +16155,100 @@ def command_conversation_answer(args: argparse.Namespace) -> int:
     )
     payload["evidence_refs"].extend(answer.get("evidence_refs", []))
     payload["audit_refs"].extend(f"audit:{event['event_id']}" for event in result["audit_events"])
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_conversation_history(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.list_conversation_answers(requested_scope, limit=args.limit)
+    answers = result["answers"]
+    payload = base_response("cornerstone conversation history", "success", root)
+    payload.update(requested_scope)
+    payload["answers"] = answers
+    payload["answer_count"] = len(answers)
+    payload["ids"]["answer_ids"] = [str(answer.get("answer_id") or "") for answer in answers]
+    payload["evidence_refs"].extend(
+        ref
+        for answer in answers
+        for ref in [
+            f"answer:{answer.get('answer_id')}",
+            f"conversation:{answer.get('conversation_id')}",
+            *[str(value) for value in answer.get("evidence_refs", []) if isinstance(value, str)],
+        ]
+        if not ref.endswith(":")
+    )
+    payload["evidence_refs"] = list(dict.fromkeys(payload["evidence_refs"]))
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
+    print_payload(payload, args.json)
+    return EXIT_SUCCESS
+
+
+def command_conversation_show(args: argparse.Namespace) -> int:
+    root = repo_root()
+    store = LocalRuntimeStore(state_dir(root, args))
+    requested_scope = scope_args(args)
+    result = store.read_product_record(
+        "conversation_answer",
+        args.answer_id,
+        requested_scope,
+        reason="cli_conversation_answer_show",
+    )
+    payload = base_response("cornerstone conversation show", "success", root)
+    payload.update(requested_scope)
+    if result.get("status") == "not_found":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_ANSWER_NOT_FOUND",
+                "message": "Saved answer was not found.",
+                "answer_id": args.answer_id,
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_NOT_FOUND
+    if result.get("status") == "scope_denied":
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_SCOPE_DENIED",
+                "message": "Saved answer is outside the requested scope.",
+                "resource_scope": result.get("resource_scope"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_SCOPE_DENIED
+    if result.get("status"):
+        payload["status"] = "failed"
+        payload["errors"].append(
+            {
+                "code": "CS_CONVERSATION_ANSWER_INTEGRITY_FAILED",
+                "message": "Saved answer could not be read safely.",
+                "reason": result.get("reason") or result.get("status"),
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_RUNTIME_FAILURE
+
+    answer = result["record"]
+    payload["answer"] = answer
+    payload["ids"].update(
+        {
+            "answer_id": answer["answer_id"],
+            "conversation_id": answer.get("conversation_id"),
+        }
+    )
+    payload["evidence_refs"].extend(
+        [
+            f"answer:{answer['answer_id']}",
+            f"conversation:{answer.get('conversation_id')}",
+            *[str(ref) for ref in answer.get("evidence_refs", []) if isinstance(ref, str)],
+        ]
+    )
+    payload["evidence_refs"] = [ref for ref in dict.fromkeys(payload["evidence_refs"]) if not ref.endswith(":")]
+    payload["audit_refs"].append(f"audit:{result['audit_event']['event_id']}")
     print_payload(payload, args.json)
     return EXIT_SUCCESS
 
@@ -20237,6 +20366,16 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
     root = repo_root()
     started_at = utc_now()
     started = perf_counter()
+    if args.reuse_vs5_current_run and args.contract != "vs5-citation-grounded-brief":
+        payload = base_response(f"cornerstone scenario verify {args.contract}", "failed", root)
+        payload["errors"].append(
+            {
+                "code": "CS_VS5_REUSE_CONTRACT_MISMATCH",
+                "message": "--reuse-vs5-current-run is valid only for vs5-citation-grounded-brief.",
+            }
+        )
+        print_payload(payload, args.json)
+        return EXIT_INVALID
     canonical_acceptance_report = (root / DEFAULT_ACCEPTANCE_SCENARIO_REPORT).resolve()
     requested_acceptance_report = (
         (root / args.output).resolve()
@@ -20362,6 +20501,18 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             embedding_model=args.embedding_model,
             ollama_url=args.ollama_url,
         )
+    elif args.contract == "vs5-citation-grounded-brief":
+        report = (
+            revalidate_vs5_human_evidence(root)
+            if args.reuse_vs5_current_run
+            else verify_vs5_citation_grounded_brief(
+                root,
+                model_provider=args.model_provider,
+                generation_model=args.generation_model,
+                embedding_model=args.embedding_model,
+                ollama_url=args.ollama_url,
+            )
+        )
     elif args.contract == "connector-contract-adapter":
         report = verify_connector_contract_adapter(root)
     elif args.contract == "vs2-policy-tenancy-egress":
@@ -20458,6 +20609,7 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
                     "vs1-ontology-suggest-promote",
                     "vs4-product-alpha-ui-daily-loop",
                     "vs5-slice-001",
+                    "vs5-citation-grounded-brief",
                     "connector-contract-adapter",
                     "vs2-policy-tenancy-egress",
                     "vs3-onprem-trusted-extension",
@@ -20549,6 +20701,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             if args.scenario
             else DEFAULT_VS4_PRODUCT_ALPHA_SCENARIO_REPORT
         )
+    if args.contract == "vs5-citation-grounded-brief" and not output_arg:
+        output_arg = "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json"
     if args.contract == "vs2-policy-tenancy-egress" and not output_arg:
         output_arg = "reports/scenario/vs2-policy-tenancy-egress-2026-06-19.json"
     if args.contract == "vs3-onprem-trusted-extension" and not output_arg:
@@ -20567,6 +20721,8 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
         transcript_command.append("--json")
     if args.reuse_vs2_local_proof_report and args.contract == "vs2-policy-tenancy-egress":
         transcript_command.extend(["--reuse-vs2-local-proof-report", args.reuse_vs2_local_proof_report])
+    if args.reuse_vs5_current_run and args.contract == "vs5-citation-grounded-brief":
+        transcript_command.append("--reuse-vs5-current-run")
     if output_arg:
         transcript_command.extend(["--output", output_arg])
     transcript_elapsed_seconds = round(perf_counter() - started, 3)
@@ -20664,6 +20820,22 @@ def command_scenario_verify(args: argparse.Namespace) -> int:
             cli_coverage["command_transcript_count"] = len(payload["command_transcripts"])
     full_report_path_for_stdout: str | None = None
     full_report_sha256_for_stdout: str | None = None
+    if (
+        args.reuse_vs5_current_run
+        and report.get("status") == "failed"
+        and output_arg
+        and (root / output_arg).resolve()
+        == (root / "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json").resolve()
+    ):
+        payload["requested_output_path"] = output_arg
+        payload["output_write_suppressed"] = True
+        payload.setdefault("errors", []).append(
+            {
+                "code": "CS_VS5_STALE_REUSE_CANONICAL_WRITE_DENIED",
+                "message": "A stale-run revalidation cannot overwrite the canonical full-run report.",
+            }
+        )
+        output_arg = None
     if output_arg:
         output_path = (root / output_arg).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -27573,6 +27745,12 @@ def build_parser() -> argparse.ArgumentParser:
     conversation_answer.add_argument("conversation_id", help="Conversation ID")
     conversation_answer.add_argument("--question", required=True, help="Question to answer")
     conversation_answer.add_argument(
+        "--artifact-id",
+        action="append",
+        default=[],
+        help="Limit the decision source set to this Artifact ID (repeat one to five times)",
+    )
+    conversation_answer.add_argument(
         "--model-provider",
         choices=["local_test", "ollama"],
         default="local_test",
@@ -27585,6 +27763,20 @@ def build_parser() -> argparse.ArgumentParser:
     add_scope_arguments(conversation_answer)
     conversation_answer.add_argument("--json", action="store_true", help="Emit JSON output")
     conversation_answer.set_defaults(func=command_conversation_answer)
+
+    conversation_history = conversation_sub.add_parser("history", help="List saved Ask answers in this workspace")
+    conversation_history.add_argument("--limit", type=int, default=50, help="Maximum saved answers to return (1-200)")
+    add_state_argument(conversation_history)
+    add_scope_arguments(conversation_history)
+    conversation_history.add_argument("--json", action="store_true", help="Emit JSON output")
+    conversation_history.set_defaults(func=command_conversation_history)
+
+    conversation_show = conversation_sub.add_parser("show", help="Reopen one saved Ask answer")
+    conversation_show.add_argument("answer_id", help="Saved Answer ID")
+    add_state_argument(conversation_show)
+    add_scope_arguments(conversation_show)
+    conversation_show.add_argument("--json", action="store_true", help="Emit JSON output")
+    conversation_show.set_defaults(func=command_conversation_show)
 
     scenario = subcommands.add_parser("scenario", help="Scenario registry and verification commands")
     scenario_sub = scenario.add_subparsers(dest="scenario_command")
@@ -27622,6 +27814,11 @@ def build_parser() -> argparse.ArgumentParser:
     verify.add_argument(
         "--reuse-vs2-local-proof-report",
         help="Reuse a current-source VS2 local proof report for vs2-policy-tenancy-egress instead of rerunning it.",
+    )
+    verify.add_argument(
+        "--reuse-vs5-current-run",
+        action="store_true",
+        help="Revalidate VS5 human records against the current canonical 9B run without regenerating reviewed outputs.",
     )
     verify_mode = verify.add_mutually_exclusive_group()
     verify_mode.add_argument(

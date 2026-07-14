@@ -45,7 +45,7 @@ No document, report, or roadmap may claim above this boundary. Product-value cla
 | 14 (autonomy), 15 (agent model), 16 (replaceable brain), 17 (LLM-as-judge), 18 (learning/self-improvement), 19 (AAR/scorecard), 20 (solution packs), 21 (extension ecosystem) | FUTURE-FACING (dormant) — no current capability exists; CLI stubs and fixtures only; reactivation by user-evidence pull (VS7 disposition, `VS7-DORM-001`) |
 | 22–32 (source systems, safety, UX surfaces, principles, non-goals, tensions, verdict) | ACTIVE as principles, with Part 0 precedence on any capability claim |
 
-One consequence stated plainly: section 16's "replaceable brain" principle stands, but *replaceable* must never again mean *omittable*. A brain is required for the product to exist; VS5 installs the first one (local Ollama `ornith:35b` for generation, `qwen3-embedding:0.6b` for embeddings, by default).
+One consequence stated plainly: section 16's "replaceable brain" principle stands, but *replaceable* must never again mean *omittable*. A brain is required for the product to exist; VS5 installs the first one (local Ollama `ornith:9b` for generation, `qwen3-embedding:0.6b` for embeddings, by default; `ornith:35b` stays opt-in for explicitly larger-model tests).
 
 ---
 
@@ -942,7 +942,7 @@ CornerStone is accountable for showing:
 
 ## 16. Replaceable Brain and Provider-Neutral AI Framework
 
-> **Status: FUTURE-FACING (dormant) as a routing/ensemble framework.** The principle stands, but replaceable never means omittable: the first required brain is installed by VS5 (local Ollama `ornith:35b` + `qwen3-embedding:0.6b`). Multi-brain routing, ensembles, and the Brain Performance Ledger stay dormant. See Part 0.3 and ADR-0007.
+> **Status: FUTURE-FACING (dormant) as a routing/ensemble framework.** The principle stands, but replaceable never means omittable: the first required brain is installed by VS5 (local Ollama `ornith:9b` + `qwen3-embedding:0.6b`; `ornith:35b` is opt-in for explicit larger-model tests). Multi-brain routing, ensembles, and the Brain Performance Ledger stay dormant. See Part 0.3 and ADR-0007.
 
 ### 16.1 Core principle
 

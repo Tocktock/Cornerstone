@@ -1,0 +1,23 @@
+{
+  "schema_version": "cs.vs5_browser_proof.v1",
+  "captured_at": "2026-07-12",
+  "browser": "Playwright Chromium",
+  "viewport_css_pixels": "1200–1280 wide",
+  "source_state": "tmp/scenario-state/vs5-citation-grounded-brief",
+  "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
+  "pipeline_sha256": "e431eb12586c7e602f27fd0aa4b0e321f64d6356f5eea0db0cc0cbd7ab78e038",
+  "brief_id": "brief_4e47a11126b67991",
+  "decision_draft_id": "claim_250b3174b17ca529",
+  "observations": {
+    "home_source_boundary": "PASS: the Home Ask surface shows checked source selectors and states the one-to-five source boundary.",
+    "brief_reading_order": "PASS: Decision question, Bottom line, Key facts, Conflicts and risks, Missing evidence, Recommended next step, and Sources used are visible in order.",
+    "citation_inspection": "PASS: the bottom line and key fact expose source snippet, exact character span, provenance, source link, and audit reference.",
+    "decision_draft": "PASS: Save as Decision draft navigated to a persisted draft with source lineage and no approval or action authority."
+  },
+  "screenshots": [
+    {"path": "home-source-selector.png", "sha256": "6846b777896df23d13ee51bb390178d49ab6ccb1ce728d5fd869cdc3b794189e", "dimensions": "1200x2033"},
+    {"path": "brief-detail.png", "sha256": "9d384693b58b7d4e7887143536618070922827d0012e7ef859ff358ce69ca410", "dimensions": "1200x6215"},
+    {"path": "decision-draft.png", "sha256": "23819da35a5b06e69dbb321276098583c2a0b4c51633727977abe341b1117436", "dimensions": "1200x1365"}
+  ],
+  "claim_boundary": "Browser proof demonstrates implemented UI behavior only; it is not VS4-H01 acceptance, a human usefulness score, or external-user evidence."
+}

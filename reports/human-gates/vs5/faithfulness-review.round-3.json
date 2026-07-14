@@ -1,0 +1,48 @@
+{
+  "schema_version": "cs.vs5_faithfulness_review_round.v1",
+  "status": "REJECTED_REVISION",
+  "reviewed_at": "2026-07-13T19:51:37Z",
+  "reviewer": {
+    "name": "JiYong / Tars",
+    "role": "CornerStone owner and target decision owner",
+    "is_owner": true
+  },
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "prompt_retrieval_revision": "297efc32dc31719eb4e90f551ed82837165205249f792da74d077d884b6ec643",
+  "model_stack": {
+    "provider": "ollama",
+    "generation_model": "ornith:9b",
+    "embedding_model": "qwen3-embedding:0.6b"
+  },
+  "source_review_path": "/Users/jiyong/.codex/attachments/2f0ea0f5-a3f2-46ff-8f2e-0a51004ec1d0/pasted-text.txt",
+  "source_review_sha256": "72ce06fcb58f661ea97e6a6eddcb4f95e06d2e11490f3d1d91cae2b2dca76b40",
+  "reviewed_brief_count": 10,
+  "reviewed_statement_count": 39,
+  "faithful_statement_count": 37,
+  "material_overstatement_count": 2,
+  "reviewed_cases": [
+    {
+      "case_id": "vendor-renewal-01",
+      "brief_id": "brief_afcf76c3695160dd",
+      "faithful_statement_count": 4,
+      "statement_count": 6,
+      "material_overstatement_count": 2,
+      "finding": "The bottom line and first conflicts/risks statement drop the source qualifier 'not recorded' and assert categorical absence of an owner or recommendation."
+    },
+    {
+      "case_id": "vendor-renewal-04",
+      "brief_id": "brief_06693d5be99e0913",
+      "faithful_statement_count": 4,
+      "statement_count": 4,
+      "material_overstatement_count": 0,
+      "citation_warning": "The availability-above-trigger statement is semantically supported by the complete case, but its citation_refs omit the contract clause containing the 98.5% trigger."
+    }
+  ],
+  "all_ten_gap_and_conflict_reviews_passed": true,
+  "non_blocking_recommendation_findings": [
+    "BrightDesk calls the unsigned DPA a compliance blocker although the source only says it remains unsigned.",
+    "policy-change-06 should recommend naming an escalation contact rather than assigning a separate owner to fill the field."
+  ],
+  "decision": "REJECT",
+  "decision_reason": "Two load-bearing Acme statements materially overstate record absence, and ParcelFlow needs the threshold-source citation added before the package is fully citation-grounded."
+}

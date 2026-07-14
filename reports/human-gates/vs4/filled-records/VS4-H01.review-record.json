@@ -1,33 +1,28 @@
 {
-  "acceptance_note": "REJECT. The current VS4 Product Alpha UI is not acceptable for external-user VS5 entry because it does not follow the attached UI/UX reference direction. This is a full visual hierarchy, information architecture, and human-friendly workflow mismatch, not only a Drop / Ask discoverability issue.",
-  "decision": "REJECT",
+  "acceptance_note": "APPROVE_WITH_EXCEPTIONS. The owner approves VS4-H01 for external-user VS5 entry after reviewing the current Drop, Artifact, Ask, Brief, citation, and Decision-draft journey. Remaining exception: Ask and answer records are saved, but the History experience does not make past questions and answers sufficiently visible or easy to revisit. History should be improved or implemented as a clearer user-facing feature.",
+  "decision": "APPROVE_WITH_EXCEPTIONS",
   "evidence_refs": [
-    "user-chat-review:2026-07-04T11:34:23Z:vs4-h01-reject",
-    "reports/human-gates/vs4/VS4-H01.json",
-    "reports/human-gates/vs4/review-kit.json",
-    "reports/human-gates/vs4/record-templates/VS4-H01.review-record.template.json",
-    "docs/design/reference-images/README.md",
-    "docs/design/reference-images/cornerstone-reference-07-home-upload-ask.png",
-    "reports/browser/vs4-product-alpha-ui-daily-loop-slice-001/home.png",
-    "docs/scenario-contracts/VS4_PRODUCT_ALPHA_UI_DAILY_LOOP_CONTRACT.md"
+    "user-chat-review:2026-07-12T09:34:19Z:vs4-h01-approve-with-exceptions",
+    "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
+    "reports/human-gates/vs5/owner-rereview-packet.json",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/manifest.json",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/home-source-selector.png",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/brief-detail.png",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/decision-draft.png"
   ],
   "issue_list": [
-    "The current UI is very complicated for the reviewer.",
-    "The attached UI/UX reference images are present in the repository, but the implemented surface is completely different in layout, hierarchy, and product feel.",
-    "The Home surface does not match the intended visual direction: clear workspace shell, prominent upload/drop area, prominent ask box, recent items, knowledge states, suggested next steps, and recent activity.",
-    "The reviewer cannot recognize the intended first actions quickly enough, including Drop and Ask.",
-    "The current surface is not human-friendly enough for external-user review.",
-    "Checklist items 4, 5, 6, and 7 are not accepted because the overall product surface fails the reference-image and human-usability review."
+    "Ask and answer records are persisted locally, but the current UI does not provide a clear first-class conversation history for finding and reopening them.",
+    "The UI emphasizes the resulting Brief and Audit trail, so a user can reasonably be unsure whether the original question and generated answer were saved.",
+    "The detailed interaction design and acceptance criteria for improved History remain to be defined; this review does not claim that improvement is implemented."
   ],
   "misleading_or_unsafe_states": [
-    "The interface risks misleading a first-time user because it presents internal product/scenario complexity instead of the reference-guided human workspace.",
-    "The UI appears to expose implementation complexity before the reviewer can understand the human product task.",
-    "The implemented UI may give false confidence from structural scenario evidence while failing the intended visual and usability direction."
+    "The current History presentation may mislead users into thinking an Ask/answer was not retained because there is no obvious conversation-history surface, even though the records and audit events are stored."
   ],
-  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, screenshots, or unredacted private data are included. This record captures only the owner's chat decision and repo-local evidence references.",
-  "reviewed_at": "2026-07-04T11:34:23Z",
+  "redaction_note": "No raw secrets, provider credentials, private keys, session cookies, bearer tokens, live provider payloads, or unredacted private data are included. This record captures the owner's explicit chat decision and repo-local evidence references.",
+  "reviewed_at": "2026-07-12T09:34:19Z",
   "reviewer": "JiYong / Tars",
   "scenario_id": "VS4-H01",
+  "schema_version": "cs.vs4_human_gate_review_record.v0",
   "scope": {
     "namespace_id": "personal",
     "owner_id": "local-user",
@@ -35,18 +30,21 @@
     "workspace_id": "default"
   },
   "screenshots_or_recording_refs": [
-    "not-provided:user-chat-review-2026-07-04"
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/home-source-selector.png",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/brief-detail.png",
+    "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/decision-draft.png",
+    "not-provided:user-ui-review-2026-07-12"
   ],
-  "signature_ref": "user-chat-review:2026-07-04T11:34:23Z:reject-vs4-h01",
+  "signature_ref": "user-chat-review:2026-07-12T09:34:19Z:approve-with-exceptions-vs4-h01",
   "task_outcomes": [
-    "Entry-gate decision recorded as REJECT.",
-    "VS5 external-user sessions should not begin from the current VS4 UI.",
-    "Next work should return to UI/UX redesign against the reference images for Product Alpha Home, Ops Inbox, Search, Artifact, Claim, and Action surfaces before retrying VS4-H01."
+    "VS4-H01 entry-gate decision is APPROVE_WITH_EXCEPTIONS.",
+    "VS5 external-user sessions are authorized to begin; History improvement is not a blocker for entry.",
+    "History discoverability remains an explicit product exception and must not be described as implemented or accepted."
   ],
   "usability_findings": [
-    "The implemented screen does not follow the attached UI/UX reference image direction.",
-    "The visual hierarchy and information architecture feel complicated instead of human-friendly.",
-    "Primary actions such as Drop and Ask are not discoverable enough.",
-    "The current UI appears built around structural verification markers rather than the intended user-facing workspace."
+    "The current Drop to Artifact to Ask to Brief journey is acceptable for external-user entry.",
+    "Redirecting to the Artifact after each upload is understandable after explanation but adds navigation during multi-source intake.",
+    "Past Ask questions and generated answers are not discoverable enough from the normal user workspace.",
+    "A better History feature should make saved Ask/answer interactions visibly retrievable while preserving links to the resulting Brief and sources; the exact design remains open."
   ]
 }

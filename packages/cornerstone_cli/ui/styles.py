@@ -505,6 +505,44 @@ button, input, textarea, select {{ font: inherit; }}
   height: 1px;
   background: var(--cs-color-border-default);
 }}
+.cs-source-set {{
+  margin: 0;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-lg);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-3);
+  display: grid;
+  gap: var(--cs-space-2);
+}}
+.cs-source-set legend {{
+  padding: 0 var(--cs-space-1);
+  color: var(--cs-color-text-primary);
+  font-weight: var(--cs-typography-weight-semibold);
+}}
+.cs-source-set p {{ margin: 0; }}
+.cs-source-choice-list {{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--cs-space-2);
+}}
+.cs-source-choice {{
+  min-width: 0;
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-primary);
+  padding: var(--cs-space-2);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--cs-space-2);
+  align-items: start;
+  cursor: pointer;
+}}
+.cs-source-choice:has(input:checked) {{ border-color: var(--cs-color-primary-600); background: var(--cs-color-primary-50); }}
+.cs-source-choice input {{ margin-top: 3px; accent-color: var(--cs-color-primary-600); }}
+.cs-source-choice span {{ min-width: 0; display: grid; gap: 2px; }}
+.cs-source-choice strong, .cs-source-choice small {{ overflow-wrap: anywhere; }}
+.cs-source-choice small {{ color: var(--cs-color-text-muted); }}
+.cs-source-choice:focus-within {{ outline: 3px solid var(--cs-color-primary-50); outline-offset: 2px; }}
 .cs-ask-bar {{
   border: 1px solid var(--cs-color-border-focus);
   border-radius: var(--cs-radius-lg);
@@ -591,6 +629,54 @@ button, input, textarea, select {{ font: inherit; }}
 .cs-home-item-icon .cs-icon, .cs-activity-icon .cs-icon, .cs-collection-icon .cs-icon, .cs-empty-mark .cs-icon {{ width: 20px; height: 20px; }}
 .cs-home-item h3 {{ margin: 0; font-size: var(--cs-typography-body-fontSize); line-height: var(--cs-typography-body-lineHeight); }}
 .cs-home-item p {{ margin: 0; color: var(--cs-color-text-muted); font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-question-history-list {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  overflow: hidden;
+  background: var(--cs-color-surface-primary);
+}}
+.cs-question-history-row {{
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  gap: var(--cs-space-3);
+  align-items: center;
+  min-height: 86px;
+  padding: var(--cs-space-3);
+  border-bottom: 1px solid var(--cs-color-border-default);
+}}
+.cs-question-history-row:last-child {{ border-bottom: 0; }}
+.cs-question-history-row:hover {{ background: var(--cs-color-surface-subtle); }}
+.cs-question-history-mark {{
+  width: 30px;
+  height: 30px;
+  border-radius: var(--cs-radius-sm);
+  display: grid;
+  place-items: center;
+  background: var(--cs-color-primary-50);
+  color: var(--cs-color-primary-700);
+}}
+.cs-question-history-copy {{ min-width: 0; display: grid; gap: 3px; }}
+.cs-question-history-copy strong, .cs-question-history-copy span, .cs-question-history-copy small {{ overflow-wrap: anywhere; }}
+.cs-question-history-copy span, .cs-question-history-copy small {{ color: var(--cs-color-text-muted); }}
+.cs-question-history-copy small {{ font-size: var(--cs-typography-metadata-fontSize); }}
+.cs-answer-citation {{
+  border: 1px solid var(--cs-color-border-default);
+  border-radius: var(--cs-radius-md);
+  background: var(--cs-color-surface-subtle);
+  padding: var(--cs-space-4);
+  display: grid;
+  gap: var(--cs-space-3);
+}}
+.cs-answer-citation .cs-panel-header {{ margin-bottom: 0; }}
+.cs-answer-citation blockquote {{
+  margin: 0;
+  border-left: 3px solid var(--cs-color-primary-600);
+  padding-left: var(--cs-space-3);
+  color: var(--cs-color-text-secondary);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}}
 .cs-activity-list {{
   display: grid;
   border: 1px solid var(--cs-color-border-default);
@@ -2207,6 +2293,7 @@ button, input, textarea, select {{ font: inherit; }}
   flex-wrap: wrap;
 }}
 .cs-brief-answer-head h2 {{ margin: var(--cs-space-1) 0 0; font-size: 20px; line-height: 1.3; }}
+.cs-brief-question {{ margin: var(--cs-space-1) 0 var(--cs-space-3); color: var(--cs-color-text-secondary); font-size: 16px; line-height: 1.5; }}
 .cs-brief-answer-text {{
   margin: 0;
   max-width: 72ch;
@@ -3634,7 +3721,7 @@ button, input, textarea, select {{ font: inherit; }}
   .cs-home-canvas > .cs-panel-header p {{ display: none; }}
   .cs-home-source-row {{ display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }}
   .cs-home-source-row .cs-button {{ justify-content: center; padding-inline: var(--cs-space-2); }}
-  .cs-home-item, .cs-next-step, .cs-home-paste-row {{ grid-template-columns: 1fr; }}
+  .cs-home-item, .cs-question-history-row, .cs-next-step, .cs-home-paste-row {{ grid-template-columns: 1fr; }}
   .cs-home-loop-inline {{ display: none; }}
   .cs-home-source-note {{ display: none; }}
   .cs-drop {{ min-height: auto; padding: var(--cs-space-2); gap: var(--cs-space-2); }}

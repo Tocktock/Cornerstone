@@ -16,7 +16,7 @@ product_goal:
 scenario_standard:
   file: "docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md"
   authority: "canonical long-term product behavior and release gate"
-  scenario_count: 206
+  scenario_count: 216
   counts_by_area:
     CS-PROD: 10
     CS-ARCH: 14
@@ -31,11 +31,12 @@ scenario_standard:
     CS-EXT: 16
     CS-SEC: 20
     CS-REG: 20
+    CS-VAL: 10
 
 scenario_matrix:
   markdown: "docs/scenario-contracts/SCENARIO_MATRIX_FULL.md"
   csv: "docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv"
-  scenario_count: 206
+  scenario_count: 216
 
 cli_native_first:
   contract: "docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md"
@@ -99,7 +100,7 @@ technical_defaults:
     policy: "OPA/Rego-compatible"
     audit: "append-only tamper-evident"
     connector_boundary: "ConnectorHub-mediated"
-    model_access: "local-first Ollama (ornith:35b generation, qwen3-embedding:0.6b embeddings); local_test for CI; provider-neutral router direction; external providers optional per-scenario"
+    model_access: "local-first Ollama (ornith:9b generation, qwen3-embedding:0.6b embeddings); ornith:35b opt-in for explicit larger-model tests; local_test for CI; provider-neutral router direction; external providers optional per-scenario"
     local_start: "one-command local/on-prem target"
 
 first_implementation_contract:
@@ -304,11 +305,11 @@ product_value_verification:
     - "CS-VAL-006 unearned trust labels"
     - "CS-VAL-007 canned non-answer Ask"
   model_stack:
-    generation: "ollama ornith:35b"
+    generation: "ollama ornith:9b"
     embeddings: "ollama qwen3-embedding:0.6b"
     ci_baseline: "local_test (deterministic)"
     llm_judge_rule: "advisory only; never flips a row; humans own subjective PASS"
-  matrix_fold_in: "CS-VAL rows fold into the generated 206-row matrix at next registry regeneration (code change scheduled inside VS5)"
+  matrix_fold_in: "CS-VAL rows were folded into the generated 216-row matrix during VS5 on 2026-07-12; authoritative definitions remain in this standard"
 
 active_milestones:
   vs5:

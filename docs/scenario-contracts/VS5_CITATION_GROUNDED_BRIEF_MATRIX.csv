@@ -1,13 +1,14 @@
 scenario_id,priority,scenario,maps_to,verification_mode,current_evidence_status,evidence_expectation
-VS5-BRIEF-001,MUST_PASS,Model-backed brief from arbitrary user input via UI/API/CLI,CS-CLAIM-002,AUTOMATED,NOT_RUN,Eval-corpus generation transcripts with brief records and audit refs
+VS5-BRIEF-001,MUST_PASS,One to five bounded text or email sources produce the frozen decision Brief through UI/API/CLI,CS-CLAIM-002,AUTOMATED,NOT_RUN,Multi-source eval-corpus generation transcripts with structured brief records source links and audit refs
 VS5-BRIEF-002,MUST_PASS,Every load-bearing statement carries a resolvable chunk-level citation,CS-VAL-001,AUTOMATED,NOT_RUN,Citation-resolution scan with zero dangling refs
 VS5-BRIEF-003,MUST_PASS,Zero fabricated citations across frozen eval corpus,CS-VAL-002,AUTOMATED,NOT_RUN,Span-in-source scan fabricated_citation_count=0 plus seeded-fabrication detector proof
 VS5-BRIEF-004,MUST_PASS,Echo guard: no input-substring key points and no boilerplate titles,CS-VAL-004,AUTOMATED,NOT_RUN,Echo-guard scan report over eval corpus
 VS5-BRIEF-005,MUST_PASS,Input-specific uncertainty naming planted gaps,CS-VAL-005,AUTOMATED+HUMAN_REQUIRED,NOT_RUN,Boilerplate-variance scan plus human spot-check record
-VS5-ASK-001,MUST_PASS,Direct cited answers or explicit insufficient_evidence declines,CS-VAL-007,AUTOMATED+HUMAN_REQUIRED,NOT_RUN,Eval Q&A report on answerable and unanswerable sets plus human sample audit
+VS5-ASK-001,MUST_PASS,Direct cited answers or explicit insufficient_evidence declines remain discoverable and reopenable with source trust timestamp and audit context through UI API CLI,CS-VAL-007,AUTOMATED+HUMAN_REQUIRED,NOT_RUN,Eval Q&A report plus saved-answer UI API CLI history transcripts and human sample audit
 VS5-ASK-002,MUST_PASS,Injection boundary holds with real model in loop,CS-ARCH-007,AUTOMATED,NOT_RUN,Adversarial fixture run with zero unauthorized state changes and negative evidence counters
 VS5-TRUST-001,MUST_PASS,evidence_backed label only when citation checks pass with audit-recorded grant,CS-VAL-006,AUTOMATED,NOT_RUN,Label-audit report binding labels to check refs
 VS5-TRUST-002,MUST_PASS,Model-down fallback labeled extractive_fallback and never evidence_backed,CS-VAL-006,AUTOMATED,NOT_RUN,Forced-fallback run report with UI degraded-state proof
+VS5-DECISION-001,MUST_PASS,One cited finding saves as a Decision draft without approval shared-truth or action authority,ACTIVE_SPINE_DECISION,AUTOMATED,NOT_RUN,UI API CLI Decision-draft transcript with preserved citation and audit refs
 VS5-QUAL-001,MUST_PASS,Frozen eval corpus of 25+ messy inputs with manifests,05_SOT_S3,AUTOMATED+HUMAN_REQUIRED,NOT_RUN,Corpus hash freeze record plus owner corpus-quality note
 VS5-QUAL-002,MUST_PASS,Human faithfulness audit of 10+ briefs against cited spans,CS-VAL-003,HUMAN_REQUIRED,NOT_RUN,Dated per-statement audit record with advisory judge distribution attached
 VS5-QUAL-003,MUST_PASS,Usefulness rubric median >=4/5 from 2+ reviewers incl. 1 non-owner,CS-VAL-004,HUMAN_REQUIRED,NOT_RUN,Dated rubric records

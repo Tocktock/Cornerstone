@@ -7,7 +7,7 @@ cd "$ROOT"
 HOST="${CORNERSTONE_HOST:-127.0.0.1}"
 PORT="${CORNERSTONE_PORT:-8787}"
 STATE_DIR="${CORNERSTONE_STATE_DIR:-data/local}"
-GENERATION_MODEL="${CORNERSTONE_GENERATION_MODEL:-ornith:35b}"
+GENERATION_MODEL="${CORNERSTONE_GENERATION_MODEL:-ornith:9b}"
 EMBEDDING_MODEL="${CORNERSTONE_EMBEDDING_MODEL:-qwen3-embedding:0.6b}"
 OLLAMA_URL="${CORNERSTONE_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
 OLLAMA_URL="${OLLAMA_URL%/}"
@@ -28,7 +28,7 @@ Optional environment variables:
   CORNERSTONE_HOST                 Web server host (default: 127.0.0.1)
   CORNERSTONE_PORT                 Web server port (default: 8787)
   CORNERSTONE_STATE_DIR            Runtime state directory (default: data/local)
-  CORNERSTONE_GENERATION_MODEL     Ollama generation model (default: ornith:35b)
+  CORNERSTONE_GENERATION_MODEL     Ollama generation model (default: ornith:9b)
   CORNERSTONE_EMBEDDING_MODEL      Ollama embedding model (default: qwen3-embedding:0.6b)
   CORNERSTONE_OLLAMA_BASE_URL      Loopback Ollama URL (default: http://127.0.0.1:11434)
   CORNERSTONE_STARTUP_TIMEOUT      Startup timeout in seconds (default: 30)

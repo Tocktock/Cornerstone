@@ -1,0 +1,36 @@
+{
+  "schema_version": "cs.vs5_faithfulness_review_round.v1",
+  "status": "REJECTED_REVISION",
+  "reviewed_at": "2026-07-12T13:44:35Z",
+  "reviewer": {
+    "name": "JiYong / Tars",
+    "role": "CornerStone owner and target decision owner",
+    "is_owner": true
+  },
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "prompt_retrieval_revision": "76f6ba46fe83401bd38e5cc7b4c13fc0b4cb00c1e48ca6eedc42d65fe4184522",
+  "model_stack": {
+    "provider": "ollama",
+    "generation_model": "ornith:9b",
+    "embedding_model": "qwen3-embedding:0.6b"
+  },
+  "source_review_path": "/Users/jiyong/.codex/attachments/23642cf6-f2ad-472a-a400-2f8fd0bb4fcc/pasted-text.txt",
+  "reviewed_cases": [
+    {
+      "case_id": "vendor-renewal-01",
+      "brief_id": "brief_82e395d6b7fef327",
+      "faithful": true,
+      "material_overstatement": false,
+      "finding": "Factual statements preserve Finance's conditional support and Security's incomplete, unrecorded recommendation/owner state. The Finance-Security item is a valid unresolved dependency, not a literal contradiction."
+    },
+    {
+      "case_id": "vendor-renewal-03",
+      "brief_id": "brief_fb66386f79caf546",
+      "faithful": false,
+      "material_overstatement": true,
+      "finding": "The bottom line calls the unsigned DPA a required document before full adoption, but the source establishes only that Legal says the DPA remains unsigned. Requirement and adoption-prerequisite language are unsupported."
+    }
+  ],
+  "decision": "REJECT",
+  "decision_reason": "One of the first two reviewed Briefs contained a material unsupported qualification, so this model/prompt revision cannot satisfy VS5-QUAL-002."
+}

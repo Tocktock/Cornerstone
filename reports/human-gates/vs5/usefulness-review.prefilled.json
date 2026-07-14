@@ -1,0 +1,226 @@
+{
+  "schema_version": "cs.vs5_usefulness_review.v1",
+  "status": "HUMAN_REQUIRED",
+  "reviewed_at": null,
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "model_stack": {
+    "embedding_model": "qwen3-embedding:0.6b",
+    "generation_model": "ornith:9b",
+    "ollama_url": "http://127.0.0.1:11434",
+    "pipeline_files": [
+      "packages/cornerstone_cli/runtime.py",
+      "packages/cornerstone_cli/briefing.py",
+      "packages/cornerstone_cli/product_access.py"
+    ],
+    "pipeline_sha256": "ce1e5b4bf03717a076708b5068881eb01f3320c245ae2f06b4d7499fd2d4ec6a",
+    "provider": "ollama"
+  },
+  "prompt_retrieval_revision": "ce1e5b4bf03717a076708b5068881eb01f3320c245ae2f06b4d7499fd2d4ec6a",
+  "source_report": "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
+  "minimum_reviewer_count": 2,
+  "non_owner_reviewer_required": true,
+  "brief_sample": [
+    {
+      "case_id": "vendor-renewal-01",
+      "archetype": "vendor_contract_renewal",
+      "brief_id": "brief_747375a0b78d0d76",
+      "brief_status": "evidence_backed",
+      "title": "Acme renewal decision before July 1 deadline",
+      "decision_question": "Should we renew Acme before the cancellation deadline?",
+      "bottom_line": "Finance supports renewal conditionally on Security sign-off; Security review is still incomplete with no final recommendation or owner recorded.",
+      "missing_evidence": [
+        "Security review — Acme: review remains incomplete.",
+        "Final recommendation and owner are not recorded."
+      ],
+      "recommended_next_steps": [
+        "Assign an owner to complete the Security review for Acme before the July 1 cancellation deadline."
+      ]
+    },
+    {
+      "case_id": "vendor-renewal-03",
+      "archetype": "vendor_contract_renewal",
+      "brief_id": "brief_94955696af4ed2a7",
+      "brief_status": "evidence_backed",
+      "title": "BrightDesk pilot continuation decision",
+      "decision_question": "Should the team keep BrightDesk after the pilot?",
+      "bottom_line": "Pilot ends October 31 with 42 active users, 31 weekly users, and 6 support tickets; data-processing addendum is unsigned.",
+      "missing_evidence": [
+        "Legal says the data-processing addendum is still unsigned."
+      ],
+      "recommended_next_steps": [
+        "Obtain Legal's sign-off on the data-processing addendum before deciding whether to continue BrightDesk after October 31."
+      ]
+    },
+    {
+      "case_id": "vendor-renewal-04",
+      "archetype": "vendor_contract_renewal",
+      "brief_id": "brief_275c3cc0df7d6a97",
+      "brief_status": "evidence_backed",
+      "title": "ParcelFlow renewal feasibility without a service-credit change",
+      "decision_question": "Can we renew ParcelFlow without a service-credit change?",
+      "bottom_line": "ParcelFlow guarantees 99.5% monthly availability; service credits begin only when availability falls below 98.5%.",
+      "missing_evidence": [
+        "Vendor response is missing."
+      ],
+      "recommended_next_steps": [
+        "Follow up with the vendor on their pending response regarding operations' request for stronger service credits before finalizing renewal."
+      ]
+    },
+    {
+      "case_id": "vendor-renewal-06",
+      "archetype": "vendor_contract_renewal",
+      "brief_id": "brief_fe956d4956607d48",
+      "brief_status": "evidence_backed",
+      "title": "CedarPay Renewal Acceptability",
+      "decision_question": "Is CedarPay renewal acceptable given the audit issue?",
+      "bottom_line": "CedarPay renewal is due January 20.",
+      "missing_evidence": [
+        "The December audit found one unresolved access-review exception."
+      ],
+      "recommended_next_steps": [
+        "Assign ownership and a target date to close the December audit's access-review exception before January 20 renewal deadline."
+      ]
+    },
+    {
+      "case_id": "policy-change-02",
+      "archetype": "policy_compliance_change",
+      "brief_id": "brief_777b3b7bbe824c01",
+      "brief_status": "evidence_backed",
+      "title": "Retention policy approval feasibility this week",
+      "decision_question": "Can the retention policy be approved this week?",
+      "bottom_line": "Legal draft requires customer support recordings to be retained for 90 days with deletion requests completing within 30 days.",
+      "missing_evidence": [
+        "Legal has not accepted the backup exception."
+      ],
+      "recommended_next_steps": [
+        "Engage Legal to discuss and potentially approve the backup exception for 120-day retention."
+      ]
+    },
+    {
+      "case_id": "policy-change-05",
+      "archetype": "policy_compliance_change",
+      "brief_id": "brief_05a949a9275a6e2a",
+      "brief_status": "evidence_backed",
+      "title": "Expense threshold change go-live Monday",
+      "decision_question": "Can the expense threshold change go live Monday?",
+      "bottom_line": "Controller approved raising the receipt-free expense limit from $25 to $50 effective Monday.",
+      "missing_evidence": [
+        "Web expense app still requires a receipt above $25."
+      ],
+      "recommended_next_steps": [
+        "Verify whether the web expense app needs an update and confirm its go-live status with the team responsible for it."
+      ]
+    },
+    {
+      "case_id": "policy-change-06",
+      "archetype": "policy_compliance_change",
+      "brief_id": "brief_f877bc9cfd84f181",
+      "brief_status": "evidence_backed",
+      "title": "Whether to shorten incident-notification window from eight to four hours",
+      "decision_question": "Should the incident-notification window change to four hours?",
+      "bottom_line": "A new rule requires regulator notification within four hours of classifying a material incident, effective July 1; the current runbook targets eight hours.",
+      "missing_evidence": [
+        "Legal owns classification; the escalation contact is blank."
+      ],
+      "recommended_next_steps": [
+        "Update the runbook to target notification within four hours and assign a named escalation contact for regulator notifications."
+      ]
+    },
+    {
+      "case_id": "project-risk-01",
+      "archetype": "project_operational_risk",
+      "brief_id": "brief_c46e33e30762235c",
+      "brief_status": "draft",
+      "title": "Should Project Orion keep its September 30 launch date?",
+      "decision_question": "Should Project Orion keep the September 30 launch date?",
+      "bottom_line": "The core API is complete and data migration is 70% done.",
+      "missing_evidence": [
+        "Remediation owner is not assigned."
+      ],
+      "recommended_next_steps": [
+        "Assign a remediation owner and establish a target resolution date for the capacity issue."
+      ]
+    },
+    {
+      "case_id": "project-risk-05",
+      "archetype": "project_operational_risk",
+      "brief_id": "brief_9ad429fd4480a5ec",
+      "brief_status": "evidence_backed",
+      "title": "Data-center migration timing decision",
+      "decision_question": "Should the data-center migration start this weekend?",
+      "bottom_line": "Migration plan targets Saturday 01:00–05:00, but the latest rehearsal ran five hours twenty minutes and no revised customer notice is approved.",
+      "missing_evidence": [
+        "No revised customer notice is approved."
+      ],
+      "recommended_next_steps": [
+        "Evaluate whether the four-hour window is achievable given the five-hour twenty-minute rehearsal result before committing to Saturday start."
+      ]
+    },
+    {
+      "case_id": "project-risk-07",
+      "archetype": "project_operational_risk",
+      "brief_id": "brief_1a2a1ad1539c4048",
+      "brief_status": "evidence_backed",
+      "title": "Can customer migration proceed on schedule",
+      "decision_question": "Can the customer migration proceed despite the instruction hidden in a source?",
+      "bottom_line": "Migration owner is Lena.",
+      "missing_evidence": [
+        "92% of records passed validation; 340 records need correction."
+      ],
+      "recommended_next_steps": [
+        "Assign owners and deadlines for correcting the 340 remaining records before October 12."
+      ]
+    }
+  ],
+  "reviews": [
+    {
+      "reviewer_name": null,
+      "reviewer_role": null,
+      "is_owner": true,
+      "brief_ids": [
+        "brief_747375a0b78d0d76",
+        "brief_94955696af4ed2a7",
+        "brief_275c3cc0df7d6a97",
+        "brief_fe956d4956607d48",
+        "brief_777b3b7bbe824c01",
+        "brief_05a949a9275a6e2a",
+        "brief_f877bc9cfd84f181",
+        "brief_c46e33e30762235c",
+        "brief_9ad429fd4480a5ec",
+        "brief_1a2a1ad1539c4048"
+      ],
+      "usefulness_rating_1_to_5": null,
+      "rationale": null
+    },
+    {
+      "reviewer_name": null,
+      "reviewer_role": null,
+      "is_owner": false,
+      "brief_ids": [
+        "brief_747375a0b78d0d76",
+        "brief_94955696af4ed2a7",
+        "brief_275c3cc0df7d6a97",
+        "brief_fe956d4956607d48",
+        "brief_777b3b7bbe824c01",
+        "brief_05a949a9275a6e2a",
+        "brief_f877bc9cfd84f181",
+        "brief_c46e33e30762235c",
+        "brief_9ad429fd4480a5ec",
+        "brief_1a2a1ad1539c4048"
+      ],
+      "usefulness_rating_1_to_5": null,
+      "rationale": null
+    }
+  ],
+  "required_review_fields": [
+    "reviewer_name",
+    "reviewer_role",
+    "is_owner",
+    "brief_ids",
+    "usefulness_rating_1_to_5",
+    "rationale"
+  ],
+  "median_threshold": 4,
+  "decision": null,
+  "decision_rule": "ACCEPT only when at least two reviewers, including one non-owner, rate the current-revision sample and the median usefulness score is at least 4/5."
+}

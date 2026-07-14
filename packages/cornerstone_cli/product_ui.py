@@ -28,7 +28,7 @@ from cornerstone_cli.ui.styles import render_styles as _token_css, style_asset
 from cornerstone_cli.validators import redact_text
 
 PRODUCT_LIST_ROUTES = {"/", "/search", "/artifacts", "/briefs", "/claims", "/actions", "/inbox", "/audit"}
-PRODUCT_RECORD_FAMILIES = frozenset({"artifact", "brief", "claim", "action", "memory"})
+PRODUCT_RECORD_FAMILIES = frozenset({"artifact", "brief", "claim", "action", "memory", "answer"})
 PRODUCT_ROUTE_RECORD_FAMILIES = {
     "/": PRODUCT_RECORD_FAMILIES,
     "/search": frozenset(),
@@ -47,6 +47,7 @@ PRODUCT_DETAIL_RECORD_FAMILIES = {
     "claims": frozenset({"artifact", "brief", "claim"}),
     "memories": frozenset({"artifact", "memory"}),
     "actions": frozenset({"artifact", "brief", "claim", "action"}),
+    "answers": frozenset({"artifact", "answer"}),
 }
 PRODUCT_SEARCH_TYPES = [
     ("all", "All"),
@@ -63,6 +64,7 @@ INBOX_LANES = [
     ("failed-runs", "Failed runs"),
 ]
 INBOX_PAGE_SIZE = 20
+VS5_DECISION_SOURCE_MAX_BYTES = 128 * 1024
 AUDIT_LIFECYCLES = [
     ("all", "All activity"),
     ("created", "Created"),
@@ -72,7 +74,7 @@ AUDIT_LIFECYCLES = [
     ("executed", "Executed"),
     ("other", "Other"),
 ]
-PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "memories", "actions"}
+PRODUCT_DETAIL_ROUTES = {"artifacts", "briefs", "claims", "memories", "actions", "answers"}
 
 REFERENCE_IMAGE_ROWS = [
     ("cornerstone-reference-01-vendor-detail.png", "Vendor object detail", "Dormant direction", "Entity/object explorer structure only; do not add this surface during the VS5 scope freeze."),
@@ -166,7 +168,7 @@ def render_product_page(
         ctx["page_audit_ref"] = str((page_access.get("audit_refs") or [""])[0])
     if page_access_failed:
         ctx["load_errors"].append("page access audit")
-        for key in ("artifacts", "briefs", "claims", "actions", "memories", "inbox", "audit", "audit_all"):
+        for key in ("artifacts", "briefs", "claims", "actions", "memories", "answers", "inbox", "audit", "audit_all"):
             ctx[key] = []
         ctx["inbox_total"] = 0
         return _page(
@@ -334,6 +336,7 @@ def render_product_detail(
         "claims": "claim",
         "memories": "memory",
         "actions": "action",
+        "answers": "answer",
     }.get(kind, kind)
     evidence_ref = f"{evidence_kind}:{record_id}"
     if kind == "artifacts":
@@ -384,6 +387,10 @@ def render_product_detail(
         content = _action_detail(ctx, record) if record else _not_found("action")
         title = _action_title(record) if record else "Action not found"
         active = "/actions"
+    elif kind == "answers":
+        content = _answer_detail(ctx, record) if record else _not_found("saved answer")
+        title = _truncate(str(record.get("question") or "Saved answer"), 72) if record else "Saved answer not found"
+        active = "/"
     else:
         return 404, _page(root, "Not found", "/", _not_found("record"), ctx, "")
     status = 200 if record else 404
@@ -430,6 +437,11 @@ def _build_context(
         if "memory" in selected_families
         else []
     )
+    answers = (
+        _recent(_safe_records(lambda: store._answer_records(scope), load_errors, "saved answers"))
+        if "answer" in selected_families
+        else []
+    )
     audit_all = (
         _recent(
             [
@@ -471,6 +483,7 @@ def _build_context(
         "claims": claims,
         "actions": actions,
         "memories": memories,
+        "answers": answers,
         "audit": audit,
         "audit_all": audit_all,
         "audit_integrity": audit_integrity,
@@ -876,7 +889,7 @@ def _brief_label_state(record: dict[str, Any]) -> tuple[str, str]:
 
 def _brief_citation_refs(record: dict[str, Any]) -> list[str]:
     refs: list[str] = []
-    for key in ("key_point_citations", "recommended_next_step_citations"):
+    for key in ("load_bearing_statements", "key_point_citations", "recommended_next_step_citations"):
         rows = record.get(key)
         if not isinstance(rows, list):
             continue
@@ -1419,8 +1432,35 @@ def _home(ctx: dict[str, Any]) -> str:
         for item in ctx["suggestions"]
     )
     recent = _recent_items_block(ctx)
+    recent_questions = _recent_questions_block(ctx)
     activity = _recent_activity_block(ctx) if ctx.get("audit") else ""
     layout_class = "cs-home-layout has-activity" if activity else "cs-home-layout"
+    source_choices = []
+    for artifact in ctx.get("artifacts", [])[:5]:
+        artifact_id = str(artifact.get("artifact_id") or "")
+        if not artifact_id:
+            continue
+        presentation = _artifact_state(ctx, artifact)
+        if (
+            presentation.get("state") != "searchable"
+            or int(artifact.get("original_size_bytes") or 0) > VS5_DECISION_SOURCE_MAX_BYTES
+        ):
+            continue
+        source_choices.append(
+            f'''<label class="cs-source-choice">
+  <input type="checkbox" value="{h(artifact_id)}" data-decision-source checked>
+  <span><strong>{h(_artifact_title(artifact))}</strong><small>{h(presentation["label"])} · {h(_display_date(artifact))}</small></span>
+</label>'''
+        )
+    source_set = (
+        f'''<fieldset class="cs-source-set">
+  <legend>Sources for this decision</legend>
+  <p class="cs-muted">Choose one to five saved sources. CornerStone will stay inside this boundary.</p>
+  <div class="cs-source-choice-list">{"".join(source_choices)}</div>
+</fieldset>'''
+        if source_choices
+        else '''<div class="cs-empty cs-source-set-empty"><strong>Save a source first</strong><p>Paste or upload a plain-text source before asking for a decision Brief.</p></div>'''
+    )
     return f"""
 <section class="cs-home-intro" data-product-surface="home">
   <div class="{layout_class}">
@@ -1453,6 +1493,7 @@ def _home(ctx: dict[str, Any]) -> str:
         </form>
         <div class="cs-or-divider">or ask a question</div>
         <form class="cs-stack" id="cs-ask-form">
+          {source_set}
           <div class="cs-ask-bar" role="group" aria-label="Ask the workspace">
             <span class="cs-ask-mark">{icon("chat")}</span>
             <div>
@@ -1468,10 +1509,55 @@ def _home(ctx: dict[str, Any]) -> str:
         </form>
       </div>
       </section>
+      {recent_questions}
       {recent}
     </div>
     {f'<aside class="cs-stack cs-home-activity">{activity}</aside>' if activity else ''}
   </div>
+</section>
+"""
+
+
+def _answer_label(record: dict[str, Any]) -> tuple[str, str]:
+    label = str(record.get("trust_label") or record.get("label") or "draft").lower()
+    if label == "evidence_backed":
+        return "Source-backed answer", "evidenceBacked"
+    if label == "insufficient_evidence":
+        return "Insufficient evidence", "insufficientEvidence"
+    if label == "extractive_fallback":
+        return "Extractive fallback", "underReview"
+    return "Draft answer", "draft"
+
+
+def _recent_questions_block(ctx: dict[str, Any]) -> str:
+    answers = [record for record in ctx.get("answers", []) if record.get("answer_id")][:5]
+    if not answers:
+        return """
+<section class="cs-panel flat cs-question-history" aria-labelledby="recent-questions-title">
+  <div class="cs-panel-header"><div><h2 id="recent-questions-title">Recent questions</h2><p class="cs-muted">Questions and answers are saved here with their source context.</p></div></div>
+  <div class="cs-empty">No saved answers yet. Ask a question after selecting one to five sources.</div>
+</section>
+"""
+    rows = []
+    for answer in answers:
+        label, state = _answer_label(answer)
+        rows.append(
+            f"""
+<a class="cs-question-history-row" href="{h(_detail_href('answers', answer.get('answer_id')))}">
+  <span class="cs-question-history-mark">{icon("chat")}</span>
+  <span class="cs-question-history-copy">
+    <strong>{h(_truncate(str(answer.get("question") or "Saved question"), 120))}</strong>
+    <span>{h(_truncate(str(answer.get("answer") or "No answer text was saved."), 180))}</span>
+    <small>{h(_display_date(answer))} · Reopen answer and sources</small>
+  </span>
+  {_chip(label, state)}
+</a>
+"""
+        )
+    return f"""
+<section class="cs-panel flat cs-question-history" aria-labelledby="recent-questions-title">
+  <div class="cs-panel-header"><div><h2 id="recent-questions-title">Recent questions</h2><p class="cs-muted">Every Ask answer remains connected to its saved sources and audit trail.</p></div><a class="cs-meta" href="/audit">View all activity</a></div>
+  <div class="cs-question-history-list">{"".join(rows)}</div>
 </section>
 """
 
@@ -3573,11 +3659,84 @@ def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
 """
 
 
+def _answer_detail(ctx: dict[str, Any], answer: dict[str, Any]) -> str:
+    answer_id = str(answer.get("answer_id") or "")
+    question = str(answer.get("question") or "Saved question")
+    answer_text = str(answer.get("answer") or "No answer text was saved.")
+    label, state = _answer_label(answer)
+    source_items = _source_items(ctx, answer)
+    source_list = _source_links_from_items(source_items)
+    citation_refs = [str(ref) for ref in answer.get("citation_refs", []) if isinstance(ref, str)]
+    citation_rows = []
+    store = ctx.get("store")
+    scope = ctx.get("scope") if isinstance(ctx.get("scope"), dict) else {}
+    artifact_by_id = {
+        str(record.get("artifact_id") or ""): record
+        for record in ctx.get("artifacts", [])
+        if isinstance(record, dict)
+    }
+    for ref in citation_refs:
+        if not ref.startswith("evidence_chunk:") or store is None:
+            continue
+        chunk = store.get_evidence_chunk(ref.split(":", 1)[1])
+        if not isinstance(chunk, dict) or chunk.get("scope") != scope:
+            continue
+        artifact_id = str(chunk.get("artifact_id") or "")
+        artifact = artifact_by_id.get(artifact_id)
+        source_title = _artifact_title(artifact) if artifact else "Saved source"
+        span = _format_span(chunk.get("span"))
+        citation_rows.append(
+            f"""
+<article class="cs-answer-citation">
+  <div class="cs-panel-header"><div><strong>{h(source_title)}</strong><p class="cs-meta">Exact supporting excerpt · span {h(span)}</p></div>{_chip("Source excerpt", "searchable")}</div>
+  <blockquote>{h(str(chunk.get("text") or ""))}</blockquote>
+  {f'<a class="cs-button secondary" href="/artifacts/{h(artifact_id)}">Open full source</a>' if artifact_id else ''}
+</article>
+"""
+        )
+    if not citation_rows:
+        citation_rows.append(
+            '<div class="cs-empty">No exact citation excerpt is available for this saved answer. Review the linked sources before relying on it.</div>'
+        )
+    audit_refs = [str(ref) for ref in answer.get("audit_refs", []) if isinstance(ref, str)]
+    activity = _record_activity_panel(ctx, "conversation_answer", answer_id, audit_refs)
+    presented_as_fact = answer.get("presented_as_fact") is True
+    return f"""
+<section class="cs-brief-workbench cs-answer-history-detail" data-product-surface="answer-history-detail" data-answer-id="{h(answer_id)}">
+  <div class="cs-stack">
+    <header class="cs-brief-titlebar">
+      <nav class="cs-brief-breadcrumb" aria-label="Detail path"><a href="/">Home</a><span aria-hidden="true">/</span><span>Saved answer</span></nav>
+      <div class="cs-brief-heading-row"><h1>{h(_truncate(question, 140))}</h1>{_chip(label, state)}</div>
+      <p class="cs-muted">This question and answer were saved together. Reopen the supporting excerpts before using the answer in a decision.</p>
+      <div class="cs-brief-meta"><span>{h(_display_date(answer))}</span><span>{h(str(len(source_items)))} linked source{"s" if len(source_items) != 1 else ""}</span><span>{h(str(len(citation_refs)))} citation ref{"s" if len(citation_refs) != 1 else ""}</span></div>
+    </header>
+    <section class="cs-brief-answer-panel" aria-labelledby="saved-answer-title">
+      <div class="cs-brief-answer-head"><div><div class="cs-kicker">Question</div><p class="cs-brief-question">{h(question)}</p><h2 id="saved-answer-title">Saved answer</h2></div>{_chip(label, state)}</div>
+      <p class="cs-brief-answer-text">{h(answer_text)}</p>
+      <p class="cs-meta">Presented as fact: {"Yes — deterministic source checks passed" if presented_as_fact else "No — review or additional evidence is required"}</p>
+    </section>
+    <section class="cs-panel" aria-labelledby="answer-citations-title">
+      <div class="cs-panel-header"><div><h2 id="answer-citations-title">Supporting excerpts</h2><p class="cs-muted">Exact retrieved text used by the saved answer.</p></div></div>
+      <div class="cs-stack">{"".join(citation_rows)}</div>
+    </section>
+  </div>
+  <aside class="cs-stack">
+    <section class="cs-artifact-side-card"><div class="cs-panel-header"><h2>Sources used</h2>{_chip(str(len(source_items)), "searchable")}</div>{source_list}</section>
+    <section class="cs-artifact-side-card"><h2 class="cs-section-title">Continue</h2><a class="cs-button secondary" href="/">Ask another question</a><a class="cs-button secondary" href="/audit?record=conversation_answer:{h(answer_id)}">Open answer history</a><p class="cs-muted">Reopening a saved answer does not regenerate it or change its trust state.</p></section>
+    {activity}
+  </aside>
+</section>
+"""
+
+
 def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     label, state = _brief_label(brief)
     summary = str(brief.get("summary") or "")
     key_points = [str(item) for item in brief.get("key_points", []) if isinstance(item, str)]
     findings = [str(item) for item in brief.get("findings", []) if isinstance(item, str)]
+    conflicts = [str(item) for item in brief.get("conflicts_risks", []) if isinstance(item, str)]
+    if not conflicts:
+        conflicts = [str(item) for item in brief.get("contradictions", []) if isinstance(item, str)]
     gaps = [_plain_runtime_text(item) for item in brief.get("gaps", []) if isinstance(item, str)]
     gaps.extend(_plain_runtime_text(item) for item in brief.get("uncertainty", []) if isinstance(item, str))
     gaps = gaps or ["Check the linked sources before treating this as decision-ready."]
@@ -3585,6 +3744,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     source_list = _source_links_from_items(source_items)
     point_rows = _statement_rows(brief, key_points, source_items)
     finding_rows = _statement_rows(brief, findings, source_items, offset=len(key_points))
+    conflict_rows = _statement_rows(brief, conflicts, source_items, offset=len(key_points) + len(findings))
     gap_rows = "".join(f"<li>{h(point)}</li>" for point in gaps[:8])
     next_steps = [_plain_runtime_text(item) for item in brief.get("recommended_next_steps", []) if isinstance(item, str)]
     next_rows = "".join(f"<li>{h(item)}</li>" for item in next_steps[:4]) or "<li>Review the visible sources before requesting review.</li>"
@@ -3609,8 +3769,19 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         else "Unsupported or unresolved citation work remains; use this as a draft until source spans are checked."
     )
     summary_text = summary or (key_points[0] if key_points else "No summary text was drafted yet. Use the findings and source snippets below before requesting review.")
+    decision_question = str(brief.get("decision_question") or brief.get("evidence_bundle", {}).get("query") or "What matters for this decision?")
+    load_bearing_rows = brief.get("load_bearing_statements") if isinstance(brief.get("load_bearing_statements"), list) else []
+    bottom_line_refs = next(
+        (
+            [str(ref) for ref in row.get("citation_refs", []) if isinstance(ref, str)]
+            for row in load_bearing_rows
+            if isinstance(row, dict) and row.get("section") == "bottom_line"
+        ),
+        [],
+    )
+    bottom_line_citations = _citation_disclosure_for_refs(bottom_line_refs, source_items, brief)
     brief_id = str(brief.get("brief_id") or "")
-    claim_statement = next((value for value in [*key_points, *findings, summary_text] if value.strip()), "")
+    claim_statement = next((value for value in [summary_text, *key_points, *findings] if value.strip()), "")
     can_create_claim = bool(brief_id and _evidence_bundle_id(brief) and claim_statement)
     related_work = _brief_related_work(ctx, brief)
     activity = _record_activity_panel(
@@ -3644,7 +3815,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
           <h1>{h(brief_title)}</h1>
           {_chip(label, state)}
         </div>
-        <p class="cs-muted">Read the answer, citation trail, and uncertainty together before using this brief for a decision.</p>
+        <p class="cs-muted">Read the bottom line, source support, conflicts, and missing evidence together before making a decision.</p>
         <div class="cs-brief-meta">
           <span>{h(_display_date(brief))}</span>
           <span>{h(str(source_count))} visible source{"s" if source_count != 1 else ""}</span>
@@ -3659,12 +3830,14 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     <section class="cs-brief-answer-panel" aria-labelledby="brief-answer-title">
       <div class="cs-brief-answer-head">
         <div>
-          <div class="cs-kicker">Brief answer</div>
-          <h2 id="brief-answer-title">What we know</h2>
+          <div class="cs-kicker">Decision question</div>
+          <p class="cs-brief-question">{h(decision_question)}</p>
+          <h2 id="brief-answer-title">Bottom line</h2>
         </div>
         {check_chip}
       </div>
       <p class="cs-brief-answer-text">{h(summary_text)}</p>
+      <div class="cs-citation-rail" aria-label="Citation disclosure for bottom line">{bottom_line_citations or _chip("Needs source check", "underReview")}</div>
       <div class="cs-brief-answer-meta" aria-label="Brief status">
         <span><strong>{h(decision_snapshot)}</strong> decision state</span>
         <span><strong>{h(source_count)}</strong> visible source{"s" if source_count != 1 else ""}</span>
@@ -3674,7 +3847,7 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     <section class="cs-panel">
       <div class="cs-panel-header">
         <div>
-          <h2>Findings with citations</h2>
+          <h2>Key facts</h2>
           <p class="cs-muted">Each load-bearing statement stays close to the source that supports it.</p>
         </div>
         {_chip("Source coverage", "searchable")}
@@ -3682,13 +3855,17 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
       {point_rows}
       {f'<h2 class="cs-section-title">More findings</h2>{finding_rows}' if findings else ''}
     </section>
+    <section class="cs-panel">
+      <div class="cs-panel-header"><div><h2>Conflicts and risks</h2><p class="cs-muted">Differences, dependencies, and unresolved risk that could change the decision.</p></div>{_chip("Decision risk", "underReview")}</div>
+      {conflict_rows if conflicts else '<div class="cs-empty">No conflict or risk was identified in the selected sources.</div>'}
+    </section>
     <div class="cs-brief-note-grid">
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>What this brief cannot confirm</h2>{_chip("Needs source check", "underReview")}</div>
+        <div class="cs-panel-header"><h2>Missing evidence</h2>{_chip("Needs source check", "underReview")}</div>
         <ul class="cs-brief-note-list">{gap_rows}</ul>
       </section>
       <section class="cs-panel">
-        <div class="cs-panel-header"><h2>Suggested next steps</h2>{_chip("Draft only", "draft")}</div>
+        <div class="cs-panel-header"><h2>Recommended next step</h2>{_chip("Recommendation", "draft")}</div>
         <ul class="cs-brief-note-list">{next_rows}</ul>
       </section>
     </div>
@@ -3717,11 +3894,11 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     <section class="cs-artifact-side-card">
       <h2 class="cs-section-title">Continue to a decision</h2>
       <div class="cs-review-box">
-        {f'<button class="cs-button" type="button" id="cs-create-claim-button" data-brief-id="{h(brief_id)}" data-statement="{h(claim_statement)}">Draft Claim from finding</button>' if can_create_claim else '<p class="cs-muted">A Claim can be drafted after this Brief has a source-linked finding.</p>'}
+        {f'<button class="cs-button" type="button" id="cs-create-claim-button" data-brief-id="{h(brief_id)}" data-statement="{h(claim_statement)}">Save as Decision draft</button>' if can_create_claim else '<p class="cs-muted">A Decision draft can be saved after this Brief has a source-linked finding.</p>'}
         <a class="cs-button secondary" href="/audit?record=brief:{h(brief_id)}">Open Brief history</a>
       </div>
-      <div id="cs-claim-create-status" class="cs-status is-idle" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden>No Claim candidate created yet.</div>
-      <p class="cs-muted">Use this as a draft until each important statement is matched to a source span.</p>
+      <div id="cs-claim-create-status" class="cs-status is-idle" data-state="idle" role="status" aria-live="polite" aria-atomic="true" hidden>No Decision draft saved yet.</div>
+      <p class="cs-muted">A Decision draft preserves the source links. It does not approve shared truth or authorize an action.</p>
     </section>
     {activity}
   </aside>
@@ -4348,7 +4525,9 @@ def _source_card(item: dict[str, str]) -> str:
 def _statement_rows(record: dict[str, Any], statements: list[str], source_items: list[dict[str, str]], offset: int = 0) -> str:
     if not statements:
         return '<div class="cs-empty">No findings were drafted yet.</div>'
-    citation_rows = record.get("key_point_citations")
+    citation_rows = record.get("load_bearing_statements")
+    if not isinstance(citation_rows, list):
+        citation_rows = record.get("key_point_citations")
     citation_map: dict[str, list[str]] = {}
     if isinstance(citation_rows, list):
         for row in citation_rows:
@@ -4403,8 +4582,8 @@ def _citation_ref_kind(ref: str) -> str:
 
 def _format_span(span: Any) -> str:
     if isinstance(span, dict):
-        start = span.get("start")
-        end = span.get("end")
+        start = span.get("char_start", span.get("start"))
+        end = span.get("char_end", span.get("end"))
         if start is not None and end is not None:
             return f"{start}-{end}"
     if isinstance(span, (list, tuple)) and len(span) >= 2:
@@ -4551,11 +4730,12 @@ def _source_items_from_refs(
             ctx.get("load_errors") if isinstance(ctx.get("load_errors"), list) else None,
             "source preview",
         )
+        display_artifact = artifact if artifact.get("_preview") else {**artifact, "_preview": preview}
         items.append(
             {
                 "ref": ref,
                 "label": f"Source {index}",
-                "title": _artifact_title(artifact),
+                "title": _artifact_title(display_artifact),
                 "snippet": snippets.get(ref) or preview or "Open source.",
                 "href": _detail_href("artifacts", artifact_id),
                 "date": _display_date(artifact),
@@ -4956,17 +5136,17 @@ def _home_script(scope: dict[str, Any]) -> str:
       const briefId = claimButton.getAttribute("data-brief-id") || "";
       const statement = claimButton.getAttribute("data-statement") || "";
       if (!briefId || !statement) {
-        setStatus(claimStatus, "This Brief needs a supported finding before a Claim can be drafted.", "error");
+        setStatus(claimStatus, "This Brief needs a supported finding before a Decision draft can be saved.", "error");
         return;
       }
       claimButton.disabled = true;
-      setStatus(claimStatus, "Drafting Claim candidate...", "loading");
+      setStatus(claimStatus, "Saving Decision draft with its sources...", "loading");
       try {
         const created = await postJson("/claims", {brief_id: briefId, statement});
         const claim = created.claim || {};
         const claimId = claim["claim" + "_id"];
-        if (!claimId) throw new Error("Claim candidate was not saved.");
-        setStatus(claimStatus, "Claim candidate saved. Opening draft...", "success");
+        if (!claimId) throw new Error("Decision draft was not saved.");
+        setStatus(claimStatus, "Decision draft saved. Opening draft...", "success");
         window.location.href = scopedUrl("/claims/" + encodeURIComponent(claimId) + "?view=html");
       } catch (error) {
         setStatus(claimStatus, error.message, "error");
@@ -5041,6 +5221,11 @@ def _home_script(scope: dict[str, Any]) -> str:
         setStatus(askStatus, "Enter a question first.", "error");
         return;
       }
+      const sourceIds = Array.from(document.querySelectorAll("[data-decision-source]:checked")).map(node => node.value).filter(Boolean);
+      if (sourceIds.length < 1 || sourceIds.length > 5) {
+        setStatus(askStatus, "Select one to five saved sources for this decision.", "error");
+        return;
+      }
       setBusy(askForm, askButton, true, "Checking", "Ask");
       try {
         setStatus(askStatus, "Checking saved sources...", "loading");
@@ -5048,7 +5233,7 @@ def _home_script(scope: dict[str, Any]) -> str:
         const conversation = started.conversation || {};
         const id = conversation["conversation" + "_id"];
         if (!id) throw new Error("Conversation was not saved.");
-        const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question});
+        const answered = await postJson("/conversations/" + encodeURIComponent(id) + "/answers", {question, artifact_ids: sourceIds});
         const answer = answered.answer || {};
         const sourceSnapshot = answered.search_snapshot || {};
         const text = answer.answer || "Draft answer saved. Open the linked sources before using it.";
@@ -5058,14 +5243,15 @@ def _home_script(scope: dict[str, Any]) -> str:
           return;
         }
         if (Number(sourceSnapshot.result_count || 0) > 0 && sourceSnapshot.search_snapshot_id) {
-          setStatus(askStatus, "Preparing a source-linked fallback Brief...", "loading");
+          setStatus(askStatus, "Synthesizing a decision Brief from the selected sources...", "loading");
           const bundled = await postJson("/evidence-bundles", {search_snapshot_id: sourceSnapshot.search_snapshot_id});
           const bundle = bundled.evidence_bundle || {};
           if (!bundle.evidence_bundle_id) throw new Error("Supporting evidence was not saved.");
           const prepared = await postJson("/briefs", {evidence_bundle_id: bundle.evidence_bundle_id});
           const brief = prepared.brief || {};
           if (!brief.brief_id) throw new Error("Brief draft was not saved.");
-          setStatus(askStatus, "Keyword-summary Brief prepared. Opening draft...", "success");
+          const briefMode = brief.output_mode === "ollama_generated" ? "Decision Brief ready." : "Extractive fallback prepared.";
+          setStatus(askStatus, briefMode + " Opening source-linked draft...", "success");
           window.location.href = scopedUrl("/briefs/" + encodeURIComponent(brief.brief_id) + "?view=html");
           return;
         }

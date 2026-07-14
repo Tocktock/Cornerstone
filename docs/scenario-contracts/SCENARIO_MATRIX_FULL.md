@@ -1,8 +1,8 @@
 # CornerStone Full Scenario Matrix
 
-Generated from `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md`.
+Generated from `docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md` plus the Plane 2 acceptance rows in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`.
 
-Total parsed scenario IDs: **206**.
+Total parsed scenario IDs: **216**.
 
 | Area | Count |
 |---|---:|
@@ -19,6 +19,7 @@ Total parsed scenario IDs: **206**.
 | CS-EXT | 16 |
 | CS-SEC | 20 |
 | CS-REG | 20 |
+| CS-VAL | 10 |
 
 | ID | Type | Title | Section |
 |---|---|---|---|
@@ -228,3 +229,13 @@ Total parsed scenario IDs: **206**.
 | CS-REG-018 | REGRESSION_GUARD | Security defaults must remain conservative | 16. Long-Term Regression Guard Scenarios |
 | CS-REG-019 | REGRESSION_GUARD | UX must not expose internal repo split as product model | 16. Long-Term Regression Guard Scenarios |
 | CS-REG-020 | REGRESSION_GUARD | Scenario verification must remain the release standard | 16. Long-Term Regression Guard Scenarios |
+| CS-VAL-001 | MUST_PASS | Every load-bearing brief statement carries a resolvable citation | 3. Product Value Acceptance Scenarios |
+| CS-VAL-002 | MUST_PASS | Zero fabricated citations | 3. Product Value Acceptance Scenarios |
+| CS-VAL-003 | MUST_PASS | Brief statements are faithful to their cited spans | 3. Product Value Acceptance Scenarios |
+| CS-VAL-004 | MUST_PASS | Brief synthesizes beyond extraction | 3. Product Value Acceptance Scenarios |
+| CS-VAL-005 | MUST_PASS | Uncertainty and gaps are input-specific, not boilerplate | 3. Product Value Acceptance Scenarios |
+| CS-VAL-006 | MUST_PASS | Trust labels are earned, never decorative | 3. Product Value Acceptance Scenarios |
+| CS-VAL-007 | MUST_PASS | Ask answers the question or honestly declines | 3. Product Value Acceptance Scenarios |
+| CS-VAL-008 | MUST_PASS | An unfamiliar user reaches a traceable brief in 10 minutes | 3. Product Value Acceptance Scenarios |
+| CS-VAL-009 | MUST_PASS | External users trust the brief and would use it | 3. Product Value Acceptance Scenarios |
+| CS-VAL-010 | REGRESSION_GUARD | No claim above earned verdict anywhere in active docs or reports | 3. Product Value Acceptance Scenarios |

@@ -1,0 +1,13 @@
+{
+  "schema_version": "cs.vs5_ask_review.v1",
+  "status": "HUMAN_REQUIRED",
+  "reviewed_at": null,
+  "reviewer": {"name": null, "role": null, "is_owner": null},
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
+  "prompt_retrieval_revision": "e431eb12586c7e602f27fd0aa4b0e321f64d6356f5eea0db0cc0cbd7ab78e038",
+  "minimum_case_count": 10,
+  "answer_reviews": [],
+  "decision": null,
+  "decision_rule": "ACCEPT only when at least ten current-revision answerable and unanswerable pairs are reviewed; answerable responses directly and faithfully answer from cited evidence, and unanswerable responses plainly decline without adding unsupported facts."
+}

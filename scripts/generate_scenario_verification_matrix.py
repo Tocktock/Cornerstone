@@ -53,6 +53,7 @@ CLASS_BY_PREFIX = {
     "CS-EXT": "D+P+S",
     "CS-SEC": "S+P+D",
     "CS-REG": "D+P+S",
+    "CS-VAL": "M+D+H",
 }
 
 SECURITY_CLASS_OVERRIDES = {
@@ -84,6 +85,8 @@ def class_for(scenario_id: str) -> str:
 
 
 def command_for(scenario_id: str, vs0_ids: set[str]) -> str:
+    if scenario_id.startswith("CS-VAL-"):
+        return "cornerstone scenario verify vs5-citation-grounded-brief --model-provider ollama --json"
     if scenario_id in vs0_ids:
         return (
             "cornerstone scenario verify vs0 "
@@ -91,6 +94,14 @@ def command_for(scenario_id: str, vs0_ids: set[str]) -> str:
             "--model-provider local_test --json"
         )
     return f"cornerstone scenario verify full --scenario {scenario_id} --json"
+
+
+def owner_for(scenario_id: str) -> str:
+    if scenario_id in {"CS-VAL-008", "CS-VAL-009"}:
+        return "Human"
+    if scenario_id in {"CS-VAL-003", "CS-VAL-004", "CS-VAL-005", "CS-VAL-007"}:
+        return "AI+Human"
+    return "AI"
 
 
 def load_existing_rows() -> dict[str, dict[str, str]]:
@@ -114,15 +125,29 @@ def build_rows(existing_rows: dict[str, dict[str, str]] | None = None) -> list[d
             "type": scenario["type"],
             "local_required": "true",
             "verification_class": class_for(scenario_id),
-            "verification_owner": "AI",
+            "verification_owner": owner_for(scenario_id),
             "verification_command": command_for(scenario_id, vs0_ids),
-            "evidence_artifact": f"reports/scenario/{scenario_id.lower()}.json",
+            "evidence_artifact": (
+                "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json"
+                if scenario_id.startswith("CS-VAL-")
+                else f"reports/scenario/{scenario_id.lower()}.json"
+            ),
             "human_required_reason": "",
             "required_human_action": "",
             "expected_human_evidence": "",
             "release_impact": "",
             "status": "NOT_VERIFIED",
         }
+        if row["verification_owner"] in {"Human", "AI+Human"}:
+            row.update(
+                {
+                    "human_required_reason": "Subjective product value or external-user behavior cannot be established by automation alone.",
+                    "required_human_action": "Complete the dated VS5 rubric or external-session record required by the active contract.",
+                    "expected_human_evidence": "A dated reviewer or participant record bound to the frozen corpus and current model stack.",
+                    "release_impact": "Blocks VALUE_VERIFIED_LOCAL or VALUE_VERIFIED_EXTERNAL until accepted.",
+                    "status": "HUMAN_REQUIRED",
+                }
+            )
         existing = (existing_rows or {}).get(scenario_id, {})
         for field in PRESERVED_FIELDS:
             if existing.get(field):

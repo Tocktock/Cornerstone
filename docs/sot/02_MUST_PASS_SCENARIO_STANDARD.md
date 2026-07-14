@@ -97,9 +97,9 @@ This standard is **Plane 1**: it verifies structure, boundaries, records, and sa
 
 1. **Plane 1 evidence alone can support at most the verdict `STRUCTURAL_READY`.** No feature, milestone, or release may claim usefulness, understanding, or product value from Plane 1 evidence.
 2. **Plane 2 — the product value plane — is defined in `docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md`** (CS-VAL-001 – CS-VAL-010: grounding, zero fabricated citations, faithfulness, synthesis-beyond-extraction, honest uncertainty, earned trust labels, direct answers, external comprehension, external trust, overclaim guard). Completion claims about the product spine require both planes.
-3. **CS-VAL rows are canonical acceptance authority now.** They are folded into the generated 206-row matrix at the next registry regeneration (a code change scheduled inside VS5); until then `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` is their authoritative home and this section is the binding pointer.
+3. **CS-VAL rows are canonical acceptance authority now.** They were folded into the generated 216-row matrix during VS5 on 2026-07-12; `05_PRODUCT_VALUE_VERIFICATION_STANDARD.md` remains the authoritative definition and this section is the binding pointer.
 
-**Scenario family activity status.** All 206 scenarios remain the long-term behavior standard. For planning and release gating, families are classified as follows (reclassification requires a dated ADR):
+**Scenario family activity status.** All 216 scenarios remain the long-term behavior standard. For planning and release gating, families are classified as follows (reclassification requires a dated ADR):
 
 | Family | Status | Rationale |
 |---|---|---|

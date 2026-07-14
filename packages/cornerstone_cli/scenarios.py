@@ -74,9 +74,9 @@ from cornerstone_cli.vs2_security import VS2_PROOF_REPORT, run_vs2_local_securit
 from cornerstone_cli.vs2_verification_metadata import build_source_fingerprint, validate_reusable_report
 
 
-FULL_EXPECTED = 206
-FULL_MUST_PASS = 184
-FULL_REGRESSION = 22
+FULL_EXPECTED = 216
+FULL_MUST_PASS = 193
+FULL_REGRESSION = 23
 VS0_EXPECTED = 58
 VS0_MUST_PASS = 52
 VS0_REGRESSION = 6
@@ -18289,7 +18289,7 @@ def verify_vs5_slice_001(
             "S01",
             "MUST_PASS",
             "PASS" if s01_ok else "FAIL",
-            ["cornerstone brief create --evidence-bundle-id <id> --model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b --json"],
+            [f"cornerstone brief create --evidence-bundle-id <id> --model-provider ollama --generation-model {generation_model} --embedding-model {embedding_model} --json"],
             "Brief create accepts the Ollama provider/model flags and returns model-backed JSON when local Ollama is available.",
         ),
         _row(
@@ -38890,7 +38890,7 @@ def verify_vs0_scaffold(root: Path) -> dict[str, Any]:
                 "scripts/verify_cli_native_first_docs.sh",
                 "cornerstone scenario coverage --json",
             ],
-            "Existing 206 full scenarios, 58 VS-0 scenarios, and CLI native-first gate remain wired.",
+            "Existing 216 full scenarios, 58 VS-0 scenarios, and CLI native-first gate remain wired.",
         ),
     ]
 

@@ -45,8 +45,10 @@ API_ROUTES = [
     "GET /artifacts/{artifact_id}",
     "GET /artifacts/{artifact_id}/original",
     "POST /conversations",
+    "GET /conversations/history",
     "POST /conversations/{conversation_id}/answers",
     "POST /conversations/{conversation_id}/promote",
+    "GET /answers/{answer_id}",
     "POST /search",
     "GET /search-snapshots/{snapshot_id}",
     "POST /evidence-bundles",
@@ -5633,6 +5635,12 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
         if len(parts) == 2 and parts[0] == "search-snapshots":
             self._show_search_snapshot(parts[1])
             return
+        if parts == ["conversations", "history"]:
+            self._conversation_history()
+            return
+        if len(parts) == 2 and parts[0] == "answers":
+            self._show_conversation_answer(parts[1])
+            return
         if len(parts) == 2 and parts[0] == "evidence-bundles":
             self._show_evidence_bundle(parts[1])
             return
@@ -6048,6 +6056,92 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             )
         )
 
+    def _conversation_history(self) -> None:
+        scope = self._query_scope()
+        query = self._query()
+        try:
+            limit = int((query.get("limit") or ["50"])[-1])
+        except ValueError:
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_HISTORY_LIMIT_INVALID", "message": "History limit must be an integer."}],
+                ),
+                400,
+            )
+            return
+        result = self.store.list_conversation_answers(scope, limit=limit)
+        answers = result["answers"]
+        refs = [
+            ref
+            for answer in answers
+            for ref in [
+                f"answer:{answer.get('answer_id')}",
+                f"conversation:{answer.get('conversation_id')}",
+                *[str(value) for value in answer.get("evidence_refs", []) if isinstance(value, str)],
+            ]
+            if not ref.endswith(":")
+        ]
+        self._send_json(
+            _json_response(
+                "success",
+                answers=answers,
+                answer_count=len(answers),
+                evidence_refs=list(dict.fromkeys(refs)),
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
+    def _show_conversation_answer(self, answer_id: str) -> None:
+        scope = self._query_scope()
+        result = self.store.read_product_record(
+            "conversation_answer",
+            answer_id,
+            scope,
+            reason="api_conversation_answer_show",
+        )
+        if result.get("status") == "not_found":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_ANSWER_NOT_FOUND", "message": "Saved answer not found."}],
+                ),
+                404,
+            )
+            return
+        if result.get("status") == "scope_denied":
+            self._send_json(
+                _json_response(
+                    "denied",
+                    errors=[{"code": "CS_SCOPE_DENIED", "message": "Saved answer is outside the requested scope."}],
+                ),
+                403,
+            )
+            return
+        if result.get("status"):
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[{"code": "CS_CONVERSATION_ANSWER_INTEGRITY_FAILED", "message": "Saved answer could not be read safely."}],
+                ),
+                409,
+            )
+            return
+        answer = result["record"]
+        refs = [
+            f"answer:{answer_id}",
+            f"conversation:{answer.get('conversation_id')}",
+            *[str(value) for value in answer.get("evidence_refs", []) if isinstance(value, str)],
+        ]
+        self._send_json(
+            _json_response(
+                "success",
+                answer=answer,
+                evidence_refs=[ref for ref in dict.fromkeys(refs) if not ref.endswith(":")],
+                audit_refs=[f"audit:{result['audit_event']['event_id']}"],
+            )
+        )
+
     def _show_claim(self, claim_id: str) -> None:
         scope = self._query_scope()
         result = self.store.read_product_record("claim", claim_id, scope, reason="api_claim_show")
@@ -6338,7 +6432,8 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 400,
             )
             return
-        result = self.briefing.answer(conversation_id, question, scope)
+        artifact_ids = [str(value) for value in body.get("artifact_ids", []) if isinstance(value, str) and value]
+        result = self.briefing.answer(conversation_id, question, scope, artifact_ids=artifact_ids)
         if result.get("status") == "not_found":
             self._send_json(_json_response("failed", errors=[{"code": "CS_CONVERSATION_NOT_FOUND", "message": "Conversation not found."}]), 404)
             return
@@ -6346,6 +6441,25 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
             self._send_json(_json_response("denied", errors=[{"code": "CS_SCOPE_DENIED", "message": "Conversation is outside the requested scope."}]), 403)
             return
         if result.get("status"):
+            if result.get("status") in {"input_boundary_exceeded", "source_not_found"}:
+                self._send_json(
+                    _json_response(
+                        "failed",
+                        errors=[
+                            {
+                                "code": "CS_VS5_INPUT_BOUNDARY_EXCEEDED"
+                                if result.get("status") == "input_boundary_exceeded"
+                                else "CS_VS5_SOURCE_NOT_FOUND",
+                                "message": "Select one to five supported sources within the VS5 size boundary."
+                                if result.get("status") == "input_boundary_exceeded"
+                                else "One or more selected sources were not found in the requested scope.",
+                                **{key: result.get(key) for key in ("source_count", "max_source_count", "max_source_bytes", "total_source_bytes", "max_total_source_bytes") if result.get(key) is not None},
+                            }
+                        ],
+                    ),
+                    400 if result.get("status") == "input_boundary_exceeded" else 404,
+                )
+                return
             self._send_json(
                 _json_response(
                     "failed",
@@ -6499,6 +6613,9 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 page_size=page_size,
                 snapshot_id=str(body.get("snapshot_id")) if body.get("snapshot_id") else None,
                 excluded_source_types=frozenset(excluded_source_types),
+                included_artifact_ids=frozenset(
+                    str(value) for value in body.get("artifact_ids", []) if isinstance(value, str) and value
+                ),
             )
         )
         if result.get("status") == "not_found":
@@ -6624,6 +6741,21 @@ class VS0RuntimeHandler(BaseHTTPRequestHandler):
                 _json_response(
                     "failed",
                     errors=[{"code": "CS_BRIEF_EVIDENCE_REQUIRED", "message": "Evidence-backed Brief creation requires at least one evidence item."}],
+                ),
+                400,
+            )
+            return
+        if result.get("status") == "input_boundary_exceeded":
+            self._send_json(
+                _json_response(
+                    "failed",
+                    errors=[
+                        {
+                            "code": "CS_VS5_INPUT_BOUNDARY_EXCEEDED",
+                            "message": "Decision Brief input must contain one to five supported sources within the VS5 size boundary.",
+                            **{key: result.get(key) for key in ("source_count", "max_source_count", "max_source_bytes", "total_source_bytes", "max_total_source_bytes")},
+                        }
+                    ],
                 ),
                 400,
             )

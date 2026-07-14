@@ -1,0 +1,11 @@
+{
+  "schema_version": "cs.vs5_performance_budget.v1",
+  "frozen_at": "2026-07-12",
+  "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
+  "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
+  "pilot_measurements_seconds": {"three_source_brief": 21.727, "three_source_answer": 3.512},
+  "combined_operation_p95_budget_seconds": 35.0,
+  "minimum_full_corpus_sample_count": 50,
+  "refreeze_reason": "The redundant second model generation was removed after deterministic grounded guards covered all frozen gap/conflict cases; the 35-second budget was re-frozen from the resulting ornith:9b pilot with headroom for full-corpus variance.",
+  "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
+}

@@ -16,7 +16,7 @@ This bundle resolves authority:
 
 - The **Product Goal & Direction** document is product authority.
 - The **MUST-PASS Scenario Standard** is acceptance and release authority.
-- The **Full Scenario Matrix** is the generated index for the 206 scenarios.
+- The **Full Scenario Matrix** is the generated index for the 216 scenarios, including the ten CS-VAL Plane 2 rows.
 - The **CLI Native-First Contract** is the no-CLI-no-feature-PASS execution gate.
 - The **Local Verification Plane** defines local scenario verification, fixture corpus, model harness, deterministic validators, CLI-native evidence, and release gating.
 - The **Design System Contract** defines the calm workspace/admin visual direction, tokens, component baseline, and design acceptance scenarios.
@@ -109,8 +109,8 @@ If lower-priority content conflicts with higher-priority content, report the con
 
 | File | Role |
 |---|---|
-| `../scenario-contracts/SCENARIO_MATRIX_FULL.md` | Markdown scenario index, 206 scenarios |
-| `../scenario-contracts/SCENARIO_MATRIX_FULL.csv` | CSV scenario index, 206 scenarios |
+| `../scenario-contracts/SCENARIO_MATRIX_FULL.md` | Markdown scenario index, 216 scenarios |
+| `../scenario-contracts/SCENARIO_MATRIX_FULL.csv` | CSV scenario index, 216 scenarios |
 | `../scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md` | Mandatory no-CLI-no-feature-PASS execution gate |
 | `../scenario-contracts/CLI_FEATURE_PARITY_MATRIX.csv` | Native CLI command coverage by feature family |
 | `../scenario-contracts/LOCAL_VERIFICATION_PLANE_V0.md` | Local verification plane for scenario registry, fixture corpus, model harness, validators, transcripts, and gates |
@@ -198,7 +198,7 @@ Active now:
 - Scenario verification before release claims — **both planes: structural (Plane 1) and product value (Plane 2); Plane 1 alone supports at most `STRUCTURAL_READY`.**
 - CLI-native-first for every product feature: no verified native `cornerstone ...` command path means no feature PASS.
 - Local verification: deterministic validators own structural PASS; LLM judges are advisory only and never flip a row; humans own subjective quality PASS.
-- Local-first model stack: Ollama `ornith:35b` (generation) and `qwen3-embedding:0.6b` (embeddings) are the default assumption; external providers optional and named per-scenario.
+- Local-first model stack: Ollama `ornith:9b` (generation) and `qwen3-embedding:0.6b` (embeddings) are the default assumption; `ornith:35b` is opt-in for explicitly named larger-model tests; external providers are optional and named per-scenario.
 - Calm workspace design: light-first, evidence-aware, safe-action UI; no dark command-center or admin-first default; internal tokens never as user-facing copy.
 
 Preserved direction, dormant until user-evidence pull (ADR-0007; disposition in VS7):
@@ -226,7 +226,7 @@ The historical VS0 implementation slice was:
 
 The full long-term scenario suite remains authoritative, but VS0 froze the first structural slice. Every VS0 feature also had to be operable through the native `cornerstone ...` CLI path and verified with CLI transcript evidence.
 
-The task-scoped runtime scenario contract after the completed local deterministic scaffold proof is `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`. It contains 14 `VS0-RT-*` rows for a runnable local product runtime with CLI, API, and minimal UI parity. It does not change the canonical 206-scenario count or mark production readiness PASS.
+The task-scoped runtime scenario contract after the completed local deterministic scaffold proof is `../scenario-contracts/VS0_PRODUCT_RUNTIME_READINESS_CONTRACT.md`. It contains 14 `VS0-RT-*` rows for a runnable local product runtime with CLI, API, and minimal UI parity. It did not change the then-current 206-scenario count and does not mark production readiness PASS; the current matrix is 216 after the VS5 CS-VAL fold-in.
 
 The historical local acceptance task-scoped scenario contract is `../scenario-contracts/VS0_RUNTIME_ACCEPTANCE_AND_HARDENING_CONTRACT.md`. It contains 9 `VS0-ACC-*` rows for real browser proof, readiness evidence semantics, connector-call wording, quickstart repeatability, release evidence packaging, and overclaim regression guards. The contract is status-neutral; the local deterministic report passes 7 AI-verifiable rows and keeps 2 human-only rows as `HUMAN_REQUIRED`.
 

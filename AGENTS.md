@@ -6,7 +6,7 @@
 
 ## The One-Paragraph Orientation (read this first)
 
-The active product spine is `Drop / Ask -> Evidence-backed Brief -> Decision -> Audit`. The structural substrate (artifacts, evidence, audit, UI/CLI) is verified; the intelligence layer does not exist yet and is the active build (VS5: model-backed, citation-grounded Brief/Ask on local Ollama `ornith:35b` + `qwen3-embedding:0.6b`). Work that does not serve the spine, the active milestone contract, or an explicit user request is out of scope. **Scope freeze:** do not create new scenario contracts, verification report families, trace counters, or CLI command families outside the spine until VS5 closes. Do not expand dormant systems (ConnectorHub, VS2/VS3, brain routing, agents, ontology, autopilot, capsules, packs, memory promotion). Optimizing internal PASS counts is not progress; the success metric is Plane 2 evidence in front of external users.
+The active product spine is `Drop / Ask -> Evidence-backed Brief -> Decision -> Audit`. The structural substrate (artifacts, evidence, audit, UI/CLI) is verified; the intelligence layer does not exist yet and is the active build (VS5: model-backed, citation-grounded Brief/Ask on local Ollama `ornith:9b` + `qwen3-embedding:0.6b`). Work that does not serve the spine, the active milestone contract, or an explicit user request is out of scope. **Scope freeze:** do not create new scenario contracts, verification report families, trace counters, or CLI command families outside the spine until VS5 closes. Do not expand dormant systems (ConnectorHub, VS2/VS3, brain routing, agents, ontology, autopilot, capsules, packs, memory promotion). Optimizing internal PASS counts is not progress; the success metric is Plane 2 evidence in front of external users.
 
 ## Product Authority
 
@@ -91,7 +91,7 @@ Plane 1 — structural (deterministic):
 
 Plane 2 — product value (required for any value claim):
 
-- Model stack for quality runs: local Ollama `ornith:35b` (generation) and `qwen3-embedding:0.6b` (embeddings). Do not assume external providers; name them per-scenario if genuinely needed.
+- Model stack for local quality runs: local Ollama `ornith:9b` (generation) and `qwen3-embedding:0.6b` (embeddings). Use `ornith:35b` only when a specific comparison or test explicitly requires the larger model. Do not assume external providers; name them per-scenario if genuinely needed.
 - Deterministic citation-integrity checks (resolution, span-in-source, echo/boilerplate guards, label audits) own the mechanical part of quality PASS.
 - LLM-as-judge output is **advisory metadata only** — it never flips a row to PASS. Humans own subjective quality PASS with dated rubric records.
 - External-user rows require participants who are not JiYong/Tars; owner walkthroughs or browser proofs cannot satisfy them.

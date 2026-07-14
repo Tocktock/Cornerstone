@@ -1,0 +1,93 @@
+{
+  "schema_version": "cs.vs5_owner_rereview_packet.v1",
+  "status": "REVIEW_COMPLETED",
+  "scenario_id": "VS4-H01",
+  "purpose": "Reassess the model-backed Home to Brief to citation to Decision-draft journey after the 2026-07-04 owner rejection.",
+  "claim_boundary": {
+    "packet_is_review_input_only": true,
+    "prior_rejection_remains_current_until_superseded": false,
+    "human_acceptance_claimed": true,
+    "external_sessions_authorized": true,
+    "product_value_claimed": false
+  },
+  "prior_decision": {
+    "decision": "REJECT",
+    "reviewed_at": "2026-07-04T11:34:23Z",
+    "record_path": "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json",
+    "record_sha256": "ac0480d4a0d9e97531a92fa4edbaacaf22ff83f0113e3ff0b25311c6f15c2df7"
+  },
+  "current_decision": {
+    "decision": "APPROVE_WITH_EXCEPTIONS",
+    "reviewed_at": "2026-07-12T09:34:19Z",
+    "reviewer": "JiYong / Tars",
+    "record_path": "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json",
+    "record_sha256": "bedf54bb228ff63d43063104695eee6e987b08a7f169a030ce98d414c123865d",
+    "exception_summary": "Ask and answer records are saved, but the user-facing History experience needs clearer discovery and revisit behavior.",
+    "exception_follow_up": {
+      "status": "IMPLEMENTED_AND_AI_VERIFIED_HUMAN_CONFIRMATION_NOT_RECORDED",
+      "implemented_behavior": "Home shows Recent questions; a saved answer reopens with question, answer, trust state, timestamp, linked sources, exact citation excerpts when available, and audit context; API and conversation CLI history/show paths use the same scoped records.",
+      "automated_evidence": "VS5-ASK-001 saved_history_ui_api_cli_test_exit_code=0",
+      "browser_evidence_path": "output/playwright/vs5-ask-history-2026-07-12/"
+    }
+  },
+  "current_revision": {
+    "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+    "pipeline_sha256": "ce1e5b4bf03717a076708b5068881eb01f3320c245ae2f06b4d7499fd2d4ec6a",
+    "model_stack": {
+      "provider": "ollama",
+      "generation_model": "ornith:9b",
+      "embedding_model": "qwen3-embedding:0.6b"
+    },
+    "scenario_report": {
+      "path": "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
+      "sha256": "2d1e24352d18d49a962d7de2c4b0e5c2c2cf44715ff6e18fdb202aaa4c15b832",
+      "verdict": "AI_VERIFIABLE_READY_HUMAN_GATES_PENDING",
+      "automated_summary": "13 PASS, 0 FAIL, 6 HUMAN_REQUIRED, 25/25 Brief and Ask guards, saved History UI/API/CLI proof passed, p95 31.458 seconds"
+    },
+    "browser_proof": {
+      "manifest_path": "output/playwright/vs5-first-defensible-decision-brief-2026-07-12/manifest.json",
+      "manifest_sha256": "2c791637b3af2bdbcb246271a5dbe74623c774b4e50b39b408b5933ca15aa091",
+      "brief_id": "brief_4e47a11126b67991",
+      "decision_draft_id": "claim_250b3174b17ca529",
+      "revision_note": "Historical UI proof retained from the owner review; current model-quality evidence is the separately hash-bound scenario report and refreshed human-review inputs."
+    }
+  },
+  "prior_findings_to_reassess": [
+    {
+      "prior_finding": "The current UI is very complicated for the reviewer.",
+      "current_evidence": "Home screenshot shows a standard workspace shell with a single Drop-or-Ask first-use region, bounded source selector, recent items, and recent activity.",
+      "human_judgment": "ACCEPTED_FOR_ENTRY"
+    },
+    {
+      "prior_finding": "Primary actions such as Drop and Ask are not discoverable enough.",
+      "current_evidence": "Home heading and first region expose Drop a file or paste notes, source selection, and Ask the workspace without opening admin or scenario surfaces.",
+      "human_judgment": "ACCEPTED_FOR_ENTRY"
+    },
+    {
+      "prior_finding": "The reference-guided Home hierarchy and product feel were not followed.",
+      "current_evidence": "The refreshed Home proof contains workspace navigation, prominent source intake and Ask, recent items, and recent activity; visual-direction acceptance remains entirely human.",
+      "human_judgment": "ACCEPTED_FOR_ENTRY"
+    },
+    {
+      "prior_finding": "Implementation complexity appeared before the human product task.",
+      "current_evidence": "Brief proof leads with decision question, bottom line, key facts, conflicts/risks, missing evidence, next step, and sources; technical provenance is progressively disclosed.",
+      "human_judgment": "ACCEPTED_FOR_ENTRY"
+    },
+    {
+      "prior_finding": "The surface was not human-friendly enough for external review.",
+      "current_evidence": "The current journey exposes exact source excerpts and returns to a Decision draft that plainly states approval and action authority are unavailable.",
+      "human_judgment": "ACCEPTED_WITH_HISTORY_EXCEPTION"
+    }
+  ],
+  "review_tasks": [
+    "From Home, identify Drop and Ask without coaching.",
+    "Confirm that selecting one to five sources is understandable and visibly bounds the decision.",
+    "Read the current Acme Brief in order and state its bottom line and uncertainty.",
+    "Open at least one citation and verify the excerpt, surrounding source path, and return path.",
+    "Open the Decision draft and verify that it preserves source lineage without approval or action authority.",
+    "Record APPROVE, APPROVE_WITH_EXCEPTIONS, or REJECT in the rereview template; list every remaining issue or exception."
+  ],
+  "record_template": "reports/human-gates/vs4/record-templates/VS4-H01.rereview-record.template.json",
+  "filled_record_destination": "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json",
+  "validation_command": "cornerstone human-gate validate-record --scope vs4 --scenario VS4-H01 --record-file reports/human-gates/vs4/filled-records/VS4-H01.review-record.json --json"
+}

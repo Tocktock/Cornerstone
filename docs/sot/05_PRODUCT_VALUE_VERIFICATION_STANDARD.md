@@ -4,7 +4,7 @@
 **Owner:** JiYong / Tars
 **Status:** Active acceptance authority for all product-value claims (binding on VS5 and later; retroactively binding on any new value claim about existing surfaces)
 **Decision record:** `docs/adr/ADR-0007-product-value-first-reset.md`
-**Relationship to `02_MUST_PASS_SCENARIO_STANDARD.md`:** The 206-scenario standard remains the long-term behavior authority and the structural release gate (Plane 1). This document adds the second, mandatory verification plane (Plane 2) that structural evidence cannot substitute for.
+**Relationship to `02_MUST_PASS_SCENARIO_STANDARD.md`:** The 216-scenario matrix remains the long-term behavior index and structural release gate (Plane 1). The ten CS-VAL definitions in this document supply the second, mandatory verification plane (Plane 2) that structural evidence cannot substitute for.
 
 ---
 
@@ -34,34 +34,34 @@ No milestone, release note, README, report, or roadmap may use the words "useful
 
 ### 1.2 Model assumptions for Plane 2
 
-- Generation: local Ollama **`ornith:35b`** (verified installed 2026-07-04).
+- Generation: local Ollama **`ornith:9b`** (verified installed 2026-07-12). `ornith:35b` is opt-in for explicitly named larger-model comparisons.
 - Embeddings: local Ollama **`qwen3-embedding:0.6b`** (verified installed 2026-07-04).
 - Plane 1 CI baseline remains the deterministic `local_test` provider; Plane 2 quality runs use the local Ollama stack.
 - External model providers (Claude, GPT, Gemini) are optional and future-facing; a scenario that assumes one must name it and mark itself `EXTERNAL_ENVIRONMENT`.
-- LLM-as-judge (including `ornith:35b` judging its own outputs) may produce advisory scores recorded alongside evidence; it may never flip a row to PASS. Humans own subjective PASS; deterministic checks own mechanical PASS.
+- LLM-as-judge (including `ornith:9b` judging its own outputs) may produce advisory scores recorded alongside evidence; it may never flip a row to PASS. Humans own subjective PASS; deterministic checks own mechanical PASS.
 
 ## 2. CS-VAL Scenario Family — Product Value MUST-PASS
 
-Scenario dimensions follow the adaptive standard: **Priority** (MUST_PASS / REGRESSION), **Verification mode** (AUTOMATED / HUMAN_REQUIRED / AUTOMATED+HUMAN), **Current evidence status** (as of 2026-07-04).
+Scenario dimensions follow the adaptive standard: **Priority** (MUST_PASS / REGRESSION), **Verification mode** (AUTOMATED / HUMAN_REQUIRED / AUTOMATED+HUMAN), **Current evidence status** (as of the 2026-07-12 `ornith:9b` frozen-corpus run).
 
-These rows are canonical acceptance authority now. Folding them into the generated 206-row matrix requires a registry code change and is scheduled inside VS5 (see ADR-0007); until then this document is their authoritative home.
+These rows are canonical acceptance authority. They were folded into the generated 216-row matrix during VS5 on 2026-07-12 (see ADR-0007); this document remains their authoritative definition.
 
 ### Scenario index
 
 | ID | Priority | Scenario | Verification mode | Current evidence status |
 |---|---|---|---|---|
-| CS-VAL-001 | MUST_PASS | Every load-bearing brief statement carries a resolvable citation | AUTOMATED | NOT_RUN (no model-backed brief exists) |
-| CS-VAL-002 | MUST_PASS | Zero fabricated citations | AUTOMATED | NOT_RUN |
-| CS-VAL-003 | MUST_PASS | Brief statements are faithful to their cited spans | AUTOMATED (advisory) + HUMAN_REQUIRED | NOT_RUN |
-| CS-VAL-004 | MUST_PASS | Brief synthesizes beyond extraction | AUTOMATED (guard) + HUMAN_REQUIRED | **FAIL** (current brief is an input echo; verified 2026-07-04) |
-| CS-VAL-005 | MUST_PASS | Uncertainty and gaps are input-specific, not boilerplate | AUTOMATED (guard) + HUMAN_REQUIRED | **FAIL** (current uncertainty strings are hardcoded; verified 2026-07-04) |
-| CS-VAL-006 | MUST_PASS | Trust labels are earned, never decorative | AUTOMATED | **FAIL** (canned answers carry `evidence_backed` / `presented_as_fact`; verified 2026-07-04) |
-| CS-VAL-007 | MUST_PASS | Ask answers the question or honestly declines | AUTOMATED (guard) + HUMAN_REQUIRED | **FAIL** (canned non-answer; verified 2026-07-04) |
+| CS-VAL-001 | MUST_PASS | Every load-bearing brief statement carries a resolvable citation | AUTOMATED | **PASS** (25/25 frozen-corpus Briefs; report dated 2026-07-12) |
+| CS-VAL-002 | MUST_PASS | Zero fabricated citations | AUTOMATED | **PASS** (0 fabricated citations; seeded dangling ref rejected) |
+| CS-VAL-003 | MUST_PASS | Brief statements are faithful to their cited spans | AUTOMATED (advisory) + HUMAN_REQUIRED | HUMAN_REQUIRED (10/25 earned automated anchors; ten-Brief human audit not run) |
+| CS-VAL-004 | MUST_PASS | Brief synthesizes beyond extraction | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 passed the echo/title guard; human usefulness review not run) |
+| CS-VAL-005 | MUST_PASS | Uncertainty and gaps are input-specific, not boilerplate | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 planted-gap and conflict checks passed; human spot-check not run) |
+| CS-VAL-006 | MUST_PASS | Trust labels are earned, never decorative | AUTOMATED | **PASS** (0 unearned `evidence_backed`; forced fallback honestly labeled) |
+| CS-VAL-007 | MUST_PASS | Ask answers the question or honestly declines | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 answerable/unanswerable pairs passed; human sample audit not run) |
 | CS-VAL-008 | MUST_PASS | An unfamiliar user reaches a traceable brief in 10 minutes | HUMAN_REQUIRED (external) | NOT_RUN |
 | CS-VAL-009 | MUST_PASS | External users trust the brief and would use it | HUMAN_REQUIRED (external) | NOT_RUN |
-| CS-VAL-010 | REGRESSION | No claim above earned verdict anywhere in active docs/reports | AUTOMATED | NOT_RUN |
+| CS-VAL-010 | REGRESSION | No claim above earned verdict anywhere in active docs/reports | AUTOMATED | **PASS** (active VS5 report verdict is `AI_VERIFIABLE_READY_HUMAN_GATES_PENDING`) |
 
-The four **FAIL** rows are recorded deliberately. They are the honest baseline this standard exists to fix. They must not be reworded, reclassified, or hidden; they flip only with VS5 evidence.
+The four baseline FAIL guards (CS-VAL-004/005/006/007) now have passing automated evidence in the canonical VS5 report. Their human-owned portions remain `HUMAN_REQUIRED`; automated readiness does not establish usefulness or product value.
 
 ### CS-VAL-001 — Every load-bearing brief statement carries a resolvable citation
 
@@ -107,7 +107,7 @@ The four **FAIL** rows are recorded deliberately. They are the honest baseline t
 - **Given** any output (brief, answer, claim suggestion), **then**: `evidence_backed` may appear only when CS-VAL-001/002 checks pass for that specific output; templated, extractive-fallback, or model-unavailable outputs must carry an explicit `extractive_fallback` / `template` label and may never carry `evidence_backed` or `presented_as_fact`; label assignment is recorded in the audit trail with the check refs that earned it.
 - **Verification method:** Deterministic label-audit over eval corpus + forced-fallback runs (model stopped) verifying honest degraded labeling.
 - **PASS evidence:** Label-audit report, including a model-down run showing fallback outputs correctly labeled.
-- **Current status:** FAIL, recorded openly (see index). This row also acts as REGRESSION after first PASS.
+- **Current status:** PASS in the 2026-07-12 automated report; this row now acts as REGRESSION.
 
 ### CS-VAL-007 — Ask answers the question or honestly declines
 
@@ -132,7 +132,7 @@ The four **FAIL** rows are recorded deliberately. They are the honest baseline t
 ### CS-VAL-010 — No claim above earned verdict (overclaim regression)
 
 - **Intent / risk addressed:** The repository's own history shows claim inflation by vocabulary ("Product Alpha ready") on structural evidence.
-- **Given** active docs (README, SoT bundle, active contracts, closure/checkpoint reports), **then** no active document states or implies usefulness, understanding, or product value beyond the current verdict ladder position; `STRUCTURAL_READY` work is labeled as such; the four open CS-VAL FAIL rows remain visible until evidence flips them.
+- **Given** active docs (README, SoT bundle, active contracts, closure/checkpoint reports), **then** no active document states or implies usefulness, understanding, or product value beyond the current verdict ladder position; automated VS5 readiness is labeled separately from the eight open human rows.
 - **Verification method:** Deterministic claim-language scan (forbidden-claim phrase list vs. current verdict) + human review at each milestone close.
 - **PASS evidence:** Claim-scan report per milestone close.
 

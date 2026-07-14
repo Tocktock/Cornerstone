@@ -1,0 +1,19 @@
+{
+  "schema_version": "cs.vs5_corpus_quality_review.v1",
+  "status": "HUMAN_REQUIRED",
+  "reviewed_at": null,
+  "reviewer": {
+    "name": null,
+    "role": null,
+    "is_owner": null
+  },
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "case_count": 25,
+  "target_cohort_fit": null,
+  "domain_specific_and_non_generic": null,
+  "messy_input_is_realistic": null,
+  "multi_source_conflict_gap_coverage_is_representative": null,
+  "review_note": null,
+  "decision": null,
+  "decision_rule": "ACCEPT only when the reviewer confirms the frozen 25-case corpus is realistic for the VS5 decision-owner cohort, domain-specific enough to resist generic guessing, and representative of multi-source facts, conflicts, gaps, and answerable/unanswerable questions."
+}

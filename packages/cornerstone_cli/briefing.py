@@ -13,6 +13,9 @@ from cornerstone_cli.runtime import (
     DEFAULT_MODEL_PROVIDER,
     DEFAULT_OLLAMA_BASE_URL,
     LocalRuntimeStore,
+    VS5_MAX_SOURCE_BYTES,
+    VS5_MAX_SOURCE_COUNT,
+    VS5_MAX_TOTAL_SOURCE_BYTES,
 )
 
 
@@ -86,12 +89,38 @@ class BriefingApplication:
             **self.model_config.store_kwargs(),
         )
 
-    def answer(self, conversation_id: str, question: str, scope: dict[str, str]) -> dict[str, Any]:
+    def answer(
+        self,
+        conversation_id: str,
+        question: str,
+        scope: dict[str, str],
+        *,
+        artifact_ids: list[str] | None = None,
+    ) -> dict[str, Any]:
         conversation = self.store.get_conversation(conversation_id)
         if conversation is None:
             return {"status": "not_found", "resource": "conversation"}
         if conversation.get("scope") != scope:
             return {"status": "scope_denied", "resource_scope": conversation.get("scope")}
+        selected_artifact_ids = list(dict.fromkeys(str(value) for value in (artifact_ids or []) if str(value)))
+        if selected_artifact_ids:
+            selected_artifacts = [self.store.get_artifact(artifact_id, scope) for artifact_id in selected_artifact_ids]
+            if any(artifact is None for artifact in selected_artifacts):
+                return {"status": "source_not_found"}
+            source_sizes = [int((artifact or {}).get("original_size_bytes") or 0) for artifact in selected_artifacts]
+            if (
+                len(selected_artifact_ids) > VS5_MAX_SOURCE_COUNT
+                or any(size > VS5_MAX_SOURCE_BYTES for size in source_sizes)
+                or sum(source_sizes) > VS5_MAX_TOTAL_SOURCE_BYTES
+            ):
+                return {
+                    "status": "input_boundary_exceeded",
+                    "source_count": len(selected_artifact_ids),
+                    "max_source_count": VS5_MAX_SOURCE_COUNT,
+                    "max_source_bytes": VS5_MAX_SOURCE_BYTES,
+                    "total_source_bytes": sum(source_sizes),
+                    "max_total_source_bytes": VS5_MAX_TOTAL_SOURCE_BYTES,
+                }
         search = ProductAccessApplication(self.store).search(
             SearchRequest(
                 query=question,
@@ -99,6 +128,7 @@ class BriefingApplication:
                 mode="evidence",
                 page_size=100,
                 excluded_source_types=frozenset({"conversation_turn"}),
+                included_artifact_ids=frozenset(selected_artifact_ids),
             )
         )
         if search.get("status") != "success":

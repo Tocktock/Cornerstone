@@ -1,0 +1,14 @@
+{
+  "schema_version": "cs.vs5_usefulness_review.v1",
+  "status": "HUMAN_REQUIRED",
+  "reviewed_at": null,
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
+  "prompt_retrieval_revision": "e431eb12586c7e602f27fd0aa4b0e321f64d6356f5eea0db0cc0cbd7ab78e038",
+  "minimum_reviewer_count": 2,
+  "non_owner_reviewer_required": true,
+  "reviews": [],
+  "required_review_fields": ["reviewer_name", "reviewer_role", "is_owner", "brief_ids", "usefulness_rating_1_to_5", "rationale"],
+  "median_threshold": 4,
+  "decision": null
+}

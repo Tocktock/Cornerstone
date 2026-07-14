@@ -10,7 +10,7 @@
 
 Start the real VS5 intelligence path by making Brief and Ask optionally use the local Ollama stack:
 
-- generation model: `ornith:35b`
+- generation model: `ornith:9b` (`ornith:35b` only for an explicitly named larger-model comparison)
 - embedding model: `qwen3-embedding:0.6b`
 - deterministic baseline: `local_test` remains the Plane 1 CI provider only
 
@@ -20,8 +20,8 @@ This slice does **not** complete VS5, does not claim product value, does not run
 
 ## Success Criteria
 
-1. `cornerstone brief create ... --model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b --json` runs against local Ollama and returns a model-backed brief when the local models are available.
-2. `cornerstone conversation answer ... --model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b --json` uses the same retrieval/generation path and either answers directly with citations or returns `insufficient_evidence`.
+1. `cornerstone brief create ... --model-provider ollama --generation-model ornith:9b --embedding-model qwen3-embedding:0.6b --json` runs against local Ollama and returns a model-backed brief when the local models are available.
+2. `cornerstone conversation answer ... --model-provider ollama --generation-model ornith:9b --embedding-model qwen3-embedding:0.6b --json` uses the same retrieval/generation path and either answers directly with citations or returns `insufficient_evidence`.
 3. Retrieved evidence enters prompts only as quoted evidence blocks with stable `evidence_chunk:<id>` refs; artifact text is never treated as executable instructions.
 4. Generated load-bearing Brief and Ask statements carry citation refs to stored evidence chunks, with chunk span metadata resolving back to the scoped artifact derived text.
 5. `evidence_backed` and `presented_as_fact` are assigned only when deterministic citation-resolution/span checks pass for that exact output. Otherwise outputs use `draft`, `insufficient_evidence`, or `extractive_fallback`.
@@ -40,7 +40,7 @@ This slice does **not** complete VS5, does not claim product value, does not run
 
 ## Assumptions
 
-- Local Ollama is available at the configured base URL for model-backed verification, with `ornith:35b` and `qwen3-embedding:0.6b` installed.
+- Local Ollama is available at the configured base URL for model-backed verification, with `ornith:9b` and `qwen3-embedding:0.6b` installed. The larger `ornith:35b` is not the default.
 - Citation integrity in this slice means deterministic citation resolution and span-in-source checks. Human faithfulness/usefulness review remains later VS5 work.
 - `local_test` behavior may continue returning fallback-safe structural outputs for CI and legacy Plane 1 checks.
 - Existing claim records may still use `evidence_backed` where their existing claim-specific evidence rules pass; this slice targets Brief and Ask output labels.
@@ -57,7 +57,7 @@ This slice does **not** complete VS5, does not claim product value, does not run
 
 | ID | Expected Result | Verification |
 |---|---|---|
-| S01 | `brief create` accepts `--model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b` and returns model-backed JSON when Ollama is available. | CLI transcript + JSON output |
+| S01 | `brief create` accepts `--model-provider ollama --generation-model ornith:9b --embedding-model qwen3-embedding:0.6b` and returns model-backed JSON when Ollama is available. | CLI transcript + JSON output |
 | S02 | Brief generation retrieves chunked evidence from the user's artifact and sends only quoted evidence blocks to the model. | source review + adversarial fixture |
 | S03 | Generated Brief key points are model-produced statements with citation refs to stored artifact/chunk/span records. | CLI/API JSON inspection |
 | S04 | `conversation answer` uses the same Ollama-backed retrieval/generation path and answers directly or returns `insufficient_evidence`. | CLI transcript + JSON output |
@@ -86,9 +86,9 @@ This slice does **not** complete VS5, does not claim product value, does not run
   - `cornerstone artifact ingest --text ... --source user_paste --state-dir <tmp> --json`
   - `cornerstone search query ... --state-dir <tmp> --json`
   - `cornerstone evidence bundle create --search-snapshot-id <id> --state-dir <tmp> --json`
-  - `cornerstone brief create --evidence-bundle-id <id> --model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b --state-dir <tmp> --json`
+  - `cornerstone brief create --evidence-bundle-id <id> --model-provider ollama --generation-model ornith:9b --embedding-model qwen3-embedding:0.6b --state-dir <tmp> --json`
   - `cornerstone conversation start --message ... --state-dir <tmp> --json`
-  - `cornerstone conversation answer <id> --question ... --model-provider ollama --generation-model ornith:35b --embedding-model qwen3-embedding:0.6b --state-dir <tmp> --json`
+  - `cornerstone conversation answer <id> --question ... --model-provider ollama --generation-model ornith:9b --embedding-model qwen3-embedding:0.6b --state-dir <tmp> --json`
   - forced model-down equivalents using an unavailable Ollama URL
 - `scripts/verify_sot_docs.sh`
 - `python3 scripts/verify_scenario_matrix.py`

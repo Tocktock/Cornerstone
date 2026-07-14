@@ -429,6 +429,82 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(len(store._all_audit_events()), audit_before_denied)
         self.assertEqual(list((self.state_dir / "search" / "snapshots").glob("*.json")), [])
 
+    def test_saved_ask_history_is_discoverable_and_reopenable_across_ui_api_and_cli(self) -> None:
+        artifact_id, _, _ = self.create_source_stack()
+        started_status, _, started_raw = _request(
+            self.base_url,
+            "/conversations",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "message": "When does the vendor agreement renew?"},
+        )
+        self.assertEqual(started_status, 200)
+        conversation_id = json.loads(started_raw)["conversation"]["conversation_id"]
+        answered_status, _, answered_raw = _request(
+            self.base_url,
+            f"/conversations/{conversation_id}/answers",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "question": "When does the vendor agreement renew?",
+                "artifact_ids": [artifact_id],
+            },
+        )
+        self.assertEqual(answered_status, 200)
+        answer = json.loads(answered_raw)["answer"]
+        answer_id = answer["answer_id"]
+
+        history_status, _, history_raw = _request(
+            self.base_url,
+            f"/conversations/history?{urlencode(DEFAULT_SCOPE)}",
+            headers={"accept": "application/json"},
+        )
+        self.assertEqual(history_status, 200)
+        history = json.loads(history_raw)
+        self.assertEqual(history["answer_count"], 1)
+        self.assertEqual(history["answers"][0]["answer_id"], answer_id)
+        self.assertTrue(history["audit_refs"])
+
+        show_status, _, show_raw = _request(
+            self.base_url,
+            f"/answers/{answer_id}?{urlencode(DEFAULT_SCOPE)}",
+            headers={"accept": "application/json"},
+        )
+        self.assertEqual(show_status, 200)
+        shown = json.loads(show_raw)
+        self.assertEqual(shown["answer"]["question"], "When does the vendor agreement renew?")
+        self.assertIn(f"answer:{answer_id}", shown["evidence_refs"])
+        self.assertTrue(shown["audit_refs"])
+
+        home = self.fetch_product_html("/")
+        self.assertIn("Recent questions", home)
+        self.assertIn("Every Ask answer remains connected", home)
+        self.assertIn(f'href="/answers/{answer_id}?view=html"', home)
+        self.assertIn("When does the vendor agreement renew?", home)
+
+        detail = self.fetch_product_html(f"/answers/{answer_id}?view=html")
+        self.assertIn('data-product-surface="answer-history-detail"', detail)
+        self.assertIn("Saved answer", detail)
+        self.assertIn("Sources used", detail)
+        self.assertIn(f"/artifacts/{artifact_id}", detail)
+        self.assertIn(f"/audit?record=conversation_answer:{answer_id}", detail)
+
+        def run_cli(*arguments: str) -> tuple[int, dict[str, Any]]:
+            output = io.StringIO()
+            with redirect_stdout(output):
+                exit_code = cli_main([*arguments, "--state-dir", str(self.state_dir), "--json"])
+            return exit_code, json.loads(output.getvalue())
+
+        history_exit, history_payload = run_cli("conversation", "history")
+        self.assertEqual(history_exit, 0)
+        self.assertEqual(history_payload["answers"][0]["answer_id"], answer_id)
+        self.assertTrue(history_payload["audit_refs"])
+
+        show_exit, show_payload = run_cli("conversation", "show", answer_id)
+        self.assertEqual(show_exit, 0)
+        self.assertEqual(show_payload["answer"]["question"], "When does the vendor agreement renew?")
+        self.assertIn(f"answer:{answer_id}", show_payload["evidence_refs"])
+        self.assertTrue(show_payload["audit_refs"])
+
     def test_secret_like_search_query_is_redacted_in_snapshot_audit_and_html(self) -> None:
         secret = "sk-uiquery1234567890"
         status, _, raw = _request(
@@ -1807,16 +1883,16 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Detail path", brief_html)
         self.assertIn("Back to briefs", brief_html)
         self.assertIn("Brief reading workspace", brief_html)
-        self.assertIn("Brief answer", brief_html)
-        self.assertIn("What we know", brief_html)
+        self.assertIn("Bottom line", brief_html)
+        self.assertIn("Key facts", brief_html)
         self.assertIn("Brief status", brief_html)
         self.assertIn('data-presented-as-fact="false"', brief_html)
         self.assertIn('data-citation-check-refs-count="0"', brief_html)
         self.assertIn('data-resolved-citation-count="0"', brief_html)
         self.assertIn('data-unresolved-citation-count="0"', brief_html)
-        self.assertIn("Findings with citations", brief_html)
-        self.assertIn("What this brief cannot confirm", brief_html)
-        self.assertIn("Suggested next steps", brief_html)
+        self.assertIn("Conflicts and risks", brief_html)
+        self.assertIn("Missing evidence", brief_html)
+        self.assertIn("Recommended next step", brief_html)
         self.assertIn("Sources used", brief_html)
         self.assertIn("Citation disclosure for finding", brief_html)
         self.assertIn("Inspect source", brief_html)
@@ -1997,7 +2073,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         home = self.fetch_product_html("/")
         self.assertNotIn('postJson("/search"', home)
         self.assertIn("const sourceSnapshot = answered.search_snapshot || {};", home)
-        self.assertIn("Keyword-summary Brief prepared", home)
+        self.assertIn("Decision Brief ready", home)
+        self.assertIn("Extractive fallback prepared", home)
         self.assertIn("Brief preparation was blocked because the Ask text contained unsafe instructions", home)
 
         snapshots_before = {

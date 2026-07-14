@@ -1,0 +1,100 @@
+{
+  "schema_version": "cs.vs5_faithfulness_review_round.v1",
+  "status": "REJECTED_REVISION",
+  "reviewed_at": "2026-07-13T06:39:53Z",
+  "reviewer": {
+    "name": "JiYong / Tars",
+    "role": "CornerStone owner and target decision owner",
+    "is_owner": true
+  },
+  "corpus_manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "prompt_retrieval_revision": "5a8a322c9fd8f805696dda3065d0026e05280f1f4849c224afc53da3eada63bd",
+  "model_stack": {
+    "provider": "ollama",
+    "generation_model": "ornith:9b",
+    "embedding_model": "qwen3-embedding:0.6b"
+  },
+  "source_review_path": "/Users/jiyong/.codex/attachments/07c1bd6a-e672-421a-918d-504132f7bccd/pasted-text.txt",
+  "source_review_sha256": "19978c0cb83dedbdb3b7199d3097388b4039b1ed5ca9ab42cc19891d24ee7cd0",
+  "reviewed_cases": [
+    {
+      "case_id": "vendor-renewal-01",
+      "brief_id": "brief_670f258db0c7fdd8",
+      "faithful": false,
+      "material_overstatement": true,
+      "statement_judgments": [
+        {
+          "section": "bottom_line",
+          "faithful": false,
+          "material_overstatement": true,
+          "finding": "The source says Finance can support renewal if Security signs off. The bottom line changes this to unqualified present support and drops a decision-critical condition."
+        },
+        {
+          "section": "key_facts",
+          "statement_index": 0,
+          "faithful": true,
+          "material_overstatement": false
+        },
+        {
+          "section": "key_facts",
+          "statement_index": 1,
+          "faithful": true,
+          "material_overstatement": false
+        },
+        {
+          "section": "key_facts",
+          "statement_index": 2,
+          "faithful": true,
+          "material_overstatement": false
+        },
+        {
+          "section": "conflicts_risks",
+          "statement_index": 0,
+          "faithful": true,
+          "material_overstatement": false
+        }
+      ],
+      "gap_and_conflict_review": {
+        "all_planted_gap_terms_addressed": true,
+        "all_planted_contradictions_addressed": true,
+        "missing_evidence_is_specific": true,
+        "conflicts_and_gaps_match_sources": true
+      },
+      "finding": "One load-bearing bottom-line statement materially overstates Finance's position by dropping the Security-sign-off condition. All remaining statements and gap/conflict fields pass."
+    },
+    {
+      "case_id": "vendor-renewal-03",
+      "brief_id": "brief_0aca146d4f8d8dca",
+      "faithful": true,
+      "material_overstatement": false,
+      "statement_judgments": [
+        {
+          "section": "bottom_line",
+          "faithful": true,
+          "material_overstatement": false
+        },
+        {
+          "section": "key_facts",
+          "statement_index": 0,
+          "faithful": true,
+          "material_overstatement": false
+        },
+        {
+          "section": "conflicts_risks",
+          "statement_index": 0,
+          "faithful": true,
+          "material_overstatement": false
+        }
+      ],
+      "gap_and_conflict_review": {
+        "all_planted_gap_terms_addressed": true,
+        "all_planted_contradictions_addressed": true,
+        "missing_evidence_is_specific": true,
+        "conflicts_and_gaps_match_sources": true
+      },
+      "finding": "All generated statements preserve actors, numbers, attribution, approximation, and unsigned-document status; the benefit-versus-legal-readiness tension is source-supported."
+    }
+  ],
+  "decision": "REJECT",
+  "decision_reason": "The Acme bottom line drops Finance's Security-sign-off condition, so this model/prompt revision cannot satisfy VS5-QUAL-002. BrightDesk passes, but eight additional current-run Briefs would still require review after a corrected run."
+}

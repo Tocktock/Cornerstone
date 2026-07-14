@@ -29,6 +29,7 @@ class SearchRequest:
     page_size: int = 20
     snapshot_id: str | None = None
     excluded_source_types: frozenset[str] = frozenset()
+    included_artifact_ids: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True, slots=True)
@@ -106,6 +107,7 @@ class ProductAccessApplication:
                 query,
                 **request.scope,
                 excluded_source_types=set(request.excluded_source_types),
+                included_artifact_ids=set(request.included_artifact_ids),
                 result_types=result_types,
                 search_mode=mode,
             )

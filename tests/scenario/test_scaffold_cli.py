@@ -275,6 +275,7 @@ class ScaffoldCliTests(unittest.TestCase):
             "What changed?",
             **scope,
             excluded_source_types={"conversation_turn"},
+            included_artifact_ids=set(),
             result_types={"artifact", "ontology_object"},
             search_mode="evidence",
         )
@@ -16952,7 +16953,7 @@ LocalRuntimeStore(state_dir).append_audit(
                 "--model-provider",
                 "ollama",
                 "--generation-model",
-                "ornith:35b",
+                "ornith:9b",
                 "--embedding-model",
                 "qwen3-embedding:0.6b",
             ]
@@ -17001,7 +17002,7 @@ LocalRuntimeStore(state_dir).append_audit(
             self.assertEqual(brief["trust_label"], "evidence_backed")
             self.assertTrue(brief["presented_as_fact"])
             self.assertEqual(brief["model_provider"], "ollama")
-            self.assertEqual(brief["generation_model"], "ornith:35b")
+            self.assertEqual(brief["generation_model"], "ornith:9b")
             self.assertEqual(brief["embedding_model"], "qwen3-embedding:0.6b")
             self.assertEqual(brief["model_run"]["provider"], "ollama")
             self.assertEqual(brief["model_run"]["embedding_status"], "embedded")
@@ -17051,7 +17052,7 @@ LocalRuntimeStore(state_dir).append_audit(
             self.assertEqual(supported_answer["trust_label"], "evidence_backed")
             self.assertTrue(supported_answer["presented_as_fact"])
             self.assertEqual(supported_answer["model_provider"], "ollama")
-            self.assertEqual(supported_answer["generation_model"], "ornith:35b")
+            self.assertEqual(supported_answer["generation_model"], "ornith:9b")
             self.assertEqual(supported_answer["embedding_model"], "qwen3-embedding:0.6b")
             self.assertIn("July 31", supported_answer["answer"])
             self.assertTrue(supported_answer["citation_refs"])
@@ -17132,7 +17133,7 @@ LocalRuntimeStore(state_dir).append_audit(
             "--model-provider",
             "ollama",
             "--generation-model",
-            "ornith:35b",
+            "ornith:9b",
             "--embedding-model",
             "qwen3-embedding:0.6b",
             "--json",

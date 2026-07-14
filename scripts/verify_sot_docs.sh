@@ -45,21 +45,27 @@ require_file "scripts/verify_vs0_scaffold_readiness_docs.sh"
 require_file "docs/agent/SCENARIO_FIRST_AGENT_INSTRUCTION.md"
 require_file "docs/agent/PROJECT_OPERATING_CONSTITUTION.md"
 
-scenario_count=$(grep -E '^## CS-[A-Z]+-[0-9]{3} ' docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md | wc -l | tr -d ' ')
-[ "$scenario_count" = "206" ] || fail "expected 206 full scenarios, found $scenario_count"
+plane1_scenario_count=$(grep -E '^## CS-[A-Z]+-[0-9]{3} ' docs/sot/02_MUST_PASS_SCENARIO_STANDARD.md | wc -l | tr -d ' ')
+[ "$plane1_scenario_count" = "206" ] || fail "expected 206 Plane 1 scenarios, found $plane1_scenario_count"
+
+value_scenario_count=$(grep -E '^### CS-VAL-[0-9]{3} ' docs/sot/05_PRODUCT_VALUE_VERIFICATION_STANDARD.md | wc -l | tr -d ' ')
+[ "$value_scenario_count" = "10" ] || fail "expected 10 Plane 2 CS-VAL scenarios, found $value_scenario_count"
+
+scenario_count=$((plane1_scenario_count + value_scenario_count))
+[ "$scenario_count" = "216" ] || fail "expected 216 full scenarios, found $scenario_count"
 
 matrix_md_count=$(grep -E '^\| CS-[A-Z]+-[0-9]{3} \|' docs/scenario-contracts/SCENARIO_MATRIX_FULL.md | wc -l | tr -d ' ')
-[ "$matrix_md_count" = "206" ] || fail "expected 206 markdown matrix rows, found $matrix_md_count"
+[ "$matrix_md_count" = "216" ] || fail "expected 216 markdown matrix rows, found $matrix_md_count"
 
 matrix_csv_count=$(awk -F, 'NR > 1 && $1 ~ /^CS-/ { count++ } END { print count + 0 }' docs/scenario-contracts/SCENARIO_MATRIX_FULL.csv)
-[ "$matrix_csv_count" = "206" ] || fail "expected 206 csv matrix rows, found $matrix_csv_count"
+[ "$matrix_csv_count" = "216" ] || fail "expected 216 csv matrix rows, found $matrix_csv_count"
 
 vs0_count=$(grep -E '^\| CS-[A-Z]+-[0-9]{3} \|' docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md | wc -l | tr -d ' ')
 [ "$vs0_count" = "58" ] || fail "expected 58 VS-0 scenario rows, found $vs0_count"
 
-grep -q 'Total parsed scenario IDs: \*\*206\*\*' docs/scenario-contracts/SCENARIO_MATRIX_FULL.md || fail "matrix markdown missing 206 total marker"
+grep -q 'Total parsed scenario IDs: \*\*216\*\*' docs/scenario-contracts/SCENARIO_MATRIX_FULL.md || fail "matrix markdown missing 216 total marker"
 grep -q 'Total VS-0 scenario IDs: \*\*58\*\*' docs/scenario-contracts/VS0_IMPLEMENTATION_CONTRACT.md || fail "VS-0 contract missing 58 total marker"
-grep -q 'scenario_count: 206' docs/sot/sot_manifest.yaml || fail "manifest missing full scenario count"
+grep -q 'scenario_count: 216' docs/sot/sot_manifest.yaml || fail "manifest missing full scenario count"
 grep -q 'scenario_count: 58' docs/sot/sot_manifest.yaml || fail "manifest missing VS-0 scenario count"
 grep -q 'No CLI, no feature PASS' docs/scenario-contracts/CLI_NATIVE_FIRST_CONTRACT.md || fail "CLI native-first hard gate missing"
 grep -q 'cli_native_first:' docs/sot/sot_manifest.yaml || fail "manifest missing CLI native-first section"
@@ -90,4 +96,4 @@ sh scripts/verify_local_verification_plane_docs.sh
 sh scripts/verify_design_system_docs.sh
 sh scripts/verify_vs0_scaffold_readiness_docs.sh
 
-printf 'PASS: CornerStone SoT docs verified (206 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane).\n'
+printf 'PASS: CornerStone SoT docs verified (216 full scenarios, design system, VS-0 scaffold readiness, VS-0 scaffold gate, 58 VS-0 scenarios, CLI native-first gate, local verification plane).\n'

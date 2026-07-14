@@ -1,0 +1,16 @@
+{
+  "schema_version": "cs.vs5_eval_freeze.v1",
+  "corpus_id": "vs5-first-defensible-decision-brief-2026-07-12",
+  "frozen_at": "2026-07-12",
+  "manifest_path": "fixtures/vs5/eval/manifest.json",
+  "manifest_sha256": "d82fb349e646b8bdff957c8f67c0395f8816e979c9d1b7e47d1aba17dcfbe3f1",
+  "case_count": 25,
+  "language": "en",
+  "target_cohort": "operational decision owners",
+  "decision_archetypes": [
+    "vendor_contract_renewal",
+    "policy_compliance_change",
+    "project_operational_risk"
+  ],
+  "change_policy": "Any manifest change invalidates this freeze and all dependent Plane 2 evidence."
+}
