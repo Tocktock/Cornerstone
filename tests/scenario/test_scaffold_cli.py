@@ -16746,7 +16746,10 @@ LocalRuntimeStore(state_dir).append_audit(
 
             brief = result["brief"]
             self.assertEqual(brief["citation_check_refs"] and brief["trust_label"], "draft")
-            self.assertEqual(brief["statement_anchor_checks"][0]["status"], "failed")
+            self.assertGreater(
+                brief["model_run"]["response_metadata"]["pruned_ungrounded_key_fact_count"],
+                0,
+            )
             self.assertEqual(brief["semantic_faithfulness_state"], "human_required")
             self.assertFalse(brief["label_check"]["earned_evidence_backed"])
 
@@ -16814,8 +16817,13 @@ LocalRuntimeStore(state_dir).append_audit(
             brief = result["brief"]
             self.assertEqual(brief["trust_label"], "draft")
             self.assertFalse(brief["presented_as_fact"])
-            self.assertEqual(brief["statement_anchor_checks"][0]["allowed_citation_refs"], [])
-            self.assertEqual(brief["statement_anchor_checks"][0]["status"], "failed")
+            outside_anchor = next(
+                row
+                for row in brief["statement_anchor_checks"]
+                if prior_ref in row["citation_refs"]
+            )
+            self.assertEqual(outside_anchor["allowed_citation_refs"], [])
+            self.assertEqual(outside_anchor["status"], "failed")
             check = store.get_citation_check(brief["citation_check_refs"][0].split(":", 1)[1])
             self.assertTrue(check["retrieval_allowlist_enforced"])
             self.assertNotIn(prior_ref, check["allowed_citation_refs"])
@@ -16863,11 +16871,24 @@ LocalRuntimeStore(state_dir).append_audit(
             answer = result["answer"]
             self.assertEqual(answer["trust_label"], "insufficient_evidence")
             self.assertFalse(answer["presented_as_fact"])
-            self.assertIn("evidence_chunk:fabricated-answer-ref", answer["citation_refs"])
+            self.assertEqual(answer["citation_refs"], [])
             check_id = answer["citation_check_refs"][0].split(":", 1)[1]
             check = store.get_citation_check(check_id)
             self.assertEqual(check["fabricated_citation_count"], 1)
             self.assertEqual(check["status"], "failed")
+            self.assertIn(
+                "evidence_chunk:fabricated-answer-ref",
+                check["citation_refs"],
+            )
+            self.assertEqual(
+                check["errors"],
+                [
+                    {
+                        "ref": "evidence_chunk:fabricated-answer-ref",
+                        "code": "INVALID_CITATION_REF",
+                    }
+                ],
+            )
 
     def test_vs5_ask_rejects_valid_same_scope_citation_outside_current_retrieval(self) -> None:
         with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-retrieval-allowlist-") as state_dir:

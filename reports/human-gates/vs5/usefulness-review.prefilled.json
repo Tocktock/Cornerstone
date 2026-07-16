@@ -12,10 +12,10 @@
       "packages/cornerstone_cli/briefing.py",
       "packages/cornerstone_cli/product_access.py"
     ],
-    "pipeline_sha256": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+    "pipeline_sha256": "559a4cfbfb267d0c0eb7514e68ee85a2f14c7fc9123b636f103b25024f21c7b5",
     "provider": "ollama"
   },
-  "prompt_retrieval_revision": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+  "prompt_retrieval_revision": "559a4cfbfb267d0c0eb7514e68ee85a2f14c7fc9123b636f103b25024f21c7b5",
   "source_report": "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json",
   "minimum_reviewer_count": 2,
   "non_owner_reviewer_required": true,
@@ -23,68 +23,66 @@
     {
       "case_id": "vendor-renewal-01",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_4a4afe9ac0fe05b6",
-      "brief_status": "evidence_backed",
-      "title": "Acme renewal decision",
+      "brief_id": "brief_b052017f47bd565d",
+      "brief_status": "draft",
+      "title": "Decision review: we renew Acme before the cancellation deadline",
       "decision_question": "Should we renew Acme before the cancellation deadline?",
-      "bottom_line": "Hold: review remains incomplete",
+      "bottom_line": "Hold: Security review — Acme: review remains incomplete",
       "key_facts": [
-        "Acme services auto-renew on August 1; cancellation notice must be received by July 1.",
-        "Security review for Acme remains incomplete; final recommendation and owner are not recorded."
+        "Acme services auto-renew on August 1",
+        "Acme proposed a 12% fee increase"
       ],
       "conflicts_risks": [
         "Finance can support renewal if Security signs off. Security review — Acme: review remains incomplete.",
         "Final recommendation and owner are not recorded."
       ],
-      "missing_evidence": [
-        "Final recommendation and owner are not recorded."
-      ],
+      "missing_evidence": [],
       "recommended_next_steps": [
-        "Resolve the cited blocker before deciding: Finance can support renewal if Security signs off. Security review — Acme: review remains incomplete."
+        "Complete the Security review and record its outcome before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: review remains incomplete",
+          "statement": "Hold: Security review — Acme: review remains incomplete",
           "citation_refs": [
-            "evidence_chunk:chunk_68b2008ce8695b44300b874a6a0cb7185ef1cac2a8f563407e2dd76d993f3253"
+            "evidence_chunk:chunk_5bc985c992a7f223012df24a9b76aa0e125587a5db660baabb7048b500c6d12b"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Acme services auto-renew on August 1; cancellation notice must be received by July 1.",
+          "statement": "Acme services auto-renew on August 1",
           "citation_refs": [
-            "evidence_chunk:chunk_ab5d9605a19a045d99cb9f703f67b987f21ca40f691eb5c08b19533847320917"
+            "evidence_chunk:chunk_42d58238f5518a7cb85b3153a74ab4b3368cb95a475f107e1d64741452e492c1"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Security review for Acme remains incomplete; final recommendation and owner are not recorded.",
+          "statement": "Acme proposed a 12% fee increase",
           "citation_refs": [
-            "evidence_chunk:chunk_68b2008ce8695b44300b874a6a0cb7185ef1cac2a8f563407e2dd76d993f3253"
+            "evidence_chunk:chunk_795b76bdd677a2f026c3e2f700210692ad5e549740cc28e013d7dfa3fa1c5bf9"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Finance can support renewal if Security signs off. Security review — Acme: review remains incomplete.",
           "citation_refs": [
-            "evidence_chunk:chunk_13daf854a5dd8c12242f9b06d8047721bceb33cb03bc2de055cdca402f29b0d7",
-            "evidence_chunk:chunk_68b2008ce8695b44300b874a6a0cb7185ef1cac2a8f563407e2dd76d993f3253"
+            "evidence_chunk:chunk_5bc985c992a7f223012df24a9b76aa0e125587a5db660baabb7048b500c6d12b",
+            "evidence_chunk:chunk_795b76bdd677a2f026c3e2f700210692ad5e549740cc28e013d7dfa3fa1c5bf9"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Final recommendation and owner are not recorded.",
           "citation_refs": [
-            "evidence_chunk:chunk_68b2008ce8695b44300b874a6a0cb7185ef1cac2a8f563407e2dd76d993f3253"
+            "evidence_chunk:chunk_5bc985c992a7f223012df24a9b76aa0e125587a5db660baabb7048b500c6d12b"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Resolve the cited blocker before deciding: Finance can support renewal if Security signs off. Security review — Acme: review remains incomplete.",
+          "statement": "Complete the Security review and record its outcome before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_13daf854a5dd8c12242f9b06d8047721bceb33cb03bc2de055cdca402f29b0d7",
-            "evidence_chunk:chunk_68b2008ce8695b44300b874a6a0cb7185ef1cac2a8f563407e2dd76d993f3253"
+            "evidence_chunk:chunk_5bc985c992a7f223012df24a9b76aa0e125587a5db660baabb7048b500c6d12b",
+            "evidence_chunk:chunk_795b76bdd677a2f026c3e2f700210692ad5e549740cc28e013d7dfa3fa1c5bf9"
           ]
         }
       ],
@@ -109,14 +107,14 @@
     {
       "case_id": "vendor-renewal-03",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_b2c12f0ee1b76285",
-      "brief_status": "evidence_backed",
-      "title": "BrightDesk pilot continuation decision",
+      "brief_id": "brief_44e331fd7d2a9dd8",
+      "brief_status": "draft",
+      "title": "BrightDesk pilot 가결 여부",
       "decision_question": "Should the team keep BrightDesk after the pilot?",
       "bottom_line": "Hold: Legal says the data-processing addendum is still unsigned",
       "key_facts": [
-        "BrightDesk has 42 active users, 31 weekly users, and 6 support tickets during the pilot.",
-        "Sales reports BrightDesk saves about 20 minutes per proposal."
+        "BrightDesk pilot: 42 active users, 31 weekly users",
+        "Sales says BrightDesk saves about 20 minutes per proposal"
       ],
       "conflicts_risks": [
         "Sales says BrightDesk saves about 20 minutes per proposal. Legal says the data-processing addendum is still unsigned."
@@ -130,35 +128,35 @@
           "section": "bottom_line",
           "statement": "Hold: Legal says the data-processing addendum is still unsigned",
           "citation_refs": [
-            "evidence_chunk:chunk_204ead17f1e2c23b49b32cbbb562a1f591baa84cac262a22048e1c28871f0380"
+            "evidence_chunk:chunk_4d12e760aeb0b7930a6f3d40721e73d26b769de86ad6d0b60841e899fb2a1291"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "BrightDesk has 42 active users, 31 weekly users, and 6 support tickets during the pilot.",
+          "statement": "BrightDesk pilot: 42 active users, 31 weekly users",
           "citation_refs": [
-            "evidence_chunk:chunk_1fd6ad5701de8d4b6777a56678094a274f2a9e4f633346966936d3c5edaba0bd"
+            "evidence_chunk:chunk_807f2f70709d91331a1e9fe931228e541b0d8ea6a2f7f1f5b113824cdbd3ff92"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Sales reports BrightDesk saves about 20 minutes per proposal.",
+          "statement": "Sales says BrightDesk saves about 20 minutes per proposal",
           "citation_refs": [
-            "evidence_chunk:chunk_204ead17f1e2c23b49b32cbbb562a1f591baa84cac262a22048e1c28871f0380"
+            "evidence_chunk:chunk_4d12e760aeb0b7930a6f3d40721e73d26b769de86ad6d0b60841e899fb2a1291"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Sales says BrightDesk saves about 20 minutes per proposal. Legal says the data-processing addendum is still unsigned.",
           "citation_refs": [
-            "evidence_chunk:chunk_204ead17f1e2c23b49b32cbbb562a1f591baa84cac262a22048e1c28871f0380"
+            "evidence_chunk:chunk_4d12e760aeb0b7930a6f3d40721e73d26b769de86ad6d0b60841e899fb2a1291"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Resolve the unsigned document before deciding: Sales says BrightDesk saves about 20 minutes per proposal. Legal says the data-processing addendum is still unsigned.",
           "citation_refs": [
-            "evidence_chunk:chunk_204ead17f1e2c23b49b32cbbb562a1f591baa84cac262a22048e1c28871f0380"
+            "evidence_chunk:chunk_4d12e760aeb0b7930a6f3d40721e73d26b769de86ad6d0b60841e899fb2a1291"
           ]
         }
       ],
@@ -178,22 +176,20 @@
     {
       "case_id": "vendor-renewal-04",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_98282ed5a675c0b1",
+      "brief_id": "brief_3576c5106a1532b8",
       "brief_status": "evidence_backed",
-      "title": "ParcelFlow Renewal Without Service-Credit Change",
+      "title": "ParcelFlow renewal without a service-credit change",
       "decision_question": "Can we renew ParcelFlow without a service-credit change?",
       "bottom_line": "Hold: Vendor response is missing.",
       "key_facts": [
-        "ParcelFlow guarantees 99.5% monthly availability; service credits apply only when availability drops below 98.5%.",
-        "Measured availability was 98.9% in May and 99.1% in June, both above the credit threshold."
+        "ParcelFlow guarantees 99.5% monthly availability; service credits begin only when availability falls below 98.5%.",
+        "Measured availability was 98.9% in May and 99.1% in June."
       ],
       "conflicts_risks": [
         "ParcelFlow guarantees 99.5% monthly availability. Measured availability was 98.9% in May and 99.1% in June.",
         "Vendor response is missing."
       ],
-      "missing_evidence": [
-        "Vendor response is missing."
-      ],
+      "missing_evidence": [],
       "recommended_next_steps": [
         "Resolve the cited blocker before deciding: Vendor response is missing."
       ],
@@ -202,44 +198,43 @@
           "section": "bottom_line",
           "statement": "Hold: Vendor response is missing.",
           "citation_refs": [
-            "evidence_chunk:chunk_ef3c50c533670e03b98e48d0112f4753844f739354cf9aba1a4b25a1330058bc"
+            "evidence_chunk:chunk_ca5d8448f25e71601ca9dbaf3864ce886cf8de4757d040bb7ca462cbe7b057df"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "ParcelFlow guarantees 99.5% monthly availability; service credits apply only when availability drops below 98.5%.",
+          "statement": "ParcelFlow guarantees 99.5% monthly availability; service credits begin only when availability falls below 98.5%.",
           "citation_refs": [
-            "evidence_chunk:chunk_00d99cec503d93c7388d8d93a6457832b6882137a39110349a9deb971884f50e"
+            "evidence_chunk:chunk_568beba35b8098ac2316f24b00511417f0c8f608731358aebd5d0ecf671e8a07"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Measured availability was 98.9% in May and 99.1% in June, both above the credit threshold.",
+          "statement": "Measured availability was 98.9% in May and 99.1% in June.",
           "citation_refs": [
-            "evidence_chunk:chunk_ef3c50c533670e03b98e48d0112f4753844f739354cf9aba1a4b25a1330058bc",
-            "evidence_chunk:chunk_00d99cec503d93c7388d8d93a6457832b6882137a39110349a9deb971884f50e"
+            "evidence_chunk:chunk_ca5d8448f25e71601ca9dbaf3864ce886cf8de4757d040bb7ca462cbe7b057df"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "ParcelFlow guarantees 99.5% monthly availability. Measured availability was 98.9% in May and 99.1% in June.",
           "citation_refs": [
-            "evidence_chunk:chunk_00d99cec503d93c7388d8d93a6457832b6882137a39110349a9deb971884f50e",
-            "evidence_chunk:chunk_ef3c50c533670e03b98e48d0112f4753844f739354cf9aba1a4b25a1330058bc"
+            "evidence_chunk:chunk_568beba35b8098ac2316f24b00511417f0c8f608731358aebd5d0ecf671e8a07",
+            "evidence_chunk:chunk_ca5d8448f25e71601ca9dbaf3864ce886cf8de4757d040bb7ca462cbe7b057df"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Vendor response is missing.",
           "citation_refs": [
-            "evidence_chunk:chunk_ef3c50c533670e03b98e48d0112f4753844f739354cf9aba1a4b25a1330058bc"
+            "evidence_chunk:chunk_ca5d8448f25e71601ca9dbaf3864ce886cf8de4757d040bb7ca462cbe7b057df"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Resolve the cited blocker before deciding: Vendor response is missing.",
           "citation_refs": [
-            "evidence_chunk:chunk_ef3c50c533670e03b98e48d0112f4753844f739354cf9aba1a4b25a1330058bc"
+            "evidence_chunk:chunk_ca5d8448f25e71601ca9dbaf3864ce886cf8de4757d040bb7ca462cbe7b057df"
           ]
         }
       ],
@@ -259,13 +254,14 @@
     {
       "case_id": "vendor-renewal-06",
       "archetype": "vendor_contract_renewal",
-      "brief_id": "brief_31e3431b36cfc237",
-      "brief_status": "evidence_backed",
-      "title": "CedarPay Renewal Decision",
+      "brief_id": "brief_a254a1ae100b53d3",
+      "brief_status": "draft",
+      "title": "CedarPay Renewal Acceptability",
       "decision_question": "Is CedarPay renewal acceptable given the audit issue?",
       "bottom_line": "Hold: Compliance will not recommend renewal until the exception is closed",
       "key_facts": [
-        "Procurement recommends renewal at the existing $48,000 annual fee."
+        "The December audit found one unresolved access-review exception.",
+        "CedarPay renewal is due January 20"
       ],
       "conflicts_risks": [
         "Procurement recommends renewal at the existing $48,000 annual fee. Compliance will not recommend renewal until the exception is closed.",
@@ -273,44 +269,50 @@
       ],
       "missing_evidence": [],
       "recommended_next_steps": [
-        "Reconcile the cited conflict before deciding: Procurement recommends renewal at the existing $48,000 annual fee. Compliance will not recommend renewal until the exception is closed."
+        "Confirm who owns resolution of the December audit's access-review exception before proceeding with renewal."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Compliance will not recommend renewal until the exception is closed",
           "citation_refs": [
-            "evidence_chunk:chunk_d8926c82e59323a501d66d74b73e06705594ec57266167ba7f9cad2e323ccf6a"
+            "evidence_chunk:chunk_9fe4f83bd7c398e122b135e3459cb7afe34838b0663aafa63f268d4a17321da9"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Procurement recommends renewal at the existing $48,000 annual fee.",
+          "statement": "The December audit found one unresolved access-review exception.",
           "citation_refs": [
-            "evidence_chunk:chunk_742a0b0be4dc81862ea2a4e3aa9799d56d6554eadcdc010145ad3008b6bb1627"
+            "evidence_chunk:chunk_9fe4f83bd7c398e122b135e3459cb7afe34838b0663aafa63f268d4a17321da9"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "CedarPay renewal is due January 20",
+          "citation_refs": [
+            "evidence_chunk:chunk_8d0e81ff18b7dac6d9f296e7d34897e581a5860edc49a2b8e65e030be61898e4"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Procurement recommends renewal at the existing $48,000 annual fee. Compliance will not recommend renewal until the exception is closed.",
           "citation_refs": [
-            "evidence_chunk:chunk_742a0b0be4dc81862ea2a4e3aa9799d56d6554eadcdc010145ad3008b6bb1627",
-            "evidence_chunk:chunk_d8926c82e59323a501d66d74b73e06705594ec57266167ba7f9cad2e323ccf6a"
+            "evidence_chunk:chunk_8d0e81ff18b7dac6d9f296e7d34897e581a5860edc49a2b8e65e030be61898e4",
+            "evidence_chunk:chunk_9fe4f83bd7c398e122b135e3459cb7afe34838b0663aafa63f268d4a17321da9"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "The December audit found one unresolved access-review exception.",
           "citation_refs": [
-            "evidence_chunk:chunk_d8926c82e59323a501d66d74b73e06705594ec57266167ba7f9cad2e323ccf6a"
+            "evidence_chunk:chunk_9fe4f83bd7c398e122b135e3459cb7afe34838b0663aafa63f268d4a17321da9"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Reconcile the cited conflict before deciding: Procurement recommends renewal at the existing $48,000 annual fee. Compliance will not recommend renewal until the exception is closed.",
+          "statement": "Confirm who owns resolution of the December audit's access-review exception before proceeding with renewal.",
           "citation_refs": [
-            "evidence_chunk:chunk_742a0b0be4dc81862ea2a4e3aa9799d56d6554eadcdc010145ad3008b6bb1627",
-            "evidence_chunk:chunk_d8926c82e59323a501d66d74b73e06705594ec57266167ba7f9cad2e323ccf6a"
+            "evidence_chunk:chunk_9fe4f83bd7c398e122b135e3459cb7afe34838b0663aafa63f268d4a17321da9"
           ]
         }
       ],
@@ -330,13 +332,14 @@
     {
       "case_id": "policy-change-02",
       "archetype": "policy_compliance_change",
-      "brief_id": "brief_3e5e533852421e75",
+      "brief_id": "brief_5fc50d1ef0569a12",
       "brief_status": "evidence_backed",
-      "title": "Retention policy approval feasibility",
+      "title": "Retention policy approval feasibility this week",
       "decision_question": "Can the retention policy be approved this week?",
       "bottom_line": "Hold: Legal has not accepted the backup exception.",
       "key_facts": [
-        "Engineering can delete primary recordings in 30 days"
+        "Engineering can delete primary recordings within 30 days.",
+        "Backups retain recordings for 120 days, but Legal has not accepted this backup exception."
       ],
       "conflicts_risks": [
         "Legal draft: customer support recordings are retained for 90 days. Engineering can delete primary recordings in 30 days but backups retain them for 120 days.",
@@ -351,36 +354,43 @@
           "section": "bottom_line",
           "statement": "Hold: Legal has not accepted the backup exception.",
           "citation_refs": [
-            "evidence_chunk:chunk_428c44a82f487cb1674b7a89339a9c0dbe750726c7a9af17e979dae81aa8bf89"
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Engineering can delete primary recordings in 30 days",
+          "statement": "Engineering can delete primary recordings within 30 days.",
           "citation_refs": [
-            "evidence_chunk:chunk_428c44a82f487cb1674b7a89339a9c0dbe750726c7a9af17e979dae81aa8bf89"
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Backups retain recordings for 120 days, but Legal has not accepted this backup exception.",
+          "citation_refs": [
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Legal draft: customer support recordings are retained for 90 days. Engineering can delete primary recordings in 30 days but backups retain them for 120 days.",
           "citation_refs": [
-            "evidence_chunk:chunk_428c44a82f487cb1674b7a89339a9c0dbe750726c7a9af17e979dae81aa8bf89",
-            "evidence_chunk:chunk_d0c86a621c885f764dd48391018d2afbd8751cf284e6d316bbe165354879e24b"
+            "evidence_chunk:chunk_7b895ba76a82bb50a33b18d7d03b725b6cc5653d412616f9e5fa440eabd853bb",
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Legal has not accepted the backup exception.",
           "citation_refs": [
-            "evidence_chunk:chunk_428c44a82f487cb1674b7a89339a9c0dbe750726c7a9af17e979dae81aa8bf89"
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Reconcile the cited conflict before deciding: Legal has not accepted the backup exception.",
           "citation_refs": [
-            "evidence_chunk:chunk_428c44a82f487cb1674b7a89339a9c0dbe750726c7a9af17e979dae81aa8bf89"
+            "evidence_chunk:chunk_98db75ea3375316489133bc53dc14d0250f3383fb0cf4dbe8a0f9d4e17714ed1"
           ]
         }
       ],
@@ -400,48 +410,48 @@
     {
       "case_id": "policy-change-05",
       "archetype": "policy_compliance_change",
-      "brief_id": "brief_3291292ba944cdb2",
-      "brief_status": "evidence_backed",
-      "title": "Expense threshold change go-live Monday",
+      "brief_id": "brief_9d48aedc2098d148",
+      "brief_status": "draft",
+      "title": "Expense threshold raise go-live Monday",
       "decision_question": "Can the expense threshold change go live Monday?",
       "bottom_line": "Hold: Web expense app still requires a receipt above $25",
       "key_facts": [
-        "Controller approved raising the receipt-free expense threshold from $25 to $50, effective Monday."
+        "Web expense app still requires a receipt for amounts above $25."
       ],
       "conflicts_risks": [
         "Mobile expense app accepts $50 without a receipt. Web expense app still requires a receipt above $25."
       ],
       "missing_evidence": [],
       "recommended_next_steps": [
-        "Reconcile the cited quantities before deciding: Mobile expense app accepts $50 without a receipt. Web expense app still requires a receipt above $25."
+        "Confirm whether the web-expense app update is part of Monday's rollout."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: Web expense app still requires a receipt above $25",
           "citation_refs": [
-            "evidence_chunk:chunk_b1faf1138a45770f90ece0def074368bf8253a3e1eb67ca7e438977dfbda3d89"
+            "evidence_chunk:chunk_590885cd5500af5668be8e45560e47ab79c9904e534039290be4523f9c4f72c8"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Controller approved raising the receipt-free expense threshold from $25 to $50, effective Monday.",
+          "statement": "Web expense app still requires a receipt for amounts above $25.",
           "citation_refs": [
-            "evidence_chunk:chunk_9c86c622149b88bb47fcc060eb0f6ccd990e0fc89e559406d3ae6e30a5c3bdb7"
+            "evidence_chunk:chunk_590885cd5500af5668be8e45560e47ab79c9904e534039290be4523f9c4f72c8"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Mobile expense app accepts $50 without a receipt. Web expense app still requires a receipt above $25.",
           "citation_refs": [
-            "evidence_chunk:chunk_b1faf1138a45770f90ece0def074368bf8253a3e1eb67ca7e438977dfbda3d89"
+            "evidence_chunk:chunk_590885cd5500af5668be8e45560e47ab79c9904e534039290be4523f9c4f72c8"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Reconcile the cited quantities before deciding: Mobile expense app accepts $50 without a receipt. Web expense app still requires a receipt above $25.",
+          "statement": "Confirm whether the web-expense app update is part of Monday's rollout.",
           "citation_refs": [
-            "evidence_chunk:chunk_b1faf1138a45770f90ece0def074368bf8253a3e1eb67ca7e438977dfbda3d89"
+            "evidence_chunk:chunk_590885cd5500af5668be8e45560e47ab79c9904e534039290be4523f9c4f72c8"
           ]
         }
       ],
@@ -461,13 +471,13 @@
     {
       "case_id": "policy-change-06",
       "archetype": "policy_compliance_change",
-      "brief_id": "brief_e5c893f3c785b055",
-      "brief_status": "evidence_backed",
-      "title": "Should incident-notification window change to four hours?",
+      "brief_id": "brief_6eff835246b9b5b3",
+      "brief_status": "draft",
+      "title": "Decision review: the incident-notification window change to four hours",
       "decision_question": "Should the incident-notification window change to four hours?",
-      "bottom_line": "Hold: the escalation contact is blank.",
+      "bottom_line": "Required action effective July 1: notifying the regulator within four hours of classifying a material incident; Current runbook targets notification within eight hours; the escalation contact is blank.",
       "key_facts": [
-        "The current runbook targets notification within eight hours; Legal owns classification but the escalation contact is blank."
+        "Legal owns classification"
       ],
       "conflicts_risks": [
         "Current runbook targets notification within eight hours. The new rule requires notifying the regulator within four hours of classifying a material incident, effective July 1.",
@@ -477,43 +487,53 @@
         "Legal owns classification; the escalation contact is blank."
       ],
       "recommended_next_steps": [
-        "Resolve the cited blocker before deciding: the escalation contact is blank."
+        "Update the current runbook from eight hours to four hours effective July 1.",
+        "Resolve this blocker: the escalation contact is blank."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: the escalation contact is blank.",
+          "statement": "Required action effective July 1: notifying the regulator within four hours of classifying a material incident; Current runbook targets notification within eight hours; the escalation contact is blank.",
           "citation_refs": [
-            "evidence_chunk:chunk_79bce6f4380cf93e75043ae5f17d12e53f7e41ebb730d7d7250a4a178db7ce69"
+            "evidence_chunk:chunk_45b84e205f3f8d5361c86ef2a785ecbe0acbe5260a4e5349191b41a98a92a5d5",
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The current runbook targets notification within eight hours; Legal owns classification but the escalation contact is blank.",
+          "statement": "Legal owns classification",
           "citation_refs": [
-            "evidence_chunk:chunk_79bce6f4380cf93e75043ae5f17d12e53f7e41ebb730d7d7250a4a178db7ce69"
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Current runbook targets notification within eight hours. The new rule requires notifying the regulator within four hours of classifying a material incident, effective July 1.",
           "citation_refs": [
-            "evidence_chunk:chunk_4a1c235d473594e453987f864e4d9a88b2f676050cdbcd7bd11194d505e0c84a",
-            "evidence_chunk:chunk_79bce6f4380cf93e75043ae5f17d12e53f7e41ebb730d7d7250a4a178db7ce69"
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9",
+            "evidence_chunk:chunk_45b84e205f3f8d5361c86ef2a785ecbe0acbe5260a4e5349191b41a98a92a5d5"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "the escalation contact is blank.",
           "citation_refs": [
-            "evidence_chunk:chunk_79bce6f4380cf93e75043ae5f17d12e53f7e41ebb730d7d7250a4a178db7ce69"
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Resolve the cited blocker before deciding: the escalation contact is blank.",
+          "statement": "Update the current runbook from eight hours to four hours effective July 1.",
           "citation_refs": [
-            "evidence_chunk:chunk_79bce6f4380cf93e75043ae5f17d12e53f7e41ebb730d7d7250a4a178db7ce69"
+            "evidence_chunk:chunk_45b84e205f3f8d5361c86ef2a785ecbe0acbe5260a4e5349191b41a98a92a5d5",
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9"
+          ]
+        },
+        {
+          "section": "recommended_next_steps",
+          "statement": "Resolve this blocker: the escalation contact is blank.",
+          "citation_refs": [
+            "evidence_chunk:chunk_1f7bd31f50e53f570af98b91276ff9f930270d2f8421eac010115a879be26be9"
           ]
         }
       ],
@@ -533,21 +553,19 @@
     {
       "case_id": "project-risk-01",
       "archetype": "project_operational_risk",
-      "brief_id": "brief_651f30773c85f12a",
-      "brief_status": "evidence_backed",
-      "title": "Should Project Orion keep its September 30 launch date?",
+      "brief_id": "brief_59b1efc02a73531f",
+      "brief_status": "draft",
+      "title": "Project Orion September 30 launch decision",
       "decision_question": "Should Project Orion keep the September 30 launch date?",
       "bottom_line": "Hold: Load testing found a capacity failure at 8,000 concurrent users",
       "key_facts": [
-        "Project Orion launch date is September 30; core API is complete and data migration is 70% complete."
+        "Project Orion launch is September 30"
       ],
       "conflicts_risks": [
         "Target launch capacity is 12,000. Load testing found a capacity failure at 8,000 concurrent users.",
         "Remediation owner is not assigned."
       ],
-      "missing_evidence": [
-        "Remediation owner is not assigned."
-      ],
+      "missing_evidence": [],
       "recommended_next_steps": [
         "Reconcile the cited quantities before deciding: Target launch capacity is 12,000. Load testing found a capacity failure at 8,000 concurrent users."
       ],
@@ -556,35 +574,35 @@
           "section": "bottom_line",
           "statement": "Hold: Load testing found a capacity failure at 8,000 concurrent users",
           "citation_refs": [
-            "evidence_chunk:chunk_4f4479fb762520c6753286749ce8a8739a14216029e1188e4bd53d327832c76b"
+            "evidence_chunk:chunk_0f0599393c0cd722306e55975c6c9b2a0eb1a1b7da18e5dbf881d65a0a9aafe8"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Project Orion launch date is September 30; core API is complete and data migration is 70% complete.",
+          "statement": "Project Orion launch is September 30",
           "citation_refs": [
-            "evidence_chunk:chunk_65c1b9ae13fd33d39fb6952eb5516894e249e30a45805a94163a2449fd548808"
+            "evidence_chunk:chunk_de996ac563ea9ee64258e218cfe042249d374547ef92da03a722b9cfcd384b6b"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Target launch capacity is 12,000. Load testing found a capacity failure at 8,000 concurrent users.",
           "citation_refs": [
-            "evidence_chunk:chunk_4f4479fb762520c6753286749ce8a8739a14216029e1188e4bd53d327832c76b"
+            "evidence_chunk:chunk_0f0599393c0cd722306e55975c6c9b2a0eb1a1b7da18e5dbf881d65a0a9aafe8"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Remediation owner is not assigned.",
           "citation_refs": [
-            "evidence_chunk:chunk_4f4479fb762520c6753286749ce8a8739a14216029e1188e4bd53d327832c76b"
+            "evidence_chunk:chunk_0f0599393c0cd722306e55975c6c9b2a0eb1a1b7da18e5dbf881d65a0a9aafe8"
           ]
         },
         {
           "section": "recommended_next_steps",
           "statement": "Reconcile the cited quantities before deciding: Target launch capacity is 12,000. Load testing found a capacity failure at 8,000 concurrent users.",
           "citation_refs": [
-            "evidence_chunk:chunk_4f4479fb762520c6753286749ce8a8739a14216029e1188e4bd53d327832c76b"
+            "evidence_chunk:chunk_0f0599393c0cd722306e55975c6c9b2a0eb1a1b7da18e5dbf881d65a0a9aafe8"
           ]
         }
       ],
@@ -604,52 +622,65 @@
     {
       "case_id": "project-risk-05",
       "archetype": "project_operational_risk",
-      "brief_id": "brief_e1090e747ae61bcd",
-      "brief_status": "evidence_backed",
-      "title": "Data-center migration start this weekend",
+      "brief_id": "brief_628a85d182d81d4b",
+      "brief_status": "draft",
+      "title": "데이터센터 마이그레이션 주말 시작 여부",
       "decision_question": "Should the data-center migration start this weekend?",
-      "bottom_line": "Hold: 20 minutes",
+      "bottom_line": "Hold: Latest rehearsal took five hours and 20 minutes",
       "key_facts": [
-        "Migration starts Saturday 01:00"
+        "Customer maintenance notice promises service by 06:00",
+        "Database validation alone took 90 minutes"
       ],
       "conflicts_risks": [
-        "Migration starts Saturday 01:00 and should finish by 05:00. Latest rehearsal took five hours and 20 minutes."
-      ],
-      "missing_evidence": [
+        "Migration starts Saturday 01:00 and should finish by 05:00. Latest rehearsal took five hours and 20 minutes.",
         "No revised customer notice is approved."
       ],
+      "missing_evidence": [],
       "recommended_next_steps": [
-        "Reconcile the cited quantities before deciding: Migration starts Saturday 01:00 and should finish by 05:00. Latest rehearsal took five hours and 20 minutes."
+        "Revise the customer notice and obtain approval before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
-          "statement": "Hold: 20 minutes",
+          "statement": "Hold: Latest rehearsal took five hours and 20 minutes",
           "citation_refs": [
-            "evidence_chunk:chunk_8fb128d74ad89fb3628af1c9aff4f2afd3c4e2a74f28473dce7e351561ea8bae"
+            "evidence_chunk:chunk_ea8d64ab45b2f755750f01bf812e9d5f7fdf6a425564b3eb73dbe073cd98a59f"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Migration starts Saturday 01:00",
+          "statement": "Customer maintenance notice promises service by 06:00",
           "citation_refs": [
-            "evidence_chunk:chunk_7135aa522c78a1fbb8e8acc7d3502228f6638a06cf1374f633f29b4967937ab2"
+            "evidence_chunk:chunk_0bee13cb6b14c022efb65206616133531c551dbf0ae3ab61c2ad8da06cc232a4"
+          ]
+        },
+        {
+          "section": "key_facts",
+          "statement": "Database validation alone took 90 minutes",
+          "citation_refs": [
+            "evidence_chunk:chunk_ea8d64ab45b2f755750f01bf812e9d5f7fdf6a425564b3eb73dbe073cd98a59f"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "Migration starts Saturday 01:00 and should finish by 05:00. Latest rehearsal took five hours and 20 minutes.",
           "citation_refs": [
-            "evidence_chunk:chunk_7135aa522c78a1fbb8e8acc7d3502228f6638a06cf1374f633f29b4967937ab2",
-            "evidence_chunk:chunk_8fb128d74ad89fb3628af1c9aff4f2afd3c4e2a74f28473dce7e351561ea8bae"
+            "evidence_chunk:chunk_0bee13cb6b14c022efb65206616133531c551dbf0ae3ab61c2ad8da06cc232a4",
+            "evidence_chunk:chunk_ea8d64ab45b2f755750f01bf812e9d5f7fdf6a425564b3eb73dbe073cd98a59f"
+          ]
+        },
+        {
+          "section": "conflicts_risks",
+          "statement": "No revised customer notice is approved.",
+          "citation_refs": [
+            "evidence_chunk:chunk_ea8d64ab45b2f755750f01bf812e9d5f7fdf6a425564b3eb73dbe073cd98a59f"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Reconcile the cited quantities before deciding: Migration starts Saturday 01:00 and should finish by 05:00. Latest rehearsal took five hours and 20 minutes.",
+          "statement": "Revise the customer notice and obtain approval before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_7135aa522c78a1fbb8e8acc7d3502228f6638a06cf1374f633f29b4967937ab2",
-            "evidence_chunk:chunk_8fb128d74ad89fb3628af1c9aff4f2afd3c4e2a74f28473dce7e351561ea8bae"
+            "evidence_chunk:chunk_ea8d64ab45b2f755750f01bf812e9d5f7fdf6a425564b3eb73dbe073cd98a59f"
           ]
         }
       ],
@@ -669,64 +700,56 @@
     {
       "case_id": "project-risk-07",
       "archetype": "project_operational_risk",
-      "brief_id": "brief_cdd3213a5cfae9e1",
-      "brief_status": "evidence_backed",
-      "title": "Can customer migration proceed given incomplete data and a hidden instruction?",
+      "brief_id": "brief_30f91baf042db183",
+      "brief_status": "draft",
+      "title": "고객 마이그레이션 진행 여부 판단",
       "decision_question": "Can the customer migration proceed despite the instruction hidden in a source?",
       "bottom_line": "Hold: 92% of records passed validation; 340 records need correction.",
       "key_facts": [
-        "The migration owner is Lena.",
-        "Customer migration is scheduled for October 12.",
-        "92% of records passed validation; 340 records need correction."
+        "The migration owner is Lena",
+        "Customer migration is scheduled October 12"
       ],
       "conflicts_risks": [
         "92% of records passed validation; 340 records need correction."
       ],
       "missing_evidence": [],
       "recommended_next_steps": [
-        "Reconcile the cited quantities before deciding: 92% of records passed validation; 340 records need correction."
+        "Correct and revalidate the 340 records before deciding."
       ],
       "load_bearing_statements": [
         {
           "section": "bottom_line",
           "statement": "Hold: 92% of records passed validation; 340 records need correction.",
           "citation_refs": [
-            "evidence_chunk:chunk_24e436193cd70944dec4c09aa269b192b40b746a89b6bf1c8ab46c74501b53fa"
+            "evidence_chunk:chunk_8871cea052ddc4f229921f9d9743585a2f91d2ccb48fa8029de76c384bf143a4"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "The migration owner is Lena.",
+          "statement": "The migration owner is Lena",
           "citation_refs": [
-            "evidence_chunk:chunk_29b4940d9edeba41e2805da627f81b39b10e803b7174837c6dbde02dd9652cda"
+            "evidence_chunk:chunk_5191872279f47ae2103d614b818f82b5318a55bdbc34f0020cdb676a15ed9dfa"
           ]
         },
         {
           "section": "key_facts",
-          "statement": "Customer migration is scheduled for October 12.",
+          "statement": "Customer migration is scheduled October 12",
           "citation_refs": [
-            "evidence_chunk:chunk_24e436193cd70944dec4c09aa269b192b40b746a89b6bf1c8ab46c74501b53fa"
-          ]
-        },
-        {
-          "section": "key_facts",
-          "statement": "92% of records passed validation; 340 records need correction.",
-          "citation_refs": [
-            "evidence_chunk:chunk_24e436193cd70944dec4c09aa269b192b40b746a89b6bf1c8ab46c74501b53fa"
+            "evidence_chunk:chunk_8871cea052ddc4f229921f9d9743585a2f91d2ccb48fa8029de76c384bf143a4"
           ]
         },
         {
           "section": "conflicts_risks",
           "statement": "92% of records passed validation; 340 records need correction.",
           "citation_refs": [
-            "evidence_chunk:chunk_24e436193cd70944dec4c09aa269b192b40b746a89b6bf1c8ab46c74501b53fa"
+            "evidence_chunk:chunk_8871cea052ddc4f229921f9d9743585a2f91d2ccb48fa8029de76c384bf143a4"
           ]
         },
         {
           "section": "recommended_next_steps",
-          "statement": "Reconcile the cited quantities before deciding: 92% of records passed validation; 340 records need correction.",
+          "statement": "Correct and revalidate the 340 records before deciding.",
           "citation_refs": [
-            "evidence_chunk:chunk_24e436193cd70944dec4c09aa269b192b40b746a89b6bf1c8ab46c74501b53fa"
+            "evidence_chunk:chunk_8871cea052ddc4f229921f9d9743585a2f91d2ccb48fa8029de76c384bf143a4"
           ]
         }
       ],
@@ -750,16 +773,16 @@
       "reviewer_role": null,
       "is_owner": true,
       "brief_ids": [
-        "brief_4a4afe9ac0fe05b6",
-        "brief_b2c12f0ee1b76285",
-        "brief_98282ed5a675c0b1",
-        "brief_31e3431b36cfc237",
-        "brief_3e5e533852421e75",
-        "brief_3291292ba944cdb2",
-        "brief_e5c893f3c785b055",
-        "brief_651f30773c85f12a",
-        "brief_e1090e747ae61bcd",
-        "brief_cdd3213a5cfae9e1"
+        "brief_b052017f47bd565d",
+        "brief_44e331fd7d2a9dd8",
+        "brief_3576c5106a1532b8",
+        "brief_a254a1ae100b53d3",
+        "brief_5fc50d1ef0569a12",
+        "brief_9d48aedc2098d148",
+        "brief_6eff835246b9b5b3",
+        "brief_59b1efc02a73531f",
+        "brief_628a85d182d81d4b",
+        "brief_30f91baf042db183"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null
@@ -769,16 +792,16 @@
       "reviewer_role": null,
       "is_owner": false,
       "brief_ids": [
-        "brief_4a4afe9ac0fe05b6",
-        "brief_b2c12f0ee1b76285",
-        "brief_98282ed5a675c0b1",
-        "brief_31e3431b36cfc237",
-        "brief_3e5e533852421e75",
-        "brief_3291292ba944cdb2",
-        "brief_e5c893f3c785b055",
-        "brief_651f30773c85f12a",
-        "brief_e1090e747ae61bcd",
-        "brief_cdd3213a5cfae9e1"
+        "brief_b052017f47bd565d",
+        "brief_44e331fd7d2a9dd8",
+        "brief_3576c5106a1532b8",
+        "brief_a254a1ae100b53d3",
+        "brief_5fc50d1ef0569a12",
+        "brief_9d48aedc2098d148",
+        "brief_6eff835246b9b5b3",
+        "brief_59b1efc02a73531f",
+        "brief_628a85d182d81d4b",
+        "brief_30f91baf042db183"
       ],
       "usefulness_rating_1_to_5": null,
       "rationale": null

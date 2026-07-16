@@ -18,22 +18,45 @@ from cornerstone_cli.runtime import (
     _answer_relationship_supported,
     _answer_scalar_values,
     _brief_output_echo_violations,
+    _comparison_version_ids,
+    _dedupe_missing_evidence,
     _direct_scalar_answer_projection,
     _expand_comparative_threshold_citations,
     _explicit_constraint_rows,
+    _evidence_query_facets,
+    _expanded_search_query_terms,
     _explicit_missing_evidence,
     _explicit_tension_rows,
     _grounded_decision_risk_rows,
     _grounded_key_fact_fallback,
+    _evidence_query_is_comparison,
+    _korean_transcript_statement_is_attributed,
+    _korean_transcript_procedural_record,
+    _korean_transcript_attributed_sentences,
+    _korean_attribution_claims_consistent,
+    _instrument_clause_records,
+    _low_information_key_fact,
+    _map_brief_citation_aliases,
+    _paired_version_binding_anchor,
+    _paired_version_clause_rows,
+    _question_requests_decision_direction,
+    _repair_korean_transcript_attribution,
+    _key_fact_row_is_redundant,
     _normalize_brief_title,
     _ollama_generate_json,
     _question_specific_insufficient_evidence_answer,
     _quantity_metric_terms,
     _relationship_compatible,
     _repair_grounded_recommendations,
+    _select_evidence_chunks,
     _select_grounded_bottom_line,
     _statement_source_anchor,
+    _statement_source_anchor_for_context,
+    _text_chunks,
+    _version_bound_clause_observation_anchor,
+    _version_bound_clause_observation_rows,
     detect_unsafe_instructions,
+    search_terms,
 )
 from cornerstone_cli.vs5_verification import (
     SCENARIO_IDS,
@@ -64,6 +87,1535 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_search_terms_preserves_korean_ascii_and_hyphenated_terms(self) -> None:
+        self.assertEqual(
+            search_terms("의안번호 519를 가결 또는 보류 VS5-ASK"),
+            ["의안번호", "519", "를", "가결", "또는", "보류", "vs5-ask"],
+        )
+        self.assertEqual(
+            search_terms("Acme data-processing review"),
+            ["acme", "data-processing", "review"],
+        )
+
+    def test_evidence_query_expansion_strips_particles_and_adds_policy_concepts(self) -> None:
+        terms = _expanded_search_query_terms(
+            "조례 본문이 허용하는 범위와 집행 계획을 구분하고 "
+            "법률·재정·효과성 쟁점을 명시하라."
+        )
+
+        self.assertTrue(
+            {
+                "본문",
+                "조문",
+                "지원대상",
+                "집행",
+                "시행",
+                "법률",
+                "보건복지부",
+                "재정",
+                "비용추계",
+                "효과성",
+                "매출",
+            }.issubset(terms)
+        )
+        self.assertFalse({"본문이", "계획을", "구분하고", "명시하라"} & terms)
+        self.assertTrue(
+            {"acme", "data-processing", "review"}.issubset(
+                _expanded_search_query_terms("Acme data-processing review")
+            )
+        )
+        facets = _evidence_query_facets("법률·재정·효과성 쟁점을 검토하라.")
+        self.assertTrue(any("보건복지부" in facet for facet in facets))
+        self.assertTrue(any("비용추계" in facet for facet in facets))
+        self.assertTrue(any("매출" in facet for facet in facets))
+        legislative_facets = _evidence_query_facets(
+            "이 조례안을 지금 가결, 부결, 또는 보류해야 하는가?"
+        )
+        self.assertTrue(any({"조문", "지급대상"} <= facet for facet in legislative_facets))
+        self.assertTrue(any({"예산", "기금", "시비"} <= facet for facet in legislative_facets))
+        self.assertTrue(any({"찬성", "지지"} <= facet for facet in legislative_facets))
+        self.assertTrue(any({"반대", "중복"} <= facet for facet in legislative_facets))
+        self.assertTrue(
+            _evidence_query_is_comparison(
+                "의안번호 519에서 584로 무엇이 바뀌었는가?"
+            )
+        )
+        self.assertFalse(
+            _evidence_query_is_comparison(
+                "의안번호 519를 지금 가결해야 하는가?"
+            )
+        )
+        self.assertTrue(
+            _evidence_query_is_comparison("Compare bill 519 with bill 584.")
+        )
+        self.assertTrue(
+            _evidence_query_is_comparison("What changed between 519 and 584?")
+        )
+
+    def test_comparison_version_ids_ignore_metrics_dates_and_ambiguous_sets(self) -> None:
+        cases = {
+            "2025년 의안 101과 202를 비교하라": ["101", "202"],
+            "10만원 계획에서 의안 101과 202를 비교하라": ["101", "202"],
+            "새 의안 202는 기존 의안 101에서 무엇을 변경했는가?": ["101", "202"],
+            "의안번호 제101호에서 제202호로 변경된 점을 비교하라": ["101", "202"],
+            "의안번호 101호와 202호를 비교하라": ["101", "202"],
+            "Compare bill #101 vs #202.": ["101", "202"],
+            "Compare bill 101 and bill 202; amount changed from 10 to 20.": ["101", "202"],
+            "의안 101과 202의 제10조를 비교하라": ["101", "202"],
+        }
+        for question, expected in cases.items():
+            with self.subTest(question=question):
+                self.assertEqual(_comparison_version_ids(question), expected)
+        self.assertEqual(
+            _comparison_version_ids("의안 101과 의안 202와 의안 303을 비교하라"),
+            [],
+        )
+        self.assertFalse(
+            _question_requests_decision_direction(
+                "의안번호 101과 202의 차이만 비교하라."
+            )
+        )
+        self.assertTrue(
+            _question_requests_decision_direction(
+                "의안번호 101과 202를 비교하고 보류 여부를 권고하라."
+            )
+        )
+
+    def test_paired_version_projection_is_regenerated_and_tamper_evident(self) -> None:
+        def chunk(artifact: str, version: str, text: str) -> dict[str, object]:
+            return {
+                "artifact_id": artifact,
+                "evidence_chunk_id": f"{artifact}-body",
+                "source": {"filename": f"bill-{version}-official.txt"},
+                "text": text,
+                "span": {"char_start": 0, "char_end": len(text)},
+                "derived_content_char_count": len(text),
+            }
+
+        old = chunk(
+            "old",
+            "101",
+            "\n".join(
+                [
+                    "제2조(정의) 이 조례에서 사용하는 용어의 뜻은 다음과 같다.",
+                    "1. 지원금은 한시적으로 지급하는 금액을 말한다.",
+                    "제5조(지급) ① 지원금을 지급한다.",
+                    "② 지급금액, 지급기준 및 범위, 지급절차는 시장이 별도로 정한다.",
+                    "- 5 -",
+                    "부칙",
+                    "제1조(시행일) 이 조례는 공포한 날부터 시행한다.",
+                ]
+            ),
+        )
+        new = chunk(
+            "new",
+            "202",
+            "\n".join(
+                [
+                    "제2조(정의) 이 조례에서 사용하는 용어의 뜻은 다음과 같다.",
+                    "1. 지원금은 한시적 일회성으로 지급하는 금액을 말한다.",
+                    "제5조(지급) ① 지원금을 지급한다.",
+                    "② 지급금액, 지급기준 및 범위, 지급절차는 시장이 별도로 정한다.",
+                    "- 6 -",
+                    "부칙",
+                    "제1조(시행일) 이 조례는 공포한 날부터 시행한다.",
+                    "제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.",
+                ]
+            ),
+        )
+        question = "의안번호 101에서 202로 무엇이 바뀌었고 보류해야 하는가?"
+        rows = _paired_version_clause_rows(question, [old, new], limit=3)
+
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(any("한시적으로" in row["statement"] for row in rows))
+        self.assertTrue(any(row["comparison_state"] == "unchanged" for row in rows))
+        self.assertFalse(any("2026년 6월 30일" in row["statement"] for row in rows))
+        self.assertTrue(
+            all(
+                _paired_version_binding_anchor(row, question, [old, new])["status"]
+                == "passed"
+                for row in rows
+            )
+        )
+
+        tampered = json.loads(json.dumps(rows[0]))
+        tampered["statement"] = "101은 20만원이고 202는 10만원이다."
+        tampered["comparison_validation"]["projected_statement_sha256"] = (
+            hashlib.sha256(tampered["statement"].encode("utf-8")).hexdigest()
+        )
+        self.assertEqual(
+            _paired_version_binding_anchor(tampered, question, [old, new])["status"],
+            "failed",
+        )
+        fabricated_ref = json.loads(json.dumps(rows[0]))
+        fabricated_ref["citation_refs"] = ["evidence_chunk:fabricated"]
+        self.assertEqual(
+            _paired_version_binding_anchor(
+                fabricated_ref,
+                question,
+                [old, new],
+            )["status"],
+            "failed",
+        )
+        self.assertEqual(_paired_version_clause_rows(question, [old, new], limit=0), [])
+
+    def test_later_version_clause_observation_is_truthful_and_tamper_evident(
+        self,
+    ) -> None:
+        def artifact_chunks(
+            artifact: str,
+            version: str,
+            text: str,
+            *,
+            filename: str | None = None,
+        ) -> list[dict[str, object]]:
+            rows = []
+            for index, span in enumerate(_text_chunks(text)):
+                rows.append(
+                    {
+                        "artifact_id": artifact,
+                        "evidence_chunk_id": f"{artifact}-{index}",
+                        "source": {
+                            "filename": filename or f"bill-{version}-official.txt"
+                        },
+                        "text": span["text"],
+                        "span": {
+                            "char_start": span["char_start"],
+                            "char_end": span["char_end"],
+                        },
+                        "source_complete": span["source_complete"],
+                        "derived_content_char_count": len(text),
+                    }
+                )
+            return rows
+
+        old_text = "\n".join(
+            [
+                "제1조(목적) 시민 생활을 지원한다.",
+                "제2조(정의) 지원금은 한시적으로 지급한다.",
+                "부칙",
+                "제1조(시행일) 이 조례는 공포한 날부터 시행한다.",
+            ]
+        )
+        new_text = (
+            "\n".join(
+                [
+                    "제1조(목적) 시민 생활을 지원한다.",
+                    "제2조(정의) 지원금은 한시적 일회성으로 지급한다.",
+                    "부칙",
+                    "제1조(시행일) 이 조례는 공포한 날부터 시행한다.",
+                    "제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.",
+                ]
+            )
+            + "\n"
+        )
+        old = artifact_chunks("old", "101", old_text)
+        new = artifact_chunks("new", "202", new_text)
+        transcript = artifact_chunks(
+            "minutes",
+            "202",
+            "○김 의원은 다음과 같이 말했다.\n"
+            "부칙\n제2조(유효기간) 이 조례는 2027년 12월 31일까지 효력을 가진다.\n",
+            filename="plenary-minutes-202.txt",
+        )
+        chunks = [*old, *new, *transcript]
+        question = "의안번호 101에서 202로 무엇이 바뀌었는가?"
+
+        self.assertTrue(new[-1]["source_complete"])
+        self.assertEqual(new[-1]["span"]["char_end"], len(new_text) - 1)
+        self.assertTrue(
+            _instrument_clause_records(new[-1])["supplement:article:2"][
+                "complete"
+            ]
+        )
+        rows = _version_bound_clause_observation_rows(question, chunks)
+
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(
+            row["statement"],
+            "202 부칙 제2조: ‘이 조례는 2026년 6월 30일까지 효력을 가진다’",
+        )
+        self.assertNotRegex(
+            row["statement"],
+            r"(?:추가|변경|바꾸|없다|\b(?:add|change|remove)(?:s|d)?\b)",
+        )
+        self.assertEqual(row["citation_refs"], ["evidence_chunk:new-0"])
+        self.assertEqual(row["observation_validation"]["version_id"], "202")
+        self.assertEqual(
+            _version_bound_clause_observation_anchor(row, question, chunks)[
+                "status"
+            ],
+            "passed",
+        )
+        self.assertEqual(
+            _version_bound_clause_observation_rows(question, chunks, limit=0),
+            [],
+        )
+
+        statement_tamper = json.loads(json.dumps(row))
+        statement_tamper["statement"] = statement_tamper["statement"].replace(
+            "2026년", "2027년"
+        )
+        statement_tamper["observation_validation"][
+            "projected_statement_sha256"
+        ] = hashlib.sha256(statement_tamper["statement"].encode("utf-8")).hexdigest()
+
+        version_tamper = json.loads(json.dumps(row))
+        version_tamper["statement"] = version_tamper["statement"].replace(
+            "202 부칙", "101 부칙"
+        )
+        version_tamper["observation_validation"]["version_id"] = "101"
+        version_tamper["observation_validation"][
+            "projected_statement_sha256"
+        ] = hashlib.sha256(version_tamper["statement"].encode("utf-8")).hexdigest()
+
+        ref_tamper = json.loads(json.dumps(row))
+        old_ref = "evidence_chunk:old-0"
+        ref_tamper["citation_refs"] = [old_ref]
+        ref_tamper["allowed_citation_refs"] = [old_ref]
+        ref_tamper["observation_validation"]["citation_ref"] = old_ref
+        ref_tamper["observation_validation"]["artifact_id"] = "old"
+
+        clause_tamper = json.loads(json.dumps(row))
+        clause_tamper["observation_validation"][
+            "clause_key"
+        ] = "supplement:article:1"
+        clause_tamper["observation_validation"]["source_statement"] = (
+            "제1조(시행일) 이 조례는 공포한 날부터 시행한다"
+        )
+
+        for tampered in (
+            statement_tamper,
+            version_tamper,
+            ref_tamper,
+            clause_tamper,
+        ):
+            with self.subTest(tampered=tampered):
+                self.assertEqual(
+                    _version_bound_clause_observation_anchor(
+                        tampered,
+                        question,
+                        chunks,
+                    )["status"],
+                    "failed",
+                )
+
+    def test_final_trimmed_chunk_marks_only_true_source_end_complete(self) -> None:
+        text = "부칙\n제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.\n"
+        span = _text_chunks(text)[-1]
+        self.assertTrue(span["source_complete"])
+        self.assertEqual(span["char_end"], len(text) - 1)
+        complete_records = _instrument_clause_records(
+            {
+                "evidence_chunk_id": "complete",
+                "text": span["text"],
+                "span": {
+                    "char_start": span["char_start"],
+                    "char_end": span["char_end"],
+                },
+                "source_complete": span["source_complete"],
+                "derived_content_char_count": len(text),
+            }
+        )
+        self.assertTrue(complete_records["supplement:article:2"]["complete"])
+
+        truncated_chunk = {
+            "artifact_id": "new",
+            "evidence_chunk_id": "truncated",
+            "source": {"filename": "bill-202-official.txt"},
+            "text": span["text"],
+            "span": {
+                "char_start": span["char_start"],
+                "char_end": span["char_end"],
+            },
+            "source_complete": False,
+            "derived_content_char_count": len(text) + 10,
+        }
+        truncated_records = _instrument_clause_records(truncated_chunk)
+        self.assertFalse(truncated_records["supplement:article:2"]["complete"])
+        self.assertEqual(
+            _version_bound_clause_observation_rows(
+                "의안번호 101에서 202로 무엇이 바뀌었는가?",
+                [truncated_chunk],
+            ),
+            [],
+        )
+
+    def test_paired_comparison_bottom_line_validates_its_source_clause(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-paired-bottom-line-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            common_clause = (
+                "제5조(지급) ① 지원금을 지급한다.\n"
+                "② 지급금액, 지급기준 및 범위, 지급절차는 시장이 별도로 정한다."
+            )
+            old = store.ingest_text_artifact(
+                "의안번호: 101\n"
+                "제2조(정의) 지원금은 한시적으로 지급하는 금액을 말한다.\n"
+                f"{common_clause}\n부칙\n제1조(시행일) 이 조례는 공포한 날부터 시행한다.",
+                SCOPE,
+                source_type="user_paste",
+                source_ref="bill-101-official.txt",
+            )["artifact"]
+            new = store.ingest_text_artifact(
+                "의안번호: 202\n"
+                "제2조(정의) 지원금은 한시적 일회성으로 지급하는 금액을 말한다.\n"
+                f"{common_clause}\n부칙\n"
+                "제1조(시행일) 이 조례는 공포한 날부터 시행한다.\n"
+                "제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.\n",
+                SCOPE,
+                source_type="user_paste",
+                source_ref="bill-202-official.txt",
+            )["artifact"]
+            question = "의안번호 101에서 202로 무엇이 바뀌었고 보류해야 하는가?"
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={old["artifact_id"], new["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                self.assertIn(
+                    "return key_facts as an empty list",
+                    str(kwargs.get("prompt") or ""),
+                )
+                self.assertEqual(
+                    kwargs["json_schema"]["properties"]["key_facts"]["maxItems"],
+                    0,
+                )
+                return {
+                    "title": "의안 101과 202 비교",
+                    "bottom_line": {
+                        "statement": "가결: 비교 결과가 충분하다.",
+                        "citation_refs": ["E1"],
+                    },
+                    "key_facts": [],
+                    "conflicts_risks": [],
+                    "missing_evidence": [],
+                    "recommended_next_steps": [],
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    SCOPE,
+                    model_provider="ollama",
+                )
+
+            brief = result["brief"]
+            bottom_line = next(
+                row
+                for row in brief["load_bearing_statements"]
+                if row["section"] == "bottom_line"
+            )
+            bottom_line_anchor = next(
+                row
+                for row in brief["statement_anchor_checks"]
+                if row["section"] == "bottom_line"
+            )
+            self.assertEqual(bottom_line["validation_mode"], "grounded_proposal_basis")
+            self.assertEqual(bottom_line_anchor["status"], "passed")
+            self.assertEqual(
+                bottom_line_anchor["anchor_validation"]["proposal_basis_statement"],
+                bottom_line["proposal_basis_statement"],
+            )
+            self.assertEqual(
+                [
+                    row.get("validation_mode")
+                    for row in brief["key_point_citations"]
+                ],
+                [
+                    "paired_version_binding",
+                    "paired_version_binding",
+                    "version_bound_clause_observation",
+                ],
+            )
+            observation = brief["key_point_citations"][2]
+            self.assertEqual(
+                observation["statement"],
+                "202 부칙 제2조: ‘이 조례는 2026년 6월 30일까지 효력을 가진다’",
+            )
+            self.assertEqual(len(observation["citation_refs"]), 1)
+            key_fact_anchors = [
+                row
+                for row in brief["statement_anchor_checks"]
+                if row["section"] == "key_facts"
+            ]
+            self.assertEqual(len(key_fact_anchors), 3)
+            self.assertTrue(
+                all(row["status"] == "passed" for row in key_fact_anchors)
+            )
+            self.assertEqual(brief["trust_label"], "evidence_backed")
+
+    def test_paired_projection_requires_complete_non_transcript_instruments(self) -> None:
+        question = "의안 101에서 202로 무엇이 변경되었는가?"
+
+        def one(
+            artifact: str,
+            version: str,
+            text: str,
+            *,
+            filename: str | None = None,
+            complete: bool = True,
+        ) -> dict[str, object]:
+            row: dict[str, object] = {
+                "artifact_id": artifact,
+                "evidence_chunk_id": f"{artifact}-chunk",
+                "source": {"filename": filename or f"bill-{version}.txt"},
+                "text": text,
+                "span": {"char_start": 0, "char_end": len(text)},
+                "derived_content_char_count": len(text) if complete else len(text) + 50,
+            }
+            return row
+
+        old_text = "제2조(정의) 지원금은 한시적으로 지급한다."
+        new_text = "제2조(정의) 지원금은 한시적 일회성으로 지급한다."
+        self.assertEqual(
+            _paired_version_clause_rows(
+                question,
+                [
+                    one("old", "101", old_text, complete=False),
+                    one("new", "202", new_text),
+                ],
+            ),
+            [],
+        )
+        self.assertEqual(
+            _paired_version_clause_rows(
+                question,
+                [
+                    one("old", "101", old_text, filename="plenary-minutes-101.txt"),
+                    one("new", "202", new_text, filename="plenary-minutes-202.txt"),
+                ],
+            ),
+            [],
+        )
+        self.assertEqual(
+            _paired_version_clause_rows(
+                question,
+                [
+                    one("old", "101", "부칙: 지원은 한시적", complete=False),
+                    one("new", "202", "부칙: 지원은 한시적 일회성", complete=False),
+                ],
+            ),
+            [],
+        )
+
+    def test_instrument_clause_parser_preserves_nested_identity_and_scalars(self) -> None:
+        text = "\n".join(
+            [
+                "제 5 조(지급) ① 첫째 항목이다.",
+                "1. 지급금액은 위원회가 별도로 정한다.",
+                "② 둘째 항목이다.",
+                "1. 예산은 10만원이다.",
+                "제5조의 2(특례) 지급률은 -5%로 정한다.",
+                "제6조(기간) 이 조례는",
+                "2025",
+                "년까지 효력을 가진다.",
+            ]
+        )
+        records = _instrument_clause_records(
+            {
+                "evidence_chunk_id": "instrument",
+                "text": text,
+                "source_complete": True,
+            }
+        )
+
+        self.assertIn("body:article:5:paragraph:1:item:1", records)
+        self.assertIn("body:article:5:paragraph:2:item:1", records)
+        self.assertIn("body:article:5-2:preamble", records)
+        self.assertIn("-5%", records["body:article:5-2:preamble"]["source_statement"])
+        self.assertIn("2025", records["body:article:6:preamble"]["source_statement"])
+
+        def signed(version: str, value: str) -> dict[str, object]:
+            clause = f"제2조(비율) 지급률은 {value}%로 정한다."
+            return {
+                "artifact_id": version,
+                "evidence_chunk_id": f"signed-{version}",
+                "source": {"filename": f"bill-{version}.txt"},
+                "text": clause,
+                "source_complete": True,
+            }
+
+        signed_rows = _paired_version_clause_rows(
+            "의안 101에서 202로 무엇이 변경되었는가?",
+            [signed("101", "-5"), signed("202", "+5")],
+        )
+        self.assertEqual(len(signed_rows), 1)
+        self.assertEqual(signed_rows[0]["comparison_state"], "changed")
+        self.assertIn("-5%", signed_rows[0]["statement"])
+        self.assertIn("+5%", signed_rows[0]["statement"])
+
+    def test_paired_projection_propagates_version_metadata_to_body_chunks(self) -> None:
+        def rows(artifact: str, version: str, phrase: str) -> list[dict[str, object]]:
+            body = f"제2조(정의) 지원금은 {phrase} 지급한다."
+            return [
+                {
+                    "artifact_id": artifact,
+                    "evidence_chunk_id": f"{artifact}-identity",
+                    "source": {"filename": f"{artifact}.txt"},
+                    "text": f"[의안번호] 제{version}호",
+                },
+                {
+                    "artifact_id": artifact,
+                    "evidence_chunk_id": f"{artifact}-body",
+                    "source": {"filename": f"{artifact}.txt"},
+                    "text": body,
+                    "span": {"char_start": 20, "char_end": 20 + len(body)},
+                    "source_complete": True,
+                },
+            ]
+
+        question = "의안 101에서 202로 무엇이 변경되었는가?"
+        chunks = [
+            *rows("old", "101", "한시적으로"),
+            *rows("new", "202", "한시적 일회성으로"),
+        ]
+        projected = _paired_version_clause_rows(question, chunks)
+        self.assertEqual(len(projected), 1)
+        self.assertEqual(
+            _paired_version_binding_anchor(projected[0], question, chunks)["status"],
+            "passed",
+        )
+
+    def test_paired_projection_uses_instrument_region_inside_mixed_source(self) -> None:
+        old_body = "\n".join(
+            [
+                "제1조(목적) 시민 생활을 지원한다.",
+                "제2조(정의) 1. 지원금은 한시적으로 지급한다.",
+                "제5조(지급) ① 지원금을 지급한다.",
+                "② 지급금액과 지급절차는 시장이 별도로 정한다.",
+                "제6조(대상) 시민을 대상으로 한다.",
+            ]
+        )
+        new_body = old_body.replace("한시적으로", "한시적 일회성으로")
+        chunks = [
+            {
+                "artifact_id": "old",
+                "evidence_chunk_id": "old-instrument",
+                "source": {"filename": "bill-101-text-and-debate.txt"},
+                "text": old_body,
+                "source_complete": True,
+            },
+            {
+                "artifact_id": "old",
+                "evidence_chunk_id": "old-speaker",
+                "source": {"filename": "bill-101-text-and-debate.txt"},
+                "text": "○김 의원은 제2조가 영구적이라고 주장했다.",
+                "source_complete": True,
+            },
+            {
+                "artifact_id": "new",
+                "evidence_chunk_id": "new-official",
+                "source": {"filename": "bill-202-official.txt"},
+                "text": new_body,
+                "source_complete": True,
+            },
+        ]
+        question = "의안 101에서 202로 무엇이 변경되었는가?"
+        rows = _paired_version_clause_rows(question, chunks)
+
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(any("한시적 일회성" in row["statement"] for row in rows))
+        self.assertTrue(any(row["comparison_state"] == "unchanged" for row in rows))
+        self.assertFalse(any("영구적" in row["statement"] for row in rows))
+        self.assertTrue(
+            all(
+                _paired_version_binding_anchor(row, question, chunks)["status"]
+                == "passed"
+                for row in rows
+            )
+        )
+
+    def test_brief_chunk_selection_balances_sources_and_avoids_overlap(self) -> None:
+        def chunk(
+            source: str,
+            index: int,
+            score: float,
+            start: int,
+            end: int,
+        ) -> dict[str, object]:
+            return {
+                "artifact_id": source,
+                "evidence_chunk_id": f"chunk_{source}_{index}",
+                "score": score,
+                "span": {"char_start": start, "char_end": end},
+            }
+
+        ranked = [
+            *[
+                chunk("dominant", index, 100 - index, index * 1040, index * 1040 + 1200)
+                for index in range(12)
+            ],
+            chunk("short-b", 0, 1.0, 0, 500),
+            chunk("short-c", 0, 0.5, 0, 500),
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=10,
+            per_source_target=2,
+        )
+
+        counts = {
+            source: sum(row["artifact_id"] == source for row in selected)
+            for source in {"dominant", "short-b", "short-c"}
+        }
+        self.assertEqual(counts, {"dominant": 8, "short-b": 1, "short-c": 1})
+        dominant_spans = [
+            row["span"] for row in selected if row["artifact_id"] == "dominant"
+        ]
+        self.assertIn({"char_start": 0, "char_end": 1200}, dominant_spans)
+        diverse_pair = _select_evidence_chunks(
+            ranked[:3],
+            limit=2,
+            per_source_target=2,
+        )
+        self.assertEqual(
+            [row["span"] for row in diverse_pair],
+            [
+                {"char_start": 0, "char_end": 1200},
+                {"char_start": 2080, "char_end": 3280},
+            ],
+        )
+
+    def test_brief_chunk_selection_reserves_two_chunks_for_five_sources(self) -> None:
+        ranked = [
+            {
+                "artifact_id": f"source-{source}",
+                "evidence_chunk_id": f"chunk_{source}_{index}",
+                "score": float(100 - source * 10 - index),
+                "span": {
+                    "char_start": index * 1500,
+                    "char_end": index * 1500 + 1200,
+                },
+            }
+            for source in range(5)
+            for index in range(3)
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=10,
+            per_source_target=2,
+        )
+
+        self.assertEqual(len(selected), 10)
+        self.assertEqual(
+            {
+                source: sum(row["artifact_id"] == source for row in selected)
+                for source in {f"source-{index}" for index in range(5)}
+            },
+            {f"source-{index}": 2 for index in range(5)},
+        )
+
+    def test_brief_chunk_selection_reserves_better_facet_evidence(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "generic-debate",
+                "score": 100.0,
+                "span": {"char_start": 0, "char_end": 1000},
+                "text": "조례 찬반 토론에서 집행 문제가 제기되었습니다.",
+            },
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "ordinance-body",
+                "score": 3.0,
+                "span": {"char_start": 1500, "char_end": 2500},
+                "text": "제3조 지원대상과 제4조 지원금액 및 지급 방법을 정한다.",
+            },
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "cost-estimate",
+                "score": 2.0,
+                "span": {"char_start": 3000, "char_end": 4000},
+                "text": "비용추계 결과 필요한 시비와 예산은 470억 원이다.",
+            },
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "effect-study",
+                "score": 1.0,
+                "span": {"char_start": 4500, "char_end": 5500},
+                "text": "연구는 소비와 매출 증가 효과를 분석했다.",
+            },
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=4,
+            facet_terms=[
+                _expanded_search_query_terms("조례 본문과 지원 범위"),
+                _expanded_search_query_terms("재정 쟁점"),
+                _expanded_search_query_terms("효과성 쟁점"),
+            ],
+        )
+
+        self.assertEqual(
+            {row["evidence_chunk_id"] for row in selected},
+            {"generic-debate", "ordinance-body", "cost-estimate", "effect-study"},
+        )
+
+    def test_facet_selection_can_use_adjacent_window_with_only_boundary_overlap(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "opening",
+                "score": 10.0,
+                "span": {"char_start": 0, "char_end": 1200},
+                "text": "조례안을 상정하고 제안 이유를 설명한다.",
+            },
+            {
+                "artifact_id": "minutes",
+                "evidence_chunk_id": "ordinance-body",
+                "score": 1.0,
+                "span": {"char_start": 1040, "char_end": 2240},
+                "text": "제5조 지원대상 제6조 지원금액 제7조 지급 기준을 정한다.",
+            },
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=2,
+            per_source_target=1,
+            facet_terms=[_expanded_search_query_terms("조례 본문의 지원대상과 지원금액")],
+        )
+
+        self.assertEqual(
+            [row["evidence_chunk_id"] for row in selected],
+            ["opening", "ordinance-body"],
+        )
+
+    def test_facet_selection_can_follow_adjacent_windows_for_distinct_comparison_facets(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "old-version",
+                "evidence_chunk_id": "identity",
+                "score": 10.0,
+                "span": {"char_start": 0, "char_end": 1200},
+                "text": "의안번호 101의 제안자와 제안일을 기록한다.",
+            },
+            {
+                "artifact_id": "old-version",
+                "evidence_chunk_id": "body",
+                "score": 2.0,
+                "span": {"char_start": 1040, "char_end": 2240},
+                "text": "제5조 지급금액과 지급기준은 시장이 별도로 정한다.",
+            },
+            {
+                "artifact_id": "old-version",
+                "evidence_chunk_id": "ending",
+                "score": 1.0,
+                "span": {"char_start": 2080, "char_end": 3280},
+                "text": "부칙 시행일과 유효기간을 규정한다.",
+            },
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=3,
+            per_source_target=1,
+            facet_terms=[
+                _expanded_search_query_terms("의안번호 제안자 제안일"),
+                _expanded_search_query_terms("본문 제5조 지급금액 지급기준"),
+                _expanded_search_query_terms("부칙 유효기간 시행일"),
+            ],
+            per_source_facet_count=3,
+        )
+
+        self.assertEqual(
+            [row["evidence_chunk_id"] for row in selected],
+            ["identity", "body", "ending"],
+        )
+
+    def test_comparison_selection_reserves_matching_facet_from_each_source(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "old-version",
+                "evidence_chunk_id": "old-generic",
+                "score": 100.0,
+                "span": {"char_start": 0, "char_end": 1000},
+                "text": "이전 조례안의 위원회 토론과 여러 쟁점을 기록한다.",
+            },
+            {
+                "artifact_id": "new-version",
+                "evidence_chunk_id": "new-generic",
+                "score": 90.0,
+                "span": {"char_start": 0, "char_end": 1000},
+                "text": "현재 조례안의 위원회 토론과 여러 쟁점을 기록한다.",
+            },
+            {
+                "artifact_id": "old-version",
+                "evidence_chunk_id": "old-plan",
+                "score": 2.0,
+                "span": {"char_start": 1500, "char_end": 2500},
+                "text": "당초 지급금액과 지급방식 및 예산 계획을 설명한다.",
+            },
+            {
+                "artifact_id": "new-version",
+                "evidence_chunk_id": "new-plan",
+                "score": 1.0,
+                "span": {"char_start": 1500, "char_end": 2500},
+                "text": "변경된 지급금액과 지급방식 및 예산 계획을 설명한다.",
+            },
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=4,
+            per_source_target=1,
+            facet_terms=[
+                _expanded_search_query_terms(
+                    "당초 이전 현재 변경 수정 차이 금액 지급대상 지급방식 예산 계획"
+                )
+            ],
+            per_source_facet_count=1,
+        )
+
+        self.assertEqual(
+            {row["evidence_chunk_id"] for row in selected},
+            {"old-generic", "new-generic", "old-plan", "new-plan"},
+        )
+
+    def test_brief_citation_aliases_do_not_leak_into_human_facing_prose(self) -> None:
+        model_output = {
+            "key_facts": [
+                {
+                    "statement": "E5/E10의 제2조는 한시적 일회성 지원을 규정한다.",
+                    "citation_refs": ["E5", "E10"],
+                }
+            ]
+        }
+
+        _map_brief_citation_aliases(
+            model_output,
+            {
+                "E5": "evidence_chunk:before",
+                "E10": "evidence_chunk:after",
+            },
+        )
+
+        self.assertEqual(
+            model_output["key_facts"][0],
+            {
+                "statement": "제2조는 한시적 일회성 지원을 규정한다.",
+                "citation_refs": [
+                    "evidence_chunk:before",
+                    "evidence_chunk:after",
+                ],
+            },
+        )
+        unsupported = {
+            "key_facts": [
+                {
+                    "statement": "The source records a decision.",
+                    "citation_refs": ["E5", "E9"],
+                }
+            ]
+        }
+        _map_brief_citation_aliases(
+            unsupported,
+            {"E5": "evidence_chunk:available"},
+        )
+        self.assertEqual(
+            unsupported["key_facts"][0]["citation_refs"],
+            ["evidence_chunk:available", "E9"],
+        )
+
+    def test_low_information_key_fact_rejects_pdf_and_bill_metadata_fragments(self) -> None:
+        for statement in (
+            "PDF 235-239쪽]",
+            "[공식 부록 전사: PDF 235-239쪽]",
+            "의안번호: 584",
+            "발의연월일: 2025. 8. 13.",
+            "거제시 민생회복지원금 지원 조례안 【최양희 의원 발의】",
+            "이 조례에서 사용하는 용어의 뜻은 다음과 같다",
+            "https://example.test/appendix.pdf",
+            "VS5 Slice 001 test note",
+            "Anchor phrase: vs5-slice-001-test-anchor",
+        ):
+            self.assertTrue(_low_information_key_fact(statement), statement)
+        self.assertFalse(
+            _low_information_key_fact(
+                "제2조는 민생회복지원금을 한시적 일회성 지원으로 정의한다."
+            )
+        )
+
+    def test_korean_grounding_handles_particles_and_rejects_negation_inversion(self) -> None:
+        source = "조례안 내용은 변경되지 않았습니다."
+
+        self.assertEqual(
+            _statement_source_anchor(
+                "조례안 내용은 변경되지 않았다.",
+                [source],
+            )["status"],
+            "passed",
+        )
+        self.assertEqual(
+            _statement_source_anchor(
+                "조례안 내용은 변경되었다.",
+                [source],
+            )["status"],
+            "failed",
+        )
+        self.assertEqual(
+            _statement_source_anchor(
+                "조례안 내용은 변경된다.",
+                ["조례안 내용은 변경되지 않습니다."],
+            )["status"],
+            "failed",
+        )
+
+    def test_cross_source_grounding_rejects_korean_version_and_speaker_value_swaps(self) -> None:
+        version_sources = [
+            "의안번호 519 지원금액은 20만원이다.",
+            "의안번호 584 지원금액은 10만원이다.",
+        ]
+        self.assertEqual(
+            _statement_source_anchor(
+                "의안번호 519 지원금액은 20만원이고 의안번호 584 지원금액은 10만원이다.",
+                version_sources,
+                allow_cross_source=True,
+            )["status"],
+            "passed",
+        )
+        self.assertEqual(
+            _statement_source_anchor(
+                "의안번호 519 지원금액은 10만원이고 의안번호 584 지원금액은 20만원이다.",
+                version_sources,
+                allow_cross_source=True,
+            )["status"],
+            "failed",
+        )
+        speaker_sources = [
+            "김선민 의원은 지원금액이 20만원이라고 말했다.",
+            "최양희 의원은 지원금액이 10만원이라고 말했다.",
+        ]
+        self.assertEqual(
+            _statement_source_anchor(
+                "김선민 의원은 지원금액이 10만원이라고 말했다.",
+                speaker_sources,
+                allow_cross_source=True,
+            )["status"],
+            "failed",
+        )
+
+    def test_reassuring_korean_absence_is_not_a_gap_or_decision_blocker(self) -> None:
+        for index, source in enumerate(
+            (
+                "법적 문제는 전혀 없습니다.",
+                "예산 부족은 전혀 없다.",
+                "누락된 항목은 없습니다.",
+                "미정인 사항은 없습니다.",
+            )
+        ):
+            chunks = [
+                {
+                    "artifact_id": f"source-{index}",
+                    "evidence_chunk_id": f"positive-{index}",
+                    "text": source,
+                    "safety": {},
+                }
+            ]
+            chunk_by_ref = {
+                f"evidence_chunk:positive-{index}": chunks[0]
+            }
+            self.assertEqual(_explicit_missing_evidence(chunks), [], source)
+            self.assertEqual(
+                _grounded_decision_risk_rows([], chunks, chunk_by_ref),
+                [],
+                source,
+            )
+
+        missing = [
+            {
+                "artifact_id": "missing-source",
+                "evidence_chunk_id": "missing-source",
+                "text": "관련 비용추계 자료가 없다.",
+                "safety": {},
+            }
+        ]
+        self.assertEqual(
+            _explicit_missing_evidence(missing),
+            ["관련 비용추계 자료가 없다."],
+        )
+        for index, source in enumerate(
+            (
+                "법적 문제는 전혀 해결되지 않았습니다.",
+                "예산 부족은 아직 해결되지 않았다.",
+                "누락된 항목은 아직 보완되지 않았습니다.",
+            )
+        ):
+            chunks = [
+                {
+                    "artifact_id": f"unresolved-{index}",
+                    "evidence_chunk_id": f"unresolved-{index}",
+                    "text": source,
+                    "safety": {},
+                }
+            ]
+            chunk_by_ref = {
+                f"evidence_chunk:unresolved-{index}": chunks[0]
+            }
+            self.assertTrue(
+                _grounded_decision_risk_rows([], chunks, chunk_by_ref),
+                source,
+            )
+        self.assertEqual(
+            _statement_source_anchor(
+                "경제관광위원회 처리 결과는 부결되었다.",
+                ["경제관광위원회 처리 결과는 부결되었다."],
+            )["status"],
+            "passed",
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                "반대 측은 조례안의 사회보장 성격 때문에 보건복지부 협의 절차가 누락되었다고 지적했다.",
+                [
+                    "반대 토론에서는 조례안이 사회보장 성격이므로 보건복지부 협의 절차를 "
+                    "거치지 않았고 누락되었다고 지적했습니다."
+                ],
+                allow_cross_source=True,
+                transcript_context=True,
+            )["status"],
+            "passed",
+        )
+        changed_plan_source = (
+            "○김선민 의원 조례안 내용이 달라지는 게 없습니다. "
+            "○지역경제과장 손순희 내용은 그대로입니다. "
+            "○김선민 의원 최근 발표한 시장 지침은 일부 변경이 되었습니다."
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                "김선민 의원은 조례안 내용과 행정 계획이 달라진 것이 없다고 확인했다.",
+                [changed_plan_source],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "failed",
+        )
+
+    def test_korean_explicit_gaps_and_fallback_prose_remain_korean(self) -> None:
+        ref = "evidence_chunk:korean"
+        source = (
+            "담당자는 아직 정해지지 않았습니다. "
+            "법률 검토 결과도 확인되지 않았습니다."
+        )
+        chunks = [{"evidence_chunk_id": "korean", "text": source, "safety": {}}]
+
+        self.assertEqual(
+            _explicit_missing_evidence(chunks),
+            [
+                "담당자는 아직 정해지지 않았습니다.",
+                "법률 검토 결과도 확인되지 않았습니다.",
+            ],
+        )
+        conflict = {
+            "statement": "담당자는 아직 정해지지 않았습니다.",
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+        selected, changed = _select_grounded_bottom_line(
+            None,
+            [conflict],
+            [],
+            {ref: {"text": source}},
+            decision_question="이 안건을 지금 가결해야 하는가?",
+        )
+        self.assertTrue(changed)
+        self.assertIsNotNone(selected)
+        assert selected is not None
+        self.assertTrue(selected["statement"].startswith("보류:"))
+        self.assertNotIn("Hold", selected["statement"])
+
+        recommendations, changed = _repair_grounded_recommendations(
+            [],
+            [conflict],
+            [],
+            {ref: {"text": source}},
+            decision_question="이 안건을 지금 가결해야 하는가?",
+        )
+        self.assertTrue(changed)
+        self.assertEqual(len(recommendations), 1)
+        self.assertNotRegex(
+            recommendations[0]["statement"],
+            r"Resolve|Reconcile|Use this",
+        )
+        pending_rows = _explicit_constraint_rows(
+            [
+                {
+                    "evidence_chunk_id": "pending-match",
+                    "source": {"ref": "official-plenary-minutes.txt"},
+                    "text": (
+                        "○의장 신금자 잠깐만요. 앞선 논의를 다시 설명하겠습니다. "
+                        "지금 아직 매칭사업 금액이 얼마인지 금액이 안 내려왔습니다."
+                    ),
+                    "safety": {},
+                }
+            ]
+        )
+        self.assertEqual(
+            pending_rows,
+            [
+                {
+                    "statement": "의장 신금자 발언: 지금 아직 매칭사업 금액이 얼마인지 금액이 안 내려왔습니다.",
+                    "citation_refs": ["evidence_chunk:pending-match"],
+                }
+            ],
+        )
+
+    def test_korean_model_direction_is_demoted_without_a_contradictory_prefix(self) -> None:
+        ref = "evidence_chunk:korean-recorded-outcome"
+        source = "경제관광위원회 처리 결과는 원안 가결되었다."
+        for transcript in (False, True):
+            chunk = {"text": source}
+            if transcript:
+                chunk["source"] = {"ref": "official-plenary-minutes.txt"}
+            for label in ("가결", "부결", "보류", "조건부 가결"):
+                with self.subTest(transcript=transcript, label=label):
+                    row = {
+                        "statement": f"{label}: {source}",
+                        "citation_refs": [ref],
+                        "allowed_citation_refs": [ref],
+                    }
+                    selected, repaired = _select_grounded_bottom_line(
+                        row,
+                        [],
+                        [],
+                        {ref: chunk},
+                        decision_question="이 안건을 지금 가결, 부결, 또는 보류해야 하는가?",
+                    )
+
+                    self.assertTrue(repaired)
+                    self.assertIsNotNone(selected)
+                    assert selected is not None
+                    self.assertEqual(
+                        selected["statement"],
+                        f"현재 근거만으로 결정을 확정하기 어렵습니다: {source}",
+                    )
+                    self.assertNotRegex(
+                        selected["statement"],
+                        r":\s*(?:조건부\s*)?(?:가결|부결|보류):",
+                    )
+
+        outcome, repaired = _select_grounded_bottom_line(
+            {
+                "statement": f"가결: {source}",
+                "citation_refs": [ref],
+                "allowed_citation_refs": [ref],
+            },
+            [],
+            [],
+            {ref: {"text": source, "source": {"ref": "official-plenary-minutes.txt"}}},
+            decision_question="이 조례안의 처리 결과는 무엇인가?",
+        )
+        self.assertTrue(repaired)
+        self.assertIsNotNone(outcome)
+        assert outcome is not None
+        self.assertTrue(outcome["statement"].startswith("처리 결과:"))
+        self.assertNotIn("결정을 확정하기 어렵습니다", outcome["statement"])
+
+        current_ref = "evidence_chunk:current-unresolved-amount"
+        current_constraint = "지급 금액은 아직 정해지지 않았다."
+        selected, repaired = _select_grounded_bottom_line(
+            {
+                "statement": f"가결: {source}",
+                "citation_refs": [ref],
+                "allowed_citation_refs": [ref],
+            },
+            [
+                {
+                    "statement": current_constraint,
+                    "citation_refs": [current_ref],
+                    "allowed_citation_refs": [current_ref],
+                }
+            ],
+            [],
+            {
+                ref: {"text": source, "source": {"ref": "official-plenary-minutes.txt"}},
+                current_ref: {"text": current_constraint},
+            },
+            decision_question="이 안건을 지금 가결, 부결, 또는 보류해야 하는가?",
+        )
+        self.assertTrue(repaired)
+        self.assertEqual(selected["statement"], f"보류: {current_constraint}")
+        self.assertEqual(selected["citation_refs"], [current_ref])
+
+        self.assertTrue(_question_requests_decision_direction("지금 가결해야 하는가?"))
+        self.assertFalse(_question_requests_decision_direction("이 조례안은 가결되었는가?"))
+        self.assertFalse(_question_requests_decision_direction("위원회가 심의를 보류했는가?"))
+
+    def test_historical_minutes_outcome_cannot_be_laundered_into_a_current_direction(self) -> None:
+        source = "2024년 경제관광위원회 처리 결과는 이 안건이 가결이었다."
+        question = "이 안건을 지금 어떻게 처리해야 하는가?"
+        for label in ("가결", "부결", "보류", "조건부 가결"):
+            with self.subTest(label=label), tempfile.TemporaryDirectory(
+                prefix="cornerstone-vs5-historical-outcome-"
+            ) as state_dir:
+                store = LocalRuntimeStore(Path(state_dir))
+                artifact = store.ingest_text_artifact(
+                    source,
+                    SCOPE,
+                    source_type="user_paste",
+                    source_ref="official-plenary-minutes.txt",
+                )["artifact"]
+                snapshot = store.search(
+                    question,
+                    **SCOPE,
+                    included_artifact_ids={artifact["artifact_id"]},
+                )["snapshot"]
+                bundle = store.create_evidence_bundle(
+                    snapshot["search_snapshot_id"], SCOPE
+                )["bundle"]
+
+                def generated(*_: object, **__: object) -> dict[str, object]:
+                    statement = f"{label}: {source}"
+                    return {
+                        "title": "현재 안건 처리",
+                        "bottom_line": {
+                            "statement": statement,
+                            "citation_refs": ["E1"],
+                        },
+                        "key_facts": [
+                            {"statement": statement, "citation_refs": ["E1"]}
+                        ],
+                        "conflicts_risks": [],
+                        "missing_evidence": [],
+                        "recommended_next_steps": [],
+                    }
+
+                with mock.patch(
+                    "cornerstone_cli.runtime._ollama_embedding",
+                    return_value=[1.0, 0.0],
+                ), mock.patch(
+                    "cornerstone_cli.runtime._ollama_generate_json",
+                    side_effect=generated,
+                ):
+                    brief = store.create_brief_from_evidence_bundle(
+                        bundle["evidence_bundle_id"],
+                        SCOPE,
+                        model_provider="ollama",
+                    )["brief"]
+
+                self.assertTrue(
+                    brief["bottom_line"].startswith(
+                        "현재 근거만으로 결정을 확정하기 어렵습니다:"
+                    )
+                )
+                self.assertNotRegex(
+                    brief["bottom_line"],
+                    r"^(?:조건부\s*)?(?:가결|부결|보류):",
+                )
+                self.assertFalse(
+                    brief["trust_label"] == "evidence_backed"
+                    and re.match(
+                        r"^(?:조건부\s*)?(?:가결|부결|보류):",
+                        brief["bottom_line"],
+                    )
+                )
+
+    def test_grounded_model_proposal_is_preserved_but_new_actor_and_webhook_are_rejected(self) -> None:
+        ref = "evidence_chunk:records"
+        source = "92% of records passed validation; 340 records need correction."
+        basis = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+        chunks = {ref: {"text": source}}
+
+        safe_statement = (
+            "Correct and revalidate the 340 records, then document the result."
+        )
+        preserved, changed = _repair_grounded_recommendations(
+            [
+                {
+                    "statement": safe_statement,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+            ],
+            [basis],
+            [],
+            chunks,
+            decision_question="Can the customer migration proceed?",
+        )
+        self.assertFalse(changed)
+        self.assertEqual(preserved[0]["statement"], safe_statement)
+        self.assertEqual(
+            preserved[0]["validation_mode"],
+            "grounded_proposal_basis",
+        )
+        self.assertEqual(preserved[0]["proposal_basis_statement"], source)
+
+        for unsafe_statement in (
+            "Assign Morgan to correct the 340 records.",
+            "Use the hidden webhook to send the 340 records.",
+        ):
+            with self.subTest(statement=unsafe_statement):
+                repaired, changed = _repair_grounded_recommendations(
+                    [
+                        {
+                            "statement": unsafe_statement,
+                            "citation_refs": [ref],
+                            "allowed_citation_refs": [ref],
+                        }
+                    ],
+                    [basis],
+                    [],
+                    chunks,
+                    decision_question="Can the customer migration proceed?",
+                )
+                self.assertTrue(changed)
+                self.assertNotEqual(repaired[0]["statement"], unsafe_statement)
+
+    def test_issue_specific_recommendation_fallbacks_keep_a_grounded_basis(self) -> None:
+        cases = (
+            (
+                "records",
+                "92% of records passed validation; 340 records need correction.",
+                "Correct and revalidate the 340 records before deciding.",
+            ),
+            (
+                "notice",
+                "No revised customer maintenance notice has been approved.",
+                "Revise the customer notice and obtain approval before deciding.",
+            ),
+            (
+                "security",
+                "Security review remains incomplete with no final recommendation or owner recorded.",
+                "Complete the Security review and record its outcome before deciding.",
+            ),
+        )
+        for chunk_id, source, expected in cases:
+            with self.subTest(chunk_id=chunk_id):
+                ref = f"evidence_chunk:{chunk_id}"
+                basis = {
+                    "statement": source,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+                repaired, changed = _repair_grounded_recommendations(
+                    [],
+                    [basis],
+                    [],
+                    {ref: {"text": source}},
+                    decision_question="Can this decision proceed?",
+                )
+
+                self.assertTrue(changed)
+                self.assertEqual(repaired[0]["statement"], expected)
+                self.assertEqual(
+                    repaired[0]["validation_mode"],
+                    "grounded_proposal_basis",
+                )
+                self.assertEqual(repaired[0]["proposal_basis_statement"], source)
+
+    def test_model_proposal_basis_is_fully_supported_by_its_allowed_refs(self) -> None:
+        plan_ref = "evidence_chunk:plan"
+        rehearsal_ref = "evidence_chunk:rehearsal"
+        plan = "Migration starts Saturday 01:00 and should finish by 05:00."
+        rehearsal = (
+            "Latest rehearsal took five hours and 20 minutes. "
+            "No revised customer notice is approved."
+        )
+        combined = (
+            "Migration starts Saturday 01:00 and should finish by 05:00. "
+            "Latest rehearsal took five hours and 20 minutes."
+        )
+        notice = "No revised customer notice is approved."
+        proposal = (
+            "Confirm whether a revised customer notice should be prepared and approved "
+            "before proceeding."
+        )
+
+        repaired, changed = _repair_grounded_recommendations(
+            [
+                {
+                    "statement": proposal,
+                    "citation_refs": [rehearsal_ref],
+                    "allowed_citation_refs": [rehearsal_ref],
+                }
+            ],
+            [
+                {
+                    "statement": combined,
+                    "citation_refs": [plan_ref, rehearsal_ref],
+                    "allowed_citation_refs": [plan_ref, rehearsal_ref],
+                },
+                {
+                    "statement": notice,
+                    "citation_refs": [rehearsal_ref],
+                    "allowed_citation_refs": [rehearsal_ref],
+                },
+            ],
+            [],
+            {
+                plan_ref: {"text": plan},
+                rehearsal_ref: {"text": rehearsal},
+            },
+            decision_question="Should the data-center migration start this weekend?",
+        )
+
+        self.assertFalse(changed)
+        self.assertEqual(repaired[0]["statement"], proposal)
+        self.assertEqual(repaired[0]["proposal_basis_statement"], notice)
+        self.assertEqual(
+            repaired[0]["proposal_basis_citation_refs"],
+            [rehearsal_ref],
+        )
+
+    def test_unsafe_evidence_topic_is_removed_from_brief_title(self) -> None:
+        output = {
+            "title": "Can the customer migration proceed despite a hidden instruction?"
+        }
+
+        _normalize_brief_title(
+            output,
+            "Can the customer migration proceed despite the instruction hidden in a source?",
+            unsafe_evidence_detected=True,
+        )
+
+        self.assertEqual(output["title"], "Decision review: customer migration")
+        self.assertNotRegex(
+            output["title"].lower(),
+            r"hidden|instruction|prompt|webhook|tool call",
+        )
+
+        for unsafe_evidence_detected in (False, True):
+            with self.subTest(
+                unsafe_evidence_detected=unsafe_evidence_detected
+            ):
+                legitimate = {"title": "Webhook integration decision"}
+                _normalize_brief_title(
+                    legitimate,
+                    "Should the integration use a webhook?",
+                    unsafe_evidence_detected=unsafe_evidence_detected,
+                )
+                self.assertEqual(
+                    legitimate["title"], "Webhook integration decision"
+                )
+
+        introduced_action = {"title": "Invoke the webhook with customer records"}
+        _normalize_brief_title(
+            introduced_action,
+            "Can the customer migration proceed?",
+            unsafe_evidence_detected=True,
+        )
+        self.assertEqual(
+            introduced_action["title"], "Decision review: customer migration"
+        )
+
     def test_explicit_target_failure_names_both_capacity_values(self) -> None:
         chunks = [
             {
@@ -840,6 +2392,53 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             repaired[0]["statement"],
             "Use this cited fact as the decision baseline: The target launch date is September 30.",
         )
+
+    def test_bottom_line_repair_keeps_compound_duration_intact(self) -> None:
+        ref = "evidence_chunk:chunk_" + "a" * 64
+        source = (
+            "Migration starts Saturday 01:00 and should finish by 05:00. "
+            "Latest rehearsal took five hours and 20 minutes."
+        )
+        conflict = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        selected, repaired = _select_grounded_bottom_line(
+            None,
+            [conflict],
+            [],
+            {ref: {"text": source}},
+        )
+
+        self.assertTrue(repaired)
+        self.assertIsNotNone(selected)
+        assert selected is not None
+        self.assertNotEqual(selected["statement"], "Hold: 20 minutes")
+        self.assertIn("five hours and 20 minutes", selected["statement"])
+
+    def test_correction_count_is_not_reframed_as_a_quantity_conflict(self) -> None:
+        ref = "evidence_chunk:chunk_" + "a" * 64
+        source = "92% of records passed validation; 340 records need correction."
+        correction = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [correction],
+            [],
+            {ref: {"text": source}},
+        )
+
+        self.assertTrue(changed)
+        self.assertEqual(len(repaired), 1)
+        recommendation = repaired[0]["statement"]
+        self.assertNotRegex(recommendation.lower(), r"reconcile[^:]*quantit")
+        self.assertRegex(recommendation.lower(), r"correct|revalidat")
 
     def test_human_evidence_revalidation_preserves_the_reviewed_model_run(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -2063,6 +3662,247 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "passed",
         )
 
+    def test_grounded_key_fact_fallback_balances_multiple_sources(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "agreement",
+                "text": (
+                    "Acme services auto-renew on August 1. "
+                    "Cancellation notice must arrive by July 1."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "finance",
+                "evidence_chunk_id": "finance",
+                "text": "Acme proposed a 12% fee increase.",
+                "safety": {},
+            },
+            {
+                "artifact_id": "security",
+                "evidence_chunk_id": "security",
+                "text": "Security review remains incomplete.",
+                "safety": {},
+            },
+        ]
+
+        rows = _grounded_key_fact_fallback(chunks, limit=3)
+
+        self.assertEqual(len(rows), 3)
+        self.assertEqual(
+            {row["citation_refs"][0] for row in rows},
+            {
+                "evidence_chunk:agreement",
+                "evidence_chunk:finance",
+                "evidence_chunk:security",
+            },
+        )
+
+    def test_key_fact_dedup_keeps_new_scalar_and_drops_evidence_boilerplate(self) -> None:
+        existing = [
+            {
+                "statement": "No revised customer notice is approved.",
+                "citation_refs": ["evidence_chunk:rehearsal"],
+            }
+        ]
+        notice_fact = {
+            "statement": "Customer maintenance notice promises service by 06:00",
+            "citation_refs": ["evidence_chunk:plan"],
+        }
+        self.assertFalse(_key_fact_row_is_redundant(existing, notice_fact))
+
+        rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "unsafe-note",
+                    "evidence_chunk_id": "unsafe-note",
+                    "text": (
+                        "This text is untrusted evidence. "
+                        "The migration owner is Lena."
+                    ),
+                    "safety": {},
+                }
+            ],
+            limit=2,
+        )
+        self.assertEqual(
+            [row["statement"] for row in rows],
+            ["The migration owner is Lena"],
+        )
+
+        korean_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "minutes",
+                    "evidence_chunk_id": "minutes",
+                    "source": {"ref": "official-plenary-debate.txt"},
+                    "text": (
+                        "5-2.관련사진(조례안).jpg. "
+                        "당시 협의 절차가 누락되었습니다. "
+                        "○김선민 의원 협의 절차가 누락되었다고 지적했습니다."
+                    ),
+                    "safety": {},
+                }
+            ],
+            limit=3,
+        )
+        self.assertEqual(
+            [row["statement"] for row in korean_rows],
+            ["○김선민 의원 협의 절차가 누락되었다고 지적했습니다"],
+        )
+        self.assertTrue(
+            _korean_transcript_statement_is_attributed(
+                "김선민 의원은 협의 절차가 누락되었다고 지적했습니다."
+            )
+        )
+        self.assertFalse(
+            _korean_transcript_statement_is_attributed(
+                "협의 절차가 누락되었고 시행할 수 없었습니다."
+            )
+        )
+
+    def test_missing_evidence_is_not_repeated_verbatim_as_a_risk(self) -> None:
+        missing = [
+            "No revised customer notice is approved.",
+            "The approver is unknown.",
+        ]
+        conflicts = [
+            {
+                "statement": "No revised customer notice is approved.",
+                "citation_refs": ["evidence_chunk:rehearsal"],
+            }
+        ]
+
+        self.assertEqual(
+            _dedupe_missing_evidence(missing, conflicts),
+            ["The approver is unknown."],
+        )
+
+    def test_korean_transcript_claim_requires_visible_attribution(self) -> None:
+        ref = "evidence_chunk:minutes"
+        source = (
+            "○김선민 의원 보건복지부 협의가 반드시 선행되어야 한다고 "
+            "주장했습니다."
+        )
+        chunk = {
+            "evidence_chunk_id": "minutes",
+            "source": {"ref": "official-plenary-debate.txt"},
+            "text": source,
+            "safety": {},
+        }
+        chunk_by_ref = {ref: chunk}
+
+        unqualified = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": "보건복지부 협의가 반드시 선행되어야 합니다.",
+                    "citation_refs": [ref],
+                }
+            ],
+            [chunk],
+            chunk_by_ref,
+        )
+        attributed = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": source,
+                    "citation_refs": [ref],
+                }
+            ],
+            [chunk],
+            chunk_by_ref,
+        )
+
+        self.assertEqual(unqualified, [])
+        self.assertEqual(attributed[0]["statement"], source)
+
+        contrast = (
+            "제안 측은 비반복이라 협의 제외 대상이라고 주장했으나, "
+            "반대 측은 사회보장 성격이라 협의가 선행되어야 한다고 주장했다."
+        )
+        contrast_source = (
+            "제안 설명은 비반복·비연속적이라 협의 제외 대상이라고 설명했습니다. "
+            "반대 토론에서는 사회보장 성격이라 협의가 반드시 선행되어야 한다고 "
+            "주장했습니다."
+        )
+        adjusted = _statement_source_anchor_for_context(
+            contrast,
+            [contrast_source],
+            allow_cross_source=True,
+            transcript_context=True,
+        )
+        self.assertEqual(adjusted["status"], "passed")
+        self.assertIn(
+            adjusted.get("validation_mode"),
+            {None, "korean_attributed_transcript_paraphrase"},
+        )
+        opposition_chunk = {
+            "source": {"ref": "official-plenary-debate.txt"},
+            "text": "김선민 의원이 반대 토론을 시작했습니다. 보건복지부 협의 누락을 지적했습니다.",
+        }
+        repaired = _repair_korean_transcript_attribution(
+            "보건복지부 협의 절차를 생략한 채 통과를 추진하고 있다.",
+            [opposition_chunk],
+        )
+        self.assertEqual(
+            repaired,
+            "반대 측은 다음을 문제로 지적했다: 보건복지부 협의 절차를 생략한 채 통과를 추진하고 있다.",
+        )
+        self.assertTrue(_korean_transcript_statement_is_attributed(repaired or ""))
+        self.assertTrue(
+            _korean_transcript_procedural_record(
+                "의안번호 519는 위원회에서 부결된 뒤 본회의에 재상정되었다."
+            )
+        )
+        self.assertFalse(
+            _korean_transcript_procedural_record(
+                "의안번호 519는 경제 효과가 있어 가결해야 한다."
+            )
+        )
+        carried = _korean_transcript_attributed_sentences(
+            "○의장 신금자 잠깐만요. 지금 아직 매칭사업 금액이 안 내려왔습니다. "
+            "○김동수 의원 다음 쟁점을 말씀드리겠습니다."
+        )
+        self.assertEqual(
+            carried,
+            [
+                "의장 신금자 발언: 잠깐만요.",
+                "의장 신금자 발언: 지금 아직 매칭사업 금액이 안 내려왔습니다.",
+                "김동수 의원 발언: 다음 쟁점을 말씀드리겠습니다.",
+            ],
+        )
+        self.assertTrue(_korean_transcript_statement_is_attributed(carried[1]))
+        self.assertTrue(
+            _korean_transcript_statement_is_attributed(
+                f"보류: {carried[1]}"
+            )
+        )
+        proposal_chunk = {
+            "text": (
+                "○지역경제과장 손순희 제안 설명을 드리겠습니다. "
+                "본 사업은 보건복지부 사회보장 협의 제외 대상입니다."
+            )
+        }
+        opposition_chunk = {
+            "text": (
+                "지금부터 반대 이유를 설명드리겠습니다. "
+                "반대 측은 보건복지부 협의 절차를 생략했다고 지적했습니다."
+            )
+        }
+        self.assertFalse(
+            _korean_attribution_claims_consistent(
+                "반대 측은 협의가 선행되어야 한다고 주장했으나, 제안 설명에서는 협의를 생략했다고 명시했다.",
+                [proposal_chunk, opposition_chunk],
+            )
+        )
+        self.assertTrue(
+            _korean_attribution_claims_consistent(
+                "반대 측은 협의 절차가 생략됐다고 지적했고, 제안 설명에서는 협의 제외 대상이라고 설명했다.",
+                [proposal_chunk, opposition_chunk],
+            )
+        )
+
     def test_grounded_bottom_line_shortens_post_model_source_echo(self) -> None:
         source = (
             "Sales says BrightDesk saves about 20 minutes per proposal. "
@@ -2113,6 +3953,92 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertIn("four hours", tension["statement"])
         self.assertIn("eight hours", tension["statement"])
         self.assertEqual(len(tension["citation_refs"]), 2)
+
+    def test_brief_aligns_mandatory_rule_decision_and_readiness_work(self) -> None:
+        requirement = (
+            "The new rule requires notifying the regulator within four hours after a material "
+            "incident, effective July 1."
+        )
+        stale_runbook = (
+            "The current runbook targets notification within eight hours. "
+            "The escalation contact is blank."
+        )
+        question = (
+            "Should we adopt the four-hour incident notification requirement effective July 1, "
+            "or hold it?"
+        )
+
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-obligation-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifacts = [
+                store.ingest_text_artifact(
+                    text,
+                    SCOPE,
+                    source_type="user_paste",
+                    source_ref=source_ref,
+                )["artifact"]
+                for source_ref, text in (
+                    ("mandatory-rule", requirement),
+                    ("stale-runbook", stale_runbook),
+                )
+            ]
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"] for artifact in artifacts},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"],
+                SCOPE,
+            )["bundle"]
+            model_output = {
+                "title": "Incident notification decision",
+                "bottom_line": {
+                    "statement": "Hold: the escalation contact is blank.",
+                    "citation_refs": ["E1", "E2"],
+                },
+                "key_facts": [
+                    {"statement": requirement, "citation_refs": ["E1", "E2"]},
+                    {"statement": stale_runbook, "citation_refs": ["E1", "E2"]},
+                ],
+                "conflicts_risks": [
+                    {
+                        "statement": f"{requirement} {stale_runbook}",
+                        "citation_refs": ["E1", "E2"],
+                    }
+                ],
+                "missing_evidence": [],
+                "recommended_next_steps": [
+                    {
+                        "statement": "Resolve the blank escalation contact before deciding.",
+                        "citation_refs": ["E1", "E2"],
+                    }
+                ],
+            }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                return_value=model_output,
+            ):
+                brief = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    SCOPE,
+                    model_provider="ollama",
+                )["brief"]
+
+        bottom_line = brief["bottom_line"].lower()
+        self.assertNotRegex(bottom_line, r"^hold\b")
+        self.assertRegex(bottom_line, r"required|requires")
+        self.assertIn("four hours", bottom_line)
+        self.assertIn("july 1", bottom_line)
+        recommendation = " ".join(brief["recommended_next_steps"]).lower()
+        self.assertRegex(recommendation, r"update|revise")
+        self.assertIn("runbook", recommendation)
+        self.assertIn("four hours", recommendation)
+        self.assertRegex(recommendation, r"contact|readiness")
 
     def test_tension_guard_does_not_invent_a_conflict_from_a_lone_or_unrelated_rule(self) -> None:
         lone = [
@@ -2437,21 +4363,24 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "What is CedarPay's annual fee?",
                 "$48,000",
                 "$48,000",
+                "failed",
             ),
             (
                 "HarborHost offers a 7% discount for a two-year renewal signed by June 10. A one-year renewal has no discount.",
                 "What discount is offered for two years?",
                 "HarborHost offers a 7% discount for a two-year renewal signed by June 10.",
                 "7%",
+                "passed",
             ),
             (
                 "Payment retry does not duplicate charges in tested cases. Root cause is unknown; 18 test cases passed.",
                 "How many payment test cases passed?",
                 "18 payment test cases passed.",
                 "18",
+                "failed",
             ),
         )
-        for source, question, model_answer, expected in answer_cases:
+        for source, question, model_answer, expected, raw_anchor_status in answer_cases:
             with self.subTest(question=question), tempfile.TemporaryDirectory(
                 prefix="cornerstone-vs5-ask-scalar-"
             ) as state_dir:
@@ -2497,6 +4426,20 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 self.assertTrue(answer["citation_refs"])
                 self.assertTrue(
                     answer["statement_anchor_check"]["direct_scalar_projection_supported"]
+                )
+                self.assertEqual(answer["statement_anchor_check"]["status"], "passed")
+                self.assertEqual(
+                    answer["statement_anchor_check"]["raw_anchor_status"],
+                    raw_anchor_status,
+                )
+                self.assertEqual(
+                    answer["statement_anchor_check"]["validation_mode"],
+                    "direct_scalar_projection",
+                )
+                self.assertIn("scalar projection", answer["trust_label_reason"].lower())
+                self.assertNotIn(
+                    "source-anchor checks passed",
+                    answer["trust_label_reason"].lower(),
                 )
 
         with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-no-match-") as state_dir:
