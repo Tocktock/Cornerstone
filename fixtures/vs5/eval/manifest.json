@@ -1,6 +1,6 @@
 {
   "schema_version": "cs.vs5_eval_manifest.v1",
-  "corpus_id": "vs5-first-defensible-decision-brief-2026-07-12",
+  "corpus_id": "vs5-first-defensible-decision-brief-2026-07-16",
   "language": "en",
   "target_cohort": "operational decision owners",
   "decision_archetypes": ["vendor_contract_renewal", "policy_compliance_change", "project_operational_risk"],
@@ -244,7 +244,7 @@
       "contradiction_terms": ["four hours", "eight hours"],
       "answerable_question": "When does the new incident rule take effect?",
       "answer_terms": ["July 1"],
-      "unanswerable_question": "Who is the escalation contact?"
+      "unanswerable_question": "Who is responsible for updating the runbook?"
     },
     {
       "id": "policy-change-07",
@@ -274,7 +274,7 @@
       "contradiction_terms": [],
       "answerable_question": "When is training completion due?",
       "answer_terms": ["June 28"],
-      "unanswerable_question": "When will Japanese localization finish?"
+      "unanswerable_question": "Who owns Japanese localization?"
     },
     {
       "id": "project-risk-01",
@@ -289,7 +289,7 @@
       "contradiction_terms": ["8,000", "12,000"],
       "answerable_question": "What is the target launch capacity?",
       "answer_terms": ["12,000"],
-      "unanswerable_question": "Who owns capacity remediation?"
+      "unanswerable_question": "When will capacity remediation finish?"
     },
     {
       "id": "project-risk-02",
@@ -334,7 +334,7 @@
       "contradiction_terms": [],
       "answerable_question": "When are movers booked?",
       "answer_terms": ["August 24"],
-      "unanswerable_question": "When will the fire inspection occur?"
+      "unanswerable_question": "Who will conduct the fire inspection?"
     },
     {
       "id": "project-risk-05",

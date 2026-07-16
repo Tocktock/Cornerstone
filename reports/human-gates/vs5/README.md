@@ -13,7 +13,7 @@ Required order:
 7. Run five unaided external stranger-test sessions and store one dated record per participant in `external-sessions/`. Retain one consented three-minute unedited recording reference.
 8. After all records are complete, run `PATH="$PWD:$PATH" cornerstone scenario verify vs5-citation-grounded-brief --reuse-vs5-current-run --json --output reports/scenario/vs5-citation-grounded-brief-2026-07-12.json`. This validates the human evidence without regenerating the Brief and Ask IDs that were reviewed. If it reports a stale reusable run, perform a fresh full 9B run, refresh the prefilled inputs, and review the new revision instead of bypassing the mismatch.
 
-All records must name the frozen corpus hash, model stack, prompt/retrieval revision, review date, and reviewer or participant role. Changing the model, prompt scheme, retrieval pipeline, or corpus invalidates dependent Plane 2 evidence.
+Follow each current template's binding fields. Corpus-derived records name the frozen corpus hash; model-output reviews additionally name the model stack and prompt/retrieval revision; every completed record names its date and responsible reviewer or participant role. Changing the model, prompt scheme, retrieval pipeline, or corpus invalidates dependent Plane 2 evidence.
 
 Prefilled files are review inputs, not evidence of acceptance. Do not rename them to the canonical filled-record paths until a reviewer has completed every required judgment field.
 

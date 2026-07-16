@@ -1,11 +1,13 @@
 {
   "schema_version": "cs.vs5_performance_budget.v1",
-  "frozen_at": "2026-07-12",
+  "frozen_at": "2026-07-16",
   "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
   "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
-  "pilot_measurements_seconds": {"three_source_brief": 21.727, "three_source_answer": 3.512},
+  "corpus_manifest_sha256": "568bd1cd634ce597ef8a9f3a1106eaf00b9cf349fe16de7dda9d07a6d1edb8c4",
+  "prompt_retrieval_revision": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+  "pilot_measurements_seconds": {"three_source_brief": 11.59, "three_source_answer": 4.54},
   "combined_operation_p95_budget_seconds": 35.0,
   "minimum_full_corpus_sample_count": 50,
-  "refreeze_reason": "The redundant second model generation was removed after deterministic grounded guards covered all frozen gap/conflict cases; the 35-second budget was re-frozen from the resulting ornith:9b pilot with headroom for full-corpus variance.",
+  "refreeze_reason": "The July 16 citation-grounding repair added clause-local risk synthesis, final echo enforcement, question-bound scalar Ask repair, short model-facing citation aliases, direction- and unit-checked target-versus-failure pairing, and grammar-guarded passive unassigned-role gap detection. The 35-second per-operation budget was re-frozen after a current three-source ornith:9b Brief and Ask pilot; the required full-corpus run remains the enforcement surface.",
   "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
 }

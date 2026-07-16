@@ -122,7 +122,8 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Drop a file or paste notes", home)
         self.assertIn("Paste text source", home)
         self.assertIn("Files up to 25 MB are archived byte-for-byte", home)
-        self.assertIn('aria-label="Choose a file to archive"', home)
+        self.assertIn('aria-label="Choose one to five files to archive"', home)
+        self.assertIn("multiple hidden", home)
         self.assertIn("Browse files", home)
         self.assertIn("Save source", home)
         self.assertIn("Ask the workspace", home)
@@ -137,6 +138,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertNotIn("file.text()", home)
         self.assertIn("Paste text before saving.", home)
         self.assertIn("Enter a question first.", home)
+        self.assertIn("at most 128 KiB per source and 512 KiB total", home)
         self.assertIn("Recent items", home)
         self.assertIn("Saved sources will appear here.", home)
         self.assertNotIn("Knowledge states", home)
@@ -186,6 +188,27 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(legacy_status, 200)
         self.assertIn("text/html", legacy_content_type)
         self.assertIn('id="run-evux"', legacy)
+
+    def test_home_batches_one_to_five_uploads_in_place_and_checks_only_the_current_batch(self) -> None:
+        self.create_source_stack()
+
+        home = self.fetch_product_html("/")
+        source_inputs = re.findall(r'<input[^>]+data-decision-source[^>]*>', home)
+
+        self.assertTrue(source_inputs)
+        self.assertTrue(all(" checked" not in source_input for source_input in source_inputs))
+        self.assertIn('id="cs-file-input" type="file" aria-label="Choose one to five files to archive" multiple', home)
+        self.assertIn('const maxDecisionSourceBytes = 131072;', home)
+        self.assertIn('const maxDecisionTotalBytes = 524288;', home)
+        self.assertIn('const currentBatchSourceIds = new Set();', home)
+        self.assertIn('node.dataset.currentBatch = "false";', home)
+        self.assertIn('input.dataset.currentBatch = "true";', home)
+        self.assertIn('for (let index = 0; index < files.length; index += 1)', home)
+        self.assertIn('saveFiles(files);', home)
+        self.assertIn('Choose one to five files at a time.', home)
+        self.assertIn('selected for this Brief. Add sources or ask the decision question below.', home)
+        self.assertIn('0 of 5 sources selected · 0 of 512 KiB', home)
+        self.assertNotIn('window.location.href = scopedUrl("/artifacts/"', home)
 
     def test_product_routes_share_shell_and_hide_internal_language(self) -> None:
         for route in PRODUCT_ROUTES:
@@ -1449,7 +1472,8 @@ class ProductUiRoutesTest(unittest.TestCase):
             html,
         )
         self.assertIn("preserveScope();", html)
-        self.assertIn('window.location.href = scopedUrl("/artifacts/"', html)
+        self.assertIn('fetch(scopedUrl("/artifacts/upload")', html)
+        self.assertNotIn('window.location.href = scopedUrl("/artifacts/"', html)
         self.assertNotIn('workspace_id: "default"', html)
 
         source_text = "Project X scope isolation receipt."
@@ -1827,6 +1851,40 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Unresolved citation ref", html)
         self.assertIn("Unsupported or unresolved", html)
         self.assertNotIn("Second unrelated source", html)
+
+    def test_only_bottom_line_citation_disclosure_is_initially_expanded(self) -> None:
+        source_items = [
+            {
+                "ref": "artifact:primary",
+                "label": "Source 1",
+                "title": "Primary source",
+                "snippet": "The contract renews August 1.",
+                "href": "/artifacts/primary?view=html",
+                "date": "2026-07-16",
+                "fingerprint": "primary-fingerprint",
+            }
+        ]
+        brief = {
+            "brief_id": "brief_progressive_citations",
+            "evidence_links": [
+                {
+                    "artifact_ref": "artifact:primary",
+                    "evidence_chunk_ref": "evidence_chunk:chunk-1",
+                    "snippet": "The contract renews August 1.",
+                    "span": {"start": 0, "end": 29},
+                }
+            ],
+        }
+
+        finding = product_ui._citation_disclosure_for_refs(
+            ["evidence_chunk:chunk-1"], source_items, brief
+        )
+        bottom_line = product_ui._citation_disclosure_for_refs(
+            ["evidence_chunk:chunk-1"], source_items, brief, initially_open=True
+        )
+
+        self.assertNotIn('<details class="cs-citation-card" open>', finding)
+        self.assertEqual(bottom_line.count('<details class="cs-citation-card" open>'), 1)
 
     def test_brief_claim_and_action_detail_pages_use_plain_disclosure(self) -> None:
         _, bundle_id, _ = self.create_source_stack()
@@ -2648,7 +2706,7 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn('id="cs-create-claim-button"', brief_html)
         self.assertIn(f'data-brief-id="{brief_id}"', brief_html)
         self.assertIn("Related decisions and actions", brief_html)
-        self.assertIn("Claim candidates", brief_html)
+        self.assertIn("Decision drafts", brief_html)
         self.assertIn("Action previews", brief_html)
         self.assertIn("History", brief_html)
 
@@ -2698,6 +2756,43 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertIn("Brief lineage and gaps", claim_html)
         self.assertIn("Open source Brief", claim_html)
         self.assertIn("History", claim_html)
+
+    def test_brief_handoff_renders_decision_draft_language_on_internal_claim_route(self) -> None:
+        _, bundle_id, _ = self.create_source_stack()
+        brief_status, _, brief_raw = _request(
+            self.base_url,
+            "/briefs",
+            method="POST",
+            payload={**DEFAULT_SCOPE, "evidence_bundle_id": bundle_id},
+        )
+        self.assertEqual(brief_status, 200)
+        brief = json.loads(brief_raw)["brief"]
+        decision_status, _, decision_raw = _request(
+            self.base_url,
+            "/claims",
+            method="POST",
+            payload={
+                **DEFAULT_SCOPE,
+                "brief_id": brief["brief_id"],
+                "statement": str(brief.get("summary") or brief["key_points"][0]),
+            },
+        )
+        self.assertEqual(decision_status, 200)
+        decision = json.loads(decision_raw)["claim"]
+        self.assertEqual(decision["product_role"], "decision_draft")
+
+        detail = self.fetch_product_html(f"/claims/{decision['claim_id']}?view=html")
+        visible_html = re.sub(r"<script\b[^>]*>.*?</script>", " ", detail, flags=re.IGNORECASE | re.DOTALL)
+        visible_text = re.sub(r"<[^>]+>", " ", visible_html)
+
+        self.assertIn('data-product-role="decision_draft"', detail)
+        self.assertIn("Decision draft saved", visible_text)
+        self.assertIn("Back to Decisions", visible_text)
+        self.assertIn("Decision boundary", visible_text)
+        self.assertIn("grants no approval, shared-truth, or action authority", visible_text)
+        self.assertNotRegex(visible_text, r"\bClaims?\b")
+        self.assertNotIn("Approve Claim", visible_text)
+        self.assertIn('href="/claims"', detail)
 
     def test_claim_approval_denials_report_evidence_and_semantic_boundaries(self) -> None:
         unsupported_status, _, unsupported_raw = _request(
@@ -2865,7 +2960,7 @@ class ProductUiRoutesTest(unittest.TestCase):
             payload={
                 **DEFAULT_SCOPE,
                 "evidence_bundle_id": bundle_id,
-                "statement": "Vendor renewal annual price increased.",
+                "statement": "Finance says the vendor renewal annual price increased.",
             },
         )
         self.assertEqual(create_status, 200, create_raw)

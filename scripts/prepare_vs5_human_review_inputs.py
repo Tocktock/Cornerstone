@@ -18,6 +18,11 @@ ASK_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/ask-review.template.json"
 ASK_PATH = ROOT / "reports/human-gates/vs5/ask-review.prefilled.json"
 CORPUS_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/corpus-quality-review.template.json"
 CORPUS_REVIEW_PATH = ROOT / "reports/human-gates/vs5/corpus-quality-review.prefilled.json"
+EXTERNAL_SESSION_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-session.template.json"
+EXTERNAL_ROUND_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-round.template.json"
+EXTERNAL_RUNTIME_EVIDENCE_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-runtime-evidence.template.json"
+EXTERNAL_EVIDENCE_AUDIT_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-evidence-audit.template.json"
+VS4_H01_PATH = ROOT / "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json"
 SELECTED_CASE_IDS = (
     "vendor-renewal-01",
     "vendor-renewal-03",
@@ -124,6 +129,8 @@ def _faithfulness_reviews(
             statement_reviews.append(
                 {
                     "section": statement.get("section"),
+                    "statement_type": statement.get("statement_type"),
+                    "presented_as_fact": statement.get("presented_as_fact"),
                     "statement": statement.get("statement"),
                     "citation_refs": citation_refs,
                     "source_evidence": source_evidence,
@@ -161,11 +168,18 @@ def _faithfulness_reviews(
     return reviews
 
 
-def _usefulness_sample(selected: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _usefulness_sample(
+    selected: list[dict[str, Any]],
+    corpus: dict[str, Any],
+) -> list[dict[str, Any]]:
+    cases = {str(case.get("id") or ""): case for case in corpus.get("cases", [])}
     sample = []
     for item in selected:
         result = item["case_result"]
         brief = item["brief"]
+        case = cases.get(str(result.get("case_id") or ""))
+        if case is None:
+            raise ValueError(f"Selected corpus case is missing: {result.get('case_id')}")
         missing = brief.get("missing_evidence")
         if not isinstance(missing, list) or not missing:
             missing = [
@@ -176,6 +190,24 @@ def _usefulness_sample(selected: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not isinstance(next_steps, list) or not next_steps:
             single = str(brief.get("recommended_next_step") or "").strip()
             next_steps = [single] if single else []
+        statements = [
+            {
+                "section": str(row.get("section") or ""),
+                "statement": str(row.get("statement") or ""),
+                "citation_refs": [str(ref) for ref in row.get("citation_refs", [])],
+            }
+            for row in brief.get("load_bearing_statements", [])
+            if isinstance(row, dict) and str(row.get("statement") or "").strip()
+        ]
+        source_set = [
+            {
+                "name": str(source.get("name") or "source"),
+                "text": str(source.get("text") or ""),
+                "sha256": hashlib.sha256(str(source.get("text") or "").encode("utf-8")).hexdigest(),
+            }
+            for source in case.get("sources", [])
+            if isinstance(source, dict)
+        ]
         sample.append(
             {
                 "case_id": result["case_id"],
@@ -185,8 +217,16 @@ def _usefulness_sample(selected: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "title": brief.get("title"),
                 "decision_question": brief.get("decision_question"),
                 "bottom_line": brief.get("bottom_line") or brief.get("summary"),
+                "key_facts": [
+                    row["statement"] for row in statements if row["section"] == "key_facts"
+                ],
+                "conflicts_risks": [
+                    row["statement"] for row in statements if row["section"] == "conflicts_risks"
+                ],
                 "missing_evidence": missing,
                 "recommended_next_steps": next_steps,
+                "load_bearing_statements": statements,
+                "source_set": source_set,
             }
         )
     return sample
@@ -254,6 +294,7 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
             "answer": answer.get("answer"),
             "label": answer.get("label"),
             "citation_refs": answer.get("citation_refs", []),
+            "supporting_result_count": answer.get("supporting_result_count"),
             "citation_resolution_errors": citation_resolution_errors,
             "source_evidence": source_evidence,
             "reviewer_note": None,
@@ -280,7 +321,16 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
     return reviews
 
 
-def build_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
+def build_inputs() -> tuple[
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+    dict[str, Any],
+]:
     report, selected, source_refs = _selected_records()
     corpus = _load(CORPUS_PATH)
     model_stack = report.get("model_stack")
@@ -299,6 +349,8 @@ def build_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict
                 "For every statement, compare the text with every listed source excerpt.",
                 "Set faithful to true only when the statement preserves numbers, dates, actors, modality, conditions, and direction.",
                 "Set material_overstatement to true for any contradiction, inversion, unsupported consequence, or dropped qualifier that changes meaning.",
+                "Review bottom-line decision_synthesis as a cited assessment, not as a sourced fact; reject it if its rationale does not support the recommendation.",
+                "Every recommended_next_steps row must be present in statements, remain presented_as_fact=false, cite its factual basis, and avoid inventing an approver, signer, owner, obligation, or deadline.",
                 "Compare generated_missing_evidence with every planted gap term and generated conflict statement with every planted contradiction term; complete all gap_and_conflict_review fields.",
                 "Do not change automated_anchor_status; it is mechanical context only and never decides the human judgment.",
             ],
@@ -307,7 +359,7 @@ def build_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict
         }
     )
     usefulness = _load(USEFULNESS_PATH)
-    brief_sample = _usefulness_sample(selected)
+    brief_sample = _usefulness_sample(selected, corpus)
     brief_ids = [row["brief_id"] for row in brief_sample]
     usefulness.update(
         {
@@ -317,6 +369,12 @@ def build_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
             "brief_sample": brief_sample,
+            "review_instructions": [
+                "Read every original source in source_set before rating its Brief.",
+                "Review the complete Brief: bottom line, key facts, conflicts/risks, missing evidence, and recommended next steps.",
+                "Rate 4 or 5 only when the Brief materially reduces decision-preparation work compared with reading the sources while preserving important nuance.",
+                "Use the same ten-Brief sample for every reviewer and explain concrete strengths or defects in the rationale.",
+            ],
             "reviews": [
                 {
                     "reviewer_name": None,
@@ -368,7 +426,51 @@ def build_inputs() -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict
             "decision": None,
         }
     )
-    return faithfulness, usefulness, ask, corpus_review
+    external_session_template = _load(EXTERNAL_SESSION_TEMPLATE_PATH)
+    external_session_template.update(
+        {
+            "status": "HUMAN_REQUIRED_EXTERNAL",
+            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "model_stack": model_stack,
+            "prompt_retrieval_revision": revision,
+        }
+    )
+    h01_record = _load(VS4_H01_PATH)
+    external_round_template = _load(EXTERNAL_ROUND_TEMPLATE_PATH)
+    external_round_template.update(
+        {
+            "status": "HUMAN_REQUIRED_EXTERNAL",
+            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "model_stack": model_stack,
+            "prompt_retrieval_revision": revision,
+            "prerequisite": {
+                "vs4_h01_decision": h01_record.get("decision"),
+                "vs4_h01_reviewed_at": h01_record.get("reviewed_at"),
+                "vs4_h01_record": "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json",
+            },
+        }
+    )
+    external_runtime_evidence_template = _load(EXTERNAL_RUNTIME_EVIDENCE_TEMPLATE_PATH)
+    external_runtime_evidence_template["prompt_retrieval_revision"] = revision
+    external_evidence_audit_template = _load(EXTERNAL_EVIDENCE_AUDIT_TEMPLATE_PATH)
+    external_evidence_audit_template.update(
+        {
+            "status": "HUMAN_REQUIRED_EXTERNAL",
+            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "model_stack": model_stack,
+            "prompt_retrieval_revision": revision,
+        }
+    )
+    return (
+        faithfulness,
+        usefulness,
+        ask,
+        corpus_review,
+        external_session_template,
+        external_round_template,
+        external_runtime_evidence_template,
+        external_evidence_audit_template,
+    )
 
 
 def _encoded(value: dict[str, Any]) -> str:
@@ -379,12 +481,25 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Refresh VS5 human-review inputs from the current canonical report.")
     parser.add_argument("--check", action="store_true", help="Fail when the prefilled review inputs are stale.")
     args = parser.parse_args()
-    faithfulness, usefulness, ask, corpus_review = build_inputs()
+    (
+        faithfulness,
+        usefulness,
+        ask,
+        corpus_review,
+        external_session_template,
+        external_round_template,
+        external_runtime_evidence_template,
+        external_evidence_audit_template,
+    ) = build_inputs()
     expected = {
         FAITHFULNESS_PATH: _encoded(faithfulness),
         USEFULNESS_PATH: _encoded(usefulness),
         ASK_PATH: _encoded(ask),
         CORPUS_REVIEW_PATH: _encoded(corpus_review),
+        EXTERNAL_SESSION_TEMPLATE_PATH: _encoded(external_session_template),
+        EXTERNAL_ROUND_TEMPLATE_PATH: _encoded(external_round_template),
+        EXTERNAL_RUNTIME_EVIDENCE_TEMPLATE_PATH: _encoded(external_runtime_evidence_template),
+        EXTERNAL_EVIDENCE_AUDIT_TEMPLATE_PATH: _encoded(external_evidence_audit_template),
     }
     stale = [path for path, content in expected.items() if not path.exists() or path.read_text() != content]
     if args.check:

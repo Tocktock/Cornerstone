@@ -1,0 +1,39 @@
+{
+  "schema_version": "cs.vs5_external_round.v1",
+  "status": "HUMAN_REQUIRED_EXTERNAL",
+  "round_id": null,
+  "registered_at": null,
+  "registered_by": {
+    "name": null,
+    "role": null
+  },
+  "prerequisite": {
+    "vs4_h01_decision": "APPROVE_WITH_EXCEPTIONS",
+    "vs4_h01_reviewed_at": "2026-07-12T09:34:19Z",
+    "vs4_h01_record": "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json"
+  },
+  "corpus_manifest_sha256": "568bd1cd634ce597ef8a9f3a1106eaf00b9cf349fe16de7dda9d07a6d1edb8c4",
+  "model_stack": {
+    "embedding_model": "qwen3-embedding:0.6b",
+    "generation_model": "ornith:9b",
+    "ollama_url": "http://127.0.0.1:11434",
+    "pipeline_files": [
+      "packages/cornerstone_cli/runtime.py",
+      "packages/cornerstone_cli/briefing.py",
+      "packages/cornerstone_cli/product_access.py"
+    ],
+    "pipeline_sha256": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+    "provider": "ollama"
+  },
+  "prompt_retrieval_revision": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+  "formal_participant_hashes": [
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "pilot_participant_hashes": [],
+  "registration_note": null,
+  "decision": null
+}

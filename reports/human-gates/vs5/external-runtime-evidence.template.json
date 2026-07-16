@@ -1,0 +1,15 @@
+{
+  "schema_version": "cs.vs5_external_runtime_evidence.v1",
+  "round_id": null,
+  "formal_attempt_number": null,
+  "stable_participant_hash": null,
+  "prompt_retrieval_revision": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+  "brief_id": null,
+  "brief_record_sha256": null,
+  "citation_ref": null,
+  "citation_chunk_sha256": null,
+  "source_artifact_ref": null,
+  "source_artifact_sha256": null,
+  "captured_at": null,
+  "captured_by": null
+}

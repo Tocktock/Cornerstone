@@ -42,26 +42,26 @@ No milestone, release note, README, report, or roadmap may use the words "useful
 
 ## 2. CS-VAL Scenario Family — Product Value MUST-PASS
 
-Scenario dimensions follow the adaptive standard: **Priority** (MUST_PASS / REGRESSION), **Verification mode** (AUTOMATED / HUMAN_REQUIRED / AUTOMATED+HUMAN), **Current evidence status** (as of the 2026-07-12 `ornith:9b` frozen-corpus run).
+Scenario dimensions follow the adaptive standard: **Priority** (MUST_PASS / REGRESSION) and **Verification mode** (AUTOMATED / HUMAN_REQUIRED / AUTOMATED+HUMAN). Run-specific status belongs only in the canonical generated VS5 report, whose corpus, pipeline, runtime-state, and verification-contract bindings must all match the current revision. This contract deliberately does not freeze dated PASS counts into its own hash.
 
 These rows are canonical acceptance authority. They were folded into the generated 216-row matrix during VS5 on 2026-07-12 (see ADR-0007); this document remains their authoritative definition.
 
 ### Scenario index
 
-| ID | Priority | Scenario | Verification mode | Current evidence status |
+| ID | Priority | Scenario | Verification mode | Acceptance state |
 |---|---|---|---|---|
-| CS-VAL-001 | MUST_PASS | Every load-bearing brief statement carries a resolvable citation | AUTOMATED | **PASS** (25/25 frozen-corpus Briefs; report dated 2026-07-12) |
-| CS-VAL-002 | MUST_PASS | Zero fabricated citations | AUTOMATED | **PASS** (0 fabricated citations; seeded dangling ref rejected) |
-| CS-VAL-003 | MUST_PASS | Brief statements are faithful to their cited spans | AUTOMATED (advisory) + HUMAN_REQUIRED | HUMAN_REQUIRED (10/25 earned automated anchors; ten-Brief human audit not run) |
-| CS-VAL-004 | MUST_PASS | Brief synthesizes beyond extraction | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 passed the echo/title guard; human usefulness review not run) |
-| CS-VAL-005 | MUST_PASS | Uncertainty and gaps are input-specific, not boilerplate | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 planted-gap and conflict checks passed; human spot-check not run) |
-| CS-VAL-006 | MUST_PASS | Trust labels are earned, never decorative | AUTOMATED | **PASS** (0 unearned `evidence_backed`; forced fallback honestly labeled) |
-| CS-VAL-007 | MUST_PASS | Ask answers the question or honestly declines | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED (25/25 answerable/unanswerable pairs passed; human sample audit not run) |
-| CS-VAL-008 | MUST_PASS | An unfamiliar user reaches a traceable brief in 10 minutes | HUMAN_REQUIRED (external) | NOT_RUN |
-| CS-VAL-009 | MUST_PASS | External users trust the brief and would use it | HUMAN_REQUIRED (external) | NOT_RUN |
-| CS-VAL-010 | REGRESSION | No claim above earned verdict anywhere in active docs/reports | AUTOMATED | **PASS** (active VS5 report verdict is `AI_VERIFIABLE_READY_HUMAN_GATES_PENDING`) |
+| CS-VAL-001 | MUST_PASS | Every load-bearing brief statement carries a resolvable citation | AUTOMATED | REPORT_OWNED — must PASS on the current bound run |
+| CS-VAL-002 | MUST_PASS | Zero fabricated citations | AUTOMATED | REPORT_OWNED — must PASS on the current bound run |
+| CS-VAL-003 | MUST_PASS | Brief statements are faithful to their cited spans | AUTOMATED (advisory) + HUMAN_REQUIRED | HUMAN_REQUIRED — current bound outputs plus dated human review |
+| CS-VAL-004 | MUST_PASS | Brief synthesizes beyond extraction | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED — current bound outputs plus dated human review |
+| CS-VAL-005 | MUST_PASS | Uncertainty and gaps are input-specific, not boilerplate | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED — current bound outputs plus dated human review |
+| CS-VAL-006 | MUST_PASS | Trust labels are earned, never decorative | AUTOMATED | REPORT_OWNED — must PASS on the current bound run |
+| CS-VAL-007 | MUST_PASS | Ask answers the question or honestly declines | AUTOMATED (guard) + HUMAN_REQUIRED | HUMAN_REQUIRED — current bound outputs plus dated human review |
+| CS-VAL-008 | MUST_PASS | An unfamiliar user reaches a traceable brief in 10 minutes | HUMAN_REQUIRED (external) | HUMAN_REQUIRED — five eligible external sessions |
+| CS-VAL-009 | MUST_PASS | External users trust the brief and would use it | HUMAN_REQUIRED (external) | HUMAN_REQUIRED — threshold evidence from the same external round |
+| CS-VAL-010 | REGRESSION | No claim above earned verdict anywhere in active docs/reports | AUTOMATED | REPORT_OWNED — must PASS on the current bound run |
 
-The four baseline FAIL guards (CS-VAL-004/005/006/007) now have passing automated evidence in the canonical VS5 report. Their human-owned portions remain `HUMAN_REQUIRED`; automated readiness does not establish usefulness or product value.
+Automated guards establish only the machine-owned portion of these rows. Their human-owned portions remain `HUMAN_REQUIRED`; automated readiness does not establish usefulness or product value. A prior report becomes stale immediately when any bound corpus, generation pipeline, runtime-state, performance budget, verifier, or acceptance-contract input changes.
 
 ### CS-VAL-001 — Every load-bearing brief statement carries a resolvable citation
 
@@ -107,7 +107,7 @@ The four baseline FAIL guards (CS-VAL-004/005/006/007) now have passing automate
 - **Given** any output (brief, answer, claim suggestion), **then**: `evidence_backed` may appear only when CS-VAL-001/002 checks pass for that specific output; templated, extractive-fallback, or model-unavailable outputs must carry an explicit `extractive_fallback` / `template` label and may never carry `evidence_backed` or `presented_as_fact`; label assignment is recorded in the audit trail with the check refs that earned it.
 - **Verification method:** Deterministic label-audit over eval corpus + forced-fallback runs (model stopped) verifying honest degraded labeling.
 - **PASS evidence:** Label-audit report, including a model-down run showing fallback outputs correctly labeled.
-- **Current status:** PASS in the 2026-07-12 automated report; this row now acts as REGRESSION.
+- **Current status authority:** The canonical bound report owns run status; this row acts as a regression gate on every fresh run.
 
 ### CS-VAL-007 — Ask answers the question or honestly declines
 
@@ -132,7 +132,7 @@ The four baseline FAIL guards (CS-VAL-004/005/006/007) now have passing automate
 ### CS-VAL-010 — No claim above earned verdict (overclaim regression)
 
 - **Intent / risk addressed:** The repository's own history shows claim inflation by vocabulary ("Product Alpha ready") on structural evidence.
-- **Given** active docs (README, SoT bundle, active contracts, closure/checkpoint reports), **then** no active document states or implies usefulness, understanding, or product value beyond the current verdict ladder position; automated VS5 readiness is labeled separately from the eight open human rows.
+- **Given** active docs (README, SoT bundle, active contracts, closure/checkpoint reports), **then** no active document states or implies usefulness, understanding, or product value beyond the current verdict ladder position; automated VS5 readiness is labeled separately from every open human row.
 - **Verification method:** Deterministic claim-language scan (forbidden-claim phrase list vs. current verdict) + human review at each milestone close.
 - **PASS evidence:** Claim-scan report per milestone close.
 

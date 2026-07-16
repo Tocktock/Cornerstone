@@ -65,6 +65,7 @@ INBOX_LANES = [
 ]
 INBOX_PAGE_SIZE = 20
 VS5_DECISION_SOURCE_MAX_BYTES = 128 * 1024
+VS5_DECISION_TOTAL_SOURCE_MAX_BYTES = 512 * 1024
 AUDIT_LIFECYCLES = [
     ("all", "All activity"),
     ("created", "Created"),
@@ -222,7 +223,11 @@ def render_product_page(
         content = _brief_list_page(ctx)
         active = "/briefs"
     elif route == "/claims":
-        title = "Claims"
+        title = (
+            "Decisions"
+            if ctx.get("claims") and all(_is_decision_draft(claim) for claim in ctx["claims"])
+            else "Claims"
+        )
         content = _claim_list_page(ctx)
         active = "/claims"
     elif route == "/actions":
@@ -737,6 +742,10 @@ def _claim_title(record: dict[str, Any]) -> str:
     return _truncate(str(record.get("statement") or "Untitled claim"), 120)
 
 
+def _is_decision_draft(record: dict[str, Any]) -> bool:
+    return str(record.get("product_role") or "") == "decision_draft"
+
+
 def _action_title(record: dict[str, Any] | None) -> str:
     if not record:
         return "Action"
@@ -1092,6 +1101,8 @@ def _inbox_items(
         )
     for claim in [claim for claim in claims if str(claim.get("status") or "").lower() != "approved"]:
         label, state = _claim_label(claim)
+        decision_draft = _is_decision_draft(claim)
+        product_kind = "Decision draft" if decision_draft else "Claim"
         evidence_integrity = claim.get("evidence_integrity") if isinstance(claim.get("evidence_integrity"), dict) else {}
         source_supported = str(
             (claim.get("statement_support") if isinstance(claim.get("statement_support"), dict) else {}).get("status")
@@ -1099,11 +1110,13 @@ def _inbox_items(
         ) == "source_supported"
         items.append(
             {
-                "kind": "Claim",
+                "kind": product_kind,
                 "title": _claim_title(claim),
                 "detail": (
                     "The linked evidence chain failed integrity verification and must be repaired before review."
                     if evidence_integrity.get("status") == "failed"
+                    else "Source links are preserved. Review this Decision draft against the Brief before using it."
+                    if decision_draft
                     else
                     "Source support is attached; statement-level semantic review is required before owner approval."
                     if source_supported
@@ -1117,7 +1130,7 @@ def _inbox_items(
                 "queue": "Needs review",
                 "priority": "High" if state == "draft" else "Medium",
                 "owner": owner_label,
-                "type": "Claim",
+                "type": product_kind,
                 "icon": "C",
                 "record_kind": "claim",
                 "record_id": str(claim.get("claim_id") or ""),
@@ -1335,11 +1348,17 @@ def _nav(active: str, ctx: dict[str, Any]) -> str:
         "/claims": len(ctx["claims"]) if "claim" in loaded else None,
         "/actions": len(ctx["actions"]) if "action" in loaded else None,
     }
+    visible_claims = ctx.get("claims", []) if isinstance(ctx.get("claims"), list) else []
+    claim_nav_label = (
+        "Decisions"
+        if visible_claims and all(_is_decision_draft(claim) for claim in visible_claims)
+        else "Claims"
+    )
     primary = [
         ("/", "Home"),
         ("/search", "Search"),
         ("/artifacts", "Artifacts"),
-        ("/claims", "Claims"),
+        ("/claims", claim_nav_label),
         ("/actions", "Actions"),
     ]
     return f"""
@@ -1436,7 +1455,7 @@ def _home(ctx: dict[str, Any]) -> str:
     activity = _recent_activity_block(ctx) if ctx.get("audit") else ""
     layout_class = "cs-home-layout has-activity" if activity else "cs-home-layout"
     source_choices = []
-    for artifact in ctx.get("artifacts", [])[:5]:
+    for artifact in ctx.get("artifacts", []):
         artifact_id = str(artifact.get("artifact_id") or "")
         if not artifact_id:
             continue
@@ -1446,21 +1465,22 @@ def _home(ctx: dict[str, Any]) -> str:
             or int(artifact.get("original_size_bytes") or 0) > VS5_DECISION_SOURCE_MAX_BYTES
         ):
             continue
+        source_size = int(artifact.get("original_size_bytes") or 0)
         source_choices.append(
             f'''<label class="cs-source-choice">
-  <input type="checkbox" value="{h(artifact_id)}" data-decision-source checked>
-  <span><strong>{h(_artifact_title(artifact))}</strong><small>{h(presentation["label"])} · {h(_display_date(artifact))}</small></span>
+  <input type="checkbox" value="{h(artifact_id)}" data-decision-source data-source-size="{h(source_size)}">
+  <span><strong>{h(_artifact_title(artifact))}</strong><small data-source-note>{h(presentation["label"])} · {h(_display_date(artifact))} · {h(source_size)} bytes</small></span>
 </label>'''
         )
-    source_set = (
-        f'''<fieldset class="cs-source-set">
+        if len(source_choices) >= 5:
+            break
+    source_set = f'''<fieldset class="cs-source-set" id="cs-decision-source-set" aria-describedby="cs-source-boundary cs-source-selection-summary">
   <legend>Sources for this decision</legend>
   <p class="cs-muted">Choose one to five saved sources. CornerStone will stay inside this boundary.</p>
-  <div class="cs-source-choice-list">{"".join(source_choices)}</div>
+  <p class="cs-meta" id="cs-source-boundary">Brief input: UTF-8 plain text, .txt, or .md; at most 128 KiB per source and 512 KiB total. Files up to {MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)} MB can still be archived, but unsupported or larger sources are not selected for the Brief.</p>
+  <div class="cs-source-choice-list" id="cs-source-choice-list">{"".join(source_choices)}{'' if source_choices else '<div class="cs-empty cs-source-set-empty" id="cs-source-set-empty"><strong>Save a source first</strong><p>Paste or upload one to five plain-text sources before asking for a decision Brief.</p></div>'}</div>
+  <p class="cs-meta" id="cs-source-selection-summary" role="status" aria-live="polite">0 of 5 sources selected · 0 of 512 KiB</p>
 </fieldset>'''
-        if source_choices
-        else '''<div class="cs-empty cs-source-set-empty"><strong>Save a source first</strong><p>Paste or upload a plain-text source before asking for a decision Brief.</p></div>'''
-    )
     return f"""
 <section class="cs-home-intro" data-product-surface="home">
   <div class="{layout_class}">
@@ -1477,13 +1497,13 @@ def _home(ctx: dict[str, Any]) -> str:
             <div class="cs-drop-mark">{icon("upload")}</div>
             <div>
               <strong>Drop a file or paste notes</strong>
-              <p class="cs-muted">Files up to {MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)} MB are archived byte-for-byte; pasted text stays a separate source.</p>
+              <p class="cs-muted">Choose one to five files. Files up to {MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)} MB are archived byte-for-byte; Briefs use plain-text sources up to 128 KiB each and 512 KiB total.</p>
             </div>
           </div>
           <div class="cs-home-source-row">
             <button class="cs-button secondary" type="button" id="cs-file-button">Browse files</button>
             <button class="cs-button" id="cs-save-source-button" type="submit">Save source</button>
-            <input id="cs-file-input" type="file" aria-label="Choose a file to archive" hidden>
+            <input id="cs-file-input" type="file" aria-label="Choose one to five files to archive" multiple hidden>
           </div>
           <div class="cs-home-paste-row" aria-label="Paste text source">
             <label class="cs-sr-only" for="cs-drop-text">Paste source text</label>
@@ -1590,9 +1610,10 @@ def _recent_items_block(ctx: dict[str, Any]) -> str:
         )
     for claim in ctx["claims"][:2]:
         label, state = _claim_label(claim)
+        product_kind = "Decision draft" if _is_decision_draft(claim) else "Claim"
         items.append(
             {
-                "kind": "Claim",
+                "kind": product_kind,
                 "title": _claim_title(claim),
                 "detail": f"{_display_date(claim)} - Review source support",
                 "href": _detail_href("claims", claim.get("claim_id")),
@@ -1777,6 +1798,8 @@ def _search_href(q: str, search_type: str, snapshot_id: str = "", page: int | No
 def _search_snapshot_result(row: dict[str, Any]) -> str:
     result_type = str(row.get("result_type") or "artifact")
     kind = {"artifact": "Source", "brief": "Brief", "claim": "Claim", "action": "Action"}.get(result_type, "Source")
+    if result_type == "claim" and str(row.get("product_role") or "") == "decision_draft":
+        kind = "Decision draft"
     record_id = str(row.get(f"{result_type}_id") or "")
     href_kind = {"artifact": "artifacts", "brief": "briefs", "claim": "claims", "action": "actions"}.get(result_type, "artifacts")
     if result_type == "artifact":
@@ -1864,6 +1887,7 @@ def _search_result_row(
         "Source": "is-source",
         "Brief": "is-brief",
         "Claim": "is-claim",
+        "Decision draft": "is-claim",
         "Action": "is-action",
     }.get(kind, "is-source")
     return f"""
@@ -2272,6 +2296,10 @@ def _brief_list_page(ctx: dict[str, Any]) -> str:
 
 def _claim_list_page(ctx: dict[str, Any]) -> str:
     claims = ctx["claims"]
+    decision_draft_count = sum(1 for claim in claims if _is_decision_draft(claim))
+    only_decision_drafts = bool(claims) and decision_draft_count == len(claims)
+    collection_label = "Decision drafts" if only_decision_drafts else "Claims"
+    collection_title = "Decision drafts under review" if only_decision_drafts else "Claims under review"
     supported_count = sum(
         1
         for claim in claims
@@ -2297,20 +2325,22 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
     rows = ""
     for claim in claims:
         label, state = _claim_label(claim)
+        decision_draft = _is_decision_draft(claim)
+        product_kind = "Decision draft" if decision_draft else "Claim"
         source_count = len([ref for ref in _evidence_refs(claim) if ref.startswith("artifact:")])
         rows += _collection_row(
             "C",
             _claim_title(claim),
-            "Review source support before approval.",
+            "Review the preserved source links before using this draft." if decision_draft else "Review source support before approval.",
             _detail_href("claims", claim.get("claim_id")),
-            [("Claim", ""), (_display_date(claim), ""), (f"{source_count} source refs", "")],
+            [(product_kind, ""), (_display_date(claim), ""), (f"{source_count} source refs", "")],
             [(label, state), ("Review required", "underReview")],
             footer=[
                 ("Evidence refs", f"{source_count} source refs"),
                 ("Trust lane", label),
-                ("Next review step", "Semantic review before owner approval"),
+                ("Next review step", "Compare with the source Brief" if decision_draft else "Semantic review before owner approval"),
             ],
-            action_label="Review claim",
+            action_label="Review decision draft" if decision_draft else "Review claim",
         )
     rows = rows or _empty_state(
         "Day zero",
@@ -2332,31 +2362,44 @@ def _claim_list_page(ctx: dict[str, Any]) -> str:
             ("Evidence picker", "Support must stay visible before approval."),
         ],
     )
+    collection_summary_items: list[tuple[str, int]] = [
+        (collection_label, len(claims)),
+        ("With sources", supported_count),
+    ]
+    if only_decision_drafts:
+        collection_summary_items.append(("Draft", len(claims)))
+    else:
+        collection_summary_items.extend(
+            [("Semantic review needed", semantic_review_needed_count), ("Approved", approved_count)]
+        )
+    collection_summary = _collection_summary(collection_summary_items)
+    trust_or_boundary = (
+        '<section class="cs-panel flat"><h2 class="cs-section-title">Decision boundary</h2><p class="cs-muted">A Decision draft preserves source links only. It cannot approve shared truth or authorize an action.</p></section>'
+        if only_decision_drafts
+        else f'<section class="cs-panel flat"><h2 class="cs-section-title">Trust ladder</h2>{_claim_trust_ladder(bool(supported_count), bool(semantic_reviewed_count), bool(approved_count))}</section>'
+    )
     return f"""
 <section data-product-surface="claims">
   <div class="cs-page-head">
-    <div class="cs-kicker">Claims</div>
-    <h1>Claims under review</h1>
-    <p>Trace each statement to saved sources, then review whether those sources actually support its meaning before owner approval.</p>
+    <div class="cs-kicker">{h(collection_label)}</div>
+    <h1>{h(collection_title)}</h1>
+    <p>{"Decision drafts preserve a sourced finding without approval, shared-truth, or action authority." if only_decision_drafts else "Trace each statement to saved sources, then review whether those sources actually support its meaning before owner approval."}</p>
   </div>
   <div class="cs-collection-workbench">
     <div>
-      {_collection_summary([("Claims", len(claims)), ("With sources", supported_count), ("Semantic review needed", semantic_review_needed_count), ("Approved", approved_count)])}
+      {collection_summary}
       <div class="cs-collection-list">{rows}</div>
     </div>
     <aside class="cs-stack">
       <section class="cs-panel flat">
         <h2 class="cs-section-title">Review posture</h2>
-        <p class="cs-muted">Claims can show source support, but they stay Draft until statement-level semantic review is recorded separately from owner approval.</p>
+        <p class="cs-muted">{"Decision drafts remain Draft and grant no approval or action authority." if only_decision_drafts else "Claims can show source support, but they stay Draft until statement-level semantic review is recorded separately from owner approval."}</p>
         <div class="cs-review-box">
           <a class="cs-button" href="/inbox">Open review inbox</a>
           <a class="cs-button secondary" href="/artifacts">Check sources</a>
         </div>
       </section>
-      <section class="cs-panel flat">
-        <h2 class="cs-section-title">Trust ladder</h2>
-        {_claim_trust_ladder(bool(supported_count), bool(semantic_reviewed_count), bool(approved_count))}
-      </section>
+      {trust_or_boundary}
     </aside>
   </div>
 </section>
@@ -3588,9 +3631,9 @@ def _linked_records(ctx: dict[str, Any], artifact_id: Any) -> str:
         refs = _evidence_refs(claim)
         if marker in refs:
             label, state = _claim_label(claim)
-            rows.append(_generic_row("Claim", _claim_title(claim), "Uses this source.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim)))
+            rows.append(_generic_row("Decision draft" if _is_decision_draft(claim) else "Claim", _claim_title(claim), "Uses this source.", _detail_href("claims", claim.get("claim_id")), label, state, _display_date(claim)))
     if not rows:
-        return '<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No briefs or claims are linked to this source yet.</div></section>'
+        return '<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-empty">No Brief or Decision draft is linked to this source yet.</div></section>'
     return f'<section class="cs-artifact-side-card" id="linked-work"><h2 class="cs-section-title">Linked work</h2><div class="cs-list">{"".join(rows[:4])}</div></section>'
 
 
@@ -3604,14 +3647,25 @@ def _related_brief_id(record: dict[str, Any]) -> str:
     return str(related.get("brief_id") or "")
 
 
-def _record_activity_panel(ctx: dict[str, Any], record_kind: str, record_id: str, audit_refs: list[str]) -> str:
+def _record_activity_panel(
+    ctx: dict[str, Any],
+    record_kind: str,
+    record_id: str,
+    audit_refs: list[str],
+    *,
+    product_label: str | None = None,
+) -> str:
     events = []
     for event in ctx.get("audit", []):
         subject = event.get("subject") if isinstance(event.get("subject"), dict) else {}
         if str(subject.get("type") or "") == record_kind and str(subject.get("id") or "") == record_id:
             events.append(event)
+    def event_label(event: dict[str, Any]) -> str:
+        label = _plain_event(str(event.get("event_type") or "recorded"))
+        return label.replace("Claim", product_label) if product_label else label
+
     rows = "".join(
-        f'<div class="cs-stat-row"><span class="cs-stat-icon">{icon("history")}</span><div><strong>{h(_plain_event(str(event.get("event_type") or "recorded")))}</strong><div class="cs-meta">{h(_display_date(event))}</div></div></div>'
+        f'<div class="cs-stat-row"><span class="cs-stat-icon">{icon("history")}</span><div><strong>{h(event_label(event))}</strong><div class="cs-meta">{h(_display_date(event))}</div></div></div>'
         for event in events[:5]
     )
     refs = "".join(f"<li><code>{h(ref)}</code></li>" for ref in audit_refs[:5])
@@ -3639,9 +3693,9 @@ def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
     claim_ids = {str(claim.get("claim_id") or "") for claim in claims}
     actions = [action for action in ctx.get("actions", []) if str(action.get("source_claim_id") or "") in claim_ids]
     claim_rows = "".join(
-        f'<a class="cs-list-row" href="{h(_detail_href("claims", claim.get("claim_id")))}"><span class="cs-meta">Claim candidate</span><strong>{h(_claim_title(claim))}</strong></a>'
+        f'<a class="cs-list-row" href="{h(_detail_href("claims", claim.get("claim_id")))}"><span class="cs-meta">{"Decision draft" if _is_decision_draft(claim) else "Claim candidate"}</span><strong>{h(_claim_title(claim))}</strong></a>'
         for claim in claims[:4]
-    ) or '<div class="cs-empty">No Claim candidate has been created from this Brief yet.</div>'
+    ) or '<div class="cs-empty">No Decision draft has been saved from this Brief yet.</div>'
     action_rows = "".join(
         f'<a class="cs-list-row" href="{h(_detail_href("actions", action.get("action_id")))}"><span class="cs-meta">Action preview</span><strong>{h(_action_title(action))}</strong></a>'
         for action in actions[:4]
@@ -3652,7 +3706,7 @@ def _brief_related_work(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
 <section class="cs-panel" aria-label="Related Brief work">
   <div class="cs-panel-header"><div><h2>Related decisions and actions</h2><p class="cs-muted">Only persisted records are shown here. Draft suggestions remain in the next-steps section above.</p></div></div>
   <div class="cs-brief-note-grid">
-    <div><h3>Claim candidates</h3>{claim_rows}</div>
+    <div><h3>Decision drafts</h3>{claim_rows}</div>
     <div><h3>Action previews</h3>{action_rows}</div>
   </div>
 </section>
@@ -3779,7 +3833,12 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
         ),
         [],
     )
-    bottom_line_citations = _citation_disclosure_for_refs(bottom_line_refs, source_items, brief)
+    bottom_line_citations = _citation_disclosure_for_refs(
+        bottom_line_refs,
+        source_items,
+        brief,
+        initially_open=True,
+    )
     brief_id = str(brief.get("brief_id") or "")
     claim_statement = next((value for value in [summary_text, *key_points, *findings] if value.strip()), "")
     can_create_claim = bool(brief_id and _evidence_bundle_id(brief) and claim_statement)
@@ -3908,6 +3967,9 @@ def _brief_detail(ctx: dict[str, Any], brief: dict[str, Any]) -> str:
 
 def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     label, state = _claim_label(claim)
+    decision_draft = _is_decision_draft(claim)
+    product_label = "Decision draft" if decision_draft else "Claim"
+    product_collection_label = "Decisions" if decision_draft else "Claims"
     source_items = _source_items(ctx, claim)
     source_list = _source_links_from_items(source_items)
     authority = claim.get("authority") if isinstance(claim.get("authority"), dict) else {}
@@ -3917,7 +3979,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     is_approved = str(claim.get("status") or "").lower() == "approved"
     evidence_backed_earned = _claim_evidence_backed_earned(claim)
     approval_eligible = not is_approved and authority.get("can_be_approved") is True
-    rationale = _plain_runtime_text(claim.get("rationale") or "").strip() or "No separate rationale was recorded for this Claim."
+    rationale = _plain_runtime_text(claim.get("rationale") or "").strip() or f"No separate rationale was recorded for this {product_label}."
     claim_title = _claim_title(claim)
     claim_statement = str(claim.get("statement") or claim_title)
     source_label = f"{len(source_items)} source{'s' if len(source_items) != 1 else ''}"
@@ -3936,7 +3998,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         if str(event.get("event_type") or "") == "claim.approval.denied" and str(subject.get("id") or "") == claim_id:
             denial_events.append(event)
     denial_panel = ""
-    if denial_events:
+    if denial_events and not decision_draft:
         denied = denial_events[0]
         details = denied.get("details") if isinstance(denied.get("details"), dict) else {}
         audit_ref = f"audit:{denied.get('event_id')}" if denied.get("event_id") else "Audit reference unavailable"
@@ -3960,13 +4022,21 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         "claim",
         claim_id,
         [str(ref) for ref in claim.get("audit_refs", []) if isinstance(ref, str)],
+        product_label="Decision draft" if decision_draft else None,
     )
     approved_at = _display_date({"created_at": claim.get("approved_at")}) if claim.get("approved_at") else "Approval time not recorded"
     blocked_reason = _plain_runtime_text(
         authority.get("blocked_reason")
         or "The exact Claim statement needs current citation-checked source support before approval."
     )
-    if is_approved:
+    if decision_draft:
+        approval_panel = f"""
+<section class="cs-panel cs-decision-panel" data-decision-draft-boundary="true">
+  <div class="cs-panel-header"><div><h2>Decision draft saved</h2><p class="cs-muted">This sourced finding is preserved for review. It grants no approval, shared-truth, or action authority.</p></div>{_chip("Draft", "draft")}</div>
+  <div class="cs-review-box">{related_brief}</div>
+</section>
+"""
+    elif is_approved:
         approval_panel = f"""
 <section class="cs-panel cs-decision-panel" data-claim-approval-state="approved">
   <div class="cs-panel-header"><div><h2>Approval recorded</h2><p class="cs-muted">Recorded {h(approved_at)}. This does not authorize an external action.</p></div>{_chip("Approved", "approved")}</div>
@@ -4006,6 +4076,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
 <section
   class="cs-grid-two cs-claim-workbench"
   data-product-surface="claim-detail"
+  data-product-role="{h(str(claim.get('product_role') or 'claim_draft'))}"
   data-source-support-attached="{str(has_sources).lower()}"
   data-evidence-backed-earned="{str(evidence_backed_earned).lower()}"
   data-approval-eligible="{str(approval_eligible).lower()}"
@@ -4016,7 +4087,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
         <div class="cs-brief-title">
           <nav class="cs-claim-breadcrumb" aria-label="Detail path">
             <span class="cs-meta">Detail path</span>
-            <a href="/claims">Claims</a>
+            <a href="/claims">{h(product_collection_label)}</a>
             <span aria-hidden="true">/</span>
             <span>{h(_truncate(claim_title, 90))}</span>
           </nav>
@@ -4029,8 +4100,8 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
             <span>{h(source_label)} attached</span>
           </div>
         </div>
-        <div class="cs-claim-actions" aria-label="Claim actions">
-          <a class="cs-button secondary" href="/claims">Back to Claims</a>
+        <div class="cs-claim-actions" aria-label="{h(product_label)} actions">
+          <a class="cs-button secondary" href="/claims">Back to {h(product_collection_label)}</a>
           <a class="cs-button secondary" href="/audit?record=claim:{h(claim_id)}">Open history</a>
         </div>
       </div>
@@ -4046,7 +4117,7 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
     {approval_panel}
     {denial_panel}
     <section class="cs-panel">
-      <div class="cs-panel-header"><div><h2>Brief lineage and gaps</h2><p class="cs-muted">The source Brief stays separate from this Claim record.</p></div></div>
+      <div class="cs-panel-header"><div><h2>Brief lineage and gaps</h2><p class="cs-muted">The source Brief stays separate from this {h(product_label)} record.</p></div></div>
       <div class="cs-review-box">{related_brief}</div>
       <ul class="cs-brief-note-list">{gap_rows}</ul>
     </section>
@@ -4056,16 +4127,16 @@ def _claim_detail(ctx: dict[str, Any], claim: dict[str, Any]) -> str:
       <div class="cs-panel-header">
         <div>
           <h2>Supporting evidence</h2>
-          <p class="cs-muted">These links open the visible local sources attached to this Claim.</p>
+          <p class="cs-muted">These links open the visible local sources attached to this {h(product_label)}.</p>
         </div>
         {_chip(str(len(source_items)), "searchable")}
       </div>
       {source_list}
     </section>
     <section class="cs-panel flat">
-      <h2 class="cs-section-title">Authority</h2>
-      <p class="cs-muted">{h(blocked_reason)}</p>
-      <p class="cs-muted">A Claim never starts an external action from this page.</p>
+      <h2 class="cs-section-title">{h("Decision boundary" if decision_draft else "Authority")}</h2>
+      <p class="cs-muted">{h("This Decision draft preserves a source-linked finding without granting approval or shared truth." if decision_draft else blocked_reason)}</p>
+      <p class="cs-muted">{h("A Decision draft cannot authorize or start an external action." if decision_draft else "A Claim never starts an external action from this page.")}</p>
     </section>
     {activity}
   </aside>
@@ -4619,7 +4690,13 @@ def _citation_item_for_ref(ref: str, source_items: list[dict[str, str]], record:
     return None
 
 
-def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, str]], record: dict[str, Any] | None = None) -> str:
+def _citation_disclosure_for_refs(
+    refs: list[str],
+    source_items: list[dict[str, str]],
+    record: dict[str, Any] | None = None,
+    *,
+    initially_open: bool = False,
+) -> str:
     record = record or {}
     brief_id = str(record.get("brief_id") or "")
     audit_refs = [str(ref) for ref in record.get("audit_refs", []) if isinstance(ref, str)]
@@ -4634,7 +4711,7 @@ def _citation_disclosure_for_refs(refs: list[str], source_items: list[dict[str, 
             unresolved.append(ref)
     cards = []
     for index, item in enumerate(items[:3], start=1):
-        open_attr = " open" if index == 1 else ""
+        open_attr = " open" if initially_open and index == 1 else ""
         ref_kind = item.get("ref_kind") or _citation_ref_kind(item.get("ref", ""))
         span = item.get("span") or "Whole source"
         cards.append(
@@ -4993,6 +5070,8 @@ def _home_script(scope: dict[str, Any]) -> str:
   const fileInput = document.getElementById("cs-file-input");
   const fileButton = document.getElementById("cs-file-button");
   const saveButton = document.getElementById("cs-save-source-button");
+  const sourceChoiceList = document.getElementById("cs-source-choice-list");
+  const sourceSelectionSummary = document.getElementById("cs-source-selection-summary");
   const askForm = document.getElementById("cs-ask-form");
   const askInput = document.getElementById("cs-ask-input");
   const askStatus = document.getElementById("cs-ask-status");
@@ -5007,6 +5086,10 @@ def _home_script(scope: dict[str, Any]) -> str:
   const approveActionDialog = document.getElementById("cs-action-approval-dialog");
   const confirmActionApproval = document.getElementById("cs-confirm-action-approval");
   const actionApprovalStatus = document.getElementById("cs-action-approval-status");
+  const maxDecisionSourceBytes = __MAX_DECISION_SOURCE_BYTES__;
+  const maxDecisionTotalBytes = __MAX_DECISION_TOTAL_BYTES__;
+  const maxDecisionSourceCount = 5;
+  const currentBatchSourceIds = new Set();
   function setStatus(node, message, state) {
     if (!node) return;
     const status = state || "idle";
@@ -5023,6 +5106,121 @@ def _home_script(scope: dict[str, Any]) -> str:
     button.disabled = busy;
     button.textContent = busy ? loadingLabel : defaultLabel;
   }
+  function decisionSourceInputs() {
+    return Array.from(document.querySelectorAll("[data-decision-source]"));
+  }
+  function selectedSourceStats() {
+    const selected = decisionSourceInputs().filter(node => node.checked && !node.disabled);
+    return {
+      selected,
+      count: selected.length,
+      totalBytes: selected.reduce((total, node) => total + Number(node.dataset.sourceSize || 0), 0)
+    };
+  }
+  function formatKiB(bytes) {
+    if (!bytes) return "0";
+    return String(Math.ceil(bytes / 1024));
+  }
+  function updateSourceSelectionSummary() {
+    if (!sourceSelectionSummary) return;
+    const stats = selectedSourceStats();
+    sourceSelectionSummary.textContent = stats.count + " of 5 sources selected · " + formatKiB(stats.totalBytes) + " of 512 KiB";
+  }
+  function bindSourceChoice(input) {
+    if (!input || input.dataset.selectionBound === "true") return;
+    input.dataset.selectionBound = "true";
+    input.addEventListener("change", function () {
+      const stats = selectedSourceStats();
+      if (stats.count > maxDecisionSourceCount || stats.totalBytes > maxDecisionTotalBytes) {
+        input.checked = false;
+        setStatus(
+          askStatus,
+          stats.count > maxDecisionSourceCount
+            ? "Select no more than five sources for this Brief."
+            : "Selected sources exceed the 512 KiB Brief limit. Unselect a source before adding this one.",
+          "error"
+        );
+      }
+      updateSourceSelectionSummary();
+    });
+  }
+  function beginCurrentSourceBatch() {
+    currentBatchSourceIds.clear();
+    decisionSourceInputs().forEach(node => {
+      node.checked = false;
+      node.dataset.currentBatch = "false";
+    });
+    updateSourceSelectionSummary();
+  }
+  function sourceTitle(artifact) {
+    const source = artifact.source || {};
+    if (source.filename) return source.filename;
+    if (source.type === "user_paste") return "Pasted source";
+    return source.ref || "Saved source";
+  }
+  function sourceBriefEligibility(artifact) {
+    const size = Number(artifact.original_size_bytes || 0);
+    const derived = artifact.derived || {};
+    if (size > maxDecisionSourceBytes) {
+      return {eligible: false, size, note: "Saved only · exceeds the 128 KiB per-source Brief limit"};
+    }
+    if (derived.status !== "ready" || !derived.text_ref) {
+      return {eligible: false, size, note: "Saved only · no readable plain-text representation for this Brief"};
+    }
+    return {eligible: true, size, note: "Saved and available for this Brief"};
+  }
+  function addCurrentBatchSource(artifact) {
+    if (!sourceChoiceList || !artifact || !artifact.artifact_id) return false;
+    const id = String(artifact.artifact_id);
+    const eligibility = sourceBriefEligibility(artifact);
+    const newToCurrentBatch = !currentBatchSourceIds.has(id);
+    currentBatchSourceIds.add(id);
+    const empty = document.getElementById("cs-source-set-empty");
+    if (empty) empty.remove();
+    let input = decisionSourceInputs().find(node => node.value === id);
+    let note = null;
+    if (!input) {
+      const label = document.createElement("label");
+      label.className = "cs-source-choice";
+      input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = id;
+      input.setAttribute("data-decision-source", "");
+      const copy = document.createElement("span");
+      const title = document.createElement("strong");
+      note = document.createElement("small");
+      note.setAttribute("data-source-note", "");
+      title.textContent = sourceTitle(artifact);
+      copy.append(title, note);
+      label.append(input, copy);
+      sourceChoiceList.append(label);
+      bindSourceChoice(input);
+    } else {
+      note = input.closest("label") && input.closest("label").querySelector("[data-source-note]");
+    }
+    input.dataset.sourceSize = String(eligibility.size);
+    input.dataset.currentBatch = "true";
+    input.disabled = !eligibility.eligible;
+    let selected = false;
+    if (eligibility.eligible) {
+      const stats = selectedSourceStats();
+      if (stats.count < maxDecisionSourceCount && stats.totalBytes + eligibility.size <= maxDecisionTotalBytes) {
+        input.checked = true;
+        selected = true;
+      }
+    }
+    if (note) {
+      note.textContent = selected
+        ? eligibility.note + " · selected"
+        : eligibility.eligible
+          ? "Saved · not selected because the current Brief reached its count or 512 KiB limit"
+          : eligibility.note;
+    }
+    updateSourceSelectionSummary();
+    return selected && newToCurrentBatch;
+  }
+  decisionSourceInputs().forEach(bindSourceChoice);
+  updateSourceSelectionSummary();
   async function postJson(path, body) {
     const response = await fetch(path, {
       method: "POST",
@@ -5067,30 +5265,54 @@ def _home_script(scope: dict[str, Any]) -> str:
       payload["source" + "_ref"] = sourceRef || "home-paste";
       const saved = await postJson("/artifacts", payload);
       const artifact = saved.artifact || {};
-      const id = artifact["artifact" + "_id"];
-      setStatus(dropStatus, "Saved. Opening source...", "success");
-      if (id) window.location.href = scopedUrl("/artifacts/" + encodeURIComponent(id) + "?view=html");
+      beginCurrentSourceBatch();
+      const selected = addCurrentBatchSource(artifact);
+      dropText.value = "";
+      setStatus(
+        dropStatus,
+        selected
+          ? "Source saved and selected. Add more sources or ask the decision question below."
+          : "Source saved, but it is outside the Brief text or size boundary. Add a supported source or choose another saved source below.",
+        "success"
+      );
     } catch (error) {
       setStatus(dropStatus, error.message, "error");
     } finally {
       setBusy(dropForm, saveButton, false, "Saving", "Save source");
     }
   }
-  async function saveFile(file) {
+  async function saveFiles(fileList) {
+    const files = Array.from(fileList || []);
+    if (files.length < 1) return;
+    if (files.length > maxDecisionSourceCount) {
+      setStatus(dropStatus, "Choose one to five files at a time.", "error");
+      return;
+    }
     setBusy(dropForm, saveButton, true, "Archiving", "Save source");
     if (fileButton) fileButton.disabled = true;
-    setStatus(dropStatus, "Archiving original file bytes...", "loading");
+    beginCurrentSourceBatch();
+    let savedCount = 0;
+    let selectedCount = 0;
     try {
-      const saved = await postFile(file);
-      const artifact = saved.artifact || {};
-      const id = artifact["artifact" + "_id"];
-      setStatus(dropStatus, "Original archived. Opening source...", "success");
-      if (id) window.location.href = scopedUrl("/artifacts/" + encodeURIComponent(id) + "?view=html");
+      for (let index = 0; index < files.length; index += 1) {
+        const file = files[index];
+        setStatus(dropStatus, "Archiving " + (index + 1) + " of " + files.length + ": " + (file.name || "source") + "...", "loading");
+        const saved = await postFile(file);
+        const artifact = saved.artifact || {};
+        savedCount += 1;
+        if (addCurrentBatchSource(artifact)) selectedCount += 1;
+      }
+      setStatus(
+        dropStatus,
+        savedCount + " source" + (savedCount === 1 ? "" : "s") + " archived. " + selectedCount + " selected for this Brief. Add sources or ask the decision question below.",
+        "success"
+      );
     } catch (error) {
-      setStatus(dropStatus, error.message, "error");
+      setStatus(dropStatus, savedCount + " source" + (savedCount === 1 ? "" : "s") + " archived before the error. " + error.message, "error");
     } finally {
       setBusy(dropForm, saveButton, false, "Archiving", "Save source");
       if (fileButton) fileButton.disabled = false;
+      if (fileInput) fileInput.value = "";
     }
   }
   if (dropForm && dropText) {
@@ -5112,17 +5334,17 @@ def _home_script(scope: dict[str, Any]) -> str:
     }));
     dropForm.addEventListener("drop", function (event) {
       event.preventDefault();
-      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
-      if (!file) return;
-      saveFile(file);
+      const files = event.dataTransfer && event.dataTransfer.files;
+      if (!files || !files.length) return;
+      saveFiles(files);
     });
   }
   if (fileButton && fileInput) {
     fileButton.addEventListener("click", () => fileInput.click());
     fileInput.addEventListener("change", function () {
-      const file = fileInput.files && fileInput.files[0];
-      if (!file) return;
-      saveFile(file);
+      const files = fileInput.files;
+      if (!files || !files.length) return;
+      saveFiles(files);
     });
   }
   document.querySelectorAll("[data-ask-suggestion]").forEach(button => {
@@ -5221,9 +5443,14 @@ def _home_script(scope: dict[str, Any]) -> str:
         setStatus(askStatus, "Enter a question first.", "error");
         return;
       }
-      const sourceIds = Array.from(document.querySelectorAll("[data-decision-source]:checked")).map(node => node.value).filter(Boolean);
+      const sourceStats = selectedSourceStats();
+      const sourceIds = sourceStats.selected.map(node => node.value).filter(Boolean);
       if (sourceIds.length < 1 || sourceIds.length > 5) {
         setStatus(askStatus, "Select one to five saved sources for this decision.", "error");
+        return;
+      }
+      if (sourceStats.totalBytes > maxDecisionTotalBytes) {
+        setStatus(askStatus, "Selected sources exceed the 512 KiB Brief limit.", "error");
         return;
       }
       setBusy(askForm, askButton, true, "Checking", "Ask");
@@ -5267,4 +5494,6 @@ def _home_script(scope: dict[str, Any]) -> str:
 </script>
 """.replace("__SCOPE__", _script_json(safe_scope)).replace(
         "__MAX_UPLOAD_BYTES__", str(MAX_BROWSER_UPLOAD_BYTES)
-    ).replace("__MAX_UPLOAD_MB__", str(MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024)))
+    ).replace("__MAX_UPLOAD_MB__", str(MAX_BROWSER_UPLOAD_BYTES // (1024 * 1024))).replace(
+        "__MAX_DECISION_SOURCE_BYTES__", str(VS5_DECISION_SOURCE_MAX_BYTES)
+    ).replace("__MAX_DECISION_TOTAL_BYTES__", str(VS5_DECISION_TOTAL_SOURCE_MAX_BYTES))

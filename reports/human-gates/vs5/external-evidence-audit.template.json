@@ -1,0 +1,47 @@
+{
+  "schema_version": "cs.vs5_external_evidence_audit.v1",
+  "status": "HUMAN_REQUIRED_EXTERNAL",
+  "round_id": null,
+  "corpus_manifest_sha256": "568bd1cd634ce597ef8a9f3a1106eaf00b9cf349fe16de7dda9d07a6d1edb8c4",
+  "model_stack": {
+    "embedding_model": "qwen3-embedding:0.6b",
+    "generation_model": "ornith:9b",
+    "ollama_url": "http://127.0.0.1:11434",
+    "pipeline_files": [
+      "packages/cornerstone_cli/runtime.py",
+      "packages/cornerstone_cli/briefing.py",
+      "packages/cornerstone_cli/product_access.py"
+    ],
+    "pipeline_sha256": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+    "provider": "ollama"
+  },
+  "prompt_retrieval_revision": "a1eaca7da9e9fa7b59cdcbf7fbb1edfa1889acd20c3be67b576229181a73c4b2",
+  "reviewed_at": null,
+  "reviewer": {
+    "name": null,
+    "role": null
+  },
+  "round_record_sha256": null,
+  "session_record_sha256": {
+    "session-01.json": null,
+    "session-02.json": null,
+    "session-03.json": null,
+    "session-04.json": null,
+    "session-05.json": null
+  },
+  "runtime_evidence_manifest_sha256": {},
+  "verification": {
+    "preregistration_was_frozen_before_sessions": null,
+    "all_five_participants_are_distinct_real_people": null,
+    "participant_recruitment_and_eligibility_verified": null,
+    "each_participant_used_their_own_real_input": null,
+    "runtime_records_and_hashes_recomputed_from_retained_evidence": null,
+    "participant_restatements_and_source_explanations_reviewed": null,
+    "recording_custody_hash_consent_and_duration_verified": null,
+    "no_formal_attempt_was_omitted_replaced_or_cherry_picked": null,
+    "pilot_and_archived_round_participants_do_not_overlap": null
+  },
+  "evidence_refs": [],
+  "review_note": null,
+  "decision": null
+}
