@@ -1,0 +1,924 @@
+EX-10.27
+28
+exhibit1027-super8xk.htm
+EX-10.27
+
+Document
+
+Exhibit 10.27
+
+SUPPLY AGREEMENT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+JUNE 20, 2014
+
+This Supply and Service Agreement (the “Agreement”) is effective as of the date of last signature found below (the “Effective Date”) between Illumina, Inc., a Delaware corporation having a place of business at 5200 Illumina Way, San Diego, CA 92122 (“Illumina”) and Icahn School of Medicine at Mount Sinai, having a place of business at One Gustave L. Levy Place, New York, NY 10029 (“Customer”). Customer and Illumina may be referred to herein as “Party” or “Parties.”
+
+I. DEFINITIONS
+
+“Affiliate(s)” means with respect to a Party, any entity that, directly or indirectly, controls, is controlled by or is under common control with such Party for so long as such control exists. For purposes of this definition, an entity has control of another entity if it has the direct or indirect ability or power to direct or cause the direction of management policies of such other entity or otherwise direct the affairs of such other entity, whether through ownership of the voting securities of such other entity, by contract or otherwise.
+
+“Application Specific IP” means any and all Illumina Intellectual Property Rights to the extent pertaining to or covering aspects or features of the Supplied Product (or use thereof) only with regard to (i.e., that are particular to) specific field(s) of use or specific application(s). Application Specific IP excludes all Core IP. By way of non-limiting example, Illumina Intellectual Property Rights for NIPT, for specific diagnostic methods, for specific forensic methods, or for specific nucleic acid biomarkers, probe sequences, or combinations of biomarkers or sequences, are examples of Application Specific IP.
+
+“Clinical Use” means testing of [***] with Customer’s own Laboratory Developed Tests in a clinical laboratory, for all clinical applications, specifically excluding (i) any and all Excluded Activities, (ii) [***] testing, (iii) [***] testing, (iv) [***], and [***] testing. Clinical Use includes [***].
+
+“Collection Territory” means the country or countries from which samples and specimens may be collected for testing by · Customer for Clinical Use and/or NIPT Use. The Collection Territory is [***].
+
+“Consumable(s)” means reagents and consumable items that are offered for sale under, purchased under, supplied under or otherwise governed by the terms and conditions of this Agreement and that are intended by Illumina for use with, and are to be consumed through the use of, Hardware and Existing Hardware. The Consumables that may be purchased under this Agreement as of the Effective Date are set forth in Exhibit A, Part 2. Consumables are either TG Consumables or non-TG Consumables (including Temporary Consumables), or custom. All references in this Agreement to Consumables means both TG Consumables and Non-TG Consumables unless specified otherwise in this Agreement.
+
+“Core IP” means any and all Illumina Intellectual Property Rights to the extent pertaining to or covering aspects or features of the Supplied Product (or use thereof) without regard to (i.e., not particular to) any specific field(s) of use or specific application(s). To avoid any doubt, and without limitation, Core IP specifically excludes any and all Intellectual Property Rights relating to [***].
+
+“Customer Use” means Clinical Use, NIPT Use, and Research Use.
+
+“Documentation” means Illumina’s user manual, package insert, and similar documentation, for the Supplied Product in effect on the date that the Supplied Product ships. Documentation may contain additional terms and conditions (which are hereby incorporated into this Agreement by reference) and may be provided (including by reference to a website) with the Supplied Product at the time of shipment or may be provided electronically by Illumina.
+
+“Excluded Activities” means any and all uses of a Supplied Product that (A) is not in accordance with the Supplied Product’s Specifications or Documentation, (B) requires [***], except to the extent [***], (C) is a [***] except to the extent [***], (D) is the [***], (E) is the [***], (F) [***], (G) is the [***] (unless the [***]), (H) is the [***] (including [***]), or (I) is the [***].
+
+“Existing Hardware” means those Illumina instruments, accessories, or peripherals that Customer purchased from Illumina prior to the Effective Date. In the event of any conflict between the original supply terms for Existing Hardware and the terms and conditions of this Agreement, the terms and conditions of this Agreement shall supersede and govern Customer’s use of the Existing Hardware, subject to Section 8.1 regarding warranty for Existing Hardware.
+
+“Fetal Chromosomal Abnormalities” means [***]. including [***] (including but not limited to [***]) and [***] (including but not limited to [***]) and [***] , including but not limited to [***] (including but not limited to [***])
+
+“Force Majeure” is defined in Section 13.8.
+
+“Hardware” means instruments, accessories or peripherals that are offered for sale under, purchased under, supplied under or otherwise governed by the terms and conditions of this Agreement. The Hardware that may be purchased under this Agreement as of the Effective Date is set forth in Exhibit A, Part 1.
+
+“Illumina Intellectual Property Rights” means any and all Intellectual Property Rights owned or controlled (including under license) by Illumina or Affiliates of Illumina as of the date the Supplied Product ships. Application Specific IP and Core IP are separate, non-overlapping, subsets within the Illumina Intellectual Property Rights.
+
+“Intellectual Property Right(s)” means all rights in patent, copyrights (including rights in computer software), trade secrets, know-how, trademark, service mark and trade dress rights and other industrial or intellectual property rights under the laws of any jurisdiction, whether registered or not and including all applications or rights to apply therefor and registrations thereto.
+
+“Laboratory Developed Test” means a test developed by Customer and performed by Customer in its own laboratory facility, which in the United States is regulated under the Clinical Laboratory Improvement Act (i.e., CLIA).
+
+“Law” means all statutes, statutory instruments, regulations, ordinances, or legislation to which a Party is subject; common law and the law of equity as applicable to a Party; binding court orders, judgments or decrees; industry code of practice, guidance, policy or standards enforceable by law; and applicable, directions, policies, guidance, rules or orders made or given by a governmental or regulatory authority.
+
+“On-Hardware Consumable” means a reagent or consumable that is used to perform a process on a sequencing or genotyping instrument in question. Non-limiting examples of On-Hardware Consumables supplied under this Agreement are [***], which are used to perform [***] on Hardware and Existing Hardware.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+“Off-Hardware Consumable” means a reagent or consumable that is used to perform a process or step that is not performed on a sequencing or genotyping instrument in question. Non-limiting examples of Off-Hardware Consumables include the [***], as well as [***], which are used to [***] on Hardware or Existing Hardware.
+
+“NIPT” means [***].
+
+“NIPT Application Specific IP” means [***] that pertain to the Supplied Product (and use thereof) only with regard to the performance of NIPT tests within NIPT Use.
+
+“NIPT Use” means the testing of [***] with Customer’s own Laboratory Developed Tests in a clinical laboratory, subject to Excluded Activities, wherein the testing is (i) the [***]and/or (ii) the [***], both (i) and (ii) [***], specifically excluding the Excluded Activities. NIPT Use includes [***] where [***] Supplied Products are [***]. Any and all other [***], including [***], is expressly excluded from NIPT Use.
+
+“NYGC-ILMN Agreement” means [***].
+
+“Other IP” means any and all Intellectual Property Rights of third parties (excluding Illumina’s Affiliates) to the extent pertaining to or covering aspects or features of the Supplied Product (or use thereof) with regard to any specific field(s) of use or specific application(s). By way of non-limiting example, third party Intellectual Property Rights for [***], are examples of Other IP. Other IP excludes all Core IP and Application Specific IP.
+
+“Purchase Order” means written purchase orders as defined in Section 6.1
+
+“Regulatory Approvals” means any and all regulatory approvals, licenses, and/or certifications necessary for Customer to use the Supplied Products as intended by Customer for Customer Use.
+
+“Research Use” means internal research, which includes performance of research services provided to third-parties, specifically excluding any and all Excluded Activities.
+
+“Service Contract” is the written agreement that governs the provision of service and maintenance for Hardware by Illumina.
+
+“Software” means software (including without limitation Hardware operating software, data analysis software) supplied under or otherwise governed by the terms and conditions of this Agreement, regardless of whether it is embedded in or installed on Hardware or provided separately.
+
+“Specifications” means Illumina’s written or electronically published specifications for a Supplied Product in effect for that Supplied Product on the date that the Supplied Product ships.
+
+“Supplied Product(s)” means the Consumables, Hardware, and/or Software that are offered for sale under, purchased under, supplied under or otherwise acquired under and governed by the terms and conditions of this Agreement.
+
+“Temporary Consumable(s)” means Non-TG Consumables that Illumina has authorized (in writing, including in this Agreement) Customer to purchase under this Agreement and use for Clinical Use and/or NIPT Use, as well as Research Use.
+
+“Test Fee” is defined on Exhibit B.
+
+“Term” means the term of this Agreement as defined in Section 12.1.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+“Territory” means the country or countries in which Customer may use the Supplied Products. The Territory is [***].
+
+“TG Consumables” means those Consumables that are designated with the pre-fix “TG” in their catalogue number.
+
+II. GOVERNING TERMS; SUPPLIED PRODUCTS AND PRICING
+
+2.1 Exclusive Governing Terms. This Agreement (together with the applicable Documentation and Specifications) exclusively governs the ordering, purchase, supply, and use of Supplied Product and Illumina’s provision of services (other than Service Contracts), and its terms shall prevail and override any conflicting, amending and/or additional terms contained in any purchase orders, invoices or similar documents, or any and all terms and conditions of sale previously negotiated between Illumina and Customer which are hereby rejected and shall be null and void. Further, Customer agrees that any and all terms and rights granted Customer in the NYGC-ILMN Agreement that are or may be applicable to Customer with respect to Supplied Products or 1llumina ‘s provision of services, including Customer’s procurement and use of Supplied Products, are null and void and not enforceable by Customer. Failure of Illumina or Customer to object to any such conflicting, amending and/or additional terms shall not constitute a waiver by Illumina or Customer, nor constitute acceptance by Illumina or Customer of such terms. All of Customer’s purchases of products from Illumina shall be made under this Agreement. Customer shall notify Illumina if it desires to purchase a product that is not listed on Exhibit A, and the Parties will negotiate an appropriate amendment to add the product(s) to Exhibit A. The conditions, requirements, exclusions and restrictions on Supplied Product use and other activities set forth in this Agreement are bargained for conditions of sale and, therefore, control the sale of such Supplied Products and the rights in and to Supplied Products conferred upon Customer at purchase. For the avoidance of doubt, this Agreement is personal to Customer and the rights and obligations regarding purchase and supply do not extend to Affiliates of Customer.
+
+2.2 Supplied Products; Pricing
+
+a. Supplied Products. The Supplied Products and any applicable Service Contracts, along with pricing and [***] are set forth on Exhibit A. If a price for a Supplied Product or Service Contract is not set forth in Exhibit A, the Parties will agree to the price [***]. All prices and amounts payable under this Agreement shall be in $US.
+
+b. Service Contract. Customer shall, throughout the Term, purchase and maintain the minimum of [***]on each Hardware that Customer uses for NJPT Use.
+
+c. Test Fee. Exhibit B sets forth the Test Fee and audit rights that are applicable to use of the Supplied Products for NIPT Use.
+
+d. Exclusivity. In exchange [***] under this Agreement, Customer agrees to exclusively use only Illumina [***] for [***] performed by Customer during the Term. For the avoidance of doubt, Customer agrees that [***] under this Agreement when performing [***] during the Tenn.
+
+2.3 Initial Purchase Commitment.
+
+a. Minimum Purchase Commitment. Beginning in the [***] Customer launches an [***], Customer shall purchase and take delivery of no less than [***] during each calendar quarter of this Agreement during the Term. Such amount is based upon the [***]during such time period.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+b. One-time Payment. Customer shall make a one-time payment of $[***] to Illumina within [***]days [***] the Effective Date.
+
+III. USE RIGHTS FOR SUPPLIED PRODUCTS
+
+3.1 Authorized Uses of Supplied Products.
+
+a. Research Use Rights. Subject to the terms and conditions of this Agreement, Customer’s purchase of each unit of Supplied Product under this Agreement confers upon Customer the [***]right [***] to use [***] in accordance with the terms and conditions pertaining to Supplied Products that are set forth in this Agreement (including in Documentation and Specifications). The Parties agree that the preceding sentence is designed to and does alter the effect of the exhaustion of patent rights that would otherwise result if the sale was made without restriction.
+
+b. Clinical Use Rights. Subject to the terms and conditions of this Agreement Customer’s purchase of each unit of TG Consumable and Temporary Consumable under this Agreement confers upon Customer [***]right [***] to use that [***], only on [***] from the Collection Territory, solely in accordance with the terms and conditions pertaining to Supplied Products that are set fo1th in this Agreement (including in Documentation and Specifications). The Parties agree that the preceding sentence is designed to and does alter the effect of the exhaustion of patent rights that would otherwise result if the sale was made without restriction.
+
+c. NIPT Use Rights. Subject to the terms and conditions of this Agreement, including payment of a Test Fee, Customer’s purchase of each unit of TG Consumable and Temporary Consumable under this Agreement confers upon Customer [***] to use that [***], only on [***] from the Collection Territory, and only in accordance with all terms and conditions pertaining to Supplied Products that are set forth in this Agreement (including in Documentation and Specifications). The Parties agree that the preceding sentence is designed to and does alter the effect of the exhaustion of patent rights that would otherwise result if the sale was made without restriction. Illumina acknowledges that [***] Customer to use [***]in the Territory, under terms and conditions expressly stated in this Agreement, permits Customer to [***] as a [***] and [***], subject to Customer’s [***] in accordance with this Agreement,
+
+d. Software. Subject to the terms and conditions of this Agreement, Customer has the right to use Software solely in connection with Hardware, Existing Hardware and Consumables for (i) [***]in Customer’s facility in the Territory, and (ii) for [***]in Customer’s facility in the Territory, only [***] the Collection Territory, and in both of the preceding (i) and (ii) only in accordance with the use rights set forth in this Section 3.1 and any applicable end-user license agreement. All Software is licensed, not sold, to Customer, is non-transferable, non-sublicensable, and may be subject to additional terms set forth in the end user license agreement. With respect to Software, references in this Agreement to “purchase” or “sale” of Supplied Products (and similar grammatical variations) are understood to mean that Software is licensed under this Agreement and not sold.
+
+e. Existing Hardware. The rights conferred upon Customer with purchase of Consumables under this Agreement as set forth in Section 3.1 (a)-(c) include the right for Customer to [***] to the same extent as Customer has the right to [***]under this Agreement. With respect only to Customer Use rights set forth in Sections 3.2 (a), (b), and (c), including without limitation, the related requirements, restrictions, limitations, and exclusions set forth in this Agreement, reference to [***] is understood to include [***], even if not expressly stated.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+5
+
+f. Test Marking. See Exhibit B, part B3 for requirements regarding marking NIPT test reports.
+
+3.2 Limitations on Customer Use; Excluded Activities.
+
+a. Certain Limitations on Use. Customer agrees that (i) it will not use a Supplied Product for or in any Excluded Activity, (ii) it will not [***], or [***], any [***], (iii) it will use the Supplied Products only within the scope of the Illumina Intellectual Property Rights and permitted field of use within Customer Use expressly conferred upon Customer with purchase of each unit of Supplied Product in accordance with Section 3.1 (Authorized Use of Supplied Products).
+
+b. Consumables; On-Instrument Consumables; Off-Instrument Consumables. Consumables and Hardware were specifically designed and manufactured to operate together. Customer acknowledges and agrees that (i) with respect to [***], it will only use [***], (ii) with respect to [***] it will use with [***]are [***], (iii) it will use [***]only for [***] (except to the extent applicable to [***]), (iv) Customer is not granted any right under this Agreement to [***], any [***], even for use in place of [***], even for its [***], and (v) Customer is not granted any right under this Agreement to [***], including [***].
+
+c. Illumina Proprietary Information. Customer acknowledges that the contents of and methods of operation of the Supplied Products are proprietary to Illumina and/or its Affiliates and contain or embody trade secrets of Illumina and/or its Affiliates. With respect to [***] that are included in Supplied Products, Customer agrees that it shall only use the same with the Supplied Products.
+
+d. Documentation. Customer agrees that it will not alter, modify, copy, or remove the Documentation from Customer’s facility, unless expressly permitted to do so in the Documentation or in this Agreement. Permitted copies of the Documentation shall include Illumina’s copyright and other proprietary notices.
+
+IV. INTELLECTUAL PROPERTY RIGHTS
+
+4.1 Core IP and Application Specific IP. Customer’s purchase of Supplied Products under this Agreement confers upon Customer, on a unit-by-unit basis, only the use rights under Core IP and, to the extent expressly stated, NIPT Application Specific IP, as stated in Section 3.1. As of the Effective Date, the only Application Specific IP that Customer has determined it requires for its intended use of Supplied Products is NIPT Application Specific IP. If Customer requires rights under additional Application Specific IP (whether the requirement is determined by Customer or Illumina), then it will obtain the required rights from Illumina or Customer will discontinue use of Supplied Products in a manner that requires rights to Application Specific IP. Illumina will give good faith consideration to Customer’s request to obtain rights under Application Specific IP. Any future grant by Illumina to Customer of rights to Application Specific IP will be subject to the Parties’ good faith negotiation of the terms under which such rights are to be granted, including consideration, and will be granted, if at all, under a separate written agreement.
+
+4.2 Other IP. Customer’s intended use of the Supplied Products may require that it obtain license or other rights to third party Intellectual Property Rights, including Other IP, to use Supplied Products for any and all applications within Customer Use without infringement or misuse of such third party Intellectual Property Rights. It is Customer’s responsibility to ensure that it has or obtains rights to all third party Intellectual Property Rights that are required for Customer to use the Supplied Products for Customer Use without infringement or misuse of such third party Intellectual Property Rights, subject to
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+6
+
+the limited obligation of Illumina to indemnify Customer for infringement of certain third party Intellectual Property Rights as expressly set forth in Section 11.1.
+
+4.3 All Rights Reserved.
+
+a. The rights conferred upon Customer under this Agreement are limited to those use rights (field of use under the stated Illumina Intellectual Property Rights) expressly conferred upon Customer upon purchase of each unit of Supplied Products under this Agreement, as expressly stated in Section 3.1 (Authorized Uses of Supplied Products), and Customer agrees that any use of Supplied Products outside the scope of such rights is a prohibited and unauthorized use. All prohibited and unauthorized uses infringe Illumina Intellectual Property Rights and are expressly excluded from Customer Use. Illumina, on behalf of itself and its Affiliates (and their respective successors and assigns), retains all and does not waive the right to enforce Illumina Intellectual Property Rights and bring suit or proceedings against any person or entity, including Customer (and its Affiliates, and their respective successors, and assigns), with respect to any and all prohibited or unauthorized uses of Supplied Product or Existing Hardware. Customer agrees that actual knowledge by Illumina, Illumina’s Affiliates, or their respective directors, officers, employees, or agents that Customer is using Supplied Product or Existing Hardware in any unauthorized or unpermitted manner, does not (i) waive or otherwise limit any rights under this Agreement or at Law that Illumina, Illumina’s Affiliates or their respective successors and assigns, have to address the unauthorized or unpermitted use, or (ii) grant Customer a license or other right to any Illumina Intellectual Property Right, whether by implication, estoppel, or otherwise,
+
+b. Except as expressly stated in Section 3.1 (Authorized Uses of Supplied Products), no sublicense or other right or license under any Illumina Intellectual Property Rights is or are granted, expressly, by implication, by estoppel or otherwise, under this Agreement. Supplied Products and Existing Hardware may be covered by one or more patents in the Territory. Illumina does not represent, warrant, covenant or undertake that use of Supplied Product for any or all applications within Customer Uses will not infringe or be a misuse of Application Specific IP (except to the extent rights under NIPT Application Specific IP are conferred upon purchase) or third party Intellectual Property Rights, including Other IP, and expressly disclaims and excludes any statement or implication otherwise, to the maximum extent permitted by Law. Notwithstanding anything in this Agreement to the contrary, Customer assumes all risk associated with not obtaining any required rights to Other IP or Application Specific IP (except to the extent rights under NIPT Application Specific IP are confe1Ted upon purchase).
+
+V. REGULATORY
+
+5.1 Research Supplied Products. The Supplied Products are labeled For Research Use Only. Customer acknowledges that, unless expressly stated otherwise in writing by Illumina, no Supplied Product has been subjected to any conformity assessment or other regulatory review or certified, approved or cleared by any regulatory entity or conformity assessment body, whether foreign or domestic (including without limitation the United States Food and Drug Administration), or otherwise reviewed, cleared or approved under any Law for any purpose, whether research, commercial, diagnostic or otherwise. Purchaser agrees to comply with all applicable laws and regulations when using, maintaining, and disposing of Supplied Product. In the event any Supplied Product added to this Agreement after the Effective Date has been certified, approved or cleared by a regulatory agency, including without limitation the FDA, then it may be subject to additional terms and conditions of sale and this Agreement will be amended as may be necessary.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+7
+
+5.2 Regulatory Approvals. Customer, and not Illumina, is responsible for obtaining any and all Regulatory Approvals. Customer agrees to promptly disclose to Illumina any communication that it receives from a government body, agency, or other regulatory or accrediting body pertaining to the Supplied Products or Customer’s use of the Supplied Products.
+
+5.3 Regulatory Appropriate Product. If Illumina [***] determines that it is proper from a regulatory standpoint to discontinue sale of any Supplied Product to Customer for an application within Customer Use and Illumina makes available for purchase by Customer a product or combination of products that has a relevant regulatory status more appropriate for such application within Customer Use, then Customer will transition to the use of that product or combination of products and cease using the applicable Supplied Product for that application within Customer Use within [***] after that product or combination of products is available for purchase by Customer (unless a shorter time period for transition is required by Law, in which case, within that shorter time period). In such event, the Parties will work together in good faith to coordinate such transition and, if necessary, to modify other terms and conditions of this Agreement.
+
+VI. PURCHASING; PAYMENT; DELIVERY
+
+6.1 Purchase Orders; Acceptance; Cancellation. Customer shall order Supplied Product using written purchase orders (“Purchase Order(s)”) submitted under and in accordance with this Agreement. Purchase Orders shall state, at a minimum, the Illumina catalogue number, the Illumina provided quote number (or other reference provided by Illumina), the quantity ordered, price, requested delivery date, and address for delivery, and shall reference this Agreement. All Purchase Orders shall be sent to the attention of Illumina Customer Solutions or to any other person or department designated by Illumina in writing. Acceptance of a Purchase Order occurs when Illumina provides Customer a sales order confirmation. Purchase Orders submitted in accordance with this Agreement will not be unreasonably rejected by Illumina. Except as expressly stated in Section 7.4 (Payment Instead of Taking TG Consumables), all Purchase Orders accepted by Illumina are non-cancelable by Customer and may not be modified without the prior written consent of Illumina.
+
+6.2 Invoices; Payment; Taxes.
+
+a. Invoices and Payment. Illumina shall issue invoices upon shipment of Supplied Products or upon provision of Service Contracts, as applicable. Invoices shall be sent to Customer’s accounts payable department, or any other address designated by Customer in writing. All invoices are payable as of the date of invoice and payments by Customer on such invoices are due within [***] after the date of the invoice. Test Fees are due and payable as set forth on Exhibit B. Without limiting any remedies available to Illumina, any amounts not paid when due under this Agreement will accrue interest at the rate of [***]% [***], or the maximum amount allowed by Law, if lower. In the event of nonpayment, Illumina shall have the right to take any action allowed in Law in addition to any rights or remedies under this Agreement, including without limitation, revoke the rights conferred and/or licenses granted hereunder and suspend performance, including shipment, until all payments are made current. Customer shall [***] costs (including [***]) incurred by Illumina in connection with the collection of late payments. Each Purchase Order is a separate, independent transaction under this Agreement, and al1 amounts due under any other Purchase Orders or other transactions with Illumina shall be paid by the Customer in full without any set-off, counterclaim, deduction or withholding. Customer agrees to pay for Supplied Products supplied, and for services provided including Service Contracts, hereunder in accordance with the terms and conditions of this Agreement.
+
+b. Taxes. All prices and other amounts payable to Illumina hereunder are exclusive of and are payable without withholding or deduction for taxes, GST, VAT, customs duties, tariffs, charges
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+8
+
+or otherwise as required by Law from time to time upon the sale of the Supplied Product or provision of services, all of which will be added to the purchase price or subsequently invoiced to the Customer to gross up any payment in respect of which withholding or deduction is required to be made.
+
+6.3 Shipping Terms; Title and Risk of Loss; Ship Date Changes.
+
+a. Shipping; Title, Risk of Loss. Unless otherwise agreed upon in writing, all shipments are made [***]and Customer is responsible for freight and insurance which will be added to the invoice and paid by Customer, except that all shipments to [***] [***] at Customer’s address on the Purchase Order. In [***] cases, title (except for [***]) and [***] is made available at such address.
+
+b. Ship Date Changes. The latest ship date allowed for any Supplied Product under a Purchase Order is the date that is [***] after the date the Purchase Order was received by Illumina. Subject to the te1ms and conditions of this Agreement, Illumina will use reasonable efforts, but makes no guarantee and does not unde1take that it will be able, to accommodate Customer requests to bring forward the ship dates for Supplied Products on a Purchase Order.
+
+VII. TG CONSUMABLES - ADDITIONAL TERMS AND CONDITIONS
+
+7.1 Expiry Date; Single Lot Shipments/ Kit Lot Testing for TG Consumables.
+
+a. Expiry Date for TG Consumables. Illumina shall use [***] to ensure that TG Consumables shall have an expiry date that is no less than [***] at the time of shipment. Expiry date will be pre-printed on the TG Consumable packaging.
+
+b. Single Lot Shipments. Illumina shall use [***] to ensure each shipment of a given TG Consumable supplied under this Agreement includes [***].
+
+c. Kit Lot Testing. Illumina shall use [***] to test each component reagent that comprises a given TG Consumable supplied under this Agreement, together with the other component reagents of that TG Consumable to ensure their functionality, unless sufficient data are available to demonstrate that a given component reagent, or component reagents, if quality tested independently, does not affect performance of the TG Consumable.
+
+d. Certificates of Analysis. Illumina shall, provide a [***] TG Consumables sold to Customer under this Agreement. In testing TG Consumables, Illumina will provide testing information that Illumina deems appropriate to report quality of each lot of TG Consumables.
+
+7.2 TG Consumable Lead Time. Subject to the terms and conditions of this Agreement, if a Purchase Order for TG Consumables is submitted (a) by the [***] business day of the calendar month, the first shipment of TG Consumables on the Purchase Order will be no earlier than [***] from the date the Purchase Order is accepted by Illumina and (b) after the [***] business day of the calendar month, the first shipment of TG Consumables on the Purchase Order will be no later than [***]from the date the Purchase Order is accepted by Illumina.
+
+7.3 Forecasts for TG Consumables. Customer shall, no later than the [***] business day of each calendar month, provide a written non-binding forecast detailing the estimated quantity of TG Consumables, on a TG Consumable-by-TG Consumable basis, that Customer requires during the following [***].
+
+7.4 Payment Instead of Taking TG Consumable. The type and quantity of TG Consumables required by Customer on a Purchase Order are manufactured by Illumina only after receipt of Customer’s Purchase Order for those TG Consumables. Except with respect to [***], which [***], and
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+9
+
+except as stated [***]), Customer may [***] of a Purchase Order for TG Consumables under this Agreement; provided that Illumina reserves the right to charge Customer up to [***]% of the purchase price of the canceled TG Consumables, and Customer agrees to make payment on any and all invoices provided by Illumina for such charges in accordance with this Agreement.
+
+7.5 Temporary Consumables. Subject to the terms and conditions of this Agreement, if Non-TG Consumables are supplied under this Agreement as Temporary Consumables, then those Non-TG Consumables shall, solely for the purposes of Clinical Use and NIPT Use, as applicable, be considered to have the same Clinical Use and NIPT Use rights as TG Consumables. With respect to Non-TG Consumables for which Illumina does not have a corresponding TG version (“TG Version”) generally available for purchase during the Term, at such time as Illumina does have a TG version generally available for purchase, Illumina will give Customer notice of the availability of that TG Version and at that time it shall automatically be added to Exhibit A of this Agreement and available for purchase by Customer. Notice may be by way of inclusion of the TG Version on a quote. Customer agrees that (i) within [***] of the date of such notice Customer will cease using the applicable Non-TG Consumables as Temporary Consumables for Clinical Use and NIPT Use, as applicable, (ii) it will promptly modify or cancel existing open Purchase Orders (without being subject to the charge set forth in Section 7.4) as needed so as to ensure that Customer will no longer receive the applicable Non-TG Consumables as Temporary Consumable after the date that is [***] after the date of the notice, unless Customer will use such Non-TG Consumables only for Research Use, and (iii) Customer will not place additional Purchase Orders for the applicable Non-TG Consumables as Temporary Consumable for Clinical Use and NIPT Use, as applicable, after receipt of such notice.
+
+7.6 Discontinuation/Changes to Certain TG Consumables.
+
+a. TG Consumables will not be manufactured in their current configurations indefinitely as a result of product life cycle or other business considerations. Accordingly, a given TG Consumable may be phased out of production and no longer available and/or there may be a new, reconfigured, or repackaged version of a TG Consumable that embodies a material change to form, fit or function of such TG Consumable (such discontinued or materially changed TG Consumable is referred to as a “Discontinued Consumable”). Any product or combination of products that is intended by Illumina to replace such Discontinued Consumable shall be referred to as a “Substitute Consumable.” In some instances a Substitute Consumable may differ from the Discontinued Consumable through changes in one or more components that comprised the Discontinued Consumable (“Changed Components”). In other instances the Substitute Consumable may represent a complete change from the Discontinued Consumable (“Complete Change”).
+
+b. In the case of a Discontinued Consumable that will have Changed Components, Illumina will use [***] to make the Changed Components and instructions on how to modify the Discontinued Consumable in order to use the Changed Components available [***]as soon as practical, but no later than [***] to the date that the Discontinued Consumable will no longer be available for purchase. Illumina will provide a [***] to facilitate Customer’s validation efforts in support of the change.
+
+c. In the case of a Discontinued Consumable that will have a Complete Change, Illumina will use [***] to make the Substitute Consumable available for purchase by Customer as soon as practical, but no later than [***] prior to the date that the Discontinued Consumable will no longer be available for purchase. Illumina will [***] to facilitate Customer’s validation efforts in support of the change.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+10
+
+d. Once a Discontinued Consumable is no longer available for purchase (either in the instance of a Complete Change or Changed Component), Illumina will give [***] to this Agreement as a Consumable and the Discontinued Consumable will be removed. The price for a Substitute Consumable will be [***] for the Substitute Consumable. Use of Substitute Consumables shall be subject to the terms and conditions of this Agreement. In the event Customer expends [***] but, nevertheless, is [***] that Customer achieved through use of the Supplied Product that was replaced by the Substitute Consumable, then Customer shall provide written notice to Illumina of the [***], along with a [***] undertaken by Customer to improve the economic or technical benefit. Upon the earlier of [***] business days after receipt of such notice, or Illumina’s confirmation of the [***], Customer shall no [***] set forth in [***] of this Agreement.
+
+7.7 TG Consumable Ship Schedule. Each Purchase Order for TG Consumables [***], to be agreed to between Illumina and Customer prior to Illumina accepting that Purchase Order, that details the quantity of and type of TG Consumables (on a TG Consumable-by-TG Consumable basis) that Customer requires to be delivered [***] that is covered by the Purchase Order.
+
+VIII. WARRANTY
+
+8.1 Warranty for Supplied Products. All warranties are personal to Customer and may not be transferred or assigned to a third-party, including an Affiliate of Customer. All warranties for Hardware are facility specific and do not transfer and are void if the Hardware is used at or moved to another facility, including moved to, between, or among facilities of Customer, unless Illumina conducts such move. All warranties for Consumables are facility specific and cannot be re-shipped, including re-shipments between or among facilities of Customer. The warranties set forth in this Agreement only apply to units of Supplied Products purchased under this Agreement. Warranty for Existing Hardware is as stated in the original terms of sale.
+
+a. Warranty for Consumables. Illumina warrants, except as expressly stated otherwise in this Agreement, that Consumables, other than custom Consumables, will conform to their Specifications until [***] of (i) for TG Consumables, [***] from the date of shipment from Illumina and for Non-TG Consumables, [***] from the date of shipment from Illumina, and (ii) any [***], but in no event later than [***] from the date of shipment. With respect to [***] Consumables (i.e., [***]), Illumina only warrants that [***]. Illumina makes no warranty that custom Consumables will work as intended by Customer or for Customer’s intended uses.
+
+b. Warranty for Hardware. Illumina warrants that Hardware, other than Upgraded Components, will conform to its Specifications for a period of [***] after its shipment date from Illumina unless the Hardware includes Illumina-provided installation, in which case the warranty period begins on the [***] or [***]s after the date the Illumina Hardware was delivered, whichever occurs first (“Base Hardware Warranty”). “Upgraded Components” means Illumina-provided components, modifications, or enhancements to Hardware that was acquired by Customer prior to the date Illumina provides these Upgraded Components. Illumina warrants that Upgraded Components will conform to their Specifications for the [***] of the Base Hardware Warranty or a period of [***] from the date the Upgraded Components are installed. Upgraded Components do not extend the Base Hardware Warranty.
+
+8.2 Exclusions from Warranty Coverage. The foregoing warranties in Section 8.1 shall not apply to the extent a non-conformance is due to (a) abuse, misuse, neglect, negligence, accident, improper storage, or use contrary to the Documentation (misuse includes use of a Consumable more than one time), (b) improper handling, installation, maintenance, or repair (other than by Illumina personnel), (c) unauthorized alteration, (d) an event of Force Majeure, or (e) use with a third party’s good not
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+11
+
+provided by Illumina (unless the applicable Documentation or Specifications expressly state such third party’s good is for use with it).
+
+8.3 Sole Remedy. The following states Customer’s sole remedy and Illumina’s sole obligations under the foregoing warranties.
+
+a. Consumables. Illumina will repair or replace the non-conforming Consumable in its sole discretion. Repaired or replaced Non-TG Consumables come with a warranty of [***] after delivery of the repaired or replaced Consumable. Repaired or replaced TG Consumables come with a warranty that is the longer of [***] after delivery of the repaired or replaced Consumable or any expiration date or the end of the shelf-life pre-printed on such TG Consumable. In no event will the warranty for repaired or replaced Consumables be later than [***] from the date of shipment. With respect to replaced TG Consumables, Illumina will use [***] to provide replacement TG Consumables in Customer’s next scheduled shipment where single lot per shipment can be maintained.
+
+b. Hardware. Illumina will repair or replace the non-conforming Hardware in its sole discretion. Hardware may be repaired or replaced with functionally equivalent, reconditioned, or new Hardware or components (if only a component of Hardware is non-conforming). If the Hardware is replaced in its entirety, or if only a component(s) is/are being repaired or replaced, the warranty period for the replacement Hardware is the longer of [***] from the date of its shipment or the remaining period on the original Hardware warranty. Replaced or repaired components do not extend the original Hardware warranty period.
+
+8.4 Procedure. In order to be eligible for repair or replacement under this warranty Customer must (a) promptly contact Illumina’s customer support department to report the non-conformance, (b) cooperate with Illumina in the diagnosis of the non-conformance, and (c) return the Supplied Product, transportation charges prepaid, to Illumina following Illumina’ s instructions or, if agreed by Illumina, grant Illumina’s authorized repair personnel access to this Supplied Product in order to confirm the non-conformance and make repairs.
+
+8.5 Third-Party Goods. Illumina has no warranty obligations with respect to any goods or software originating from a third party, including without limitation, any such goods or software supplied to Customer under this Agreement. Third-party goods or software are those that are labeled or branded with a third-party’s name. The warranty for third-party goods or software, if any, is provided by the original manufacturer. Illumina will cooperate with Customer in filing any warranty claims with such third-parties.
+
+8.6 Limited Warranties. TO THE EXTENT PERMITTED BYLAW AND EXCEPT FOR THE EXPRESS LIMITED WARRANTIES FOR SUPPLIED PRODUCTS SET FORTH IN SECTION 8.1 AND 8.3 OF THIS AGREEMENT, ILLUMINA MAKES NO (AND EXPRESSLY DISCLAIMS ALL) WARRANTIES, EXPRESS, IMPLIED OR STATUTORY, WITH RESPECT TO THE SUPPLIED PRODUCTS, OR ANY SERVICES PROVIDED IN CONNECTION WITH THIS AGREEMENT, INCLUDING WITHOUT LIMITATION ANY IMPLIED WARRANTY OF MERCHANTABILITY OR SATISFACTORY QUALITY, FITNESS FOR A PARTICULAR PURPOSE, CARE AND SKILL, NONINFRINGEMENT, OR ARISING FROM COURSE OF PERFORMANCE, DEALING, USAGE OR TRADE. WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, ILLUMINA MAKES NO CLAIM, REPRESENTATION, OR WARRANTY OF ANY KIND AS TO THE UTILITY OF THE SUPPLIED PRODUCTS FOR CUSTOMER’S INTENDED USES.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+12
+
+IX. CONFIDENTIAL INFORMATION
+
+9.1 Confidential Information; Confidentiality. The Parties acknowledge that a Party (the “Recipient Party”) may have access to confidential or proprietary information (“Confidential Information “) of the other Party (the “Disclosing Party”) in connection with this Agreement. In order to be protected as Confidential Information, information must be disclosed with a confidential or other similar proprietary legend and in the case of orally or visually disclosed information, the Disclosing Party shall notify the Recipient Party of its confidential nature at the time of disclosure and provide a written summary that is marked with a confidential or other similar proprietary legend to the Recipient Party within [***] (email acceptable). Confidential Information may include, but shall not be limited to, inventions, designs, formulas, algorithms, trade secrets, know-how, customer lists, cost and pricing information, business and marketing plans, and other business, regulatory, manufacturing and financial information. This Agreement, including its terms, including pricing, is Confidential Information. During the Term of this Agreement and for a period of [***] years thereafter, the Recipient Party shall hold the Disclosing Party’s Confidential Information in confidence using at least the degree of care that is used by the Recipient Party with respect to its own Confidential Information, but no less than reasonable care. The Recipient Party shall disclose the Confidential Information of the Disclosing Party solely on a need to know basis to its employees, contractors, officers, directors, representatives, and those of its Affiliates, under written confidentiality and restricted use terms or U11dertakings consistent with this Agreement. The Recipient Party shall not use the Disclosing Party’s Confidential Information for any purpose other than exercising its rights and fulfilling its obligations under this Agreement. The Confidential Information shall at all times remains the property of the Disclosing Party. The Recipient Party shall, upon written request of the Disclosing Party, return to the Disclosing Party or destroy the Confidential Information of the Disclosing Party. Notwithstanding the foregoing, the Recipient Party may maintain one copy of the Disclosing Party’s Confidential Information to be retained by the Recipient Party’s Legal Department for archival purposes only.
+
+9.2 Exceptions. Notwithstanding any provision contained in this Agreement to the contrary, neither Party shall be required to maintain in confidence or be restricted in its use of any of the following: (a) information that, at the time of disclosure to the Recipient Party, is in the public domain through no breach of this Agreement or breach of another obligation of confidentiality owed to the Disclosing Party or its Affiliates by the Receiving Party; (b) information that, after disclosure hereunder, becomes part of the public domain by publication or otherwise, except by breach of this Agreement or breach of another obligation of confidentiality owed to the Disclosing Party or its Affiliate by the Receiving Party; (c) information that was in the Recipient Party’s or its Affiliate ‘s possession at the time of disclosure hereunder by the Disclosing Party unless subject to an obligation of confidentiality or restricted use owed to the Disclosing Party or its Affiliate; (d) information that is independently developed by or for the Recipient Party or its Affiliates without use of or reliance on Confidential Information of the Disclosing Party; or (e) information that the Recipient Party receives from a third party where such third party was under no obligation of confidentiality to the Disclosing Party or its Affiliate with respect to such information.
+
+9.3 Disclosures Required by Law. The Recipient Party may disclose Confidential Information of the Disclosing Party as required by court order, operation of law, or government regulation, including in connection with submissions to regulatory authorities with respect to the Supplied Products; provided that, the Recipient Party promptly notifies the Disclosing Party of the specifics of such requirement prior to the actual disclosure, or promptly thereafter if prior disclosure is impractical under the circumstances, uses diligent and reasonable efforts to limit the scope of such disclosure or obtain confidential treatment of the Confidential Information if available, and allows the Disclosing Party to participate in the process undertaken to protect the confidentiality of the Disclosing Party’s Confidential
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+13
+
+Information including, without limitation, cooperating with the Disclosing Party in its efforts to permit the Receiving Party to comply with the requirements of such order, law, or regulation in a manner that discloses the least amount necessary, if any, of the Confidential Information of the Disclosing Party.
+
+9.4 Injunctive Relief. Each Party acknowledges that any use or disclosure of the other Party’s Confidential Information other than in accordance with this Agreement may cause irreparable damage to the other Party. Therefore, in the event of any such use or disclosure or threatened use or threatened disclosure of the Confidential Information of either Party hereto, the non-breaching Party shall be entitled, in addition to all other rights and remedies available at Law, to seek injunctive relief against the breach or threatened breach of any obligations under this Article IX.
+
+9.5 Disclosure of Agreement. Except as expressly provided otherwise in this Agreement, neither Party may disclose this Agreement, the terms and conditions of this Agreement, including any financial terms thereof, and the subject matter of this Agreement to any third party without the prior written consent of the other Party, which consent shall not be unreasonably withheld. Notwithstanding anything in this Agreement to the contrary, Customer acknowledges and agrees that Illumina and its Affiliates, as healthcare companies, may, if required by applicable Law, disclose this Agreement, its terms, its subject matter, including financial terms (including without limitation, Illumina’s compliance with Sunshine Act).
+
+X. LIMITATIONS OF LIABILITY; DISCLAIMERS; REPRESENTATIONS
+
+10.1 Limitation of Liability.
+
+a. EXCEPT WITH RESPECT TO LIABILITY ARISING FROM (1) INDEMNIFICATION OBLIGATIONS UNDER ARTICLE XI, (2) BREACH OF [***], OR (3) [***] BREACH OR [***] MISCONDUCT UNDER THIS AGREEMENT, BUT OTHERWISE TO THE EXTENT PERMITTED BY LAW, IN NO EVENT SHALL ILLUMINA OR ITS AFFILIATES BE LIABLE TO CUSTOMER, NOR SHALL CUSTOMER OR ITS AFFILIATES BE LIABLE TO ILLUMINA, FOR [***] ARISING OUT OF OR IN CONNECTION WITH THIS AGREEMENT, INCLUDING WITHOUT LIMITATION, THE [***], HOWEVER ARISING OR CAUSED AND ON ANY THEORY OF LIABILITY (WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY MISREPRESENTATION, BREACH OF STATUTORY DUTY OR OTHERWISE).
+
+b. EXCEPT WITH RESPECT TO LIABILITY ARISING FROM (1) ILLUMINA’S INDEMNIFICATION OBLIGATIONS UNDER ARTICLE XI, (2) BREACH BY ILLUMINA OF [***], OR (3) ILLUMINA’S [***] BREACH OR [***] MISCONDUCT UNDER THIS AGREEMENT, BUT OTHERWISE TO THE EXTENT PERMITTED BY LAW, ILLUMINA’S TOTAL AND CUMULATIVE LIABILITY TO CUSTOMER ARISING UNDER OR IN CONNECTION WITH THIS AGREEMENT, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE), STRICT LIABILITY, MISREPRESENTATION, BREACH OF STATUTORY DUTY OR OTHERWISE, SHALL IN NO EVENT EXCEED [***]) DURING THE [***].
+
+c. EXCEPT WITH RESPECT TO LIABILITY ARISING FROM (1) CUSTOMER’S INDEMNIFICATION OBLIGATIONS UNDER ARTICLE XI, (2) CUSTOMER’S BREACH OF [***], (3) CUSTOMER’S [***] BREACH OR [***] MISCONDUCT UNDER THIS AGREEMENT, AND (4) CUSTOMER’S [***], BUT OTHERWISE TO THE EXTENT PERMITTED BY LAW, CUSTOMER’S TOTAL AND CUMULATIVE LIABILITY TO ILLUMINA ARISING UNDER OR IN CONNECTION WITH THIS AGREEMENT, WHETHER IN CONTRACT, TORT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+14
+
+(INCLUDING NEGLIGENCE), STRICT LIABILITY, MISREPRESENTATION, BREACH OF STATUTORY DUTY OR OTHERWISE, SHALL IN NO EVENT EXCEED [***] DURING THE [***].
+
+d. THE LIMITATION OF LIABILITY IN THJS SECTION 10.1 SHALL APPLY EVEN IF ILLUMINA OR ITS AFFILIATES OR CUSTOMER AND ITS AFFILIATES HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH LIABILITY, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. NOTWITHSTANDING ANYTHING IN THIS AGREEMENT TO THE CONTRARY, INCLUDING WITHOUT LIMITATION, IN THIS ARTICLE X, THIS AGREEMENT DOES NOT LIMIT LIABILITY OF CUSTOMER OR ITS AFFILIATES FOR ANY INFRINGEMENT OF ILLUMINA INTELLECTUAL PROPERTY RIGHTS, INCLUDING WITHOUT LIMITATION, APPLICATION SPECIFIC IP (EXCEPT TO THE EXTENT RIGHTS UNDER NIPT APPLICATION SPECIFIC IP ARE CONFERRED ON CUSTOMER UPON PURCHASE OF EACH UNIT OF SUPPLIED PRODUCT AS EXPRESSLY STATED IN SECTION 3.1).
+
+10.2 Customer Representations and Warranties. Customer represents and warrants and covenants that (a) it owns, leases, or otherwise contractually controls the facilities in which Supplied Products will be used for Customer Use; (b) it has the right and authority to enter into this Agreement without violating the terms of any other agreement; (c) it has all rights and licenses necessary to purchase and use the Supplied Products for Customer Use; (d) the person(s) signing this Agreement on its behalf has the right and authority to bind Customer to the terms and conditions of this Agreement, and (e) it will perform NIPT tests within NIPT Use in a professional and workmanlike manner and in accordance with Law.
+
+10.3 Customer Agreements. Customer is not an authorized dealer, representative, reseller, or distributor of any of Illumina’ s, or its Affiliates’, products or services. Customer (a) is not purchasing the Supplied Product on behalf of a third party, (b) is not purchasing the Supplied Product in order to resell or distribute the Supplied Product to a third party, (c) is not purchasing the Supplied Product in order to export the Supplied Product from the country in which Illumina shipped the Supplied Product pursuant to the ship-to address designated by Illumina at the time of ordering, and (d) will not export the Supplied Product out of such country in (c).
+
+XI. INDEMNIFICATION; INSURANCE
+
+11.1 Indemnity.
+
+a. Indemnification by Illumina for Infringement. Subject to the terms and conditions of this Agreement, including without limitation, the Exclusions to Illumina Indemnification Obligation (Section 11.1(b) below), Indemnification by Customer (Section 11.1(c) below), Conditions of Indemnification Obligation (Section 11.1(d) below), and Customer’s obligations pertaining to Other IP pursuant to Article IV,
+
+(i) Illumina shall defend, indemnify and hold harmless Customer, and its officers, directors, representatives and employees (Customer and each of the foregoing a “Customer Indemnitee”), against any claim or action brought by a third-party:
+
+(A) alleging infringement of the valid and enforceable Intellectual Property Rights of a third party that pertain to or cover aspects or features of the Supplied Product(s) (or use thereof) without [***], as a result of [***], in accordance with all the terms and conditions of this Agreement,
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+15
+
+(B) alleging infringement of the valid and enforceable Intellectual Property Rights of a third party that pertain to or cover aspects or features of the Supplied Product(s) (or use thereof) without [***], as a result of [***], with [***], in accordance with all the terms and conditions of this Agreement,
+
+(C) alleging infringement of the valid and enforceable Intellectual Property Rights of a third party that pertain to or cover aspects or features of the Supplied Product(s) (or use thereof) without [***], as a result of [***], with [***], in accordance with all the terms and conditions of this Agreement,
+
+(the infringement claims in (A), (B), and (C) are collectively and individually an “Illumina Infringement Claim”), and
+
+(ii) Illumina shall [***] awarded against such Customer Indemnitee in connection with such Illumina Infringement Claim.
+
+The foregoing obligation to indemnify, defend and hold harmless shall not be applicable for any claim or action brought by (x) a third party who is or becomes or was an Affiliate of Customer.
+
+If the Supplied Products or any part thereof become, or in Illumina’s opinion may become the subject of an infringement claim or action against Illumina (including its Affiliates) or Customer and/or any other Customer Indemnitee, Illumina [***], to (A) [***]Customer the right to continue using such Supplied Products, (B) [***] such Supplied Products with [***], or (C) [***]of such Supplied Products that are or may become the subject of an infringement claim or action and [***], [***] to supply such Supplied Products hereunder, and [***] to Customer the [***] (as [***] in Customer’s [***]) of the returned Supplied Product at the time of [***]; provided that, [***] Consumables. This Section (including without limitation Section 11.1(b) and other Sections referred to herein) states the entire liability of Illumina for any allegation of Customer infringement of third party Intellectual Property Rights, as well as Illumina’s entire obligation under this Agreement to indemnify, defend and hold harmless the Customer and other Customer Indemnitees.
+
+b. Exclusions to Illumina Indemnification Obligation. Illumina shall have no obligation under Section 11.1(a), (or any obligation under this Agreement), to defend, indemnify or hold harmless any Customer Indemnitee or pay any settlements, final judgments or costs with respect to any Illumina Infringement Claim, to the extent such Illumina Infringement Claim is or arises from any one or more of:
+
+(i) the use of the Supplied Products in any [***] with respect to [***] of the Supplied Products in accordance with [***],
+
+(ii) the use of the Supplied Products in any manner or for any purpose [***],
+
+(iii) the use of the Supplied Products in [***],
+
+(iv) the use of the Supplied Products to [***], including without limitation, [***],
+
+(v) Illumina’s compliance with [***] (e.g., [***]),
+
+(vi) the use of the Supplied Products in any manner or for any purpose that [***], or
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+16
+
+(vii) Customer’s breach of any term, including breach of a representation or warranty or condition , made hereunder or included in this Agreement, wherein any use specified in (i), (ii), (iii) (iv), or (vi) is a use performed by Customer, its Affiliate, or a party to whom Customer or its Affiliate transfers Supplied Product (regardless of whether any such use or transfer is permitted under this Agreement) (each of (i)-(vii), is referred to as an “Excluded Claim”).
+
+c. Indemnification by Customer. Customer shall defend, indemnify and hold harmless Illumina, its Affiliates, their [***], and [***], and their respective officers, directors, representatives, employees, successors and assigns (Illumina and each of the foregoing an “Illumina Indemnitee(s)”), against any and all claims, liabilities, damages, fines, penalties, causes of action, and losses of any and every kind (“Claim”), including without limitation, claims relating to or arising out of personal injury or death, and claims relating to or arising out of infringement of a third patty’s Intellectual Property Rights, to the extent a Claim results from, relates to, or arises out of:
+
+(i) any action described in any Excluded Claim, including without limitation, [***],
+
+(ii) Customer’s failure to [***],
+
+(iii) Customer’s [***], and/or [***] without limitation, [***].
+
+d. Conditions of Indemnification. The Parties’ indemnification obligations under this Section 11.1 are subject to the Party seeking indemnification (i) notifying the other, indemnifying Party promptly in writing of the claim, (ii) giving indemnifying Party exclusive control and authority over the defense of such claim, (iii) not admitting infringement of any Intellectual Property Right without prior written consent of the indemnifying Party, (iv) not entering into any settlement or compromise of any such action without the indemnifying Party ‘s prior written consent, and (v) providing all [***]e to the indemnifying Party that the indemnifying Party requests and ensuring that its officers, directors, representatives and employees and other indemnitees likewise provide assistance (provided that indemnifying Party reimburses the indemnified Party(ies) for its/their [***]providing such assistance ). An indemnifying Party will not enter into or otherwise consent to an adverse judgment or order, or make any admission as to liability or fault that would adversely affect the indemnified party, or settle a dispute without the prior written consent of the indemnified Party, which consent not to be unreasonably withheld, conditioned, or delayed.
+
+e. Third-Party Goods. Notwithstanding anything in this Agreement to the contrary, Illumina shall have no indemnification obligations with respect to any goods or software originating from a third party, including without limitation, any such goods or software supplied to Customer under this Agreement. Third-party goods are those that are labeled or branded with a third-party’s name. Customer’s sole right to indemnification with respect to such third party goods or software shal1 be pursuant to the original manufacturer’s or original licensor’s indemnity, if any, to Customer, to the extent provided by the original manufacturer or original licensor.
+
+11.2 Insurance. Customer shall obtain and maintain insurance coverage as follows: (i) a policy for liability (including professional and errors & omissions) in the amount of no less than US$[***]per occurrence, and (ii) separately a policy for commercial general liability and public liability insurance in the amount of no less than US$[***], in the case of each of (i) and (ii) to protect the Illumina Indemnitees under the indemnification provided hereunder. Illumina shall be an additional insured on Customer’s insurance policy or policies and, upon request, Illumina shall be provided appropriate certificates of insurance. Such policies shall provide a waiver of subrogation against Illumina as an additional insured and contain no cross-liability exclusion. Customer agrees that the Parties intend that
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+17
+
+Customer’s insurance coverage will be primary over any other potentially applicable insurance. Customer shall ensure that any umbrella or excess liability coverage shall not treat the naming of Illumina as an additional insured as a coverage change that voids or terminates such coverage. Customer will not cancel or amend the policies without [***] prior written notice to Illumina. Customer shall maintain such insurance at all times during the Term and for a period of [***]thereafter.
+
+XII. TERM AND TERMINATION
+
+12.1 Term. This Agreement shall commence on the Effective Date and terminate three (3) years thereafter unless otherwise terminated early as provided hereunder or extended longer by the mutual agreement of the Parties. The period from the Effective Date to the date the Agreement terminates or expires is the “Term.”
+
+12.2 Early Termination. Without limiting any other rights of termination expressly provided in this Agreement or under Law, this Agreement may be terminated early as follows:
+
+a. Breach of Provision. If a Party materially breaches this Agreement and fails to cure such breach within [***] days after receiving written notice of the breach from the other Party, the non-breaching Party shall have the right to terminate this Agreement with immediate effect by providing written notice of termination to the other Party. Notwithstanding the foregoing, and without limiting any other right or remedy of Illumina, breach by Customer of any term in Article III (Use Rights for Supplied Products) or Article IV (Intellectual Property), under this Agreement, gives Illumina the right to seek injunctive relief and/or to terminate this Agreement with immediate effect upon written notice.
+
+b. Bankruptcy and Insolvency. A Party may terminate this Agreement, effective immediately upon written notice, if the other Party becomes the subject of a voluntary or involuntary petition in bankruptcy, for winding up of that Party, or any proceeding relating to insolvency, receivership, administrative receivership, administration liquidation or company voluntary arrangement or scheme of arrangement with its creditors that is not dismissed or set aside within [***]. In the event of any insolvency proceeding commenced by or against Customer, Illumina shall be entitled to cancel any Purchase Order then outstanding and not accept any further Purchase Order until bankruptcy or insolvency proceeding is resolved.
+
+c. Termination for Regulatory Standards. In the event that either Party is notified by a regulatory agency or government body, including without limitation the FDA or any foreign equivalent, or [***], that its performance under this Agreement is illegal or violates any Law, then each Party has the right to terminate the part(s) of the Agreement negatively affected by such ruling, upon [***] prior [***]to the other Party and Illumina has the right to cease supplying the affected Supplied Product.
+
+12.3 Right to Cease Delivery. In addition to any other remedies available to Illumina under this Agreement or at Law, Illumina reserves the right to cease shipping Supplied Product to Customer immediately if Customer (a) uses the Supplied Product in any unauthorized or unpermitted manner, including without limitation, outside the scope of Customer Use (including the Intellectual Property Rights and field of use) expressly conferred to Customer in accordance with Section 3.1 (Authorized Uses of Supplied Products) of this Agreement, (b) fails to pay invoices when due, (c) breaches any term in Article III (Use Rights for Supplied Products) or Article IV (Intellectual Property), (d) breaches any Customer representation or warranty made hereunder or (e) provides notice to Illumina in accordance with Section 12.2(c).
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+18
+
+12.4 Survival of Obligations. All definitions, all purchase commitments under open Purchase Orders, all payment obligations, Section 3.2 (Limitations on Customer Use; Excluded Activities), Article IV (Intellectual Property Rights), Sections 5.1 (Research Supplied Products), 5.2 (Regulatory Approvals), non-cancellation of Purchase Orders under Section 6.1 (Purchase Orders; Acceptance; Cancellation), title and risk of loss under Section 6.3 (Shipping Terms; Title and Risk of Loss; Ship Date Changes), 7.4 (Payment Instead of Taking TG Consumable), Articles VIII (Warranty), IX (confidential Information), X (Limitations of Liability; Disclaimers; Representations), XI (Indemnification; Insurance), Section 12.4 (Survival of Obligations), XIII (Additional Terms and Conditions). With respect to Use Rights in Section 3.1, Customer has the right to use the units of Consumables supplied under this Agreement with Hardware and Existing Hardware until the expiration date of those Consumables. Termination or expiration of this Agreement shall not relieve the Parties of any liability or obligation that accrued hereunder prior to the effective date of such termination or expiration nor preclude either Party from pursuing all rights and remedies it may have hereunder or at law or in equity with respect to any breach of this Agreement, nor prejudice either Party’s right to obtain performance of any obligation. ·
+
+XIII. ADDITIONAL TERMS AND CONDITIONS
+
+13.1 Governing Law; Jurisdiction. This Agreement and any dispute or claim arising out of or in connection with it or its subject matter or formation shall be governed and construed in accordance with the laws of the State of California, U.S.A., without regard to provisions on the conflicts of laws. Any legal process to resolve a dispute under this Agreement, including without limitation arbitration or court proceedings, shall take place in San Diego, California. The Parties agree that the United Nations Convention on Contracts for the International Sale of goods shall not apply to this Agreement, including any terms in Documentation. In Illumina’s sole discretion, any dispute, claim or controversy arising out of or relating to the breach, termination, enforcement, interpretation or validity of these terms and conditions, shall be determined by confidential binding arbitration conducted in the English language, (i) to be held in San Diego, California before one arbitrator who has at least 10 years of experience in handling disputes similar to the dispute to be arbitrated hereunder and administered by JAMS pursuant to the JAMS Comprehensive Arbitration Rule In all cases of arbitration hereunder each Party shall bear its own costs and expenses and an equal share of the arbitrator’s and administrator’s fees of arbitration; neither Party nor an arbitrator may disclose the existence, content, or results of any arbitration without the prior written consent of both Parties, unless required by law; the decision of the arbitrator shall be final and binding on the Parties, provided that, the arbitrator shall not have the authority to alter any explicit provision of these terms and conditions; judgment on the award may be entered in any court having jurisdiction. This clause shal1 not preclude the Parties from seeking provisional remedies in aid of arbitration from a court of appropriate jurisdiction. Notwithstanding anything herein to the contrary, any claims or causes of action involving infringement, validity, or enforceability of a Party or its Affiliate’s Inte11ectual Property rights are not subject to this arbitration clause.
+
+13.2 Illumina Affiliates; Rights of Third Parties. Customer agrees that Illumina may delegate or subcontract any or all of its rights and obligations under this Agreement to one or more of its Affiliates. Illumina invoices and other documentation may come from an Illumina Affiliate and Customer shall honor those just as if they came directly from Illumina. There are no third party beneficiaries to this Agreement and no term of this Agreement is enforceable under the Contracts (Rights of Third Parties) Act 1999 by a person or entity who is not a Party to this Agreement. The Parties to this Agreement may rescind or terminate this Agreement or vary any of its terms in accordance with their rights under this Agreement and by Law, without the consent of any third party.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+19
+
+13.3 Legal Compliance. Nothing in this Agreement is intended, or should be interpreted, to prevent either Party from complying with, or to require a Party to violate, any and all applicable Laws. Should either Party reasonably conclude that any portion of this Agreement is or may be in violation of a change in a Law made after the Effective Date, or if any such change or proposed change would materially alter the amount or method of compensating Illumina for Supplied Products purchased by, or services performed for, Customer, or would materially increase the cost of Illumina’s performance hereunder, the Parties agree to negotiate in good faith written modifications to this Agreement as may be necessary to establish compliance with such changes and/or to reflect applicable changes in compensation necessitated by such legal changes, with any mutually agreed upon modifications added to this Agreement by written amendment.
+
+13.4 Severability; No Waiver; Rights and Remedies. If any provision or subsection of this Agreement is held invalid, illegal or unenforceable, it shall be enforced to the maximum extent permissible so as to effect the intent of the Parties, and the remainder of this Agreement will continue in full force and effect. The failure or delay of either Party to exercise any right or remedy provided herein or to require any performance of any term of this Agreement shall not be construed as a waiver, and no single or partial exercise of any right or remedy provided herein, or the waiver by either Party of any breach of this Agreement shall not prevent a subsequent exercise or enforcement of, or be deemed a waiver of any subsequent breach of, the same or any other term of this Agreement. Except as expressly provided in this Agreement, the rights and remedies of each Party under this Agreement are cumulative and not exclusive of any rights or remedies provided by Law.
+
+13.5 Assignment. Customer shall not assign or transfer this Agreement or any rights or obligations under this Agreement, without the prior written consent of Illumina, which consent shall not be unreasonably withheld, delayed or conditioned. Customer agrees that it would not unreasonable for Illumina to not consent to Customer assigning or transferring this Agreement to an entity that is a material competitor of Illumina in the sequencing market. Illumina may assign this Agreement to an entity that is capable of fulfilling Illumina’s obligations under this Agreement.
+
+13.6 Export. Customer agrees that the Supplied Products, or any related technology provided under this Agreement, may be subject to restrictions and controls imposed by the United States Export Administration Act and the regulations thereunder (or the regulations and laws of another country). Notwithstanding anything to the contrary in this Agreement, Customer agrees not to export or re-export the Supplied Products, or any related technology into any country in violation of such controls or any other laws, rules or regulations of any country, state or jurisdiction.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+20
+
+13.7 Notices. All notices required or permitted under this Agreement shall be in writing, in English, and shall be deemed received only when (a) delivered personally; (b) 5 days after having been sent by registered or certified mail, return receipt requested, postage prepaid (or 10 days for international mail); or (c) 1 day after deposit with a commercial express courier specifying next day delivery or, for international courier packages, 2 days after deposit with a commercial express courier specifying 2-day delivery, with written verification of receipt. All notices shall be sent to the following or any other address designated by a Party using the procedures set f011h in this Sub-Section:
+
+If to Illumina:
+
+Illumina, Inc.
+
+5200 Illumina Way
+
+San Diego, CA 92122
+
+Attn: Nicholas J. Naclerio
+
+SVP Corporate and Venture Development
+
+With a copy to: General Counsel
+
+Illumina, Inc.
+
+5200 Illumina Way
+
+San Diego, CA 92122
+
+Attn: General Counsel
+
+If to Customer
+
+Icahn School of Medicine at Mount Sinai
+
+One Gustave L. Levy Place
+
+New York, NY 10029
+
+Attn: Director, Department of Genetics
+
+With a copy to:
+
+Icahn School of Medicine at Mount Sinai
+
+One Gustave L. Levy Place
+
+New York, NY 10029
+
+Attn: General Counsel
+
+13.8 Force Majeure. Neither Party shall be in breach of this Agreement nor liable for any failure to perform or delay in the performance of this Agreement attributable in whole or in part to any cause beyond its reasonable control, including but not limited to acts of God, fire, flood, tornado, earthquake, hurricane, lightning, any action taken by government or a regulatory authority, actual or threatened acts of war, terrorism, civil disturbance or insurrection, sabotage, labor shortages or disputes, failure or delay in delivery by Illumina’s suppliers or subcontractors, transportation difficulties, interruption or failure of any utility service, raw materials or equipment, or the other Party’s fault or negligence (each an event of “Force Majeure”). In the event of any such delay the delivery date for performance shall be deferred for a period equal to the time lost by reason of the delay. Notwithstanding anything in this Agreement to the contrary, Customer’s payment obligations are not affected by this provision except to the extent the Force Majeure affects financial institutions and, as a result, the financial institutions cannot complete the transaction necessary for Customer to satisfy its payment obligations.
+
+13.9 Entire Agreement; Amendment; Waiver. This Agreement represents the entire agreement between the Parties regarding the subject matter hereof and supersedes all prior discussions, communications, agreements, and understandings of any kind and nature between the Parties. The Patties acknowledge and agree that by entering into this Agreement, they do not rely on any statement, representation, assurance or warranty of any person or entity other than as expressly set out in the Agreement. Each Party agrees that it shall have no right or remedy (other than for breach of contract) in respect of any statement, representation, assurance or warranty (whether made negligently or innocently) other than as expressly set out in this Agreement. Nothing in this Section shall exclude or limit liability for fraud. No amendment to this Agreement will be effective unless in writing and signed by both Pa1ties. No waiver of any right, condition, or breach of this Agreement will be effective unless in writing and signed by the Party who has the right to waive the right, condition or breach and delivered to the other Party.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+21
+
+13.10 Relationship of the Parties. The Parties are independent contractors under this Agreement and nothing contained in this Agreement shall be construed as creating a partnership, joint venture or agency relationship between the Parties or, as granting either Party the authority to bind or contract any obligation in the name of the other Party, or to make any statements, representations, warranties or commitments on behalf of the other Party.
+
+13.11 Publicity; Use of Names or Trademarks. Each Party shall obtain the prior written consent of the other Party on all press releases or other public announcements relating to this Agreement, including its existence or its terms, provided that a Party is not required to obtain prior written consent of the other Party for press releases or public disclosures that repeat information that has been previously publicly disclosed. Notwithstanding any of the foregoing, if required by Law, including without limitation by the U.S. Securities and Exchange Commission or any stock exchange or Nasdaq, then a Party may issue a press release or other public announcement regarding this Agreement, provided that the other Party has received prior written notice of such intended press release or public announcement and an opportunity to seek a protective order if practicable under the circumstances, and the Party subject to the requirement cooperates with the other Party to limit the disclosure and includes in such press release or public announcement only such information relating to this Agreement as is required by such Law to be publicly disclosed. The Parties will make all reasonable attempts to diligently and in good faith work together to redact this Agreement to a mutually acceptable extent in the event this Agreement is required by applicable Law to be made public (e.g., SEC filing). Neither Party shall use the name or trademarks of the other Party without the express prior written consent of the other Party.
+
+13.12 Headings; Interpretation; Miscellaneous. Sections, titles and headings in this Agreement are for convenience only and are not intended to affect the meaning or interpretation hereof. This Agreement has been negotiated in the English language and only the English language version shall control. Any translation of this Agreement into a non-English language is for convenience only. Whenever required by the context, the singular term shall include the plural, the plural term shall include the singular, and the gender of any pronoun shall include all genders. As used in this Agreement except as the context may otherwise require, the words “include”, “includes”, “including”, and “such as” are deemed to be followed by “without limitation”, whether or not they are in fact followed by such words or words of like import, and “will” and “shall” are used synonymously. Except as expressly stated, any reference to “days” shall be to calendar days, and “business day” shall mean all days other than Saturdays, Sundays or a national or local holiday recognized in the United States, and any reference to “calendar month” shall be to the month and not a 30 day period, and any reference to “calendar quarter” shall mean the first 3 calendar months of the year, the 4-6th calendar months of the year, the 7-9th calendar months of the year, and the last 3 calendar months of the year. Whenever the last day for the exercise of any privilege or the discharge of any duty hereunder shall fall on, or any notice is deemed to be given on a Saturday, Sunday, or national holiday, the Party having such privilege or duty shall have until 5:00 pm PST on the next succeeding business day to exercise such privilege or to discharge such duty or the Party giving notice shall be deemed to have given notice on the next succeeding business day. It is further agreed that no usage of trade, course of performance, or other regular practice between the Parties hereto shall be used to interpret or alter the terms and conditions of this Agreement, including without limitation, the scope of use rights for each unit of Supplied Product supplied under this Agreement. Ambiguities, if any, in this Agreement shall not be construed against any particular Party, irrespective of which Party may be deemed to have authored the ambiguous provision. Unless expressly stated otherwise in this Agreement, notification of changes to any Supplied Product, including but not limited to Consumables, Hardware, and Software is not provided. Nothing in this Agreement prevents or restricts Illumina from manufacturing, offering and selling Supplied Products to any party third party or Affiliate for any use, or prevents or restricts Illumina and its Affiliates from using the Supplied Products for any use, even if any
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+22
+
+such use is competitive with Customer. Illumina is constantly innovating and developing new products or new versions of products. Accordingly, Illumina makes no guarantee that the specific products described in or referenced in this Agreement will be manufactured throughout the Term or for any specific period of time.
+
+13.13 Counterparts. This Agreement may be executed in one or more counterparts, and each of which shall be deemed to be an original, and all of which shall constitute one and the same instrument.
+
+13.14 Further Assurance; Costs. Except as expressly provided in this Agreement, each Party shall pay its own costs incurred in connection with the negotiation, preparation, and execution of this Agreement any documents referred to in it.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+23
+
+IN WITNESS WHEREOF, the Parties hereto have caused this Agreement to be executed by their respective duly authorized representatives.
+
+Customer:
+
+Illumina:
+
+By:
+
+/s/ Jeffrey Silberstein
+
+By:
+
+/s/ Nicholas J. Naclerio
+
+Name: Jeffrey Silberstein
+
+Name: Nicholas J. Naclerio
+
+Title: EVP, Chief Administrative Officer
+
+Title: SVP, Corporate & Venture Development
+
+Date:
+
+7/17/14
+
+Date:
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+24
+
+EXHIBIT A - PART 1 OF 2 - HARDWARE PRICING
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+25
+
+EXHIBIT A- PART 2 OF 2- CONSUMABLES PRICING
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+26
+
+Quotation Number: 4197041
+
+Quotation Date: Apr 17 2019
+
+Expiration Date: Apr 25 2019
+
+Page 1 of 4
+
+EXHIBIT B
+
+NIPT TEST FEES; AUDIT RIGHTS
+
+[***]
+
+Illumina, Inc.
+
+5200 Illumina Way
+
+San Diego CA 92122-4616
+
+USA
+
+Hereinafter referred to as “Illumina”
+
+[***]
+
+PRODUCT AND PRICING
+
+[***]
+
+Illumina, Inc., 5200 Illumina Way
+
+San Diego
+
+www.illumina.com
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+27
+
+Confidential
+
+ASSIGNMENT OF AND FIRST AMENDMENT TO SUPPLY AGREEMENT
+
+This Assignment of and First Amendment to the Supply Agreement (“First Amendment”) is effective as of the 20th of February, 2018 (“Amendment Effective Date”), between Illumina, Inc., a Delaware corporation having a place of business at 5200 Illumine Way, San Diego, CA 92122 (“Illumina”) and Icahn School of Medicine at Mount Sinai (“Original Customer”). Original Customer and Illumina may be referred to herein as “Party” or “Parties.”
+
+WHEREAS, the Parties entered into a Supply Agreement, dated August 20, 2014 (“Agreement”);
+
+WHEREAS, the Parties inadvertently let the Agreement expire prior to extending the Term, but have continued to perform as if the Agreement has been in full force and effect, which has been the intent of the Parties;
+
+WHEREAS. Original Customer wishes to assign the Agreement to Mount Sinai Genomics, Inc. d/b/a Sema4 (“New Customer”). and Illumina consents to such assignment; and
+
+WHEREAS, the Parties and New Customer desire to revive and amend the Agreement by entering into this First Amendment to add additional products and extend the term.
+
+NOW THEREFORE, for good and valuable consideration. the Parties and New Customer agree as follows:
+
+ASSIGNMENT AND ASSUMPTION
+
+1. Original Customer hereby transfers, sells, conveys, assigns, and delivers unto New Customer, its successors and assigns, and New Customer hereby acquires and accepts, effective as of the Amendment Effective Date, all of Original Customer's right, title, and interest in and to the Agreement without encumbrance.
+
+2. New Customer hereby assumes the obligations of Original Customer under the Agreement, effective as of the Amendment Effective Date, and shall pay, keep, observe, perform, and discharge all of the terms, covenants, conditions, obligations, and liabilities of Original Customer thereunder.
+
+3. From and after the Amendment Effective Date, New Customer shall replace Origina1 Customer as “Customer” under the Agreement and have all of the rights, benefits, obligations, and liabilities of “Customer” thereunder and under any other agreements or documents required to be delivered pursuant to the Agreement, and Original Customer shall have no further obligations or liabilities under the Agreement.
+
+4. Illumine has consented to such assignment and assumption.
+
+AMENDMENT
+
+5. Section 2.2(d) is deleted in its entirety and replaced with the following:
+
+(d) Exclusivity. In exchange for the discounts on Consumables and Hardware offered Customer under this Agreement, Customer agrees to [***] during the Term. For the avoidance of doubt, Customer agrees that it [***] during the Term.
+
+6. Section 12.1 is deleted in its entirety and replaced with the following:
+
+12.1 Term. This Agreement shall commence on the Effective Date and terminate six (6) years thereafter unless otherwise terminated early as provided hereunder or extended longer by
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+1
+
+Confidential
+
+the mutual agreement of the Parties. The period from the Effective Date to the date the Agreement terminates or expires is the “Term.”
+
+7. Section 13.7 is amended to delete Customer's notice details and replace them with the following:
+
+Mount Sinai Genomics, Inc.
+
+1425 Madison Avenue
+
+New York, NY 10029
+
+Attn: General Counsel
+
+8. Exhibit A — Part 2 of 2 is amended to also include [***].
+
+9. Exhibit A — Part 2 of 2 is further amended to add the following Consumables under the section entitled [***]:
+
+[***]
+
+10. Exhibit A — Part 2 of 2 is further amended to add the following Consumables under a new section entitled “[***]”:
+
+[***]
+
+11. Exhibit B is deleted in its entirety and replaced with the new Exhibit B contained in Attachment 1 to this First Amendment.
+
+12. All capitalized terms not defined in this First Amendment shall have the meaning ascribed to them in the Agreement. Except as expressly modified herein, the Agreement shall remain in full force and effect in accordance with its terms.
+
+SIGNATURE PAGE FOLLOWS
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+Confidential
+
+IN WITNESS WHEREOF, the Parties and New Customer have signed this First Amendment as of the dates indicated below.
+
+ILLUMINA
+
+ORIGINAL CUSTOMER
+
+By:
+
+By:
+
+Name:
+
+Jeffrey S. Eidel
+
+Name:
+
+Stephen Harvey
+
+Title:
+
+VP Corporate and Business Development
+
+Title:
+
+CFO
+
+Date:
+
+2/23/18
+
+Date:
+
+2/23/2018
+
+NEW CUSTOMER
+
+By:
+
+Name:
+
+Matt Rosamond
+
+Title:
+
+CFO
+
+Date:
+
+2/22/18
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+Confidential
+
+ATTACHMENT 1
+
+EXHIBIT B
+
+NIPT TEST FEES; AUDIT RIGHTS
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+September 26, 2019
+
+AMENDMENT 2 TO NIPT SUPPLY AGREEMENT
+
+Matt Rosamond
+
+Chief Financial Officer
+
+Mount Sinai Genomics, Inc. DBA Sema4
+
+333 Ludlow Street,
+
+Stamford CT 06902
+
+Re: Supply Agreement between Illumina, Inc., (“Illumina”) and Icahn School of Medicine at Mount Sinai dated 6/20/2014, as assigned and amended on 2/20/2018 (“Agreement”).
+
+Dear Mr. Rosamond,
+
+We are pleased to notify you of two changes to the Agreement, effective July 1, 2019:
+
+NIPT Test Fee
+
+The amount of the NIPT Test Fee (or equivalent term used in the Agreement) due under the Agreement is reduced as follows:
+
+For all tests for which an NIPT Test Fee (or equivalent term used in the Agreement) is due under the Agreement (“NIPT Tests”) performed on or after July 1, 2019, and for each [***] period thereafter during the Term (each such period ending on June 30 or December 31), the amount of the NIPT Test Fee for each NIPT Test performed will be calculated according to the table below. The “Annualized Applicable NIPT Test Volume” for purposes of the below table shall be equal to the number of NIPT Tests performed in the relevant [***] period [***].
+
+Annualized Applicable NIPT Test Volume
+
+NIPT Test Fee Amount
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+By way of example, if [***] NIPT Tests are performed in the [***] of calendar year 2019, the annualized NIPT Test volume would be [***] NIPT Tests, and the Test Fee amount for [***] NIPT Tests performed in the [***] of calendar year 2020 will be [***] for each NIPT Test performed. If [***] NIPT Tests are performed in the [***] of calendar year 2020, the [***] NIPT Test volume would be [***] NIPT Tests, and the Test Fee amount for [***] NIPT Tests performed in the second half of calendar year 2020 will be $[***] for [***] NIPT Test performed.
+
+Advantage Consumables No Longer Required for NIPT testing
+
+Advantage Consumables (or the equivalent term for Consumables that are branded as “Illumina Advantage”) will no longer be required to be used for [***]. Subject to any other obligations and restrictions relating to the use of Illumina-branded consumables in the Agreement, the requirement to use
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+1
+
+Confidential
+
+Advantage Consumables for [***] and all references to Temporary Consumables with respect to [***] are hereby deleted.
+
+The Agreement is hereby amended accordingly, and all other terms and conditions (whether relating to NIPT Test Fees, clinical testing other than [***], or otherwise) remain in force and unchanged. Unless otherwise stated, all defined terms set forth in this amendment shall have the meaning set forth in the Agreement.
+
+Please do not hesitate to contact me with any questions, and please return a countersigned version of this amendment at your earliest convenience.
+
+Sincerely,
+
+Nicki Berry
+
+Vice President, Americas Sales
+
+Illumina
+
+Agreed to for Customer by:
+
+Matthew Rosamond
+
+Name
+
+CFO
+
+Title
+
+9/26/2019
+
+Date
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+Confidential
+
+Third Amendment to Supply Agreement
+
+This Third Amendment to the Supply Agreement (“Third Amendment”) is effective as of the July 8, 2020 (“Third Amendment Effective Date”), between Illumina, Inc., a Delaware corporation having a place of business at 5200 Illumina Way, San Diego, CA 92122 (“Illumina”) and Mount Sinai Genomics, Inc. d/b/a Sema4 (“Customer”). Customer and Illumina may be referred to herein as “Party” or “Parties.”
+
+WHEREAS, the Parties entered into a Supply Agreement, dated August 20, 2014, amended by that Assignment of and First Amendment to Supply Agreement dated February 20, 2018 (“First Amendment”), and Amendment 2 to NIPT Supply Agreement dated September 26, 2019 (“Agreement”);
+
+WHEREAS, the Parties desire to amend the Agreement by entering into this Third Amendment to add additional products and extend the term;
+
+WHEREAS, for good and valuable consideration the Parties agree as follows:
+
+AMENDMENT
+
+1. The first sentence of Section 12.1 is deleted in its entirety and replaced with the following:
+
+12.1 Term. This Agreement shall commence on the Effective Date and terminate on August 19, 2023, unless otherwise terminated early as provided hereunder or extended by the mutual agreement of the Parties.
+
+2. Exhibit A – Part 2 of 2 is amended to add the following Consumables under the section entitled “[***],” as established in the First Amendment:
+
+Catalogue
+
+Description
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+Customer understands that Purchase Orders for [***]s shall [***] following the end of 2020. Further, shipment of [***] must occur no later than the December 31, 2021. For the avoidance of doubt, all [***] listed in this [***] as of the Third Amendment Effective Date are [***].
+
+All capitalized terms not defined in this First Amendment shall have the meaning ascribed to them in the Agreement. Except as expressly modified herein, the Agreement shall remain in full force and effect in accordance with its terms.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+Confidential
+
+IN WITNESS WHEREOF, the Parties have signed this Third Amendment as of the dates indicated below.
+
+ILLUMINA
+
+CUSTOMER
+
+By:
+
+By:
+
+Name:
+
+Mark Van Oene
+
+Name:
+
+Joel Sendek
+
+Title:
+
+Sr. Vice President & Chief Commercial Officer
+
+Title:
+
+CEO
+
+Date:
+
+10/12/2020
+
+Date:
+
+12/14/2020
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4

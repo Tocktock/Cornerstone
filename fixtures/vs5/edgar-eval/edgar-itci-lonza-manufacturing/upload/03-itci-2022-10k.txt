@@ -1,0 +1,792 @@
+
+Table of Contents
+
+falseFY0001567514 0001567514 2022-01-01 2022-12-31 0001567514 2020-01-01 2020-12-31 0001567514 2021-01-01 2021-12-31 0001567514 2021-10-01 2021-12-31 0001567514 2021-07-01 2021-09-30 0001567514 2021-04-01 2021-06-30 0001567514 2021-01-01 2021-03-31 0001567514 2022-10-01 2022-12-31 0001567514 2022-07-01 2022-09-30 0001567514 2022-04-01 2022-06-30 0001567514 2022-01-01 2022-03-31 0001567514 2022-12-31 0001567514 2021-12-31 0001567514 2022-01-07 2022-01-07 0001567514 2022-01-07 0001567514 2023-02-27 0001567514 2021-06-30 0001567514 2020-12-31 0001567514 2022-08-09 2022-08-09 0001567514 2022-08-16 2022-08-16 0001567514 2019-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember 2022-12-31 0001567514 itci:IndefinitePeriodCarryForwardMember 2022-12-31 0001567514 itci:ExpireIn2037Member 2022-12-31 0001567514 itci:InducementAwardPlanMember 2022-12-31 0001567514 us-gaap:ComputerEquipmentMember 2022-12-31 0001567514 us-gaap:FurnitureAndFixturesMember 2022-12-31 0001567514 us-gaap:EquipmentMember 2022-12-31 0001567514 us-gaap:LeaseholdImprovementsMember 2022-12-31 0001567514 itci:TimeBasedRestrictedStockUnitsRSUMember 2022-12-31 0001567514 itci:InducementAwardPlanMember 2022-12-31 0001567514 srt:MinimumMember 2022-12-31 0001567514 srt:MaximumMember 2022-12-31 0001567514 us-gaap:PurchaseCommitmentMember itci:SiegfriedCampaignAndLonzaCampaignMember 2022-12-31 0001567514 itci:VehicleFleetLeaseMember 2022-12-31 0001567514 itci:ContractualMaturityMoreThanOneYearAndLessThanTwoYearsMember 2022-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:CommercialPaperMember 2022-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:CertificatesOfDepositMember 2022-12-31 0001567514 itci:FDICCertificatesOfDepositMember 2022-12-31 0001567514 itci:InducementAwardPlanMember us-gaap:RestrictedStockUnitsRSUMember 2022-12-31 0001567514 us-gaap:CashAndCashEquivalentsMember 2022-12-31 0001567514 us-gaap:MoneyMarketFundsMember us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:MoneyMarketFundsMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel2Member us-gaap:MoneyMarketFundsMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel3Member us-gaap:MoneyMarketFundsMember 2022-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel2Member us-gaap:USGovernmentAgenciesDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 itci:FDICCertificatesOfDepositMember us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember itci:FDICCertificatesOfDepositMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember itci:FDICCertificatesOfDepositMember 2022-12-31 0001567514 itci:FDICCertificatesOfDepositMember us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel3Member 2022-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:CommercialPaperMember us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel1Member us-gaap:CommercialPaperMember 2022-12-31 0001567514 us-gaap:CommercialPaperMember us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:CommercialPaperMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:CorporateDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel2Member us-gaap:CorporateDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel3Member us-gaap:CorporateDebtSecuritiesMember 2022-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2022-12-31 0001567514 us-gaap:FairValueInputsLevel3Member 2022-12-31 0001567514 us-gaap:ComputerEquipmentMember 2021-12-31 0001567514 us-gaap:FurnitureAndFixturesMember 2021-12-31 0001567514 us-gaap:EquipmentMember 2021-12-31 0001567514 us-gaap:LeaseholdImprovementsMember 2021-12-31 0001567514 itci:SiegfriedCampaignAndLonzaCampaignMember us-gaap:PurchaseCommitmentMember 2021-12-31 0001567514 itci:ContractualMaturityMoreThanOneYearAndLessThanTwoYearsMember 2021-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember 2021-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember 2021-12-31 0001567514 us-gaap:CommercialPaperMember 2021-12-31 0001567514 us-gaap:CertificatesOfDepositMember 2021-12-31 0001567514 us-gaap:CashAndCashEquivalentsMember 2021-12-31 0001567514 us-gaap:MoneyMarketFundsMember us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel1Member us-gaap:MoneyMarketFundsMember 2021-12-31 0001567514 us-gaap:MoneyMarketFundsMember us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:MoneyMarketFundsMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:USGovernmentAgenciesDebtSecuritiesMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel1Member us-gaap:CertificatesOfDepositMember 2021-12-31 0001567514 us-gaap:CertificatesOfDepositMember us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel3Member us-gaap:CertificatesOfDepositMember 2021-12-31 0001567514 us-gaap:CommercialPaperMember us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:CommercialPaperMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel2Member us-gaap:CommercialPaperMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel3Member us-gaap:CommercialPaperMember 2021-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember us-gaap:FairValueInputsLevel1Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel2Member us-gaap:CorporateDebtSecuritiesMember 2021-12-31 0001567514 us-gaap:CorporateDebtSecuritiesMember us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueMeasurementsRecurringMember us-gaap:FairValueInputsLevel1Member 2021-12-31 0001567514 us-gaap:FairValueInputsLevel2Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueInputsLevel3Member us-gaap:FairValueMeasurementsRecurringMember 2021-12-31 0001567514 us-gaap:FairValueInputsLevel3Member 2021-12-31 0001567514 itci:InventoriableCostsMember 2022-01-01 2022-12-31 0001567514 us-gaap:ResearchAndDevelopmentExpenseMember 2022-01-01 2022-12-31 0001567514 us-gaap:SellingGeneralAndAdministrativeExpensesMember 2022-01-01 2022-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2022-01-01 2022-12-31 0001567514 us-gaap:EmployeeStockOptionMember srt:MinimumMember 2022-01-01 2022-12-31 0001567514 us-gaap:EmployeeStockOptionMember srt:MaximumMember 2022-01-01 2022-12-31 0001567514 us-gaap:CommonStockMember 2022-01-01 2022-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2022-01-01 2022-12-31 0001567514 us-gaap:EmployeeStockOptionMember 2022-01-01 2022-12-31 0001567514 itci:TimeBasedRestrictedStockUnitsRSUMember 2022-01-01 2022-12-31 0001567514 srt:MinimumMember itci:BristolMyersSquibbCompanyMember us-gaap:ProductMember 2022-01-01 2022-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember srt:MaximumMember 2022-01-01 2022-12-31 0001567514 itci:InducementAwardPlanMember 2022-01-01 2022-12-31 0001567514 us-gaap:ProductMember 2022-01-01 2022-12-31 0001567514 us-gaap:GrantMember 2022-01-01 2022-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember 2022-01-01 2022-12-31 0001567514 itci:InducementAwardPlanMember 2022-01-01 2022-12-31 0001567514 srt:MaximumMember 2022-01-01 2022-12-31 0001567514 srt:MinimumMember 2022-01-01 2022-12-31 0001567514 us-gaap:RetainedEarningsMember 2022-01-01 2022-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2022-01-01 2022-12-31 0001567514 itci:VehicleFleetLeaseMember 2022-01-01 2022-12-31 0001567514 itci:CustomerThreeMember us-gaap:AccountsReceivableMember us-gaap:CustomerConcentrationRiskMember 2022-01-01 2022-12-31 0001567514 us-gaap:CustomerConcentrationRiskMember itci:CustomerTwoMember us-gaap:AccountsReceivableMember 2022-01-01 2022-12-31 0001567514 us-gaap:AccountsReceivableMember itci:CustomerOneMember us-gaap:CustomerConcentrationRiskMember 2022-01-01 2022-12-31 0001567514 srt:MaximumMember us-gaap:AccountsReceivableMember us-gaap:CustomerConcentrationRiskMember 2022-01-01 2022-12-31 0001567514 itci:CaplytaMember 2022-01-01 2022-12-31 0001567514 us-gaap:EmployeeStockOptionMember 2022-01-01 2022-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2022-01-01 2022-12-31 0001567514 us-gaap:ResearchAndDevelopmentExpenseMember 2021-01-01 2021-12-31 0001567514 us-gaap:SellingGeneralAndAdministrativeExpensesMember 2021-01-01 2021-12-31 0001567514 itci:InventoriableCostsMember 2021-01-01 2021-12-31 0001567514 itci:InducementAwardPlanMember 2021-01-01 2021-12-31 0001567514 us-gaap:GrantMember 2021-01-01 2021-12-31 0001567514 us-gaap:ProductMember 2021-01-01 2021-12-31 0001567514 us-gaap:CommonStockMember 2021-01-01 2021-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2021-01-01 2021-12-31 0001567514 us-gaap:RetainedEarningsMember 2021-01-01 2021-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2021-01-01 2021-12-31 0001567514 itci:VehicleFleetLeaseMember 2021-01-01 2021-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2021-01-01 2021-12-31 0001567514 us-gaap:CustomerConcentrationRiskMember us-gaap:AccountsReceivableMember itci:CustomerTwoMember 2021-01-01 2021-12-31 0001567514 itci:CustomerOneMember us-gaap:AccountsReceivableMember us-gaap:CustomerConcentrationRiskMember 2021-01-01 2021-12-31 0001567514 us-gaap:AccountsReceivableMember itci:CustomerThreeMember us-gaap:CustomerConcentrationRiskMember 2021-01-01 2021-12-31 0001567514 srt:MaximumMember us-gaap:AccountsReceivableMember us-gaap:CustomerConcentrationRiskMember 2021-01-01 2021-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember 2021-01-01 2021-12-31 0001567514 itci:CaplytaMember 2021-01-01 2021-12-31 0001567514 us-gaap:EmployeeStockOptionMember 2021-01-01 2021-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2021-01-01 2021-12-31 0001567514 itci:InventoriableCostsMember 2020-01-01 2020-12-31 0001567514 us-gaap:ResearchAndDevelopmentExpenseMember 2020-01-01 2020-12-31 0001567514 us-gaap:SellingGeneralAndAdministrativeExpensesMember 2020-01-01 2020-12-31 0001567514 us-gaap:CommonStockMember 2020-01-01 2020-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2020-01-01 2020-12-31 0001567514 itci:InducementAwardPlanMember 2020-01-01 2020-12-31 0001567514 us-gaap:ProductMember 2020-01-01 2020-12-31 0001567514 us-gaap:GrantMember 2020-01-01 2020-12-31 0001567514 us-gaap:RetainedEarningsMember 2020-01-01 2020-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2020-01-01 2020-12-31 0001567514 itci:VehicleFleetLeaseMember 2020-01-01 2020-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember itci:ItciNationalDemocraticAllianceMember 2020-01-01 2020-12-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember 2020-01-01 2020-12-31 0001567514 itci:CaplytaMember 2020-01-01 2020-12-31 0001567514 us-gaap:EmployeeStockOptionMember 2020-01-01 2020-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2020-01-01 2020-12-31 0001567514 itci:TwoThousandEighteenEquityIncentivePlanMember 2020-12-31 0001567514 us-gaap:IPOMember 2022-01-07 2022-01-07 0001567514 itci:InducementAwardPlanMember srt:MaximumMember 2019-12-31 0001567514 stpr:NY 2018-09-30 0001567514 itci:BristolMyersSquibbCompanyMember us-gaap:ProductMember 2005-05-31 2005-05-31 0001567514 us-gaap:ProductMember itci:BristolMyersSquibbCompanyMember 2013-12-01 2013-12-31 0001567514 itci:BristolMyersSquibbCompanyMember us-gaap:ProductMember 2014-12-01 2014-12-31 0001567514 itci:BristolMyersSquibbCompanyMember us-gaap:ProductMember 2019-01-31 0001567514 itci:NationalDemocraticAllianceMember itci:BristolMyersSquibbCompanyMember us-gaap:ProductMember 2019-12-23 2019-12-23 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2021-12-31 0001567514 us-gaap:RestrictedStockUnitsRSUMember 2022-12-31 0001567514 us-gaap:CommonStockMember 2022-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2022-12-31 0001567514 us-gaap:RetainedEarningsMember 2022-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2022-12-31 0001567514 itci:InducementAwardPlanMember 2021-12-31 0001567514 us-gaap:CommonStockMember 2021-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2021-12-31 0001567514 us-gaap:RetainedEarningsMember 2021-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2021-12-31 0001567514 us-gaap:CommonStockMember 2019-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2019-12-31 0001567514 us-gaap:RetainedEarningsMember 2019-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2019-12-31 0001567514 us-gaap:CommonStockMember 2020-12-31 0001567514 us-gaap:AdditionalPaidInCapitalMember 2020-12-31 0001567514 us-gaap:RetainedEarningsMember 2020-12-31 0001567514 us-gaap:AccumulatedOtherComprehensiveIncomeMember 2020-12-31 iso4217:USD xbrli:pure xbrli:shares utr:Year utr:Month itci:Segment iso4217:USD xbrli:shares
+
+UNITED STATES
+
+SECURITIES AND EXCHANGE COMMISSION
+
+Washington, D.C. 20549
+
+FORM
+10-K
+
+(Mark One)
+
+☒
+
+ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934
+
+For the fiscal year ended December 31, 2022
+
+OR
+
+☐
+
+TRANSITION REPORT PURSUANT TO
+S
+ECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934
+
+For the transition period from
+
+to
+
+Commission file number:
+001-36274
+
+Intra-Cellular Therapies, Inc.
+
+(Exact name of registrant as specified in its charter)
+
+Delaware
+
+36-4742850
+
+(State or other jurisdiction of
+
+incorporation or organization)
+
+(I.R.S. Employer
+
+Identification No.)
+
+430 East 29th Street
+
+New York, New York 10016
+
+(Address of principal executive offices) (Zip Code)
+
+Registrant’s telephone number, including area code (646)
+440-9333
+
+Securities registered pursuant to Section 12(b) of the Exchange Act:
+
+Title of each class
+
+Trading
+
+Symbol(s)
+
+Name of each exchange
+
+on which registered
+
+Common Stock, $0.0001 Par Value Per Share
+
+ITCI
+
+The Nasdaq Global Select Market
+
+Securities registered pursuant to Section 12(g) of the Exchange Act: None
+
+Indicate by check mark if the registrant is a well-known seasoned issuer, as defined in Rule 405 of the Securities Act. Yes ☒ No ☐
+
+Indicate by check mark if the registrant is not required to file reports pursuant to Section 13 or Section 15(d) of the Exchange Act. Yes ☐ No ☒
+
+Indicate by check mark whether the registrant (1) has filed all reports required to be filed by Section 13 or 15(d) of the Securities Exchange Act of 1934 during the preceding 12 months (or for such shorter period that the registrant was required to file such reports), and (2) has been subject to such filing requirements for the past 90 days. Yes ☒ No ☐
+
+Indicate by check mark whether the registrant has submitted electronically every Interactive Data File required to be submitted pursuant to Rule 405 of Regulation
+S-T
+(§ 232.405 of this chapter) during the preceding 12 months (or for such shorter period that the registrant was required to submit such files). Yes
+☒
+No ☐
+
+Indicate by check mark whether the registrant is a large accelerated filer, an accelerated filer, a
+non-accelerated
+filer, a smaller reporting company, or an emerging growth company. See the definitions of “large accelerated filer,” “accelerated filer,” “smaller reporting company” and “emerging growth company” in Rule
+12b-2
+of the Exchange Act.
+
+Large accelerated filer
+
+☒
+
+Accelerated filer
+
+☐
+
+Non-accelerated
+filer
+
+☐
+
+Smaller reporting company
+
+☐
+
+Emerging
+
+growth
+
+company
+
+☐
+
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ☐
+
+Indicate by check mark whether the registrant has filed a report on and attestation to its management’s assessment of the effectiveness of its internal control over financial reporting under Section 404(b) of the Sarbanes-Oxley Act (15 U.S.C. 7262(b)) by the registered public accounting firm that prepared or issued its audit report. ☒
+
+If securities are registered pursuant to Section 12(b) of the Act, indicate by check mark whether the financial statements of the registrant included in the filing reflect the correction of an error to previously issued financial statements. ☐
+
+Indicate by check mark whether any of those error corrections are restatements that required a recovery analysis of incentive-based compensation received by any of the registrant’s executive officers during the relevant recovery period pursuant to §
+240.10D-1(b). ☐
+
+Indicate by check mark whether the registrant is a shell company (as defined in Rule
+12b-2
+of the Exchange Act). Yes ☐ No ☒
+
+The aggregate market value of the registrant’s voting and
+non-voting
+common stock held by
+non-affiliates
+of the registrant (without admitting that any person whose shares are not included in such calculation is an affiliate) computed by reference to the price at which the common stock was last sold as of the last business day of the registrant’s most recently completed second fiscal quarter was approximately $5.3 billion.
+
+As of February 27, 2023, the registrant had 95,280,003 shares of common stock outstanding.
+
+Table of Contents
+
+TABLE OF CONTENTS
+
+PART I
+
+3
+
+Item 1.
+
+Business
+
+3
+
+Item 1A.
+
+Risk Factors
+
+25
+
+Item 1B.
+
+Unresolved Staff Comments
+
+60
+
+Item 2.
+
+Properties
+
+60
+
+Item 3.
+
+Legal Proceedings
+
+60
+
+Item 4.
+
+Mine Safety Disclosures
+
+60
+
+PART II
+
+61
+
+Item 5.
+
+Market for Registrant’s Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities
+
+61
+
+Item 6.
+
+[Reserved]
+
+61
+
+Item 7.
+
+Management’s Discussion and Analysis of Financial Condition and Results of Operations
+
+62
+
+Item 7A.
+
+Quantitative and Qualitative Disclosures About Market Risk
+
+74
+
+Item 8.
+
+Financial Statements and Supplementary Data
+
+75
+
+Item 9.
+
+Changes in and Disagreements with Accountants on Accounting and Financial Disclosure
+
+76
+
+Item 9A.
+
+Controls and Procedures
+
+76
+
+Item 9B.
+
+Other Information
+
+80
+
+Item 9C.
+
+Disclosure Regarding Foreign Jurisdictions that Prevent Inspections
+
+80
+
+PART III
+
+81
+
+Item 10.
+
+Directors, Executive Officers and Corporate Governance
+
+81
+
+Item 11.
+
+Executive Compensation
+
+81
+
+Item 12.
+
+Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters
+
+81
+
+Item 13.
+
+Certain Relationships and Related Transactions, and Director Independence
+
+81
+
+Item 14.
+
+Principal Accountant Fees and Services
+
+81
+
+PART IV
+
+82
+
+Item 15
+
+Exhibits and Financial Statement Schedules
+
+82
+
+Item 16.
+
+Form 10-K Summary
+
+86
+
+Signatures
+
+87
+
+1
+
+Table of Contents
+
+DOCUMENTS INCORPORATED BY REFERENCE
+
+The following documents (or parts thereof) are incorporated by reference into the following parts of this Form 10-K: Certain information required in Part III of this Annual Report on Form 10-K is incorporated by reference from the Registrant’s Proxy Statement for the 2023 Annual Meeting of Stockholders to be filed with the Securities and Exchange Commission.
+
+2
+
+Table of Contents
+
+PART I
+
+All brand names or trademarks appearing in this report are the property of their respective holders. Use or display by us of other parties’ trademarks, trade dress, or products in this report is not intended to, and does not, imply a relationship with, or endorsements or sponsorship of, us by the trademark or trade dress owners. Unless the context requires otherwise, references in this report to the “Company,” “we,” “us,” and “our” refer to Intra-Cellular Therapies, Inc. and its wholly-owned subsidiary, ITI, Inc.
+
+Item 1.
+
+BUSINESS
+
+Overview
+
+We are a biopharmaceutical company focused on the discovery, clinical development and commercialization of innovative, small molecule drugs that address underserved medical needs primarily in neuropsychiatric and neurological disorders by targeting intracellular signaling mechanisms within the central nervous system, or CNS. In December 2019, CAPLYTA® (lumateperone) was approved by the U.S. Food and Drug Administration, or FDA, for the treatment of schizophrenia in adults (42mg/day) and we initiated the commercial launch of CAPLYTA in March 2020. In December 2021, CAPLYTA was approved by the FDA for the treatment of bipolar depression in adults (42mg/day). We initiated the commercial launch of CAPLYTA for the treatment of bipolar depression in December 2021. Additionally, in April 2022, the FDA approved two new dosage strengths of CAPLYTA, 10.5 mg and 21 mg capsules, to provide dosage recommendations for patients concomitantly taking strong or moderate CYP3A4 inhibitors, and 21 mg for patients with moderate or severe hepatic impairment (Child-Pugh class B or C). We initiated the commercial launch for these special population doses in August 2022. As used in this report, “CAPLYTA” refers to lumateperone approved by the FDA for the treatment of schizophrenia in adults and for the treatment of bipolar depression in adults, and “lumateperone” refers to, where applicable, CAPLYTA as well as lumateperone for the treatment of indications beyond schizophrenia and bipolar depression. Lumateperone is in Phase 3 clinical development as a novel treatment for major depressive disorder, or MDD.
+
+Our Product
+
+In December 2019, CAPLYTA was approved by the FDA for the treatment of schizophrenia in adults (42mg/day) and we initiated the commercial launch of CAPLYTA in March 2020. In support of our commercialization efforts, we employ a national salesforce consisting of approximately 370 sales representatives. In December 2021, CAPLYTA was approved by the FDA for the treatment of bipolar depression in adults (42mg/day). CAPLYTA is the only FDA-approved treatment for depressive episodes associated with bipolar I or II disorder (bipolar depression) in adults as monotherapy and as adjunctive therapy with lithium or valproate. We initiated the commercial launch of CAPLYTA for the treatment of bipolar depression in December 2021. In addition, the FDA approved new dosage strengths, 10.5mg and 21mg, for special populations of patients, in April 2022. We initiated the commercial launch for these special population doses in August 2022.
+
+The efficacy of CAPLYTA 42 mg in schizophrenia was demonstrated in two placebo-controlled trials, showing a statistically significant separation from placebo on the primary endpoint, the Positive and Negative Syndrome Scale, or PANSS, total score. The most common adverse reactions (>5% and twice the rate of placebo) for the recommended dose of CAPLYTA versus placebo were somnolence/sedation (24% vs. 10%) and dry mouth (6% vs. 2%). In pooled data from short term studies, mean changes from baseline in weight gain, fasting glucose, triglycerides and total cholesterol were similar between CAPLYTA and placebo. The incidence of extrapyramidal symptoms was 6.7% for CAPLYTA and 6.3% for placebo.
+
+The efficacy of CAPLYTA 42 mg in bipolar depression was demonstrated in two positive Phase 3 placebo-controlled bipolar depression studies, which evaluated the effects of CAPLYTA on depression in adult patients with bipolar I or bipolar II disorder both as monotherapy (Study 404) and as adjunctive therapy with lithium or valproate (Study 402). In these studies, the efficacy of CAPLYTA 42 mg was established by demonstrating
+
+3
+
+Table of Contents
+
+statistically significant improvements over placebo for the change from baseline in the Montgomery-Asberg Depression Rating scale, or MADRS, total score at week 6. CAPLYTA 42 mg also showed a statistically significant improvement in the key secondary endpoint relating to clinical global impression of bipolar disorder in each study. In addition, CAPLYTA demonstrated a favorable tolerability and safety profile consistent with findings in prior clinical studies in schizophrenia. The most common reported adverse reactions (occurring at a rate of 5% or more and at least twice the rate of placebo) were somnolence/sedation, dizziness, nausea, and dry mouth. Mean changes from baseline in weight, fasting glucose, total cholesterol, triglycerides, and LDL cholesterol were similar between CAPLYTA and placebo.
+
+Our Development Programs
+
+Our pipeline includes several product candidates in clinical development and additional product candidates in nonclinical testing. We believe that our product candidates offer innovative therapeutic approaches and may provide advantages relative to current therapies. The following table summarizes our product candidates and programs:
+
+OUR THERAPEUTIC PIPELINE
+
+The safety and efficacy of investigational agents and/or investigational uses of approved products have not been established.
+
+Lumateperone Development Program
+
+The efficacy of lumateperone could be mediated through a combination of antagonist activity at central serotonin 5-HT2A receptors and postsynaptic antagonist activity at central dopamine D2 receptors. In terms of pharmacodynamics, lumateperone has high binding affinity for serotonin 5-HT2A receptors and moderate binding affinity for dopamine D2 receptors, serotonin transporters, dopamine D1 receptors, dopamine D4 receptors and adrenergic alpha 1A and alpha 1B receptors. It lacks biologically relevant interactions with other receptors including muscarinic and histaminergic receptors. As a result, we believe lumateperone may represent a potential treatment across multiple therapeutic indications.
+
+Lumateperone for the treatment of major depressive disorder and other mood disorders
+
+As a potent 5-HT2A receptor antagonist and serotonin reuptake inhibitor, we believe that lumateperone could improve symptoms of depression with fewer side effects than currently marketed antipsychotics and
+
+4
+
+Table of Contents
+
+antidepressants. Dopamine modulation by lumateperone may also reduce irritability and aggression that can accompany many mood disorders. Lumateperone, as a standalone agent, indirectly enhances glutamatergic neurotransmission through both AMPA and NMDA channels in the prefrontal cortex via lumateperone’s dopamine D1 receptor activation. By enhancing AMPA neurotransmission, lumateperone also activates key proteins in the mTOR pathway which has shown antidepressant effects. As such, lumateperone may represent a potential treatment for mood disorders including MDD and post-traumatic stress disorder.
+
+Lumateperone is in Phase 3 clinical development as a novel treatment for MDD. Patient enrollment in Study 501 and Study 502, global Phase 3 clinical trials evaluating lumateperone 42 mg as an adjunctive therapy to antidepressants for the treatment of MDD, is ongoing. In addition, in the second quarter of 2023, we expect to initiate a third global Phase 3 trial, Study 505, also evaluating lumateperone 42 mg as an adjunctive therapy to antidepressants for the treatment of MDD. Study 505 is intended to serve as a potential additional registration trial in support of a supplemental New Drug Application, or sNDA, for approval of lumateperone as an adjunctive therapy to antidepressants for the treatment of MDD, if needed. This is a common strategy employed in mood disorder development programs. Subject to the results of Study 501 and Study 502, we expect to file an sNDA with the FDA for approval of lumateperone as an adjunctive therapy to antidepressants for the treatment of MDD in 2024. In the first quarter of 2020, as part of our lumateperone bipolar depression clinical program, we initiated our third monotherapy Phase 3 study, Study 403, evaluating lumateperone as monotherapy in the treatment of major depressive episodes associated with bipolar I or bipolar II disorder. Following the positive results in our adjunctive study that was part of our bipolar depression clinical program, Study 402, we amended Study 403 to evaluate major depressive episodes with mixed features in bipolar disorder in patients with bipolar I or bipolar II disorder and mixed features in patients with MDD. Clinical conduct for Study 403 has been completed, and we expect to report topline results in the first quarter of 2023. Following reporting of topline results, we intend to discuss the results with the FDA to determine whether this study will provide supportive data for a potential future regulatory filing for this indication.
+
+We have also initiated a Phase 3 study evaluating lumateperone for the prevention of relapse in patients with schizophrenia. The study is being conducted in five phases consisting of a screening phase, a 6-week, open-label run-in phase during which all patients will receive 42 mg of lumateperone per day, a 12-week, open-label stabilization phase during which all patients will receive 42 mg of lumateperone per day; a double-blind treatment phase, 26 weeks in duration, during which patients receive either 42 mg of lumateperone per day or placebo (1:1 ratio) and a 2-week safety follow-up phase. This study is being conducted in accordance with our post approval marketing commitment to the FDA in connection with the approval of CAPLYTA for the treatment of schizophrenia as is typical for antipsychotics.
+
+Other Indications for Lumateperone
+
+Within the lumateperone portfolio, we are also developing a long-acting injectable, or LAI, formulation to provide more treatment options to patients suffering from mental illness. We have completed the nonclinical development of an LAI formulation, and we have conducted a Phase 1 single ascending dose study with this formulation. This study evaluated the pharmacokinetics, safety and tolerability of lumateperone LAI in patients with stable symptoms of schizophrenia. We completed this study and it was safe and well tolerated. We are evaluating several additional formulations of the lumateperone LAI with treatment durations of one month and longer. Non-clinical development on these additional formulations is ongoing and expected to be completed in 2023 and we plan to initiate Phase I single ascending dose studies with these formulations in 2023. Given the encouraging tolerability data to date with oral lumateperone, we believe that an LAI option, in particular, may lend itself to being an important formulation choice for certain patients.
+
+We hold exclusive, worldwide commercialization rights to lumateperone and a family of compounds from Bristol-Myers Squibb Company pursuant to an exclusive license.
+
+5
+
+Table of Contents
+
+Other Product Candidates
+
+We are developing ITI-1284-ODT-SL for the treatment of agitation in patients with dementia, the treatment of dementia-related psychosis and the treatment of generalized anxiety disorder. ITI-1284-ODT-SL is a deuterated form of lumateperone, a new molecular entity formulated as an oral disintegrating tablet for sublingual administration. ITI-1284-ODT-SL is formulated as an oral solid dosage form that dissolves almost instantly when placed under the tongue, allowing for ease of use in the elderly and may be particularly beneficial for patients who have difficulty swallowing conventional tablets. Phase 1 single and multiple ascending dose studies in healthy volunteers and healthy elderly volunteers (> than 65 years of age) evaluated the safety, tolerability and pharmacokinetics of ITI-1284-ODT-SL. In these studies, there were no reported serious adverse events in either age group. In the elderly cohort, reported adverse events were infrequent with the most common adverse event being transient dry mouth (mild). Based on these results, we have initiated our program evaluating ITI-1284-ODT-SL for the treatment of agitation in patients with Alzheimer’s disease. We are in discussions with the FDA regarding the nonclinical toxicological profile of ITI-1284-ODT-SL. The FDA has informed us that they do not believe the deuterated and undeuterated forms of lumateperone are identical. As a result, the nonclinical data from lumateperone may not be broadly applied to ITI-1284-ODT-SL and we are conducting additional toxicology studies. We expect to commence clinical conduct in a Phase 2 study in agitation in patients with Alzheimer’s disease in 2023. Additional studies in psychosis in patients with Alzheimer’s disease and generalized anxiety disorder are also planned for 2023. We are continuing with Phase 1 studies with ITI-1284-ODT-SL, including drug-drug interaction studies.
+
+We have another major program that has yielded a portfolio of compounds that selectively inhibit the enzyme phosphodiesterase type 1, or PDE1. PDE1 enzymes are highly active in multiple disease states and our PDE1 inhibitors are designed to reestablish normal function in these disease states. Abnormal PDE1 activity is associated with cellular proliferation and activation of inflammatory cells. Our PDE1 inhibitors ameliorate both of these effects in animal models. We intend to pursue the development of our phosphodiesterase, or PDE, program, for the treatment of aberrant immune system activation in several CNS and non-CNS conditions with a focus on diseases where excessive PDE1 activity has been demonstrated and increased inflammation is an important contributor to disease pathogenesis. Our potential disease targets include immune system regulation, neurodegenerative diseases, cancers and other non-CNS disorders. Lenrispodun (ITI-214) is our lead compound in this program. Following the favorable safety and tolerability results in our Phase 1 program, we initiated our development program for lenrispodun for Parkinson’s disease and conducted a Phase 1/2 clinical trial of lenrispodun in patients with Parkinson’s disease to evaluate safety and tolerability in this patient population, as well as motor and non-motor exploratory endpoints. In this study, lenrispodun was generally well-tolerated with a favorable safety profile and clinical signs consistent with improvements in motor symptoms and dyskinesias. We have initiated our Phase 2 clinical program with lenrispodun for Parkinson’s disease, and expect to commence patient enrollment in the first quarter of 2023. We also have an active Investigational New Drug application to evaluate our newest candidate within the PDE 1 inhibitor program, ITI-1020, as a novel cancer immunotherapy. A Phase 1 program with ITI-1020 in healthy volunteers is anticipated to commence in the first half of 2023.
+
+We also have a development program with our ITI-333 compound as a potential treatment for substance use disorders and pain. There is a pressing need to develop new drugs to treat opioid addiction and safe, effective, non-addictive treatments to manage pain. ITI-333 is a novel compound that uniquely combines activity as an antagonist at serotonin 5-HT2A receptors and a partial agonist at µ-opioid receptors. These combined actions support the potential utility of ITI-333 in the treatment of opioid use disorder and associated comorbidities (e.g., depression, anxiety, sleep disorders) without opioid-like safety and tolerability concerns. We have conducted a Phase 1 single ascending dose study evaluating the safety, tolerability and pharmacokinetics of ITI-333 in healthy volunteers. In this study, ITI-333 achieved plasma exposures at or above those required for efficacy and was generally safe and well-tolerated. We have commenced a neuroimaging study to investigate brain occupancy for receptors that play a role in substance use disorder and also have applicability for pain. The results of this study will support the dose selection for future studies. We commenced a multiple ascending dose study in the first quarter of 2023. We have received a grant from the National Institute on Drug Abuse under the
+
+6
+
+Table of Contents
+
+Helping to End Addiction Long-term Initiative, or NIH HEAL Initiative, that we expect will fund a significant portion of the early stage clinical development costs associated with this program.
+
+Our Drug Discovery Platform and Capabilities
+
+Based on the pioneering efforts of our late co-founder and Nobel laureate, Dr. Paul Greengard, we have developed a detailed understanding of intracellular signaling pathways and intracellular targets. We have used that knowledge to develop several state of the art technology platforms, including one called CNSProfileTM. This technology monitors the phosphoprotein changes elicited by major psychotropic drug classes and subclasses, and generates a unique molecular signature for drug compounds. By monitoring how the levels of these phosphoproteins change in vivo, we identify intracellular signaling pathways through which several major drug classes operate. Along with what we believe to be state of the art drug discovery efforts, we have used, and may continue to use, this information as a tool to validate our selection of nonclinical candidate molecules.
+
+Given the nature of our research and development and business activities, we do not expect that compliance with federal, state and local environmental laws will result in material costs or have a significant negative effect on our operations.
+
+Disease and Market Overview
+
+Our programs for small molecule therapeutics are designed to address various CNS and other diseases that we believe are underserved or unmet by currently available therapies and that represent large potential commercial market opportunities for us. Background information on the diseases and related commercial markets that may be addressed by our programs is set forth below.
+
+Schizophrenia
+
+Schizophrenia is a disabling and chronic mental illness that is characterized by multiple symptoms during an acute phase of the disorder that can include so-called “positive” symptoms, such as hallucinations, hearing voices, grandiose beliefs and suspiciousness or paranoia. These symptoms can be accompanied by additional, harder to treat symptoms, such as social withdrawal, blunted emotional response and speech deficits, collectively referred to as “negative” symptoms, difficulty concentrating and disorganized thoughts, or cognitive impairment, depression and insomnia. Such residual symptoms often persist even after the acute positive symptoms subside, and contribute substantially to the social and employment disability associated with schizophrenia.
+
+According to the American Psychiatric Association and the National Institute of Mental Health, about 1% of the population (2.4 million adults in the United States) suffers from schizophrenia in any given year. A landmark study funded by the National Institute of Mental Health, the Clinical Antipsychotic Trials of Intervention Effectiveness, also referred to as CATIE, which was published in The New England Journal of Medicine in September 2005, found that 74% of patients taking typical or atypical antipsychotics discontinued treatment within 18 months because of side effects or lack of efficacy.
+
+Bipolar Disorder
+
+Bipolar disorder, sometimes referred to as manic-depressive illness, is characterized by extreme shifts in mood. Individuals with bipolar disorder may experience intense feelings of over-excitement, irritability, impulsivity with grandiose beliefs and racing thoughts, referred to as a manic episode. Symptoms of depression may include feeling tired, hopeless and sad, with difficulty concentrating and thoughts of suicide. Some people experience both types of symptoms in the same “mixed” episode. Severe symptoms of bipolar disorder can be associated with hallucinations or delusions, otherwise referred to as psychosis.
+
+7
+
+Table of Contents
+
+According to the National Institute of Mental Health, an estimated 4.4% of adults in the United States (approximately 11 million adults in the United States) experience bipolar disorder at some time in their lives. Bipolar disorder is often treated with antipsychotic medications alone or in combination with mood stabilizers. The side effects and safety risks associated with antipsychotic drugs in patients with bipolar disorder are similar to those experienced by patients with schizophrenia. Moreover, a large national research program conducted from 1998 to 2005 called the Systematic Treatment Enhancement Program for Bipolar Disorder, or STEP-BD, followed 4,360 patients with bipolar disorder long term and showed that about half of patients who were treated for bipolar disorder, still experienced lingering and recurrent symptoms, indicating a clear need for improved treatments.
+
+Major Depressive Disorder
+
+MDD is a mood disorder that can be associated with symptoms of sadness, hopelessness, helplessness, feelings of guilt, irritability, loss of interest in formerly pleasurable activities, cognitive impairment, disturbed sleep patterns, and suicide ideation or behavior. Different people may experience different symptoms, but everyone with major depression experiences symptoms that are severe enough to interfere with everyday functioning, such as the ability to concentrate at work or school, social interactions, eating and sleeping. Sometimes the depressive episode can be so severe it is accompanied by psychosis (hallucinations and delusions).
+
+According to the National Institute of Mental Health, approximately 8.4% of adults in the United States experience MDD each year. The antidepressant market is primarily composed of selective serotonin reuptake inhibitors such as escitalopram and selective norepinephrine reuptake inhibitors, or SNRIs, such as duloxetine. Antipsychotics such as quetiapine, aripriprazole, Rexulti® and Vraylar® are also used as adjunctive treatments with antidepressant treatment. The National Institute of Mental Health-funded Sequenced Treatment Alternatives to Relieve Depression, or STAR*D, study showed that only one-third of treated patients experience complete remission of depressive symptoms. Nearly two-thirds of patients with depression do not fully recover on an anti-depressant medication.
+
+Behavioral Disturbances in Dementia
+
+The World Health Organization estimates that approximately 55 million people worldwide have dementia, and there are nearly 10 million new cases every year. The Alzheimer’s Association estimates more than 6 million Americans are living with Alzheimer’s dementia, or AD, in 2022. While the diagnostic criteria for AD and other dementias mostly focus on the related cognitive deficits, it is often the behavioral and psychiatric symptoms that are most troublesome for caregivers and lead to poor quality of life for patients. Several behavioral symptoms are quite prevalent in patients with dementia, including patients with AD. We believe that ITI-1284 may provide a novel therapy for treating the behavioral disturbances accompanying dementia, including AD.
+
+The FDA has not approved any drug to treat the behavioral symptoms of dementia, including AD. We believe there is a large unmet medical need for a safe and effective therapy to treat the behavioral symptoms in patients with dementia, including AD.
+
+Parkinson’s Disease
+
+Parkinson’s disease is a chronic and progressive neurodegenerative disorder that involves malfunction and death of neurons in a region of the brain that controls movement. This neurodegeneration creates a shortage of an important brain signaling chemical, or neurotransmitter, known as dopamine, thereby rendering patients unable to direct or control their movements in a normal manner. Parkinson’s disease is characterized by well-known motor symptoms, including tremors, limb stiffness, slowness of movements, and difficulties with posture and balance, as well as by non-motor symptoms, which include sleep disturbances, mood disorders, cognitive
+
+8
+
+Table of Contents
+
+impairment and psychosis. Parkinson’s disease progresses slowly in most people and the severity of symptoms tends to worsen over time.
+
+According to the National Parkinson Foundation, about 1 million people in the United States and more than 10 million people worldwide suffer from this disease. Parkinson’s disease is more common in people over 60 years of age, and the prevalence of this disease is expected to increase significantly as the average age of the population increases. Parkinson’s disease patients are commonly treated with dopamine replacement therapies, such as levodopa, commonly referred to as L-DOPA, which is metabolized to dopamine, and dopamine agonists, which are molecules that mimic the action of dopamine. Global Data estimated global sales of therapeutics such as L-DOPA, and dopamine agonists used to treat the disease to be approximately $4.3 billion in 2022.
+
+Non-motor symptoms can be particularly distressing and even more troublesome to patients with Parkinson’s disease than the primary motor disturbances. Non-motor symptoms substantially contribute to the burden of Parkinson’s disease and deeply affect the quality of life of patients and their caregivers. Non-motor symptoms of Parkinson’s disease are associated with increased caregiver stress and burden, nursing home placement, and increased morbidity and mortality. Treatment of non-motor symptoms associated with Parkinson’s disease poses a challenge to physicians. Current dopamine replacement drugs used to treat the motor symptoms of Parkinson’s disease do not help, and sometimes worsen, the non-motor symptoms. We believe there is a large unmet medical need for the treatment of non-motor symptoms associated with Parkinson’s disease.
+
+Opioid Use Disorder
+
+The opioid crisis was declared a public health emergency in 2017. According to the 2019 CDC annual surveillance report of drug-related risks and outcomes, opioid misuse is widespread with over 10 million Americans reporting opioid misuse. The rate of drug overdose deaths involving opioids in the United States remains high, with more than 68,000 deaths reported in 2020.
+
+Opioids are a class of drugs that include the illegal drug heroin, synthetic opioids such as fentanyl, and pain relievers available legally by prescription, including oxycodone, hydrocodone, codeine and morphine. Opioids produce high levels of positive reinforcement, increasing the odds that people will continue using them despite negative consequences. Opioid use disorder is a chronic lifelong disorder, with serious potential consequences including disability, relapses, and death. While medications including methadone, buprenorphine and naltrexone are approved to treat opioid use disorder, these medications do not effectively treat psychiatric comorbidities (e.g., mood and anxiety disorders) that may drive opioid use/abuse or dysphoria or the dysphoria and mood disturbances (e.g., depression and anxiety) that often accompany opioid withdrawal and abstinence.
+
+Our Strategy
+
+Our goal is to discover, develop and commercialize novel small molecule therapeutics for the treatment of CNS diseases and other diseases in order to improve the lives of people suffering from such illnesses. Using our key understanding of intracellular signaling, we seek to accomplish our goal, using our in-house expert drug discovery and clinical development teams, in two ways:
+
+•
+
+we seek to have the capability to develop first-in-class medications with novel mechanisms that have the potential to treat CNS diseases and other diseases for which there are no previously marketed drugs; and
+
+•
+
+we seek to develop drugs that either can differentiate themselves in competitive markets by addressing aspects of CNS diseases and other diseases which are not adequately treated by currently marketed drugs or can be effective with fewer side effects.
+
+The key elements of our strategy are to:
+
+•
+
+continue to commercialize CAPLYTA, which has been approved by the FDA for the treatment of schizophrenia and bipolar depression in adults, in the United States;
+
+9
+
+Table of Contents
+
+•
+
+complete the development of lumateperone for additional neuropsychiatric indications, such as MDD;
+
+•
+
+expand the commercial potential of lumateperone by investigating its usefulness in additional neurological areas;
+
+•
+
+continue to advance our other product candidates in clinical development such as lenrispodun, for the treatment of CNS and other disorders; ITI-1284, for the treatment of neuropsychiatric disorders and behavioral disturbances in dementia; and ITI-333, for substance use disorders, pain and psychiatric comorbidities including depression and anxiety; and
+
+•
+
+advance the earlier stage product candidates in our pipeline.
+
+Intellectual Property
+
+Our Patent Portfolio
+
+As of February 1, 2023, we owned or controlled approximately 130 patent families filed in the United States and other major markets worldwide, including approximately 125 issued or allowed U.S. patents, 62 pending U.S. patent applications, 527 issued or allowed foreign patents and 343 pending foreign patent applications, directed to novel compounds, formulations, methods of treatment, synthetic methods, and platform technologies.
+
+Lumateperone tosylate is FDA-approved as CAPLYTA® for the treatment of schizophrenia and for the treatment of bipolar depression. We have extensively characterized this compound and related compounds and filed additional patent applications on salt forms, polymorphs, pharmaceutical formulations, new indications, improved methods of manufacture, metabolites, derivatives, and structurally related novel compounds. As of February 1, 2023, our lumateperone program consisted of approximately 36 patent families that we own or control, filed in the United States and other major markets, including 49 issued or allowed U.S. patents, 29 pending U.S. patent applications, 213 issued or allowed foreign patents and 155 pending foreign patent applications. Thirteen patents are currently Orange Book listed in the United States. In addition to patent protection, lumateperone has five years of new chemical entity data exclusivity with the FDA, until December 2024. Patent protection for lumateperone includes:
+
+Summary Description of Patent
+
+or Patent Application
+
+United States or Foreign
+
+Jurisdiction
+
+Expiration Date
+
+ITI-007 Product Patent (approved drug product—lumateperone tosylate—in any pharmaceutical form)
+
+Granted: US (10,464,938*), AU
+
+March 12, 2028 (US: does not include expected 6-month extension in US for pediatric studies)
+
+ITI-007 Crystal Form Patent (approved drug product—lumateperone tosylate—in solid crystalline form)
+
+Granted: US (8,648,077*; 9,199,995*; 9,586,960*; RE48,825*), EP (AT, BE, BG, CH, CZ, DE, DK, EE, ES, FI, FR, GB, GR, HR, HU, IE, IT, LT, LU, LV, NL, NO, PL, PT, RO, SE, SI, SK, TR), AU, CA, CN, KR, HK, JP and MX
+
+December 1, 2029 (US; does not include expected 6-month extension for pediatric studies; additional patent term extension possible through 2033**);
+
+March 12, 2029 (ex-US)
+
+Pending in IL, IN
+
+ITI-007 Dosage and Method of Treatment Patents (including schizophrenia, bipolar depression, sleep disorder indications)
+
+Granted: US (8,598,119*; 9,186,258, 9,616,061*, 10,702,522*; 10,117,867*; RE48,839*), AU, CN, JP, KR, MX, EP (allowed)
+
+Pending: US (continuation), EP (divisional), IN, KR (divisional), MX (divisional)
+
+December 28, 2029 (US; does not include expected 6-month extension for pediatric studies; additional patent term extension possible through 2033**);
+
+May 27, 2029 (ex-US)
+
+10
+
+Table of Contents
+
+Summary Description of Patent
+
+or Patent Application
+
+United States or Foreign
+
+Jurisdiction
+
+Expiration Date
+
+ITI-007 Residual Symptoms Patent (treatment of negative/residual symptoms of schizophrenia)
+
+Granted: US (9,956,227*; 10,960,009*; 11,026,951*), AU, EP, JP, KR, MX, RU
+
+Pending: US (continuation), AU (divisional), JP (divisional), EP (divisional), IN, KR (divisional), MX (divisional), CA, BR, IL, CN
+
+December 3, 2034 (US and ex-US; does not include expected US 6-month extension for pediatric studies;)
+
+Patents for Additional Dosage Forms
+
+Granted: US (10,695,345*; 11,052,084*)
+
+Pending: US (continuation), AU, CA, CN, EP, IN, IL, JP, KR, MX, RU
+
+2037-2039
+
+Patents for Additional Indications (including post-traumatic stress disorder, impulse control disorder, symptoms associated with dementia, acute depression, and acute anxiety)
+
+Granted: US (11,053,245; 11,124,514)
+
+Granted or pending in US, EP, JP, and other countries
+
+2033-2034
+
+*
+
+Orange-Book listed U.S. patents (NB: U.S. 8,598,119 and U.S. 9,586,960 have been requested for delisting as they have been superseded by RE48,839 and RE48,825, respectively)
+
+**
+
+We have filed patent term extension applications on two U.S. patents. The U.S. Patent and Trademark Office, or USPTO, has not completed its review of these applications. In the United States, we are permitted to extend the term of one U.S. patent for lumateperone or the use thereof. Accordingly, on completion of the USPTO’s review of our patent term extension applications, we must select one of the two patents to which any patent term extension granted will attach. Patent terms may be subject to change not only due to potential patent term extensions but also to any terminal disclaimer that reduces patent term, as well as other factors. Because the U.S. patent laws and related judicial interpretations change, modifications or new interpretations of the laws may impact our patent terms.
+
+Our ITI-1284 program relates to novel lumateperone derivatives for the treatment of behavioral disturbances associated with dementia, and other central nervous system disorders. Six families of patent applications have been filed, which have already resulted in eight U.S. patents and fifteen foreign patents. The ITI-1284 molecule has composition of matter protection to 2037, with possible extensions and additional Orange Book-listable protection to 2042.
+
+Our program on PDE1 inhibitors for cognition, dopamine-mediated and other disorders, cardiovascular disorders, as well as several others, includes patent protection across 55 families, including 31 families for the lead molecule, lenrispodun, as well as a wide range of filings on other proprietary compounds and indications. The lenrispodun lead molecule has composition of matter protection to 2029, with possible extensions and additional Orange Book-listable protection to 2034. Additionally, we expect to have data exclusivity in the European Union (EU) for up to 11 years from commercial launch. We have obtained patent coverage for lenrispodun in the treatment of cardiovascular disorders, including heart failure, that extends to 2034. We are also evaluating potential follow-on compounds for lenrispodun which would have patent protection beyond 2030.
+
+Our ITI-333 program relates to novel compounds for the non-addictive treatment of pain and for the treatment of opiate use disorder. 18 families of patent applications have been filed, including five families which have already resulted in six U.S. patents and three EP grants, as well as thirteen other foreign grants. These patent families will protect the lead compound, as well as many other analogs under development, beyond 2037 (exclusive of any patent term extensions and regulatory exclusivities).
+
+11
+
+Table of Contents
+
+We have also filed patent applications on novel proprietary targets and lead compounds for AD, which would provide compound protection beyond 2028 or beyond 2034, depending on which compound is ultimately selected for development.
+
+License Agreement
+
+The Bristol-Myers Squibb License Agreement
+
+On May 31, 2005, we entered into a worldwide, exclusive License Agreement with Bristol-Myers Squibb Company, or BMS, pursuant to which we hold a license to certain patents and know-how of BMS relating to lumateperone and other specified compounds. The agreement was amended on November 3, 2010. The licensed rights are exclusive, except BMS retains rights in specified compounds in the fields of obesity, diabetes, metabolic syndrome and cardiovascular disease. However, BMS has no right to use, develop or commercialize lumateperone and other specified compounds in any field of use. We have the right to grant sublicenses of the rights conveyed by BMS. We are obliged under the license to use commercially reasonable efforts to develop and commercialize the licensed technology. We are also prohibited from engaging in the clinical development or commercialization of specified competitive compounds.
+
+Under the agreement, we made an upfront payment of $1.0 million to BMS, a milestone payment of $1.25 million in December 2013, and a milestone payment of $1.5 million in December 2014 following the initiation of our first Phase 3 clinical trial for lumateperone for patients with schizophrenia. Upon FDA acceptance of a New Drug Application, or NDA, filing for lumateperone, we were obligated to pay BMS a $2.0 million milestone payment. The FDA accepted our NDA filing for lumateperone for the treatment of schizophrenia in the third quarter of 2018 and, as a result, we paid the milestone payment in the first quarter of 2019. The FDA approved our NDA filing on December 23, 2019 and as a result, we accrued $5.0 million related to that milestone in the fourth quarter of 2019 which was paid in the first quarter of 2020. Remaining potential milestone payments under the agreement with respect to lumateperone total $5.0 million if approvals to market the product are received in certain countries outside the U.S. Under the agreement, we may be obliged to make other milestone payments to BMS, for licensed products other than lumateperone, of up to an aggregate of approximately $14.75 million. We are also obliged to make tiered single digit percentage royalty payments ranging between 5 – 9% on sales of licensed products. We are obliged to pay to BMS a percentage of non-royalty payments made in consideration of any sublicense.
+
+The agreement extends, and royalties are payable, on a country-by-country and product-by-product basis, through the later of ten years after first commercial sale of a licensed product in such country, expiration of the last licensed patent covering a licensed product, its method of manufacture or use, or the expiration of other government grants providing market exclusivity, subject to certain rights of the parties to terminate the agreement on the occurrence of certain events. On termination of the agreement, we may be obliged to convey to BMS rights in developments relating to a licensed compound or licensed product, including regulatory filings, research results and other intellectual property rights.
+
+Manufacturing
+
+We do not own or operate manufacturing facilities for the production of CAPLYTA or any of our product candidates, nor do we have plans to develop our own manufacturing operations in the foreseeable future. We currently rely on third-party contract manufacturers for all of our required raw materials inclusive of active pharmaceutical ingredient, or API, and its intermediates, as well as finished product for commercial sales of CAPLYTA and for ournonclinical research and clinical trials, including our ongoing and anticipated trials. We believe that we would be able to contract with other third-party contract manufacturers to obtain active pharmaceutical ingredients, or API, if our existing sources of API were no longer available, but there is no assurance that API would be available from other third-party manufacturers on acceptable terms, on the timeframe that our business would require, or at all.
+
+12
+
+Table of Contents
+
+The Siegfried Supply Agreement
+
+On January 4, 2017, we entered into a supply agreement with Siegfried Evionnaz SA, an affiliate of Siegfried AG, or Siegfried. Following the automatic expiration of the agreement on January 4, 2023, we entered into a new supply agreement with Siegfried effective January 5, 2023, or the Siegfried Agreement. Under the Siegfried Agreement, Siegfried has agreed to manufacture and supply the API for lumateperone in commercial quantities. We agreed to provide Siegfried with a rolling forecast of our anticipated requirements for supply of the API. Under the agreement, our purchase prices for supply of the API from Siegfried are specified prices based on the volume of API produced. The initial term of the Siegfried Agreement is three years until January 5, 2026. The Siegfried Agreement will automatically renew on an evergreen basis for a consecutive one-year period, unless either party notifies the other party of its election to not renew the agreement at least 12 months prior to the end of the initial term or any renewal period then in effect. Either party may terminate the agreement prior to its expiration upon an uncured material breach by the other party, the liquidation or dissolution of the other party, the commencement of insolvency procedures or other bankruptcy-related proceedings that are not dismissed within a certain period of time, the appointment of any receiver, trustee or assignee to take possession of the properties of the other party, the cessation of all or substantially all of the other party’s business operations, or a continuing force majeure event affecting the other party. Under the Siegfried Agreement, we have the right to and may purchase the API for lumateperone from other suppliers. As of December 31, 2022, the Company has committed to purchasing production campaigns of API and intermediate product from Siegfried that are expected to be delivered in 2023 and 2024.
+
+The Lonza Manufacturing Services Agreement
+
+On January 10, 2017, we entered into a manufacturing services agreement, as amended on December 19, 2022, or the Lonza Agreement, with Lonza Ltd., or Lonza. Under the Lonza Agreement, Lonza has agreed to manufacture and supply the API for lumateperone, with purchase prices specified based on the volume produced. We agreed to provide Lonza with a written forecast of our estimated quarterly requirements. On December 19, 2022, the Lonza Agreement was amended to, among other items, extend the current term of the agreement until December 31, 2028 and provide for certain minimum annual purchase commitments by the Company for the years 2025 through 2028 for delivery in 2026 through 2029. Either party may terminate the agreement prior to its expiration upon a prior written notice, an uncured material breach by the other party, the insolvency, liquidation, dissolution or bankruptcy of the other party, or a continuing force majeure event affecting the other party, and may be extended by mutual consent. As of December 31, 2022, the Company has committed to purchasing production campaigns of API and intermediate products from Lonza that are expected to be delivered in 2023 and 2024.
+
+Development and commercial quantities of any products that we develop will need to be manufactured in facilities, and by processes, that comply with the requirements of the FDA and the regulatory agencies of other jurisdictions in which we are seeking approval. We currently employ internal resources to manage our manufacturing contractors.
+
+Commercial Operations
+
+We initiated the commercial launch of CAPLYTA for the treatment of schizophrenia in adults in the United States in March 2020. In December 2021 we launched CAPLYTA for the treatment of bipolar depression in adults. In support of our commercialization efforts we employ a national sales force consisting of approximately 370 sales representatives. In the future, we may choose to commercialize CAPLYTA or any other products, in markets outside of the United States, if approved for sale in such markets, by establishing one or more strategic alliances.
+
+13
+
+Table of Contents
+
+Customers
+
+We are currently approved to sell CAPLYTA for the treatment of schizophrenia in adults and for the treatment of bipolar depression in adults in the U.S. CAPLYTA is priced in line with other currently marketed branded antipsychotics indicated for the treatment of schizophrenia and for the treatment of bipolar depression. We distribute CAPLYTA principally through three third-party wholesale drug distributors whose concentration are each between 28% and 39% of total sales.
+
+Competition
+
+We face, and will continue to face, intense competition from pharmaceutical and biotechnology companies, as well as numerous academic and research institutions and governmental agencies, both in the United States and abroad. We compete, or will compete, with existing and new products being developed by our competitors. Some of these competitors are pursuing the development of pharmaceuticals that target the same diseases and conditions that our research and development programs target.
+
+Even if we are successful in commercializing CAPLYTA and developing and obtaining approval of our product candidates, we would compete with a variety of established drugs in the areas of our targeted CNS therapeutic indications. CAPLYTA for the treatment of schizophrenia and for the treatment of bipolar depression competes with, among other branded products, Fanapt®, marketed by Vanda Pharmaceuticals, Lybalvi®, marketed by Alkermes, Rexulti®, marketed by Otsuka Pharmaceutical, and Vraylar®, marketed by AbbVie. In addition, CAPLYTA competes and our product candidates, if approved, would compete with, among other generic antipsychotic products, aripiprazole, clozapine, haloperidol, lurasidone, olanzapine, paliperidone, quetiapine/XR and risperidone.
+
+In addition, the companies described above and other competitors may have a variety of drugs in development or be awaiting FDA approval that could reach the market and become established before our approved product is established in the market or before we are able to sell our product candidates, if approved. Our competitors may also develop alternative therapies that could further limit the market for any drugs that we may develop. Many of our competitors are using technologies or methods different or similar to ours to identify and validate drug targets and to discover novel small molecule drugs. Many of our competitors and their collaborators have significantly greater experience than we do in the following:
+
+•
+
+identifying and validating targets;
+
+•
+
+screening compounds against targets;
+
+•
+
+nonclinical studies and clinical trials of potential pharmaceutical products; and
+
+•
+
+obtaining FDA and other regulatory clearances.
+
+In addition, many of our competitors and their collaborators have substantially greater advantages in the following areas:
+
+•
+
+capital resources;
+
+•
+
+research and development resources;
+
+•
+
+manufacturing capabilities; and
+
+•
+
+sales and marketing.
+
+Smaller companies also may prove to be significant competitors, particularly through proprietary research discoveries and collaborative arrangements with large pharmaceutical and established biotechnology companies. Many of our competitors have products that have been approved by the FDA or are in advanced development. We face competition from other companies, academic institutions, governmental agencies and other public and private research organizations for collaborative arrangements with pharmaceutical and biotechnology companies,
+
+14
+
+Table of Contents
+
+in recruiting and retaining highly qualified commercial, scientific and management personnel and for licenses to additional technologies. Our competitors, either alone or with their collaborators, may succeed in developing technologies or drugs that are more effective, safer, and more affordable or more easily administered than ours and may achieve patent protection or commercialize drugs sooner than us. Developments by others may render our product candidates or our technologies obsolete. Our failure to compete effectively could have a material adverse effect on our business.
+
+Government Regulation
+
+United States—FDA Process
+
+The research, development, testing, manufacture, labeling, promotion, advertising, import and export, distribution and marketing, among other things, prescription of drug products are extensively regulated by governmental authorities in the United States and other countries. In the United States, the FDA regulates drugs under the Federal Food, Drug, and Cosmetic Act, or the FDCA, and its implementing regulations. Failure to comply with the applicable U.S. requirements may subject us to administrative or judicial sanctions, such as FDA refusal to approve pending NDAs, clinical holds, warning letters, fines, civil penalties, product recalls, product seizures, total or partial suspension of production or distribution, injunctions and/or criminal prosecution.
+
+Drug Approval Process. None of our drug product candidates may be marketed in the United States until the drug has received FDA approval. Such approval can take many years to obtain and may be rejected by the FDA at a number of steps. The steps required before a drug may be marketed in the United States generally include the following:
+
+•
+
+completion of extensive nonclinical laboratory tests, potentially animal studies, and formulation studies in accordance with the FDA’s Good Laboratory Practice, or GLP, regulations;
+
+•
+
+submission to the FDA of an Investigational New Drug application, or IND, for human clinical testing, which must become effective before human clinical trials may begin;
+
+•
+
+performance of adequate and well-controlled human clinical trials to establish the safety and efficacy of the drug for each proposed indication;
+
+•
+
+submission to the FDA of an NDA after completion of all clinical trials;
+
+•
+
+satisfactory completion of an FDA pre-approval inspection of the manufacturing facility or facilities at which the API and finished drug product are produced and tested to assess compliance with current Good Manufacturing Practices, or cGMPs;
+
+•
+
+satisfactory completion of FDA inspections of clinical trial sites to assure that data supporting the safety and effectiveness of the product candidate has been generated in compliance with Good Clinical Practices; and
+
+•
+
+FDA review and approval of the NDA prior to any commercial marketing or sale of the drug in the United States.
+
+Nonclinical tests include laboratory evaluation of product chemistry, toxicity and formulation, as well as animal studies. The Consolidated Appropriations Act for 2023, signed into law on December 29, 2022, (P.L. 117-328) amended the FDCA to specify that nonclinical testing for drugs may, but is not required to, include in vivo animal testing. According to the amended language, a sponsor may fulfill nonclinical testing requirements by completing various in vitro assays (e.g., cell-based assays, organ chips, or microphysiological systems), in silico studies (i.e., computer modeling), other human or non-human biology-based tests (e.g., bioprinting), or in vivo animal tests. The conduct of the nonclinical tests and formulation of the compounds for testing must comply with federal regulations and requirements. The results of the nonclinical tests, together with manufacturing information and analytical data, are submitted to the FDA as part of an IND, which must become effective before human clinical trials may begin. An IND will automatically become effective 30 days after receipt by the FDA,
+
+15
+
+Table of Contents
+
+unless before that time the FDA raises concerns or questions about the conduct of the trial, such as whether human research subjects will be exposed to an unreasonable health risk. In such a case, the IND sponsor and the FDA must resolve any outstanding FDA concerns or questions before clinical trials can proceed. The FDA, the trial’s sponsor or an Institutional Review Board, or IRB, overseeing the trial also may place a study on hold at any time during its execution.
+
+Clinical trials involve administration of the investigational drug to human subjects under the supervision of qualified investigators. Clinical trials are conducted under protocols detailing the objectives of the study, the parameters to be used in monitoring safety and the effectiveness criteria to be evaluated. Each protocol must be provided to the FDA as part of a separate submission to the IND. Further, an IRB, for each site proposing to conduct the clinical trial, must review and approve the study protocol and informed consent information for study subjects for any clinical trial before it commences at that center, and the IRB must monitor the study until it is completed. There are also requirements governing reporting of on-going clinical trials and clinical trial results to public registries. Failure to timely register a covered clinical study or to submit study results as provided for in the law can give rise to civil monetary penalties and also prevent the non-compliant party from receiving future grant funds from the federal government. The ClinicalTrials.gov registration and reporting final rule became effective in 2017, and the government has begun enforcing those requirements against non-compliant clinical trial sponsors. Study subjects must provide informed consent before being enrolled to participate in a clinical trial.
+
+Clinical trials necessary for product approval typically are conducted in three sequential phases, but the phases may overlap.
+
+•
+
+Phase 1 usually involves the initial introduction of the investigational drug into a limited population, typically healthy humans, to evaluate its short-term safety, dosage tolerance, metabolism, pharmacokinetics and pharmacologic actions, and, if possible, to gain an early indication of its effectiveness.
+
+•
+
+Phase 2 usually involves trials in a limited patient population to (i) evaluate dosage tolerance and appropriate dosage; (ii) identify possible adverse effects and safety risks; and (iii) evaluate preliminarily the efficacy of the drug for specific targeted indications. Multiple Phase 2 clinical trials may be conducted by the sponsor to obtain information prior to beginning larger and more expensive Phase 3 clinical trials.
+
+•
+
+Phase 3 trials, commonly referred to as pivotal studies, are undertaken in an expanded patient population at multiple, geographically dispersed clinical trial centers to further evaluate clinical efficacy and test further for safety by using the drug in its final form.
+
+The FDA may approve an NDA for a product candidate, but require that the sponsor conduct additional clinical trials to further assess the drug after NDA approval under a post-approval commitment. Post-approval trials are typically referred to as Phase 4 clinical trials.
+
+Congress also recently amended the FDCA, as part of the Consolidated Appropriations Act for 2023, in order to require sponsors of a Phase 3 clinical trial, or other “pivotal study” of a new drug to support marketing authorization, to design and submit a diversity action plan for such clinical trial. The action plan must include the sponsor’s diversity goals for enrollment, as well as a rationale for the goals and a description of how the sponsor will meet them. Sponsors must submit a diversity action plan to the FDA by the time the sponsor submits the relevant clinical trial protocol to the agency for review. The FDA may grant a waiver for some or all of the requirements for a diversity action plan. It is unknown at this time how the diversity action plan may affect Phase 3 trial planning and timing or what specific information FDA will expect in such plans, but if the FDA objects to a sponsor’s diversity action plan, it may delay trial initiation.
+
+16
+
+Table of Contents
+
+During the development of a new drug, sponsors are given an opportunity to meet with the FDA at certain points. These points may be prior to submission of an IND, at the end of Phase 2, and before an NDA is submitted. Meetings at other times may be requested. These meetings can provide an opportunity for the sponsor to share information about the data gathered to date, for the FDA to provide advice, and for the sponsor and the FDA to reach an agreement on the next phase of development. Sponsors typically use the end of Phase 2 meeting to discuss their Phase 2 clinical results and present their plans for the pivotal Phase 3 clinical trial that they believe will support approval of the new drug. A sponsor may request a Special Protocol Assessment, or SPA, to reach an agreement with the FDA that the protocol design, clinical endpoints, and statistical analyses are acceptable to support regulatory approval of the product candidate with respect to effectiveness in the indication studied. If such an agreement is reached, it will be documented and made part of the administrative record, and it will be binding on the FDA except in limited circumstances, such as if the FDA identifies a substantial scientific issue essential to determining the safety or effectiveness of the product after clinical studies begin, or if the sponsor fails to follow the protocol that was agreed upon with the FDA. There is no guarantee that a study will ultimately be adequate to support an approval even if the study is subject to an SPA.
+
+Concurrent with clinical trials, companies usually complete additional animal safety studies and must also develop additional information about the chemistry and physical characteristics of the drug and finalize a process for manufacturing the product in accordance with cGMP requirements. The manufacturing process must be capable of consistently producing quality batches of the drug candidate and the manufacturer must develop methods for testing the quality, purity and potency of the final drugs. Additionally, appropriate packaging must be selected and tested and stability studies must be conducted to demonstrate that the drug candidate does not undergo unacceptable deterioration over its shelf life.
+
+Assuming successful completion of the required clinical testing, the results of nonclinical studies and of clinical studies, together with other detailed information, including information on the manufacture and composition of the drug, are submitted to the FDA in the form of an NDA requesting approval to market the product for one or more indications. An NDA must be accompanied by a significant user fee, and the sponsor of an approved NDA is also subject to an annual program fee. These fees are typically adjusted annually, but exemptions and waivers may be available under certain circumstances. The NDA is subject to a sixty-day acceptance period, and if sufficiently complete to permit substantive review, will be filed by the FDA at the end of that period. For NDAs that are assigned a standard review designation, the FDA’s goal is to complete its review ten months from the date the FDA files the NDA and, for NDA determined by the agency to be eligible for priority review, six months from the date the FDA files the NDA. These goals can be extended by the FDA through requests for additional information from the sponsor.
+
+The testing and approval process requires substantial time, effort and financial resources. The FDA will review the NDA to determine, among other things, whether product candidate is safe and effective for its intended use. FDA may refuse to approve an NDA if the applicable regulatory criteria are not satisfied or may require additional clinical or other data and information. The FDA may also refer the application to the appropriate advisory committee, typically a panel of clinicians, for review, evaluation and a recommendation as to whether the application should be approved. The FDA is not bound by the recommendations of the advisory committee, but it typically follows such recommendations.
+
+Before approving an NDA, the FDA inspects the facility or the facilities at which the drug and/or its active pharmaceutical ingredient is manufactured and will not approve the product unless the manufacturing is in compliance with cGMPs. On the basis of the FDA’s evaluation of the NDA and accompanying information, including the results of the inspection of the manufacturing facilities, it may issue an approval letter or a Complete Response Letter. The approval letter authorizes commercial marketing of the drug for specific indications. As a condition of NDA approval, the FDA may require post-marketing testing and surveillance to monitor the drug’s safety or efficacy, or impose other conditions, as discussed further below. A Complete Response Letter indicates that the review cycle of the application is complete and the application will not be approved in its current form. A Complete Response Letter outlines the deficiencies in the submission and may
+
+17
+
+Table of Contents
+
+require additional clinical data and/or additional clinical trial(s), and/or other significant, expensive and time-consuming requirements related to clinical trials, nonclinical studies or manufacturing. If a Complete Response Letter is issued, the applicant may choose to either resubmit the NDA addressing all of the deficiencies identified in the letter or withdraw the application. Even if such additional information is submitted, the FDA may ultimately decide that the NDA does not satisfy the criteria for approval. Data from clinical trials is not always conclusive and the FDA may interpret data differently than we or our collaborators interpret data. Alternatively, the FDA could also approve the NDA with a Risk Evaluation and Mitigation Strategy, or REMS, to mitigate risks of the drug, which could include medication guides, physician communication plans, or elements to assure safe use, such as restricted distribution methods, patient registries or other risk minimization tools. Once the FDA approves a drug, the FDA may withdraw product approval if on-going regulatory requirements are not met or if safety problems occur after the product reaches the market. In addition, the FDA may require testing, including Phase 4 clinical trials, and surveillance programs to monitor the safety of approved products that have been commercialized, and the FDA has the power to prevent or limit further marketing of a product based on the results of these post-marketing programs or other information.
+
+Post-Approval Requirements. After a drug has been approved by the FDA for sale, the FDA may require that certain post-approval requirements be satisfied, including the conduct of additional clinical trials. If post-approval conditions are not satisfied, the FDA may withdraw its approval of the drug. In addition, certain changes to an approved product, such as adding new indications, making certain manufacturing changes, or making certain additional labeling claims, are subject to further FDA review and approval. Before a company can market products for additional indications, it must obtain additional approvals from the FDA, typically through the submission and approval of a supplemental NDA. Obtaining approval for a new indication generally requires that additional clinical trials be conducted. A company cannot be sure that any additional approval for new indications for any product candidate will be approved on a timely basis, or at all.
+
+In addition, holders of an approved NDA are required to (i) report certain adverse reactions to the FDA and maintain pharmacovigilance programs to proactively look for these adverse events; (ii) comply with certain requirements concerning advertising and promotional labeling for their products; and (iii) continue to have quality control and manufacturing procedures conform to cGMPs after approval. The FDA periodically inspects the sponsor’s records related to safety reporting and the approved drug’s manufacturing facilities, which includes assessment of on-going compliance with cGMPs. Accordingly, manufacturers must continue to expend time, money and effort in the area of production and quality control to maintain cGMP compliance. We intend to continue to use third-party manufacturers to produce our products in clinical and commercial quantities, and future FDA inspections may identify compliance issues at the facilities of our contract manufacturers that may disrupt production or distribution, or require substantial resources to correct. In addition, discovery of problems with a product after approval may result in new restrictions on a product, manufacturer or holder of an approved NDA, including recall of the product from the market, imposition of a REMS program, or withdrawal of approval of the NDA for that drug, among other potential consequences.
+
+Moreover, the distribution of prescription pharmaceutical products is subject to the Prescription Drug Marketing Act, or the PDMA, which regulates the distribution of drugs and drug samples at the federal level, and sets minimum standards for the registration and regulation of drug distributors by the states. Both the PDMA and state laws limit the distribution of prescription drug product samples and impose requirements to ensure accountability in distribution. Most recently, the Drug Supply Chain Security Act, or DSCSA, was enacted with the aim of building an electronic system to identify and trace certain prescription drugs distributed in the United States. The DSCSA mandates phased-in and resource-intensive obligations for pharmaceutical manufacturers, wholesale distributors, and dispensers over a ten-year period that is expected to culminate in November 2023. From time to time, new legislation and regulations may be implemented that could significantly change the statutory provisions governing the approval, manufacturing and marketing of products regulated by the FDA. It is impossible to predict whether further legislative or regulatory changes will be enacted, or FDA regulations, guidance or interpretations changed or what the impact of such changes, if any, may be.
+
+18
+
+Table of Contents
+
+Patent Term Restoration and Marketing Exclusivity. Depending upon the timing, duration and specifics of FDA approval of the use of our drugs, some of our U.S. patents may be eligible for limited patent term extension under the Drug Price Competition and Patent Term Restoration Act of 1984, referred to as the Hatch-Waxman Amendments. The Hatch-Waxman Amendments permit a patent restoration term of up to five years as compensation for patent term lost during product development and the FDA regulatory review process. However, patent term restoration cannot extend the remaining term of a patent beyond a total of 14 years from the product’s approval date. The patent term restoration period is generally one-half the time between the effective date of an IND and the submission date of an NDA, plus the time between the submission date of an NDA and the approval of that application. Only one patent applicable to an approved drug is eligible for the extension and the extension must be requested prior to expiration of the patent. Also, the approval must be the first permitted commercial marketing or use of the active ingredient under the relevant provision of law. The USPTO, in consultation with the FDA, reviews and approves the application for any patent term extension or restoration. We have applied for, and in the future we intend to apply for, restorations of patent term for some of our currently owned or licensed patents to add patent life beyond their current expiration date, depending on the expected length of clinical trials and other factors involved in the submission of the relevant NDA.
+
+Data and market exclusivity provisions under the FDCA also can delay the submission or the approval of certain applications. The FDCA provides a five-year period of non-patent data exclusivity within the United States to the first applicant to gain approval of an NDA for a new chemical entity. A drug is a new chemical entity if the FDA has not previously approved any other new drug containing the same active moiety, which is the molecule or ion responsible for the action of the drug substance. During the exclusivity period, the FDA may not accept for review an abbreviated new drug application, or ANDA, or a 505(b)(2) NDA submitted by another company for another version of such drug where the applicant does not own or have a legal right of reference to all the data required for approval. However, an application may be submitted after four years if it contains a certification of patent invalidity or non-infringement. The FDCA also provides three years of marketing exclusivity for an NDA, 505(b)(2) NDA or supplement to an existing NDA if new clinical investigations, other than bioavailability studies, conducted or sponsored by the applicant are deemed by the FDA to be essential to the approval of the application, for example, for new indications, dosages or strengths of an existing drug. This three-year exclusivity covers only the data and information associated with the new clinical investigations and does not prohibit the FDA from approving ANDAs or 505(b)(2) NDAs for drugs containing the original active agent. Five-year and three-year exclusivity will not delay the submission or approval of a full NDA; however, an applicant submitting a full NDA would be required to conduct, or obtain a right of reference to all of the nonclinical studies and clinical trials necessary to demonstrate safety and effectiveness. The FDCA also provides seven years of market exclusivity for a drug designated for a rare disease or condition (e.g., a disease or condition that affects less than 200,000 people in the United States) that begins to run after the drug’s marketing approval for that condition. The exclusivity prohibits the approval of the same drug for the same disease or condition unless there is a showing of clinical superiority or other exceptions are triggered.
+
+Foreign Regulation
+
+In addition to regulations in the United States, we may become subject to a variety of foreign regulations governing clinical trials and commercial sales and distribution of our products. Whether or not we obtain FDA approval for a product, we must obtain approval by the comparable regulatory authorities of foreign countries before we can commence clinical trials and approval of foreign countries or economic areas, such as the European Union, before we may market products in those countries or areas. The approval process and requirements governing the conduct of clinical trials, product licensing, pricing and reimbursement vary greatly from place to place, and the time may be longer or shorter than that required for FDA approval.
+
+Pricing and Reimbursement
+
+In the United States and internationally, sales of any approved products, and our ability to generate revenues on such sales, are dependent, in significant part, on the availability of adequate coverage and reimbursement
+
+19
+
+Table of Contents
+
+from third-party payors, such as state and federal governments, managed care providers and private insurance plans. Private insurers, such as health maintenance organizations and managed care providers, have implemented cost-cutting and reimbursement initiatives and likely will continue to do so in the future. These include establishing formularies that govern the drugs and biologics that will be offered and the out-of-pocket obligations of member patients for such products. We may need to conduct pharmacoeconomic studies to demonstrate the cost-effectiveness of our products for formulary coverage and reimbursement. Even with such studies, our products may be considered less safe, less effective or less cost-effective than existing products, and third-party payors may not provide coverage and reimbursement for our product candidates, in whole or in part.
+
+In addition, particularly in the United States and increasingly in other countries, we are required to provide discounts and pay rebates to state and federal governments and agencies in connection with purchases of our products that are reimbursed by such entities. It is possible that future legislation in the United States and other jurisdictions could be enacted to potentially impact reimbursement rates for the products we are developing and may develop in the future and could further impact the levels of discounts and rebates paid to federal and state government entities. Any legislation that impacts these areas could impact, in a significant way, our ability to generate revenues from sales of any approved product that we bring to market. Most recently, on August 16, 2022, President Biden signed into the law the Inflation Reduction Act of 2022, or the IRA. Among other things, the IRA has multiple provisions that may impact the prices of drug products that are both sold into the Medicare program and throughout the United States. Starting in 2023, a manufacturer of drugs or biological products covered by Medicare Parts B or D must pay a rebate to the federal government if their drug product’s price increases faster than the rate of inflation. This calculation is made on a drug product by drug product basis and the amount of the rebate owed to the federal government is directly dependent on the volume of a drug product that is paid for by Medicare Parts B or D. Additionally, starting for payment year 2026, the Centers for Medicare & Medicaid Services (CMS) will negotiate drug prices annually for a select number of single source Part D drugs without generic or biosimilar competition. CMS will also negotiate drug prices for a select number of Part B drugs starting for payment year 2028. If a drug product is selected by CMS for negotiation, it is expected that the revenue generated from such drug will decrease. CMS has begun to implement these new authorities but their impact on the pharmaceutical industry in the United States remains uncertain. In addition to the IRA’s drug price negotiation provisions, President Biden’s Executive Order 14087, issued in October 2022, called for CMS to prepare and submit a report to the White House on potential payment and delivery modes that would complement to IRA, lower drug costs, and promote access to innovative drugs. As of mid-January 2023, the report had not been released but it is expected to further inform the current Administration’s priorities and activities in this area.
+

@@ -1,0 +1,1135 @@
+
+​
+
+Material U.S. Federal Income Tax Consequences
+
+For a discussion summarizing the material U.S. federal income tax consequences of the Domestication and the exercise of redemption rights, please see “Material U.S. Federal Income Tax Consequences.”
+
+31
+
+TABLE OF CONTENTS​​​
+
+Anticipated Accounting Treatment
+
+Upon consummation of the Business Combination, we will perform a comprehensive review of the two entities’ accounting policies. As a result of the review, we may identify differences between the accounting policies of the two entities which, when conformed, could have a material impact on the financial statements of the post-combination company. Based on its initial analysis, we did not identify any differences that would have a material impact.
+
+Redemption Rights
+
+Pursuant to the Current Charter, a public shareholder may elect to have their Vickers Ordinary Shares redeemed for cash at the applicable redemption price per share equal to the quotient obtained by dividing (i) the aggregate amount on deposit in the Trust Account as of two business days prior to the consummation of the Business Combination, including interest (net of taxes payable), by (ii) the total number of then-outstanding public shares. As of March 31, 2022, this would have amounted to approximately $10.18 per public share.
+
+You will be entitled to receive cash for any public shares to be redeemed only if you:
+
+(i)
+
+(a)
+
+hold public shares, or
+
+(b)
+
+hold public shares through Units and you elect to separate your Units into the underlying public shares and Public Warrants prior to exercising your redemption rights with respect to the public shares; and
+
+​
+
+(ii)
+
+prior to        , Eastern Time, on        , 2022, (a) submit a written request to Continental that Vickers redeem your public shares for cash and (b) deliver your public shares to Continental, physically or electronically through DTC.
+
+​
+
+Holders of outstanding Units must separate the underlying public shares and Public Warrants prior to exercising redemption rights with respect to the public shares. If the Units are registered in a holder’s own name, the holder must deliver the certificate for its Units to Continental, with written instructions to separate the Units into their individual component parts. This must be completed far enough in advance to permit the mailing of the certificates back to the holder so that the holder may then exercise his, her or its redemption rights upon the separation of the public shares and Public Warrants from the Units. Each Unit contains one-half of a Public Warrant and no fractional Public Warrants may be issued. If a holder owns an odd number of Public Warrants, the fractional Public Warrant will expire worthless.
+
+If a holder exercises its redemption rights, then such holder will be exchanging its redeemed public shares for cash and will no longer own any public shares of Vickers. Any Public Warrants will be unaffected. Such a holder will be entitled to receive cash for its public shares only if it properly demands redemption and delivers its public shares (either physically or electronically) to Continental in accordance with the procedures described herein. Please see the section titled “The Meeting — Redemption Rights” for the procedures to be followed if you wish to redeem your public shares for cash.
+
+Emerging Growth Company
+
+Vickers is an “emerging growth company,” as defined in Section 2(a) of the Securities Act, as modified by the Jumpstart Our Business Startups Act of 2012 (the “JOBS Act”), and it may take advantage of certain exemptions from various reporting requirements that are applicable to other public companies that are not emerging growth companies, including, but not limited to, not being required to comply with the auditor attestation requirements of Section 404 of the Sarbanes-Oxley Act of 2002, as amended (the “Sarbanes-Oxley Act”), reduced disclosure obligations regarding executive compensation in Vickers’s periodic reports and proxy statements, and exemptions from the requirements of holding a nonbinding advisory vote on executive compensation and stockholder approval of any golden parachute payments not previously approved.
+
+Further, Section 102(b)(1) of the JOBS Act exempts emerging growth companies from being required to comply with new or revised financial accounting standards until private companies (that is, those that
+
+32
+
+TABLE OF CONTENTS​​​
+
+have not had a Securities Act registration statement declared effective or do not have a class of securities registered under the Exchange Act) are required to comply with the new or revised financial accounting standards. The JOBS Act provides that a company can elect to opt out of the extended transition period and comply with the requirements that apply to non-emerging growth companies but any such election to opt out is irrevocable. New Scilex has irrevocably elected not to avail itself of this exemption from new or revised accounting standards and, therefore, will be subject to the same new or revised accounting standards as other public companies that are not emerging growth companies. As a result, changes in rules of U.S. generally accepted accounting principles or their interpretation, the adoption of new guidance or the application of existing guidance to changes in New Scilex’s business could significantly affect New Scilex’s business, financial condition and results of operations. In addition, New Scilex is in the process of evaluating the benefits of relying on the other exemptions and reduced reporting requirements provided by the JOBS Act, as more fully described in the section titled “Management’s Discussion and Analysis of Financial Condition and Results of Operations of Scilex — Emerging Growth Company.”
+
+New Scilex will qualify and will remain as an emerging growth company until the earlier of: (i) the last day of the fiscal year (a) following the fifth anniversary of the closing of the IPO, (b) in which New Scilex has total annual gross revenue of at least $1.07 billion, or (c) in which New Scilex is deemed to be a large accelerated filer, which means the market value of the common equity of New Scilex that is held by non-affiliates equals or exceeds $700 million as of the last business day of its most recently completed second fiscal quarter; and (ii) the date on which New Scilex has issued more than $1.00 billion in non-convertible debt securities during the prior three-year period. References herein to “emerging growth company” have the meaning associated with it in the JOBS Act.
+
+Smaller Reporting Company
+
+Additionally, Vickers is currently a “smaller reporting company” as defined in Item 10(f)(1) of Regulation S-K. Smaller reporting companies may take advantage of certain reduced disclosure obligations, including, among other things, providing only two years of audited financial statements. Following the Business Combination, Vickers expects that New Scilex will no longer be a smaller reporting company because it will be a majority-owned subsidiary of Sorrento.
+
+Comparison of Shareholders’ Rights
+
+Following the consummation of the Business Combination, the rights of Vickers’s shareholders who become New Scilex stockholders in the Business Combination will no longer be governed by the Current Charter and instead will be governed by the Proposed Charter and the Proposed Bylaws. See “Comparison of Shareholders’ Rights.”
+
+Summary Risk Factors
+
+In evaluating the Business Combination and the Proposals to be considered and voted on at the Meeting, you should carefully review and consider the risk factors set forth under the section entitled “Risk Factors” beginning on page 36 of this proxy statement/prospectus. Some of these risks are summarized below. References in the summary under the subheadings “— Risks Related to Scilex’s Limited Operating History, Financial Condition and Capital Requirements”, “— Risks Related to Scilex’s Commercial Operations and Product Development”, “— Risks Related to Scilex’s Business and Operations”, “— Risks Related to Scilex’s Intellectual Property”, “— Risks Related to Government Regulations” and “— Risks Related to Scilex’s Relationship with Sorrento” to “we,” “us,” “our,” and “the Company” generally refer to Scilex in the present tense or New Scilex from and after the Business Combination.
+
+Risks Related to Scilex’s Limited Operating History, Financial Condition and Capital Requirements
+
+•
+
+We are currently a single commercial product company that is heavily dependent on the commercial success of ZTlido and we may be unable to generate sufficient revenue to support our operations.
+
+​
+
+•
+
+We have a limited operating history and have incurred significant losses since our inception. We anticipate that we will incur continued losses for the foreseeable future.
+
+​
+
+​
+
+33
+
+TABLE OF CONTENTS
+
+•
+
+Even after the completion of the Business Combination, we will require substantial additional funding, which may not be available to us on acceptable terms, or at all.
+
+​
+
+•
+
+Our recurring losses from operations, negative cash flows and substantial cumulative net losses raise substantial doubt about our ability to continue as a going concern.
+
+​
+
+Risks Related to Scilex’s Commercial Operations and Product Development
+
+•
+
+We obtain our commercial supply of ZTlido, clinical supply of our product candidates and certain of the raw materials used in our product candidates from sole or single source suppliers and manufacturers. In the event of a loss of one of these suppliers or manufacturers, or a failure by any such supplier or manufacturer to comply with FDA regulations, we may not be able to find an alternative source on commercially reasonable terms, or at all.
+
+​
+
+•
+
+We rely on third parties to conduct our clinical trials and intend to rely on third parties to conduct all of our future clinical trials. If these third parties do not successfully carry out their contractual duties, fail to comply with applicable regulatory requirements or meet expected deadlines, we may be unable to obtain regulatory approval for our product candidates.
+
+​
+
+•
+
+Interim “top-line” and preliminary data from our clinical trials that we announce or publish from time to time may change as more patient data become available and are subject to audit and verification procedures that could result in material changes in the final data.
+
+​
+
+•
+
+ZTlido may have undesirable properties that could result in significant negative consequences, and our product candidates may cause undesirable side effects that could delay or prevent their regulatory approval.
+
+​
+
+Risks Related to Scilex’s Business and Operations
+
+•
+
+If we are unable to retain our key executives, it may delay our development efforts and harm our business, financial condition and results of operations.
+
+​
+
+•
+
+Any disruption in our research and development facilities could adversely affect our business, financial condition and results of operations.
+
+​
+
+Risks Related to Scilex’s Intellectual Property
+
+•
+
+We are substantially dependent on the intellectual property we in-license from Oishi and Itochu, and if we lose the right to license such intellectual property or if the Product Development Agreement is terminated for any reason, our ability to commercialize ZTlido and develop and commercialize SP-103 would be harmed.
+
+​
+
+​
+
+•
+
+We recently entered into the Romeg Agreement for the in-licensing of certain intellectual property rights from Romeg with respect to the commercialization of GLOPERBA, and if we lose the right to license such intellectual property or if the Romeg Agreement is terminated for any reason, our ability to commercialize GLOPERBA would be harmed.
+
+​
+
+​
+
+•
+
+If we are unable to maintain patent protection for ZTlido, GLOPERBA or our product candidates, or if the scope of the patent protection obtained is not sufficiently broad, we may not be able to compete effectively in our markets.
+
+​
+
+Risks Related to Government Regulations
+
+•
+
+The regulatory approval processes of the FDA are lengthy, time-consuming and inherently unpredictable, and if we are ultimately unable to obtain regulatory approval for our product candidates, our business, financial condition and results of operations will be substantially harmed.
+
+​
+
+•
+
+Any approved product candidate will be subject to ongoing and continued regulatory review, which may result in significant expense and limit our ability to commercialize such products.
+
+​
+
+Risks Related to Scilex’s Relationship with Sorrento
+
+•
+
+Certain of our directors and officers may have actual or potential conflicts of interest because of their positions with Sorrento.
+
+​
+
+​
+
+34
+
+TABLE OF CONTENTS
+
+•
+
+We are controlled by Sorrento, whose interests may differ from those of our public shareholders.
+
+​
+
+Risks Related to Ownership of New Scilex’s Common Stock
+
+•
+
+If the perceived benefits of the Business Combination do not meet the expectations of investors or securities analysts, the market price of Vickers’s securities or, following the Business Combination, New Scilex’s securities, may decline.
+
+​
+
+•
+
+New Scilex will be an emerging growth company, and it cannot be certain if the reduced reporting requirements applicable to emerging growth companies will make its common stock less attractive to investors.
+
+​
+
+•
+
+Following the Business Combination, New Scilex will be a controlled company within the meaning of the Nasdaq Listing Rules and, as a result, will qualify for, and may rely on, exemptions from certain corporate governance requirements. Stockholders of New Scilex may not have the same protection afforded to stockholders of companies that are subject to such governance requirements.
+
+​
+
+Risks Related to Vickers and the Business Combination
+
+​
+
+•
+
+Vickers will be forced to liquidate the Trust Account if it cannot consummate a business combination by January 11, 2023. In the event of a liquidation, Vickers’s public shareholders will receive $10.29 per share and the Warrants will expire worthless.
+
+​
+
+•
+
+There is no guarantee that a shareholder’s decision whether to redeem their shares for a pro rata portion of the Trust Account will put the shareholder in a better future economic position.
+
+​
+
+•
+
+Vickers will not obtain an opinion from an unaffiliated third party as to the fairness of the Business Combination.
+
+​
+
+•
+
+Vickers’s Sponsors, directors and officers may have certain conflicts in determining to recommend the acquisition of Scilex, since certain of their interests, and certain interests of their affiliates and associates, are different from, or in addition to (and which may conflict with), your interests as a shareholder.
+
+​
+
+​
+
+35
+
+TABLE OF CONTENTS​​
+
+RISK FACTORS
+
+You should consider carefully the following risk factors, as well as the other information set forth in this proxy statement/prospectus, including matters addressed in the section titled “Cautionary Note Regarding Forward-Looking Statements,” before making a decision on how to vote your Vickers Ordinary Shares. These risk factors are not exhaustive. We may face additional risks and uncertainties that are not presently known to us, or that we currently deem immaterial. The following discussions should be read in conjunction with our financial statements and the notes to the financial statements included therein.
+
+Unless the context otherwise requires, references in the subsection “— Risks Related to Scilex’s Limited Operating History, Financial Condition and Capital Requirements”, “— Risks Related to Scilex’s Commercial Operations and Product Development”, “— Risks Related to Scilex’s Business and Operations”, “— Risks Related to Scilex’s Intellectual Property”, “— Risks Related to Government Regulations” and “— Risks Related to Scilex’s Relationship with Sorrento” to “we,” “us,” “our,” and “the Company” generally refer to Scilex in the present tense or New Scilex from and after the Business Combination.
+
+Risks Related to Scilex’s Limited Operating History, Financial Condition and Capital Requirements
+
+We are currently a single commercial product company that is heavily dependent on the commercial success of ZTlido and we may be unable to generate sufficient revenue to support our operations.
+
+ZTlido is our only product approved for commercial sale and we are entirely dependent upon its sales to generate revenue. In February 2018, we obtained regulatory approval for ZTlido for the relief of neuropathic pain associated with PHN, which is a form of post-shingles nerve pain, and we began commercializing ZTlido in the United States in October 2018. As a result, it is difficult to evaluate our current business and predict our future prospects. We cannot assure that ZTlido will gain market acceptance among physicians, health care payors, patients and the medical community, which is critical to our commercial success. We have limited experience engaging in commercial activities and limited relationships with physicians, hospitals and payors. Market acceptance of ZTlido depends on a number of factors, including:
+
+•
+
+acceptance by physicians, major operators of clinics and patients of the drug as a safe and effective treatment for the relief of neuropathic pain associated with PHN;
+
+​
+
+•
+
+the availability, cost and potential advantages of alternative treatments, including less expensive generic products;
+
+​
+
+•
+
+the effectiveness of our sales and marketing efforts;
+
+​
+
+•
+
+the availability of coverage, adequacy of reimbursement and favorability of pricing policies by third-party payors and government authorities;
+
+​
+
+•
+
+the timing of market introduction of other competitive products;
+
+​
+
+•
+
+the product labeling or any product inserts required by the U.S. Food and Drug Administration (the “FDA”); and
+
+​
+
+•
+
+the prevalence and severity of adverse side effects.
+
+​
+
+In order to successfully commercialize ZTlido, we will need to expand our marketing efforts to develop new relationships and expand existing relationships. Physicians may decide not to prescribe ZTlido for a variety of reasons, including changes in available offerings, adverse publicity, perceived safety issues, inadequate coverage or reimbursement for ZTlido or the utilization of products developed by other parties, all of which are circumstances outside of our control. Demand for ZTlido may not increase as quickly as we predict, and we may be unable to increase our revenue to the level that we currently expect. Even if we succeed in increasing market acceptance of ZTlido, maintaining and creating relationships with physicians, we may be unable to reach or sustain a level of profitability.
+
+Our ability to effectively promote ZTlido will also depend on pricing and cost-effectiveness, including our ability to produce at a competitive price. In addition, our efforts to educate the medical community and third-party payors on the benefits of ZTlido may require significant resources, may be constrained by FDA rules and policies on product promotion and may never be successful.
+
+36
+
+TABLE OF CONTENTS
+
+We have a limited operating history and have incurred significant losses since our inception. We anticipate that we will incur continued losses for the foreseeable future.
+
+We have a limited operating history. Prior to March 2019, our operations were conducted through Scilex Pharmaceuticals Inc. (“Scilex Pharma”), which was formed in September 2012 and is now our wholly-owned subsidiary. In March 2019, we effected a corporate reorganization and acquired Semnur Pharmaceuticals, Inc. (“Semnur”), which was formed in June 2013. Since our inception, we have focused on organizing and staffing our company, business planning, raising capital, identifying potential non-opioid pain therapy candidates, undertaking preclinical studies and clinical trials of our product candidates and establishing research and development and manufacturing collaborations. All of our revenue to date is attributable to sales of ZTlido, and we expect that sales of ZTlido will account for all of our revenue for at least the near term. Our relatively short operating history as a company makes any assessment of our future success and viability subject to significant uncertainty.
+
+Investment in biopharmaceutical product development is highly speculative because it entails substantial upfront capital expenditures and significant risk that any potential product candidate will fail to demonstrate adequate effect or an acceptable safety profile, gain regulatory approval and become commercially viable. We will encounter risks and difficulties frequently experienced by early-stage biopharmaceutical companies in rapidly evolving fields, and we have not yet demonstrated an ability to overcome such risks and difficulties successfully. Our ability to execute on our business model and generate revenues depends on a number of factors including our ability to:
+
+•
+
+successfully complete ongoing pre-clinical studies and clinical trials and obtain regulatory approvals for our current and future product candidates;
+
+​
+
+•
+
+identify new acquisition or in-licensing opportunities;
+
+​
+
+•
+
+successfully identify new product candidates and advance those product candidates into pre-clinical studies and clinical trials;
+
+​
+
+•
+
+raise additional funds when needed and on terms acceptable to us;
+
+​
+
+•
+
+attract and retain experienced management and advisory teams;
+
+​
+
+•
+
+add operational, financial and management information systems and personnel, including personnel to support clinical, pre-clinical manufacturing and planned future commercialization efforts and operations;
+
+​
+
+•
+
+launch commercial sales of our product candidates, whether alone or in collaboration with others;
+
+​
+
+•
+
+initiate and continue relationships with third-party suppliers and manufacturers and have commercial quantities of product candidates manufactured at acceptable cost and quality levels and in compliance with the FDA, and other regulatory requirements;
+
+​
+
+•
+
+set acceptable prices for product candidates and obtain coverage and adequate reimbursement from third-party payors;
+
+​
+
+•
+
+achieve market acceptance of product candidates in the medical community and with third-party payors and consumers; and
+
+​
+
+•
+
+maintain, expand and protect our intellectual property portfolio.
+
+​
+
+If we cannot successfully execute any one of the foregoing, our business may not succeed or become profitable.
+
+Since our inception, we have incurred significant net losses, with net losses of $88.4 million, $47.5 million, and $178.6 million for the years ended December 31, 2021, 2020, and 2019, respectively. As of December 31, 2021, we had an accumulated deficit of approximately $352.6 million. For the foreseeable future, we expect to continue to incur significant expenses related to the commercialization of ZTlido and GLOPERBA and the research and development of our product candidates, SP-102 (10 mg dexamethasone sodium phosphate viscous gel) (“SEMDEXA”), SP-103 (lidocaine topical system) 5.4% (“SP-103”), and SP-104 (4.5mg, low-dose naltrexone hydrochloride delayed-release capsules) (“SP-104”). We anticipate that our expenses will increase substantially due to the completion of the pivotal Phase 3 trial for SEMDEXA,
+
+37
+
+TABLE OF CONTENTS
+
+commencement of the Phase 2 clinical trial for SP-103 and initiation of the multiple Phase 1 trials for SP-104. Consequently, we expect to incur substantial losses for the foreseeable future and may never become profitable.
+
+We are subject to risks incidental to the development of new biopharmaceutical products, and we may encounter unforeseen expenses, difficulties, complications, delays and other unknown factors that may adversely affect our business. If we do achieve profitability, we may not be able to sustain or increase profitability on a quarterly or annual basis. Our failure to become and remain profitable could impair our ability to raise capital, maintain our research and development efforts, expand our business or continue our operations.
+
+The terms of our outstanding debt arrangements place restrictions on our operating and financial flexibility.
+
+On September 7, 2018, Scilex Pharma issued and sold senior secured notes due 2026 (the “Scilex Pharma Notes”), in an aggregate principal amount of $224.0 million, for an aggregate purchase price of $140.0 million. The Scilex Pharma Notes are governed by an indenture (as amended, the “Indenture”), with Scilex Pharma, as issuer, U.S. Bank National Association, a national banking association, as trustee (the “Trustee”), and collateral agent (the “Collateral Agent”), and Sorrento, as guarantor. Pursuant to an amendment to the Indenture, (i) on June 3, 2022, Scilex Pharma repurchased approximately $41.4 million of the aggregate principal amount of the outstanding Scilex Pharma Notes at 100% of the principal amount thereof (the “Repurchase”), (ii) the holders of the Scilex Pharma Notes agreed that Scilex Pharma can repurchase the remaining principal amount of the Scilex Pharma Notes at any time on or before September 30, 2022 for $41.4 million (subject to reduction for any quarterly royalty payments) and upon such repurchase the holders of the Scilex Pharma Notes will forgive and discharge $28.0 million of the aggregate principal amount of such notes, and (iii) the minimum cash requirement under the Indenture was reduced to $5.0 million in aggregate unrestricted cash equivalents at the end of each calendar month. As of June 30, 2022, the outstanding principal amount of the Scilex Pharma Notes is $69.4 million.
+
+The Indenture provides that the holders of the Scilex Pharma Notes will be entitled to receive quarterly payments in an amount equal to a fixed percentage, ranging from 15% to 25%, of the net sales of ZTlido for the prior fiscal quarter on each February 15, May 15, August 15 and November 15. As security for the Scilex Pharma Notes, Scilex Pharma has granted to the Collateral Agent, for the benefit of the Purchasers, a continuing security interest in and lien on Scilex Pharma’s right, title, and interest in and to ZTlido and all property and assets of Scilex Pharma that are necessary for, or otherwise relevant to, now or in the future, the manufacture and sale of ZTlido, on a worldwide basis (exclusive of Japan). The Indenture contains customary events of default with respect to the Scilex Pharma Notes (including a failure to make any payment of principal on the Scilex Pharma Notes when due and payable), and, upon certain events of default occurring and continuing, the Trustee by notice to Scilex Pharma, or the holders of at least 25% in principal amount of the outstanding Scilex Pharma Notes by notice to Scilex Pharma and the Trustee, may (subject to the provisions of the Indenture) declare 100% of the then-outstanding principal amount of the Scilex Pharma Notes to be due and payable immediately. In the case of certain events, including bankruptcy, insolvency or reorganization involving us, the Scilex Pharma Notes will automatically become due and payable. In addition, upon a change of control of Scilex Pharma (as defined in the Indenture), each holder of a Scilex Pharma Note shall have the right to require Scilex Pharma to repurchase all or any part of such Scilex Pharma Note holder’s then-outstanding Scilex Pharma Note at a repurchase price in cash equal to 101% of the then-outstanding principal amount thereof. The Business Combination will not constitute a change of control for purposes of the Scilex Pharma Notes. We may not have sufficient funds and may not be able to arrange for additional financing to pay the amounts that may become due under the Scilex Pharma Notes.
+
+Pursuant to the Indenture, Scilex Pharma must also comply with certain covenants with respect to the commercialization of ZTlido, as well as customary affirmative and restrictive covenants, including limitations on indebtedness, dividends, share repurchases, certain restricted payments, prepayment, redemption or repurchase of subordinated debt, fundamental transactions including a merger, amalgamation or consolidation involving Scilex Pharma, transactions with affiliates and investments. In addition, if actual cumulative net sales of ZTlido from October 1, 2022 through September 30, 2023 are less than approximately $218.1 million, then we will be obligated to pay an additional installment of the principal of the Scilex
+
+38
+
+TABLE OF CONTENTS
+
+Pharma Notes each quarter in an amount between approximately $10.1 million and approximately $30.6 million, with the amount of the additional installment of principal to be determined by reference to the amount by which cumulative net sales of ZTlido from October 1, 2022 through September 30, 2023 are less than approximately $218.1 million. In addition, if our actual cumulative net sales of ZTlido from October 1, 2022 through September 30, 2023 are less than approximately $290.7 million, then the aggregate principal amount due under the Scilex Pharma Notes will be increased by between approximately $2.6 million and approximately $84.8 million, with the amount of the principal increase to be determined by reference to the amount by which the cumulative net sales of ZTlido from October 1, 2022 through September 30, 2023 is less than approximately $290.7 million. Any failure to reach the above milestones could substantially reduce the amount of money available to finance our operations and business activities.
+
+Our outstanding indebtedness and any future indebtedness we may incur, combined with our other financial obligations, could increase our vulnerability to adverse changes in general economic, industry and market conditions, limit our flexibility in planning for, or reacting to, changes in our business and the industry and impose a competitive disadvantage compared to our competitors that have less debt or better debt servicing options. If we raise additional capital through debt financing, the terms of any new debt could further restrict our ability to operate our business.
+
+The Indenture imposes certain affirmative and restrictive covenants on Sorrento, and certain events involving Sorrento may trigger an event of default under the Scilex Pharma Notes, which would result in the Scilex Pharma Notes becoming automatically due and payable.
+
+Pursuant to the Indenture, Sorrento agreed to irrevocably and unconditionally guarantee, on a senior unsecured basis, the punctual performance and payment when due of all obligations of Scilex Pharma under the Indenture (the “Guarantee”). As a result of the Guarantee, the Indenture contains certain events of default with respect to the Scilex Pharma Notes that may be triggered as a result of certain actions, failures to act or events involving Sorrento. For example, each of the following events is an event of default under the Indenture: (1) if Sorrento fails to honor the Guarantee, or (2) if there is a bankruptcy, insolvency or reorganization event involving Sorrento. Any failure by Sorrento to honor the Guarantee or any bankruptcy, insolvency or reorganization event involving Sorrento would result in an event of default and the Scilex Pharma Notes becoming automatically due and payable. We cannot guarantee that Sorrento will be able to satisfy all of its obligations under the Indenture. Any failure by Sorrento to comply with its obligations under the Indenture could have a negative effect on our business, financial condition and results of operations, particularly if any such failure to comply results in an event of default or the Scilex Pharma Notes otherwise becoming automatically due and payable.
+
+We may be required to make milestone payments to the former stockholders of Semnur in connection with our development and commercialization of SEMDEXA, which could adversely affect the overall profitability of SEMDEXA, if approved.
+
+Under the terms of the Agreement and Plan of Merger we entered into with Semnur, Sigma Merger Sub, Inc., our prior wholly-owned subsidiary, Fortis Advisors LLC, solely as representative of the holders of Semnur equity, or the Semnur Equityholders, and Sorrento, for limited purposes, we are obligated to pay the Semnur Equityholders up to an aggregate of $280.0 million in contingent cash consideration based on the achievement of certain milestones. A $40.0 million payment will be due upon obtaining the first approval of a new drug application by the FDA (“NDA”) of any Semnur product, which includes SEMDEXA. Additional payments will be due upon the achievement of certain cumulative net sales of Semnur products, as follows:
+
+•
+
+a $20.0 million payment upon the achievement of $100.0 million in cumulative net sales of a Semnur product;
+
+​
+
+•
+
+$20.0 million payment upon the achievement of $250.0 million in cumulative net sales of a Semnur product;
+
+​
+
+•
+
+a $50.0 million payment upon the achievement of $500.0 million in cumulative net sales of a Semnur product; and
+
+​
+
+39
+
+TABLE OF CONTENTS
+
+•
+
+a $150.0 million payment upon the achievement of $750.0 million in cumulative net sales of a Semnur product.
+
+​
+
+These milestone obligations could impose substantial additional costs on us, divert resources from other aspects of our business, and adversely affect the overall profitability of SEMDEXA, if approved. We may need to obtain additional financing to satisfy these milestone payments, and cannot be sure that any additional funding, if needed, will be available on terms favorable to us, or at all.
+
+Even after the completion of the Business Combination, we will require substantial additional funding, which may not be available to us on acceptable terms, or at all.
+
+Our operations have consumed substantial amounts of cash since inception. We expect to significantly increase our spending to continue our commercialization efforts for ZTlido, advance development of our current product candidates and launch and commercialize any product candidates for which we receive regulatory approval. Furthermore, following the Business Combination, we expect to incur additional costs associated with operating as a public company. We will also require additional capital to fund our other operating expenses and capital expenditures.
+
+As of March 31, 2022, our cash and cash equivalents were approximately $33.6 million and we had an accumulated deficit of approximately $361.7 million. The amount and timing of our future funding requirements will depend on many factors, some of which are outside of our control, including but not limited to:
+
+•
+
+the costs and expenses associated with our ongoing commercialization efforts for ZTlido;
+
+​
+
+•
+
+the degree of success we experience in commercializing ZTlido;
+
+​
+
+•
+
+the revenue generated by sales of ZTlido and other products that may be approved, if any;
+
+​
+
+•
+
+the scope, progress, results and costs of conducting studies and clinical trials for our product candidates, SEMDEXA, SP-103 and SP-104;
+
+​
+
+•
+
+the timing of, and the costs involved in, obtaining regulatory approvals for our product candidates;
+
+​
+
+​
+
+•
+
+the costs of manufacturing ZTlido, GLOPERBA and our product candidates;
+
+​
+
+•
+
+the timing and amount of any milestone, royalty or other payments we are required to make pursuant to any current or future collaboration or license agreements;
+
+​
+
+•
+
+our ability to maintain existing, and establish new, strategic collaborations, licensing or other arrangements and the financial terms of any such agreements, including the timing and amount of any future milestone, royalty or other payments due under any such agreement;
+
+​
+
+​
+
+•
+
+the extent to which ZTlido, GLOPERBA or any of our product candidates, if approved for commercialization, is adopted by the physician community;
+
+​
+
+•
+
+our need to expand our research and development activities;
+
+​
+
+•
+
+the costs of acquiring, licensing or investing in businesses, product candidates and technologies;
+
+​
+
+•
+
+the effect of competing products and product candidates and other market developments;
+
+​
+
+•
+
+the number and types of future products we develop and commercialize;
+
+​
+
+•
+
+any product liability or other lawsuits related to our products;
+
+​
+
+•
+
+the expenses needed to attract, hire and retain skilled personnel;
+
+​
+
+•
+
+the costs associated with being a public company after the closing of the Business Combination;
+
+​
+
+•
+
+our need to implement additional internal systems and infrastructure, including financial and reporting systems;
+
+​
+
+•
+
+the number of public shares that are redeemed by our public shareholders;
+
+​
+
+•
+
+the costs of preparing, filing and prosecuting patent applications and maintaining, enforcing and defending intellectual property-related claims; and
+
+​
+
+40
+
+TABLE OF CONTENTS
+
+•
+
+the extent and scope of our general and administrative expenses.
+
+​
+
+Until we are able to generate significant revenue, if ever, we expect to finance our operations through a combination of equity offerings, debt financings, collaborations, government contracts or other strategic transactions. We cannot be sure that any additional funding, if needed, will be available on terms favorable to us, or at all. Any additional fundraising efforts may divert our management from their day-to-day activities, which may adversely affect our ability to develop and commercialize our product candidates. Furthermore, any additional equity or equity-related financing may be dilutive to our stockholders, and debt or equity financing, if available, may subject us to restrictive covenants and significant interest costs. If we raise additional funds through collaborations or strategic alliances with third parties, we may have to relinquish valuable rights to our product candidates, future revenue streams, research programs or technologies, or grant licenses on terms that may not be favorable to us. If we are unsuccessful in our efforts to raise additional financing on acceptable terms, we may be required to significantly reduce or cease our operations.
+
+Our recurring losses from operations, negative cash flows and substantial cumulative net losses raise substantial doubt about our ability to continue as a going concern.
+
+In Note 2 titled “Liquidity and Going Concern” of our consolidated financial statements included elsewhere in this proxy statement/prospectus, we disclose that there is substantial doubt about our ability to continue as a going concern. In addition, our independent registered public accounting firm included an explanatory paragraph in its report on our consolidated financial statements as of and for the year ended December 31, 2021, which stated that substantial doubt existed about our ability to continue as a going concern. We have negative working capital and have incurred significant operating losses and negative cash flows from operations and expect to continue incurring losses for the foreseeable future. Further, we had an accumulated deficit of approximately $352.6 million as of December 31, 2021 and approximately $264.1 million as of December 31, 2020. These conditions raise substantial doubt about our ability to continue as a going concern. Our consolidated financial statements do not include any adjustments that might result from the outcome of this uncertainty.
+
+Our ability to become a profitable operating company is dependent upon our ability to generate revenue and obtain financing adequate to fulfill our development and commercialization activities, and achieving a level of revenue adequate to support our cost structure. We have plans to obtain additional resources to fund our currently planned operations and expenditures through additional debt and equity financing. Our plans are substantially dependent upon the success of future sales of ZTlido, which is still in the early stages of commercialization, and are dependent upon, among other things, the success of our marketing of ZTlido and our ability to secure additional payor contracts with terms that are consistent with our business plan. If we are unable to obtain sufficient funding, our financial condition and results of operations will be materially and adversely affected and we may be unable to continue as a going concern. After the completion of the Business Combination, future financial statements may disclose substantial doubt about our ability to continue as a going concern. If we seek additional financing to fund our business activities in the future and there remains substantial doubt about our ability to continue as a going concern, investors or other financing sources may be unwilling to provide additional funding to us on commercially reasonable terms or at all.
+
+We have identified a material weakness in our internal control over financial reporting. Any material weakness may cause us to fail to timely and accurately report our financial results or result in a material misstatement of our financial statements.
+
+In connection with the audit of our consolidated financial statements for the years ended December 31, 2021 and 2020, we identified control deficiencies in the design and operation of our internal control over financial reporting that constituted a material weakness. A material weakness is a deficiency, or a combination of deficiencies, in internal control over financial reporting such that there is a reasonable possibility that a material misstatement of our financial statements will not be prevented or detected on a timely basis.
+
+For the years ended December 31, 2021 and 2020, the material weakness identified in our internal control over financial reporting related to ineffective control activities in the areas of revenue, debt, derivative liabilities, cash flows and leases caused by a lack of sufficient accounting resources. As a result of the material
+
+41
+
+TABLE OF CONTENTS​
+
+weakness, we hired additional accounting personnel and are implementing remediation measures including, but not limited to, performing a comprehensive assessment of accounting and finance resource requirements and hiring other personnel with sufficient accounting expertise at Sorrento to improve the operating effectiveness of our review controls and monitoring activities, and utilizing external accounting experts as appropriate. Any potential material misstatements were identified and corrected as audit adjustments in the applicable periods and are properly reflected in the Scilex financial statements included in this proxy statement/prospectus. We expect to hire personnel with accounting expertise and utilize external accounting experts at Scilex following the closing of the Business Combination.
+
+In the future, in order to properly manage our internal control over financial reporting, we may need to take additional measures to further augment our finance resources, and we cannot be certain that the measures we have taken, and expect to take, to improve our internal controls will be sufficient to ensure that our internal controls will remain effective and eliminate the possibility that other material weaknesses or deficiencies may develop or be identified in the future. If we experience future material weaknesses or deficiencies in internal controls and we are unable to correct them in a timely manner, our ability to record, process, summarize and report financial information accurately and within the time periods specified in the rules and forms of the SEC, will be adversely affected. Any such failure could negatively affect the market price and trading liquidity of the New Scilex Common Stock, lead to delisting, cause investors to lose confidence in our reported financial information, subject us to civil and criminal investigations and penalties, and generally materially and adversely impact our business and financial condition.
+
+If we identify future material weaknesses in our internal controls over financial reporting or fail to meet the demands that will be placed upon us as a public company, including the requirements of the Sarbanes-Oxley Act as, we may be unable to accurately report our financial results or report them within the timeframes required by law or stock exchange regulations. Failure to comply with Section 404 of the Sarbanes-Oxley Act could also potentially subject us to sanctions or investigations by the SEC or other regulatory authorities. If additional material weaknesses exist or are discovered in the future, and we are unable to remediate any such material weakness, our business, financial condition and results of operations could suffer.
+
+Risks Related to Scilex’s Commercial Operations and Product Development
+
+We obtain our commercial supply of ZTlido, clinical supply of our product candidates and certain of the raw materials used in our product candidates from sole or single source suppliers and manufacturers. In the event of a loss of one of these suppliers or manufacturers, or a failure by any such supplier or manufacturer to comply with FDA regulations, we may not be able to find an alternative source on commercially reasonable terms, or at all.
+
+We rely on a number of sole or single source suppliers and manufacturers, including:
+
+•
+
+the manufacturer and supplier for the commercial supply of ZTlido;
+
+​
+
+•
+
+the manufacturer and supplier for the clinical supply of SP-103;
+
+​
+
+•
+
+the manufacturer and supplier for the clinical supply of SP-104;
+
+​
+
+•
+
+the supplier of sodium hyaluronate, one of the excipients for SEMDEXA; and
+
+​
+
+•
+
+the manufacturer for the clinical supply of SEMDEXA.
+
+​
+
+Under the Product Development Agreement, dated as of May 11, 2011, by and among Scilex Pharmaceuticals, Inc. (as successor to Stason Pharmaceuticals, Inc.), Oishi Koseido Co., Ltd. (“Oishi”) and Itochu Chemical Frontier Corporation (“Itochu,” and together with Oishi, the “Developers”) (as amended, the “Product Development Agreement”), and the Commercial Supply Agreement, dated as of February 16, 2017, by and among Scilex Pharma and Oishi and Itochu (as amended, the “Commercial Supply Agreement”), we license the rights to ZTlido from and rely exclusively on Oishi and Itochu for the manufacturing and supply of ZTlido and SP-103 (collectively, the “Products”). Oishi and Itochu have the right to terminate the Product Development Agreement and the Commercial Supply Agreement under certain circumstances, including, among other things: (1) if we are in material breach of the agreement and the breach is not curable or if the breach is curable and we fail to cure such material breach within 180 days after notice requesting to cure; (2) if, at any time during the term of the Product Development Agreement and
+
+42
+
+TABLE OF CONTENTS
+
+the Commercial Supply Agreement, the market conditions are such that (a) our total net profits for ZTlido and SP-103 are equal to or less than five percent of our net sales of ZTlido and SP-103 for a period of four or more consecutive quarters, or (b) the economic viability of ZTlido and SP-103 is affected significantly as evidenced by documentation and substantial information by any external circumstances deemed detrimental to all parties as agreed to by us, on the one hand, and Oishi and Itochu, on the other hand, and the parties are unable to resolve the concerns under the foregoing clauses (a) and (b) after 30 days of good-faith discussion; and (3) in the event of our bankruptcy or assignment for the benefit of creditors. As of the date of this proxy statement/prospectus, Scilex’s net profits for ZTlido and SP-103 have not exceeded five percent of net sales. Accordingly, Oishi and Itochu have the right to terminate the Product Development Agreement and Commercial Supply Agreement. As of the date of this proxy statement/prospectus, neither Oishi nor Itochu has exercised its right of termination. If the Product Development Agreement and the Commercial Supply Agreement are terminated, we would lose access to the intellectual property and proprietary manufacturing process upon which ZTlido and SP-103 depend.
+
+Under our exclusive Supply Agreement, dated December 17, 2015 (the “Genzyme Supply Agreement”), with Genzyme Corporation (“Genzyme”), we depend on Genzyme to fulfill our clinical and commercial supply requirements for sodium hyaluronate, one of the excipients for SEMDEXA. Genzyme has the right to terminate the Supply Agreement under certain circumstances, including, but not limited to: (1) if we are in material breach of the agreement and fail to cure such breach within 30 days of written notice of such breach, (2) if our development of SEMDEXA is ceased or we do not file for regulatory approval for SEMDEXA by January 1, 2020, or (3) if Genzyme decides to discontinue manufacturing the product at its facility for economic or strategic reasons and provides us with 24 months’ notice. We did not file for regulatory approval for SEMDEXA by January 1, 2020 and we are only aware of a limited number of suppliers of the excipient. Although Genzyme has not exercised its right of termination to date, in the event that it decides to do so, we may not be able to find an alternative supplier of sodium hyaluronate on commercially reasonable terms.
+
+Under our Master Services Agreement, dated January 27, 2017 (as amended, the “Lifecore Master Services Agreement”), with Lifecore Biomedical, LLC (“Lifecore”), we depend on Lifecore to manufacture clinical supplies of SEMDEXA. Lifecore has the right to terminate the Lifecore Master Services Agreement under certain circumstances, including, but not limited to: (1) if we are in material breach of the agreement and fail to cure such breach within 30 days of written notice; (2) if we (a) become insolvent, (b) cease to function as a going concern, (c) become convicted of or plead guilty to a charge of violating any law relating to either party’s business, or (d) engage in any act which materially impairs goodwill associated with SEMDEXA or materially impairs the terminating party’s trademark or trade name; (3) if we fail to pay past due invoices upon 30 days’ written notice, or (4) if we reject or fail to respond to a major change proposed by Lifecore that does not change Semnur’s written and approved acceptance criteria in its product specifications. In the event that Lifecore decides to terminate the Lifecore Master Services Agreement, finding an alternative manufacturer may be difficult.
+
+Under the Master Services Agreement (the “Tulex Master Services Agreement”) and statement of work with Tulex Pharmaceuticals Inc. (“Tulex”), we depend on Tulex to develop, test and manufacture clinical supplies of SP-104. Tulex has the right to terminate the Tulex Master Services Agreement under certain circumstances, including, but not limited to: (1) if we are in material breach of the agreement or a statement of work and fail to cure such breach within 15 days after receipt of notice of such breach (or such other time period expressly stated in the applicable statement of work) or (2) in the event of our insolvency, bankruptcy, reorganization, liquidation or receivership, or a failure to remove any insolvency, bankruptcy, reorganization, liquidation or receivership proceedings within ten days from the date of institution of such proceedings. In addition, we may terminate the agreement or any statement of work (a) without cause upon 30 days prior written notice to Tulex or (b) immediately upon written notice in the event Tulex is dissolved or undergoes a change in control. In the event that the Tulex Master Services Agreement or a statement of work is terminated, we may not be able to find an alternative manufacturer and supplier on commercially reasonable terms.
+
+Additionally, the manufacturing facilities used by our third-party suppliers and manufacturers must continue to comply with FDA regulations and are subject to periodic announced or unannounced inspections. We have limited control over the ability of our third-party suppliers and manufacturers to
+
+43
+
+TABLE OF CONTENTS
+
+maintain adequate quality control, quality assurance and qualified personnel. If our third-party suppliers and manufacturers fail to comply with FDA regulations, the FDA may not authorize the manufacture of our products and product candidates at these facilities, and we may be unable to find alternative manufacturing facilities in a timely manner or at all. The failure by such third parties to comply with applicable regulations could result in sanctions being imposed on us, including clinical holds, fines, injunctions, import detention, civil penalties, delays, suspension or withdrawal of approvals, seizures or recalls of our product, operating restrictions and criminal prosecutions.
+
+In addition, our product candidates may compete with other product candidates and products for access to manufacturing facilities and other supplies. There are a limited number of manufacturers that operate under current Good Manufacturing Practices (“cGMP”) regulations and that might be capable of manufacturing for us. Also, prior to the approval of our product candidates, we would need to identify a contract manufacturer that could produce our products at a commercial scale and that could successfully complete FDA pre-approval inspection and inspections by other health authorities. Agreements with such manufacturers or suppliers may not be available to us at the time we would need to have that capability and capacity.
+
+If our commercial supply of ZTlido, clinical supply of our product candidates and certain of the raw materials used in our product candidates are disrupted or delayed, there can be no assurance that alternative sources can serve as adequate replacements or that supplies will be available on terms that are favorable to us, if at all. Any disruption in supply could affect the profitability of ZTlido and the development of SEMDEXA, SP-103 and SP-104.
+
+We rely on a single third-party logistics distribution provider, Cardinal Health, which is also currently our only customer.
+
+We currently rely on Cardinal Health as the third-party logistics distribution provider for ZTlido in the United States. Cardinal Health also performs the following services on our behalf: customer service, credit checks, invoicing, chargebacks, wholesaler fee for service, government reporting, customer returns, accounts receivable, inventory control, product security (DSCSA serialization) inquiries and recall assistance. In the years ended December 31, 2021, 2020, and 2019, Cardinal Health was our only customer and sales to Cardinal Health represented all of our net revenue. Our revenue would likely decline if we are unable to maintain a favorable relationship with Cardinal Health. We may be unable to control the timing of the delivery of ZTlido to wholesalers, and any financial uncertainty or loss of key logistic employees of Cardinal Health may negatively impact our sales. In addition, our dependence on Cardinal Health could result in Cardinal Health’s increased bargaining position and pressure on the prices we charge.
+
+As we continue to expand the commercialization of ZTlido, we have expanded our direct distribution network to national and regional wholesalers and pharmacies in April 2022. We currently hold all necessary wholesaler licenses and commenced selling directly to our main wholesaler customers as well as pharmacies. We discontinued our use of “title model” services provided by Cardinal Health, but expect that Cardinal Health will continue to perform other third-party logistics services for us. Any disruption in the abovementioned distribution channel would adversely affect our business, financial condition and results of operations.
+
+If we fail to achieve certain milestones in our Product Development Agreement with Itochu and Oishi, we could lose rights that are important to our business.
+
+Certain of our existing license and supply agreements impose various milestone and other obligations on us. For example, under our Product Development Agreement with Itochu and Oishi, if our total net profits for ZTlido and SP-103 are equal to or less than five percent of our net sales of ZTlido and SP-103 for a period of four or more consecutive quarters, Itochu and Oishi have the right to terminate the Product Development Agreement if the parties are unable to resolve the concerns after 30 days of good-faith negotiation. As of the date of this proxy statement/prospectus, Scilex’s net profits for ZTlido and SP-103 have not exceeded five percent of net sales. Accordingly, Oishi and Itochu have the right to terminate the Product Development Agreement and Commercial Supply Agreement. As of the date of this proxy statement/​prospectus, neither Oishi nor Itochu has exercised its right of termination.
+
+44
+
+TABLE OF CONTENTS
+
+If we fail to achieve the milestones under the Product Development Agreement, we may lose our exclusivity rights or the counterparty may have the right to terminate the agreement, any of which could adversely affect our business, financial condition and results of operations.
+
+We rely on third parties to conduct our clinical trials and intend to rely on third parties to conduct all of our future clinical trials. If these third parties do not successfully carry out their contractual duties, fail to comply with applicable regulatory requirements or meet expected deadlines, we may be unable to obtain regulatory approval for our product candidates.
+
+We currently do not have the ability to independently conduct any clinical trials. The FDA and regulatory authorities in other jurisdictions require us to comply with regulations and standards, commonly referred to as good clinical practice (“GCP”) requirements for conducting, monitoring, recording and reporting the results of clinical trials, in order to ensure that the data and results are scientifically credible and accurate and that the trial subjects are adequately informed of the potential risks of participating in clinical trials. We rely on medical institutions, clinical investigators, contract laboratories and other third parties, such as contract research organizations (“CROs”), to conduct GCP-compliant clinical trials of our product candidates properly and on time. While we have agreements governing their activities, we control only certain aspects of their activities and have limited influence over their actual performance. The third parties with whom we contract for execution of our GCP-compliant clinical trials play a significant role in the conduct of these studies and trials and the subsequent collection and analysis of data. These third parties are not our employees and, except for restrictions imposed by our contracts with such third parties, we have limited ability to control the amount and timing of resources that they devote to our programs. Although we rely on these third parties to conduct our GCP-compliant clinical trials, we remain responsible for ensuring that each of our clinical trials is conducted in accordance with our investigational plan and protocol and applicable laws and regulations, and our reliance on the CROs does not relieve us of our regulatory responsibilities. For any violations of laws and regulations in the conduct of our preclinical studies and clinical trials, we could be subject to warning letters or enforcement actions that may include civil penalties up to and including criminal prosecution.
+
+Many of the third parties with whom we contract may also have relationships with other commercial entities, including our competitors, for whom they may also be conducting clinical trials or other drug development activities that could harm our competitive position. We face the risk of potential unauthorized disclosure or infringement, misappropriation or other violation of our intellectual property by CROs, which may reduce our trade secret and intellectual property protection and allow our potential competitors to access and exploit our proprietary technology.
+
+Further, any of these third parties may terminate their engagements with us or be unable to fulfill their contractual obligations. If the third parties conducting our clinical trials do not adequately perform their contractual duties or obligations, experience significant business challenges, disruptions or failures, do not meet expected deadlines, terminate their agreements with us or need to be replaced, or if the quality or accuracy of the data they obtain is compromised due to their failure to adhere to our protocols or to GCPs, or for any other reason, we may need to enter into new arrangements with alternative third parties. This could be difficult, costly or impossible, and our clinical trials may need to be extended, delayed, terminated or repeated. As a result, we may not be able to obtain regulatory approval or successful commercialization in a timely fashion, or at all, for the applicable product candidate. Our financial results and the commercial prospects for our product candidates would be harmed, our costs could increase, and our ability to generate revenue could be delayed.
+
+We may in the future enter into collaborations, in-licensing arrangements, joint ventures, or strategic alliances with third-parties that may not result in the development of commercially viable products or the generation of significant future revenues.
+
+Our business is substantially dependent upon the intellectual property licensed from Oishi and Itochu. In the ordinary course of our business, we may enter into collaborations, additional in-licensing arrangements (such as, for example, the Romeg Agreement), joint ventures, or strategic alliances to develop proposed products and to pursue new markets.
+
+45
+
+TABLE OF CONTENTS
+
+Proposing, negotiating and implementing collaborations, in-licensing arrangements, joint ventures, strategic alliances or partnerships may be a lengthy and complex process. Other companies, including those with substantially greater financial, marketing, sales, technology or other business resources, may compete with us for these opportunities or arrangements. We may not identify, secure or complete any such transactions or arrangements in a timely manner, on a cost-effective basis, on acceptable terms, or at all, and may not realize the anticipated benefits of any such transactions or arrangements.
+
+Additionally, with respect to current and future collaborations, we may not be in a position to exercise sole decision-making authority regarding the transaction or arrangement, which could create the potential risk of creating impasses on decisions, and our collaborators may have economic or business interests or goals that are, or that may become, inconsistent with our business interests or goals. It is possible that conflicts may arise with our collaborators, such as conflicts concerning the achievement of performance milestones, or the interpretation of significant terms under any agreement, such as those related to financial obligations or the ownership or control of intellectual property developed during the collaboration. If any conflicts arise with our current or future collaborators, they may act in their self-interest, which may be adverse to our best interest, and they may breach their obligations to us. In addition, we have limited control over the amount and timing of resources that our current collaborators or any future collaborators devote to our collaborators’ or our future products. Disputes between us and our collaborators may result in litigation or arbitration which would increase our expenses and divert the attention of our management. Further, these transactions and arrangements are contractual in nature and may be terminated or dissolved under the terms of the applicable agreements and, in such event, we may not continue to have rights to the products relating to such transaction or arrangement or may need to purchase such rights at a premium.
+
+Delays in clinical trials could result in increased costs to us and delay our ability to obtain commercial approval and generate additional revenue.
+
+Before obtaining marketing approval for the sale of our product candidates, we must conduct extensive clinical trials to demonstrate the safety and efficacy of our product candidates for their intended indications. Clinical testing is expensive, time-consuming and uncertain as to outcome. We cannot guarantee that any clinical trials will be conducted as planned or completed on schedule, if at all. A failure of one or more clinical trials can occur at any stage of testing. Events that may prevent successful or timely completion of clinical development include:
+
+•
+
+delays in obtaining regulatory authorizations to commence a clinical trial or reaching a consensus with regulatory authorities on trial design;
+
+​
+
+•
+
+delays in identifying prospective clinical investigators or clinical trial sites that have necessary qualifications, interest and capacity to perform a requested protocol;
+
+​
+
+•
+
+delays in reaching agreement on acceptable terms with prospective CROs and clinical trial sites, the terms of which can be subject to extensive negotiation and may vary significantly among different CROs and clinical trial sites;
+
+​
+
+•
+
+delays in obtaining approval from one or more institutional review boards (“IRBs”);
+
+​
+
+•
+
+IRBs refusing to approve, suspending or terminating the trial at the investigational site, precluding enrollment of additional subjects, or withdrawing their approval of the trial;
+
+​
+
+•
+
+changes to the clinical trial protocol;
+
+​
+
+•
+
+delays in recruiting suitable subjects to participate in our clinical trials;
+
+​
+
+•
+
+failure by us, any CROs we engage or any other third parties to adhere to clinical trial requirements;
+
+​
+
+•
+
+failure to perform in accordance with GCPs;
+
+​
+
+•
+
+delays in the testing, validation, manufacturing and delivery of our product candidates to the clinical sites, including delays by third parties with whom we have contracted to perform certain of those functions;
+
+​
+
+•
+
+delays in subjects completing participation in a trial or returning for post-treatment follow-up, including, for example, as a result of reluctance to visit medical facilities as a result of the COVID-19 pandemic;
+
+​
+
+46
+
+TABLE OF CONTENTS
+
+•
+
+clinical trial sites or subjects dropping out of a trial;
+
+​
+
+•
+
+lack of adequate funding to continue the trial;
+
+​
+
+•
+
+selection of clinical endpoints that require prolonged periods of clinical observation or analysis of the resulting data;
+
+​
+
+•
+
+subjects experiencing severe or unexpected drug-related adverse effects;
+
+​
+
+•
+
+imposition of a clinical hold by regulatory authorities as a result of a serious adverse event, after an inspection of our clinical trial operations, trial sites or manufacturing facilities, or for other reasons;
+
+​
+
+•
+
+occurrence of serious adverse events in our trials or in trials of the same class of agents conducted by other sponsors;
+
+​
+
+•
+
+changes in regulatory requirements or guidance that require amending or submitting new clinical protocols;
+
+​
+
+•
+
+a facility manufacturing our product candidates or any of their components being ordered by the FDA to temporarily or permanently shut down due to violations of cGMP regulations or other applicable requirements;
+
+​
+
+•
+
+any changes to our manufacturing process that may be necessary or desired;
+
+​
+
+•
+
+third-party clinical investigators losing the licenses or permits necessary to perform our clinical trials, not performing our clinical trials on our anticipated schedule or consistent with the clinical trial protocol, GCP, or other regulatory requirements;
+
+​
+
+•
+
+third-party contractors not performing data collection or analysis in a timely or accurate manner; or
+
+​
+
+•
+
+third-party contractors becoming debarred or suspended or otherwise penalized by the FDA or other government or regulatory authorities for violations of regulatory requirements, in which case we may need to find a substitute contractor, and we may not be able to use some or all of the data produced by subcontractors in support of our marketing applications.
+
+​
+
+We could also encounter delays if a clinical trial is suspended or terminated by us, by the IRBs of the institutions in which such trials are being conducted, by a Data Safety Monitoring Board for such trial or by the FDA. Such authorities may impose such a suspension or termination due to a number of factors, including failure to conduct the clinical trial in accordance with regulatory requirements or our clinical protocols, inspection of the clinical trial operations or trial site by the FDA resulting in the imposition of a clinical hold, unforeseen safety issues or adverse side effects, participants being exposed to unacceptable health risks, failure to demonstrate a benefit from using a drug, changes in governmental regulations or administrative actions or lack of adequate funding to continue the clinical trial. In addition, changes in regulatory requirements and policies may occur, and we may need to amend clinical trial protocols to comply with these changes. Amendments may require us to resubmit our clinical trial protocols to IRBs for reexamination, which may impact the costs, timing or successful completion of a clinical trial.
+
+Our product development costs will increase if we experience delays in testing or marketing approvals. The FDA and other regulatory agencies may impose new or refined testing expectations based on experience and increased knowledge over time. In addition, if we make manufacturing or other changes to our product candidates, we may need to conduct additional studies to bridge our modified product candidates to earlier versions. We do not know whether any of our clinical trials, including our planned clinical trials of SP-103, SP-104 and SEMDEXA, will begin or continue as planned, will need to be restructured or will be completed on schedule, or at all. We may not have the necessary capabilities, including adequate staffing, to successfully manage the execution and completion of any clinical trials we initiate in a way that leads to our obtaining marketing approval for our product candidates in a timely manner, or at all. Significant clinical trial delays also could shorten any periods during which we may have the exclusive right to commercialize our product candidates or allow our competitors to bring products to market before we do and impair our ability to successfully commercialize our product candidates.
+
+We face potential business disruptions and related risks resulting from the COVID-19 pandemic, which could have a material adverse effect on our business, financial condition and results of operations.
+
+In December 2019, a novel strain of coronavirus, or SARS-CoV-2, was reported to have surfaced in Wuhan, China. SARS-CoV-2 is the virus that causes COVID-19. The COVID-19 outbreak has grown into a
+
+47
+
+TABLE OF CONTENTS
+
+global pandemic that has impacted countries throughout the world. Financial markets have been experiencing extreme fluctuations that may cause a contraction in available liquidity globally as important segments of the credit markets react to the development. The pandemic may lead to a decline in business and consumer confidence. The global outbreak of COVID-19 continues to rapidly evolve. As a result, businesses have closed or limited operations and limits have been placed on travel. The extent to which COVID-19 may impact our business, clinical trials and sales of ZTlido will depend on future developments, which are highly uncertain and cannot be predicted with confidence, such as the ultimate geographic spread of the disease and variants, the duration of the outbreak, travel restrictions and social distancing in the United States and other countries, business closures or business disruptions and the effectiveness of actions taken in the United States and other countries to contain and treat the disease.
+
+We are monitoring the potential impact of the COVID-19 outbreak, and if COVID-19 or variants of concern continue to spread globally, including in the United States, we may experience disruptions that could severely impact the development of our product candidates, including:
+
+•
+
+delays or difficulties in enrolling patients in our clinical trials as patients may be reluctant, or unable, to visit clinical sites;
+
+​
+
+•
+
+delays or difficulties in clinical site initiation, including difficulties in recruiting clinical site investigators, clinical site staff and potential closure of clinical facilities;
+
+​
+
+•
+
+decreases in patients seeking treatment for chronic pain;
+
+​
+
+•
+
+delays in receiving approval from local regulatory authorities to initiate our planned clinical trials;
+
+​
+
+•
+
+delays in clinical sites receiving the supplies and materials needed to conduct our clinical trials, including interruption in global shipping that may affect the transport of clinical trial materials;
+
+​
+
+•
+
+changes in local regulations as part of a response to the COVID-19 outbreak, which may require us to change the ways in which our clinical trials are conducted, which may result in unexpected costs, or cause us to discontinue the clinical trials altogether;
+
+​
+
+•
+
+diversion of healthcare resources away from the conduct of clinical trials, including the diversion of hospitals serving as our clinical trial sites and hospital staff supporting the conduct of our clinical trials;
+
+​
+
+•
+
+risk that participants enrolled in our clinical trials will acquire COVID-19 while the clinical trial is ongoing, which could impact the results of the clinical trial, including by increasing the number of observed adverse events;
+
+​
+
+•
+
+delays in necessary interactions with local regulators, ethics committees and other important agencies and contractors due to limitations in employee resources or forced furlough of government employees; and
+
+​
+
+•
+
+interruption of key clinical trial activities, such as clinical trial site monitoring, due to limitations on travel imposed or recommended by federal or state governments, employers and others.
+
+​
+
+Quarantines, shelter-in-place and similar government orders, or the perception that such orders, shutdowns or other restrictions on the conduct of business operations could occur, related to COVID-19 or other infectious diseases could impact personnel at third-party suppliers in the United States and other countries, or the availability or cost of materials, which would disrupt our supply chain. Any manufacturing supply interruption of materials could adversely affect our ability to conduct ongoing and future research and testing activities. For example, we obtain our commercial supply of ZTlido and our clinical supply of SP-103 exclusively from Oishi and Itochu in Japan. The COVID-19 pandemic may result in delays in the procurement and shipping of ZTlido, which may have an adverse impact on our operating results.
+
+On September 24, 2021, the Safer Federal Workforce Task Force issued written guidance to implement Executive Order 14042, which was signed by President Biden on September 9, 2021. A number of federal courts have issued orders enjoining enforcement of the Executive Order, including one on a nationwide basis. As a result, the government stated that it will take no action to enforce the requirements of the Executive Order at this time. As a federal contractor, we have mandated that all of our employees and, in addition, contractors that enter our U.S. buildings and certain other locations, be fully vaccinated against COVID-19,
+
+48
+
+TABLE OF CONTENTS
+
+subject to disability and religious exemptions, by December 8, 2021. Despite the government’s no-action position, we continue to comply with the Executive Order. We may experience workforce constraints due to shortages of vaccinated personnel, strains on the labor market, limitations on hiring new employees and difficulty retaining and securing employees who are vaccinated, all of which could negatively affect our business and operations.
+
+The spread of COVID-19, which has caused a broad impact globally, may materially affect us economically. While the potential economic impact brought by, and the duration of, COVID-19 may be difficult to assess or predict, a widespread pandemic could result in significant disruption of global financial markets, which could in the future negatively affect our liquidity. In addition, a recession or market correction resulting from the spread of COVID-19 could materially affect our business and the value of the New Scilex Common Stock.
+
+In addition, the continued spread of COVID-19 globally could materially and adversely impact our operations, including without limitation, our manufacturing and supply chain, sales and marketing efforts, sales of ZTlido, travel and employee health and availability, which may have a material and adverse effect on our business, financial condition and results of operations.
+
+Even if we complete the necessary clinical trials, we cannot predict when, or if, we will obtain regulatory approval for our product candidates and the approval may be for a more narrow indication than we seek.
+
+We cannot commercialize our product candidates until the appropriate regulatory authorities have reviewed and approved the product candidates. The process of obtaining regulatory approvals and the subsequent compliance with appropriate federal, state and local statutes and regulations require the expenditure of substantial time and financial resources and we may not be able to obtain the required regulatory approvals. Even if our product candidates meet the safety and efficacy endpoints in clinical trials, the regulatory authorities may not complete their review processes in a timely manner, or we may not be able to obtain regulatory approval. Additional delays may result if an FDA advisory committee, if convened, recommends non-approval or restrictions on approval. In addition, we may experience delays or rejections based upon additional government regulation from future legislation or administrative action or changes in regulatory authority policy or data requirements during the period of product development, clinical trials and the regulatory review process.
+
+Even if we receive regulatory approval, the FDA may approve a product candidate for more limited indications than requested or they may impose significant limitations in the form of narrow indications, warnings or a Risk Evaluation and Mitigation Strategy (“REMS”). The FDA may require labeling that includes precautions or contra-indications with respect to conditions of use, or may grant approval subject to the performance of costly post-marketing clinical trials. In addition, the FDA may not approve the labeling claims that are necessary or desirable for the successful commercialization of our product candidates. Any of the foregoing scenarios could materially harm the commercial prospects for our product candidates.
+
+Additionally, if the results of any clinical trials are inconclusive or if there are safety concerns or serious adverse events associated with our product candidates, we may:
+
+•
+
+be delayed or fail in obtaining marketing approval for our product candidates;
+
+​
+
+•
+
+obtain approval for indications or patient populations that are not as broad as we intended or desired;
+
+​
+
+•
+
+obtain approval with labeling that includes significant use or distribution restrictions or safety warnings;
+
+​
+
+•
+
+be subject to changes in the way the products are administered;
+
+​
+
+•
+
+be required to perform additional clinical trials to support approval or be subject to additional post-marketing testing requirements;
+
+​
+
+•
+
+have regulatory authorities withdraw, or suspend, their approval of the product or impose restrictions on its distribution in the form of a modified REMS;
+
+​
+
+•
+
+be sued and held liable for harm caused to patients; or
+
+​
+
+49
+
+TABLE OF CONTENTS
+
+•
+
+experience damage to our reputation.
+
+​
+
+We may find it difficult to enroll or maintain patients in our clinical trials, which could delay or prevent us from proceeding with clinical trials of our product candidates.
+
+Identifying and qualifying patients to participate in any clinical trials of our product candidates is critical to our success. The timing of any clinical trials depends on our ability to recruit patients and to complete required follow-up periods. If patients are unwilling to participate in our clinical trials due to negative publicity from adverse events, competitive clinical trials for similar patient populations, or for other reasons, the timeline for recruiting patients, conducting trials and potentially obtaining regulatory approval may be delayed. We may also experience delays if patients withdraw from a clinical trial or do not complete the required monitoring period. These delays could result in increased costs, delays in advancing our product candidates, delays in testing the effectiveness of our product candidates or termination of clinical trials altogether.
+
+Patient enrollment is affected by many factors, including:
+
+•
+
+the size and nature of the patient population;
+
+​
+
+•
+
+the proximity of patients to clinical sites;
+
+​
+
+•
+
+the eligibility and exclusion criteria for the trial;
+
+​
+
+•
+
+the design of the clinical trial;
+
+​
+
+•
+
+competing clinical trials;
+
+​
+
+•
+
+the risk that enrolled patients will not complete a clinical trial;
+
+​
+
+•
+
+ability to monitor patients adequately during and after treatment;
+
+​
+
+•
+
+potential disruptions caused by the COVID-19 pandemic, including difficulties in initiating clinical sites, enrolling and retaining participants, diversion of healthcare resources away from clinical trials, travel or quarantine policies that may be implemented and other factors;
+
+​
+
+•
+
+our ability to recruit clinical trial investigators with the appropriate competencies and experience; and
+
+​
+
+•
+
+clinicians’ and patients’ perceptions as to the potential advantages of the product candidate in relation to other available products.
+
+​
+
+The conditions for which we currently plan to evaluate our product candidates are common but the eligibility criteria of our clinical trials limit the pool of available trial participants. For example, we experienced a delay in the enrollment of our now completed SEMDEXA Phase 3 clinical trial in sciatica due to the selective eligibility criteria in place to reduce the placebo effect and the impacts of COVID-19, and may experience similar issues with enrollment of our other planned clinical trials.
+
+In addition, our clinical trials will compete with other clinical trials for product candidates that are in the same therapeutic areas as our product candidates, and this competition will reduce the number and types of patients available to it, because some patients who have opted to enroll in our trials may instead opt to enroll in a trial being conducted by a competitor. We may conduct some of our clinical trials at the same clinical trial sites that some of our competitors use, which will reduce the number of patients who are available for our clinical trials at such clinical trial sites.
+
+The incidence and prevalence for target patient populations of our product candidates are based on estimates and third-party sources. If the market opportunities for our product candidates are smaller than we estimate or if any approval that we obtain is based on a narrower definition of the patient population, our revenue and ability to achieve profitability might be materially and adversely affected.
+
+Periodically, we make estimates regarding the incidence and prevalence of target patient populations of our product candidates based on various third-party sources and internally generated analyses and use such
+
+50
+
+TABLE OF CONTENTS
+
+estimates in making decisions regarding our product development strategy, including acquiring or in-licensing product candidates and determining indications on which to focus in preclinical studies or clinical trials.
+
+These estimates may be inaccurate or based on imprecise data. For example, the total addressable market opportunities will depend on, among other things, acceptance by the medical community and patient access, drug pricing and reimbursement. The number of patients in the addressable markets may turn out to be lower than expected, patients may not be otherwise amenable to treatment with our product candidates, or new patients may become increasingly difficult to identify or gain access to, all of which may significantly harm our business, financial condition, results of operations and prospects.
+
+We face significant competition and our competitors may discover, develop or commercialize products faster or more successfully than us.
+
+The biotechnology and pharmaceutical industries are characterized by intense competition and rapid technological advances. In addition, the competition in the pain management market, and other relevant markets, is intense.
+
+ZTlido and our product candidate, SP-103, face and will likely face competition from prescription and generic topical lidocaine patches, including Lidoderm® (a branded, prescription 5% lidocaine patch product) (“Lidoderm”) and generic lidocaine patches manufactured by Mylan N.V., Teva Pharmaceutical Industries Limited (“Teva”) and Par Pharmaceutical, Inc. Additionally, SP-103, if approved, will likely compete with various opioid pain medications, nonsteroidal anti-inflammatory drugs (“NSAIDs”), muscle relaxants, antidepressants and anticonvulsants particularly as we seek approval for the treatment of acute LBP.
+
+SEMDEXA, if approved, has the potential to become the first FDA-approved epidural steroid product for the treatment of sciatica. While there are currently no FDA approved epidural steroid injections indicated for the treatment of sciatica, Scilex is aware of certain non-steroid product candidates in development. SEMDEXA, if approved, also will compete with various opioid pain medications, NSAIDs, muscle relaxants, antidepressants, anticonvulsants and surgical procedures. Procedures may include nerve blocks and transcutaneous electrical nerve stimulations. We may also face indirect competition from the off-label and unapproved use of branded and generic injectable steroids.
+
+While there are currently no formulations containing naltrexone in clinical development for the treatment of fibromyalgia, Scilex is aware of certain non-opioid therapeutics currently in a late-stage phase 3 pipeline containing two 505(b)(2) development programs. Our product candidate, SP-104, will likely face direct competition from these candidates.
+
+We expect that the market will become increasingly competitive in the future. Many of our competitors, either alone or together with their collaborative partners, operate larger research and development programs and have substantially greater financial resources than we do, as well as significantly greater experience in: developing product candidates and technologies, undertaking preclinical studies and clinical trials, obtaining FDA and other regulatory approvals of product candidates, formulating and manufacturing product candidates, and launching, marketing and selling product candidates.
+
+Additional mergers and acquisitions in the biotechnology and pharmaceutical industries may result in even more resources being concentrated in our competitors. As a result, these companies may obtain regulatory approval more rapidly than we are able to and may be more effective in selling and marketing their products as well. Smaller or early-stage companies or generic or biosimilar pharmaceutical manufacturers may also prove to be significant competitors, particularly through collaborative arrangements with large, established companies. These competitors also compete with us in recruiting and retaining qualified scientific and management personnel and establishing clinical trial sites and patient registration for clinical trials, as well as in acquiring technologies complementary to, or necessary for, our programs. Competition may increase further as a result of advances in the commercial applicability of technologies and greater availability of capital for investment in these industries. Our commercial opportunity could be reduced or eliminated if our competitors succeed in developing, acquiring or licensing on an exclusive basis, products that are more effective or less costly than any product candidate that we are currently developing or that we may develop.
+
+51
+
+TABLE OF CONTENTS
+
+If approved, our product candidates will face competition from commercially available drugs as well as drugs that are in the development pipelines of our competitors and later enter the market.
+
+Established pharmaceutical companies may invest heavily to accelerate discovery and development of novel compounds or to in-license novel compounds that could make our product candidates less competitive. Accordingly, our competitors may succeed in obtaining patent protection, receiving FDA approval or discovering, developing and commercializing medicines before we do, which would have a material adverse impact on our business, financial condition and results of operations.
+
+The third-party payor coverage and reimbursement status of newly approved products is uncertain. Failure to obtain or maintain coverage and adequate reimbursement for ZTlido, GLOPERBA or our product candidates, if approved, could decrease our ability to generate product revenue.
+
+There is significant uncertainty related to the third-party coverage and reimbursement of existing and newly approved products. Market acceptance and sales of ZTlido, GLOPERBA and our product candidates, if approved, in domestic markets will depend significantly on the availability of coverage and adequacy of reimbursement from third-party payors, including government programs (such as Medicare and Medicaid) and private payor healthcare and insurance programs. In the United States, no uniform policy of coverage and reimbursement for products exists among third-party payors. Coverage and reimbursement for ZTlido can differ significantly from payor to payor, and we may not be able to maintain adequate coverage and reimbursement in the future.
+
+Further, obtaining coverage and reimbursement approval for a product from a government or other third-party payor is a time-consuming and costly process that could require us to provide supporting scientific, clinical and cost-effectiveness data for the use of our products to each third-party payor separately, with no assurance that coverage and adequate reimbursement will be obtained or applied consistently. We may not be able to provide data sufficient to gain acceptance with respect to coverage and reimbursement. Additionally, coverage may be more limited than the purposes for which the product is approved by the FDA or similar regulatory authorities outside of the United States. Assuming that coverage is obtained for a given product, the resulting reimbursement rates might not be adequate or may require co-payments or co-insurance that patients find unacceptably high. Patients, physicians, and other healthcare providers may be less likely to prescribe, dispense or use, as applicable, any approved product unless coverage is provided and reimbursement is adequate to cover a significant portion of the cost.
+
+The market for our products will depend significantly on access to third-party payors’ drug formularies for which third-party payors provide coverage and reimbursement. The industry competition to be included in such formularies often leads to downward pricing pressures on pharmaceutical companies. Also, third-party payors may refuse to include a particular branded product in their formularies or otherwise restrict patient access to a branded product when a less costly generic equivalent or other alternative is available.
+
+In addition, even if we obtain adequate levels of reimbursement, third-party payors carefully review and increasingly question the coverage of, and challenge the prices charged for, products. A primary trend in the U.S. healthcare industry and elsewhere is cost containment. Increasingly, third-party payors are requiring that pharmaceutical companies provide them with predetermined discounts from list prices and are challenging the prices for products. We cannot be sure that coverage and reimbursement will be available for any product candidate that we commercialize and, if reimbursement is available, what the level of reimbursement will be. If coverage and reimbursement of our product candidates are unavailable or limited in scope or amount, or if pricing is set at unsatisfactory levels, we may be unable to achieve or sustain profitability. Furthermore, the requirements governing medical product pricing vary widely from country to country. In some foreign countries, the proposed pricing for a prescription device must be approved before it may be lawfully marketed. Historically, products launched in the European Union do not follow price structures of the United States and generally prices tend to be significantly lower.
+
+Our product candidate SEMDEXA is expected to be a physician-administered injectable viscous gel and as such, separate reimbursement for the product itself may not be available. Instead, if SEMDEXA receives regulatory approval, the administering physician may be reimbursed only for providing the treatment or procedure in which SEMDEXA is used. To the extent separate coverage and reimbursement should
+
+52
+
+TABLE OF CONTENTS
+
+become available for SEMDEXA, we anticipate that it will be sold to physicians on a “buy and bill” basis. Buy and bill products must be purchased by healthcare providers before they can be administered to patients. Healthcare providers subsequently must seek reimbursement for the product from the applicable third-party payor, such as Medicare or a health insurance company. Healthcare providers may be reluctant to administer our product candidates, if approved, because they would have to fund the purchase of the product and then seek reimbursement, which may be lower than their purchase price, or because they do not want the additional administrative burden required to obtain reimbursement for the product.
+
+Further, the codes used by providers to bill for SEMDEXA, if approved, could also affect reimbursement. J-Codes are codes maintained by the Centers for Medicare and Medicaid Services (“CMS”), which are a component of the Healthcare Common Procedure Coding System and are typically used to report injectable drugs that ordinarily cannot be self-administered. We do not have a specific J-Code for any of our product candidates. If our product candidates are approved, we may apply for one but cannot guarantee that a J-Code will be granted. To the extent separate coverage or reimbursement is available for any product candidate, if approved, and a specific J-Code is not available, physicians would need to use a non-specific miscellaneous J-Code to bill third-party payors for these physician-administered drugs. Because miscellaneous J-Codes may be used for a wide variety of products, health plans may have more difficulties determining the actual product used and billed for the patient. These claims must often be submitted with additional information and manually processed, which can create delays in claims processing times as well as increasing the likelihood for claim denials and claim errors.
+
+Because we have multiple programs and product candidates in our development pipeline and are pursuing a variety of target indications and treatment approaches, we may expend our limited resources to pursue a particular product candidate and fail to capitalize on development opportunities or product candidates that may be more profitable or for which there is a greater likelihood of success.
+
+Apart from our FDA-approved product, ZTlido, we currently have several product candidates that are at various stages of development. We have limited financial and management resources. As a result, we may forego or delay pursuit of opportunities with potential target indications or product candidates that later prove to have greater commercial potential than our current and planned development programs and product candidates.
+
+We strive to progress product candidates that can address unmet or underserved medical needs and favor those candidates with large market opportunities. However, our resource allocation decisions may cause us to fail to capitalize on viable commercial product candidates or profitable market opportunities. Our spending on current and future research and development programs and other future product candidates for specific indications may not yield any commercially viable future product candidates. If we do not accurately evaluate the commercial potential or target market for a particular product candidate, we may be required to relinquish valuable rights to that product candidate through collaboration, licensing or other royalty arrangements in cases in which it would have been more advantageous for us to retain sole development and commercialization rights to such future product candidates.
+

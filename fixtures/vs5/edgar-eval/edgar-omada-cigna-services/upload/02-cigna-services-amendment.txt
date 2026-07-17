@@ -1,0 +1,116 @@
+21
+d785770dex103b.htm
+EX-10.3(B)
+
+EX-10.3(b)
+
+[***] Certain information in this document has been excluded pursuant to Regulation S-K, Item 601(b)(10). Such excluded information is not material and would likely cause competitive harm to the registrant if publicly disclosed.
+
+Exhibit 10.3(b)
+
+AMENDMENT No. 1
+
+WHEREAS,
+Omada Health, Inc. (“Omada”) and Cigna Health and Life Insurance Company (“CHLIC”) are parties to a Services Agreement effective as of February 1, 2018 (the “Agreement”); and
+
+WHEREAS, Omada and CHLIC wish to amend the agreement pursuant to Section 7.08 of the Agreement to reflect changes that have arisen subsequent to
+the effective date of the Agreement,
+
+NOW, THEREFORE, Omada and CHLIC hereby agree to amend the Agreement as follows:
+
+1.
+
+The definition of “At-Risk Participants” is deleted and the
+following substituted in its place:
+
+“At-Risk Participants”
+means individuals covered under individual and group insurance policies issued by CHLIC and self-insured group health plans administered by CHLIC that have been identified by CHUC as potentially being at risk of developing type 2 diabetes or
+other obesity-related chronic diseases if preventive measures are not taken.
+
+2.
+
+The definition of “Enrolled Participants” is deleted and the following substituted in its place:
+
+“Enrolled Participants” means any At-Risk Participants who are
+eligible for and elect to enroll in the Omada Covered Services under the then applicable Omada Participating Provider Agreement. Notwithstanding the foregoing, “Enrolled Participants” shall not include [***]. For purposes of [***],
+“Enrolled Participants” will include [***].
+
+3.
+
+In Exhibit A, fourth bullet, [***] is substituted for [***].
+
+4.
+
+In Exhibit A, fifth bullet, [***] is substituted for [***].
+
+5.
+
+In Exhibit A, Sections 2, Analytical Services to Identify
+At-Risk Participants (Effective 1/1/18) and for accounts launching on or after June 1, 2018, the following new section 4 under Inclusion Criteria:
+
+4. [***]
+
+6.
+
+In Attachment 1 to Exhibit A, section 1, substitute [***] for [***].
+
+7.
+
+In Attachment 1 to Exhibit A, section 6, substitute [***] for [***].
+
+8.
+
+In Attachment 1 to Exhibit A, section 8, delete the parenthetical at the end and substitute in its
+place: [***].
+
+9.
+
+In Exhibit A, the numbering of the subsection for Educational Services (Effective 1/1/19) is changed from 2 to
+3 and all subsequent subsections (3-6) are renumbered accordingly (4-7).
+
+10.
+
+In Exhibit A, the heading of Section 1 is revised to read as follows:
+
+“Outreach and Enrollment Support Services for Non-Facets and
+Non-U500 Insured Business Only”
+
+11.
+
+In Attachment 1 to Exhibit A, the heading is revised to read as follows:
+
+“CLIENT RULES OF ENGAGEMENT FOR NON-FACETS AND
+NON-U500 FULLY INSURED BUSINESS ONLY”
+
+12.
+
+In Exhibit A, the following new section 7 is added:
+
+7. Services in Connection with Facets and U500 Fully Insured Clients Administered on Proclaim and Power Systems
+
+[***]
+
+This Amendment is effective November 1,
+2019.
+
+Except as changed by this Amendment, all the terms of the Agreement remain in full force and effect.
+
+Omada Health, Inc.
+
+By:
+
+/s/ Sean Duffy
+
+Print Name: Sean Duffy
+
+Title: Chief Executive Officer
+
+Cigna Health and Life Insurance Company
+
+By:
+
+/s/ Edward P. Potanka
+
+Print Name: Edward P. Potanka
+
+Title: Assistant Secretary

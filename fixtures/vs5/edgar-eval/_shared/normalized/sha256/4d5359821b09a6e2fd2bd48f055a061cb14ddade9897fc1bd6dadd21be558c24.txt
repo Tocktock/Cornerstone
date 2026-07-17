@@ -1,0 +1,84 @@
+EX-10
+3
+itos-ex10_15.htm
+EX-10.15
+
+EX-10
+
+Exhibit 10.15
+
+Execution Copy
+
+Amendment No. 2 to Collaboration and LICENSE AGREEMENT
+
+This Amendment No. 2 (“Amendment No. 2”) to the Collaboration and License Agreement dated June 11, 2021 (the “Agreement”) and previously amended on January 24, 2022, between GLAXOSMITHKLINE INTELLECTUAL PROPERTY (No. 4) LIMITED, a company registered in England and Wales (registered number 11721880) and having business offices at 980 Great West Road, Brentford, Middlesex TW8 9GS United Kingdom (“GSK”), and iTeos Belgium S.A., a public limited company having an office at Rue des Frères Wright, 29, B-6041 Gosselies Belgium (“ITEOS”) is effective as of September 30, 2022 (“Amendment Effective Date”). Each of GSK and ITEOS may be referred to herein as a “Party” and together, the “Parties.”
+
+RECITALS
+
+WHEREAS, GSK and ITEOS desire to amend the Agreement as set forth herein in accordance with Section 17.10.
+
+NOW, THEREFORE, for good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the Parties agree as follows:
+
+1.
+Definitions. Capitalized terms used but not defined herein shall have the meaning set forth in the Agreement.
+
+2.
+The existing Section 8.13 (Currency Conversion) is deleted in its entirety and replaced by:
+
+8.13 Currency Conversion. Except as otherwise agreed by the Parties, all payments to be made by either Party to the other Party under this Agreement shall be made by such Party or its Affiliate in U.S. Dollars to the account designated by the Party to which the relevant payment is due. In the case of any amounts designated in another currency, each Party shall convert such foreign currency into U.S. Dollars using its standard conversion method consistent with its applicable Accounting Standard in a manner consistent with the respective Party’s customary and usual conversion procedures used in preparing its audited financial reports applied on a consistent basis, provided that such procedures use a widely accepted source of published exchange rates. [***].
+
+3.
+Table 12.6 is hereby deleted in its entirety and replaced with the following table:
+
+Table 12.6 – Development Deadlines
+
+Development Milestone Event
+
+Deadline for Achievement
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+1
+
+Exhibit 10.15
+
+Execution Copy
+
+4.
+Counterparts. The Parties hereby confirm and agree that, as amended herein, the Agreement remains in full force and effect. This Amendment No. 2 may be executed and delivered (including by PDF or any other electronically transmitted signatures) in counterparts, each of which shall be deemed an original, but all of which together shall constitute one and the same instrument.
+
+IN WITNESS WHEREOF, each Party has caused this Amendment No. 2 to be duly executed by its authorized representative on the Amendment Effective Date.
+
+iTeos Belgium, S.A.
+
+/s/ [***]
+
+Name: [***]
+
+Title: Director
+
+/s/ [***]
+
+Name: [***]
+
+Title: Director
+
+GLAXOSMITHKLINE INTELLECTUAL PROPERTY NO. 4 LIMITED
+
+/s/ [***]
+
+Name: [***]
+
+Title: Corporate Director
+
+2

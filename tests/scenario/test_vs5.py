@@ -13,36 +13,62 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "packages"))
 
 from cornerstone_cli.briefing import BriefingApplication, RuntimeModelConfig
+from cornerstone_cli.vs5_corpus import (
+    Vs5CorpusIntegrityError,
+    load_vs5_corpus,
+    load_vs5_corpus_source,
+    normalize_edgar_filing_html,
+)
 from cornerstone_cli.runtime import (
+    OLLAMA_EMBEDDING_BATCH_SIZE,
     LocalRuntimeStore,
+    _active_korean_speaker_context,
     _answer_relationship_supported,
+    _answer_chunk_scalar_relevance_bonus,
     _answer_scalar_values,
     _brief_output_echo_violations,
+    _brief_key_fact_target,
     _comparison_version_ids,
+    _corpus_coverage_gaps,
+    _chunk_requires_speaker_attribution,
+    _chunk_grounding_text,
+    _statement_requires_speaker_attribution,
     _dedupe_missing_evidence,
+    _decision_statement_relevant,
+    _direct_allocation_citation_projection,
+    _direct_labeled_date_source_projection,
     _direct_scalar_answer_projection,
+    _document_change_relevance_bonus,
     _expand_comparative_threshold_citations,
     _explicit_constraint_rows,
     _evidence_query_facets,
     _expanded_search_query_terms,
     _explicit_missing_evidence,
+    _explicit_document_change_projection_anchor,
+    _explicit_document_change_rows,
     _explicit_tension_rows,
     _grounded_decision_risk_rows,
     _grounded_key_fact_fallback,
+    _input_specific_uncertainty,
     _evidence_query_is_comparison,
     _korean_transcript_statement_is_attributed,
     _korean_transcript_procedural_record,
     _korean_transcript_attributed_sentences,
+    _korean_transcript_turn_records,
     _korean_attribution_claims_consistent,
     _instrument_clause_records,
     _low_information_key_fact,
     _map_brief_citation_aliases,
+    _model_conflict_risk_semantics,
     _paired_version_binding_anchor,
     _paired_version_clause_rows,
     _question_requests_decision_direction,
+    _question_specific_review_uncertainty,
     _repair_korean_transcript_attribution,
     _key_fact_row_is_redundant,
     _normalize_brief_title,
+    _ollama_embedding,
+    _ollama_embeddings,
     _ollama_generate_json,
     _question_specific_insufficient_evidence_answer,
     _quantity_metric_terms,
@@ -55,12 +81,18 @@ from cornerstone_cli.runtime import (
     _text_chunks,
     _version_bound_clause_observation_anchor,
     _version_bound_clause_observation_rows,
+    _validated_model_missing_evidence,
+    _verified_comparison_prompt_context,
     detect_unsafe_instructions,
     search_terms,
 )
 from cornerstone_cli.vs5_verification import (
+    ASK_HISTORY_GATE_COMMAND,
     SCENARIO_IDS,
+    VERIFICATION_CONTRACT_FILES,
     _answer_review_identity,
+    _contains_all_answer_terms,
+    _missing_evidence_structure_passes,
     _repeated_normalized_response_count,
     _runtime_state_binding,
     _source_evidence_identity,
@@ -87,6 +119,224 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_question_specific_review_uncertainty_is_bound_and_non_factual(self) -> None:
+        statement = _question_specific_review_uncertainty(
+            "Should the contract owner continue the Acme renewal?"
+        )
+        self.assertIn("continue the Acme renewal", statement)
+        self.assertLessEqual(len(statement), 200)
+        self.assertTrue(
+            _missing_evidence_structure_passes(
+                {
+                    "missing_evidence": [statement],
+                    "missing_evidence_checks": [
+                        {
+                            "statement": statement,
+                            "presented_as_fact": False,
+                            "validation_mode": "question_specific_structure_human_required",
+                        }
+                    ],
+                }
+            )
+        )
+
+    def test_answer_terms_accept_redundant_number_glosses_but_require_all_values(self) -> None:
+        self.assertTrue(
+            _contains_all_answer_terms(
+                "The twentieth anniversary of approval ends the term.",
+                ["twentieth (20th) anniversary of approval"],
+            )
+        )
+        self.assertFalse(
+            _contains_all_answer_terms(
+                "The nineteenth anniversary of approval ends the term.",
+                ["twentieth (20th) anniversary of approval"],
+            )
+        )
+        self.assertTrue(
+            _contains_all_answer_terms(
+                "GSK bears 60% and iTeos bears 40%.",
+                ["sixty percent (60%)", "forty percent (40%)"],
+            )
+        )
+        self.assertFalse(
+            _contains_all_answer_terms(
+                "GSK bears 60%.",
+                ["sixty percent (60%)", "forty percent (40%)"],
+            )
+        )
+
+    def test_missing_evidence_structure_keeps_semantic_judgment_human_owned(self) -> None:
+        statement = (
+            "Audited Orion batch performance is not established by the supplied sources."
+        )
+        brief = {
+            "missing_evidence": [statement],
+            "missing_evidence_checks": [
+                {
+                    "statement": statement,
+                    "presented_as_fact": False,
+                    "validation_mode": "question_specific_structure_human_required",
+                }
+            ],
+        }
+        self.assertTrue(_missing_evidence_structure_passes(brief))
+        self.assertFalse(
+            _missing_evidence_structure_passes(
+                {
+                    "missing_evidence": ["More evidence is needed."],
+                    "missing_evidence_checks": brief["missing_evidence_checks"],
+                }
+            )
+        )
+        brief["missing_evidence_checks"][0]["presented_as_fact"] = True
+        self.assertFalse(_missing_evidence_structure_passes(brief))
+
+    def test_human_revalidation_binds_and_reruns_saved_ask_history_gate(self) -> None:
+        self.assertEqual(
+            ASK_HISTORY_GATE_COMMAND,
+            [
+                "python3",
+                "-m",
+                "unittest",
+                "tests.scenario.test_product_ui_routes.ProductUiRoutesTest.test_saved_ask_history_is_discoverable_and_reopenable_across_ui_api_and_cli",
+            ],
+        )
+        self.assertTrue(
+            {
+                "packages/cornerstone_cli/product_ui.py",
+                "scripts/prepare_vs5_human_review_inputs.py",
+                "tests/scenario/test_product_ui_routes.py",
+            }
+            <= set(VERIFICATION_CONTRACT_FILES)
+        )
+
+    def test_real_corpus_source_loader_is_hash_and_span_bound(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-corpus-source-") as td:
+            root = Path(td)
+            fixture = root / "fixtures" / "case-1"
+            fixture.mkdir(parents=True)
+            raw = (
+                b"<html><body><p>HEADER</p>"
+                b"<p>Acme cancellation notice is due July 1.</p>"
+                b"<p>FOOTER</p></body></html>"
+            )
+            normalized = normalize_edgar_filing_html(raw)
+            upload = "Acme cancellation notice is due July 1."
+            start = normalized.index(upload)
+            values = {
+                "raw": raw,
+                "normalized": normalized.encode("utf-8"),
+                "upload": upload.encode("utf-8"),
+            }
+            for name, content in values.items():
+                suffix = "html" if name == "raw" else "txt"
+                (fixture / f"{name}.{suffix}").write_bytes(content)
+            source = {
+                "source_id": "case-1-source-01",
+                "case_id": "case-1",
+                "cik": "1",
+                "source_url": "https://www.sec.gov/Archives/edgar/data/1/000000000126000001/example.htm",
+                "final_url": "https://www.sec.gov/Archives/edgar/data/1/000000000126000001/example.htm",
+                "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1/000000000126000001/0000000001-26-000001-index.html",
+                "accession_number": "0000000001-26-000001",
+                "http_status": 200,
+                "filing_index_http_status": 200,
+                "content_type": "text/html",
+                "encoding": "utf-8",
+                "normalizer": "cornerstone_edgar_visible_text_v1",
+                "raw_path": "fixtures/case-1/raw.html",
+                "raw_sha256": hashlib.sha256(raw).hexdigest(),
+                "raw_bytes": len(raw),
+                "normalized_path": "fixtures/case-1/normalized.txt",
+                "normalized_sha256": hashlib.sha256(values["normalized"]).hexdigest(),
+                "normalized_bytes": len(values["normalized"]),
+                "upload_path": "fixtures/case-1/upload.txt",
+                "upload_sha256": hashlib.sha256(values["upload"]).hexdigest(),
+                "upload_bytes": len(values["upload"]),
+                "upload_span_in_normalized": {
+                    "coordinate_system": "unicode_code_points",
+                    "char_start": start,
+                    "char_end": start + len(upload),
+                    "sha256": hashlib.sha256(values["upload"]).hexdigest(),
+                },
+            }
+
+            loaded = load_vs5_corpus_source(root, source)
+
+            self.assertEqual(loaded["text"], upload)
+            self.assertEqual(loaded["source_ref"], source["upload_path"])
+            self.assertEqual(loaded["integrity"]["status"], "passed")
+
+            invalid_sources = (
+                {**source, "text": upload},
+                {**source, "raw_path": "../outside.html"},
+                {**source, "upload_sha256": "0" * 64},
+                {
+                    **source,
+                    "upload_span_in_normalized": {
+                        **source["upload_span_in_normalized"],
+                        "char_start": start + 1,
+                    },
+                },
+            )
+            for invalid in invalid_sources:
+                with self.subTest(invalid=invalid):
+                    with self.assertRaises(Vs5CorpusIntegrityError):
+                        load_vs5_corpus_source(root, invalid)
+
+            replacement_raw = b"<html><body><p>different official filing</p></body></html>"
+            (fixture / "raw.html").write_bytes(replacement_raw)
+            independently_rehashed_but_unrelated_normalization = {
+                **source,
+                "raw_sha256": hashlib.sha256(replacement_raw).hexdigest(),
+                "raw_bytes": len(replacement_raw),
+            }
+            with self.assertRaisesRegex(
+                Vs5CorpusIntegrityError,
+                "normalized text is not the canonical visible-text rendering",
+            ):
+                load_vs5_corpus_source(
+                    root, independently_rehashed_but_unrelated_normalization
+                )
+
+    def test_human_evidence_identity_binds_original_source_provenance(self) -> None:
+        evidence = {
+            "citation_ref": "evidence_chunk:chunk_" + "a" * 64,
+            "artifact_id": "art_" + "b" * 64,
+            "span": {"char_start": 10, "char_end": 20},
+            "source_excerpt": "official clause",
+            "source_ref": "fixtures/vs5/edgar-eval/case/upload/01.txt",
+            "source_id": "case-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1/doc.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1/index.html",
+            "accession_number": "0000000001-26-000001",
+            "form_type": "EX-10.1",
+            "filing_date": "2026-01-01",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/raw.html",
+            "raw_sha256": "c" * 64,
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/normalized.txt",
+            "normalized_sha256": "d" * 64,
+            "upload_path": "fixtures/vs5/edgar-eval/case/upload/01.txt",
+            "upload_sha256": "e" * 64,
+        }
+        original_identity = _source_evidence_identity(evidence)
+        for field in (
+            "source_ref",
+            "source_id",
+            "source_url",
+            "filing_index_url",
+            "accession_number",
+            "raw_sha256",
+            "normalized_sha256",
+            "upload_sha256",
+        ):
+            with self.subTest(field=field):
+                self.assertNotEqual(
+                    original_identity,
+                    _source_evidence_identity({**evidence, field: f"changed-{field}"}),
+                )
+
     def test_search_terms_preserves_korean_ascii_and_hyphenated_terms(self) -> None:
         self.assertEqual(
             search_terms("의안번호 519를 가결 또는 보류 VS5-ASK"),
@@ -120,7 +370,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertFalse({"본문이", "계획을", "구분하고", "명시하라"} & terms)
         self.assertTrue(
-            {"acme", "data-processing", "review"}.issubset(
+            {"acme", "data-processing", "data", "processing", "review"}.issubset(
                 _expanded_search_query_terms("Acme data-processing review")
             )
         )
@@ -401,6 +651,47 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     "failed",
                 )
 
+    def test_comparison_prompt_receives_verified_clause_observations(self) -> None:
+        old_text = (
+            "제2조(정의) 지원금은 시민에게 한시적으로 지급한다.\n"
+            "제5조(지급) 지급금액과 지급기준은 시장이 별도로 정한다.\n"
+        )
+        new_text = (
+            "제2조(정의) 지원금은 시민에게 한시적 일회성으로 지급한다.\n"
+            "제5조(지급) 지급금액과 지급기준은 시장이 별도로 정한다.\n"
+            "부칙\n제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.\n"
+        )
+        chunks = [
+            {
+                "artifact_id": "old",
+                "evidence_chunk_id": "old-observation",
+                "source": {"filename": "bill-101-official.txt"},
+                "text": old_text,
+                "span": {"char_start": 0, "char_end": len(old_text) - 1},
+                "source_complete": True,
+                "derived_content_char_count": len(old_text),
+            },
+            {
+                "artifact_id": "new",
+                "evidence_chunk_id": "new-observation",
+                "source": {"filename": "bill-202-official.txt"},
+                "text": new_text,
+                "span": {"char_start": 0, "char_end": len(new_text) - 1},
+                "source_complete": True,
+                "derived_content_char_count": len(new_text),
+            },
+        ]
+
+        context = _verified_comparison_prompt_context(
+            "의안번호 101에서 202로 무엇이 바뀌었는가?",
+            chunks,
+        )
+
+        self.assertIn("VERIFIED_COMPARISON_OBSERVATION", context)
+        self.assertIn("한시적 일회성", context)
+        self.assertIn('citations="E1,E2"', context)
+        self.assertIn("2026년 6월 30일", context)
+
     def test_final_trimmed_chunk_marks_only_true_source_end_complete(self) -> None:
         text = "부칙\n제2조(유효기간) 이 조례는 2026년 6월 30일까지 효력을 가진다.\n"
         span = _text_chunks(text)[-1]
@@ -441,6 +732,654 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ),
             [],
         )
+
+    def test_chunk_overlap_starts_at_nearby_sentence_boundary(self) -> None:
+        text = (
+            "A" * 850
+            + "\n"
+            + "The revised plan gives priority households 20 units and other "
+            "households 10 units, "
+            + "supporting context " * 10
+            + ".\n"
+            + "B" * 300
+        )
+
+        chunks = _text_chunks(text, max_chars=1200, overlap=160)
+
+        self.assertGreaterEqual(len(chunks), 2)
+        self.assertTrue(
+            any(
+                str(chunk["text"]).startswith("The revised plan")
+                for chunk in chunks[1:]
+            )
+        )
+        self.assertEqual(chunks[0]["char_start"], 0)
+        self.assertLessEqual(chunks[-1]["char_end"], len(text))
+
+    def test_instrument_region_inside_minutes_is_not_treated_as_testimony(self) -> None:
+        text = (
+            "제4조(지급 결정) 시장은 지원금을 지급할 수 있다.\n"
+            "제5조(지급 절차) 지급금액과 지급기준은 시장이 별도로 정한다.\n"
+        )
+        chunk = {
+            "artifact_id": "minutes",
+            "evidence_chunk_id": "instrument-in-minutes",
+            "source": {"filename": "plenary-minutes.txt"},
+            "text": text,
+            "span": {"char_start": 0, "char_end": len(text) - 1},
+            "source_complete": True,
+            "derived_content_char_count": len(text),
+            "safety": {},
+        }
+
+        self.assertFalse(_chunk_requires_speaker_attribution(chunk))
+        self.assertFalse(
+            _statement_requires_speaker_attribution(
+                "지급금액과 지급기준은 시장이 별도로 정한다",
+                chunk,
+            )
+        )
+        self.assertTrue(
+            _statement_requires_speaker_attribution(
+                "지원금 465억 원과 집행 경비 5억 원을 편성했다",
+                chunk,
+            )
+        )
+        facts = _grounded_key_fact_fallback([chunk], limit=3)
+        self.assertTrue(
+            any("지급금액" in str(row.get("statement")) for row in facts),
+            facts,
+        )
+        alias_chunk = {
+            **chunk,
+            "evidence_chunk_id": "instrument-alias-in-minutes",
+            "text": text
+            + (
+                "제3조(시장의 책무) 거제시장(이하 ‘시장’)은 "
+                "필요한 재원을 확보하도록 노력해야 한다."
+            ),
+        }
+        alias_facts = _grounded_key_fact_fallback(
+            [alias_chunk],
+            limit=5,
+            decision_question="조례의 재정 의무와 집행 계획을 확인하라.",
+        )
+        self.assertTrue(alias_facts)
+        self.assertTrue(
+            all(
+                not re.match(r"^(?:은|는|이|가|을|를)\s", row["statement"])
+                for row in alias_facts
+            ),
+            alias_facts,
+        )
+        self.assertTrue(
+            any("시장" in row["statement"] for row in alias_facts),
+            alias_facts,
+        )
+
+        agenda = {
+            **chunk,
+            "evidence_chunk_id": "agenda-in-minutes",
+            "text": "○의장 신금자 제31항 지원 조례안을 상정합니다.",
+        }
+        ranked = _grounded_key_fact_fallback(
+            [agenda, chunk],
+            limit=1,
+            decision_question="조례 본문이 허용하는 지급 범위와 집행 계획을 구분하라.",
+        )
+        self.assertEqual(len(ranked), 1)
+        self.assertIn("지급금액", ranked[0]["statement"])
+        self.assertNotIn("상정", ranked[0]["statement"])
+
+        debate = {
+            **chunk,
+            "evidence_chunk_id": "claim-in-minutes",
+            "text": "○김 의원 지급금액이 너무 크다고 주장했습니다.",
+        }
+        self.assertTrue(_chunk_requires_speaker_attribution(debate))
+
+        mixed_single_clause = {
+            **chunk,
+            "evidence_chunk_id": "single-instrument-clause-in-mixed-source",
+            "text": (
+                "제5조(지급 결정) ② 지급금액과 지급기준은 시장이 별도로 정한다.\n"
+                "○김선민 의원 지급금액이 너무 크다고 주장했습니다."
+            ),
+            "instrument_source": True,
+        }
+        self.assertFalse(
+            _statement_requires_speaker_attribution(
+                "② 지급금액과 지급기준은 시장이 별도로 정한다",
+                mixed_single_clause,
+            )
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                "② 지급금액과 지급기준은 시장이 별도로 정한다",
+                [_chunk_grounding_text(mixed_single_clause)],
+                allow_cross_source=False,
+                transcript_context=False,
+            )["status"],
+            "passed",
+        )
+        self.assertTrue(
+            _statement_requires_speaker_attribution(
+                "지급금액이 너무 크다고 주장했습니다",
+                mixed_single_clause,
+            )
+        )
+        mixed_facts = _grounded_key_fact_fallback(
+            [mixed_single_clause],
+            limit=3,
+            decision_question="조례의 지급금액 기준과 제기된 우려를 확인하라.",
+        )
+        self.assertTrue(
+            any("지급기준" in row["statement"] for row in mixed_facts),
+            mixed_facts,
+        )
+        self.assertTrue(
+            any(
+                row["statement"].startswith("김선민 의원 발언:")
+                for row in mixed_facts
+            ),
+            mixed_facts,
+        )
+
+    def test_speaker_context_carries_across_a_mid_turn_chunk_boundary(self) -> None:
+        source = (
+            "○지역경제과장 손순희 당초 계획은 전 시민에게 1인당 20만 원씩 "
+            "지급하는 것으로 총 소요 예산은 약 470억 원이었습니다. "
+            + "상세 설명 " * 80
+        )
+        start = source.index("총 소요 예산")
+        context = _active_korean_speaker_context(source, start)
+        self.assertEqual(context["label"], "지역경제과장 손순희")
+
+        chunk = {
+            "source": {"filename": "plenary-minutes.txt"},
+            "text": source[start:],
+            "speaker_context": context,
+        }
+        grounding = _chunk_grounding_text(chunk)
+        self.assertTrue(grounding.startswith("○지역경제과장 손순희 "))
+        repaired = _repair_korean_transcript_attribution(
+            "총 소요 예산은 약 470억 원이었습니다.",
+            [chunk],
+        )
+        self.assertEqual(
+            repaired,
+            "지역경제과장 손순희 발언: 총 소요 예산은 약 470억 원이었습니다.",
+        )
+
+        mixed_turn_chunk = {
+            "source": {"filename": "plenary-minutes.txt"},
+            "text": (
+                "협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다. "
+                "○김선민 의원 재정 효과는 독립 평가가 필요하다고 지적했습니다."
+            ),
+            "speaker_context": context,
+        }
+        grounding = _chunk_grounding_text(mixed_turn_chunk)
+        self.assertTrue(grounding.startswith("○지역경제과장 손순희 "))
+        self.assertIn("○김선민 의원", grounding)
+        self.assertEqual(
+            _repair_korean_transcript_attribution(
+                "협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다.",
+                [mixed_turn_chunk],
+            ),
+            "지역경제과장 손순희 발언: 협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다.",
+        )
+        self.assertEqual(
+            _repair_korean_transcript_attribution(
+                "재정 효과는 독립 평가가 필요하다고 지적했습니다.",
+                [mixed_turn_chunk],
+            ),
+            "김선민 의원 발언: 재정 효과는 독립 평가가 필요하다고 지적했습니다.",
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                "김선민 의원은 협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다.",
+                [grounding],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "failed",
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                "지역경제과장 손순희는 협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다.",
+                [grounding],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "passed",
+        )
+        for wrong_speaker_statement in (
+            "이에 대해 김선민 의원은 협의 절차는 별도 공문으로 확인해야 한다고 설명했습니다.",
+            "협의 절차는 별도 공문으로 확인해야 한다고 김선민 의원은 설명했습니다.",
+        ):
+            self.assertEqual(
+                _statement_source_anchor_for_context(
+                    wrong_speaker_statement,
+                    [grounding],
+                    allow_cross_source=False,
+                    transcript_context=True,
+                )["status"],
+                "failed",
+                wrong_speaker_statement,
+            )
+
+    def test_named_person_mentioned_inside_a_turn_is_not_mistaken_for_speaker(self) -> None:
+        statement = (
+            "이는 변광용 시장이 470억 원을 풀어서 지역 경제를 살리겠다고 한 "
+            "지원금 금액을 넘는 것입니다"
+        )
+        chunk = {
+            "source": {"filename": "geoje-plenary-minutes.txt"},
+            "text": (
+                "최양희 의원의 앞선 질의가 이어졌습니다. "
+                "○김동수 의원 "
+                f"{statement}."
+            ),
+            "speaker_context": {
+                "label": "최양희 의원",
+                "source_span": {"char_start": 0, "char_end": 6},
+            },
+        }
+
+        self.assertFalse(_korean_transcript_statement_is_attributed(statement))
+        self.assertEqual(
+            _repair_korean_transcript_attribution(statement, [chunk]),
+            f"김동수 의원 발언: {statement}",
+        )
+        grounding = _chunk_grounding_text(chunk)
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                f"김동수 의원 발언: {statement}",
+                [grounding],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "passed",
+        )
+        fallback = _grounded_key_fact_fallback(
+            [
+                {
+                    **chunk,
+                    "evidence_chunk_id": "packet-a-debate",
+                    "artifact_ref": "artifact:packet-a-minutes",
+                }
+            ],
+            limit=3,
+            decision_question=(
+                "거제시 민생회복지원금 조례안을 현재 가결할지 보류할지 결정하라."
+            ),
+        )
+        matching = [
+            row["statement"]
+            for row in fallback
+            if "470억 원" in row["statement"]
+        ]
+        self.assertTrue(matching, fallback)
+        self.assertTrue(
+            all(_korean_transcript_statement_is_attributed(value) for value in matching),
+            matching,
+        )
+
+    def test_common_council_role_resets_speaker_and_unknown_role_fails_closed(self) -> None:
+        source = (
+            "○지역경제과장 손순희 앞선 집행 계획을 설명했습니다. "
+            "○전문위원 박철수 독립 검토 결과를 설명했습니다. "
+            + "세부 검토 문장입니다. " * 100
+            + "최종 검토 금액은 530억 원입니다."
+        )
+        start = source.index("최종 검토 금액")
+        context = _active_korean_speaker_context(source, start)
+        self.assertEqual(context["label"], "전문위원 박철수")
+        chunk = {
+            "source": {"filename": "official-plenary-minutes.txt"},
+            "text": source[start:],
+            "speaker_context": context,
+        }
+        grounding = _chunk_grounding_text(chunk)
+        statement = "최종 검토 금액은 530억 원입니다."
+        self.assertEqual(
+            _repair_korean_transcript_attribution(statement, [chunk]),
+            f"전문위원 박철수 발언: {statement}",
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                f"지역경제과장 손순희 발언: {statement}",
+                [grounding],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "failed",
+        )
+        self.assertEqual(
+            _statement_source_anchor_for_context(
+                f"전문위원 박철수 발언: {statement}",
+                [grounding],
+                allow_cross_source=False,
+                transcript_context=True,
+            )["status"],
+            "passed",
+        )
+
+        unknown_role_source = (
+            "○지역경제과장 손순희 앞선 발언입니다. "
+            "○외부검토역 박철수 새 검토 발언입니다. "
+            + "세부 문장입니다. " * 100
+            + statement
+        )
+        unknown_start = unknown_role_source.index(statement)
+        self.assertIsNone(
+            _active_korean_speaker_context(unknown_role_source, unknown_start)
+        )
+        stale_context = {
+            "label": "지역경제과장 손순희",
+            "source_span": {"char_start": 0, "char_end": 11},
+        }
+        carried = _chunk_grounding_text(
+            {
+                "text": unknown_role_source[20:],
+                "speaker_context": stale_context,
+            }
+        )
+        self.assertFalse(
+            any(
+                label == "지역경제과장 손순희" and statement in turn
+                for label, turn in _korean_transcript_turn_records(carried)
+            )
+        )
+
+    def test_persisted_speaker_context_is_source_bound_and_tamper_detected(self) -> None:
+        source = (
+            "○지역경제과장 손순희 당초 계획의 재정 조건을 설명하겠습니다. "
+            + "세부 검토 문장입니다. " * 100
+            + "최종 검토 금액은 약 470억 원입니다."
+        )
+        question = "최종 검토 금액은 얼마인가?"
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-speaker-context-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="local_file",
+                source_ref="official-plenary-minutes.txt",
+            )["artifact"]
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+            result = store._build_evidence_chunks(
+                bundle["evidence_items"],
+                SCOPE,
+                query=question,
+                evidence_bundle_id=bundle["evidence_bundle_id"],
+                evidence_revision_sha256=bundle["evidence_revision_sha256"],
+                model_provider="local_test",
+                chunk_limit=10,
+            )
+
+            carried = next(
+                chunk
+                for chunk in result["chunks"]
+                if chunk.get("speaker_context")
+                and not str(chunk.get("text") or "").lstrip().startswith("○")
+            )
+            self.assertEqual(
+                carried["speaker_context"]["label"],
+                "지역경제과장 손순희",
+            )
+            ref = f"evidence_chunk:{carried['evidence_chunk_id']}"
+            _, _, error = store._validate_citation_ref(ref, SCOPE)
+            self.assertIsNone(error)
+
+            tampered = json.loads(json.dumps(carried))
+            tampered["speaker_context"]["label"] = "의장 신금자"
+            with mock.patch.object(
+                store,
+                "get_evidence_chunk",
+                return_value=tampered,
+            ):
+                _, _, error = store._validate_citation_ref(ref, SCOPE)
+            self.assertEqual(error, "SPEAKER_CONTEXT_IN_SOURCE_MISMATCH")
+
+    def test_generic_filename_keeps_full_source_transcript_context(self) -> None:
+        source = (
+            "○지역경제과장 손순희 당초 계획을 설명했습니다. "
+            + "첫 발언 세부 문장입니다. " * 70
+            + "○전문위원 박철수 수정안의 재정 조건을 설명했습니다. "
+            + "둘째 발언 세부 문장입니다. " * 80
+            + "최종 검토 금액은 470억 원입니다."
+        )
+        question = "최종 검토 금액은 얼마인가?"
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-generic-transcript-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="local_file",
+                source_ref="document-1.txt",
+            )["artifact"]
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+            result = store._build_evidence_chunks(
+                bundle["evidence_items"],
+                SCOPE,
+                query=question,
+                evidence_bundle_id=bundle["evidence_bundle_id"],
+                evidence_revision_sha256=bundle["evidence_revision_sha256"],
+                model_provider="local_test",
+                chunk_limit=10,
+            )
+
+            self.assertTrue(result["chunks"])
+            self.assertTrue(all(chunk["transcript_source"] for chunk in result["chunks"]))
+            amount_chunk = next(
+                chunk
+                for chunk in result["chunks"]
+                if "최종 검토 금액" in str(chunk.get("text") or "")
+            )
+            self.assertEqual(
+                (amount_chunk.get("speaker_context") or {}).get("label"),
+                "전문위원 박철수",
+            )
+            facts = _grounded_key_fact_fallback(
+                result["chunks"],
+                limit=3,
+                decision_question=question,
+            )
+            amount_facts = [
+                row["statement"] for row in facts if "470억 원" in row["statement"]
+            ]
+            self.assertTrue(amount_facts, facts)
+            self.assertTrue(
+                all(value.startswith("전문위원 박철수 발언:") for value in amount_facts),
+                amount_facts,
+            )
+
+    def test_carried_speaker_context_survives_brief_create_get_and_show(self) -> None:
+        source = (
+            "○지역경제과장 손순희 당초 계획의 재정 조건을 설명하겠습니다. "
+            + "세부 검토 문장입니다. " * 100
+            + "최종 검토 금액은 약 470억 원입니다."
+        )
+        question = "최종 검토 금액은 얼마인가?"
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-speaker-reopen-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="local_file",
+                source_ref="official-plenary-minutes.txt",
+            )["artifact"]
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                prompt = str(kwargs.get("prompt") or "")
+                evidence_blocks = re.findall(
+                    r'\[EVIDENCE alias="(?P<alias>E\d+)"[^\]]*'
+                    r'speaker_at_span_start="지역경제과장 손순희"[^\]]*\]'
+                    r'\s*"""(?P<body>.*?)"""',
+                    prompt,
+                    flags=re.DOTALL,
+                )
+                alias = next(
+                    value
+                    for value, body in evidence_blocks
+                    if "최종 검토 금액" in body
+                )
+                statement = (
+                    "지역경제과장 손순희 발언: 최종 검토 금액은 약 470억 원입니다."
+                )
+                return {
+                    "title": "최종 재정 검토 금액",
+                    "bottom_line": {
+                        "statement": statement,
+                        "citation_refs": [alias],
+                    },
+                    "key_facts": [
+                        {"statement": statement, "citation_refs": [alias]}
+                    ],
+                    "conflicts_risks": [],
+                    "missing_evidence": [],
+                    "recommended_next_steps": [],
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                created = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    SCOPE,
+                    model_provider="ollama",
+                )["brief"]
+
+            self.assertEqual(created["trust_label"], "evidence_backed", created)
+            speaker_links = [
+                link
+                for link in created["evidence_links"]
+                if (link.get("speaker_context") or {}).get("label")
+                == "지역경제과장 손순희"
+            ]
+            self.assertTrue(speaker_links)
+            self.assertFalse(
+                created["bottom_line"].startswith(
+                    "현재 근거만으로 결정을 확정하기 어렵습니다:"
+                ),
+                created["bottom_line"],
+            )
+            self.assertIn("470억 원", created["bottom_line"])
+            self.assertEqual(
+                [
+                    row["statement"]
+                    for row in created["load_bearing_statements"]
+                    if row["section"] == "bottom_line"
+                ],
+                [created["bottom_line"]],
+                created["load_bearing_statements"],
+            )
+            self.assertEqual(
+                [
+                    row["statement"]
+                    for row in created["load_bearing_statements"]
+                    if row["section"] == "key_facts"
+                ],
+                [
+                    value
+                    for value in created["key_points"]
+                    if value != created["bottom_line"]
+                ],
+                created["load_bearing_statements"],
+            )
+            self.assertEqual(
+                [
+                    row["statement"]
+                    for row in created["load_bearing_statements"]
+                    if row["section"] == "conflicts_risks"
+                ],
+                created["conflicts_risks"],
+                created["load_bearing_statements"],
+            )
+            reopened = store.get_brief(created["brief_id"])
+            self.assertIsNotNone(reopened)
+            self.assertEqual(
+                reopened["evidence_integrity"]["status"],
+                "passed",
+                reopened["evidence_integrity"],
+            )
+            shown = store.show_brief(created["brief_id"], SCOPE)["brief"]
+            self.assertEqual(shown["evidence_integrity"]["status"], "passed")
+            self.assertEqual(shown["bottom_line"], created["bottom_line"])
+
+    def test_non_direction_bottom_line_never_adds_unresolved_decision_language(self) -> None:
+        cases = (
+            (
+                "What is the renewal fee?",
+                "The renewal fee is $18,000.",
+                "The renewal fee is $18,000.",
+            ),
+            (
+                "최종 검토 금액은 얼마인가?",
+                "○지역경제과장 손순희 최종 검토 금액은 약 470억 원입니다.",
+                "지역경제과장 손순희 발언: 최종 검토 금액은 약 470억 원입니다.",
+            ),
+        )
+        for question, source, answer in cases:
+            with self.subTest(question=question):
+                ref = "evidence_chunk:direct-answer"
+                chunk = {
+                    "evidence_chunk_id": "direct-answer",
+                    "source": {"ref": "source.txt"},
+                    "text": source,
+                }
+                row = {
+                    "statement": answer,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+                selected, _ = _select_grounded_bottom_line(
+                    row,
+                    [],
+                    [row],
+                    {ref: chunk},
+                    decision_question=question,
+                )
+                self.assertEqual(selected["statement"], answer)
+                self.assertNotRegex(
+                    selected["statement"],
+                    r"^(?:Evidence does not yet establish a decision|"
+                    r"현재 근거만으로 결정을 확정하기 어렵습니다)",
+                )
 
     def test_paired_comparison_bottom_line_validates_its_source_clause(self) -> None:
         with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-paired-bottom-line-") as state_dir:
@@ -737,6 +1676,220 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             )
         )
 
+    def test_ollama_embeddings_batches_32_inputs_and_preserves_position(self) -> None:
+        texts = [f"text-{index}" for index in range(233)]
+        requests: list[list[str]] = []
+
+        def post_embedding(
+            base_url: str | None,
+            path: str,
+            payload: dict[str, object],
+            *,
+            timeout: int,
+        ) -> dict[str, object]:
+            self.assertIsNone(base_url)
+            self.assertEqual(path, "/api/embed")
+            self.assertEqual(timeout, 60)
+            batch = list(payload["input"])
+            requests.append(batch)
+            return {
+                "embeddings": [
+                    [float(value.removeprefix("text-")), 1.0]
+                    for value in batch
+                ]
+            }
+
+        with mock.patch(
+            "cornerstone_cli.runtime._post_ollama_json",
+            side_effect=post_embedding,
+        ):
+            vectors = _ollama_embeddings(
+                None,
+                model="qwen3-embedding:0.6b",
+                texts=texts,
+            )
+
+        self.assertEqual(OLLAMA_EMBEDDING_BATCH_SIZE, 32)
+        self.assertEqual([len(batch) for batch in requests], [32] * 7 + [9])
+        self.assertEqual([text for batch in requests for text in batch], texts)
+        self.assertEqual(
+            [vector[0] for vector in vectors],
+            [float(index) for index in range(233)],
+        )
+
+    def test_ollama_embedding_rejects_count_and_dimension_mismatches(self) -> None:
+        with mock.patch(
+            "cornerstone_cli.runtime._post_ollama_json",
+            return_value={"embeddings": [[1.0, 0.0]]},
+        ):
+            with self.assertRaisesRegex(RuntimeError, "count"):
+                _ollama_embedding(
+                    None,
+                    model="qwen3-embedding:0.6b",
+                    text=["first", "second"],
+                )
+
+        with mock.patch(
+            "cornerstone_cli.runtime._post_ollama_json",
+            return_value={"embeddings": [[1.0, 0.0], [1.0, 0.0, 0.0]]},
+        ):
+            with self.assertRaisesRegex(RuntimeError, "dimensions"):
+                _ollama_embedding(
+                    None,
+                    model="qwen3-embedding:0.6b",
+                    text=["first", "second"],
+                )
+
+        responses = iter(
+            (
+                [[1.0, 0.0] for _ in range(32)],
+                [[1.0, 0.0, 0.0]],
+            )
+        )
+        with mock.patch(
+            "cornerstone_cli.runtime._ollama_embedding",
+            side_effect=lambda *_args, **_kwargs: next(responses),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "dimensions"):
+                _ollama_embeddings(
+                    None,
+                    model="qwen3-embedding:0.6b",
+                    texts=[f"text-{index}" for index in range(33)],
+                )
+
+    def test_batched_embedding_preserves_balanced_chunk_selection(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-batched-embedding-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact_ids: list[str] = []
+            source_texts: list[str] = []
+            for source_index in range(3):
+                source_text = " ".join(
+                    f"Source {source_index} renewal evidence clause {clause_index}."
+                    for clause_index in range(120)
+                )
+                source_texts.append(source_text)
+                artifact = store.ingest_text_artifact(
+                    source_text,
+                    SCOPE,
+                    source_type="user_paste",
+                    source_ref=f"source-{source_index}",
+                )["artifact"]
+                artifact_ids.append(artifact["artifact_id"])
+            query = "What renewal evidence matters?"
+            snapshot = store.search(
+                query,
+                **SCOPE,
+                included_artifact_ids=set(artifact_ids),
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+
+            local_result = store._build_evidence_chunks(
+                bundle["evidence_items"],
+                SCOPE,
+                query=query,
+                evidence_bundle_id=bundle["evidence_bundle_id"],
+                evidence_revision_sha256=bundle["evidence_revision_sha256"],
+                model_provider="local_test",
+                chunk_limit=6,
+                per_source_target=2,
+            )
+            requests: list[list[str]] = []
+
+            def post_embedding(
+                _base_url: str | None,
+                _path: str,
+                payload: dict[str, object],
+                *,
+                timeout: int,
+            ) -> dict[str, object]:
+                self.assertEqual(timeout, 60)
+                batch = list(payload["input"])
+                requests.append(batch)
+                return {"embeddings": [[1.0, 0.0] for _ in batch]}
+
+            with mock.patch(
+                "cornerstone_cli.runtime._post_ollama_json",
+                side_effect=post_embedding,
+            ):
+                ollama_result = store._build_evidence_chunks(
+                    bundle["evidence_items"],
+                    SCOPE,
+                    query=query,
+                    evidence_bundle_id=bundle["evidence_bundle_id"],
+                    evidence_revision_sha256=bundle["evidence_revision_sha256"],
+                    model_provider="ollama",
+                    chunk_limit=6,
+                    per_source_target=2,
+                )
+
+            selected_identity = lambda result: [
+                (chunk["artifact_id"], chunk["span"])
+                for chunk in result["chunks"]
+            ]
+            self.assertEqual(
+                selected_identity(ollama_result),
+                selected_identity(local_result),
+            )
+            self.assertEqual(
+                {
+                    artifact_id: sum(
+                        chunk["artifact_id"] == artifact_id
+                        for chunk in ollama_result["chunks"]
+                    )
+                    for artifact_id in artifact_ids
+                },
+                {artifact_id: 2 for artifact_id in artifact_ids},
+            )
+            expected_input_count = 1 + sum(
+                len(_text_chunks(source_text)) for source_text in source_texts
+            )
+            self.assertEqual(sum(len(batch) for batch in requests), expected_input_count)
+            self.assertTrue(all(len(batch) <= 32 for batch in requests))
+            self.assertEqual(requests[0][0], query)
+
+    def test_batched_embedding_failure_keeps_model_unavailable_behavior(self) -> None:
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-batched-embedding-failure-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                "Acme renewal evidence is available.",
+                SCOPE,
+                source_type="user_paste",
+                source_ref="renewal-source",
+            )["artifact"]
+            snapshot = store.search(
+                "Acme renewal",
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"], SCOPE
+            )["bundle"]
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embeddings",
+                side_effect=RuntimeError("embedding batch failed"),
+            ):
+                result = store._build_evidence_chunks(
+                    bundle["evidence_items"],
+                    SCOPE,
+                    query="Acme renewal",
+                    evidence_bundle_id=bundle["evidence_bundle_id"],
+                    evidence_revision_sha256=bundle["evidence_revision_sha256"],
+                    model_provider="ollama",
+                )
+
+            self.assertEqual(result["status"], "model_unavailable")
+            self.assertEqual(result["embedding_status"], "failed")
+            self.assertEqual(result["chunks"], [])
+            self.assertIn("embedding batch failed", result["error"])
+            self.assertEqual(list(store.evidence_chunk_dir.glob("*.json")), [])
+
     def test_brief_chunk_selection_balances_sources_and_avoids_overlap(self) -> None:
         def chunk(
             source: str,
@@ -819,6 +1972,39 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             {f"source-{index}": 2 for index in range(5)},
         )
 
+    def test_brief_chunk_selection_soft_caps_a_verbose_source(self) -> None:
+        ranked = [
+            {
+                "artifact_id": source,
+                "evidence_chunk_id": f"chunk_{source}_{index}",
+                "score": float(
+                    100 - index if source == "verbose" else 20 - index
+                ),
+                "span": {
+                    "char_start": index * 1500,
+                    "char_end": index * 1500 + 1200,
+                },
+            }
+            for source, count in (("verbose", 10), ("current", 5), ("instrument", 2))
+            for index in range(count)
+        ]
+
+        selected = _select_evidence_chunks(
+            ranked,
+            limit=10,
+            per_source_target=1,
+            per_source_max=4,
+        )
+
+        self.assertEqual(len(selected), 10)
+        self.assertEqual(
+            {
+                source: sum(row["artifact_id"] == source for row in selected)
+                for source in {"verbose", "current", "instrument"}
+            },
+            {"verbose": 4, "current": 4, "instrument": 2},
+        )
+
     def test_brief_chunk_selection_reserves_better_facet_evidence(self) -> None:
         ranked = [
             {
@@ -895,6 +2081,1202 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             [row["evidence_chunk_id"] for row in selected],
             ["opening", "ordinance-body"],
         )
+
+    def test_answer_backfill_can_keep_adjacent_boundary_window(self) -> None:
+        ranked = [
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "heading-before-value",
+                "score": 10.0,
+                "span": {"char_start": 0, "char_end": 1200},
+                "text": "Section 9.1 says the Initial Term expires on",
+            },
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "value-after-boundary",
+                "score": 9.9,
+                "span": {"char_start": 1040, "char_end": 2240},
+                "text": "The Initial Term expires on December 31, 2022.",
+            },
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "unrelated-nonoverlap",
+                "score": 1.0,
+                "span": {"char_start": 2400, "char_end": 3600},
+                "text": "General notices.",
+            },
+        ]
+
+        default_selected = _select_evidence_chunks(ranked, limit=2)
+        answer_selected = _select_evidence_chunks(
+            ranked,
+            limit=2,
+            allow_boundary_overlap_backfill=True,
+        )
+
+        self.assertEqual(
+            [row["evidence_chunk_id"] for row in default_selected],
+            ["heading-before-value", "unrelated-nonoverlap"],
+        )
+        self.assertEqual(
+            [row["evidence_chunk_id"] for row in answer_selected],
+            ["heading-before-value", "value-after-boundary"],
+        )
+
+    def test_scalar_relevance_bonus_reserves_split_and_duration_rows(self) -> None:
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What development-cost split is stated?",
+                "GSK pays sixty percent (60%) and iTeos pays forty percent (40%).",
+            ),
+            8,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What development-cost split is stated?",
+                "The 2022 tax rates were 21% and 25%, respectively.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "How long is the Initial Term?",
+                "The Initial Term is three (3) years.",
+            ),
+            8,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "How long is the Initial Term?",
+                "The agreement was signed on May 1, 2014.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What effective-date wording appears in Amendment No. 1?",
+                "Amendment No. 1 is entered into effective November 3, 2010.",
+            ),
+            12,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What date wording does Amendment 1 use for its entry date?",
+                "THIS AMENDMENT NO. 1 is entered into on the 19 day of December 2022.",
+            ),
+            12,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What effective date is stated for Amendment 6?",
+                "Amendment 5 is effective as of October 17, 2018.",
+            ),
+            0,
+        )
+        illumina_question = (
+            "According to the First Amendment recital, what date does it state "
+            "for the original Illumina Supply Agreement?"
+        )
+        illumina_recital = (
+            "ASSIGNMENT OF AND FIRST AMENDMENT TO SUPPLY AGREEMENT\n"
+            "This Assignment of and First Amendment to the Supply Agreement is "
+            "effective as of February 20, 2018 (\u201cAmendment Effective Date\u201d), "
+            "between Illumina, Inc. and Icahn School of Medicine. WHEREAS, the "
+            "Parties entered into a Supply Agreement, dated August 20, 2014 "
+            "(\u201cAgreement\u201d);"
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                illumina_question,
+                illumina_recital,
+            ),
+            12,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                illumina_question,
+                "Supply Agreement, dated as of June 20, 2014, by and between "
+                "the Company and Illumina, Inc., and amendments thereto.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What effective date is stated for Amendment 6?",
+                "Amendment 6 remains unchanged. THIS AMENDMENT NO. 5 is effective "
+                "as of October 17, 2018.",
+            ),
+            0,
+        )
+        for agreement_subject in (
+            "The Master Services Agreement as amended by Amendment No. 6 is "
+            "effective as of July 19, 2012.",
+            "The Settlement Agreement under Amendment No. 6 is effective as of "
+            "October 17, 2018.",
+        ):
+            with self.subTest(agreement_subject=agreement_subject):
+                self.assertEqual(
+                    _answer_chunk_scalar_relevance_bonus(
+                        "What effective date is stated for Amendment 6?",
+                        agreement_subject,
+                    ),
+                    0,
+                )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "What date wording does Amendment 1 use for its entry date?",
+                "THIS AMENDMENT NO. 1 is entered into on a date to be agreed. "
+                "The invoice is dated the 19 day of December 2022.",
+            ),
+            0,
+        )
+
+    def test_document_change_bonus_reserves_operating_amendment_clause(self) -> None:
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "Should the owner continue under the amended collaboration?",
+                "The following sentence is hereby added to the definition of "
+                "Licensed Product: Licensed Product does not include other products.",
+            ),
+            8,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "What development-cost split is stated?",
+                "Section 3.2 states a 60% and 40% allocation.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "Should the owner continue under the amended agreement?",
+                "This service does not include optional support.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "What is the latest sales forecast?",
+                "The parties hereby amend the License Agreement.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "What changed in customer demand?",
+                "The parties hereby delete Article 3 of the License Agreement.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "What is Acme's latest agreement sales forecast?",
+                "Beta parties hereby amend the License Agreement.",
+            ),
+            0,
+        )
+
+    def test_explicit_document_changes_are_concise_and_regenerable(self) -> None:
+        decision_question = (
+            "Should iTeos, Bristol-Myers, Lifecore, and Illumina continue under "
+            "the amendment-controlled Supply Agreement?"
+        )
+        chunks = [
+            {
+                "artifact_id": "gsk-amendment",
+                "evidence_chunk_id": "gsk-identity",
+                "span": {"char_start": 0},
+                "text": (
+                    "Amendment No. 1 to Collaboration and License Agreement "
+                    "between GSK and iTeos"
+                ),
+            },
+            {
+                "artifact_id": "gsk-amendment",
+                "evidence_chunk_id": "gsk-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The following sentence is hereby added to the definition of "
+                    "Licensed Product: \u201cLicensed Product does not include, and GSK is "
+                    "not granted right to, any pharmaceutical product containing an "
+                    "active ingredient owned or Controlled by ITEOS or any of its "
+                    "Affiliates, in each case, that is not a Licensed Antibody.\u201d"
+                ),
+            },
+            {
+                "artifact_id": "bms-amendment",
+                "evidence_chunk_id": "bms-identity",
+                "span": {"char_start": 0},
+                "text": "Bristol-Myers Amendment No. 1 to License Agreement",
+            },
+            {
+                "artifact_id": "bms-amendment",
+                "evidence_chunk_id": "bms-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties amend the Agreement to delete the requirement that ITI "
+                    "complete a Qualified Study before pursuing any License with a Third Party."
+                ),
+            },
+            {
+                "artifact_id": "lifecore-amendment",
+                "evidence_chunk_id": "lifecore-identity",
+                "span": {"char_start": 0},
+                "text": "Lifecore Amendment No. 1 to Manufacturing Agreement",
+            },
+            {
+                "artifact_id": "lifecore-amendment",
+                "evidence_chunk_id": "lifecore-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "Subsection 7.1 of the Agreement (\u201cTerm; Renewal\u201d) Subsection 7.1 "
+                    "is amended by replacing the words, \u201cthe earlier of completion of "
+                    "the services or December 31, 2020\u201d with the words, \u201cDecember 31, 2022.\u201d"
+                ),
+            },
+            {
+                "artifact_id": "supply-amendment",
+                "evidence_chunk_id": "supply-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Illumina FIRST AMENDMENT. WHEREAS, the Parties entered into a Supply "
+                    "Agreement, dated August 20, 2014 (the Agreement);"
+                ),
+            },
+            {
+                "artifact_id": "issuer-filing",
+                "evidence_chunk_id": "supply-index",
+                "span": {"char_start": 1000},
+                "text": (
+                    "10.27** Supply Agreement, dated as of June 20, 2014, by and "
+                    "between the Company and Illumina, Inc., and amendments thereto."
+                ),
+            },
+        ]
+
+        rows = _explicit_document_change_rows(
+            chunks,
+            decision_question=decision_question,
+            limit=10,
+        )
+        statements = {row["statement"] for row in rows}
+
+        self.assertIn(
+            "iTeos: Amendment No. 1 excludes products containing non-Licensed-Antibody "
+            "ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope.",
+            statements,
+        )
+        self.assertIn(
+            "Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study prerequisite "
+            "before third-party licensing.",
+            statements,
+        )
+        self.assertIn(
+            "Lifecore: Amendment No. 1 replaces the earlier-of "
+            "services-completion/December 31, 2020 endpoint with December 31, 2022.",
+            statements,
+        )
+        self.assertIn(
+            "Illumina: First Amendment's August 20, 2014 date conflicts with the "
+            "exhibit index's June 20, 2014 Supply Agreement date.",
+            statements,
+        )
+        source_texts = [str(chunk["text"]) for chunk in chunks]
+        for row in rows:
+            self.assertLessEqual(
+                len(re.findall(r"[\w\u2019'-]+", row["statement"])),
+                18,
+                row,
+            )
+            self.assertFalse(
+                _brief_output_echo_violations(
+                    {"conflicts_risks": [row]},
+                    source_texts,
+                ),
+                row,
+            )
+            self.assertEqual(
+                _explicit_document_change_projection_anchor(
+                    row,
+                    decision_question,
+                    chunks,
+                )["status"],
+                "passed",
+            )
+
+    def test_document_change_projection_fails_closed_on_scope_and_ref_drift(self) -> None:
+        decision_question = (
+            "Should Bristol-Myers continue the license under the amended scope?"
+        )
+        chunks = [
+            {
+                "artifact_id": "bms-amendment",
+                "evidence_chunk_id": "identity",
+                "span": {"char_start": 0},
+                "text": "Bristol-Myers Amendment No. 1 to License Agreement",
+            },
+            {
+                "artifact_id": "bms-amendment",
+                "evidence_chunk_id": "change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties amend the Agreement to delete the requirement that ITI "
+                    "complete a Qualified Study before pursuing any License with a Third Party."
+                ),
+            },
+        ]
+        rows = _explicit_document_change_rows(
+            chunks,
+            decision_question=decision_question,
+            limit=10,
+        )
+        self.assertEqual(len(rows), 1)
+        row = rows[0]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                chunks,
+                decision_question="Should Acme renew unrelated hosting?",
+                limit=10,
+            ),
+            [],
+        )
+        self.assertEqual(
+            _explicit_document_change_projection_anchor(
+                row,
+                "Should Acme renew unrelated hosting?",
+                chunks,
+            )["status"],
+            "failed",
+        )
+
+        mutations = []
+        missing_allowed = json.loads(json.dumps(row))
+        missing_allowed["allowed_citation_refs"] = []
+        mutations.append(missing_allowed)
+        reversed_allowed = json.loads(json.dumps(row))
+        reversed_allowed["allowed_citation_refs"].reverse()
+        mutations.append(reversed_allowed)
+        duplicated_allowed = json.loads(json.dumps(row))
+        duplicated_allowed["allowed_citation_refs"].append(
+            duplicated_allowed["allowed_citation_refs"][0]
+        )
+        mutations.append(duplicated_allowed)
+        changed_allowed = json.loads(json.dumps(row))
+        changed_allowed["allowed_citation_refs"][0] = "evidence_chunk:other"
+        mutations.append(changed_allowed)
+        reversed_claimed = json.loads(json.dumps(row))
+        reversed_claimed["citation_refs"].reverse()
+        mutations.append(reversed_claimed)
+        for mutation in mutations:
+            with self.subTest(mutation=mutation):
+                self.assertEqual(
+                    _explicit_document_change_projection_anchor(
+                        mutation,
+                        decision_question,
+                        chunks,
+                    )["status"],
+                    "failed",
+                )
+
+    def test_document_date_conflict_requires_same_question_bound_subject(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "alpha-amendment",
+                "evidence_chunk_id": "alpha-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Alpha First Amendment. WHEREAS, the Parties entered into a "
+                    "Service Agreement, dated August 20, 2014."
+                ),
+            },
+            {
+                "artifact_id": "beta-index",
+                "evidence_chunk_id": "beta-index-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "Beta filing. 10.12** Service Agreement, dated as of June 20, "
+                    "2014, by and between Beta and its supplier."
+                ),
+            },
+        ]
+
+        self.assertEqual(
+            _explicit_document_change_rows(
+                chunks,
+                decision_question="Should Alpha continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        generic_company_chunks = [
+            {
+                "artifact_id": "company-amendment",
+                "evidence_chunk_id": "company-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Company First Amendment. WHEREAS, the Parties entered into a "
+                    "Service Agreement, dated August 20, 2014."
+                ),
+            },
+            {
+                "artifact_id": "company-index",
+                "evidence_chunk_id": "company-index-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between the Company and its supplier."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                generic_company_chunks,
+                decision_question="Should Company continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        subject_elsewhere_chunks = [
+            {
+                "artifact_id": "illumina-amendment",
+                "evidence_chunk_id": "illumina-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Illumina First Amendment.\nWHEREAS, the Parties entered into a "
+                    "Service Agreement, dated August 20, 2014."
+                ),
+            },
+            {
+                "artifact_id": "unrelated-index",
+                "evidence_chunk_id": "unrelated-index-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "Illumina appears elsewhere in this filing.\n"
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between Alpha and Beta."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                subject_elsewhere_chunks,
+                decision_question="Should Illumina continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        nearby_unrelated_subject = [
+            {
+                "artifact_id": "beta-amendment",
+                "evidence_chunk_id": "beta-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Beta First Amendment to Service Agreement. This filing also "
+                    "mentions Acme portfolio. WHEREAS, the Parties entered into a "
+                    "Service Agreement, dated August 20, 2014."
+                ),
+            },
+            {
+                "artifact_id": "acme-index",
+                "evidence_chunk_id": "acme-index-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between Acme and its supplier."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                nearby_unrelated_subject,
+                decision_question="Should Acme continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        trailing_index_subject = [
+            {
+                "artifact_id": "acme-amendment",
+                "evidence_chunk_id": "acme-recital",
+                "span": {"char_start": 0},
+                "text": (
+                    "Acme First Amendment. WHEREAS, the Parties entered into a "
+                    "Service Agreement, dated August 20, 2014."
+                ),
+            },
+            {
+                "artifact_id": "alpha-index",
+                "evidence_chunk_id": "alpha-index-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between Alpha and Beta. Acme portfolio note."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                trailing_index_subject,
+                decision_question="Should Acme continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        trailing_non_party_role = [
+            trailing_index_subject[0],
+            {
+                "artifact_id": "alpha-index",
+                "evidence_chunk_id": "alpha-index-agent-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between Alpha and Beta, with Acme acting solely as filing agent."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                trailing_non_party_role,
+                decision_question="Should Acme continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+        trailing_role_with_exhibit_suffix = [
+            trailing_index_subject[0],
+            {
+                "artifact_id": "alpha-index",
+                "evidence_chunk_id": "alpha-index-suffixed-agent-row",
+                "span": {"char_start": 0},
+                "text": (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by and "
+                    "between Alpha and Beta, with Acme acting solely as filing agent, "
+                    "and amendments thereto."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                trailing_role_with_exhibit_suffix,
+                decision_question="Should Acme continue the Service Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+        for role_clause in (
+            "Alpha and Beta as trustee for Acme",
+            "Alpha and Beta on behalf of Acme",
+        ):
+            with self.subTest(role_clause=role_clause):
+                variant = json.loads(
+                    json.dumps(trailing_role_with_exhibit_suffix)
+                )
+                variant[1]["text"] = (
+                    "10.12** Service Agreement, dated as of June 20, 2014, by "
+                    f"and between {role_clause}, and amendments thereto."
+                )
+                self.assertEqual(
+                    _explicit_document_change_rows(
+                        variant,
+                        decision_question=(
+                            "Should Acme continue the Service Agreement?"
+                        ),
+                        limit=10,
+                    ),
+                    [],
+                )
+
+    def test_document_change_projection_binds_cited_subject_and_nearest_amendment(
+        self,
+    ) -> None:
+        hidden_subject_chunks = [
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "identity",
+                "span": {"char_start": 0},
+                "text": "Amendment No. 1 to License Agreement",
+            },
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties amend the Agreement to delete the requirement that ITI "
+                    "complete a Qualified Study before pursuing any License with a Third Party."
+                ),
+            },
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "uncited-subject",
+                "span": {"char_start": 1800},
+                "text": "Acme annual report.",
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                hidden_subject_chunks,
+                decision_question=(
+                    "Should Acme continue under the amendment-controlled License Agreement?"
+                ),
+                limit=10,
+            ),
+            [],
+        )
+
+        nearby_subject_chunks = [
+            {
+                "artifact_id": "beta",
+                "evidence_chunk_id": "beta-identity",
+                "span": {"char_start": 0},
+                "text": (
+                    "Beta Amendment No. 1 to License Agreement. This filing also "
+                    "discusses Acme unrelated hosting."
+                ),
+            },
+            {
+                "artifact_id": "beta",
+                "evidence_chunk_id": "beta-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties amend the Agreement to delete the requirement that ITI "
+                    "complete a Qualified Study before pursuing any License with a Third Party."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                nearby_subject_chunks,
+                decision_question=(
+                    "Should Acme continue under the amendment-controlled License Agreement?"
+                ),
+                limit=10,
+            ),
+            [],
+        )
+
+        later_party_relation = [
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "generic-identity",
+                "span": {"char_start": 0},
+                "text": (
+                    "Amendment No. 1 to License Agreement.\n"
+                    "This filing also discusses a hosting agreement between Acme "
+                    "and Vendor.\n\nOther material."
+                ),
+            },
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties amend the Agreement to delete the requirement that "
+                    "ITI complete a Qualified Study before pursuing any License with "
+                    "a Third Party."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                later_party_relation,
+                decision_question=(
+                    "Should Acme continue under the amendment-controlled License "
+                    "Agreement?"
+                ),
+                limit=10,
+            ),
+            [],
+        )
+        for unrelated_identity in (
+            "Amendment No. 1 to License Agreement. 2024 filing notes a hosting "
+            "agreement between Acme and Vendor.",
+            "Amendment No. 1 to License Agreement. \u201cThis filing discusses a "
+            "hosting agreement between Acme and Vendor.\u201d",
+            "Amendment No. 1 to License Agreement; hosting agreement between "
+            "Acme and Vendor.",
+        ):
+            with self.subTest(unrelated_identity=unrelated_identity):
+                variant = json.loads(json.dumps(later_party_relation))
+                variant[0]["text"] = unrelated_identity
+                self.assertEqual(
+                    _explicit_document_change_rows(
+                        variant,
+                        decision_question=(
+                            "Should Acme continue under the amendment-controlled "
+                            "License Agreement?"
+                        ),
+                        limit=10,
+                    ),
+                    [],
+                )
+        effective_then_unrelated_parties = json.loads(
+            json.dumps(later_party_relation)
+        )
+        effective_then_unrelated_parties[0]["text"] = (
+            "Amendment No. 1 to License Agreement\n\n"
+            "This Amendment No. 1 is effective as of January 1, 2024. "
+            "This filing also discusses an unrelated Hosting Agreement between "
+            "Acme (\u201cAcme\u201d) and Vendor (\u201cVendor\u201d)."
+        )
+        self.assertEqual(
+            _explicit_document_change_rows(
+                effective_then_unrelated_parties,
+                decision_question=(
+                    "Should Acme continue under the amendment-controlled License "
+                    "Agreement?"
+                ),
+                limit=10,
+            ),
+            [],
+        )
+        for next_sentence in (
+            "2024 filing materials discuss",
+            "eBay filing materials discuss",
+        ):
+            with self.subTest(next_sentence=next_sentence):
+                variant = json.loads(
+                    json.dumps(effective_then_unrelated_parties)
+                )
+                variant[0]["text"] = variant[0]["text"].replace(
+                    "This filing also discusses",
+                    next_sentence,
+                )
+                self.assertEqual(
+                    _explicit_document_change_rows(
+                        variant,
+                        decision_question=(
+                            "Should Acme continue under the amendment-controlled "
+                            "License Agreement?"
+                        ),
+                        limit=10,
+                    ),
+                    [],
+                )
+        trailing_amendment_role = json.loads(json.dumps(later_party_relation))
+        trailing_amendment_role[0]["text"] = (
+            "This Amendment No. 1 is effective as of January 1, 2024 by and "
+            "between Alpha (\u201cAlpha\u201d) and Beta (\u201cBeta\u201d), with Acme acting "
+            "solely as filing agent."
+        )
+        self.assertEqual(
+            _explicit_document_change_rows(
+                trailing_amendment_role,
+                decision_question=(
+                    "Should Acme continue under the amendment-controlled License "
+                    "Agreement?"
+                ),
+                limit=10,
+            ),
+            [],
+        )
+        self.assertEqual(
+            _explicit_document_change_rows(
+                nearby_subject_chunks,
+                decision_question="Should First Amendment control the License Agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+        combined_amendments = [
+            {
+                "artifact_id": "combined",
+                "evidence_chunk_id": "combined-clause",
+                "span": {"char_start": 0},
+                "text": (
+                    "Bristol-Myers Amendment No. 1 preserves the original terms. "
+                    "Bristol-Myers Amendment No. 2 to the License Agreement then "
+                    "provides to delete "
+                    "the requirement that ITI complete a Qualified Study before pursuing "
+                    "any License with a Third Party."
+                ),
+            }
+        ]
+        rows = _explicit_document_change_rows(
+            combined_amendments,
+            decision_question=(
+                "Should Bristol-Myers continue the license under the amended scope?"
+            ),
+            limit=10,
+        )
+        self.assertEqual(len(rows), 1, rows)
+        self.assertIn("Amendment No. 2 deletes", rows[0]["statement"])
+        self.assertNotIn("Amendment No. 1 deletes", rows[0]["statement"])
+        self.assertEqual(
+            _explicit_document_change_projection_anchor(
+                rows[0],
+                "Should Bristol-Myers continue the license under the amended scope?",
+                combined_amendments,
+            )["status"],
+            "passed",
+        )
+
+        following_identity_chunks = [
+            {
+                "artifact_id": "gsk",
+                "evidence_chunk_id": "gsk-change",
+                "span": {"char_start": 0},
+                "text": (
+                    "The following sentence is hereby added to the definition of "
+                    "Licensed Product: \u201cLicensed Product does not include, and GSK is "
+                    "not granted right to, any product containing a pharmaceutically "
+                    "active ingredient owned or Controlled by ITEOS or any of its "
+                    "Affiliates, in each case, that is not a Licensed Antibody.\u201d"
+                ),
+            },
+            {
+                "artifact_id": "gsk",
+                "evidence_chunk_id": "gsk-signature",
+                "span": {"char_start": 1500},
+                "text": "iTeos caused Amendment No. 1 to be duly executed.",
+            },
+        ]
+        following_rows = _explicit_document_change_rows(
+            following_identity_chunks,
+            decision_question="Should iTeos continue under the amended collaboration?",
+            limit=10,
+        )
+        self.assertEqual(len(following_rows), 1, following_rows)
+        self.assertIn("Amendment No. 1 excludes", following_rows[0]["statement"])
+
+        ambiguous_following = [
+            following_identity_chunks[0],
+            {
+                "artifact_id": "gsk",
+                "evidence_chunk_id": "ambiguous-signature",
+                "span": {"char_start": 1500},
+                "text": (
+                    "iTeos caused Amendment No. 1 and Amendment No. 2 to be executed."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                ambiguous_following,
+                decision_question="Should iTeos continue under the amended collaboration?",
+                limit=10,
+            ),
+            [],
+        )
+
+    def test_document_change_projection_requires_complete_operating_semantics(
+        self,
+    ) -> None:
+        incomplete_gsk = [
+            {
+                "artifact_id": "gsk",
+                "evidence_chunk_id": "gsk-identity",
+                "span": {"char_start": 0},
+                "text": "iTeos Amendment No. 1 to Collaboration Agreement",
+            },
+            {
+                "artifact_id": "gsk",
+                "evidence_chunk_id": "gsk-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "The following sentence is hereby added to the definition of "
+                    "Licensed Product: \u201cLicensed Product does not include, and GSK is "
+                    "not granted right to, any product containing an ingredient owned "
+                    "or Controlled by ITEOS that is not a Licensed Antibody.\u201d"
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                incomplete_gsk,
+                decision_question="Should iTeos continue under the amended collaboration?",
+                limit=10,
+            ),
+            [],
+        )
+
+        incomplete_lifecore = [
+            {
+                "artifact_id": "lifecore",
+                "evidence_chunk_id": "lifecore-identity",
+                "span": {"char_start": 0},
+                "text": "Lifecore Amendment No. 1 to Manufacturing Agreement",
+            },
+            {
+                "artifact_id": "lifecore",
+                "evidence_chunk_id": "lifecore-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "Subsection 7.1 (Term) is amended by replacing the words, "
+                    "\u201cDecember 31, 2020\u201d with the words, \u201cDecember 31, 2022.\u201d"
+                ),
+            },
+        ]
+        self.assertEqual(
+            _explicit_document_change_rows(
+                incomplete_lifecore,
+                decision_question="Should Lifecore continue under the amended agreement?",
+                limit=10,
+            ),
+            [],
+        )
+
+    def test_brief_keeps_deterministic_change_when_model_returns_no_conflict(self) -> None:
+        source = (
+            "Bristol-Myers Amendment No. 1 to License Agreement. "
+            "The Parties hereby amend the Agreement to delete the requirement that "
+            "ITI complete a Qualified Study before pursuing any License with a Third Party. "
+            "The amendment is effective November 3, 2010."
+        )
+        question = (
+            "Should Bristol-Myers continue the license under the amended scope?"
+        )
+        with tempfile.TemporaryDirectory(
+            prefix="cornerstone-vs5-explicit-change-brief-"
+        ) as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="user_paste",
+                source_ref="bms-amendment.txt",
+            )["artifact"]
+            snapshot = store.search(
+                question,
+                **SCOPE,
+                included_artifact_ids={artifact["artifact_id"]},
+            )["snapshot"]
+            bundle = store.create_evidence_bundle(
+                snapshot["search_snapshot_id"],
+                SCOPE,
+            )["bundle"]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                ref = re.search(
+                    r"evidence_chunk:[a-zA-Z0-9_-]+",
+                    str(kwargs.get("prompt") or ""),
+                ).group(0)
+                return {
+                    "title": "Bristol-Myers license scope",
+                    "bottom_line": {
+                        "statement": "Hold: the Qualified Study requirement is deleted.",
+                        "citation_refs": [ref],
+                    },
+                    "key_facts": [
+                        {
+                            "statement": "The amendment is effective November 3, 2010.",
+                            "citation_refs": [ref],
+                        }
+                    ],
+                    "conflicts_risks": [],
+                    "missing_evidence": [],
+                    "recommended_next_steps": [],
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                brief = store.create_brief_from_evidence_bundle(
+                    bundle["evidence_bundle_id"],
+                    SCOPE,
+                    model_provider="ollama",
+                )["brief"]
+
+        self.assertEqual(brief["status"], "evidence_backed", brief)
+        self.assertEqual(
+            brief["conflicts_risks"],
+            [
+                "Bristol-Myers: Amendment No. 1 deletes ITI's Qualified Study "
+                "prerequisite before third-party licensing."
+            ],
+        )
+        self.assertEqual(
+            brief["bottom_line"],
+            "Recorded amendment change: Bristol-Myers: Amendment No. 1 deletes "
+            "ITI's Qualified Study prerequisite before third-party licensing.",
+        )
+        self.assertEqual(
+            brief["recommended_next_steps"],
+            [
+                "Review the amended term before deciding: Bristol-Myers: Amendment "
+                "No. 1 deletes ITI's Qualified Study prerequisite before third-party "
+                "licensing."
+            ],
+        )
+        conflict_row = next(
+            row
+            for row in brief["load_bearing_statements"]
+            if row["section"] == "conflicts_risks"
+        )
+        self.assertEqual(
+            conflict_row["validation_mode"],
+            "explicit_document_change_projection",
+        )
+        self.assertTrue(conflict_row["citation_refs"])
+        self.assertTrue(
+            all(
+                check["status"] == "passed"
+                for check in brief["statement_anchor_checks"]
+            ),
+            brief["statement_anchor_checks"],
+        )
+
+    def test_split_answer_binds_each_actor_to_the_cited_percentage(self) -> None:
+        question = "What development-cost split is stated in the collaboration agreement?"
+        source = (
+            "The Parties share Development Costs, with GSK bearing sixty percent "
+            "(60%) of such Development Costs and ITEOS bearing forty percent "
+            "(40%) of such Development Costs."
+        )
+        correct = "GSK bears 60% of Development Costs and iTeos bears 40%."
+        inverted = "GSK bears 40% of Development Costs and iTeos bears 60%."
+
+        self.assertTrue(_answer_relationship_supported(question, correct, [source]))
+        self.assertFalse(_answer_relationship_supported(question, inverted, [source]))
+        self.assertFalse(
+            _answer_relationship_supported(
+                question,
+                correct,
+                [
+                    "GSK bears 60% of Development Costs.",
+                    "iTeos bears 40% of Development Costs.",
+                ],
+            )
+        )
+        self.assertIsNone(
+            _direct_allocation_citation_projection(
+                question,
+                inverted,
+                [
+                    {
+                        "evidence_chunk_id": "correct-source",
+                        "text": source,
+                    }
+                ],
+            )
+        )
+        for unsupported_answer in (
+            "GSK bears 60% and ITEOS bears 40% of commercialization costs.",
+            "GSK bears 60% and ITEOS bears 40% of royalty costs.",
+            "GSK bears 60% and ITEOS bears 40% of all Development Costs.",
+            "GSK bears 60% and ITEOS bears 40% of Development Costs annually.",
+            "GSK bears 60% or ITEOS bears 40% of Development Costs.",
+        ):
+            with self.subTest(unsupported_answer=unsupported_answer):
+                self.assertIsNone(
+                    _direct_allocation_citation_projection(
+                        question,
+                        unsupported_answer,
+                        [
+                            {
+                                "evidence_chunk_id": "correct-source",
+                                "text": source,
+                            }
+                        ],
+                    )
+                )
+        self.assertIsNone(
+            _direct_allocation_citation_projection(
+                question,
+                correct,
+                [
+                    {
+                        "evidence_chunk_id": "gsk-only",
+                        "text": "GSK bears 60% of Development Costs.",
+                    },
+                    {
+                        "evidence_chunk_id": "iteos-only",
+                        "text": "iTeos bears 40% of Development Costs.",
+                    },
+                ],
+            )
+        )
+
+    def test_split_answer_repairs_model_citation_to_single_chunk_with_actor_bindings(self) -> None:
+        question = "What development-cost split is stated in the collaboration agreement?"
+        agreement = (
+            "3.2.3 Shared Development Costs. The Parties will share Development Costs "
+            "under the Collaboration Agreement, with GSK bearing sixty percent (60%) "
+            "of such Development Costs and ITEOS bearing forty percent (40%) of such "
+            "Development Costs."
+        )
+        issuer_summary = (
+            "Under the GSK Collaboration Agreement, GSK is responsible for 60% of the "
+            "Global Development Plan cost, while the Company is responsible for the "
+            "remaining 40%."
+        )
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-split-citation-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            agreement_artifact = store.ingest_text_artifact(
+                agreement,
+                SCOPE,
+                source_type="user_paste",
+                source_ref="collaboration-agreement",
+            )["artifact"]
+            summary_artifact = store.ingest_text_artifact(
+                issuer_summary,
+                SCOPE,
+                source_type="user_paste",
+                source_ref="issuer-summary",
+            )["artifact"]
+            conversation = store.start_conversation("Review the cost split", SCOPE)[
+                "conversation"
+            ]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                prompt = str(kwargs.get("prompt") or "")
+                summary_ref = next(
+                    re.search(r'ref="(evidence_chunk:[^"]+)"', block).group(1)
+                    for block in prompt.split("[EVIDENCE ")[1:]
+                    if "Company is responsible" in block
+                )
+                return {
+                    "answer": "GSK bears 60% and ITEOS bears 40% of Shared Development Costs.",
+                    "citation_refs": [summary_ref],
+                    "insufficient_evidence": False,
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                answer = BriefingApplication(
+                    store,
+                    RuntimeModelConfig(provider="ollama"),
+                ).answer(
+                    conversation["conversation_id"],
+                    question,
+                    SCOPE,
+                    artifact_ids=[
+                        agreement_artifact["artifact_id"],
+                        summary_artifact["artifact_id"],
+                    ],
+                )["answer"]
+
+            self.assertEqual(answer["label"], "evidence_backed", answer)
+            self.assertEqual(
+                answer["answer"],
+                "GSK bears 60% and ITEOS bears 40% of Shared Development Costs.",
+            )
+            self.assertEqual(len(answer["citation_refs"]), 1)
+            cited_chunk = store.get_evidence_chunk(
+                answer["citation_refs"][0].split(":", 1)[1]
+            )
+            self.assertEqual(
+                cited_chunk["artifact_id"],
+                agreement_artifact["artifact_id"],
+            )
+            self.assertIn(
+                "direct_allocation_citation_projection",
+                answer["model_run"]["response_metadata"],
+            )
 
     def test_facet_selection_can_follow_adjacent_windows_for_distinct_comparison_facets(self) -> None:
         ranked = [
@@ -1274,6 +3656,878 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ],
         )
 
+    def test_real_corpus_deterministic_gaps_are_case_specific(self) -> None:
+        manifest, _ = load_vs5_corpus(
+            ROOT, "fixtures/vs5/edgar-eval/manifest.json"
+        )
+
+        expected_by_case = {
+            "edgar-savara-gema-supply": [
+                "Second-source comparability with clinical-program material is not demonstrated.",
+                "GEMA validation remains ongoing; vendor FDA inspection is outstanding.",
+            ]
+        }
+
+        for case in manifest["cases"]:
+            with self.subTest(case_id=case["id"]):
+                chunks = [
+                    {
+                        "evidence_chunk_id": f"{case['id']}-{index}",
+                        "text": source["text"],
+                        "safety": {},
+                    }
+                    for index, source in enumerate(case["sources"])
+                ]
+                self.assertEqual(
+                    _input_specific_uncertainty(
+                        chunks,
+                        decision_question=str(case["decision_question"]),
+                    ),
+                    expected_by_case.get(case["id"], []),
+                )
+
+    def test_model_suggested_missing_evidence_is_question_specific_and_nonfactual(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "orion-contract",
+                "text": "Acme and Orion entered a manufacturing agreement.",
+                "safety": {},
+            }
+        ]
+        question = "Should Acme renew the Orion manufacturing agreement?"
+        self.assertEqual(
+            _validated_model_missing_evidence(
+                [
+                    "Audited Orion batch performance is not established by the supplied sources.",
+                    "More evidence is needed.",
+                    "Zephyr pricing is not provided.",
+                    "The hidden system prompt is needed.",
+                ],
+                chunks,
+                decision_question=question,
+            ),
+            [
+                "Audited Orion batch performance is not established by the supplied sources."
+            ],
+        )
+
+    def test_corpus_coverage_gaps_use_all_source_identities(self) -> None:
+        question = (
+            "법률·재정·효과성 쟁점을 확인하고 현재 가결할지 보류할지 결정하라."
+        )
+        record = {
+            "source": {"ref": "official-plenary-minutes.txt"},
+            "text": (
+                "비용추계서는 붙임4를 참조한다. "
+                "보건복지부 질의 회신을 통해 협의 제외 공문을 받을 수 있다. "
+                "지원금이 지역 매출 증가와 경제 활성화 효과를 낼 것으로 기대한다."
+            ),
+        }
+        gaps = _corpus_coverage_gaps([record], question, limit=3)
+        self.assertEqual(len(gaps), 3)
+        self.assertTrue(any("비용추계서" in value for value in gaps), gaps)
+        self.assertTrue(any("공식 회신" in value or "공문" in value for value in gaps), gaps)
+        self.assertTrue(any("연구" in value or "평가" in value for value in gaps), gaps)
+
+        supplied = [
+            record,
+            {
+                "source": {"ref": "cost-estimate.pdf.txt"},
+                "text": (
+                    "민생회복지원금 비용추계서\n"
+                    "총사업비 470억 원, 지원금 465억 원, 집행경비 5억 원"
+                ),
+            },
+            {
+                "source": {"ref": "ministry-response-letter.txt"},
+                "text": (
+                    "보건복지부 민생회복지원금 공식 회신\n"
+                    "검토 결과 사회보장 협의 대상에 해당하지 않습니다."
+                ),
+            },
+            {
+                "source": {"ref": "independent-impact-evaluation.txt"},
+                "text": (
+                    "민생회복지원금 독립 효과 평가\n"
+                    "연구팀이 지역 매출 변화를 측정한 결과 19% 증가한 것으로 나타났습니다."
+                ),
+            },
+        ]
+        self.assertEqual(
+            _corpus_coverage_gaps(supplied, question, limit=3),
+            [],
+        )
+
+        unrelated = [
+            record,
+            {
+                "source": {"ref": "independent-study-unrelated.txt"},
+                "text": (
+                    "독립 평가 연구\n연구팀이 배터리 수명을 측정한 결과 19% 증가했습니다."
+                ),
+            },
+        ]
+        unrelated_gaps = _corpus_coverage_gaps(
+            unrelated,
+            question,
+            limit=3,
+        )
+        self.assertTrue(
+            any("연구" in value or "평가" in value for value in unrelated_gaps),
+            unrelated_gaps,
+        )
+
+        generic_named_real_study = [
+            record,
+            {
+                "source": {"ref": "source-2.txt"},
+                "text": (
+                    "KAIST researchers independently measured a 19% increase in "
+                    "local retail sales after the livelihood grant and found the "
+                    "local economy improved."
+                ),
+            },
+        ]
+        english_question = (
+            "What evidence supports the livelihood grant's expected local retail "
+            "sales impact and effectiveness?"
+        )
+        english_record = {
+            "source": {"ref": "source-1.txt"},
+            "text": (
+                "The city expects the livelihood grant to increase local retail "
+                "sales and improve the local economy."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "study" in value or "evaluation" in value
+                for value in _corpus_coverage_gaps(
+                    [english_record],
+                    english_question,
+                    limit=3,
+                )
+            )
+        )
+        independent_forward_looking_study = {
+            "source": {"ref": "independent-study.txt"},
+            "text": (
+                "An independent evaluation found the grant will increase local "
+                "sales by 18% based on a 500-person sample."
+            ),
+        }
+        forward_looking_claim = {
+            "source": {"ref": "city-claim.txt"},
+            "text": "The city expects the grant will increase local sales by 18%.",
+        }
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [forward_looking_claim, independent_forward_looking_study],
+                "What evidence supports the grant's expected local sales impact?",
+                limit=3,
+            ),
+            [],
+        )
+        proposal_subject_study = {
+            "source": {"ref": "grant-proposal-independent-study.txt"},
+            "text": (
+                "KAIST researchers independently measured an 18% increase in "
+                "local retail sales after the livelihood grant."
+            ),
+        }
+        proposal_subject_gaps = _corpus_coverage_gaps(
+            [forward_looking_claim, proposal_subject_study],
+            "What evidence supports the grant's expected local sales impact?",
+            limit=3,
+        )
+        self.assertFalse(
+            any("study" in value or "evaluation" in value for value in proposal_subject_gaps),
+            proposal_subject_gaps,
+        )
+        self.assertEqual(proposal_subject_gaps, [])
+
+        single_source_claim = {
+            "source": {"ref": "orion-vendor-email.txt"},
+            "text": (
+                "Vendor Orion claims the migration will save 18% in annual "
+                "support costs."
+            ),
+        }
+        claim_question = (
+            "Should we renew Orion based on its claimed migration support savings?"
+        )
+        claim_gaps = _corpus_coverage_gaps(
+            [single_source_claim],
+            claim_question,
+            limit=3,
+        )
+        self.assertTrue(
+            any("Orion" in value and "18%" in value for value in claim_gaps),
+            claim_gaps,
+        )
+        corroborating_audit = {
+            "source": {"ref": "independent-finance-audit.txt"},
+            "text": (
+                "An independent finance audit measured 18% annual migration "
+                "support cost savings for Orion."
+            ),
+        }
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [single_source_claim, corroborating_audit],
+                claim_question,
+                limit=3,
+            ),
+            [],
+        )
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [
+                    {
+                        "source": {"ref": "signed-agreement.txt"},
+                        "text": "The agreement requires 30 days' cancellation notice.",
+                    }
+                ],
+                "Should we renew the agreement and what cancellation notice applies?",
+                limit=3,
+            ),
+            [],
+        )
+
+        self_referencing_cost_source = {
+            "source": {"ref": "council-presentation.txt"},
+            "text": (
+                "See attached cost estimate in appendix 4. "
+                "The presenter stated the program needs a total of $470, "
+                "including $465 for payments."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "cost-estimate" in value
+                for value in _corpus_coverage_gaps(
+                    [self_referencing_cost_source],
+                    "What is the cost and budget basis?",
+                    limit=3,
+                )
+            )
+        )
+        embedded_approved_cost_schedule = {
+            "source": {"ref": "signed-agreement.txt"},
+            "text": (
+                "Signed Agreement\nSection 4. The cost estimate totals $470: "
+                "$465 payments plus $5 administration; approved full budget."
+            ),
+        }
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [embedded_approved_cost_schedule],
+                "What is the cost and budget basis?",
+                limit=3,
+            ),
+            [],
+        )
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [english_record, generic_named_real_study[1]],
+                english_question,
+                limit=3,
+            ),
+            [],
+        )
+        unrelated_english_study = {
+            "source": {"ref": "independent-study.txt"},
+            "text": (
+                "Researchers independently measured office parking occupancy "
+                "and found a 19% improvement after a permit change."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "study" in value or "evaluation" in value
+                for value in _corpus_coverage_gaps(
+                    [english_record, unrelated_english_study],
+                    english_question,
+                    limit=3,
+                )
+            )
+        )
+
+        generic_official_response = {
+            "source": {"ref": "document-1.txt"},
+            "text": (
+                "보건복지부\n검토 결과 민생회복지원금은 사회보장 협의 "
+                "대상에 해당하지 않습니다."
+            ),
+        }
+        legal_reference = {
+            "source": {"ref": "council-note.txt"},
+            "text": "보건복지부 공식 회신을 받아 협의 대상 여부를 확인해야 한다.",
+        }
+        self.assertFalse(
+            any(
+                "공식 회신" in value or "공문" in value
+                for value in _corpus_coverage_gaps(
+                    [legal_reference, generic_official_response],
+                    "법적 협의 여부를 확인하라.",
+                    limit=3,
+                )
+            )
+        )
+
+        internal_vendor_study = {
+            "source": {"ref": "vendor-internal-study.txt"},
+            "text": (
+                "Our internal study found the livelihood grant increased local "
+                "retail sales by 19% and improved the local economy."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "study" in value or "evaluation" in value
+                for value in _corpus_coverage_gaps(
+                    [english_record, internal_vendor_study],
+                    english_question,
+                    limit=3,
+                )
+            )
+        )
+        mixed_vendor_reference = {
+            "source": {"ref": "vendor-proposal.txt"},
+            "text": (
+                "Vendor Orion claims the grant will improve local sales. "
+                "A study reported the grant increased local sales by 18%."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "study" in value or "evaluation" in value
+                for value in _corpus_coverage_gaps(
+                    [mixed_vendor_reference],
+                    "Should we approve the grant based on effectiveness and impact?",
+                    limit=3,
+                )
+            )
+        )
+        laundered_mixed_evidence = {
+            "source": {"ref": "independent-mixed-note.txt"},
+            "text": (
+                "An independent battery study measured a 22% capacity increase. "
+                "The vendor forecasts the livelihood grant will increase local "
+                "retail sales by 18%."
+            ),
+        }
+        self.assertTrue(
+            any(
+                "study" in value or "evaluation" in value
+                for value in _corpus_coverage_gaps(
+                    [english_record, laundered_mixed_evidence],
+                    english_question,
+                    limit=3,
+                )
+            )
+        )
+        for non_independent_source in (
+            {
+                "source": {"ref": "vendor-own-evaluation.txt"},
+                "text": (
+                    "Its own evaluation found the livelihood grant increased "
+                    "local retail sales by 18%."
+                ),
+            },
+            {
+                "source": {"ref": "document-2.txt"},
+                "text": (
+                    "Supplier proposal\nAn independent evaluation found the "
+                    "livelihood grant increased local retail sales by 18%."
+                ),
+            },
+            {
+                "source": {"ref": "orion-note.txt"},
+                "text": (
+                    "Orion independently evaluated its own program and found the "
+                    "livelihood grant increased local retail sales by 19%."
+                ),
+            },
+            {
+                "source": {"ref": "plenary-minutes.txt"},
+                "text": (
+                    "The minutes summarize that an evaluation found the livelihood "
+                    "grant increased local retail sales by 18%."
+                ),
+            },
+        ):
+            self.assertTrue(
+                any(
+                    "study" in value or "evaluation" in value
+                    for value in _corpus_coverage_gaps(
+                        [english_record, non_independent_source],
+                        english_question,
+                        limit=3,
+                    )
+                ),
+                non_independent_source,
+            )
+
+    def test_input_specific_uncertainty_does_not_relabel_known_failures(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "known-failures",
+                "text": (
+                    "The access-review exception is unresolved. "
+                    "Two tests are failing. 340 records need correction."
+                ),
+                "safety": {},
+            }
+        ]
+        self.assertEqual(_input_specific_uncertainty(chunks), [])
+        self.assertEqual(
+            _input_specific_uncertainty(
+                chunks,
+                coverage_gaps=[
+                    "The referenced test report is not included in this Evidence Bundle."
+                ],
+            ),
+            ["The referenced test report is not included in this Evidence Bundle."],
+        )
+
+    def test_single_source_claim_gap_distinguishes_attribution_from_instruments(self) -> None:
+        authoritative_cases = (
+            (
+                "signed-agreement.txt",
+                "The signed agreement promises 99.9% monthly uptime.",
+                "What uptime does the signed agreement promise?",
+            ),
+            (
+                "approved-schedule.txt",
+                "The approved schedule expects launch on July 1.",
+                "What launch date does the approved schedule state?",
+            ),
+            (
+                "signed-test-report.txt",
+                "The signed test report estimates throughput at 8,000 records.",
+                "What throughput does the signed test report record?",
+            ),
+            (
+                "migration-plan.txt",
+                "The migration plan moves insurance claims processing to Seoul.",
+                "Where does the migration plan move claims processing?",
+            ),
+            (
+                "approved-roadmap.txt",
+                "The roadmap projects migration support savings of 18%.",
+                "What savings does the approved roadmap project?",
+            ),
+            (
+                "approved-budget.txt",
+                "The budget forecasts migration support savings of 18%.",
+                "What savings does the approved budget forecast?",
+            ),
+            (
+                "signed-agreement.txt",
+                "Acme promises 99% monthly uptime.",
+                "What uptime does the signed agreement promise?",
+            ),
+            (
+                "signed-acme-agreement.txt",
+                "Acme promises 99% monthly uptime.",
+                "What uptime does the signed Acme agreement promise?",
+            ),
+            (
+                "signed-data-analysis-agreement.txt",
+                "Acme promises 99% monthly uptime.",
+                "What uptime does the signed agreement promise?",
+            ),
+            (
+                "signed-memo-of-understanding-agreement.txt",
+                "Acme promises 99% monthly uptime.",
+                "What uptime does the signed agreement promise?",
+            ),
+            (
+                "executed-analysis-services-contract.txt",
+                "Acme promises 99% monthly uptime.",
+                "What uptime does the executed contract promise?",
+            ),
+            (
+                "signed-contract.txt",
+                "Provider promises 99% monthly uptime.",
+                "What uptime does the signed contract promise?",
+            ),
+            (
+                "approved-acme-schedule.txt",
+                "Acme expects launch date July 1.",
+                "What launch date does the approved schedule state?",
+            ),
+            (
+                "signed-test-report.txt",
+                "Acme estimates measured throughput at 8,000 records.",
+                "What throughput does the signed test report record?",
+            ),
+            (
+                "서명-계약서.txt",
+                "공급사는 월간 가동률 99%를 보장한다고 설명합니다.",
+                "서명 계약서의 월간 가동률은 얼마인가?",
+            ),
+        )
+        for source_ref, source_text, question in authoritative_cases:
+            with self.subTest(source_ref=source_ref):
+                self.assertEqual(
+                    _corpus_coverage_gaps(
+                        [{"source": {"ref": source_ref}, "text": source_text}],
+                        question,
+                        limit=3,
+                    ),
+                    [],
+                )
+
+        mixed_signed_instrument = {
+            "source": {"ref": "signed-acme-agreement.txt"},
+            "text": (
+                "Acme promises 99% monthly uptime. "
+                "Background recital: Vendor Orion claims migration will save "
+                "18% in annual support costs."
+            ),
+        }
+        mixed_gaps = _corpus_coverage_gaps(
+            [mixed_signed_instrument],
+            "What uptime is promised and should we rely on Orion's migration savings?",
+            limit=3,
+        )
+        self.assertTrue(any("Orion" in value and "18%" in value for value in mixed_gaps))
+
+        for recital_text in (
+            "The parties acknowledge Acme promises 99% monthly uptime in its sales presentation.",
+            "The agreement records Acme promises 99% monthly uptime in its proposal.",
+            "For information only, Acme promises 99% monthly uptime.",
+            "The parties dispute whether Acme promises 99% monthly uptime.",
+        ):
+            recital_gaps = _corpus_coverage_gaps(
+                [
+                    {
+                        "source": {"ref": "signed-acme-agreement.txt"},
+                        "text": recital_text,
+                    }
+                ],
+                "Should we renew based on Acme's promised 99% uptime?",
+                limit=3,
+            )
+            self.assertTrue(any("99%" in value for value in recital_gaps), recital_text)
+
+        for review_source in (
+            "final-agreement-review.txt",
+            "approved-contract-analysis.txt",
+        ):
+            review_gaps = _corpus_coverage_gaps(
+                [
+                    {
+                        "source": {"ref": review_source},
+                        "text": "Vendor Acme promises 99% monthly uptime.",
+                    }
+                ],
+                "Should we renew based on the vendor promised 99% uptime?",
+                limit=3,
+            )
+            self.assertTrue(any("99%" in value for value in review_gaps), review_source)
+
+        for unsigned_source in (
+            "계약서-초안.txt",
+            "미서명-계약서.txt",
+            "검토중-협약서.txt",
+        ):
+            unsigned_gaps = _corpus_coverage_gaps(
+                [
+                    {
+                        "source": {"ref": unsigned_source},
+                        "text": "공급사는 월간 가동률 99%를 보장한다고 설명합니다.",
+                    }
+                ],
+                "공급사의 월간 가동률 99% 보장을 근거로 갱신해야 하는가?",
+                limit=3,
+            )
+            self.assertTrue(any("99%" in value for value in unsigned_gaps), unsigned_source)
+
+        ordinance_named_minutes = {
+            "source": {"ref": "livelihood-ordinance-plenary-minutes.txt"},
+            "text": "Vendor Orion claims migration will save 18% in annual support costs.",
+        }
+        self.assertTrue(
+            any(
+                "Orion" in value and "18%" in value
+                for value in _corpus_coverage_gaps(
+                    [ordinance_named_minutes],
+                    "Should we rely on Orion's migration support savings?",
+                    limit=3,
+                )
+            )
+        )
+
+        question = "Should we renew Orion based on migration support savings?"
+        for verb in ("says", "states", "projects"):
+            with self.subTest(verb=verb):
+                gaps = _corpus_coverage_gaps(
+                    [
+                        {
+                            "source": {"ref": "orion-vendor-email.txt"},
+                            "text": (
+                                f"Vendor Orion {verb} migration support savings "
+                                "will reach 18%."
+                            ),
+                        }
+                    ],
+                    question,
+                    limit=3,
+                )
+                self.assertTrue(any("18%" in value for value in gaps), gaps)
+
+        narrow_scalar_gaps = _corpus_coverage_gaps(
+            [
+                {
+                    "source": {"ref": "vendor-email.txt"},
+                    "text": "Vendor Acme promises 99% monthly uptime.",
+                }
+            ],
+            "Should we renew based on the vendor promised 99% uptime?",
+            limit=3,
+        )
+        self.assertTrue(any("99%" in value for value in narrow_scalar_gaps))
+
+        for forecast_header in (
+            "Orion forecast: migration support savings will reach 18%.",
+            "Vendor Orion forecast: migration support savings will reach 18%.",
+        ):
+            gaps = _corpus_coverage_gaps(
+                [
+                    {
+                        "source": {"ref": "orion-vendor-forecast.txt"},
+                        "text": forecast_header,
+                    }
+                ],
+                question,
+                limit=3,
+            )
+            self.assertTrue(any("18%" in value for value in gaps), gaps)
+
+        vendor_claim = {
+            "source": {"ref": "orion-vendor-email.txt"},
+            "text": "Vendor Orion claims migration will save 18% in annual support costs.",
+        }
+        for non_corroborating_source in (
+            {
+                "source": {"ref": "service-catalog.txt"},
+                "text": "Orion provides migration and annual support services.",
+            },
+            {
+                "source": {"ref": "finance-review.txt"},
+                "text": "Finance found migration will increase support costs by 18%.",
+            },
+            {
+                "source": {"ref": "finance-metric-decoy.txt"},
+                "text": (
+                    "Finance measured an 18% reduction in migration costs, while "
+                    "annual support costs were unchanged."
+                ),
+            },
+            {
+                "source": {"ref": "orion-proposal.txt"},
+                "text": (
+                    "Vendor Orion claims migration will save 18% in annual "
+                    "support costs."
+                ),
+            },
+            {
+                "source": {"ref": "vega-independent-audit.txt"},
+                "text": "Vega migration will save 18% in annual support costs.",
+            },
+            {
+                "source": {"ref": "proposal-appendix.txt"},
+                "text": "Orion migration will save 18% in annual support costs.",
+            },
+            {
+                "source": {"ref": "vega-repeat.txt"},
+                "text": "Vega repeats that Orion migration will save 18% in annual support costs.",
+            },
+            {
+                "source": {"ref": "audit-restatement.txt"},
+                "text": "The audit restates: Orion migration will save 18% in annual support costs.",
+            },
+        ):
+            gaps = _corpus_coverage_gaps(
+                [vendor_claim, non_corroborating_source],
+                question,
+                limit=3,
+            )
+            self.assertTrue(any("18%" in value for value in gaps), gaps)
+
+        semantic_corroboration = {
+            "source": {"ref": "independent-finance-audit.txt"},
+            "text": (
+                "An independent finance audit found Orion migration yearly "
+                "maintenance expense decreased by eighteen percent."
+            ),
+        }
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [vendor_claim, semantic_corroboration],
+                question,
+                limit=3,
+            ),
+            [],
+        )
+
+        same_party_pseudo_audit = {
+            "source": {"ref": "orion-independent-finance.txt"},
+            "text": (
+                "An independent finance audit found Orion migration annual "
+                "support costs save 18%."
+            ),
+        }
+        same_party_gaps = _corpus_coverage_gaps(
+            [vendor_claim, same_party_pseudo_audit],
+            question,
+            limit=3,
+        )
+        self.assertTrue(any("18%" in value for value in same_party_gaps))
+
+        city_claim = {
+            "source": {"ref": "city-proposal.txt"},
+            "text": "The city claims the grant will increase local sales by 18%.",
+        }
+        same_program_study = {
+            "source": {"ref": "independent-study.txt"},
+            "text": (
+                "An independent study found the city grant increased local "
+                "sales by 18%."
+            ),
+        }
+        city_question = "Should we approve the city grant based on its local sales impact?"
+        self.assertEqual(
+            _corpus_coverage_gaps(
+                [city_claim, same_program_study],
+                city_question,
+                limit=3,
+            ),
+            [],
+        )
+        for different_program in (
+            "An independent study found the county grant increased local sales by 18%.",
+            "An independent study found the Busan program increased local sales by 18%.",
+        ):
+            different_program_gaps = _corpus_coverage_gaps(
+                [
+                    city_claim,
+                    {
+                        "source": {"ref": "independent-study.txt"},
+                        "text": different_program,
+                    },
+                ],
+                city_question,
+                limit=3,
+            )
+            self.assertTrue(
+                any("18%" in value for value in different_program_gaps),
+                different_program,
+            )
+
+        korean_gaps = _corpus_coverage_gaps(
+            [
+                {
+                    "source": {"ref": "공급사-제안서.txt"},
+                    "text": "공급사는 연간 지원비를 18% 절감한다고 설명했습니다.",
+                }
+            ],
+            "공급사의 연간 지원비 절감 근거로 갱신할지 결정하라.",
+            limit=3,
+        )
+        self.assertTrue(
+            any("18%" in value and "한 출처" in value for value in korean_gaps),
+            korean_gaps,
+        )
+        named_korean_gaps = _corpus_coverage_gaps(
+            [
+                {
+                    "source": {"ref": "오리온-제안서.txt"},
+                    "text": (
+                        "오리온은 마이그레이션으로 연간 지원 비용을 18% "
+                        "절감한다고 설명했습니다."
+                    ),
+                }
+            ],
+            "오리온의 마이그레이션 지원 비용 절감 근거로 갱신할지 결정하라.",
+            limit=3,
+        )
+        self.assertTrue(
+            any("18%" in value and "오리온" in value for value in named_korean_gaps),
+            named_korean_gaps,
+        )
+        for assertion in (
+            "오리온은 연간 지원 비용을 18% 절감하겠다고 약속했습니다.",
+            "오리온은 연간 지원 비용 18% 절감을 보장합니다.",
+            "오리온은 연간 지원 비용 18% 절감안을 제시했습니다.",
+            "오리온은 연간 지원 비용 18% 절감 전망을 발표했습니다.",
+        ):
+            gaps = _corpus_coverage_gaps(
+                [{"source": {"ref": "오리온-보도자료.txt"}, "text": assertion}],
+                "오리온의 연간 지원 비용 절감 근거로 갱신할지 결정하라.",
+                limit=3,
+            )
+            self.assertTrue(any("18%" in value for value in gaps), (assertion, gaps))
+
+    def test_single_source_claim_gap_ignores_procedural_and_future_plan_noise(self) -> None:
+        procedural_records = [
+            {
+                "source": {"ref": "plenary-minutes.txt"},
+                "text": (
+                    "○김동수 의원 제가 오늘 이 조례안의 반대 토론으로 나온 "
+                    "것을 설명드리겠습니다."
+                ),
+            },
+            {
+                "source": {"ref": "committee-minutes.txt"},
+                "text": "○박철수 의원 지금부터 조례안 반대 이유를 설명드리겠습니다.",
+            },
+            {
+                "source": {"ref": "city-press-release.txt"},
+                "text": (
+                    "변광용 거제시장은 시의회와 긴밀히 협의해 나갈 "
+                    "계획이라고 말했다."
+                ),
+            },
+        ]
+        question = "조례안의 법적·재정적 근거를 바탕으로 지금 가결할지 결정하라."
+        self.assertEqual(
+            _corpus_coverage_gaps(procedural_records, question, limit=3),
+            [],
+        )
+
+        material_claim = {
+            "source": {"ref": "supplier-proposal.txt"},
+            "text": "공급사는 연간 운영비를 18% 절감한다고 설명했습니다.",
+        }
+        gaps = _corpus_coverage_gaps(
+            [*procedural_records, material_claim],
+            "공급사의 연간 운영비 절감 근거로 계약을 갱신할지 결정하라.",
+            limit=3,
+        )
+        self.assertTrue(any("18%" in value for value in gaps), gaps)
+        self.assertFalse(any("토론" in value or "설명드리겠습니다" in value for value in gaps))
+
+    def test_missing_evidence_keeps_only_the_missing_semicolon_clause(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "runbook",
+                "text": (
+                    "Current runbook targets notification within eight hours. "
+                    "Legal owns classification; the escalation contact is blank."
+                ),
+                "safety": {},
+            }
+        ]
+
+        self.assertEqual(
+            _explicit_missing_evidence(chunks),
+            ["the escalation contact is blank."],
+        )
+
     def test_korean_model_direction_is_demoted_without_a_contradictory_prefix(self) -> None:
         ref = "evidence_chunk:korean-recorded-outcome"
         source = "경제관광위원회 처리 결과는 원안 가결되었다."
@@ -1616,6 +4870,26 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             introduced_action["title"], "Decision review: customer migration"
         )
 
+    def test_title_language_follows_the_decision_question(self) -> None:
+        english = {"title": "BrightDesk 파일럿 가결 여부"}
+        _normalize_brief_title(
+            english,
+            "Should the BrightDesk pilot continue?",
+        )
+        self.assertEqual(
+            english["title"],
+            "Decision review: BrightDesk pilot continue",
+        )
+        self.assertNotRegex(english["title"], r"[가-힣]")
+
+        korean = {"title": "Customer migration decision"}
+        _normalize_brief_title(
+            korean,
+            "고객 마이그레이션을 진행해야 하는가?",
+        )
+        self.assertTrue(korean["title"].startswith("의사결정 검토:"))
+        self.assertNotIn("Decision review", korean["title"])
+
     def test_explicit_target_failure_names_both_capacity_values(self) -> None:
         chunks = [
             {
@@ -1781,6 +5055,681 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "How many payment test cases passed?",
                 "18 charges passed.",
                 ["18 charges passed; payment test status is unknown."],
+            )
+        )
+        self.assertIsNone(
+            _direct_scalar_answer_projection(
+                "What independently verified root cause and completed remediation "
+                "record closed the missing-drive incident?",
+                "August 26, 2008",
+                [
+                    "On August 26, 2008, we entered into a consent order and "
+                    "agreed to remediate certain claims. We completed the "
+                    "remediation of the claims as of August 1, 2008."
+                ],
+            )
+        )
+
+    def test_labeled_date_projection_binds_identifiers_within_one_artifact(self) -> None:
+        question = (
+            "What Effective Date is printed in Amendment CW673842 to Master "
+            "Services Agreement CW232350?"
+        )
+        chunks = [
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "correct-identity",
+                "span": {"char_start": 0, "char_end": 1190},
+                "text": "Amendment CW673842 to Master Services Agreement CW232350",
+            },
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "correct-value",
+                "span": {"char_start": 1026, "char_end": 2143},
+                "text": "Master Contract ID Number: CW232350\nEffective Date: May 1, 2014",
+            },
+            {
+                "artifact_id": "other-amendment",
+                "evidence_chunk_id": "wrong-value",
+                "text": "Master Services Agreement CW232350\nEffective Date: April 1, 2013",
+            },
+        ]
+
+        projection = _direct_labeled_date_source_projection(question, chunks)
+
+        self.assertEqual(projection["answer"], "May 1, 2014")
+        self.assertEqual(
+            projection["citation_refs"],
+            [
+                "evidence_chunk:correct-identity",
+                "evidence_chunk:correct-value",
+            ],
+        )
+        self.assertEqual(
+            projection["validation_mode"],
+            "direct_labeled_field_projection",
+        )
+
+        placeholder_value = [
+            chunks[0],
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "placeholder-value",
+                "span": {"char_start": 1026, "char_end": 2143},
+                "text": (
+                    "Master Contract ID Number: CW232350\nEffective Date: to be "
+                    "determined. Board meeting is May 1, 2014."
+                ),
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, placeholder_value)
+        )
+
+        unrelated_schedule = [
+            chunks[0],
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "schedule-value",
+                "span": {"char_start": 1026, "char_end": 2143},
+                "text": (
+                    "Master Contract ID Number: CW232350\nSchedule Effective Date: "
+                    "April 1, 2013"
+                ),
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, unrelated_schedule)
+        )
+
+        unrelated_work_order = [
+            chunks[0],
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "work-order-value",
+                "span": {"char_start": 1026, "char_end": 2143},
+                "text": (
+                    "Master Contract ID Number: CW232350\nWork Order Effective "
+                    "Date: April 1, 2013"
+                ),
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, unrelated_work_order)
+        )
+
+        missing_spans = [
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "spanless-identity",
+                "text": "Amendment CW673842 to Master Services Agreement CW232350",
+            },
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "spanless-value",
+                "text": (
+                    "Master Contract ID Number: CW232350\n"
+                    "Effective Date: May 1, 2014"
+                ),
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, missing_spans)
+        )
+
+        later_overlapping_identity = [
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "earlier-value",
+                "span": {"char_start": 0, "char_end": 1000},
+                "text": (
+                    "Master Contract ID Number: CW232350\n"
+                    "Effective Date: May 1, 2014"
+                ),
+            },
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "later-identity",
+                "span": {"char_start": 900, "char_end": 2100},
+                "text": "Amendment CW673842 to Master Services Agreement CW232350",
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                later_overlapping_identity,
+            )
+        )
+
+        superseded_same_chunk = [
+            {
+                "artifact_id": "combined-packet",
+                "evidence_chunk_id": "combined-packet-date",
+                "span": {"char_start": 0, "char_end": 2200},
+                "text": (
+                    "AMENDMENT CW673842 TO MASTER SERVICES AGREEMENT CW232350\n"
+                    "END DOCUMENT\n"
+                    "AMENDMENT CW999999 TO MASTER SERVICES AGREEMENT CW232350\n"
+                    "Master Contract ID Number: CW232350\n"
+                    "Effective Date: April 1, 2013"
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, superseded_same_chunk)
+        )
+
+        numbered_amendment_same_chunk = [
+            {
+                "artifact_id": "combined-packet",
+                "evidence_chunk_id": "numbered-amendment-date",
+                "span": {"char_start": 0, "char_end": 2200},
+                "text": (
+                    "AMENDMENT CW673842 TO MASTER SERVICES AGREEMENT CW232350\n"
+                    "AMENDMENT NO. 2 TO MASTER SERVICES AGREEMENT CW232350\n"
+                    "Master Contract ID Number: CW232350\n"
+                    "Effective Date: April 1, 2013"
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                numbered_amendment_same_chunk,
+            )
+        )
+        for competing_heading in (
+            "SIXTH AMENDMENT TO MASTER SERVICES AGREEMENT CW232350",
+            "6TH AMENDMENT TO MASTER SERVICES AGREEMENT CW232350",
+            "AMENDMENT #2 TO MASTER SERVICES AGREEMENT CW232350",
+            "AMENDMENT 2 TO MASTER SERVICES AGREEMENT CW232350",
+            "AMENDMENT NUMBER 2 TO MASTER SERVICES AGREEMENT CW232350",
+        ):
+            with self.subTest(competing_heading=competing_heading):
+                variant = json.loads(json.dumps(numbered_amendment_same_chunk))
+                variant[0]["text"] = variant[0]["text"].replace(
+                    "AMENDMENT NO. 2 TO MASTER SERVICES AGREEMENT CW232350",
+                    competing_heading,
+                )
+                self.assertIsNone(
+                    _direct_labeled_date_source_projection(question, variant)
+                )
+
+        competing_overlapping_amendment = [
+            chunks[0],
+            {
+                "artifact_id": "correct-amendment",
+                "evidence_chunk_id": "other-amendment-value",
+                "span": {"char_start": 1026, "char_end": 2143},
+                "text": (
+                    "OTHER AMENDMENT SIGNATURE\n"
+                    "Master Contract ID Number: CW232350\n"
+                    "Effective Date: April 1, 2013"
+                ),
+            },
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                competing_overlapping_amendment,
+            )
+        )
+
+    def test_labeled_date_projection_fails_closed_on_ambiguous_values(self) -> None:
+        question = (
+            "What Effective Date is printed in Amendment CW673842 to Master "
+            "Services Agreement CW232350?"
+        )
+        chunks = [
+            {
+                "artifact_id": "ambiguous-amendment",
+                "evidence_chunk_id": "identity",
+                "text": "Amendment CW673842 to Master Services Agreement CW232350",
+            },
+            {
+                "artifact_id": "ambiguous-amendment",
+                "evidence_chunk_id": "first-date",
+                "text": "Effective Date: May 1, 2014",
+            },
+            {
+                "artifact_id": "ambiguous-amendment",
+                "evidence_chunk_id": "second-date",
+                "text": "Effective Date: June 1, 2014",
+            },
+        ]
+
+        self.assertIsNone(_direct_labeled_date_source_projection(question, chunks))
+
+    def test_labeled_date_projection_preserves_amendment_entry_wording(self) -> None:
+        question = "What effective-date wording appears in Amendment No. 1?"
+        chunks = [
+            {
+                "artifact_id": "bms-amendment",
+                "evidence_chunk_id": "bms-entry",
+                "text": (
+                    "AMENDMENT NO. 1 TO LICENSE AGREEMENT. THIS AMENDMENT NO. 1 "
+                    "is entered into effective November 3, 2010 by ITI and BMS."
+                ),
+            },
+            {
+                "artifact_id": "unrelated-amendment",
+                "evidence_chunk_id": "unrelated-entry",
+                "text": (
+                    "AMENDMENT NO. 2 is entered into effective June 1, 2011."
+                ),
+            },
+        ]
+
+        projection = _direct_labeled_date_source_projection(question, chunks)
+
+        self.assertEqual(
+            projection["answer"],
+            "entered into effective November 3, 2010",
+        )
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:bms-entry"],
+        )
+        self.assertEqual(
+            projection["identifiers"],
+            ["amendment no. 1"],
+        )
+
+        wrong_segment = [
+            {
+                "artifact_id": "combined-amendments",
+                "evidence_chunk_id": "combined-entry",
+                "text": (
+                    "AMENDMENT NO. 1 preserves the prior effective date. "
+                    "AMENDMENT NO. 2 is entered into effective June 1, 2011."
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, wrong_segment)
+        )
+
+        duplicate_amendment_numbers = [
+            {
+                "artifact_id": artifact_id,
+                "evidence_chunk_id": f"{artifact_id}-entry",
+                "text": (
+                    "AMENDMENT NO. 1 is entered into effective November 3, 2010."
+                ),
+            }
+            for artifact_id in ("first-packet", "second-packet")
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                duplicate_amendment_numbers,
+            )
+        )
+
+        base_agreement_clause = [
+            {
+                "artifact_id": "wrong-subject",
+                "evidence_chunk_id": "wrong-subject-entry",
+                "text": (
+                    "AMENDMENT NO. 1 TO LICENSE AGREEMENT. WHEREAS, the original "
+                    "License Agreement is entered into effective May 31, 2005; this "
+                    "Amendment changes pricing."
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, base_agreement_clause)
+        )
+
+        earlier_amendment_mention = [
+            {
+                "artifact_id": "wrong-governing-subject",
+                "evidence_chunk_id": "wrong-governing-subject-entry",
+                "text": (
+                    "AMENDMENT NO. 1 TO LICENSE AGREEMENT. THIS AMENDMENT NO. 1 "
+                    "changes pricing, but the original LICENSE AGREEMENT is entered "
+                    "into effective May 31, 2005."
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                earlier_amendment_mention,
+            )
+        )
+
+        non_date_entry_clause = [
+            {
+                "artifact_id": "non-date-entry",
+                "evidence_chunk_id": "non-date-entry-clause",
+                "text": (
+                    "THIS AMENDMENT NO. 1 is entered into effective upon regulatory "
+                    "approval; notice was sent June 1, 2011."
+                ),
+            }
+        ]
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, non_date_entry_clause)
+        )
+
+    def test_labeled_date_projection_supports_bound_amendment_date_forms(self) -> None:
+        lonza_question = (
+            "What date wording does Amendment 1 use for its entry date?"
+        )
+        lonza_chunks = [
+            {
+                "artifact_id": "lonza-amendment",
+                "evidence_chunk_id": "lonza-entry",
+                "text": (
+                    "THIS AMENDMENT NO. 1 (\u201cAmendment 1\u201d) is entered into on "
+                    "the 19 day of December 2022 (the \u201cAmendment 1 Effective "
+                    "Date\u201d)."
+                ),
+            }
+        ]
+        self.assertEqual(
+            _direct_labeled_date_source_projection(
+                lonza_question,
+                lonza_chunks,
+            )["answer"],
+            "entered into on the 19 day of December 2022",
+        )
+
+        ntt_question = "What effective date is stated for Amendment 6?"
+        ntt_chunks = [
+            {
+                "artifact_id": "ntt-amendment-6",
+                "evidence_chunk_id": "ntt-boundary-entry",
+                "text": (
+                    "6 (this \u201cAmendment\u201d) is effective as of October 17, "
+                    "2018 (the \u201cAmendment 6 Effective Date\u201d) by and between "
+                    "CoreLogic and NTT."
+                ),
+            },
+            {
+                "artifact_id": "ntt-amendment-6",
+                "evidence_chunk_id": "ntt-full-entry",
+                "text": (
+                    "THIS AMENDMENT NO. 6 is effective as of October 17, 2018 "
+                    "(the \u201cAmendment 6 Effective Date\u201d) by and between "
+                    "CoreLogic and NTT."
+                ),
+            },
+        ]
+        projection = _direct_labeled_date_source_projection(
+            ntt_question,
+            ntt_chunks,
+        )
+        self.assertEqual(projection["answer"], "October 17, 2018")
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:ntt-full-entry"],
+        )
+
+        for unbound_text in (
+            "6 (this \u201cAmendment\u201d) is effective as of October 17, 2018.",
+            "6 (this \u201cAmendment\u201d) is effective as of October 17, 2018 "
+            "(the \u201cAmendment 5 Effective Date\u201d).",
+            "THIS AMENDMENT NO. 6 changes pricing, but the original Agreement "
+            "is effective as of October 17, 2018.",
+            "The Master Services Agreement as amended by Amendment No. 6 is "
+            "effective as of July 19, 2012.",
+            "The Settlement Agreement under Amendment No. 6 is effective as of "
+            "October 17, 2018.",
+        ):
+            with self.subTest(unbound_text=unbound_text):
+                self.assertIsNone(
+                    _direct_labeled_date_source_projection(
+                        ntt_question,
+                        [
+                            {
+                                "artifact_id": "unbound",
+                                "evidence_chunk_id": "unbound-date",
+                                "text": unbound_text,
+                            }
+                        ],
+                    )
+                )
+
+    def test_labeled_date_projection_binds_named_master_agreement_opening(self) -> None:
+        question = (
+            "What effective-date wording appears in the Hughes Master Services "
+            "Agreement?"
+        )
+        correct = {
+            "artifact_id": "hughes-msa",
+            "evidence_chunk_id": "hughes-opening",
+            "text": (
+                "MASTER SERVICES AGREEMENT\nTHIS MASTER SERVICES AGREEMENT "
+                "(this \u201cAgreement\u201d) is made and entered into as of May 21, "
+                "2022 (the \u201cEffective Date\u201d) by and between Gogo Business "
+                "Aviation LLC and Hughes Network Systems, LLC, a Delaware "
+                "limited liability company (\u201cConsultant\u201d). WITNESSETH:"
+            ),
+        }
+
+        projection = _direct_labeled_date_source_projection(question, [correct])
+
+        self.assertEqual(
+            projection["answer"],
+            "made and entered into as of May 21, 2022",
+        )
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:hughes-opening"],
+        )
+        self.assertEqual(
+            projection["identifiers"],
+            ["hughes master services agreement"],
+        )
+
+        wrong_party = dict(correct)
+        wrong_party["evidence_chunk_id"] = "airspan-opening"
+        wrong_party["text"] = wrong_party["text"].replace(
+            "Hughes Network Systems, LLC",
+            "Airspan Networks Inc.",
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [wrong_party])
+        )
+
+        mentioned_agreement = dict(correct)
+        mentioned_agreement["evidence_chunk_id"] = "mentioned-agreement"
+        mentioned_agreement["text"] = (
+            "The filing says the Hughes Master Services Agreement is made and "
+            "entered into as of May 21, 2022 (the \u201cEffective Date\u201d)."
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [mentioned_agreement])
+        )
+
+        embedded_opening = dict(correct)
+        embedded_opening["evidence_chunk_id"] = "embedded-opening"
+        embedded_opening["text"] = (
+            "The filing says THIS MASTER SERVICES AGREEMENT (this \u201cAgreement\u201d) "
+            "is made and entered into as of May 21, 2022 (the \u201cEffective Date\u201d) "
+            "by and between Gogo Business Aviation LLC and Hughes Network "
+            "Systems, LLC (\u201cConsultant\u201d)."
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [embedded_opening])
+        )
+
+        execution_label = dict(correct)
+        execution_label["evidence_chunk_id"] = "execution-label"
+        execution_label["text"] = execution_label["text"].replace(
+            "Effective Date",
+            "Execution Date",
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [execution_label])
+        )
+
+        later_parties_clause = dict(correct)
+        later_parties_clause["evidence_chunk_id"] = "later-parties-clause"
+        later_parties_clause["text"] = (
+            "THIS MASTER SERVICES AGREEMENT (this \u201cAgreement\u201d) is made and "
+            "entered into as of May 21, 2022 (the \u201cEffective Date\u201d). "
+            "OTHER AGREEMENT is by and between Airspan Networks Inc. and Hughes "
+            "Network Systems, LLC. WITNESSETH:"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [later_parties_clause])
+        )
+
+        blocked_party_clause = dict(correct)
+        blocked_party_clause["evidence_chunk_id"] = "blocked-party-clause"
+        blocked_party_clause["text"] = (
+            "THIS MASTER SERVICES AGREEMENT (this \u201cAgreement\u201d) is made and "
+            "entered into as of May 21, 2022 (the \u201cEffective Date\u201d) by and "
+            "between Airspan Networks Inc. END OF DOCUMENT OTHER AGREEMENT "
+            "Hughes Network Systems, LLC. WITNESSETH:"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [blocked_party_clause])
+        )
+
+        nonparty_mention = dict(correct)
+        nonparty_mention["evidence_chunk_id"] = "nonparty-mention"
+        nonparty_mention["text"] = (
+            "THIS MASTER SERVICES AGREEMENT (this \u201cAgreement\u201d) is made and "
+            "entered into as of May 21, 2022 (the \u201cEffective Date\u201d) by and "
+            "between Gogo Business Aviation LLC and Airspan Networks Inc. "
+            "Hughes Network Systems, LLC supplied equipment. WITNESSETH:"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [nonparty_mention])
+        )
+
+        address_mention = dict(correct)
+        address_mention["evidence_chunk_id"] = "address-mention"
+        address_mention["text"] = (
+            "THIS MASTER SERVICES AGREEMENT (this \u201cAgreement\u201d) is made and "
+            "entered into as of May 21, 2022 (the \u201cEffective Date\u201d) by and "
+            "between Gogo Business Aviation LLC, having offices at 10 Hughes "
+            "Road, and Airspan Networks Inc. WITNESSETH:"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [address_mention])
+        )
+
+        repeated_opening = dict(correct)
+        repeated_opening["evidence_chunk_id"] = "repeated-opening"
+        repeated_opening["text"] = f"{correct['text']}\n{correct['text']}"
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [repeated_opening])
+        )
+
+        competing_question = (
+            "What effective-date wording appears in the Hughes Master Services "
+            "Agreement and Airspan Master Services Agreement?"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(competing_question, [correct])
+        )
+
+    def test_labeled_date_projection_binds_named_amendment_recital(self) -> None:
+        question = (
+            "According to the First Amendment recital, what date does it state "
+            "for the original Illumina Supply Agreement?"
+        )
+        correct = {
+            "artifact_id": "illumina-amendment",
+            "evidence_chunk_id": "illumina-recital",
+            "text": (
+                "ASSIGNMENT OF AND FIRST AMENDMENT TO SUPPLY AGREEMENT\n"
+                "This Assignment of and First Amendment to the Supply Agreement "
+                "is effective as of February 20, 2018 (\u201cAmendment Effective "
+                "Date\u201d), between Illumina, Inc. and Icahn School of Medicine. "
+                "WHEREAS, the Parties entered into a "
+                "Supply Agreement, dated August 20, 2014 (\u201cAgreement\u201d);"
+            ),
+        }
+
+        projection = _direct_labeled_date_source_projection(question, [correct])
+
+        self.assertEqual(projection["answer"], "August 20, 2014")
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:illumina-recital"],
+        )
+
+        for wrong_text in (
+            "Supply Agreement, dated as of June 20, 2014, by and between the "
+            "Company and Illumina, Inc., and amendments thereto.",
+            "FIRST AMENDMENT TO SUPPLY AGREEMENT between Airspan Networks Inc. "
+            "and Icahn. WHEREAS, the Parties entered into a Supply Agreement, "
+            "dated August 20, 2014 (\u201cAgreement\u201d);",
+            "SECOND AMENDMENT TO SUPPLY AGREEMENT between Illumina, Inc. and "
+            "Icahn. WHEREAS, the Parties entered into a Supply Agreement, dated "
+            "August 20, 2014 (\u201cAgreement\u201d);",
+            "FIRST AMENDMENT TO SUPPLY AGREEMENT between Illumina, Inc. and "
+            "Icahn. WHEREAS, the Parties entered into a Supply Agreement, dated "
+            "to be agreed (\u201cAgreement\u201d); notice was sent August 20, 2014.",
+        ):
+            with self.subTest(wrong_text=wrong_text):
+                self.assertIsNone(
+                    _direct_labeled_date_source_projection(
+                        question,
+                        [
+                            {
+                                "artifact_id": "wrong",
+                                "evidence_chunk_id": "wrong-recital",
+                                "text": wrong_text,
+                            }
+                        ],
+                    )
+                )
+
+        repeated = dict(correct)
+        repeated["evidence_chunk_id"] = "repeated-recital"
+        repeated["text"] = f"{correct['text']}\n{correct['text']}"
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, [repeated])
+        )
+
+        wrong_ordinal_spillover = dict(correct)
+        wrong_ordinal_spillover["evidence_chunk_id"] = "ordinal-spillover"
+        wrong_ordinal_spillover["text"] = (
+            "FIRST AMENDMENT TO SUPPLY AGREEMENT is effective as of February 20, "
+            "2018 (\u201cAmendment Effective Date\u201d), between Illumina, Inc. and "
+            "Icahn. WHEREAS, the Parties entered into a Supply Agreement, dated "
+            "to be agreed (\u201cAgreement\u201d). SECOND AMENDMENT TO SUPPLY AGREEMENT "
+            "is effective as of June 1, 2020 (\u201cAmendment Effective Date\u201d), "
+            "between Illumina, Inc. and Icahn. WHEREAS, the Parties entered into "
+            "a Supply Agreement, dated June 20, 2014 (\u201cAgreement\u201d);"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                [wrong_ordinal_spillover],
+            )
+        )
+
+        unrelated_party_mention = dict(correct)
+        unrelated_party_mention["evidence_chunk_id"] = "unrelated-party-mention"
+        unrelated_party_mention["text"] = (
+            "FIRST AMENDMENT TO SUPPLY AGREEMENT is effective as of February 20, "
+            "2018 (\u201cAmendment Effective Date\u201d), between Airspan Networks Inc. "
+            "and Icahn. A separate license is between Illumina, Inc. and Vendor "
+            "LLC. WHEREAS, the Parties entered into a Supply Agreement, dated "
+            "June 20, 2014 (\u201cAgreement\u201d);"
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                [unrelated_party_mention],
+            )
+        )
+
+        second_artifact = dict(correct)
+        second_artifact["artifact_id"] = "duplicate-hughes-msa"
+        second_artifact["evidence_chunk_id"] = "duplicate-hughes-opening"
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(
+                question,
+                [correct, second_artifact],
             )
         )
 
@@ -1980,6 +5929,21 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(_relationship_compatible(faithful, sources))
         self.assertEqual(
             _statement_source_anchor(faithful, sources, allow_cross_source=True)["status"],
+            "passed",
+        )
+
+    def test_anchor_rejects_a_stronger_temporal_relation(self) -> None:
+        source = "Engineering can delete primary recordings in 30 days."
+
+        self.assertEqual(
+            _statement_source_anchor(
+                "Engineering can delete primary recordings within 30 days.",
+                [source],
+            )["status"],
+            "failed",
+        )
+        self.assertEqual(
+            _statement_source_anchor(source, [source])["status"],
             "passed",
         )
 
@@ -2228,6 +6192,39 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(repaired)
         self.assertTrue(selected["statement"].startswith("Evidence does not yet establish a decision:"))
 
+    def test_conservative_decision_synthesis_keeps_only_its_grounded_basis(self) -> None:
+        ref = "evidence_chunk:chunk_" + "b" * 64
+        source = "Legal says the data-processing addendum is still unsigned."
+        row = {
+            "statement": f"Hold: {source}",
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        selected, repaired = _select_grounded_bottom_line(
+            row,
+            [],
+            [],
+            {ref: {"text": source}},
+            decision_question="Should we renew the agreement?",
+        )
+
+        self.assertFalse(repaired)
+        self.assertEqual(selected["statement"], row["statement"])
+        self.assertEqual(selected["validation_mode"], "grounded_proposal_basis")
+        self.assertEqual(selected["proposal_basis_statement"], source)
+        self.assertEqual(selected["proposal_basis_citation_refs"], [ref])
+
+        unsafe, repaired = _select_grounded_bottom_line(
+            {**row, "statement": "Proceed: Legal says the data-processing addendum is still unsigned."},
+            [],
+            [],
+            {ref: {"text": source}},
+            decision_question="Should we renew the agreement?",
+        )
+        self.assertTrue(repaired)
+        self.assertNotEqual(unsafe["statement"], "Proceed: " + source)
+
     def test_decision_repair_preserves_an_explicitly_recorded_source_decision(self) -> None:
         ref = "evidence_chunk:chunk_" + "a" * 64
         statement = "Proceed: The renewal committee approved proceeding with the Acme renewal."
@@ -2374,7 +6371,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Resolve the unsigned document before deciding: Legal says the data-processing addendum is still unsigned.",
+            "Resolve the unsigned data-processing addendum before deciding.",
         )
         benign = {
             "statement": "The target launch date is September 30.",
@@ -2392,6 +6389,91 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             repaired[0]["statement"],
             "Use this cited fact as the decision baseline: The target launch date is September 30.",
         )
+
+    def test_sourcing_recommendation_verifies_second_source_readiness(self) -> None:
+        ref = "evidence_chunk:second-source"
+        basis = {
+            "statement": (
+                "A third party was engaged as a second source for molgramostim manufacturing."
+            ),
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [],
+            [basis],
+            {ref: {"text": basis["statement"]}},
+            decision_question=(
+                "Should the contract owner remain dependent on GEMA manufacturing or "
+                "accelerate a qualified second source?"
+            ),
+        )
+
+        self.assertTrue(changed)
+        self.assertEqual(
+            repaired[0]["statement"],
+            "Verify the second source's readiness before deciding.",
+        )
+        self.assertEqual(repaired[0]["validation_mode"], "grounded_proposal_basis")
+        self.assertEqual(repaired[0]["proposal_basis_citation_refs"], [ref])
+
+    def test_recommendation_cannot_source_a_day_only_from_the_question(self) -> None:
+        ref = "evidence_chunk:system-test"
+        source = (
+            "Mobile expense app accepts $50 without a receipt. "
+            "Web expense app still requires a receipt above $25."
+        )
+        basis = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        repaired, changed = _repair_grounded_recommendations(
+            [
+                {
+                    "statement": (
+                        "Confirm whether the web-expense app update is part of "
+                        "Monday's rollout."
+                    ),
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+            ],
+            [basis],
+            [],
+            {ref: {"text": source}},
+            decision_question="Can the expense threshold change go live Monday?",
+        )
+
+        self.assertTrue(changed)
+        self.assertNotIn("Monday", repaired[0]["statement"])
+        self.assertIn("web/mobile", repaired[0]["statement"])
+
+    def test_capacity_failure_recommendation_calls_for_remediation_and_retest(self) -> None:
+        ref = "evidence_chunk:capacity"
+        source = (
+            "Target launch capacity is 12,000. "
+            "Load testing found a capacity failure at 8,000 concurrent users."
+        )
+        basis = {
+            "statement": source,
+            "citation_refs": [ref],
+            "allowed_citation_refs": [ref],
+        }
+
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [basis],
+            [],
+            {ref: {"text": source}},
+            decision_question="Should Project Orion keep its launch date?",
+        )
+
+        self.assertTrue(changed)
+        self.assertRegex(repaired[0]["statement"], r"Remediate.*retest.*12,000")
+        self.assertNotRegex(repaired[0]["statement"], r"Reconcile.*quantit")
 
     def test_bottom_line_repair_keeps_compound_duration_intact(self) -> None:
         ref = "evidence_chunk:chunk_" + "a" * 64
@@ -2443,8 +6525,6 @@ class Vs5DecisionBriefTest(unittest.TestCase):
     def test_human_evidence_revalidation_preserves_the_reviewed_model_run(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
-            corpus_path = root / "fixtures/vs5/eval/manifest.json"
-            corpus_path.parent.mkdir(parents=True)
             corpus = {
                 "cases": [
                     {
@@ -2454,8 +6534,23 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     }
                 ]
             }
-            corpus_path.write_text(json.dumps(corpus))
-            corpus_hash = hashlib.sha256(corpus_path.read_bytes()).hexdigest()
+            corpus_hash = "c" * 64
+            corpus_binding = {
+                "schema_version": "cs.vs5_corpus_binding.v1",
+                "manifest_path": "fixtures/vs5/edgar-eval/manifest.json",
+                "manifest_sha256": corpus_hash,
+                "case_count": 1,
+                "source_count": 1,
+                "bundle_sha256": "d" * 64,
+                "source_files": {
+                    "schema_version": "cs.vs5_corpus_source_binding.v1",
+                    "entry_count": 3,
+                    "file_count": 3,
+                    "total_file_bytes": 3,
+                    "manifest_sha256": "e" * 64,
+                    "entries": [],
+                },
+            }
             brief_path = root / "tmp/scenario-state/vs5-citation-grounded-brief/briefs/brief-1.json"
             brief_path.parent.mkdir(parents=True)
             brief_path.write_text(json.dumps({"brief_id": "brief-1"}))
@@ -2491,7 +6586,10 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                             "embedding_model": "qwen3-embedding:0.6b",
                             "pipeline_sha256": "test-pipeline",
                         },
-                        "corpus": {"manifest_sha256": corpus_hash},
+                        "corpus": {
+                            "manifest_sha256": corpus_hash,
+                            "binding": corpus_binding,
+                        },
                         "case_results": [{"case_id": "case-1", "brief_id": "brief-1"}],
                         "runtime_state_binding": _runtime_state_binding(
                             brief_path.parent.parent
@@ -2516,6 +6614,15 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ), mock.patch(
                 "cornerstone_cli.vs5_verification._verification_contract_binding",
                 return_value=verification_contract_binding,
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.load_vs5_corpus",
+                return_value=(corpus, corpus_binding),
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.validate_vs5_corpus_freeze",
+                return_value={"manifest_sha256": corpus_hash},
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._run_gate",
+                return_value={"command": ASK_HISTORY_GATE_COMMAND, "exit_code": 0},
             ):
                 report = revalidate_vs5_human_evidence(root)
             self.assertEqual(report["status"], "success")
@@ -2524,7 +6631,37 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             self.assertEqual(report["summary"]["fail"], 0)
             self.assertFalse(report["human_evidence_revalidation"]["model_outputs_regenerated"])
             self.assertTrue(report["human_evidence_revalidation"]["reviewed_brief_ids_preserved"])
+            self.assertEqual(
+                report["human_evidence_revalidation"]["ask_history_surface_gate"]["exit_code"],
+                0,
+            )
             self.assertTrue(sentinel.exists())
+            with mock.patch(
+                "cornerstone_cli.vs5_verification._pipeline_sha256",
+                return_value="test-pipeline",
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._verification_contract_binding",
+                return_value=verification_contract_binding,
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.load_vs5_corpus",
+                return_value=(corpus, corpus_binding),
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.validate_vs5_corpus_freeze",
+                return_value={"manifest_sha256": corpus_hash},
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._run_gate",
+                return_value={"command": ASK_HISTORY_GATE_COMMAND, "exit_code": 1},
+            ):
+                stale_history_surface = revalidate_vs5_human_evidence(root)
+            self.assertEqual(stale_history_surface["status"], "failed")
+            self.assertIn(
+                "saved Ask history no longer passes its current UI/API/CLI gate",
+                stale_history_surface["errors"][0]["reasons"],
+            )
+            self.assertEqual(
+                stale_history_surface["errors"][0]["ask_history_surface_gate"]["exit_code"],
+                1,
+            )
             changed_contract_binding = {
                 **verification_contract_binding,
                 "manifest_sha256": "b" * 64,
@@ -2535,6 +6672,15 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ), mock.patch(
                 "cornerstone_cli.vs5_verification._verification_contract_binding",
                 return_value=changed_contract_binding,
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.load_vs5_corpus",
+                return_value=(corpus, corpus_binding),
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.validate_vs5_corpus_freeze",
+                return_value={"manifest_sha256": corpus_hash},
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._run_gate",
+                return_value={"command": ASK_HISTORY_GATE_COMMAND, "exit_code": 0},
             ):
                 stale_contract = revalidate_vs5_human_evidence(root)
             self.assertEqual(stale_contract["status"], "failed")
@@ -2550,6 +6696,15 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ), mock.patch(
                 "cornerstone_cli.vs5_verification._verification_contract_binding",
                 return_value=verification_contract_binding,
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.load_vs5_corpus",
+                return_value=(corpus, corpus_binding),
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification.validate_vs5_corpus_freeze",
+                return_value={"manifest_sha256": corpus_hash},
+            ), mock.patch(
+                "cornerstone_cli.vs5_verification._run_gate",
+                return_value={"command": ASK_HISTORY_GATE_COMMAND, "exit_code": 0},
             ):
                 stale = revalidate_vs5_human_evidence(root)
             self.assertEqual(stale["status"], "failed")
@@ -3398,10 +7553,12 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             )
 
     def test_answer_guard_accepts_every_frozen_scalar_control(self) -> None:
-        manifest = json.loads((ROOT / "fixtures/vs5/eval/manifest.json").read_text())
+        manifest, _ = load_vs5_corpus(
+            ROOT, "fixtures/vs5/edgar-eval/manifest.json"
+        )
         for case in manifest["cases"]:
-            expected = str(case["answer_terms"][0])
-            if not re.search(r"\d|[$€£%]|\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\b", expected, flags=re.IGNORECASE):
+            expected = " and ".join(str(term) for term in case["answer_terms"])
+            if not _answer_scalar_values(expected):
                 continue
             self.assertTrue(
                 _answer_relationship_supported(
@@ -3411,21 +7568,26 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 ),
                 case["id"],
             )
-            expected_scalars = _answer_scalar_values(expected)
-            source_scalars = {
-                scalar
-                for source in case["sources"]
-                for scalar in _answer_scalar_values(str(source["text"]))
-            }
-            for _, wrong_value in sorted(source_scalars - expected_scalars):
-                self.assertFalse(
-                    _answer_relationship_supported(
-                        str(case["answerable_question"]),
-                        wrong_value,
-                        [str(source["text"]) for source in case["sources"]],
-                    ),
-                    (case["id"], wrong_value),
-                )
+
+        cases_by_id = {str(case["id"]): case for case in manifest["cases"]}
+        negative_controls = (
+            ("edgar-omada-evernorth-msa", "0"),
+            ("edgar-gogo-airspan-dependency", "15 years"),
+            ("edgar-emergent-astrazeneca-manufacturing", "$87,453,649"),
+            ("edgar-iteos-gsk-collaboration", "thirty percent (30%) and seventy percent (70%)"),
+            ("edgar-omada-cigna-services", "May 22, 2018"),
+            ("edgar-emergent-az-workorder", "$174,306,844"),
+        )
+        for case_id, wrong_answer in negative_controls:
+            case = cases_by_id[case_id]
+            self.assertFalse(
+                _answer_relationship_supported(
+                    str(case["answerable_question"]),
+                    wrong_answer,
+                    [str(source["text"]) for source in case["sources"]],
+                ),
+                (case_id, wrong_answer),
+            )
 
     def test_answer_guard_rejects_wrong_scalar_shapes_and_cooccurrence(self) -> None:
         for question, answer, source in (
@@ -3492,7 +7654,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "title": "Acme renewal timing",
                 "bottom_line": {"statement": "Acme renews August 1.", "citation_refs": ["E1"]},
                 "key_facts": [
-                    {"statement": "Cancellation notice is due July 1.", "citation_refs": ["E1"]}
+                    {"statement": "Cancellation notice is due July 1.", "citation_refs": ["E1"]},
+                    {"statement": "Acme's fee increase is 99%.", "citation_refs": ["E1"]},
                 ],
                 "conflicts_risks": [],
                 "missing_evidence": [],
@@ -3510,6 +7673,11 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 )["brief"]
 
             self.assertNotEqual(brief["status"], "extractive_fallback")
+            self.assertEqual(brief["trust_label"], "evidence_backed", brief)
+            self.assertEqual(
+                brief["model_run"]["response_metadata"]["pruned_ungrounded_key_fact_count"],
+                1,
+            )
             self.assertTrue(brief["model_run"]["response_metadata"]["citation_alias_fallback"])
             self.assertTrue(all(ref.startswith("evidence_chunk:chunk_") for ref in brief["citation_refs"]))
 
@@ -3642,6 +7810,103 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertIn("99.5%", text)
         self.assertIn("98.9%", text)
 
+    def test_model_risk_rows_reject_ordinary_duties_but_keep_termination_conditions(self) -> None:
+        ordinary = {
+            "evidence_chunk_id": "ordinary",
+            "text": (
+                "All Product supplied under this Agreement shall be Manufactured by "
+                "GEMA at the Manufacturing Facilities in conformance with the API Specifications."
+            ),
+            "safety": {},
+        }
+        termination = {
+            "evidence_chunk_id": "termination",
+            "text": (
+                "SAVARA may terminate this Agreement immediately upon written notice to GEMA "
+                "if SAVARA determines that Products shall not be marketed."
+            ),
+            "safety": {},
+        }
+        chunks = [ordinary, termination]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk for chunk in chunks
+        }
+
+        rows = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": ordinary["text"],
+                    "citation_refs": ["evidence_chunk:ordinary"],
+                },
+                {
+                    "statement": termination["text"],
+                    "citation_refs": ["evidence_chunk:termination"],
+                },
+            ],
+            chunks,
+            chunk_by_ref,
+        )
+
+        self.assertEqual(len(rows), 1)
+        self.assertIn("terminate", rows[0]["statement"])
+        self.assertNotIn("All Product", rows[0]["statement"])
+
+    def test_model_risk_rows_distinguish_plain_terms_from_operational_blockers(self) -> None:
+        ordinary = [
+            "GEMA shall exclusively manufacture API for SAVARA.",
+            "Supplier shall maintain liability insurance above $5 million.",
+            "The manufacturer shall indemnify SAVARA for third-party claims.",
+            "By default, routine notices are delivered by email.",
+        ]
+        blockers = [
+            "Operations may proceed only after FDA approval is obtained.",
+            "The launch is contingent on FDA approval.",
+            "If FDA revokes approval, GEMA shall cease manufacturing.",
+            "Payment may be withheld until the audit is complete.",
+            "Launch cannot proceed without FDA approval.",
+            "FDA approval is required before launch.",
+            "Release is conditioned upon completing the security review.",
+        ]
+        chunks = [
+            {
+                "evidence_chunk_id": f"semantic-{index}",
+                "text": statement,
+                "safety": {},
+            }
+            for index, statement in enumerate([*ordinary, *blockers])
+        ]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk for chunk in chunks
+        }
+        ordinary_rows = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": chunk["text"],
+                    "citation_refs": [f"evidence_chunk:{chunk['evidence_chunk_id']}"],
+                }
+                for chunk in chunks[: len(ordinary)]
+            ],
+            chunks[: len(ordinary)],
+            chunk_by_ref,
+            limit=10,
+        )
+        output = " ".join(row["statement"] for row in ordinary_rows)
+
+        for statement in ordinary:
+            self.assertNotIn(statement, output)
+        for chunk, statement in zip(chunks[len(ordinary) :], blockers):
+            rows = _grounded_decision_risk_rows(
+                [
+                    {
+                        "statement": statement,
+                        "citation_refs": [f"evidence_chunk:{chunk['evidence_chunk_id']}"],
+                    }
+                ],
+                [chunk],
+                chunk_by_ref,
+            )
+            self.assertEqual([row["statement"] for row in rows], [statement])
+
     def test_grounded_key_fact_fallback_is_short_cited_and_source_bound(self) -> None:
         chunks = [
             {
@@ -3660,6 +7925,35 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertEqual(
             _statement_source_anchor(rows[0]["statement"], [chunks[0]["text"]])["status"],
             "passed",
+        )
+
+    def test_decision_risks_prefer_distinct_evidence_windows(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "ownership",
+                "text": "The owner is missing. The approver is unknown.",
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "security",
+                "text": "Security review remains incomplete.",
+                "safety": {},
+            },
+        ]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk
+            for chunk in chunks
+        }
+
+        rows = _grounded_decision_risk_rows([], chunks, chunk_by_ref, limit=2)
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(
+            {tuple(row["citation_refs"]) for row in rows},
+            {
+                ("evidence_chunk:ownership",),
+                ("evidence_chunk:security",),
+            },
         )
 
     def test_grounded_key_fact_fallback_balances_multiple_sources(self) -> None:
@@ -3697,6 +7991,49 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "evidence_chunk:finance",
                 "evidence_chunk:security",
             },
+        )
+        multifacet_rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=(
+                "Should we renew Acme after considering the cancellation deadline, "
+                "fee increase, and incomplete security review?"
+            ),
+        )
+        self.assertEqual(
+            {row["citation_refs"][0] for row in multifacet_rows},
+            {
+                "evidence_chunk:agreement",
+                "evidence_chunk:finance",
+                "evidence_chunk:security",
+            },
+        )
+
+    def test_long_multifacet_brief_does_not_force_two_extra_key_facts(self) -> None:
+        long_chunks = [
+            {
+                "artifact_id": f"source-{index % 3}",
+                "evidence_chunk_id": f"long-{index}",
+                "text": "조례 본문 예산 재정 법률 효과성 집행 계획 " + "근거 " * 260,
+            }
+            for index in range(8)
+        ]
+        question = (
+            "이 조례를 가결해야 하는가? 조례 본문, 집행 계획, 법률, 재정, "
+            "효과성 쟁점을 구분하라."
+        )
+
+        self.assertEqual(_brief_key_fact_target(long_chunks, question), 3)
+        self.assertEqual(
+            _brief_key_fact_target(
+                [{**chunk, "artifact_id": "one-long-source"} for chunk in long_chunks],
+                question,
+            ),
+            3,
+        )
+        self.assertEqual(
+            _brief_key_fact_target(long_chunks[:2], "Should we renew?"),
+            3,
         )
 
     def test_key_fact_dedup_keeps_new_scalar_and_drops_evidence_boilerplate(self) -> None:
@@ -3747,10 +8084,14 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             ],
             limit=3,
         )
-        self.assertEqual(
-            [row["statement"] for row in korean_rows],
-            ["○김선민 의원 협의 절차가 누락되었다고 지적했습니다"],
+        self.assertEqual(len(korean_rows), 1)
+        self.assertTrue(
+            _korean_transcript_statement_is_attributed(
+                korean_rows[0]["statement"]
+            ),
+            korean_rows,
         )
+        self.assertNotIn("당시 협의 절차", korean_rows[0]["statement"])
         self.assertTrue(
             _korean_transcript_statement_is_attributed(
                 "김선민 의원은 협의 절차가 누락되었다고 지적했습니다."
@@ -3814,7 +8155,10 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             chunk_by_ref,
         )
 
-        self.assertEqual(unqualified, [])
+        self.assertEqual(
+            unqualified[0]["statement"],
+            "김선민 의원 발언: 보건복지부 협의가 반드시 선행되어야 합니다.",
+        )
         self.assertEqual(attributed[0]["statement"], source)
 
         contrast = (
@@ -3932,6 +8276,655 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     "key_facts": [],
                 },
                 [source],
+            ),
+            [],
+        )
+
+    def test_grounded_bottom_line_compacts_long_conditional_termination_clause(self) -> None:
+        source = (
+            "SAVARA may terminate this Agreement immediately upon written notice to GEMA if: "
+            "(a) SAVARA, in its sole discretion, determines that API or Products incorporating "
+            "API shall not be marketed or shall be withdrawn from the market."
+        )
+        ref = "evidence_chunk:gema-termination"
+        selected, repaired = _select_grounded_bottom_line(
+            None,
+            [
+                {
+                    "statement": source,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+            ],
+            [],
+            {ref: {"text": source}},
+            decision_question="Should Savara continue with GEMA?",
+        )
+
+        self.assertTrue(repaired)
+        self.assertIsNotNone(selected)
+        self.assertIn("Hold:", selected["statement"])
+        self.assertIn("written notice to GEMA", selected["statement"])
+        self.assertIn("upon written notice", selected["statement"].lower())
+        self.assertIn("SAVARA determines in its sole discretion", selected["statement"])
+        self.assertIn("shall not be marketed", selected["statement"])
+        self.assertLessEqual(len(selected["statement"]), 210)
+        self.assertEqual(
+            _brief_output_echo_violations(
+                {
+                    "title": "Savara GEMA decision",
+                    "bottom_line": selected,
+                    "key_facts": [],
+                },
+                [source],
+            ),
+            [],
+        )
+
+    def test_grounded_bottom_line_does_not_treat_ifrs_as_a_conditional(self) -> None:
+        source = (
+            "Supplier shall prepare audited IFRS financial statements for the annual review "
+            "and deliver them within ninety days after year end."
+        )
+        ref = "evidence_chunk:ifrs"
+        selected, _ = _select_grounded_bottom_line(
+            None,
+            [],
+            [{"statement": source, "citation_refs": [ref], "allowed_citation_refs": [ref]}],
+            {ref: {"text": source}},
+            decision_question="Should the annual review proceed?",
+        )
+
+        self.assertIsNotNone(selected)
+        self.assertIn("ninety days", selected["statement"])
+        self.assertNotIn(" if RS", selected["statement"])
+
+    def test_grounded_bottom_line_keeps_cure_proviso_on_termination_right(self) -> None:
+        source = (
+            "Buyer may terminate this Agreement if annual revenue falls below $1 million; "
+            "provided, however, that Buyer may exercise this right only after Seller fails "
+            "to cure the shortfall within thirty days."
+        )
+        ref = "evidence_chunk:cure-proviso"
+        selected, _ = _select_grounded_bottom_line(
+            None,
+            [{"statement": source, "citation_refs": [ref], "allowed_citation_refs": [ref]}],
+            [],
+            {ref: {"text": source}},
+            decision_question="Should Buyer exercise the termination right?",
+        )
+
+        self.assertIsNotNone(selected)
+        self.assertIn("fails to cure", selected["statement"])
+        self.assertIn("thirty days", selected["statement"])
+
+        sentence_qualified = (
+            "Buyer may terminate this Agreement if annual revenue falls below $1 million. "
+            "However, termination is permitted only after Seller fails to cure the shortfall "
+            "within thirty days."
+        )
+        selected_sentence, _ = _select_grounded_bottom_line(
+            None,
+            [
+                {
+                    "statement": sentence_qualified,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+            ],
+            [],
+            {ref: {"text": sentence_qualified}},
+            decision_question="Should Buyer exercise the termination right?",
+        )
+        self.assertIsNotNone(selected_sentence)
+        self.assertIn("fails to cure", selected_sentence["statement"])
+
+        enumerated = (
+            "Buyer may terminate this Agreement if all of the following occur: "
+            "(a) annual revenue falls below $1 million; "
+            "(b) Seller fails to cure within thirty days."
+        )
+        selected_enumerated, _ = _select_grounded_bottom_line(
+            None,
+            [{"statement": enumerated, "citation_refs": [ref], "allowed_citation_refs": [ref]}],
+            [],
+            {ref: {"text": enumerated}},
+            decision_question="Should Buyer exercise the termination right?",
+        )
+        self.assertIsNotNone(selected_enumerated)
+        self.assertIn("revenue falls below", selected_enumerated["statement"])
+        self.assertIn("fails to cure", selected_enumerated["statement"])
+
+        newline_enumerated = enumerated.replace(" occur: ", " occur:\n").replace(
+            "; (b)", ";\n(b)"
+        )
+        selected_newline, _ = _select_grounded_bottom_line(
+            None,
+            [
+                {
+                    "statement": newline_enumerated,
+                    "citation_refs": [ref],
+                    "allowed_citation_refs": [ref],
+                }
+            ],
+            [],
+            {ref: {"text": newline_enumerated}},
+            decision_question="Should Buyer exercise the termination right?",
+        )
+        self.assertIsNotNone(selected_newline)
+        self.assertIn("revenue falls below", selected_newline["statement"])
+        self.assertIn("fails to cure", selected_newline["statement"])
+
+        for equivalent_trigger in (
+            "Buyer may terminate this Agreement upon occurrence of all of the following: "
+            "(a) revenue falls below $1 million; (b) Seller fails to cure within thirty days.",
+            "Buyer may terminate this Agreement when both conditions hold: revenue falls "
+            "below $1 million; Seller fails to cure within thirty days.",
+            "Buyer may terminate this Agreement following both events: revenue falls below "
+            "$1 million; Seller fails to cure within thirty days.",
+        ):
+            selected_trigger, _ = _select_grounded_bottom_line(
+                None,
+                [
+                    {
+                        "statement": equivalent_trigger,
+                        "citation_refs": [ref],
+                        "allowed_citation_refs": [ref],
+                    }
+                ],
+                [],
+                {ref: {"text": equivalent_trigger}},
+                decision_question="Should Buyer exercise the termination right?",
+            )
+            self.assertIsNotNone(selected_trigger)
+            self.assertIn("revenue falls below", selected_trigger["statement"])
+            self.assertIn("fails to cure", selected_trigger["statement"])
+
+    def test_grounded_bottom_line_keeps_restrictive_condition_grammar_intact(self) -> None:
+        cases = [
+            (
+                "Buyer may terminate this Agreement immediately upon written notice to "
+                "Seller only if Seller fails to deliver Product.",
+                ("Buyer may terminate", "written notice to Seller", "only if Seller fails"),
+            ),
+            (
+                "Buyer may terminate this Agreement immediately, except if Seller cures "
+                "the breach within ten days.",
+                ("Buyer may terminate", "except if Seller cures", "within ten days"),
+            ),
+            (
+                "Buyer may terminate this Agreement, but not unless Seller fails to "
+                "deliver Product.",
+                ("Buyer may terminate", "not unless Seller fails", "deliver Product"),
+            ),
+            (
+                "Buyer may terminate this Agreement if either (a) Seller misses the "
+                "deadline; or (b) Seller fails inspection.",
+                ("either (a)", "or (b)", "fails inspection"),
+            ),
+            (
+                "Buyer may terminate this Agreement only after Seller gives written "
+                "notice and Seller fails to cure the material breach within thirty days.",
+                ("Buyer may terminate", "only after", "gives written notice", "fails to cure"),
+            ),
+            (
+                "The launch may proceed only after Security approves the release and "
+                "Legal signs the data-processing addendum for production use.",
+                ("launch may proceed", "only after", "Security approves", "Legal signs"),
+            ),
+            (
+                "Operations can proceed subject to FDA approval and successful completion "
+                "of manufacturing validation for the commercial process.",
+                ("Operations can proceed", "subject to", "FDA approval", "successful completion"),
+            ),
+            (
+                "The rollout must wait until both the security review is complete and the "
+                "owner approves production deployment.",
+                ("must wait until both", "security review", "owner approves"),
+            ),
+            (
+                "Buyer may terminate this Agreement immediately if Seller does not cure "
+                "and (revenue falls below target or the product is withdrawn).",
+                ("Buyer may terminate", "Seller does not cure", "revenue falls below", "or the product is withdrawn"),
+            ),
+        ]
+
+        for index, (source, required_fragments) in enumerate(cases):
+            with self.subTest(index=index):
+                ref = f"evidence_chunk:restrictive-{index}"
+                selected, _ = _select_grounded_bottom_line(
+                    None,
+                    [
+                        {
+                            "statement": source,
+                            "citation_refs": [ref],
+                            "allowed_citation_refs": [ref],
+                        }
+                    ],
+                    [],
+                    {ref: {"text": source}},
+                    decision_question="Should Buyer exercise the termination right?",
+                )
+                self.assertIsNotNone(selected)
+                for fragment in required_fragments:
+                    self.assertIn(fragment, selected["statement"])
+                self.assertNotIn("notice to Seller only.", selected["statement"])
+
+    def test_model_risk_rows_reject_reassuring_absence(self) -> None:
+        reassuring = [
+            "No termination risk remains under the current agreement.",
+            "The review found no conflict between the two schedules.",
+        ]
+        chunks = [
+            {"evidence_chunk_id": f"clear-{index}", "text": statement, "safety": {}}
+            for index, statement in enumerate(reassuring)
+        ]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk for chunk in chunks
+        }
+        rows = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": chunk["text"],
+                    "citation_refs": [f"evidence_chunk:{chunk['evidence_chunk_id']}"],
+                }
+                for chunk in chunks
+            ],
+            chunks,
+            chunk_by_ref,
+        )
+        self.assertEqual(rows, [])
+
+    def test_model_conflict_semantics_recognize_operational_prerequisites(self) -> None:
+        blockers = [
+            "Launch requires FDA approval.",
+            "The launch depends on FDA approval.",
+            "FDA approval must be obtained to launch.",
+            "Security review approval is a prerequisite for release.",
+            "Release cannot proceed until the security review is complete.",
+        ]
+
+        for statement in blockers:
+            with self.subTest(statement=statement):
+                self.assertTrue(_model_conflict_risk_semantics(statement))
+
+    def test_model_conflict_semantics_reject_ordinary_actions_and_resolved_events(self) -> None:
+        ordinary_or_resolved = [
+            "The supplier shall replace defective units within ten days.",
+            "The processor shall delete customer data within thirty days.",
+            "The customer may cancel an order before shipment.",
+            "The parties may replace a contact by written notice.",
+            "No breach has occurred under the agreement.",
+            "No termination event has occurred.",
+            "No delay remains in the schedule.",
+            "The breach was cured and is no longer outstanding.",
+            "The agreement has not expired.",
+            "The approval has not been revoked.",
+        ]
+
+        for statement in ordinary_or_resolved:
+            with self.subTest(statement=statement):
+                self.assertFalse(_model_conflict_risk_semantics(statement))
+
+        self.assertTrue(
+            _model_conflict_risk_semantics("No termination right remains.")
+        )
+
+    def test_model_conflict_semantics_keep_adverse_clause_after_reassuring_clause(self) -> None:
+        for statement in (
+            "No risk remains, but launch requires FDA approval.",
+            "No conflict exists, but launch cannot proceed until FDA approval.",
+        ):
+            with self.subTest(statement=statement):
+                self.assertTrue(_model_conflict_risk_semantics(statement))
+
+    def test_explicit_constraint_rows_reject_chunk_edge_fragments(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "edge-start",
+                "text": (
+                    "determined under Section 14.3 to be in material breach and has failed "
+                    "to cure within sixty days."
+                ),
+                "span": {"char_start": 1200, "char_end": 1320},
+                "derived_content_char_count": 5000,
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "edge-end",
+                "text": "The FDA fails to approve the manufacturing applic",
+                "span": {"char_start": 2400, "char_end": 2450},
+                "derived_content_char_count": 5000,
+                "safety": {},
+            },
+        ]
+        self.assertEqual(_explicit_constraint_rows(chunks, limit=10), [])
+
+    def test_gema_readiness_gaps_are_specific_and_echo_safe(self) -> None:
+        chunks = [
+            {
+                "evidence_chunk_id": "comparability",
+                "text": (
+                    "If the product manufactured at the second source is not demonstrated "
+                    "to be comparable with materials used in the clinical program, it cannot "
+                    "be commercialized."
+                ),
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "validation",
+                "text": (
+                    "Material is sourced from GEMA and validation activities are ongoing "
+                    "to prepare for commercial manufacturing."
+                ),
+                "safety": {},
+            },
+        ]
+        question = (
+            "Should the contract owner remain dependent on GEMA manufacturing or "
+            "accelerate a qualified second source?"
+        )
+        gaps = _explicit_missing_evidence(chunks, decision_question=question)
+
+        self.assertEqual(len(gaps), 2)
+        self.assertTrue(any("comparability" in gap.lower() for gap in gaps))
+        self.assertTrue(any("validation" in gap.lower() for gap in gaps))
+        self.assertEqual(
+            _brief_output_echo_violations(
+                {"missing_evidence": gaps},
+                [chunk["text"] for chunk in chunks],
+            ),
+            [],
+        )
+
+        inspection_chunk = {
+            "evidence_chunk_id": "inspection",
+            "text": (
+                "Manufacturing and supply vendors have not yet received an FDA inspection."
+            ),
+            "safety": {},
+        }
+        combined = _explicit_missing_evidence(
+            [*chunks, inspection_chunk],
+            decision_question=question,
+            limit=2,
+        )
+        self.assertEqual(len(combined), 2)
+        self.assertIn("validation", combined[1].lower())
+        self.assertIn("inspection", combined[1].lower())
+
+    def test_non_manufacturing_validation_gap_preserves_its_subject(self) -> None:
+        cases = [
+            (
+                "Should we deploy the software after security validation?",
+                "Security validation activities are ongoing before production deployment.",
+                "Security validation",
+            ),
+            (
+                "Should the clinical model enter prospective evaluation?",
+                "Clinical model validation activities are ongoing before prospective evaluation.",
+                "Clinical model validation",
+            ),
+        ]
+
+        for question, source, expected_subject in cases:
+            with self.subTest(question=question):
+                gaps = _explicit_missing_evidence(
+                    [{"evidence_chunk_id": "validation", "text": source, "safety": {}}],
+                    decision_question=question,
+                )
+                self.assertEqual(gaps, [source])
+                self.assertIn(expected_subject, gaps[0])
+                self.assertNotIn("Commercial-manufacturing", gaps[0])
+                self.assertNotIn("supplied material", gaps[0])
+
+    def test_question_relevance_rejects_unrelated_termination_risk(self) -> None:
+        question = (
+            "Should the contract owner remain dependent on GEMA manufacturing or "
+            "accelerate a qualified second source?"
+        )
+        termination = {
+            "evidence_chunk_id": "termination",
+            "text": (
+                "We may terminate the GEMA Agreement immediately if products containing "
+                "the API will not be sold."
+            ),
+            "safety": {},
+        }
+        readiness = {
+            "evidence_chunk_id": "readiness",
+            "text": (
+                "Second-source manufacturing validation is ongoing and qualification "
+                "remains incomplete."
+            ),
+            "safety": {},
+        }
+        chunks = [termination, readiness]
+        chunk_by_ref = {
+            f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk for chunk in chunks
+        }
+        rows = _grounded_decision_risk_rows(
+            [
+                {
+                    "statement": chunk["text"],
+                    "citation_refs": [f"evidence_chunk:{chunk['evidence_chunk_id']}"],
+                }
+                for chunk in chunks
+            ],
+            chunks,
+            chunk_by_ref,
+            limit=10,
+            decision_question=question,
+        )
+        output = " ".join(row["statement"] for row in rows)
+        self.assertNotIn("terminate", output.lower())
+        self.assertIn("validation", output.lower())
+        for sourcing_fact in (
+            "Molgramostim drug substance is currently manufactured by GEMA.",
+            "All Product supplied under the Agreement shall be Manufactured by GEMA.",
+            "Material is sourced from GEMA.",
+            "An additional third-party has been engaged as a second source.",
+            "The additional third party remains a potential second source.",
+        ):
+            with self.subTest(sourcing_fact=sourcing_fact):
+                self.assertTrue(
+                    _decision_statement_relevant(sourcing_fact, question)
+                )
+
+    def test_question_relevance_rejects_unrelated_unresolved_blockers(self) -> None:
+        question = "Should ACME renew the vendor contract for another year?"
+
+        self.assertFalse(
+            _decision_statement_relevant(
+                "Launch readiness is unresolved because the security test is missing.",
+                question,
+            )
+        )
+        self.assertFalse(
+            _decision_statement_relevant(
+                "The owner is not assigned for Project Orion.",
+                question,
+            )
+        )
+        self.assertFalse(
+            _decision_statement_relevant(
+                "ACME product launch is delayed by an unrelated security review.",
+                question,
+            )
+        )
+        self.assertFalse(
+            _decision_statement_relevant(
+                "The vendor migration project is blocked by a missing owner.",
+                question,
+            )
+        )
+        self.assertTrue(
+            _decision_statement_relevant(
+                "ACME renewal approval is pending.",
+                question,
+            )
+        )
+
+    def test_key_fact_fallback_rejects_question_irrelevant_only_chunk(self) -> None:
+        question = (
+            "Should the contract owner remain dependent on GEMA manufacturing or "
+            "accelerate a qualified second source?"
+        )
+        chunks = [
+            {
+                "artifact_id": "agreement",
+                "evidence_chunk_id": "termination-only",
+                "text": "SAVARA may terminate this Agreement.",
+                "safety": {},
+            }
+        ]
+
+        self.assertEqual(
+            _grounded_key_fact_fallback(
+                chunks,
+                limit=3,
+                decision_question=question,
+            ),
+            [],
+        )
+
+    def test_key_fact_fallback_keeps_current_gema_manufacturing_fact(self) -> None:
+        question = (
+            "Should the contract owner remain dependent on GEMA manufacturing or "
+            "accelerate a qualified second source?"
+        )
+        statement = "Molgramostim drug substance is currently manufactured by GEMA."
+        rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "savara-10k",
+                    "evidence_chunk_id": "current-manufacturer",
+                    "text": statement,
+                    "safety": {},
+                }
+            ],
+            limit=3,
+            decision_question=question,
+        )
+
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["statement"], statement.rstrip("."))
+        self.assertEqual(
+            rows[0]["citation_refs"],
+            ["evidence_chunk:current-manufacturer"],
+        )
+        self.assertEqual(
+            _grounded_key_fact_fallback(
+                [
+                    {
+                        "artifact_id": "gema-definitions",
+                        "evidence_chunk_id": "noun-fragment",
+                        "text": "GEMA with respect to the Manufacture.",
+                        "safety": {},
+                    }
+                ],
+                limit=3,
+                decision_question=question,
+            ),
+            [],
+        )
+
+    def test_key_fact_fallback_keeps_distinct_second_source_status(self) -> None:
+        question = (
+            "Should the contract owner remain dependent on GEMA manufacturing or "
+            "accelerate a qualified second source?"
+        )
+        chunks = [
+            {
+                "artifact_id": "savara-10k",
+                "evidence_chunk_id": "current-manufacturer",
+                "text": "Molgramostim drug substance is currently manufactured by GEMA.",
+                "safety": {},
+            },
+            {
+                "artifact_id": "savara-10k",
+                "evidence_chunk_id": "additional-source",
+                "text": (
+                    "Additionally, we have engaged an additional third-party as a second "
+                    "source for the manufacturing of molgramostim."
+                ),
+                "safety": {},
+            },
+        ]
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=question,
+        )
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(
+            {row["statement"] for row in rows},
+            {
+                "Molgramostim drug substance is currently manufactured by GEMA",
+                "A third party was engaged as a second source for molgramostim manufacturing.",
+            },
+        )
+        self.assertEqual(
+            _brief_output_echo_violations(
+                {"key_facts": rows},
+                [chunk["text"] for chunk in chunks],
+            ),
+            [],
+        )
+
+        combined_rows = _grounded_key_fact_fallback(
+            [
+                {
+                    "artifact_id": "savara-10k",
+                    "evidence_chunk_id": "combined-status",
+                    "text": (
+                        "10\n\n"
+                        "Molgramostim drug substance is currently manufactured by GEMA. "
+                        "All clinical and nonclinical trials to-date have used material "
+                        "sourced from GEMA and validation activities are ongoing to prepare "
+                        "for commercial manufacturing. Additionally, we have engaged an "
+                        "additional third-party as a second source for the manufacturing of "
+                        "molgramostim."
+                    ),
+                    "safety": {
+                        "unsafe_instruction_detected": True,
+                        "untrusted_evidence": True,
+                    },
+                }
+            ],
+            limit=3,
+            decision_question=question,
+        )
+        self.assertEqual(
+            {row["statement"] for row in combined_rows},
+            {row["statement"] for row in rows},
+        )
+
+    def test_echo_guard_enforces_ten_consecutive_source_word_limit(self) -> None:
+        exact_thirteen_words = (
+            "Buyer may terminate if Seller fails to pay an invoice within thirty days."
+        )
+        self.assertTrue(
+            _brief_output_echo_violations(
+                {
+                    "title": "Termination review",
+                    "bottom_line": None,
+                    "conflicts_risks": [{"statement": exact_thirteen_words}],
+                },
+                [exact_thirteen_words],
+            )
+        )
+        self.assertEqual(
+            _brief_output_echo_violations(
+                {
+                    "title": "Termination review",
+                    "bottom_line": {"statement": "Buyer may terminate if Seller fails"},
+                    "key_facts": [
+                        {"statement": "to pay an invoice within thirty days"}
+                    ],
+                },
+                [exact_thirteen_words],
             ),
             [],
         )
@@ -4062,6 +9055,25 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         ]
         self.assertEqual(_explicit_tension_rows(lone), [])
         self.assertEqual(_explicit_tension_rows(unrelated), [])
+        overlapping_legal_chunks = [
+            {
+                "evidence_chunk_id": "manufacturing-duty",
+                "text": (
+                    "All Product supplied under this Agreement shall be Manufactured by GEMA "
+                    "in conformance with approved batch records."
+                ),
+                "safety": {},
+            },
+            {
+                "evidence_chunk_id": "termination-clause",
+                "text": (
+                    "A party determined to be in material breach has sixty days to cure "
+                    "before termination."
+                ),
+                "safety": {},
+            },
+        ]
+        self.assertEqual(_explicit_tension_rows(overlapping_legal_chunks), [])
         for left, right in (
             (
                 "The project targets 12,000 concurrent users.",
@@ -4280,7 +9292,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                         "title": "Acme renewal",
                         "bottom_line": {"statement": source_text, "citation_refs": [ref]},
                         "key_facts": [],
-                        "conflicts_risks": [],
+                        "conflicts_risks": [
+                            {"statement": source_text, "citation_refs": [ref]}
+                        ],
                         "missing_evidence": ["The final decision owner is unassigned."],
                         "recommended_next_steps": [],
                     }
@@ -4316,6 +9330,14 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                         "title": brief["title"],
                         "bottom_line": {"statement": brief["bottom_line"]},
                         "key_facts": [{"statement": value} for value in brief["key_facts"]],
+                        "conflicts_risks": [
+                            {"statement": value} for value in brief["conflicts_risks"]
+                        ],
+                        "missing_evidence": list(brief["missing_evidence"]),
+                        "recommended_next_steps": [
+                            {"statement": value}
+                            for value in brief["recommended_next_steps"]
+                        ],
                     },
                     [source_text],
                 )
@@ -4466,6 +9488,152 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 answer["answer"],
                 'The provided evidence does not answer the question "What happens if seats are reduced mid-year?".',
             )
+
+    def test_ask_event_answer_removes_only_redundant_preamble(self) -> None:
+        source = (
+            "13.1Term. This Agreement shall commence on the Effective Date and, unless "
+            "terminated earlier pursuant to Sections 13.2, 13.3 or 14.1 below, shall "
+            "continue in full force and effect, until the twentieth (20th) anniversary of "
+            "the date of receipt of approval by a Regulatory Authority of the first "
+            "Regulatory Filing for the marketing and sale of the first Product in any "
+            "country (the ‘Initial Term’)."
+        )
+        model_answer = (
+            "The end of the original GEMA Agreement's Initial Term is marked by the "
+            "twentieth anniversary of the date of receipt of approval by a Regulatory "
+            "Authority of the first Regulatory Filing for the marketing and sale of the "
+            "first Product in any country."
+        )
+        question = (
+            "According to Section 13.1, what event marks the end of the original GEMA "
+            "Agreement's Initial Term?"
+        )
+        expected = (
+            "The twentieth anniversary of the date of receipt of approval by a Regulatory "
+            "Authority of the first Regulatory Filing for the marketing and sale of the "
+            "first Product in any country."
+        )
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-event-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="user_paste",
+                source_ref="gema-section-13-1",
+            )["artifact"]
+            conversation = store.start_conversation(
+                "Review GEMA Section 13.1",
+                SCOPE,
+            )["conversation"]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                ref = re.search(
+                    r"evidence_chunk:[a-zA-Z0-9_-]+",
+                    str(kwargs.get("prompt") or ""),
+                ).group(0)
+                return {
+                    "answer": model_answer,
+                    "citation_refs": [ref],
+                    "insufficient_evidence": False,
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = BriefingApplication(
+                    store,
+                    RuntimeModelConfig(provider="ollama"),
+                ).answer(
+                    conversation["conversation_id"],
+                    question,
+                    SCOPE,
+                    artifact_ids=[artifact["artifact_id"]],
+                )
+
+        answer = result["answer"]
+        self.assertEqual(answer["label"], "evidence_backed", answer)
+        self.assertTrue(answer["presented_as_fact"])
+        self.assertEqual(answer["answer"], expected)
+        self.assertGreater(len(answer["answer"].split()), 25)
+        self.assertTrue(answer["citation_refs"])
+        self.assertEqual(answer["statement_anchor_check"]["status"], "passed")
+        self.assertTrue(
+            answer["statement_anchor_check"]["direct_event_projection_supported"]
+        )
+        self.assertEqual(
+            answer["statement_anchor_check"]["validation_mode"],
+            "direct_event_projection",
+        )
+        self.assertIn("event projection", answer["trust_label_reason"].lower())
+
+    def test_ask_uses_artifact_bound_labeled_date_projection(self) -> None:
+        source = (
+            "Amendment CW673842 to Master Services Agreement CW232350\n"
+            "Master Contract ID Number: CW232350\n"
+            "Effective Date: May 1, 2014"
+        )
+        question = (
+            "What Effective Date is printed in Amendment CW673842 to Master "
+            "Services Agreement CW232350?"
+        )
+        with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-ask-labeled-date-") as state_dir:
+            store = LocalRuntimeStore(Path(state_dir))
+            artifact = store.ingest_text_artifact(
+                source,
+                SCOPE,
+                source_type="user_paste",
+                source_ref="jpm-amendment",
+            )["artifact"]
+            conversation = store.start_conversation(
+                "Review the JPM amendment",
+                SCOPE,
+            )["conversation"]
+
+            def generated(*_: object, **kwargs: object) -> dict[str, object]:
+                ref = re.search(
+                    r"evidence_chunk:[a-zA-Z0-9_-]+",
+                    str(kwargs.get("prompt") or ""),
+                ).group(0)
+                return {
+                    "answer": "April 1, 2013",
+                    "citation_refs": [ref],
+                    "insufficient_evidence": False,
+                }
+
+            with mock.patch(
+                "cornerstone_cli.runtime._ollama_embedding",
+                return_value=[1.0, 0.0],
+            ), mock.patch(
+                "cornerstone_cli.runtime._ollama_generate_json",
+                side_effect=generated,
+            ):
+                result = BriefingApplication(
+                    store,
+                    RuntimeModelConfig(provider="ollama"),
+                ).answer(
+                    conversation["conversation_id"],
+                    question,
+                    SCOPE,
+                    artifact_ids=[artifact["artifact_id"]],
+                )
+
+        answer = result["answer"]
+        self.assertEqual(answer["label"], "evidence_backed", answer)
+        self.assertEqual(answer["answer"], "May 1, 2014")
+        self.assertTrue(
+            answer["statement_anchor_check"][
+                "direct_labeled_field_projection_supported"
+            ]
+        )
+        self.assertEqual(
+            answer["statement_anchor_check"]["validation_mode"],
+            "direct_labeled_field_projection",
+        )
+        self.assertIn("labeled-field projection", answer["trust_label_reason"])
 
     def test_selected_source_boundary_excludes_unselected_artifacts(self) -> None:
         with tempfile.TemporaryDirectory(prefix="cornerstone-vs5-source-boundary-") as state_dir:

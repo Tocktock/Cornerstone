@@ -1,0 +1,873 @@
+8-K
+1
+super8-k.htm
+8-K
+
+Document
+
+UNITED STATES
+
+SECURITIES AND EXCHANGE COMMISSION
+
+WASHINGTON, D.C. 20549
+
+FORM 8-K
+
+CURRENT REPORT
+
+PURSUANT TO SECTION 13 OR 15(d) OF THE
+
+SECURITIES EXCHANGE ACT OF 1934
+
+Date of Report (Date of earliest event reported): July 28, 2021 (July 22, 2021)
+
+Sema4 Holdings Corp.
+
+(Exact name of registrant as specified in its charter)
+
+Delaware
+
+001-39482
+
+85-1966622
+
+(State or other jurisdiction
+of incorporation)
+
+(Commission
+File Number)
+
+(IRS Employer
+Identification No.)
+
+333 Ludlow Street, North Tower, 8th Floor Stamford, Connecticut
+
+06902
+
+(Address of principal executive offices)
+
+(Zip Code)
+
+(800) 298-6470
+
+Registrant’s telephone number, including area code
+
+CM Life Sciences, Inc.
+
+c/o Corvex Management
+
+667 Madison Avenue
+
+New York, New York
+
+(Former name or former address, if changed since last report.)
+
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions:
+
+¨
+
+Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+
+¨
+
+Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+
+¨
+
+Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+
+¨
+
+Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))
+
+Securities registered pursuant to Section 12(b) of the Act:
+
+Title of each class
+
+Trading Symbol(s)
+
+Name of each exchange on which registered
+
+Class A common stock, par value $0.0001 per share
+
+SMFR
+
+The Nasdaq Global Select Market
+
+Warrants to purchase one share of Class A common stock, each at an exercise price of $11.50 per share
+
+SMFRW
+
+The Nasdaq Global Select Market
+
+Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (§230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (§240.12b-2 of this chapter).
+
+Emerging growth company ☒
+
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ¨
+
+INTRODUCTORY NOTE
+
+Unless otherwise stated or unless the context otherwise requires, “we,” “us,” “our,” “Sema4 Holdings” and the “Company” refer Sema4 Holdings Corp., a Delaware corporation (f/k/a CM Life Sciences, Inc., a Delaware corporation), and its consolidated subsidiary following the Closing (as defined below). Furthermore, unless otherwise stated or unless the context otherwise requires, references to “CMLS” refer to CM Life Sciences, Inc., a Delaware corporation, prior to the Closing, and references to “Sema4” refer to Mount Sinai Genomics, Inc. d/b/a Sema4, a Delaware corporation, prior to the Closing. All references herein to the “Board” refer to the board of directors of the Company.
+
+Terms used in this Current Report on Form 8-K (this “Report”) but not defined herein, or for which definitions are not otherwise incorporated by reference herein, shall have the meaning given to such terms in the Proxy Statement (as defined below) in the section entitled “Frequently Used Terms” beginning on page 7 thereof, and such definitions are incorporated herein by reference.
+
+This Report incorporates by reference certain information from reports and other documents that were previously filed with the Securities and Exchange Commission (the “SEC”), including certain information from the Proxy Statement. To the extent there is a conflict between the information contained in this Report and the information contained in such prior reports and documents and incorporated by reference herein, the information in this Report controls.
+
+Item 1.01. Entry into a Material Definitive Agreement.
+
+As disclosed under the sections entitled “Proposal No. 1—The Business Combination Proposal” beginning on page 135, of CMLS’s definitive proxy statement on Schedule 14A (the “Proxy Statement”) filed with the SEC on July 2, 2021, CMLS previously entered into an Agreement and Plan of Merger, dated February 9, 2021, with S-IV Sub, Inc., a wholly-owned subsidiary of CMLS (“Merger Sub”), and Sema4, as amended by an Amendment to Agreement and Plan of Merger, dated May 3, 2021 (the “Merger Agreement”). Pursuant to the Merger Agreement, on the Closing Date (as defined below), Merger Sub was merged with and into Sema4, with Sema4 surviving the Merger (the “Surviving Corporation”) as a wholly owned subsidiary of the Company (the “Merger” and, together with the other transactions contemplated by the Merger Agreement, the “Business Combination”).
+
+On July 21, 2021, CMLS held a special meeting of stockholders (the “Special Meeting”), at which the CMLS stockholders considered and adopted, among other matters, a proposal to approve the Business Combination, including (a) adopting the Merger Agreement and (b) approving the transactions contemplated by the Merger Agreement, including the Merger and the issuance of shares of Class A common stock, par value $0.0001 per share, of the Company (prior to the Closing, the “Class A common stock” and, following the Closing, the “common stock”) to the former Sema4 equity holders as merger consideration (as defined in the Proxy Statement).
+
+Pursuant to the terms and subject to the conditions set forth in the Merger Agreement, following the Special Meeting, on July 22, 2021 (the “Closing Date”), the Business Combination was consummated (the “Closing”).
+
+Item 2.01 of this Report discusses the consummation of the Business Combination and the entry into agreements relating thereto and is incorporated herein by reference.
+
+1
+
+Item 2.01. Completion of Acquisition or Disposition of Assets.
+
+As described above, on July 21, 2021, CMLS held the Special Meeting, at which the CMLS stockholders considered and adopted, among other matters, a proposal to approve the Merger Agreement and the Business Combination. On July 22, 2021, the parties consummated the Business Combination. In connection with the Closing, the Company changed its name from CM Life Sciences, Inc. to “Sema4 Holdings Corp.”, and the Surviving Corporation changed its name from Mount Sinai Genomics, Inc. d/b/a Sema4 to “Sema4 OpCo, Inc.”
+
+Holders of 10,188 shares of CMLS’s Class A common stock sold in its initial public offering (the “public shares”) properly exercised their right to have such shares redeemed for a full pro rata portion of the trust account holding the proceeds from CMLS’s initial public offering (the “IPO”), calculated as of two business days prior to the consummation of the Business Combination, which was approximately $10.00 per share, or $101,880 in the aggregate.
+
+As a result of the Business Combination, each share of Sema4 Class B common stock, par value $0.00001 per share, was converted into 1/100th of a share of Sema4 Class A common stock, par value $0.00001 per share (“Sema4 Common Stock”), and, immediately thereafter, each share of Sema4 Common Stock and Sema4 Preferred Stock (as defined in the Proxy Statement) was cancelled and received a portion of the merger consideration, resulting in the former Sema4 equity holders who had elected to receive Closing Available Cash (as defined in the Proxy Statement) receiving an aggregate of $230,665,220 of cash and the former Sema4 equity holders receiving an aggregate of 178,336,298 shares of common stock of the Company.
+
+Additionally, each issued and outstanding share of common stock of Merger Sub converted into and became one validly issued, fully paid and nonassessable share of common stock, par value $0.01 per share, of the Surviving Corporation.
+
+Furthermore, in connection with the redemption of the public shares as described above, CMLS Holdings LLC, a Delaware limited liability company (the “Sponsor”) forfeited no shares of Class B common stock, par value $0.0001 per share, of the Company (the “Class B common stock”) and no private placement warrants (as defined in the Proxy Statement) held by the Sponsor. Accordingly, all the shares of Class B common stock automatically converted into common stock of the Company.
+
+Pursuant to subscription agreements entered into on February 9, 2021 (collectively, the “Subscription Agreements”), certain investors agreed to subscribe for an aggregate of 35,000,000 newly-issued shares of common stock at a purchase price of $10.00 per share for an aggregate purchase price of $350,000,000 (the “PIPE Investment”). At the Closing, the Company consummated the PIPE Investment.
+
+After giving effect to the Business Combination, the redemption of public shares as described above, the conversion of the Class B common stock as described above, and the consummation of the PIPE Investment, there are currently 240,190,402 shares of the Company’s common stock issued and outstanding.
+
+The Company’s common stock and the warrants sold in the IPO (the “public warrants”) commenced trading on the Nasdaq Global Select Market of The Nasdaq Stock Market LLC (“Nasdaq”) under the symbols “SMFR” and “SMFRW,” respectively, on July 23, 2021, subject to ongoing review of the Company’s satisfaction of all listing criteria following the Business Combination.
+
+2
+
+As noted above, an aggregate of $101,880 was paid from the Company’s trust account to holders that properly exercised their right to have public shares redeemed, and the remaining balance immediately prior to the Closing of approximately $442,686,205 remained in the trust account. The remaining amount in the trust account was used to fund the Business Combination, including the payment of cash to the former Sema4 equity holders as described above.
+
+FORM 10 INFORMATION
+
+Item 2.01(f) of Form 8-K states that if the registrant was a shell company, as the Company was immediately before the Business Combination, then the registrant must disclose the information that would be required if the registrant were filing a general form for registration of securities on Form 10. Accordingly, the Company is providing below the information that would be included in a Form 10 if it were to file a Form 10. Please note that the information provided below relates to the combined company after the consummation of the Business Combination, unless otherwise specifically indicated or the context otherwise requires.
+
+Cautionary Note Regarding Forward-Looking Statements
+
+This Report includes statements that express the Company’s opinions, expectations, beliefs, plans, objectives, assumptions or projections regarding future events or future results and therefore are, or may be deemed to be, “forward-looking statements.” These forward-looking statements are within the meaning of the “safe harbor” provisions of the Private Securities Litigation Reform Act of 1995 and are based on the current expectations and beliefs of management of the Company, and are subject to a number of factors and uncertainties that could cause actual results to differ materially from those described in the forward-looking statements. These forward-looking statements can generally be identified by the use of forward-looking terminology, including the terms “believes,” “estimates,” “anticipates,” “expects,” “seeks,” “projects,” “intends,” “plans,” “may,” “will” or “should” or, in each case, their negative or other variations or comparable terminology. These forward-looking statements include all matters that are not historical facts. They appear in a number of places throughout this Report (including in information that is incorporated by reference into this Report) and include statements regarding our intentions, beliefs or current expectations concerning, among other things, the Business Combination and the benefits of the Business Combination, including results of operations, financial condition, liquidity, prospects, growth, strategies and the markets in which the Company operates. Such forward-looking statements are based on available current market material and management’s expectations, beliefs and forecasts concerning future events impacting the Company. Factors that may impact such forward-looking statements include:
+
+•the Company’s ability to realize the benefits of the Business Combination;
+
+•the Company’s ability to raise financing in the future and to comply with restrictive covenants related to long-term indebtedness;
+
+•the Company’s success in retaining or recruiting, or changes required in, its officers, key employees or directors following the Business Combination;
+
+•factors relating to the business, operations and financial performance of the Company, including:
+
+◦ the Company’s ability to comply with laws and regulations applicable to its business;
+
+◦ market conditions and global and economic factors beyond the Company’s control;
+
+•intense competition and competitive pressures from other companies worldwide in the industries in which the Company will operate; and
+
+3
+
+•litigation and the ability to adequately protect the Company’s intellectual property rights.
+
+The forward-looking statements contained in this Report are based on the Company’s current expectations and beliefs concerning future developments and their potential effects on the Business Combination and the Company. There can be no assurance that future developments affecting the Company will be those that the Company has anticipated. These forward-looking statements involve a number of risks, uncertainties (some of which are beyond the Company’s control) or other assumptions that may cause actual results or performance to be materially different from those expressed or implied by these forward-looking statements. These risks and uncertainties include, but are not limited to, those factors described or incorporated by reference under the heading “Risk Factors” below. Should one or more of these risks or uncertainties materialize, or should any of the assumptions prove incorrect, actual results may vary in material respects from those projected in these forward-looking statements. The Company will not and does not undertake any obligation to update or revise any forward-looking statements, whether as a result of new information, future events or otherwise, except as may be required under applicable securities laws.
+
+Business
+
+The business of the Company is described in the Proxy Statement in the section entitled “Sema4’s Business” beginning on page 217 thereof and that information is incorporated herein by reference.
+
+Risk Factors
+
+The risks associated with the Company’s business are described in the Proxy Statement in the section entitled “Risk Factors” beginning on page 52 thereof and are incorporated herein by reference. Such risks include, but are not limited to the following:
+
+Summary Risk Factors
+
+•The COVID-19 pandemic has affected and may further materially and adversely affect the Company’s business and financial results.
+
+•Due to the high degree of uncertainty regarding the implementation and impact of the CARES Act and other legislation related to COVID-19, there can be no assurance that the Company will be able to comply with the applicable terms and conditions of the CARES Act and retain such assistance.
+
+•Other companies or institutions may develop and market novel or improved technologies, which may make the Company’s technologies less competitive or obsolete.
+
+•If the Company does not continue to innovate and provide products and services that are useful to users, it may not remain competitive, which could harm its business and operating results.
+
+•The Company relies on highly skilled personnel in a broad array of disciplines and, if it is unable to hire, retain or motivate these individuals, or maintain its corporate culture, it may not be able to maintain the quality of its services or grow effectively.
+
+•The Company needs to scale its infrastructure in advance of demand for its products and services, and its failure to generate sufficient demand for its products and services would have a negative impact on its business and its ability to attain profitability.
+
+•The Company relies on a limited number of product and suppliers or, in some cases, single suppliers, for data infrastructure and some of its laboratory instruments and materials and may not be able to find replacements or immediately transition to alternative suppliers or service providers.
+
+4
+
+•The Company’s current and future products and services may never achieve significant commercial market acceptance.
+
+•The Company’s projections are subject to significant risks, assumptions, estimates and uncertainties, including assumptions regarding adoption of its products and services. As a result, the Company’s projected revenues, market share, expenses and profitability may differ materially from its expectations in any given quarter or fiscal year.
+
+•The Company has estimated the sizes of the markets for its current and future products and services, and these markets may be smaller than it estimates.
+
+•The Company may never become profitable.
+
+•The Company’s operating results could be subject to significant fluctuation, which could increase the volatility of the Company’s stock and warrant price and cause losses to its stockholders.
+
+•The Company’s revenue growth rate could decline over time, and it may experience downward pressure on its operating margins in the future.
+
+•The Company may need to raise additional capital to fund its existing operations, develop additional products and services, commercialize new products and services or expand its operations.
+
+•The Company has identified material weaknesses, some of which have a pervasive effect across the organization, and may identify additional material weaknesses or significant deficiencies, in its internal controls over financial reporting. The Company’s failure to remedy these matters could result in a material misstatement of its financial statements.
+
+•The Company relies on third-party laboratories to perform certain elements of its service offerings, and relies on Mount Sinai, a related party, and its clinicians for a portion of its test volume in connection with its diagnostic solutions and for data programs.
+
+•The Company and its partners will have to maintain compliance with FDA requirements for research, products and services and failure to maintain compliance with FDA requirements may prevent or delay the marketing of its products and services.
+
+•Compliance with the HIPAA security, privacy and breach notification regulations may increase the Company’s costs.
+
+•The Company faces uncertainty related to healthcare reform, pricing, coverage and reimbursement, which could reduce its revenue.
+
+•The Company’s inability to effectively protect its proprietary products, processes, and technologies, including the confidentiality of its trade secrets, could harm its competitive position.
+
+•If patent regulations or standards are modified, such changes could have a negative impact on the Company’s business.
+
+•Litigation or other proceedings resulting from either third-party claims of patent infringement, or asserting infringement by third parties of the Company’s technology, could be costly, time-consuming, and could limit its ability to commercialize its products or services.
+
+•Interruption, interference with, or failure of the Company’s information technology and communications systems could hurt its ability to effectively provide its products and services, which could harm its reputation, financial condition, and operating results.
+
+•Security breaches, privacy issues, loss of data and other incidents could compromise sensitive, protected, or personal information related to the Company’s business, could prevent it from accessing critical information, and could expose it to regulatory liability, which could adversely affect its business.
+
+•The Company depends on its scientific computing and information technology and management systems and any failure of these systems could harm its business.
+
+•If the Business Combination’s benefits do not meet the expectations of investors, stockholders or financial analysts, the market price of the Company’s securities may decline.
+
+5
+
+•Changes in laws, regulations or rules, or a failure to comply with any laws, regulations or rules, may adversely affect the Company’s business, investments and results of operations.
+
+•The Company may face litigation and other risks as a result of the material weakness in our internal control over financial reporting.
+
+•The process of taking a company public by means of a business combination with a special purpose acquisition company is different from taking a company public through an in initial public offering and may create risks for our unaffiliated investors.
+
+Financial Information
+
+The financial information of the Company is described in the Proxy Statement in the sections entitled “Selected Historical Financial Data of Sema4” and “Sema4’s Management’s Discussion and Analysis of Financial Condition and Results of Operations” beginning on pages 47 and 244 thereof, respectively, and are incorporated herein by reference.
+
+The financial information of CMLS is described in the Proxy Statement in the sections entitled “Selected Historical Financial Information of the Company” and “The Company’s Discussion and Analysis of Financial Condition and Results of Operations” beginning on pages 44 and 208 thereof, respectively, and are incorporated herein by reference.
+
+Reference is made to the disclosure set forth in Item 9.01 of this Report relating to the financial information of the Company and CMLS, and to Exhibit 99.2 to this Report, all of which are incorporated herein by reference.
+
+Properties
+
+The properties of the Company are described in the Proxy Statement in the section entitled “Sema4’s Business” beginning on page 217 thereof and that information is incorporated herein by reference.
+
+Security Ownership of Certain Beneficial Owners and Management
+
+The following table sets forth information known to us regarding the beneficial ownership of our common stock immediately following consummation of the Business Combination by:
+
+•each person who is the beneficial owner of more than 5% of the outstanding shares of our common stock;
+
+•each of our named executive officers and directors; and
+
+•all of our executive officers and directors as a group.
+
+Beneficial ownership is determined according to the rules of the SEC, which generally provide that a person has beneficial ownership of a security if he, she or it possesses sole or shared voting or investment power over that security. Under those rules, beneficial ownership includes securities that the individual or entity has the right to acquire, such as through the exercise of warrants or stock options or the vesting of restricted stock units, within 60 days of the record date. Shares subject to warrants or options that are currently exercisable or exercisable within 60 days of the record date or subject to restricted stock units that vest within 60 days of the record date are considered outstanding and beneficially owned by the person holding such warrants, options or restricted stock units for the purpose of computing the
+
+6
+
+percentage ownership of that person but are not treated as outstanding for the purpose of computing the percentage ownership of any other person.
+
+Except as noted by footnote, and subject to community property laws where applicable, based on the information provided to the Company, the persons and entities named in the table below have sole voting and investment power with respect to all shares shown as beneficially owned by them. Unless otherwise indicated, the business address of each beneficial owner listed in the table below is c/o Sema4 Holdings Corp., 333 Ludlow Street, North Tower, 8th Floor, Stamford, Connecticut 06902.
+
+The table below does not include any Earn-Out Shares (as defined in the Proxy Statement) that may be issued after the closing of the Business Combination.
+
+The beneficial ownership of our common stock is based on 240,190,402 shares of common stock issued and outstanding immediately following consummation of the Business Combination, including the redemption of public shares as described above, and conversion of the Class B common stock as described above and the consummation of the PIPE Investment.
+
+7
+
+Beneficial Ownership Table
+
+Name of Beneficial Owners
+
+Number of Shares of Class A Common Stock Beneficially Owned
+
+Percentage of Outstanding
+Class A Common Stock
+
+5% Stockholders:
+
+Entities affiliated with Blackstone Group Inc.(1)
+
+25,056,993
+
+10.4%
+
+Entities affiliated with Deerfield Management Company, L.P.(2)
+
+13,848,488
+
+5.8%
+
+Icahn School of Medicine at Mount Sinai(3)
+
+88,355,473
+
+36.8%
+
+Directors and Named Executive Officers:
+
+Eric Schadt(4)
+
+6,751,479
+
+2.8%
+
+Isaac Ro
+
+—
+
+—
+
+Daniel Clark(5)
+
+1,322,267
+
+*
+
+James Coffin(6)
+
+2,573,902
+
+1.1%
+
+Anthony Prentice(7)
+
+2,056,939
+
+*
+
+Kareem Saad
+
+—
+
+—
+
+Karen White(8)
+
+38,646
+
+*
+
+Dennis Charney
+
+—
+
+—
+
+Eli D. Casdin(9)
+
+22,730,419
+
+9.5%
+
+Emily Leproust(10)
+
+191,666
+
+*
+
+Michael Pellini
+
+—
+
+—
+
+Jason Ryan
+
+—
+
+—
+
+Joshua Ruch
+
+—
+
+—
+
+Rachel Sherman(11)
+
+136,207
+
+*
+
+Nat Turner(12)
+
+191,666
+
+*
+
+Directors and executive officers as a group (15 individuals)(13)
+
+163,254,145
+
+68.0%
+
+* Less than one percent.
+
+8
+
+(1)
+
+Consists of 24,404,324 shares of common stock held by BTO Sema4 Holdings L.P., 505,095 shares of common stock held by Blackstone Tactical Opportunities Fund - FD L.P. and 147,574 shares of common stock held by Blackstone Family Tactical Opportunities Investment Partnership III ESC L.P. BTO Holdings Manager L.L.C. is the general partner of BTO Sema4 Holdings L.P. Blackstone Tactical Opportunities Associates L.L.C. is the managing member of BTO Holdings Manager L.L.C. BTOA L.L.C. is the sole member of Blackstone Tactical Opportunities Associates L.L.C. Blackstone Holdings III L.P. is the managing member of BTOA L.L.C. Blackstone Tactical Opportunities Associates III - NQ L.P. is the general partner of Blackstone Tactical Opportunities Fund - FD L.P. BTO DE GP - NQ L.L.C. is the general partner of Blackstone Tactical Opportunities Associates III - NQ L.P. Blackstone Holdings II L.P. is the managing member of BTO DE GP - NQ L.L.C. Blackstone Holdings I/II GP L.L.C. is the general partner of Blackstone Holdings II L.P. BTO Side-by-Side GP L.L.C. is the general partner of Blackstone Family Tactical Opportunities Investment Partnership III ESC L.P. Blackstone Holdings III L.P. is the sole member of BTO Side-by-Side GP L.L.C. Blackstone Holdings III GP L.P. is the general partner of Blackstone Holdings III L.P. Blackstone Holdings III GP Management L.L.C. is the general partner of Blackstone Holdings III GP L.P. The Blackstone Group Inc. is the sole member of each of Blackstone Holdings I/II GP L.L.C. and Blackstone Holdings III GP Management L.L.C. The sole holder of the Class C common stock of The Blackstone Group Inc. is Blackstone Group Management L.L.C. Blackstone Group Management L.L.C. is wholly-owned by Blackstone's senior managing directors and controlled by its founder, Stephen A. Schwarzman. Each of the Blackstone entities described in this footnote and Stephen A. Schwarzman may be deemed to beneficially own the shares directly or indirectly controlled by such Blackstone entities or him, but each disclaims beneficial ownership of such shares. The address of Mr. Schwarzman and each of the other entities listed in this footnote is c/o The Blackstone Group Inc., 345 Park Avenue, New York, New York 10154.
+
+(2)
+
+Consists of 6,924,244 shares of common stock held by Deerfield Partners and 6,924,244 shares of common stock held by DPDF. Deerfield Management Company, L.P. (“Deerfield Management”) is the investment manager of Deerfield Partners, L.P. (“Deerfield Partners”) and Deerfield Private Design Fund V, L.P. (“DPDF”). Deerfield Mgmt, L.P. (“Deerfield Mgmt”) is the general partner of Deerfield Partners. Deerfield Mgmt V, L.P. (“Deerfield Mgmt V”) is the general partner of DPDF. James E. Flynn is the sole member of the general partner of each of Deerfield Management, Deerfield Mgmt and Deerfield Mgmt V. Deerfield Management, Deerfield Mgmt and Mr. Flynn may be deemed to beneficially own the securities held by Deerfield Partners. Deerfield Management, Deerfield Mgmt V and Mr. Flynn may be deemed to beneficially own the securities held by DPDF. The address for each of Deerfield Partners, DPDF, Deerfield Management, Deerfield Mgmt, Deerfield Mgmt V and Mr. Flynn is 345 Park Avenue South, New York, New York 10010.
+
+(3)
+
+Consists of 88,355,473 shares of common stock held by Icahn School of Medicine at Mount Sinai (“ISMMS”). The shares are held by ISMMS, a New York Education Corporation. The responsibility and authority for the voting and investment decisions with respect to the shares held by ISMMS is vested in those persons who from time to time are the executive officers of ISMMS under the oversight and direction of its board of directors and its sole member, Mount Sinai Health System, Inc., a New York Not-for-Profit Corporation. The address for Icahn School of Medicine at Mount Sinai is One Gustave L. Levy Place, New York, New York 10029.
+
+9
+
+(4)
+
+Consists of 6,751,479 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(5)
+
+Consists of 1,322,267 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(6)
+
+Consists of 2,573,902 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(7)
+
+Consists of 2,056,939 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(8)
+
+Consists of 38,646 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(9)
+
+Includes 15,993,750 shares of common stock and 6,736,669 shares of common stock underlying private placement warrants that are exercisable within 60 days of Closing. The Sponsor is the record holder of the securities reported herein. The Board of Managers of the Sponsor is comprised of Mr. Eli Casdin and Mr. Keith A. Meister who share voting and investment discretion with respect to the securities held of record by the Sponsor. Messrs. Casdin and Meister disclaim beneficial ownership of these shares except to the extent of their respective pecuniary interests therein. The business address of Mr. Casdin is c/o Corvex Management LP, Inc., 667 Madison Ave, New York, NY 10065.
+
+(10)
+
+Consists of 25,000 shares of common stock and 166,666 shares of common stock underlying private placement warrants that are exercisable within 60 days of Closing.
+
+(11)
+
+Consists of 136,207 shares of common stock subject to options that are exercisable within 60 days of Closing.
+
+(12)
+
+Consists of 25,000 shares of common stock held by Nat Turner and 166,666 shares of common stock underlying private placement warrants held by NTWJ Holdings, LLC ("NTWJ"), that are exercisable within 60 days of Closing. Mr. Turner is a managing member of NTWJ. The address for NTWJ is 139 Reade Street, New York, New York 10013.
+
+(13)
+
+Consists of (i) 163,254,145 shares of common stock held by all directors and executive officers of the Company as a group, and (ii) 12,879,440 shares of common stock subject to options held by all directors and executive officers of the Company as a group and that are exercisable within 60 days of Closing.
+
+Directors and Executive Officers
+
+The Company’s directors and executive officers upon the Closing are described in the Proxy Statement in the section entitled “Management After the Business Combination” beginning on page 279 thereof and that information is incorporated herein by reference.
+
+10
+
+Directors
+
+The Company’s Board is classified into three classes of directors. Pursuant to the approval of CMLS stockholders from the Special Meeting, the following persons will constitute the Company’s Board effective upon the Closing: Eli D. Casdin, Joshua Ruch, Michael Pellini, Rachel Sherman, Eric Schadt, Nat Turner, Dennis Charney, Emily Leproust and Jason Ryan. Keith A. Meister, Sean George and Munib Islam resigned as directors of the Company. Eli D. Casdin, Joshua Ruch and Michael Pellini were appointed to serve as Class I directors, with terms expiring at the Company’s first annual meeting of stockholders following the Closing; Rachel Sherman, Eric Schadt, Nat Turner and Dennis Charney were appointed to serve as Class II directors, with terms expiring at the Company’s second annual meeting of stockholders following the Closing; and Emily Leproust and Jason Ryan were appointed to serve as Class III directors, with terms expiring at the Company’s third annual meeting of stockholders following the Closing. Biographical information for these individuals is set forth in the Proxy Statement in the section titled “Management After the Business Combination” beginning on page 279, which is incorporated herein by reference.
+
+Committees of the Board of Directors
+
+Effective as of the Closing, the standing committees of the Company’s Board consist of an audit committee (the “Audit Committee”), a compensation committee (the “Compensation Committee”) and a nominating and corporate governance committee (the “Nominating and Corporate Governance Committee”). Each of the committees reports to the Board.
+
+Effective as of the Closing, the Board appointed Dennis Charney, Emily Leproust, and Jason Ryan to serve on the Audit Committee, with Mr. Ryan as chair. The Board appointed Joshua Ruch, Rachel Sherman and Nat Turner to serve on the Compensation Committee, with Mr. Ruch as chair. The Board appointed Joshua Ruch and Rachel Sherman to serve on the Compensation Committee, with Ms. Sherman as chair.
+
+The committees of the Board are further described in the Proxy Statement in the section entitled “Management After the Business Combination—Committees of the Board of Directors” beginning on page 283 thereof and that information is incorporated herein by reference.
+
+Executive Officers
+
+Effective as of the Closing, each of Eli D. Casdin, Brian Emes and Shaun Rodriguez resigned as the Chief Executive Officer, Chief Financial Officer and Secretary, and Chief Strategy Officer of the Company, respectively. Effective as of the Closing, the Board appointed Eric Schadt to serve as Chief Executive Officer, Isaac Ro to serve as Chief Financial Officer, James Coffin to serve as President and Chief Operating Officer, Daniel Clark to serve as Secretary and General Counsel, Anthony Prentice to serve as Chief Product Officer, Kareem Saad to serve as Chief Business Officer and Karen White to serve as Chief People Officer of the Company. Biographical information for these individuals is set forth in the Proxy Statement in the section titled “Management After the Business Combination” beginning on page 279, which is incorporated herein by reference. In connection with the Closing, the Company has determined that Shawn Assad, the Company’s Chief Accounting Officer, is not an executive officer of the Company within the meaning of Rule 16a-1(f) under the Securities Exchange Act of 1934, as amended (the “Exchange Act”).
+
+11
+
+Executive Compensation
+
+Executive Compensation and Director Compensation
+
+The executive compensation of the Company’s named executive officers and directors is described in the Proxy Statement in the section entitled “Executive Compensation of Sema4” beginning on page 273 thereof and that information is incorporated herein by reference.
+
+On the Closing Date, the Board approved forms of a stock option agreement and a RSU agreement for use in connection with awards issued pursuant to the Sema4 Holdings Corp. 2021 Incentive Plan (as defined in the Proxy Statement) issued pursuant to the Merger Agreement. The forms of these award agreements are included as Exhibits 10.6 and 10.7 to this Report, respectively and are incorporated herein by reference.
+
+Compensation Committee Interlocks and Insider Participation
+
+None of our executive officers serves as a member of the Board or compensation committee (or other committee performing equivalent functions) of any entity that has one or more executive officers serving on the Board or compensation committee.
+
+Certain Relationships and Related Party Transactions, and Director Independence
+
+Certain Relationships and Related Party Transactions
+
+Certain relationships and related party transactions are described in the Proxy Statement in the section entitled “Certain Relationships and Related Party Transactions” beginning on page 304 thereof and are incorporated herein by reference.
+
+On the Closing Date, the Company, the Sponsor and certain other parties thereto (collectively, the “rights holders”) entered into the Amended and Restated Registration Rights Agreement, which amended and restated in its entirety the prior registration rights agreement, dated September 1, 2020, by and between CMLS and the parties thereto. Pursuant to the terms of the Amended and Restated Registration Rights Agreement, the Company is to prepare and file with the SEC, no later than 30 days after the Closing Date, a shelf registration statement for an offering to be made on a continuous basis from time to time with respect to the resale of the registrable shares under the Amended and Restated Registration Rights Agreement. The Company is further required to use commercially reasonable efforts to cause such shelf registration statement to be declared effective as soon as possible after filing, but in no event later than the earlier of 60 days following the filing date thereof and five business days after the SEC notifies the Company that it will not review such registration statement, subject to extension in the event that the registration is subject comments from the SEC.
+
+In addition, pursuant to the terms of the Amended and Restated Registration Rights Agreement and subject to certain requirements and customary conditions, including with regard to the number of demand rights that may be exercised, the rights holders may demand at any time or from time to time, that the Company files a registration statement on Form S-1 or Form S-3 to register certain shares of common stock held by such rights holders. The Amended and Restated Registration Rights Agreement also provides the rights holders with “piggy-back” registration rights, subject to certain requirements and customary conditions. The Company will bear the expenses incurred in connection with the filing of any such registration statement.
+
+12
+
+The foregoing description of the Amended and Restated Registration Rights Agreement is qualified in its entirety by the text of the Amended and Registration Rights Agreement, which is included as Exhibit 10.2 to this Report and is incorporated herein by reference.
+
+Independence of Directors
+
+Nasdaq listing standards require that a majority of the Board be independent. An “independent director” is defined generally as a person other than an officer or employee of the company or its subsidiaries or any other individual having a relationship which in the opinion of the company's board of directors, would interfere with the director's exercise of independent judgment in carrying out the responsibilities of a director. The Board has determined that each individual member of the Board other than Eric Schadt and Eli D. Casdin are “independent directors” as defined in the Nasdaq listing standards and applicable SEC rules. Our independent directors will have regularly scheduled meetings at which only independent directors are present.
+
+Legal Proceedings
+
+Reference is made to the disclosure regarding legal proceedings in the section of the Proxy Statement titled “Sema4’s Business—Legal Proceedings” beginning on page 241, which is incorporated herein by reference.
+
+Market Price of and Dividends on the Registrant’s Common Equity and Related Stockholder Matters
+
+Market Information and Dividends
+
+The Company’s common stock and warrants commenced trading on the Nasdaq under the symbols “SMFR” and “SMFRW,” respectively, on July 23, 2021, subject to ongoing review of the Company’s satisfaction of all listing criteria following the Business Combination, in lieu of the common stock and warrants of CMLS. CMLS’s units ceased trading separately on the Nasdaq on July 23, 2021. The Company has never declared or paid any cash dividends and does not presently plan to pay cash dividends in the foreseeable future.
+
+Holders of Record
+
+As of the Closing and following the completion of the Business Combination, including the redemption of public shares as described above, the conversion of the Class B common stock and described above and the consummation of the PIPE Investment, the Company had 240,190,402 shares of common stock outstanding held of record by approximately 119 holders and no shares of preferred stock outstanding. Such amounts do not include DTC participants or beneficial owners holding shares through nominee names.
+
+Securities Authorized for Issuance Under Equity Compensation Plans
+
+Reference is made to the disclosure described in the Proxy Statement in the section entitled “Proposal No. 5—Approval of the Incentive Plan” beginning on page 183 thereof and “Proposal No. 6—Approval of Employee Stock Purchase Plan” beginning on page 188 thereof, which are incorporated herein by reference. As described above, the Sema4 Holdings Corp. 2021 Incentive Plan and the material terms
+
+13
+
+thereunder, including the authorization of the initial share reserve thereunder, were approved by CMLS’s stockholders at the Special Meeting.
+
+Recent Sales of Unregistered Securities
+
+Reference is made to the disclosure set forth under Item 3.02 of this Report relating to the issuance of the Company’s common stock in connection with the Business Combination, the conversion of the Class B common stock and the PIPE Investment, which is incorporated herein by reference.
+
+Description of Registrant’s Securities to be Registered
+
+The Company’s securities are described in the Proxy Statement in the section entitled “Description of Securities” beginning on page 286 thereof and that information is incorporated herein by reference. As described below, the Company’s amended and restated certificate of incorporation was approved by CMLS’s stockholders at the Special Meeting and became effective as of the Closing.
+
+Indemnification of Directors and Officers
+
+The indemnification of our directors and officers is described in the Proxy Statement in the section entitled “Certain Relationships and Related Party Transactions—Indemnification Agreements” beginning on page 309 thereof and that information is incorporated herein by reference.
+
+On the Closing Date, the Company entered into new indemnification agreements with each of its directors and executive officers and certain other key employees. The indemnification agreements provide that the Company will indemnify each of its directors, executive officers, and such other key employees against any and all expenses incurred by that director, executive officer, or other key employee because of his or her status as one of the Company’s directors, executive officers, or other key employees, to the fullest extent permitted by Delaware law, the Amended and Restated Certificate of Incorporation and the Company’s bylaws. In addition, the indemnification agreements provide that, to the fullest extent permitted by Delaware law, the Company will advance all expenses incurred by its directors, executive officers, and other key employees in connection with a legal proceeding involving his or her status as a director, executive officer, or key employee.
+
+The foregoing description of the indemnification agreements is qualified in its entirety by the text of the form of director and officer indemnification agreement, which is included as Exhibit 10.4 to this Report and is incorporated herein by reference.
+
+Financial Statements and Supplementary Data
+
+Reference is made to the disclosure set forth under Item 9.01 of this Report relating to the financial information of the Company, and to Exhibit 99.2 to this Report, all of which are incorporated herein by reference.
+
+Changes in and Disagreements with Accountants on Accounting and Financial Disclosure
+
+Reference is made to the disclosure set forth under Item 4.01 of this Report relating to the change in the Company’s certifying accountant, which is incorporated herein by reference.
+
+14
+
+Item 3.02. Unregistered Sales of Equity Securities.
+
+At the Closing, the Company consummated the Business Combination and the PIPE Investment. Additionally, 11,068,750 shares of Class B common stock held by the Sponsor and certain of its affiliates automatically converted to shares of common stock as of the Closing. The disclosure under Item 2.01 of this Report is incorporated into this Item 3.02 by reference.
+
+The Company issued the shares of common stock pursuant to the Business Combination and the PIPE Investment under Section 4(a)(2) of the Securities Act and/or Rule 506 of Regulation D promulgated under the Securities Act, as a transaction by an issuer not involving a public offering. The Company issued the shares of common stock in connection with the conversion of the Class B common stock under Section 3(a)(9) of the Securities Act, as an exchange with its existing security holders exclusively where no commission or other remuneration was paid or given directly or indirectly for soliciting such exchange. The investors in the PIPE Investment represented their intentions to acquire the shares for investment only and not with a view to or for sale in connection with any distribution, and appropriate restrictive legends were affixed to the certificates representing all of the shares issued in the Business Combination and the PIPE Investment and in connection with the conversion of the Class B common stock (or reflected in restricted book entry with the Company’s transfer agent). The parties also had adequate access, through business or other relationships, to information about the Company.
+
+Item 3.03. Material Modification to Rights of Security Holders
+
+The information set forth in Item 5.03 to this Report is incorporated herein by reference.
+
+Item 4.01 Changes in Registrant’s Certifying Accountant
+
+On July 22, 2021, the Audit Committee approved the dismissal of WithumSmith+Brown, PC (“Withum”), CMLS’s independent registered public accounting firm prior to the Business Combination, in connection with the Closing.
+
+Withum’s report (“Withum’s Report”) on CMLS’s financial statements as of December 31, 2020 and the related statements of operations, changes in shareholders’ equity and cash flows for the period from July 10, 2020 (inception) through December 31, 2020 did not contain any adverse opinion or disclaimer of opinion, nor was it qualified or modified as to uncertainty, audit scope or accounting principles, other than as follows:
+
+Withum’s Report contained a separate paragraph stating that:
+
+“As discussed in Note 2 to the financial statements, the Securities and Exchange Commission issued a public statement entitled Staff Statement on Accounting and Reporting Considerations for Warrants Issued by Special Purpose Acquisition Companies (“SPACs”) (the “Public Statement”) on April 12, 2021, which discusses the accounting for certain warrants as liabilities. The Company previously accounted for its warrants as equity instruments. Management evaluated its warrants against the Public Statement, and determined that the warrants should be accounted for as liabilities. Accordingly, the 2020 financial statements have been restated to correct the accounting and related disclosure for the warrants.”
+
+During the period from July 10, 2020 (inception) through December 31, 2020 and the subsequent period through July 22, 2021, there were no: (i) disagreements with Withum on any matter of accounting
+
+15
+
+principles or practices, financial statement disclosures or audited scope or procedures, which disagreements if not resolved to Withum’s satisfaction would have caused Withum to make reference to the subject matter of the disagreement in connection with its report or (ii) reportable events as defined in Item 304(a)(1)(v) of Regulation S-K.
+
+The Company has provided Withum with a copy of the disclosures made by the Company in response to this Item 4.01 and has requested that Withum furnish the Company with a letter addressed to the SEC stating whether it agrees with the statements made by the registrant in response to this Item 304(a) and, if not, stating the respects in which it does not agree. A letter from Withum is attached as Exhibit 16.1 to this Report.
+
+The Company expects in the coming weeks that the Audit Committee will appoint a new independent registered public accounting firm to audit the Company’s consolidated financial statements for the year ended December 31, 2021.
+
+Item 5.01. Changes in Control of the Registrant.
+
+The information set forth above under Item 1.01 and Item 2.01 of this Report is incorporated herein by reference.
+
+Item 5.02. Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers.
+
+The information set forth above in the sections titled “Directors and Officers,” “Executive Compensation,” “Certain Relationships and Related Party Transactions” and “Indemnification of Directors and Officers” in Item 2.01 to this Report is incorporated herein by reference.
+
+Item 5.03. Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year.
+
+On July 22, 2021, in connection with the consummation of the Business Combination, the Company amended and restated its certificate of incorporation, effective as of the Closing (as amended, the “Amended and Restated Certificate of Incorporation”), and the Company adopted restated bylaws (the “Bylaws”).
+
+Copies of the Amended and Restated Certificate of Incorporation and the Bylaws are attached as Exhibits 3.1 and 3.2 to this Report, respectively, and are incorporated herein by reference.
+
+The material terms of the Amended and Restated Certificate of Incorporation and the Bylaws and the general effect upon the rights of holders of the Company’s capital stock are included in the Proxy Statement under the sections titled “Proposal No. 3—The Charter Approval Proposal,” “Proposal No. 4— Approval of Certain Governance Provisions in the Amended and Restated Certificate of Incorporation,” and “Description of Securities” beginning on pages 179, 181, and 286 of the Proxy Statement, respectively, which are incorporated herein by reference.
+
+Item 5.06 Change in Shell Company Status
+
+As a result of the Business Combination, the Company ceased to be a shell company. Reference is made to the disclosure in the Proxy Statement in the sections entitled “Proposal No. 1—Approval of the Business Combination” beginning on page 135 thereof, which is incorporated herein by reference.
+
+16
+
+Item 8.01. Other Events.
+
+On July 22, 2021, the parties issued a joint press release announcing the completion of the Business Combination, a copy of which is furnished as Exhibit 99.1 hereto.
+
+Item 9.01. Financial Statement and Exhibits.
+
+(a) Financial statements of businesses acquired.
+
+The (i) audited balance sheets of Sema4 as of December 31, 2020 and 2019, the related statements of operations and comprehensive loss, redeemable convertible preferred stock and stockholders’ deficit and cash flows for each of the three years in the period ended December 31, 2020, and the related notes and (ii) the unaudited condensed financial statements of Sema4 as of March 31, 2021 and for the three months ended March 31, 2021 and 2020 and the related notes are included in the Proxy Statement beginning on page F-3 and are incorporated herein by reference.
+
+The (i) audited balance sheet of CMLS as of December 31, 2020, the related statements of operations, changes in shareholders’ equity and cash flows for the period from July 10, 2020 (inception) through December 31, 2020, and the related notes and (ii) the unaudited condensed financial statements of CMLS as of March 31, 2021 and for the three months ended March 31, 2021 and the related notes are included in the Proxy Statement beginning on page F-62 and are incorporated herein by reference.
+
+(b) Pro forma financial information.
+
+The unaudited pro forma condensed combined financial information of the Company as of and for the three months ended March 31, 2021 and for the year ended December 31, 2020 is filed as Exhibit 99.2 and is incorporated herein by reference.
+
+(d) Exhibits.
+
+Incorporated by Reference
+
+Exhibit
+Number
+
+Description
+
+Form
+
+Exhibit
+
+Filing Date
+
+2.1*
+
+Agreement and Plan of Merger, dated February 9, 2021, by and among CMLS, Merger Sub and Legacy Sema4, as amended by Amendment to Agreement and Plan of Merger dated May 3, 2021.
+
+DEFM14A
+
+Annex A
+
+07/02/2021
+
+3.1
+
+Third Amended and Restated Certificate of Incorporation of Sema4 Holdings Corp.
+
+3.2
+
+Restated Bylaws of Sema4 Holdings Corp.
+
+4.1
+
+Specimen Class A Common Stock Certificate.
+
+S-1/A
+
+4.2
+
+08/24/2020
+
+4.2
+
+Specimen Warrant Certificate.
+
+S-1/A
+
+4.3
+
+08/24/2020
+
+4.3
+
+Warrant Agreement, dated as of September 1, 2020, by and between CM Life Sciences, Inc. and Continental Stock Transfer & Trust Company, as warrant agent.
+
+8-K
+
+10.1
+
+09/04/2020
+
+17
+
+10.1
+
+Lockup Agreement, dated as of February 9, 2021, by and among the Company and the stockholder parties identified therein.
+
+8-K
+
+10.2
+
+02/11/2021
+
+10.2
+
+Amended and Restated Registration Rights Agreement, dated as of July 22, 2021, by and among the Company, certain equity holders of the Company named therein and certain equity holders of Sema4 named therein.
+
+10.3
+
+Subscription Agreement, dated as of February 9, 2021, by and among the Company and the subscriber parties thereto.
+
+8-K
+
+10.1
+
+02/11/2021
+
+10.4
+
+Form of Director and Officer Indemnification Agreement.
+
+10.5
+
+2021 Equity Incentive Award Plan.
+
+10.6
+
+Form of Stock Option Agreement under the 2021 Incentive Award Plan.
+
+10.7
+
+Form of RSU Agreement under the 2021 Incentive Award Plan.
+
+10.8
+
+Form of Earn-Out RSU Agreement.
+
+10.9
+
+2021 Employee Stock Purchase Plan.
+
+10.10
+
+Amended and Restated Employment of Agreement of Eric Schadt.
+
+10.11
+
+Employment Agreement of Isaac Ro.
+
+10.12
+
+Employment Agreement of Dan Clark.
+
+10.13
+
+Employment Agreement of James Coffin.
+
+10.14
+
+Employment Agreement of Anthony Prentice.
+
+10.15
+
+Employment Agreement of Kareem Saad.
+
+10.16
+
+Employment Agreement of Karen White.
+
+10.17
+
+Sub-Sublease, dated as of June 6, 2017, by and between Icahn School of Medicine at Mount Sinai and the Company, as amended July 31, 2019.
+
+10.18
+
+Sublease Agreement, dated as of November 8, 2019, by and between Marriott International, Inc. and the Company.
+
+10.19
+
+Sublease, dated as of June 1, 2017, by and between Icahn School of Medicine at Mount Sinai and the Company, as amended December 22, 2017.
+
+10.20
+
+Sublease, dated as of April 23, 2019, by and between Icahn School of Medicine at Mount Sinai and the Company.
+
+10.21
+
+Lease Agreement, dated as of January 31, 2020, by and between 1 Commercial Street Associates, LLC and the Company.
+
+18
+
+10.22**
+
+Master Services Agreement, dated as of April 2, 2018, by and among the Company, Icahn School of Medicine at Mount Sinai, The Mount Sinai Hospital, and the parties thereto, as amended July 31, 2019
+
+10.23**
+
+Master Services Agreement, dated as of May 10, 2018, by and between the Company and Icahn School of Medicine at Mount Sinai, as amended July 31, 2019.
+
+10.24**
+
+Data Structuring and Curation Agreement, dated as of August 1, 2019, by and between Icahn School of Medicine at Mount Sinai and the Company, as amended March 11, 2020.
+
+10.25**
+
+BioMe Biospecimen and Data Access Agreement, dated as of July 19, 2019, by and between Icahn School of Medicine at Mount Sinai and the Company.
+
+10.26**
+
+Non-Exclusive Patent License Agreement, dated as of June 1, 2017, by and between the Company and Icahn School of Medicine at Mount Sinai.
+
+10.27**
+
+Supply Agreement, dated as of June 20, 2014, by and between the Company and Illumina, Inc., and amendments thereto.
+
+16.1
+
+Letter from Withum to the U.S. Securities and Exchange Commission dated July 28, 2021.
+
+21.1
+
+Subsidiaries of the Company.
+
+99.1
+
+Press release dated July 22, 2021.
+
+99.2
+
+Unaudited pro forma condensed combined financial information of the Company as of and for the three months ended March 31, 2021 and for the year ended December 30, 2020.
+
+* Certain of the exhibits and schedules to this Exhibit have been omitted in accordance with Regulation S-K Item 601(a)(5). The Company agrees to furnish a copy of all omitted exhibits and schedules to the SEC upon its request.
+
+** The Company has omitted portions of the exhibit as permitted under Regulation S-K Item 601(b)(10).
+
+19
+
+SIGNATURES
+
+Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized.
+
+Sema4 Holdings Corp.
+
+Date:
+
+July 28, 2021
+
+By:
+
+/s/ Eric Schadt
+
+Name:
+
+Eric Schadt
+
+Title:
+
+Chief Executive Officer
+
+20

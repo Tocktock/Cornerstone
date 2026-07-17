@@ -1,0 +1,190 @@
+3
+gogo-ex10_4.htm
+EX-10.4
+
+EX-10.4
+
+Exhibit 10.4
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+WAIVER AND OMNIBUS AMENDMENT TO AIRSPAN/GOGO AGREEMENTS
+
+This WAIVER AND OMNIBUS AMENDMENT TO MASTER SERVICES AGREEMENT, SUPPLY AND PRODUCT SUPPORT AGREEMENT AND RELATED DOCUMENTS (this “Amendment”) effective as of June 27, 2024, is entered into by and between Gogo Business Aviation LLC, a Delaware limited liability company, and its Affiliates (collectively, “Gogo”) and Airspan Networks Inc., a Delaware limited liability company (“Airspan” and together with Gogo, the “Parties” and each a “Party”). Capitalized terms not otherwise defined in this Amendment have the meaning ascribed to them in the Agreement (as defined below).
+
+WHEREAS, Gogo and Airspan are parties to that certain Master Services Agreement dated as of November 25, 2019 (as the same may be amended, restated, amended and restated, supplemented or modified prior to the date hereof, the “MSA”) and that certain Statement of Work #2 under the MSA (as the same may be amended, restated, amended and restated, supplemented or modified prior to the date hereof, the “SOW”).
+
+WHEREAS, Gogo and Airspan are also parties to that certain Supply and Product Support Agreement dated as of November 25, 2019 (as the same may be amended, restated, amended and restated, supplemented or modified prior to the date hereof, the “Supply Agreement”, and together with the MSA, the SOW, and all other documents, agreements, and instruments between Airspan and/or any of its affiliates, on the one hand, and Gogo and/or any of its affiliates, on the other hand, the “Airspan/Gogo Agreements”);
+
+WHEREAS, the parties are entering into this Amendment, in part, to resolve certain disputes under the Airspan Gogo Agreements, and in connection with the Amended Joint Prepackaged Chapter 11 Plan of Reorganization of Airspan Networks Holdings Inc. and its Debtor Affiliates, filed with the U.S. Bankruptcy Court for the District of Delaware, Case No. 24-10621 (TMH) (the “Plan”);
+
+WHEREAS, Gogo and Airspan intend to, subject to the terms and conditions herein, amend the Airspan/Gogo Agreements, and Gogo has agreed to provide a conditional waiver of any purported default or event of default existing under the Airspan/Gogo Agreements as of the date of this Amendment, subject to the terms and conditions set forth in Section 4 hereof; and
+
+NOW THEREFORE, in consideration of the premises set forth above and other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties agree as follows:
+
+1.
+Amendments to MSA. The MSA is hereby amended as follows:
+
+a.
+Definitions. Article 1 of the MSA is hereby amended by inserting new Sections 1.2A, 1.2B and 1.3A in appropriate numeric order to read in its entirety as follows:
+
+1.2A “Airspan Line of Credit Agreement” means that certain Revolving Line of Credit Agreement dated as of ______, 2024, by and among Airspan Parent, as borrower, Fortress Credit Corp., as administrative agent, Gogo Business Aviation LLC, as a lender, Fortress Credit Corp. and/or its affiliates, as lender(s) (as amended, restated, amended and restated, supplemented or modified from time to time).
+
+1.2B “Airspan Parent” means Airspan Networks Holdings LLC (formerly known as Airspan Networks Holdings Inc.), a Delaware limited liability company.
+
+1.3A “ATG Evolution” means the commercial Air-to-Ground (ATG) network solution to serve North America utilizing unlicensed (2.4 GHz) spectrum for a 5G solution, and Gogo’s licensed (850 MHz) spectrum for a 4G LTE solution developed under the SOW.
+
+Page 1 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+b.
+Personnel. Section 2.2 of the MSA is hereby amended by inserting a new clause (d) in appropriate alphabetical order therein, to read in its entirety as follows:
+
+(d) Airspan will provide Gogo with bi-monthly reports identifying the Airspan personnel who are delivering, manufacturing, and performing work in connection with the ATG Evolution projects.
+
+c.
+Financial Information. Section 12.4 of the MSA is hereby amended and restated in its entirety to read as follows:
+
+12.4
+Reporting; Embedded Gogo Employees.
+
+(a)
+Airspan will provide Gogo (a) to the extent prepared, monthly unaudited financials of the Airspan Parent, (b) quarterly unaudited financial statements of the Airspan Parent, (c) commencing with the fiscal year of Airspan ending December 31, 2024, annual audited financial statements of the Airspan Parent, and (d) beginning with the fiscal year of the Airspan Parent commencing January 1, 2025, an annual budget and updates to such budget (to the extent updates are prepared), in each case at the same time as such financial statements and budget are provided to the Airspan Parent’s equity holders.
+
+(b)
+In the event delivery of the first batch of 5G radio modules to Airspan under the MSA has not been satisfied by July 1, 2025, and Gogo is no longer a lender under the Airspan Line of Credit Agreement, then Airspan will provide reasonable access to Gogo of determinations of the Airspan Parent’s board of directors (or equivalent) regarding operational matters (redacted for privileged information and conflict of interest matters) until such delivery is made.
+
+(c)
+Gogo may embed up to three (3) persons in the ATG Evolution programs (which embedded persons shall be selected and/or replaced at Gogo’s discretion, so long as such persons are reasonably acceptable to Airspan). Such placement of personnel shall be subject to background checks as reasonably requested by Airspan; provided, however, that such background checks shall be no more onerous than the background checks conducted by Airspan for its employees; provided further that if requested by Airspan, Gogo shall enter into confidentiality undertakings related to such access as requested by Airspan and shall confirm that such personnel are covered by such confidentiality undertakings. Subject to the foregoing, personnel embedded pursuant to this Section 12.4(c) shall have access to Airspan’s program management office, development, and production operations supporting the ATG Evolution programs; provided that the embedded personnel rights set forth in this Section 12.4(c) shall terminate following any termination or litigation under the MSA or other commercial agreements between Airspan and/or its Affiliates, on the one hand, and Gogo and/or its Affiliates, on the other hand (other than the Airspan Line of Credit Agreement).
+
+2.
+Amendments to Schedule and Dates. The Parties agree to the following:
+
+Page 2 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+a.
+The Parties hereby agree (1) that each of Exhibit A, Part 1.A and Exhibit A, Part 1.B hereto sets forth certain agreed milestones relating to the ATG Evolution, (2) the SOW is amended to include such milestones, and (3) (x) Exhibit A, Part 1.A sets forth firm dates for the completion of certain of such milestones and (y) Exhibit A, Part 1.B sets forth target dates for the completion of certain of such milestones. For the avoidance of doubt, the Parties agree that the dates listed under the header “Target Date” in the tables set forth in Exhibit A, Part 1.B hereto are not “firm or fixed performance dates,” but rather are “estimate or target” dates as described in Section 2.6 of the MSA. The Parties further agree that, upon the failure to satisfy a milestone set forth in Exhibit A, Part 1.A., Airspan shall have a period of thirty (30) days after written notice of such breach is received from Gogo to cure such breach (the “Part 1.A Cure Period”); provided, however, that (x) the use by Airspan of all or part of the Part 1.A Cure Period in respect to any noticed breach of the type described in this sentence shall reduce, day for day, the Part 1.A Cure Period available in respect to any such subsequent noticed breach and (y) for the avoidance of doubt, the aggregate period of time available to Airspan in respect of any or all Part 1.A Cure Periods shall not exceed thirty (30) days unless otherwise agreed by the Parties.
+
+b.
+The SOW is amended by amending “Table 10 – Milestone Payment Schedule” as set forth therein to modify the “scheduled completion” for Milestone 8 (MI8), and Milestone 9 (MI9) as set forth on Exhibit A, Part 2 hereto.
+
+c.
+The Supply Agreement and its applicable PO 129470 is amended as set forth in Exhibit A, Part 3.
+
+d.
+The Parties hereby agree that, in the event that a milestone identified on Exhibit A hereto occurs on or before the related Incentive Date (if any) set forth on such Exhibit A hereto, Gogo will pay to Airspan the correlating Incentive Payment Amount identified on Exhibit A hereto within 30 days after occurrence of such milestone.
+
+e.
+The Parties hereby agree to extend the delivery dates under Purchase Order Nos. 130143 and 132477 and the balance of the delivery dates under Purchase Order 129470 not amended by Exhibit A, Part 3 from the dates set forth therein to new mutually agreeable dates to be determined by the Parties at a later time.
+
+f.
+The Parties hereby agree to the terms regarding cooperation between Airspan and Gogo in connection with certain milestones, in each case as further set forth in Footnote 1 on Exhibit A hereto.
+
+g.
+The Parties hereby agree that, subject to the Waiver, all Parties’ rights under the Airspan/Gogo Agreements are reserved, and nothing in this Section 2 or Exhibit A hereto, except as provided in Section 2(a), 2(b), 2(c), 2(d) and 2(e) hereof, shall be interpreted to modify, increase, or limit the obligations, rights, or remedies of the Parties with respect to Airspan’s satisfaction of any milestones under the SOW (the “Milestones”), schedules, or dates under the Airspan/Gogo Agreements, or create any new remedies, rights or obligations in connection with the satisfaction of Milestones, schedules, or dates under the Airspan/Gogo Agreements beyond the terms of the existing Airspan/Gogo Agreements as in effect on the date hereof.
+
+3.
+Amendments to Supply Agreement.
+
+a.
+Records; Audit. Section 4.3(b) of the Supply Agreement is hereby amended and restated in its entirety to read as follows:
+
+Page 3 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+(b) Supplier shall provide Gogo (a) to the extent prepared, monthly unaudited financial statements of the Airspan Parent, (b) quarterly unaudited financial statements of the Airspan Parent, (c) commencing with the fiscal year of Airspan ending December 31, 2024, annual audited financial statements of the Airspan Parent, and (d) commencing with the fiscal year of the Airspan Parent commencing January 1, 2025, an annual budget and updates to such budget (to the extent updates are prepared), in each case at the same time as such financial statements and budget arc provided to the Airspan Parent’s equity holders.
+
+b.
+Definitions. Exhibit D to the Supply Agreement is hereby amended by inserting a new definition in appropriate alphabetical order therein, to read in its entirety as follows:
+
+Airspan Parent. The term “Airspan Parent” means Airspan Networks Holdings LLC (formerly known as Airspan Networks Holdings Inc.), a Delaware limited liability company.
+
+4.
+Limited Waiver. With effect from the date hereof until the Waiver Termination Date (if any), Gogo agrees to waive each default or event of default that has occurred or is purported to have occurred as of the date hereof under the Airspan/Gogo Agreements, whether such defaults are known or unknown, contingent or matured (the “Waiver”). Notwithstanding anything to the contrary in this Amendment, nothing in this Amendment shall be construed as agreement by Airspan or admission to, or acknowledgment of, the accuracy or validity of any purported default or event of default under the Airspan/Gogo Agreements. In the event that (a) a court order is entered and becomes final and non-appealable (the latter being applicable only if Airspan is actively opposing rejection of the MSA) permitting Airspan to reject the MSA pursuant to 11 U.S.C. § 365, or (b) at any time after July 1, 2025 and prior to the delivery of a functioning 5G radio module to Gogo, Gogo validly terminates the MSA in accordance with Section 7.2(a) of the MSA as a result of a future material breach by Airspan under the Airspan/Gogo Agreements that occurs after the date hereof, then the Waiver shall terminate on the date of entry of such final and non-appealable (the latter being applicable only if Airspan is actively opposing rejection of the MSA) order approving rejection of the MSA or on the date of such termination, as applicable (in either case, the “Waiver Termination Date”). Notwithstanding anything to the contrary herein, (i) the Waiver hereunder shall have no effect on the ability of Gogo to make or pursue any claims it may have against GCT Semiconductors, Inc. (“GCT”), and (ii) so long as the Waiver Termination Date has not already occurred, the Waiver shall become permanent and not subject to termination upon the delivery to Gogo of a functioning 5G radio module.
+
+5.
+Legal Fees and Expenses. The Parties have agreed that Airspan will pay up to $[***] of Gogo’s legal fees and expenses accrued by White & Case LLP, as counsel to Gogo. The Parties agree that under no circumstances shall Airspan be responsible for any other fees or expenses of Gogo, its affiliates, advisors, directors, officers, employees, agents, or legal counsel in connection with this Amendment, Airspan’s jointly administered chapter 11 cases that are pending as of the date of this Amendment before the United States Bankruptcy Court for the District of Delaware, with the lead case docketed as Case No. 24-10621, or the negotiation and execution of the Airspan Line of Credit (other than as expressly required under the terms of the Airspan Line of Credit Agreement (as defined in the MSA, as amended by this Agreement)) in excess of such amount.
+
+6.
+Effectiveness. This Amendment and the amendments and Waiver set forth herein shall become effective immediately upon the occurrence of the Effective Date (as defined in the Plan).
+
+Page 4 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+7.
+No Other Amendments. Except as expressly amended hereby, the Airspan/Gogo Agreements shall remain unmodified and in full force and effect.
+
+8.
+Effect of Amendment on other Documents. On and after the date hereof, each reference in the Airspan/Gogo Agreements to “this Agreement”, the “Master Services Agreement”, the “Statement of Work”, the “Supply Agreement”, the other documents related thereto, “hereunder”, “hereof”, “thereunder”, “thereof” or words of like import referring to any Airspan/Gogo Agreement shall mean and be a reference to such Airspan/Gogo Agreement, as amended or amended, restated, modified, supplemented, or waived by this Agreement.
+
+9.
+Order of Precedence. In the event of a conflict between the terms of the Airspan/Gogo Agreements and the terms of this Amendment, the terms of this Amendment shall prevail.
+
+10.
+Entire Agreement. This Amendment contains the entire understanding of the Parties with respect to the subject matter hereof and supersedes all prior agreements and commitments with respect thereto. There are no other oral understandings, terms or conditions, and neither Party has relied upon any express or implied representation not contained in this Amendment with respect to the subject matter hereof.
+
+11.
+Governing Law; Venue; WAIVER OF JURY TRIAL. All questions concerning the construction, validity, enforcement and interpretation of this Amendment shall be governed by and construed in accordance with the laws of the State of New York without regard to principles of conflicts of law. The United Nations convention on contracts for the international sale of goods shall not apply to this Amendment. Venue for any legal action arising out of or relating to this Amendment shall be exclusively the state or federal courts located in the borough of Manhattan, New York City, New York. Gogo and Airspan hereby consent to the jurisdiction of such courts. THE PARTIES WAIVE JURY TRIAL WITH RESPECT TO ANY DISPUTE ARISING OUT OF OR RELATED TO THIS AMENDMENT.
+
+12.
+Successors and Assigns. This Amendment shall be binding upon the Parties and their respective successors and permitted assigns.
+
+13.
+Construction. Each Party acknowledges that this Agreement was drafted jointly by the Parties, and it shall be construed neither against nor in favor of either Party.
+
+14.
+Counterparts. This Amendment may be executed in one or more counterparts, each of which shall be deemed an original, but all of which together shall constitute one and the same instrument.
+
+15.
+Severability. If any one or more of the provisions contained in this Agreement shall for any reason be held to be invalid, illegal or unenforceable in any respect, the remaining provisions of this Amendment shall be enforceable to the maximum extent possible.
+
+[Remainder of page intentionally left blank.]
+
+Page 5 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+IN WITNESS WHEREOF, the Parties have caused this Amendment to be executed by their respective duly authorized representatives shown below.
+
+Gogo Business Aviation LLC
+
+Airspan Networks Inc.
+
+/s/ Crystal L. Gordon
+
+/s/ Glenn Laxdal
+
+Signature
+
+Crystal L. Gordon
+
+Signature
+
+Glenn Laxdal
+
+Name
+
+Name
+
+EVP, General Counsel, Chief Administrative Officer and Secretary
+
+President and Chief Executive Officer
+
+Title
+
+Title
+
+Page 6 of 7
+
+Certain information identified by “[***]” has been excluded from this exhibit because it is both not material and is the type that Gogo Inc. treats as private or confidential.
+
+Exhibit A
+
+Milestones
+
+Page 7 of 7

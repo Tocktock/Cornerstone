@@ -1,0 +1,1194 @@
+EX-10.1
+2
+d18633dex101.htm
+EX-10.1
+
+EX-10.1
+
+Exhibit 10.1
+
+[Pursuant to Item 601(b)(10) of Regulation S-K, certain confidential portions of this exhibit have been omitted by means of marking such portions with
+asterisks as the identified confidential portions (i) are not material and (ii) would be competitively harmful if publicly disclosed.]
+
+Master Services Agreement
+
+Manufacture of ITI-007
+
+CONFIDENTIAL
+
+Manufacturing Services Agreement
+
+(the “Agreement”)
+
+by and between
+
+Lonza Ltd
+
+Münchensteinerstrasse 38
+
+CH-4002 Basel
+
+Switzerland
+
+- hereinafter
+“Lonza” -
+
+and
+
+ITI Limited
+
+2 Church Street, Hamilton HM 11, Bermuda
+
+-
+hereinafter “Customer” -
+
+Effective as of January 10, 2017 (the “Effective Date”)
+
+CONFIDENTIAL
+
+Table of Contents
+
+Page
+
+1
+
+Definitions and Interpretation
+
+1
+
+2
+
+Performance of Services
+
+5
+
+3
+
+Project Management / Steering Committee
+
+6
+
+4
+
+Quality
+
+7
+
+5
+
+Insurance
+
+7
+
+6
+
+Forecasting, Ordering and Cancellation
+
+7
+
+7
+
+Delivery and Acceptance
+
+9
+
+8
+
+Price and Payment
+
+10
+
+9
+
+Capital Equipment
+
+11
+
+10
+
+Intellectual Property
+
+11
+
+11
+
+Warranties
+
+12
+
+12
+
+Indemnification and Liability
+
+13
+
+13
+
+Confidentiality
+
+14
+
+14
+
+Term and Termination
+
+15
+
+15
+
+Force Majeure
+
+16
+
+16
+
+Miscellaneous
+
+16
+
+Appendix A
+
+Appendix B
+
+CONFIDENTIAL
+
+Recitals
+
+WHEREAS, Customer is engaged in
+the development and research of certain products and requires assistance in the development and manufacture of product;
+
+WHEREAS, Lonza
+and its Affiliates have expertise in the evaluation, development and manufacture of products;
+
+WHEREAS, Customer wishes to engage Lonza
+for Services relating to the development and manufacture of the Product as described in this Agreement; and
+
+WHEREAS, Lonza, or its
+Affiliate, is prepared to perform such Services for Customer on the terms and subject to the conditions set out herein.
+
+NOW, THEREFORE,
+in consideration of the mutual promises contained herein, and for other good and valuable consideration, the parties intending to be legally bound, agree as follows:
+
+1
+
+Definitions and Interpretation
+
+“Affiliate”
+
+means any company, partnership or other entity which directly or indirectly Controls, is Controlled by or is under common
+Control with the relevant Party. “Control” means the ownership of more than fifty percent (50%) of the issued share capital or the legal power to direct or cause the direction of the general management and policies of the relevant
+Party.
+
+“Agreement”
+
+means this agreement incorporating all Appendices, as amended from time to time by written agreement of the
+Parties.
+
+“Applicable Laws”
+
+means all relevant U.S. and European Union federal, state and local laws, statutes, rules, and regulations which are
+applicable to a Party’s activities hereunder, including, without limitation, the applicable regulations and guidelines of any Governmental Authority and all applicable cGMP together with amendments thereto.
+
+“Approval”
+
+means the first marketing approval by the FDA or EMA of Product from the Facility for commercial supply.
+
+“Background Intellectual Property”
+
+means any Intellectual Property either (i) owned or controlled by a Party prior to the Effective Date or
+(ii) developed or acquired by a Party independently from the performance of the Services hereunder during the Term of this Agreement.
+
+“Batch”
+
+means the Product derived from a single run of the Manufacturing Process.
+
+“Batch Price”
+
+means the Price of each Batch.
+
+“Campaign”
+
+means a series of no less than three (3) cGMP Batches manufactured consecutively.
+
+“Cancellation Fee”
+
+has the meaning given in Clause 6.6.
+
+1
+
+CONFIDENTIAL
+
+“Capital Equipment”
+
+means those certain pieces of equipment described in the Project Plan used to produce the Product that are purchased by
+Customer or for which Customer reimburses Lonza, including, without limitation, the related documentation regarding the design, validation, operation, calibration and maintenance of such equipment.
+
+“Certificate of Analysis”
+
+means a document prepared by Lonza for each Batch that lists each of the tests performed by Lonza or approved External
+Laboratories, the Specifications for each test and the test results.
+
+“Certificate of Compliance”
+
+means a document prepared by Lonza: (i) listing the manufacturing date, unique Batch number, and concentration of Product
+in such Batch, (ii) certifying that such Batch was manufactured in accordance with the Master Batch Record and cGMP, if applicable.
+
+“cGMP”
+
+means those laws and regulations applicable in the U.S. and Europe, relating to the manufacture of medicinal products for
+human use, including, without limitation, current good manufacturing practices as specified in the ICH guidelines, including without limitation, ICH Q7A “ICH Good Manufacturing Practice Guide for Active Pharmaceutical Ingredients”, US
+Federal Food Drug and Cosmetic Act at 21CFR (Chapters 210, 211, 600 and 610) and the Guide to Good Manufacturing Practices for Medicinal Products as promulgated under European Directive 91/356/EEC. For the avoidance of doubt, Lonza’s
+operational quality standards are defined in internal cGMP policy documents.
+
+“cGMP Batches”
+
+means any Batches which are required under the Project Plan to be manufactured in accordance with cGMP.
+
+“Change”
+
+means any change to the Services, pricing or Scope of Work incorporated into a written amendment to the Agreement in
+accordance with clause 16.2 or effected in accordance with the Quality Agreement.
+
+“Commencement Date”
+
+means the date of commencement of manufacturing activities for a Batch hereunder.
+
+“Competitor”
+
+means an entity that derived greater than twenty-five (25) percent of its revenues from providing contract
+manufacturing services to third parties in the last completed fiscal year prior to the date of the proposed assignment.
+
+“Confidential Information”
+
+means Customer Information and Lonza Information, as the context requires.
+
+“Customer Information”
+
+means all technical and other information not known to Lonza or in the public domain relating to the Manufacturing Process
+and the Product, from time to time supplied by the Customer to Lonza, including any materials supplied by Customer to Lonza in accordance with the Project Plan.
+
+2
+
+CONFIDENTIAL
+
+“Customer Materials”
+
+means any Raw Materials, components of Product, or other materials of any nature provided by Customer.
+
+“EMA”
+
+means the European Medicines Agency, or any successor agency thereto.
+
+“Engineering Batches”
+
+means a Batch that is intended to demonstrate the transfer of the Manufacturing Process to the Facility.
+
+“External Laboratories”
+
+means any Third Party instructed by Lonza, with Customer’s prior consent, to conduct any of the activities required to
+complete the Services.
+
+“Facility”
+
+means Lonza’s manufacturing facilities in [***] or such other Lonza facility as may be agreed upon by the
+Parties.
+
+“FDA”
+
+means the United States Food and Drug Administration, or any successor agency thereto.
+
+“Governmental Authority”
+
+means any Regulatory Authority and any national, multi-national, regional, state or local regulatory agency, department,
+bureau, or other governmental entity in the U.S. or European Union.
+
+“Intellectual Property”
+
+means (i) inventions (whether or not patentable), patents, trade secrets, copyrights, trademarks, trade names and
+domain names, rights in designs, rights in computer software, database rights, rights in confidential information (including know-how) and any other intellectual property rights, in each case whether
+registered or unregistered, (ii) all applications (or rights to apply) for, and renewals or extensions of, any of the rights described in the foregoing clause (i) and (iii) and all rights and applications that are similar or equivalent to
+the rights and application described in the foregoing clauses (i) and (ii), which exist now, or which come to exist in the future, in any part of the world.
+
+“Lonza Information”
+
+means all information that is proprietary to Lonza or any Affiliate of Lonza and that is maintained in confidence by Lonza
+or any Affiliate of Lonza and that is disclosed by Lonza or any Affiliate of Lonza to Customer under or in connection with this Agreement, including without limitation, any and all Lonza know-how and trade
+secrets.
+
+“Manufacturing Process”
+
+means the production process provided by Customer for the manufacture of Product, as such process may be improved or
+modified from time to time by agreement of the Parties in writing.
+
+“Master Batch Record”
+
+means the document, proposed by Lonza and approved by Customer, which defines the manufacturing methods, test methods and
+other procedures, directions and controls associated with the manufacture and testing of Product, and which may be amended from time to time by agreement of the Parties in writing.
+
+“New Customer Intellectual Property”
+
+has the meaning given in Clause 10.2.
+
+3
+
+CONFIDENTIAL
+
+“New General Application Intellectual Property”
+
+has the meaning given in Clause 10.3.
+
+“Party”
+
+means each of Lonza and Customer and, together, the “Parties”.
+
+“Price”
+
+means the price for the Services and Products as set out in Appendix A.
+
+“Process Validation Batch”
+
+means a Batch that is produced with the intent to show reproducibility of the Manufacturing Process and is required to
+complete process validation studies.
+
+“Product”
+
+means the proprietary molecule identified by Customer as ITI-007, to be
+manufactured by Lonza for Customer using the Manufacturing Process as specified in the Project Plan.
+
+“Project Plan”
+
+means the plan(s) describing the Services to be performed by Lonza under this Agreement, including any update and amendment
+of the Project Plan to which the Parties may agree from time to time in writing. The initial Project Plan is attached hereto as Appendix A.
+
+“Quality Agreement”
+
+means the written quality agreement, to be entered into by the Parties in accordance with Section 4.1 of this
+Agreement, setting out the responsibilities of each of the Parties in relation to Product quality as required for compliance with cGMP, and which shall be consistent with this Agreement and Applicable Laws (including meeting the requirements of the
+FDA’s then-current Guidance for Industry regarding “Contract Manufacturing Arrangements for Drugs: Quality Agreements” and the ICH guidance regarding “Q10 Pharmaceutical Quality Systems”).
+
+“Raw Materials”
+
+means all ingredients, solvents and other components of the Product required to perform the Manufacturing Process or
+Services set forth in the bill of materials detailing the same (but excluding any consumables). “Regulatory Authority” means the FDA, EMA and any other similar regulatory authorities as may be agreed upon in writing by the
+Parties.
+
+“Regulatory Approval”
+
+means any approval (including any supplements, amendments, pre- and post-marketing
+approvals, and pricing and reimbursement approvals, and including the Approval), licenses, registrations or any other authorizations required by a Regulatory Authority necessary for the manufacture, distribution, sale or use of the
+Product.
+
+“Release”
+
+has the meaning given in Clause 7.1.
+
+“Services”
+
+means all or any part of the services to be performed by Lonza under this Agreement (including, without limitation, process
+and analytical method transfer; process development; process optimization; validation; clinical and commercial manufacturing; and quality control and quality assurance activities), particulars of which are set out in a Project Plan.
+
+4
+
+CONFIDENTIAL
+
+“Specifications”
+
+means the mutually agreed upon specifications, including test procedures and acceptance criteria, of the Product as
+specified in Appendix B, which may be amended from time to time in accordance with this Agreement.
+
+“Term”
+
+has the meaning given in Clause 14.1.
+
+“Third Party”
+
+means any party other than Customer, Lonza and their respective Affiliates.
+
+In this Agreement references to the Parties are to the Parties to this Agreement, headings are used for
+convenience only and do not affect its interpretation, references to a statutory provision include references to the statutory provision as modified or re-enacted or both from time to time and to any
+subordinate legislation made under the statutory provision, references to the singular include the plural and vice versa, and references to the word “including” are to be construed without limitation.
+
+2
+
+Performance of Services
+
+2.1
+
+Performance of Services. Subject to Clause 2.3, Lonza shall itself and through its Affiliates,
+diligently carry out the Services as provided in the Project Plan and in accordance with this Agreement and use commercially reasonable efforts to perform the Services without any material defect and according to the estimated timelines as set forth
+in the Project Plan. Lonza shall retain appropriately qualified and trained personnel with the requisite knowledge and experience to perform the Services in accordance with this Agreement. Lonza may not subcontract or delegate any of its rights or
+obligations under this Agreement to perform the Services without Customer’s prior written consent not to be unreasonably withheld or delayed; provided, that any approved subcontractors and approved External Laboratories shall be subject to the
+same obligations and other provisions contained in this Agreement or any applicable Project Plan, including the obligation to maintain Customer Information in confidence under terms no less stringent than as set forth herein. Except as otherwise
+agreed to by the Parties or as otherwise agreed to under the Quality Agreement, Lonza shall be liable and responsible for the compliance by such subcontractors and External Laboratories with the applicable provisions of this Agreement.
+
+2.2
+
+Technology Transfer. The Parties expressly agree that they shall work together to transfer the
+Manufacturing Process to the Facility, including implementing the technology transfer plan set forth in Project Plan. Customer shall fully support such technology transfer as reasonably requested by Lonza.
+
+2.3
+
+Engineering Batches. Lonza shall manufacture Engineering Batches in accordance with the Project Plan.
+Customer shall have the right to make whatever further use of the non-cGMP Engineering Batches as it shall determine, provided that Customer pays for such Batches, such use is not for human use and does not
+violate any Applicable Laws. Lonza makes no warranty that Engineering Batches will meet cGMP or the Specifications. If Lonza determines that an Engineering Batch does meet cGMP and the Specifications, it will release such Engineering Batch as a cGMP
+Batch. Regardless of whether any Engineering Batch meets cGMP or the Specifications, Customer shall pay to Lonza the Price for such Engineering Batch in accordance with the terms of this Agreement.
+
+2.4
+
+cGMP Batches. Lonza will, in accordance with the terms of this Agreement and the Quality Agreement,
+manufacture at the Facility and Release to Customer, cGMP Batches that comply with the Manufacturing Process, cGMP and the Specifications and this Agreement, and each released Batch will be accompanied by a Certificate of Analysis; provided,
+however, that cGMP manufacture shall not commence until at least one (1) successful Engineering Batch has been manufactured in compliance with cGMP and Specifications. Prior to commencement of cGMP manufacturing, Lonza shall review the process
+assumptions. In the event that there is a material difference in the process assumptions as compared with the process results demonstrated during the manufacture
+
+5
+
+CONFIDENTIAL
+
+of Engineering Batches, the Parties shall meet to discuss in good faith a revision to the Batch Price to
+reflect such difference.
+
+2.5
+
+Process Validation Batches. Lonza shall manufacture and deliver Process Validation Batches as
+mutually agreed by Parties sufficient to document the operability and reproducibility of the Manufacturing Process and permit the Parties to complete and file the necessary regulatory documents.
+
+2.5.1
+
+Prior to commencement of Process Validation Batches, Lonza and Customer shall agree a process validation
+plan identifying the validation requirements of the Manufacturing Process. All process validation activities are excluded from the Price of Process Validation Batches shall be approved by the Customer in advance and shall be paid for by the Customer
+at the Price set out in the applicable Project Plan.
+
+2.5.2
+
+Any regulatory support activities (including pre-Approval
+inspection) required and agreed to by Customer to support the Approval of the Product from the Facility shall be performed and supported by Lonza as reasonably requested by Customer. All such regulatory support activities are excluded from the Price
+of Process Validation Batches, shall be approved by the Customer in advance, and shall be paid for by the Customer at the Price set out in the applicable Project Plan.
+
+2.6
+
+Supply of Customer Information and Customer Materials. Customer shall supply to Lonza all Customer
+Information and Customer Materials and other information or materials that may be reasonably required by Lonza to perform the Services. Lonza shall not be responsible for any delays arising out of Customer’s failure to provide to Lonza such
+Customer Information, Customer Materials, or other information or materials reasonably required to perform the Services. Customer shall be responsible for all additional costs and expenses arising out of such delay, including, if applicable, any
+idle Facility capacity costs.
+
+2.7
+
+Raw Materials. Lonza shall procure all required Raw Materials as well as consumables other than those
+Raw Materials that are Customer Materials. Customer shall be responsible for payment for all consumables and Raw Materials ordered or irrevocably committed to be procured by Lonza hereunder where the Parties agree that such Raw Materials are
+included in the Price as identified in the Project Plan. Upon cancellation of any Batch or termination of the Agreement, all unused Raw Materials shall be paid for by Customer within thirty (30) days of invoice and at Customer’s option
+will either be (a) held by Lonza for future use for the production of Product, (b) delivered to Customer, or (c) disposed of by Lonza. Lonza may not use any Raw Materials or Customer Materials for any purpose other than to perform
+Services in accordance with this Agreement.
+
+3
+
+Project Management / Steering Committee
+
+3.1
+
+Project Plans. With respect to a new project to be governed by this Agreement, a new Project Plan
+shall be added by agreement in a writing signed by the Parties and appended to Appendix A. Each Project Plan shall include a description of the Services to be provided, the Product to be manufactured, Specifications, a schedule for completion of the
+Project Plan, pricing details, and such other information as is necessary for relevant Services. In the event of a conflict between the terms of a Project Plan and this Agreement, the terms of this Agreement will govern, except to the extent that
+the applicable Project Plan expressly and specifically states an intent to supersede this Agreement on a specific matter.
+
+3.2
+
+Project Management. With respect to each Project Plan, each Party will appoint a project manager who
+will be the person responsible for overseeing the Project Plan on behalf of the respective Party.
+
+3.3
+
+Steering Committee. Each Party shall name a mutually agreed upon equal number of representatives for
+the Steering Committee, which shall meet twice per calendar year, or as
+
+6
+
+CONFIDENTIAL
+
+otherwise mutually agreed by the Parties. In the event that a Steering Committee dispute cannot be resolved,
+such dispute shall be escalated to a senior executive of each of Customer and Lonza.
+
+The primary
+function of the Steering Committee is to ensure the ongoing communication between the Parties and to discuss and resolve any issues arising under this Agreement. In addition to the primary function described above, the Steering Committee shall take
+on the following responsibilities:
+
+3.3.1
+
+discuss and seek resolution of issues around management of the Services;
+
+3.3.2
+
+agree and monitor deadlines and milestones for the Services; and
+
+3.3.3
+
+discuss and recommend any changes to the Services (although such changes will not take effect until they
+have been incorporated into a written amendment to the Project Plan which has been signed by the Parties).
+
+The Steering Committee may not waive or modify the terms of this Agreement, or take any action that would bind a Party without
+its prior written consent.
+
+3.4
+
+Person in Plant. Customer shall be permitted to have, at no additional cost, one (1) employee at
+the Facility as reasonably requested by Customer, at any time during the Manufacturing Process for the purpose of observing, reporting on, and consulting as to the performance of the Services. Such employee shall be subject to and agree to abide by
+confidentiality obligations to Third Parties and Lonza’s customary practices and operating procedures regarding persons in plant, and such employee agrees to comply with all instructions of Lonza’s employees at the Facility.
+
+4
+
+Quality
+
+4.1
+
+Responsibility for quality assurance and quality control of Product shall be allocated between Customer and
+Lonza as set forth in the Quality Agreement and in Lonza standard operating procedures. If there is a conflict between the terms and conditions of this Agreement and the Quality Agreement, the terms and conditions of this Agreement shall prevail. If
+the Quality Agreement is not in place at the Effective Date, Lonza and Customer commit to enter into the Quality Agreement in a timely manner, but in no event later than the commencement of cGMP manufacturing. Provisions regarding inspections by
+Regulatory Authorities and audits shall be set out in the Quality Agreement.
+
+5
+
+Insurance
+
+5.1
+
+Each Party shall, during the Term and [***] after delivery of the last Product manufactured or Services
+provided under this Agreement, obtain and maintain at its own cost and expense from a qualified insurance company, comprehensive general liability insurance including, but not limited to product liability coverage in the amount of at least [***] per
+claim in the case of a Lonza insurance policy and [***] in the case of a Customer insurance policy. Each Party shall provide the respective other Party with a certificate of such insurance upon reasonable request.
+
+6
+
+Forecasting, Ordering and Cancellation
+
+6.1
+
+Forecasting and Ordering. No later than [***], Customer shall supply Lonza with a written forecast
+showing Customer’s good faith estimated quarterly requirements for Batches for the following [***] (the “Forecast”). No later than [***] following Lonza’s receipt of a Forecast, Lonza shall provide written notice to Customer with
+an estimated production schedule showing the estimated Commencement Date and delivery date of each Batch; provided that if the Forecast for any [***] exceeds the capacity reserved for such [***] in Section 6.4 of this Agreement or agreed
+between the Parties in accordance with Section 6.9 of this Agreement (the “Reserved Capacity”), Lonza
+
+7
+
+CONFIDENTIAL
+
+shall notify Customer within [***] of receipt of the Forecast of its ability (as of the date of receipt of the
+Forecast) to manufacture the number of Batches forecasted in excess of the Reserved Capacity. The [***] of any Forecast shall be binding (“Binding Forecast”). Except as otherwise provided in Section 6.4 below, binding purchase orders
+(“Purchase Orders”) for the [***] shall be submitted by Customer on the basis of the Binding Forecast within [***] of submission of the Forecast. No Forecast shall amend any previous Binding Forecast, and all Purchase Orders shall be for
+an amount not less than [***].
+
+6.2
+
+Order Confirmation. Lonza shall confirm the delivery date(s) and quantity of Product to be delivered
+as set out in each Purchase Order within [***] days of receipt from Customer of the relevant Purchase Order. Upon confirmation, each Purchase Order will be regarded by the Parties as a binding commitment by Lonza to manufacture and to deliver to
+Customer the relevant quantity of Product according to the requirements set out in such Purchase Order. Lonza shall confirm and accept each Purchase Order that is consistent with the corresponding Forecast. Any delivery date set forth in
+Lonza’s written confirmation of a purchase order shall be an estimated delivery date only. All ordered Batches shall be scheduled in a single Campaign in each calendar year unless otherwise agreed by Lonza. Any additional or inconsistent terms
+or conditions of any Customer purchase order, acknowledgement, invoice, or similar standardized form given or received pursuant to this Agreement shall have no effect and such terms and conditions are hereby rejected.
+
+6.3
+
+Rescheduling. Lonza shall have the right to reschedule a Commencement Date of any Batch or Campaign
+upon reasonable prior written notice to Customer, provided that the rescheduled Commencement Date is no earlier or no later than [***] from the Commencement Date originally estimated at the time of Lonza’s acceptance of the binding purchase
+order. If the Customer requests to change the Commencement Date, Lonza will make all reasonable attempts to accommodate the request; provided, however, in the event that this change would impact other projects scheduled for occupancy in the
+designated suite or suites, manufacture of the Customer’s Batch or Campaign may be delayed until an adequate time period is available in the Facility schedule, and any such change requested by Customer may result in a rescheduling fee, all of
+which shall be confirmed by their Parties in writing. Any delay requested by Customer of more than [***] shall be considered a cancellation pursuant to Section 6.6.
+
+6.4
+
+Dedicated Supply: Lonza will reserve capacity for Customer, sufficient for the manufacture of
+approximately (i) [***] for [***], until [***], at which time the commitment for [***] capacity becomes binding; (ii) [***] for [***]; and (iii) [***] for [***]. Customer may cancel this reservation in writing by [***], only if Approval is not
+received, on or before end [***] without penalty. For [***], the Reserved Capacity becomes binding [***] prior to the estimated Commencement Date of the campaign.
+
+6.5
+
+Product Quantities. Quantities of Product arising from a Campaign up to a maximum of [***] above or
+below the Purchase Order will be invoiced according to the [***] price as outlined in the Project Plan. In case of additional surplus quantities or quantities below [***] of the target quantity the Parties will negotiate in good faith a reasonable
+price. The Purchase Order shall be fulfilled if at least [***] of the target quantity is delivered.
+
+6.6
+
+Cancellation of a Binding Purchase Order. Customer may cancel a binding purchase order upon written
+notice to Lonza, subject to the payment of a cancellation fee as calculated below (the “Cancellation Fee”):
+
+6.6.1
+
+In the event that Customer provides written notice of cancellation to Lonza [***] prior to the Commencement
+Date of one or more Batches, then [***] of the Batch Price of each such Batch cancelled is payable; or
+
+6.6.2
+
+In the event Customer provides written notice of cancellation more than [***] prior to the Commencement Date
+of a Batch, then [***] Cancellation Fee is payable.
+
+8
+
+CONFIDENTIAL
+
+6.7
+
+Payment of Cancellation Fee. Any Cancellation Fee shall be payable within [***] following the written
+notice of cancellation associated with the cancelled Batch. Any Cancellation Fee shall include all costs associated with the cancelled Batch, including any Raw Materials.
+
+6.8
+
+Replacement Project. Notwithstanding the foregoing, Lonza will use commercially reasonable efforts to
+secure a new project (but excluding any project then under contract with Lonza) for the cGMP manufacturing space, and for the same dates and duration that would have been occupied by Customer, and then, in such case, the Cancellation Fee for each
+Batch cancelled that is replaced by a Batch of the new project shall be reduced by an amount equal to [***] of the production fees associated with such replacement Batch.
+
+6.9
+
+Commercial Supply Negotiations: Prior to [***], Customer and Lonza will enter good faith negotiations
+to develop and finalize an operating model that can support projected commercial supply of Product starting in [***].
+
+7
+
+Delivery and Acceptance
+
+7.1
+
+Delivery. All Product shall be delivered FCA (as defined by Incoterms® 2010) the Facility. Lonza shall deliver to Customer the Certificate of Analysis, the Certificate of Compliance and such other documentation as is reasonably required to meet all applicable
+regulatory requirements of the Governmental Authorities not later than the date of delivery of Batches to the common carrier chosen by Customer (the “Release”). With respect to any Customer Materials, title and risk of loss shall remain
+with the Customer and shall not transfer to Lonza. With respect to Product, title and risk of loss shall transfer to Customer upon Release in accordance with this provision.
+
+7.2
+
+Storage. Customer shall arrange for shipment and take delivery of such Batch from the Facility, at
+Customer’s expense, within [***] after Release or pay applicable storage costs. Lonza shall provide storage on a bill and hold basis for such Batch(es) at no charge for up to [***]; provided that any additional storage beyond [***] will be
+subject to availability and, if available, will be charged to Customer and will be subject to a separate agreement. In addition to Section 8.2, Customer shall be responsible for all value added tax (VAT) and any other applicable taxes, levies,
+import, duties and fees of whatever nature imposed as a result of any storage. Notwithstanding anything to the contrary contained in this Agreement, in no event shall Lonza be required to store any Batch for more than [***] after Release. Within
+[***] following a written request from Lonza, Customer shall provide Lonza with a letter in form satisfactory to Lonza confirming the bill and hold status of each stored Batch.
+
+7.3
+
+Acceptance/Rejection of Product.
+
+7.3.1
+
+Promptly following Release of Batches, Customer shall inspect such Batches and shall have the right to test
+such Batches to determine compliance with the Specifications. Customer shall notify Lonza in writing of any rejection of a Batch based on any claim that it fails to meet Specifications within [***] of Release, after which time all unrejected Batches
+shall be deemed accepted. Customer shall inform Lonza in writing in case of concealed or latent defects (i.e. not discovered by routine quality control means), promptly upon discovery of such defects but no later than [***] after delivery of the
+Product.
+
+7.3.2
+
+In the event that Lonza believes that a Batch has been incorrectly rejected, Lonza may require that Customer
+provide to it Batch samples for testing. Lonza may retain and test the samples of such Batch. In the event of a discrepancy between Customer’s and Lonza’s test results such that Lonza’s test results fall within relevant
+Specifications, or there exists a dispute between the Parties over the extent to which such failure is attributable to a given Party, the Parties shall cause an independent laboratory promptly to review records, test data and perform comparative
+tests and analyses on samples of the Product that allegedly fails to conform to Specifications. Such independent laboratory shall be mutually agreed upon by the Parties. The independent laboratory’s results shall be in writing and shall be
+
+9
+
+final and binding save for manifest error. Unless otherwise agreed to by the Parties in writing, the costs associated with such testing and review shall be borne by the Party against whom the
+independent laboratory rules.
+
+7.3.3
+
+For Engineering Batches, Lonza shall, at its own expense, reprocess any Engineering Batch or, if
+reprocessing is not possible, replace any Engineering Batch that failed to conform with the Specifications (a “Failed Engineering Batch”). Following completion of Engineering Batches, before proceeding to Process Validation Batches, the
+Parties shall agree, in writing, that the Process is validation ready. Following such agreement to proceed with Process Validation Batches, Lonza shall, at its own expense, reprocess any Batch or, if reprocessing is not possible, replace any Batch
+that failed to conform with the Specifications (a “Failed Batch”). Such reprocessing or replacement shall be made as promptly as practicable, in light of available manufacturing capacity. Where possible, any replacement Batch shall be
+manufactured with the next scheduled cGMP Batch or Campaign. Customer acknowledges and agrees that its sole remedy with respect to a Failed Engineering Batch or a Failed Batch is as set forth in this Clause 7.3.3, and in furtherance thereof,
+Customer hereby waives all other remedies at law or in equity regarding the foregoing claims. Lonza shall be responsible for the cost of Raw Materials or Customer Materials consumed in any Failed Batch. Customer shall be responsible for the cost of
+Raw Materials or Customer Materials consumed in any Failed Engineering Batch; provided, however that in the event that it is determined (by the Parties or an independent laboratory) that a Failed Engineering Batch was solely due to Lonza’s
+material breach of its obligations hereunder, gross negligence or operator error, then Lonza shall be responsible for the cost of Raw Materials or Customer Materials consumed in such Failed Engineering Batch. Lonza shall promptly destroy each Failed
+Engineering Batch or Failed Batch at its cost and expense, if reprocessing is not possible.
+
+8
+
+Price and Payment
+
+8.1
+
+Pricing for the Services provided by Lonza are set out in, and based on the assumptions and information set
+out in, the applicable Project Plan. In the event of changes to the Services based on Customer’s request, the Parties shall discuss and agree upon any additional costs.
+
+8.2
+
+Unless otherwise indicated in writing by Lonza, all Prices and charges are exclusive of value added tax
+(VAT) and of any other applicable taxes, levies, import, duties and fees of whatever nature imposed by or under the authority of any government or public authority and all such charges applicable to the Services shall be paid by Customer (other than
+taxes based on Lonza’s income).
+
+8.3
+
+Lonza shall issue invoices to Customer for [***] of the Price for Products or Services upon the confirmation
+of a Purchase Order for the applicable Batch or Campaign, [***] of the Price for Products or Services upon commencement of the manufacturing of Products or Services, and [***] upon Release of applicable Batches or completion of applicable Services,
+unless otherwise stated in the Project Plan. To the extent not included in the Price, charges for Raw Materials for each Batch shall be invoiced upon the Release of each Batch, provided, that any Raw Materials required to be ordered more than [***]
+in advance shall be invoiced [***] at the time of order by Lonza and [***] upon Release of the Batch. All undisputed invoices are payable within [***] of date of invoice. Payment shall be made without deduction, deferment, set-off, lien or counterclaim.
+
+8.4
+
+If in default of payment of any undisputed invoice on the due date, interest shall accrue on any amount
+overdue at the lesser of (i) rate of [***] per month above the London Interbank Offered Rate (LIBOR) or (ii) [***]; and Lonza shall, at its sole discretion, and without prejudice to any other of its accrued rights, be entitled upon [***] notice
+to suspend the provision of the Services and or delivery of Product until all overdue amounts have been paid in full including interest for late payments.
+
+10
+
+CONFIDENTIAL
+
+8.5
+
+Price adjustments.
+
+8.5.1
+
+Not more than once per calendar year, Lonza may adjust the Price in accordance with the European Union
+Manufacturing Producer Prices Index (or any successor index) increase for the previous calendar year. The new Price reflecting such Batch Price adjustment shall be effective for any Batch for which the Commencement Date is on or after the date of
+Lonza’s notice to Customer of the Price adjustment.
+
+8.5.2
+
+In addition to the above, the Price may be changed by Lonza, upon reasonable prior written notice to
+Customer (providing reasonable detail and documentation in support thereof), to reflect (i) an increase in variable costs (such as energy or Raw Materials) by more than [***] (based on the initial Price or any previously amended Price), or for
+a process adjustment or assumption changes, and (ii) any material change in an environmental, safety or regulatory standard that substantially impacts Lonza’s cost and ability to perform the Services.
+
+8.5.3
+
+The Prices outlined in the Project Plan are based on the currency exchange rate of the [***] to the United
+States Dollars (USD) at the Effective Date. Lonza shall bear the risk of any increase or decrease of the [***]/USD exchange rate up to [***] from the base currency exchange rate. If the [***]/USD exchange rate is more than [***] the base currency
+exchange rate at the date on which the Prices become due for payment, then the Prices will be adjusted to compensate all exchange rate differences higher than [***]. The currency adjustments to be made, if any, shall be based on the market rate of
+exchange as published by Bloomberg.
+
+9
+
+Capital Equipment
+
+9.1
+
+Any Capital Equipment required for the performance of the Services shall be acquired on terms to be agreed
+by the Parties prior to commencement of the relevant Services.
+
+10
+
+Intellectual Property
+
+10.1
+
+Except as expressly otherwise provided herein, neither Party will, as a result of this Agreement, acquire
+any right, title, or interest in any Background Intellectual Property of the other Party, including any improvements made thereto during the Services under this Agreement.
+
+10.2
+
+Subject to Clause 10.3, Customer shall own all right, title, and interest in and to any and all Intellectual
+Property that Lonza and its Affiliates, the External Laboratories or other contractors or agents of Lonza develops, conceives, invents, first reduces to practice or makes, solely or jointly with Customer or others, that is a direct derivative of or
+improvement to Customer Information or Customer Background Intellectual Property, or that cannot be practiced without use of Customer Information or Customer Background Intellectual Property (collectively, the “New Customer Intellectual
+Property”). For avoidance of doubt, “New Customer Intellectual Property” shall include any material, processes or other items that embody, or that are claimed or covered by, any of the foregoing Intellectual Property, but excluding
+any New General Application Intellectual Property.
+
+10.3
+
+Notwithstanding Clause 10.2, and subject to the license granted in Clause 10.5, Lonza shall own all right,
+title and interest in Intellectual Property that Lonza and its Affiliates, the External Laboratories or other contractors or agents of Lonza, solely or with each other (and without Customer), develops, conceives, invents, or first reduces to
+practice or makes in the course of performance of the Services that is generally applicable to the development or manufacture of chemical or biological products or product components (“New General Application Intellectual Property”). For
+avoidance of doubt, “New General Application Intellectual Property” shall include any material, processes or other items that embody, or that are claimed or covered by, any of the foregoing Intellectual Property.
+
+11
+
+CONFIDENTIAL
+
+10.4
+
+Lonza hereby assigns to Customer all of its right, title and interest in any New Customer Intellectual
+Property. Lonza shall execute, and shall require its personnel as well as its Affiliates, External Laboratories or other contractors or agents and their personnel involved in the performance of the Services to execute, any documents reasonably
+required to confirm Customer’s ownership of the New Customer Intellectual Property, and any documents required to apply for, maintain and enforce any patent or other right in the New Customer Intellectual Property.
+
+10.5
+
+Subject to the terms and conditions set forth herein (including the payment of the Price as required above),
+Lonza hereby grants to Customer a non-exclusive, world-wide, fully paid-up, irrevocable, transferable license, including the right to grant sublicenses, under the New
+General Application Intellectual Property, to use, sell and import the Product manufactured under this Agreement.
+
+10.6
+
+Customer hereby grants Lonza the non-exclusive right to use the
+Customer Information, Customer Background Intellectual Property and New Customer Intellectual Property during the Term solely for the purpose of fulfilling its obligations under this Agreement and in accordance with the terms of this Agreement.
+
+10.7
+
+Customer will have the right to transfer the Manufacturing Process to itself and any Third Party for the
+manufacture of that Product (but no other product); provided, however, to the extent such technology transfer includes Lonza Confidential Information, Lonza Background Intellectual Property or New General Application Intellectual Property, such
+technology transfer shall be subject to (i) approval by Lonza in writing; (ii) a reasonable royalty and licensing fee; and (iii) terms to be agreed upon by the Parties. Lonza shall provide reasonably necessary documents to complete
+such technology transfer and Customer shall reimburse Lonza for any costs (based on a full-time employee rate for such support) and expenses.
+
+11
+
+Warranties
+
+11.1
+
+Lonza warrants, represents and covenants to Customer that:
+
+11.1.1
+
+the Services shall be performed in accordance with all Applicable Laws;
+
+11.1.2
+
+except with respect to any development services and Engineering Batches, the manufacture of Product shall be
+performed in accordance with cGMP and will meet the Specifications at the date of delivery;
+
+11.1.3
+
+To its knowledge, any Intellectual Property provided and used by Lonza and its Affiliates in performance of
+Services which relate to developing, formulation, manufacturing, filling, processing, packaging, analyzing or testing the Product shall not infringe, violate or misappropriate any third party Intellectual Property rights, and this warranty shall not
+apply to the extent such infringement, violation or misappropriation of any third Party Intellectual Property is based upon, in part or whole, Client’s written instructions, Specifications or use of Client Materials.
+
+11.1.4
+
+Lonza is not debarred, and has not been convicted of a crime which could lead to debarment, under 21 U.S.C.
+§335(a) or (b) (“the Debarment Act”), and Lonza will not in the performance of its obligations under this Agreement use the services of any person debarred or suspended under the Debarment Act. If Lonza becomes debarred or receives
+notice of action with respect to its debarment, Lonza shall promptly notify Customer;
+
+11.1.5
+
+no transactions or dealings under this Agreement shall be conducted with or for an individual or entity that
+is designated as the target of any sanctions, restrictions or embargoes administered by the United Nations, European Union, United Kingdom or the United States of America;
+
+12
+
+CONFIDENTIAL
+
+11.1.6
+
+it or its Affiliate holds all necessary permits, registrations, approvals, consents and licenses to enable
+it to perform the Services at the Facility; and
+
+11.1.7
+
+it has the necessary corporate authorizations to enter into and perform this Agreement.
+
+11.2
+
+Customer warrants that:
+
+11.3
+
+To its knowledge, Customer has all the rights to Customer Information and Customer Background Intellectual
+Property necessary to permit Lonza to perform the Services without infringing the Intellectual Property rights of any Third Party and the use of Customer Information and Customer Background Intellectual Property in the performance of the Services
+shall not infringe any Third Party Intellectual Property rights;
+
+11.4
+
+Customer will promptly notify Lonza in writing if it receives or is notified of a formal written claim from
+a Third Party that Customer Information and Customer Intellectual Property or that the use by Lonza thereof for the provision of the Services infringes any Intellectual Property or other rights of any Third Party; and
+
+11.5
+
+Customer has the necessary corporate authorizations to enter into this Agreement.
+
+11.6
+
+DISCLAIMER: THE WARRANTIES EXPRESSLY SET FORTH IN THIS AGREEMENT ARE IN LIEU OF ALL OTHER WARRANTIES,
+AND ALL OTHER WARRANTIES, BOTH EXPRESS AND IMPLIED, ARE EXPRESSLY DISCLAIMED, INCLUDING WITHOUT LIMITATION ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+12
+
+Indemnification and Liability
+
+12.1
+
+Indemnification by Lonza. Lonza shall indemnify the Customer, its Affiliates, and their respective
+officers, employees and agents (“Customer Indemnitees”) for any loss, damage, costs and expenses (including reasonable attorney fees) that Customer Indemnitees may suffer as a result of any Third Party claim arising directly out of
+(i) any material breach of the warranties given by Lonza in Clause 11.1 above or (ii) any claims alleging that the Services (excluding use by Lonza of Customer Information and Customer Background Intellectual Property) infringe any
+Intellectual Property rights of a Third Party except, in each case, to the extent that such claims resulted from the negligence, intentional misconduct or breach of this Agreement by any Customer Indemnitees.
+
+12.2
+
+Indemnification by Customer. Customer shall indemnify Lonza, its Affiliates, and their respective
+officers, employees and agents (“Lonza Indemnitees”) from and against any loss, damage, costs and expenses (including reasonable attorney fees) that Lonza Indemnitees may suffer as a result of any Third Party claim arising directly out of
+(i) any material breach of the warranties given by Customer in Clause 11.2 above; or (ii) any claims alleging that Lonza’s use of Customer Information or Customer Background Intellectual Property in accordance with this Agreement
+infringes any Intellectual Property rights of third parties; or (iii) the use, sale, or distribution of any Product, including any claims of product liability but excluding claims covered by Lonza’s indemnification obligation in
+Section 12.2(ii); except, in each case, to the extent that such claims resulted from the negligence, intentional misconduct or breach of this Agreement by any Lonza Indemnitees.
+
+12.3
+
+Indemnification Procedure. If the Party to be indemnified intends to claim indemnification under this
+Clause 12, it shall promptly notify the indemnifying Party in writing of such claim. The indemnitor shall have the right to control the defense and settlement thereof; provided, however, that any indemnitee shall have the right to retain its own
+counsel at its own expense. The indemnitee, its employees and agents, shall reasonably cooperate with the indemnitor in the investigation of any liability covered by this Clause 12, and shall not consent to any settlement or judgment of such claim,
+nor make any admission, without the indemnifying Party’s prior written consent. The failure to deliver prompt written notice to the indemnitor of any claim, to the extent prejudicial to its ability to defend such claim, shall relieve the
+indemnitor of any obligation to the indemnitee under this Clause 12.
+
+13
+
+CONFIDENTIAL
+
+12.4
+
+DISCLAIMER OF CONSEQUENTIAL DAMAGES. IN NO EVENT SHALL EITHER PARTY BE LIABLE TO THE OTHER PARTY FOR
+INCIDENTAL, INDIRECT, SPECIAL, PUNITIVE OR CONSEQUENTIAL DAMAGES, LOST PROFITS OR LOST REVENUES ARISING FROM OR RELATED TO THIS AGREEMENT, EXCEPT TO THE EXTENT RESULTING FROM FRAUD, GROSS NEGLIGENCE OR INTENTIONAL MISCONDUCT.
+
+12.5
+
+[***]
+
+13
+
+Confidentiality
+
+13.1
+
+A Party receiving Confidential Information (the “Receiving Party”) agrees to strictly keep secret
+any and all Confidential Information received during the Term from or on behalf of the other Party (the “Disclosing Party”) using at least the same level of measures as it uses to protect its own Confidential Information, but in any case
+at least commercially reasonable and customary efforts. Confidential Information shall include information disclosed in any form including but not limited to in writing, orally, graphically or in electronic or other form to the Receiving Party,
+observed by the Receiving Party or its employees, agents, consultants, or representatives, or otherwise learned by the Receiving Party under this Agreement, which the Receiving Party knows or reasonably should know is confidential or proprietary.
+
+13.2
+
+Notwithstanding the foregoing, Receiving Party may disclose to any courts and/or other authorities
+Confidential Information of the Disclosing Party which is or will be required pursuant to applicable governmental or administrative or public law, rule, regulation or order. In such case the Party that received the Confidential Information will, to
+the extent legally permitted, inform the other Party promptly in writing and cooperate with the Disclosing Party in seeking to minimize the extent of Confidential Information which is required to be disclosed to the courts and/or authorities.
+
+13.3
+
+The obligation to maintain confidentiality under this Agreement does not apply to Confidential Information,
+which:
+
+13.3.1
+
+at the time of disclosure was publicly available; or
+
+13.3.2
+
+is or becomes publicly available other than as a result of a breach of this Agreement by the Receiving
+Party; or
+
+13.3.3
+
+as the Receiving Party can establish by competent proof, was rightfully in its possession at the time of
+disclosure by the Disclosing Party and had not been received from or on behalf of Disclosing Party; or
+
+13.3.4
+
+is supplied to a Party by a Third Party which was not in breach of an obligation of confidentiality to
+Disclosing Party or any other party; or
+
+13.3.5
+
+is developed by the Receiving Party independently from and without use of the Disclosing Party’s
+Confidential Information, as evidenced by the Receiving Party’s contemporaneous written records.
+
+13.4
+
+The Receiving Party will use the Disclosing Party’s Confidential Information only for the purposes of
+this Agreement and will not make any use of the Confidential Information for its own separate benefit or the benefit of any Third Party including, without limitation, with respect to research or product development or any reverse engineering or
+similar testing. The Receiving Party agrees to return or destroy promptly (and certify such destruction) on Disclosing Party’s request all written or tangible Confidential Information of the Disclosing Party, except that one copy of such
+Confidential Information may be kept by the Receiving Party in its confidential files for record keeping purposes only.
+
+14
+
+CONFIDENTIAL
+
+13.5
+
+Each Party will restrict the disclosure of Confidential Information to such officers, employees, consultants
+and representatives of itself and its Affiliates who have been informed of the confidential nature of the Confidential Information and who have a need to know such Confidential Information for the purpose of this Agreement. Prior to disclosure to
+such persons, the Receiving Party shall bind its and its Affiliates’ officers, employees, consultants and representatives to confidentiality and non-use obligations no less stringent than those set forth
+herein. The Receiving Party shall notify the Disclosing Party as promptly as practicable of any unauthorized use or disclosure of its Confidential Information.
+
+13.6
+
+The Receiving Party shall at any time be fully liable for any and all breaches of the confidentiality
+obligations in this Clause 13 by any of its Affiliates or the employees, consultants and representatives of itself or its Affiliates.
+
+13.7
+
+Each Party hereto expressly agrees that any breach or threatened breach of the undertakings of
+confidentiality provided under this Clause 13 by a Party may cause irreparable harm to the other Party and that money damages may not provide a sufficient remedy to the non-breaching Party for any breach or
+threatened breach. In the event of any breach and/or threatened breach, then, in addition to all other remedies available at law or in equity, the non-breaching Party shall be entitled to seek injunctive
+relief and any other relief deemed appropriate by the non-breaching Party, without posting a bond.
+
+14
+
+Term and Termination
+
+14.1
+
+Term. This Agreement shall commence on the Effective Date and shall end on the seventh (7th) anniversary of the Effective Date, or the fifth (5th) anniversary of Approval, whichever is longer, unless terminated earlier as provided herein
+or extended by mutual written consent of the Parties (the “Term”). Notwithstanding the foregoing, each Project Plan may have separate term and termination provisions so long as the term of any Project Plan does not extend beyond the Term.
+
+14.2
+
+Termination. This Agreement may be terminated as follows:
+
+14.2.1
+
+by either Party for any reason upon twenty-four (24) months prior written notice to the other Party;
+
+14.2.2
+
+by either Party if the other Party breaches a material provision of this Agreement or a Project Plan and
+fails to cure such breach to the reasonable satisfaction of the non-breaching Party within [***] for non-payment) following written notification of such breach from the non-breaching party to the breaching party; provided, however, that such [***] period shall be extended as agreed by the Parties if the identified breach is incapable of cure within [***] and if the breaching Party
+provides a plan and timeline to cure the breach, promptly commences efforts to cure the breach and diligently prosecutes such cure (it being understood that this extended period shall be unavailable for any breach regarding non-payment), in which case such Party shall have an additional [***] to cure the breach;
+
+14.2.3
+
+Termination for NDA Rejection. Customer may terminate this Agreement if Customer receives notice that
+the New Drug Application for Product has been rejected, suspended indefinitely or terminated by the FDA. Customer must provide [***] written notice of termination in advance of the date of termination. For the avoidance of doubt, in the event of
+termination by Customer, Customer shall remain liable for all fees actually incurred by Lonza, including, but not limited to, work conducted prior to the effective date of termination (including all
+un-cancellable labor commitments, non-cancellable Third Party fees, and all work in process including all professional services rendered through the effective date of
+
+15
+
+termination), for any charges for materials that have already been purchased for the project and for any wind- down costs agreed by the Parties to be performed by Lonza.
+
+14.2.4
+
+by either Party, immediately, if the other Party becomes insolvent, is dissolved or liquidated, makes a
+general assignment for the benefit of its creditors, or files or has filed against it, a petition in bankruptcy that is not dismissed within 90 days or has a receiver appointed for a substantial part of its assets; or
+
+14.2.5
+
+by either Party pursuant to Clause 15.
+
+14.3
+
+Consequences of Termination. In the event of termination hereunder, Lonza shall be compensated for
+(i) Services rendered up to the date of termination, including in respect of any Product in-process; (ii) all costs incurred through the date of termination, including Raw Materials costs for Raw
+Materials used or purchased for use in accordance with the Project Plan; (iii) all unreimbursed Capital Equipment and related decommissioning charges incurred pursuant to Clause 9; (iv) all amounts due under Clause 6.4, without proration of the
+final calendar year and (v) any applicable Cancellation Fees. In the case of termination by Lonza for Customer’s material breach, Cancellation Fees shall be calculated as of the effective date of termination.
+
+14.4
+
+Survival. The rights and obligations of each Party which by their nature survive the termination or
+expiration of this Agreement shall survive the termination or expiration of this Agreement, including Clauses 1, 10-13 and 16 (to the extent relevant).
+
+15
+
+Force Majeure
+
+15.1
+
+If Lonza or its Affiliate or permitted contractor, as applicable, is prevented or delayed in the performance
+of any of its obligations under the Agreement by Force Majeure and gives written notice thereof to Customer specifying the matters constituting Force Majeure together with such evidence as Lonza reasonably can give and specifying the period for
+which it is estimated that such prevention or delay will continue, Lonza shall be excused from the performance or the punctual performance of such obligations as the case may be from the date of such notice for so long as such cause of prevention or
+delay shall continue. Provided that, if such Force Majeure persists for a period of [***] or more, Customer may terminate this Agreement by delivering written notice to Lonza.
+
+15.2
+
+“Force Majeure” means any reason or cause beyond Lonza’s reasonable control and that is not
+foreseeable nor due to Lonza’s negligence and affecting the performance by Lonza of its obligations under the Agreement, which may include, but is not limited to, any cause arising from or attributable to acts of God, strike, lockouts, labor
+troubles, restrictive governmental orders or decrees, riots, insurrection, war, terrorists acts, or the inability of Lonza to obtain any required raw material, energy source, equipment, labour or transportation.
+
+16
+
+Miscellaneous
+
+16.1
+
+Severability. If any provision hereof is or becomes at any time illegal, invalid or unenforceable in
+any respect, neither the legality, validity nor enforceability of the remaining provisions hereof shall in any way be affected or impaired thereby. The Parties hereto undertake to substitute any illegal, invalid or unenforceable provision by a
+provision which is as far as possible commercially equivalent considering the legal interests and the Purpose.
+
+16.2
+
+Amendments/Assignment. Modifications and/or amendments of this Agreement must be in writing and
+signed by the Parties. Lonza shall be entitled to instruct one or more of its Affiliates to perform any of Lonza’s obligations contained in this Agreement, but Lonza shall remain fully responsible in respect of those obligations, and its
+Affiliates’ actions and omissions shall be deemed made by Lonza. Subject thereto, neither Party may assign its interest under this Agreement without the prior
+
+16
+
+CONFIDENTIAL
+
+written consent of the other Party, such consent not to be unreasonably withheld, conditioned or delayed,
+provided, however that (a) Lonza may assign this Agreement to any Affiliate of Lonza or (b) either Party may assign this Agreement to any third party in connection with the sale or transfer (by whatever method) of all or substantially all
+of the assets of the business related to this Agreement; provided, however, that Customer shall not assign this Agreement to a Competitor of Lonza, and (c) Lonza shall be entitled to sell, assign and/or transfer its payment receivables
+resulting from this Agreement without the consent of the Customer. For purposes of this Clause 16.2, the terms “assign” and “assignment” shall include, without limitation (i) the sale of fifty percent (50%) or more of the
+outstanding stock of such Party to an Affiliate of such Party or an unrelated entity or natural person, (ii) the sale or transfer or other assignment of all or substantially all of the assets of the Party or the line of business or Product to
+which this Agreement relates, and (iii) a merger, consolidation, acquisition or other form of business combination. Any purported assignment without a required consent shall be void. No assignment shall relieve any Party of responsibility for
+the performance of any obligation that accrued prior to the effective date of such assignment. This Agreement shall be binding upon the Parties’ successors and permitted assigns.
+
+16.3
+
+Notice. All notices must be written and sent to the address of the Party first set forth above. All
+notices must be given (a) by personal delivery, with receipt acknowledged, (b) by facsimile followed by hard copy delivered by the methods under (c) or (d), (c) by prepaid certified or registered mail, return receipt requested, or
+(d) by prepaid recognized next business day delivery service. Notices will be effective upon receipt or at a later date stated in the notice.
+
+16.4
+
+Governing Law/Jurisdiction. This Agreement is governed in all respects by the laws of New York, USA,
+without regard to its conflicts of laws principles. The Parties agree to submit to the jurisdiction of the courts of New York, USA.
+
+16.5
+
+Entire Agreement. This Agreement and the Project Plan and Quality Agreement, together with the
+Appendices referenced and incorporated herein, constitute the entire agreement between the Parties as to the subject matter hereof and supersedes all prior and contemporaneous agreements with respect to the subject matter hereof. This Agreement may
+be executed in any number of counterparts, each of which shall be deemed to be an original, and all of which together shall constitute one and the same document. Each Party acknowledges that an original signature or a copy thereof transmitted by
+facsimile or by .pdf shall constitute an original signature for purposes of this Agreement.
+
+16.6
+
+Waiver. Failure by a Party to insist upon strict compliance with any term of this Agreement in any
+one or more instances will not be deemed to be a waiver of its rights to insist upon such strict compliance with respect to any subsequent failure.
+
+16.7
+
+Further Assurances. The Parties shall execute, acknowledge and deliver such further instruments and
+to take all such other incidental acts as may be reasonably necessary or appropriate to carry out the purpose and intent of this Agreement.
+
+16.8
+
+No Third Party Beneficiaries. This Agreement shall not confer any rights or remedies upon any person
+or entity other than the Parties and their respective successors and permitted assigns.
+
+16.9
+
+Publicity. Neither Party will make any press release or other public disclosure regarding this
+Agreement or the transactions contemplated hereby without the other Party’s express prior written consent, except as required under Applicable Laws, by any governmental agency or by the rules of any stock exchange on which the securities of the
+disclosing party are listed, in which case the party required to make the press release or public disclosure shall use commercially reasonable efforts to obtain the approval of the other party as to the form, nature and extent of the press release
+or public disclosure prior to issuing the press release or making the public disclosure. In addition, neither Party shall use the other Party’s name in a manner that could be construed as an endorsement of the other Party’s product or
+service, including any scientific conclusion as to safety or efficacy.
+
+17
+
+CONFIDENTIAL
+
+IN WITNESS WHEREOF, each of the Parties hereto has caused this Manufacturing Services Agreement to be executed by its duly authorized
+representative effective as of the Effective Date.
+
+LONZA LTD
+
+By:
+
+/s/ Cordula Altekrüger
+
+Name: Cordula Altekrüger
+
+Title: Senior
+Legal Counsel
+
+By:
+
+/s/ Bart A.M. van Aarnhem
+
+Name: Bart A.M. van Aarnhem
+
+Title: Senior
+Legal Counsel
+
+ITI Limited
+
+By:
+
+/s/ Michael Halstead
+
+Name: Michael Halstead
+
+Title: SVP, General
+Counsel
+
+By:
+
+/s/ Sharon Mates
+
+Name: Sharon Mates
+
+Title: CEO
+
+18
+
+CONFIDENTIAL
+
+APPENDIX A
+
+Project Plan
+A -1
+
+[***]
+
+1

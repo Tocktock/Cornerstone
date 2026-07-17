@@ -1,0 +1,95 @@
+{
+  "schema_version": "cs.manual_review_packet.v1",
+  "packet_id": "geoje-livelihood-support-packet-b-2025-09-19",
+  "language": "ko",
+  "as_of": "2025-09-19T11:40:59+09:00",
+  "decision_stage": "immediately_before_bill_584_vote",
+  "decision_question": "의안번호 519에서 584로 무엇이 바뀌었으며, 6월에 제기된 반대 사유가 얼마나 해소되었는가? 현재 자료만으로 가결, 부결, 또는 심의보류 중 하나를 권고하고, 확인된 사실·발언자의 주장·미확인 사항을 분리하라.",
+  "upload": [
+    {
+      "path": "upload/01_prior-bill-519-text-and-june-debate.txt",
+      "bytes": 56324,
+      "sha256": "e29eea4affe510a4c6103ac448608a2a83c85813be715604ac576c229e952d02",
+      "source_url": "https://clik.nanet.go.kr/minutes/viewer.do?DOCID=CLIKC1453347707408006&collection=minutes",
+      "source_role": "prior bill text and June arguments for version comparison"
+    },
+        {
+            "path": "upload/02_bill-584-committee-result-and-plenary-debate-pre-vote.txt",
+            "bytes": 28999,
+            "sha256": "6a0aa2e826cd77972d418bd09c28e35afaf0e5a0c11cd7433e9fdf93d31ca718",
+            "source_url": "https://clik.nanet.go.kr/minutes/viewer.do?DOCID=CLIKC427616220279154&collection=minutes",
+            "source_role": "committee conclusion, procedural motion, and competing speaker claims before the final vote"
+        },
+        {
+            "path": "upload/03_bill-584-official-appendix-text.txt",
+            "bytes": 3658,
+            "sha256": "8b113c3ee10f9d34df5d2580fcc4edde44a4a4dc21ad8a84f4ea9f9b85ec7efb",
+            "source_url": "https://gjcl.go.kr/viewer/pdf.do?uid=2240&group=appendix",
+            "source_role": "official bill 584 identity, proposal metadata, ordinance text, and sunset clause; human-verified transcription of PDF pages 3-7"
+        }
+  ],
+  "held_out": [
+    {
+      "path": "held-out/01_vote-result-2025-09-19.txt",
+      "bytes": 1521,
+      "sha256": "6731319466d55ccf9ec536108991acdfb99e6156e728246b023f5e000b0d2369",
+      "use": "post-brief chronology check only"
+    },
+    {
+      "path": "held-out/02_city-implementation-announcement-2025-09-23.txt",
+      "bytes": 2101,
+      "sha256": "2031b5b255a8e940aa8e61d94a2e918f1dc66205a5d9aaa851a27bba9d867cdc",
+      "use": "post-brief implementation-plan check only"
+    },
+    {
+      "path": "held-out/03_supplementary-budget-proposal-2025-10-27.txt",
+      "bytes": 2935,
+      "sha256": "dd14dd2b698091516ddb76c179b556a3c0b47b9370b4b47e7e584484b942c7fd",
+      "use": "post-brief budget check only"
+    }
+  ],
+  "raw_sources": [
+    {
+      "path": "raw/01_council-257-plenary-2025-09-19.html",
+      "sha256": "06893f460674040756d622e6dcd53efaff045d6ca39621c0ebf11dbbbbfd06d3"
+    },
+    {
+      "path": "raw/02_geoje-city-2025-09-23-press-release.html",
+      "sha256": "b8380cb5910e842016eaf0cecd8827591c3d37c08a79a74020f5720492143582"
+    },
+        {
+            "path": "raw/03_council-supplementary-budget-2025-10-27.html",
+            "sha256": "93d9880206cb19c8ed6269725d96d278ce7e80dfbf4f3a4308040a075338b545"
+        },
+        {
+            "path": "raw/04_bill-584-official-appendix.pdf",
+            "sha256": "689a002da04fdb0e8448c03bcd9bce9328fbf188dcceb0f9168c16965f99c8bc"
+        }
+  ],
+  "derived_sources": [
+    {
+      "path": "derived/01_council-257-plenary-2025-09-19.full.txt",
+      "sha256": "f29a2016df7250f4394f127d2ff2607fa7d6b7fb7ffe8b0f33800f8789a9cd84"
+    },
+    {
+      "path": "derived/02_geoje-city-2025-09-23-press-release.full.txt",
+      "sha256": "37e75dec8d6742403a0814bd06d0dedd2461f21b35f6c5f7735ff280ac162d18"
+    },
+        {
+            "path": "derived/03_council-supplementary-budget-2025-10-27.full.txt",
+            "sha256": "1aebf48242f00d76afa8e33786331548adc43d42e49dfcda5829dbc856c73fbf"
+        },
+        {
+            "path": "derived/04_bill-584-official-appendix.transcribed.txt",
+            "sha256": "84863818a6c9104da91830e2dc79c361300ac6280b4aae94aa8498ad7798a586"
+        }
+  ],
+  "limits": {
+        "source_count": 3,
+        "total_upload_bytes": 88981,
+        "max_source_bytes": 56324,
+        "within_vs5_intake_boundary": true
+    },
+    "judgment_policy": "The packet contains political and administrative assertions. A statement in the transcript is evidence that a speaker made the statement, not independent proof that the statement is true.",
+    "transcription_policy": "The bill 584 upload is a human-verified transcription of official PDF pages 3-7. The original PDF is preserved in raw/ and the upload records its official URLs, page range, and editing boundary."
+}

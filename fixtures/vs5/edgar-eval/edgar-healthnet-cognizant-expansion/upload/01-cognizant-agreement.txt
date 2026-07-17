@@ -1,0 +1,2538 @@
+3
+dex102.htm
+MASTER SERVICES AGREEMENT BETWEEN HEALTH NET, INC. AND COGNIZANT TECHNOLOGY
+
+Master Services Agreement between Health Net, Inc. and Cognizant Technology
+
+Exhibit 10.2
+
+Final Execution Version
+
+MASTER SERVICES AGREEMENT
+
+Between
+
+Health Net, Inc.
+
+and
+
+Cognizant
+Technology Solutions U.S. Corporation
+
+Dated
+
+September 30, 2008
+
+The mark *** indicates that text has been redacted pursuant to a request for
+confidential treatment under Rule 24b-2 of the Securities Exchange Act of 1934, as amended, and filed separately with Securities and Exchange Commission.
+
+Terms and Conditions
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+TABLE OF CONTENTS
+
+1
+
+PREAMBLE
+
+1
+
+1.1 Background and Purpose
+
+1
+
+1.2 Objectives
+
+1
+
+1.3 Structure of Agreement
+
+2
+
+1.4 Construction of Preamble
+
+4
+
+2
+
+DEFINITIONS
+
+4
+
+2.1 Defined Terms
+
+4
+
+2.2 Other Terms
+
+7
+
+3
+
+SERVICES
+
+7
+
+3.1 Provision of the Services
+
+7
+
+3.2 Implied Services
+
+7
+
+3.3 Evolution of the Services
+
+8
+
+3.4 Users of the Services
+
+8
+
+3.5 Services Not Exclusive; Variable
+
+8
+
+3.6 Cooperation and Coordination with Other Parties
+
+9
+
+3.7 New Services
+
+9
+
+4
+
+TERM AND REGULATORY APPROVALS
+
+9
+
+4.1 Initial Term
+
+9
+
+4.2 Renewal Terms
+
+10
+
+4.3 Regulatory Approvals and Federal Business
+
+10
+
+5
+
+PERFORMANCE
+
+10
+
+5.1 Performance, Generally
+
+10
+
+5.2 Place of Performance
+
+10
+
+5.3 Time of Performance
+
+11
+
+5.4 Manner of Performance
+
+11
+
+5.5 Quality Assurance and Continuous Improvement
+
+12
+
+5.6 User Satisfaction
+
+12
+
+6
+
+SERVICE LEVELS
+
+12
+
+6.1 General
+
+12
+
+6.2 Failure to Perform
+
+12
+
+7
+
+SUPPLIER PERSONNEL
+
+12
+
+7.1 Provision of Suitable Personnel
+
+12
+
+7.2 Screening and Background Checks
+
+12
+
+7.3 Responsibility for Supplier Personnel, Generally
+
+13
+
+7.4 Key Supplier Positions
+
+13
+
+7.5 Removal and Replacement of Supplier Personnel
+
+14
+
+7.6 Controlling Turnover of Supplier Personnel
+
+14
+
+7.7 Subcontracting
+
+15
+
+7.8 Managed Third Parties
+
+16
+
+8
+
+HEALTH NET RESPONSIBILITIES
+
+16
+
+8.1 Appointment of Health Net Program Management Office (PMO) Personnel
+
+16
+
+8.2 Health Net Cooperation Duties
+
+16
+
+8.3 Savings Clause
+
+17
+
+9
+
+CHARGES
+
+17
+
+Terms and Conditions
+
+i
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+9.1 Pass-Through Expenses
+
+17
+
+9.2 Incidental Expenses
+
+18
+
+9.3 Taxes
+
+18
+
+9.4 Benchmarking
+
+20
+
+10
+
+INVOICING AND PAYMENT
+
+20
+
+10.1 Invoicing
+
+20
+
+10.2 Payment Due
+
+21
+
+10.3 Accountability
+
+21
+
+10.4 Proration
+
+21
+
+10.5 Refundable Items
+
+21
+
+10.6 Deductions
+
+22
+
+10.7 Disputed Charges
+
+22
+
+11
+
+TRANSFER OR USE OF RESOURCES
+
+22
+
+11.1 Transfer of Personnel
+
+22
+
+11.2 Health Net Owned Equipment
+
+22
+
+11.3 Health Net Leased Equipment
+
+23
+
+11.4 Health Net Third Party Service Contracts
+
+23
+
+11.5 Health Net Owned Software
+
+23
+
+11.6 Health Net Licensed Software
+
+24
+
+11.7 Health Net Facilities
+
+25
+
+11.8 Terms Applicable to Health Net Facilities, Generally
+
+25
+
+11.9 Required Consents
+
+26
+
+11.10 Health Net Resources Provided to Supplier Personnel Working On-site
+
+26
+
+12
+
+RESOURCE ACQUISITIONS DURING THE TERM
+
+27
+
+12.1 General Responsibility and Compatibility
+
+27
+
+12.2 Equipment
+
+27
+
+12.3 Software
+
+27
+
+12.4 Network Connectivity
+
+28
+
+12.5 Health Net Rights to certain Software upon Termination/Expiration
+
+28
+
+13
+
+TRANSITION
+
+28
+
+13.1 “Transition” Defined
+
+28
+
+13.2 Transition Plan
+
+28
+
+13.3 Conduct of the Transition
+
+29
+
+13.4 Health Net Cooperation and Support
+
+29
+
+13.5 Completion of Transition Projects
+
+29
+
+14
+
+DATA SECURITY AND PROTECTION
+
+30
+
+14.1 “Health Net Data” Defined
+
+30
+
+14.2 Health Net Data, Generally
+
+30
+
+14.3 Data Security
+
+30
+
+14.4 Compliance with Data Privacy and Data Protection Laws, Regulations and
+Policies
+
+31
+
+14.5 Import/Export Controls
+
+31
+
+14.6 Compliance with Gramm-Leach-Bliley (“GLB Act”)
+
+32
+
+15
+
+INTELLECTUAL PROPERTY RIGHTS
+
+32
+
+15.1 Defined Terms
+
+33
+
+15.2 Independent IP
+
+33
+
+15.3 Copyright in Work Product
+
+34
+
+Terms and Conditions
+
+ii
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+15.4 Intellectual Property Rights Other than Copyright
+
+34
+
+15.5 Other Developed Items
+
+35
+
+15.6 Intellectual Property Rights Agreements with Supplier Personnel
+
+35
+
+15.7 Other Obligations and Rights Regarding Work Product
+
+35
+
+15.8 Mental Impressions
+
+35
+
+16
+
+TERMINATION
+
+36
+
+16.1 Termination By Health Net
+
+36
+
+16.2 Termination By Supplier
+
+38
+
+16.3 Extension of Termination/Expiration Date
+
+38
+
+16.4 Partial Termination
+
+38
+
+16.5 Disengagement Assistance
+
+38
+
+16.6 Survival
+
+39
+
+16.7 Bid Assistance
+
+40
+
+17
+
+GOVERNANCE AND MANAGEMENT
+
+41
+
+17.1 Governance Structure and Processes
+
+41
+
+17.2 Meetings
+
+41
+
+17.3 Reports
+
+42
+
+17.4 Procedures Manual
+
+42
+
+17.5 Change Control
+
+43
+
+17.6 Annual Technology Plan
+
+44
+
+18
+
+AUDITS AND RECORDS
+
+45
+
+18.1 Audit Rights
+
+45
+
+18.2 Audit Follow-up
+
+46
+
+18.3 Confidentiality of Audits
+
+46
+
+18.4 Records Retention
+
+46
+
+18.5 Supplier Audits
+
+47
+
+18.6 Financial Reports
+
+47
+
+18.7 Overcharges
+
+47
+
+19
+
+REPRESENTATIONS, WARRANTIES AND COVENANTS OF SUPPLIER
+
+47
+
+19.1 Work Standards
+
+47
+
+19.2 Maintenance
+
+47
+
+19.3 Efficiency and Cost-Effectiveness
+
+48
+
+19.4 Technology
+
+48
+
+19.5 Deliverables
+
+48
+
+19.6 Documentation
+
+48
+
+19.7 Compatibility
+
+48
+
+19.8 Non-Infringement
+
+48
+
+19.9 Viruses
+
+49
+
+19.10 Disabling Code
+
+50
+
+19.11 Compliance with Health Net Policies and Procedures
+
+50
+
+19.12 Compliance with Laws; Export Control
+
+50
+
+19.13 Date and Currency Compliance
+
+50
+
+19.14 Corporate Social Responsibility
+
+50
+
+19.15 Subcontractor Confidentiality and Assignment
+
+51
+
+19.16 No Improper Inducements
+
+51
+
+20
+
+MUTUAL REPRESENTATIONS AND WARRANTIES; DISCLAIMER
+
+51
+
+20.1 Mutual Representations and Warranties
+
+51
+
+20.2 Disclaimer
+
+52
+
+Terms and Conditions
+
+iii
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+21
+
+CONFIDENTIALITY
+
+52
+
+21.1 “Confidential Information” Defined
+
+52
+
+21.2 Obligations of Confidentiality
+
+53
+
+21.3 No Implied Rights
+
+54
+
+21.4 Compelled Disclosure
+
+54
+
+21.5 Confidential Treatment of this Agreement
+
+54
+
+21.6 Disclosure of Information Concerning Tax Treatment
+
+54
+
+21.7 Return or Destruction
+
+54
+
+21.8 Duration of Confidentiality Obligations
+
+55
+
+22
+
+INSURANCE
+
+55
+
+23
+
+INDEMNIFICATION
+
+55
+
+23.1 “Claim” and “Losses” Defined
+
+55
+
+23.2 Indemnification By Supplier
+
+56
+
+23.3 Infringement Claims
+
+56
+
+23.4 Indemnification By Health Net
+
+56
+
+23.5 Indemnification Procedures
+
+57
+
+23.6 Subrogation
+
+58
+
+24
+
+LIABILITY
+
+58
+
+24.1 General Intent
+
+58
+
+24.2 Limitations of Liability
+
+58
+
+24.3 Force Majeure
+
+59
+
+24.4 Disaster Recovery and Business Continuity
+
+60
+
+25
+
+RULES OF CONSTRUCTION
+
+61
+
+25.1 Entire Agreement
+
+61
+
+25.2 Contracting Parties; No Third Party Beneficiaries
+
+61
+
+25.3 Contract Amendments and Modifications
+
+61
+
+25.4 Governing Law
+
+61
+
+25.5 Relationship of the Parties
+
+62
+
+25.6 Consents and Approvals
+
+62
+
+25.7 Waiver
+
+62
+
+25.8 Remedies Cumulative
+
+62
+
+25.9 References
+
+62
+
+25.10 Rules of Interpretation
+
+63
+
+25.11 Order of Precedence
+
+63
+
+25.12 Severability
+
+63
+
+25.13 Counterparts
+
+63
+
+25.14 Reading Down
+
+63
+
+26
+
+DISPUTE RESOLUTION
+
+63
+
+26.1 Informal Dispute Resolution
+
+64
+
+26.2 Litigation
+
+64
+
+26.3 Continued Performance
+
+65
+
+26.4 Equitable Remedies
+
+65
+
+26.5 Waiver of Jury Trial
+
+65
+
+26.6 Disclaimer of Uniform Computer Information Transactions Act
+
+66
+
+27
+
+GENERAL
+
+66
+
+27.1 Binding Nature and Assignment
+
+66
+
+27.2 Nondiscrimination
+
+66
+
+Terms and Conditions
+
+iv
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+27.3 Beneficiary Hold Harmless
+
+67
+
+27.4 Notices
+
+67
+
+27.5 Non-solicitation of Employees
+
+67
+
+27.6 Legal Compliance
+
+68
+
+27.7 Covenant of Good Faith
+
+68
+
+27.8 Public Disclosures
+
+68
+
+27.9 Service Marks
+
+68
+
+27.10 Mutually Negotiated
+
+69
+
+Terms and Conditions
+
+v
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Master Services Agreement
+
+This Agreement, effective as of September 30, 2008 (the “Effective Date”), is between Health Net, Inc., a Delaware corporation with its principal place of business located at 21650 Oxnard
+Street, Woodland Hills, CA 91367 and Cognizant Technology Solutions U.S. Corporation (“Supplier”), a Delaware corporation having an office at 500 Frank W. Burr Blvd., Teaneck, New Jersey 07666 (each, a
+“Party” and collectively, the “Parties”). The Parties agree that the following terms and conditions shall apply to the services to be provided by Supplier to Health Net
+under this Agreement, in consideration of certain payments to be made by Health Net, all as more specifically described below.
+
+1
+
+PREAMBLE
+
+1.1
+
+Background and Purpose
+
+This Agreement is made and
+entered into with reference to the following:
+
+(a)
+
+Health Net, Inc. is among the nation’s largest publicly traded managed health care companies. Its mission is to help people be healthy, secure and comfortable. Health Net, Inc.
+is among the nation’s largest publicly traded managed health care companies. Its mission is to help people be healthy, secure and comfortable. The company’s health plans and government contracts subsidiaries provide health benefits to
+approximately 6.7 million individuals across the country through group, individual, Medicare, Medicaid and TRICARE and Veterans Affairs programs.
+
+(b)
+
+Supplier and its Affiliates are providers of application maintenance and development services.
+
+(c)
+
+Prior to the Effective Date, Supplier provided services to Health Net pursuant to a Master Staff Augmentation and Application Development Services Agreement (the “Staff
+Augmentation Agreement”), effective as of May 3, 2006. The Staff Augmentation Agreement will remain in effect after the Effective Date, as set forth in Section 25.1(b).
+
+(d)
+
+After a comprehensive evaluation and negotiation process, Health Net has selected Supplier to also provide the Services described in this Agreement, during the Term of the Agreement
+and pursuant to the terms and conditions of this Agreement, and Supplier desires to provide to Health Net the Services through the execution of this Agreement and the attached schedules, exhibits and appendices, all of which are governed by the
+terms and conditions set forth in this Agreement.
+
+1.2
+
+Objectives
+
+(a)
+
+Health Net and Supplier have agreed upon the following over-arching goals and objectives as those they expect to be accomplished by their execution of this Agreement and the
+performance of Services entered into pursuant to the Agreement:
+
+(i)
+
+A seamless transition of outsourced services to Supplier from Health Net and incumbent vendors in a manner that ensures minimal business disruption and business risk to Health Net;
+
+Terms and Conditions
+
+1
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(ii)
+
+A Technical Solution and Service delivery model that is scalable and responsive to change;
+
+(iii)
+
+Quality of service consistent with that of the leading providers of similar services and continuous improvement;
+
+(iv)
+
+A Technical Solution and Services that keep pace with modernization and consumerization of technology;
+
+(v)
+
+Supplier integration among other Health Net service providers to Health Net and service-wide responsibility for the Services; and
+
+(vi)
+
+Services and solutions that are continuously aligned to Health Net business needs and imperatives – i.e., a Technical Solution, Service delivery model and platform that
+will support rapid scalability, growth, and change in the composition and location of Health Net’s businesses.
+
+(b)
+
+The goals and objectives set out in this Section 1.2 are intended to be a general introduction to, and statement of the spirit of, this Agreement. Although they are not
+intended to expand or reduce the scope of the Parties’ express obligations under this Agreement, Supplier’s performance under this Agreement will be measured, in part, based on the extent to which Supplier’s performance causes or
+contributes to the achievement of them. Further, to the extent that the terms of this Agreement do not address a particular circumstance, are unclear or ambiguous, or require the Parties to discuss, negotiate or agree on a particular matter, such
+terms must be construed in accordance with, and each Party must act to give the fullest possible effect to, the goals and objectives set out in this Section 1.2.
+
+1.3
+
+Structure of Agreement
+
+This document (the
+“Terms and Conditions”) sets out the basic terms and conditions under which the Parties will conduct the transactions contemplated by this Agreement. In addition, there will be a number of Schedules and Exhibits attached to
+the Terms and Conditions, including:
+
+Schedule A (Services)
+
+Exhibit A-1 (Intentionally Left Blank)
+
+Exhibit A-2 (Transition Description)
+
+Attachment A-2-1 (Transition Plan)
+
+Exhibit A-3 (Solution Description)
+
+Exhibit A-4 (In-Scope Applications)
+
+Exhibit A-5 (Change Control Process)
+
+Attachment A-5-1 (Sample Change Notice)
+
+Exhibit A-6 (Project Framework)
+
+Attachment A-6-1 (Deliverable Acceptance Procedures)
+
+Exhibit A-7 (In Flight Projects)
+
+Exhibit A-8 (Testing Center of Excellence)
+
+Terms and Conditions
+
+2
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Exhibit A-9 (SAP Responsibility Matrix)
+
+Exhibit A-10 (Intentionally Left Blank)
+
+Exhibit A-11 (Network Diagram)
+
+Schedule B (Service Levels)
+
+Exhibit B-1 (Service Level Metrics)
+
+Exhibit B-2 (Remedy Incident and Problem Priority Level Definitions)
+
+Exhibit B-3 (Service Request Completion Times)
+
+Schedule C (Charges)
+
+Exhibit C-1 (Production Support Charge)
+
+Exhibit C-2 (Individual Application Production Support Charges)
+
+Exhibit C-3 (Applications Development Charges)
+
+Exhibit C-4 (Applications Development Hours – Onshore and Offshore Personnel)
+
+Exhibit C-5 (Transitioned Employees)
+
+Exhibit C-6 (T&M Rates)
+
+Exhibit C-7 (Skillset Mix and Supporting Skillset Rates)
+
+Schedule D (Key Supplier Positions)
+
+Schedule E (Transitioned Employees)
+
+Exhibit E-1 (Affected Employees)
+
+Exhibit E-2 (Employees on Approved Leave)
+
+Exhibit E-3 (Transition Start Date and Scheduled Steady-State Date)
+
+Schedule F (Facilities)
+
+Exhibit F-1 (Seat Requirements)
+
+Schedule G (Governance)
+
+Schedule H (Insurance)
+
+Schedule I (Third Party Service Contracts)
+
+Schedule J (Software)
+
+Exhibit J-1 (Health Net Owned Service Delivery Software)
+
+Exhibit J-2 (Health Net Leased Service Delivery Software)
+
+Exhibit J-3 (Health Net Associated Tools and Software)
+
+Exhibit J-4 (Cognizant Office Productivity Software)
+
+Schedule K (Business Associate Addendum)
+
+Schedule L (Disengagement Assistance)
+
+Schedule M (Health Net Policies and Procedures)
+
+Schedule N (Equipment)
+
+Schedule O (Approved Subcontractors)
+
+Schedule P (Reports)
+
+Schedule Q (Glossary)
+
+Terms and Conditions
+
+3
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Schedule R (Supplier Competitors)
+
+Schedule S (Form Non-Disclosure Agreement)
+
+Schedule T (Security Questionnaire)
+
+1.4
+
+Construction of Preamble
+
+The provisions of this
+Section 1 are intended to provide a general introduction to this Agreement and a context in which to interpret this Agreement’s terms and conditions in circumstances where their meanings are unclear or ambiguous. It is not intended to
+alter the plain meaning of this Agreement or to expand the scope of the Parties’ express obligations under it.
+
+2
+
+DEFINITIONS
+
+2.1
+
+Defined Terms
+
+The following capitalized terms,
+when used in this Agreement, will have the meanings given them below:
+
+(a)
+
+“Affiliate” means, with respect to an entity, any other entity or person Controlling, Controlled by or under common Control with such entity.
+
+(b)
+
+“Agreement” shall mean this Terms and Conditions document as well as all schedules, exhibits, and appendices attached hereto, as the same may
+be amended by the Parties from time to time in accordance with Section 25.3.
+
+(c)
+
+“Application” or “Application Software” means Software that performs specific End User-related data processing, data management and
+telecommunications tasks.
+
+(d)
+
+“Beneficiary” means a person who has enrolled in and/or is eligible to receive services under a Benefit Program at the time services are rendered. The
+Parties acknowledge that the term “member” may be used by Health Net and for purposes of this Agreement, the term Beneficiary includes the term “member” wherever used.
+
+(e)
+
+“Benefit Program” means a plan offered by Health Net or its Affiliates whereby Health Net or a Health Net Affiliate is obligated to provide or arrange for
+health care services, or compensation therefor, to Beneficiaries in accordance with the provisions contained in such plans.
+
+(f)
+
+“Commercially Reasonable Efforts” means taking all such steps and performing in such a manner as a well managed company would undertake where it was acting
+in a determined, prudent and reasonable manner to achieve a particular desired result for its own benefit.
+
+(g)
+
+“Control” and its derivatives, such as “Controlling” means with regard to any entity the legal, beneficial or
+equitable ownership, directly or indirectly, of: (i) fifty percent (50%) or more of the capital stock (or other ownership interest if not a stock corporation) of such entity ordinarily having voting rights; or (ii) (A) twenty
+percent (20%) or more of the capital stock (or other ownership interest if not a stock corporation) and (B) either
+
+Terms and Conditions
+
+4
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(1) a greater percentage than any other juridical person or (2) management control in fact or by agreement.
+
+(h)
+
+“Deliverable” means any tangible Work Product produced in the course of performing the Services that is listed or described in a Statement of Work, Work
+Order or other Service request document (or a project plan developed pursuant to this Agreement) or is otherwise required to be delivered by Supplier to Health Net in order to satisfy Supplier’s obligations with respect to any item to be
+provided by Supplier under a Statement of Work, Work Order or other Service request document or project plan.
+
+(i)
+
+“Disengagement Assistance” means, collectively, the Functions that Health Net requests from Supplier or that are otherwise required to enable an orderly
+transfer of Services from Supplier to Health Net or its designees without interruption or adverse effect to Health Net in connection with the cessation of any Services, or the expiration or earlier termination (for any reason) of this Agreement, in
+whole or in part, including the Functions described in Section 16.5 and Schedule L (Disengagement Assistance).
+
+(j)
+
+“Disengagement Assistance Period” means the period of time that Supplier is obligated to provide Disengagement Assistance pursuant to Section 16.5(a).
+
+(k)
+
+“Documentation” means written materials (including materials published on an Internet or Intranet site or otherwise online) that are available or necessary
+to instruct or assist End Users, operators or systems personnel in the installation, development, maintenance, operation, use or modification of any Equipment, Software, system, or Deliverable (including applicable functional and technical
+specifications), as such documentation is updated from time to time.
+
+(l)
+
+“Effective Date” has the meaning set forth in the preamble.
+
+(m)
+
+“End Users” means direct users of the Services provided under this Agreement.
+
+(n)
+
+“Equipment” means any computer and telecommunications machines or other hardware (without regard to the entity owning or leasing it) used by the Supplier in
+the provision of the Services, including all associated attachments, features, accessories and peripheral devices and related services (e.g., maintenance and support services, upgrades, and subscriptions services).
+
+(o)
+
+“Financial Responsibility” means having responsibility for furnishing and paying for resources or certain services related to resources.
+
+(p)
+
+“Former Health Net Affiliate” means: (i) any entity affiliated with Health Net at any time
+during the Term (such designation expiring at the end of the twenty-fourth (24th) month after the date that such entity ceases to Control, be
+Controlled by, or be under common Control with, Health Net); or (ii) the purchaser of all or substantially all of the assets of any line of business of Health Net or its Affiliates (such designation (A) applying only with respect to the
+business so acquired; and (B) expiring at the end of the twenty-fourth (24th) month after the date of such purchase.) At Health Net’s
+option, each Former Health Net Affiliate shall be deemed to be an Affiliate of Health Net.
+
+(q)
+
+“Health Net Facility” means a Health Net office or business location at which, or with respect to which, Supplier performs the Services.
+
+Terms and Conditions
+
+5
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(r)
+
+“In-Scope Applications” has the meaning set forth in Section 1.3 of Schedule A.
+
+(s)
+
+“IT Infrastructure” means the Equipment and Software (regardless of ownership) that comprise the infrastructure of Health Net’s and its
+Affiliates’ information technology organizations.
+
+(t)
+
+“Law” means: (i) any applicable law, statute, regulation, ordinance or subordinate legislation in force from time to time to which a Party or any of its
+Affiliates is subject; (ii) the common law as applicable to the Parties or any of their Affiliates from time to time; (iii) any binding court order, judgement or decree (including consent agreements); and (iv) any applicable
+directive, policy, rule or order that is binding on a Party or any of its Affiliates and that is made or given by any government, an agency thereof, or any regulatory body; of any country, the European Union, or other national, federal,
+commonwealth, state, provincial or local jurisdiction, and of any exchange or association (including the New York Stock Exchange and the National Association of Securities Dealers) whose regulations are binding on either Party pursuant to a
+self-regulating mechanism approved by a governmental entity.
+
+(u)
+
+“Out-of-Pocket Expenses” means reasonable, demonstrable and actual out-of-pocket expenses incurred by Supplier for Equipment, materials, supplies or services
+provided to or for Health Net as identified in this Agreement, but not including Supplier’s actual or allocated overhead costs, administrative expenses or other mark-ups.
+
+(v)
+
+“Required Consents” means such consents as may be required for (i) the assignment to a Party, or the grant to a Party of rights of access and use, of
+resources otherwise provided to or licensed by the other Party.
+
+(w)
+
+“Service Commencement Date” shall mean February 2, 2009, which is the date that Supplier shall achieve Steady-State with respect to the first In-Scope
+Application, as set forth on Exhibit A-2-1 to Schedule A, or any other date mutually agreed by the Parties in writing.
+
+(x)
+
+“Software” means program code (in both object code and Source Code forms) and all supporting documentation, media, on-line help facilities and tutorials,
+including any update, enhancement, modification, releases and Derivative Work of any item comprising Software.
+
+(y)
+
+“Source Code” means the computer code of Software in programming languages, including all comments and procedural code, and all related development documents
+(e.g., flow charts, schematics, statements of principles of operations, End User manuals, architectural standards, Documentation, and any other specification that are used to create or that comprise the computer code, of the Software concerned.
+
+(z)
+
+“Supplier Competitor” means those entities listed in Schedule R.
+
+(aa)
+
+“Supplier Personnel” means, collectively, any and all personnel furnished or engaged by Supplier to perform any part of the Services, including: (i) the
+employees of Supplier; (ii) Subcontractors; and (iii) the employees of such Subcontractors.
+
+(bb)
+
+“Systems Software” means those programs or programming (including the supporting Documentation, media, on-line help facilities and
+tutorials) that perform (i) tasks basic to
+
+Terms and Conditions
+
+6
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+the functioning of Equipment and which are required to operate the Applications Software or a system; or (ii) tasks other than as performed by
+Applications Software of a system. If programs or programming are not Applications Software, they are deemed to be Systems Software. Systems Software includes mainframe, midrange and desktop operating systems, server operating systems, network
+operating systems, systems utilities (including measuring and monitoring tools), data security Software and telecommunications monitors.
+
+(cc)
+
+“Use” means to access, use, copy, maintain, modify, enhance, perform, display, distribute and create derivative works.
+
+2.2
+
+Other Terms
+
+Other capitalized terms used in this
+Agreement but not defined above are defined where they are used and have the meanings there indicated. Those terms, acronyms, and phrases utilized in the information technology or health and wellness industry which are not otherwise defined in this
+Agreement shall be interpreted in accordance with their generally understood meaning in such industry or business context.
+
+3
+
+SERVICES
+
+3.1
+
+Provision of the Services
+
+Starting on the Service
+Commencement Date, Supplier will provide the following services, functions and responsibilities, as they may be supplemented, enhanced, modified or replaced (collectively, the “Services”):
+
+(a)
+
+the functions, responsibilities, activities and tasks (collectively, “Functions”) described in Schedule A (Services) or elsewhere in this Agreement or in a
+Work Order executed pursuant to Exhibit A-6, other than those expressly designated as Functions for which Health Net is responsible;
+
+(b)
+
+any Functions performed during the *** months preceding the Effective Date by Health Net’s or its Affiliates’ personnel (including employees and contractors) who were
+transitioned to Supplier or displaced pursuant to the Transition Plan, or whose Functions were displaced pursuant to the Transition Plan; and
+
+(c)
+
+performance, management, and completion of the projects listed or described in Exhibit A-7 (In-Flight Projects), the Transition as described in Exhibit A-2 (Transition), and any
+projects requested by Health Net.
+
+3.2
+
+Implied Services
+
+If any Functions, other than
+those retained by Health Net under this Agreement, are reasonably required for, and incidental to or inherent in, the proper performance and provision of the Services (regardless of whether they are specifically described in the Agreement), they
+shall be deemed to be implied by and included within the scope of the Services to be provided by Supplier to the same extent and in the same manner as if specifically described in the Agreement.
+
+Terms and Conditions
+
+7
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+3.3
+
+Evolution of the Services
+
+Throughout the Term,
+Supplier will seek to improve the quality, efficiency and effectiveness of the Services to keep pace with technological advances and support Health Net’s (and its Affiliates’) evolving business needs and efforts to maintain competitiveness
+in the markets in which it (and they) competes. Without limiting the generality of the foregoing, Supplier will: (i) identify and apply ‘best practice’ techniques and methodologies in performing and delivering the Services,
+(ii) train Supplier Personnel in new techniques and technologies used generally within Supplier’s organization or the IT services industry and approved by Health Net for use in rendering the Services; and (iii) make investments to
+maintain the currency of Supplier’s tools, infrastructure and other resources used by Supplier to render the Services. Changes in the Services pursuant to this Section 3.3 will not be considered New Services.
+
+3.4
+
+Users of the Services
+
+(a)
+
+Supplier will provide the Services to Health Net and, as designated by Health Net from time to time, its Affiliates, Former Health Net Affiliates, licensees, customers, providers,
+contractors and other entities with whom Health Net has a business relationship with Health Net which is broader than the mere resale of Services (each such entity a “Service Recipient”). For purposes of this Agreement,
+Services provided to such entities shall be deemed to be Services provided to Health Net.
+
+(b)
+
+With respect to Former Health Net Affiliates, Supplier will continue to provide the Services being provided as of the date of divestiture as is requested by Health Net for as long
+as such entity continues to meet the definition of “Former Health Net Affiliate” (or such shorter period of time designated by Health Net). There shall be no additional charge or fee (i.e., in addition to the charges for the actual
+Services as provided in this Agreement) for the provision of Services to Former Health Net Affiliates.
+
+3.5
+
+Services Not Exclusive; Variable
+
+(a)
+
+This Agreement is non-exclusive. Except as set forth in Section 7.10 of Schedule C, nothing in this Agreement shall be construed to limit in any way Health Net’s ability
+to request that other third parties provide, or propose to provide, services that are the same as or similar to the Services, including with respect to the In-Scope Applications. Health Net (and its Affiliates) may contract with other suppliers for
+any products and services, including products and services that are similar to or competitive with the Services or that formerly were part of the Services. In the case of Health Net’s withdrawal of portions of the Services from Supplier
+(including a withdrawal by Health Net of any In-Scope Applications from the scope of this Agreement), the charges shall be reduced using the unit rates and charging methodologies provided in Schedule C (Charges), or otherwise in an equitable manner
+to the extent such unit rates and charging methodologies do not apply to the withdrawn portions of the Services.
+
+(b)
+
+The Services are variable in volume. Such variations are provided for in the charging mechanisms set forth in Schedule C (Charges). Supplier shall be responsible for adjusting the
+resources used to provide the Services to accommodate the changes in volume (regardless of the amount of time remaining in the Term) in such a manner as to comply with all Service Levels. Supplier shall not be entitled to receive an adjustment to
+the Charges resulting from such variations in volume except as set forth in Schedule C (Charges).
+
+Terms and Conditions
+
+8
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(c)
+
+Except as set forth in Section 7.10 of Schedule C, Health Net (and its Affiliates) make no commitment for any minimum or maximum volume, scope, or value of the Services under
+this Agreement or to any minimum or maximum payments to be made to Supplier.
+
+3.6
+
+Cooperation and Coordination with Other Parties
+
+(a)
+
+If Health Net performs itself, or retains a third party to perform, any services that interface or interact with the Services, or that formerly were part of the Services, Supplier
+will, in accordance with and subject to Section 3.6(b), cooperate and coordinate with Health Net or such third party as reasonably required for Health Net or the third party to perform such services. Supplier’s cooperation and coordination
+will include, as applicable: (i) providing reasonable access to the facilities being used by Supplier to provide the Services as necessary for Health Net or the third party to perform its work; (ii) providing reasonable access to the
+Equipment and Software used in providing the Services to the extent permitted under any applicable agreements with third parties; and (iii) providing such information regarding the operating environment, system constraints and other operating
+parameters as a person with reasonable commercial skills and expertise would find reasonably necessary for Health Net or the third party to perform its work.
+
+(b)
+
+Third parties retained by Health Net who utilize Supplier’s resources shall comply with Supplier’s reasonable security and confidentiality requirements and, as relevant,
+with Supplier’s reasonable work standards, methodologies and procedures, if provided in writing by Supplier to Health Net and such third parties. Supplier shall immediately notify Health Net if an act or omission of such a third party may cause
+a problem or delay in providing the Services and shall work with Health Net to prevent or circumvent such problem or delay.
+
+3.7
+
+New Services
+
+(a)
+
+“New Services” means Functions Health Net requests Supplier to perform under this Agreement
+
+(i)
+
+that are materially different from, and in addition to, the Services, and
+
+(ii)
+
+for which there is no existing charging mechanism in this Agreement.
+
+(b)
+
+Supplier will not perform any additional Functions that would constitute New Services prior to informing Health Net what the additional charges would be for performing them, and
+receiving Health Net’s authorization to proceed. Such New Services and such additional charges would be set forth in a Change Order or contract amendment signed by both Parties. Additionally, if Supplier does perform the additional Functions
+without Health Net’s prior authorization, they will be deemed to have been performed as part of the Services at no charge.
+
+4
+
+TERM AND REGULATORY APPROVALS
+
+4.1
+
+Initial Term
+
+Terms and Conditions
+
+9
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+The term of this Agreement shall be commence on the Effective Date and expire on December, 31, 2013, unless it is terminated
+earlier or is extended pursuant to the terms of this Agreement (such period, together with all extensions thereof, the “Term”).
+
+4.2
+
+Renewal Terms
+
+By giving notice to Supplier no less
+than three months prior to the then-existing expiration date of the Agreement, Health Net may extend the Term for a period designated by Health Net of up to one year on the terms and conditions (including pricing and cost-of-living adjustments
+pursuant to Section 8.1 of Schedule C) then in effect. Health Net shall have two (2) such extension options of up to one year each.
+
+4.3
+
+Regulatory Approvals and Federal Business
+
+(a)
+
+Health Net’s obligations under this Agreement are conditioned upon Health Net obtaining regulatory consents and approvals from the appropriate governmental or other regulatory
+body necessary or advisable for Health Net to obtain in order to proceed with the transactions contemplated by this Agreement. In the event that Health Net is not able to obtain such a consent or approval, Health Net shall have the right to remove
+any impacted services from the scope of this Agreement without charge, and the Parties shall cooperate to make such changes as may be necessary to remove such Services from scope.
+
+(b)
+
+Supplier shall comply with provisions arising our of Health Net’s contracts for federal business, including restrictions against providing services from offshore and audit
+requirements.
+
+5
+
+PERFORMANCE
+
+5.1
+
+Performance, Generally
+
+Supplier is responsible for
+managing and successfully performing, completing, and delivering the Services, subject to the overall direction of Health Net and with the cooperation and support of Health Net as specified in this Agreement.
+
+5.2
+
+Place of Performance
+
+Supplier will perform the
+Services primarily at the Health Net Facilities described in Section 2 of Schedule F (Facilities), and the Supplier facilities and Subcontractor facilities described in Sections 3(a) and 4 of Schedule F (Facilities), respectively, (the
+“Supplier Facilities”). During the Term, Supplier will not change any location from which it provides Services to Health Net, or materially reallocate the volume or nature of work processed between locations from which it
+provides Services to Health Net, without Health Net’s prior written approval, which may be granted or withheld in Health Net’s discretion. Supplier will manage any approved relocations in accordance with this Agreement and a migration plan
+to be prepared by Supplier and approved by Health Net. Prior to seeking Health Net’s approval of any proposed relocation, Supplier will fully examine and evaluate the risks and anticipated effects of the contemplated relocation on the Services
+and Health Net, including the operational, technical, security, regulatory, and other effects, and will prepare and submit to Health Net an analysis of the effects. Supplier will be responsible for all costs, taxes and other expenses incurred by
+Supplier, and any new or additional costs, taxes and other expenses incurred by Health Net and reasonably demonstrated to Supplier
+
+Terms and Conditions
+
+10
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+that are related to any Supplier-initiated relocation of an operational facility from which the Services are provided.
+
+5.3
+
+Time of Performance
+
+(a)
+
+Supplier will (and will provide the resources necessary to) perform and complete the Services diligently and in a timely manner and in accordance with any applicable time schedules
+set forth in this Agreement.
+
+(b)
+
+Supplier will promptly notify Health Net upon becoming aware of any circumstances that may reasonably be expected to jeopardize the timely and successful completion (or delivery) of
+any Service, project or Deliverable. Supplier will use Commercially Reasonable Efforts to avoid or minimize any delays in performance and will inform Health Net of the steps Supplier is taking or will take to do so, and the projected actual
+completion (or delivery) time.
+
+(c)
+
+If Supplier believes a delay in performance by Health Net (or a third party service provider Health Net is responsible for managing) has caused or will cause Supplier to be unable
+to perform its obligations on time, Supplier will promptly so notify Health Net and use Commercially Reasonable Efforts to perform its obligations on time notwithstanding Health Net’s (or its third party service provider’s) failure to
+perform. If Supplier’s use of Commercially Reasonable Efforts to perform on time in such a circumstance would cause Supplier to incur significant Out-of-Pocket Expenses, Supplier will so notify Health Net. In that case, Supplier’s
+obligation to continue its efforts to work around the Health Net-caused delay will be subject to Health Net agreeing to reimburse Supplier for its additional Out-of-Pocket Expenses incurred in the course of such efforts.
+
+5.4
+
+Manner of Performance
+
+Except as this Agreement
+expressly provides otherwise, Supplier will perform the Services at least at the same level and with at least the same degree of accuracy, quality, timeliness, responsiveness and efficiency as was provided prior to the Effective Date by or for
+Health Net and other Service Recipients and in compliance with the following:
+
+(a)
+
+all applicable Service Levels;
+
+(b)
+
+the Procedures Manual;
+
+(c)
+
+applicable standards, policies and procedures of Health Net (and its Affiliates) provided in this Agreement or provided to Supplier in connection with this Agreement;
+
+(d)
+
+all other compliance obligations of Supplier under this Agreement, including compliance with data security requirements in Section 14 and compliance with Law obligations in
+Section 27.6; and
+
+(e)
+
+in cases where this Agreement does not prescribe or otherwise regulate the manner of Supplier’s performance of the Services, proven best practices followed by the leading
+providers of similar services.
+
+Terms and Conditions
+
+11
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+5.5
+
+Quality Assurance and Continuous Improvement
+
+In
+performing the Services, Supplier will follow commercially reasonable quality assurance procedures designed to ensure that the Services are performed with a high degree of professional quality and reliability. Such procedures shall include
+checkpoint reviews, testing, acceptance, and other procedures for Health Net to confirm the quality of Supplier’s performance. Supplier, as part of its total quality management process, will provide continuous quality assurance and quality
+improvement through: (i) the identification and application of proven techniques and tools from other installations within its operations; and (ii) the implementation of concrete programs, practices and measures designed to improve
+performance (including the Service Levels). Supplier will utilize project management tools, including productivity aids and project management systems, as appropriate in performing the Services.
+
+5.6
+
+User Satisfaction
+
+Supplier will conduct
+Satisfaction Surveys in accordance with Section 6 of Schedule B. Health Net’s satisfaction with the Services will be taken into account by Supplier in its performance appraisals of Supplier Personnel.
+
+6
+
+SERVICE LEVELS
+
+6.1
+
+General
+
+Quantitative performance standards for
+certain of the Services (“Service Levels”) are set forth in Schedule B (Service Levels).
+
+6.2
+
+Failure to Perform
+
+Supplier will place ***%) of
+the aggregate monthly charges payable by Health Net under this Agreement (excluding Pass-Through Expenses) at risk each month for Service Level Credits (such amount the “Amount at Risk”). Supplier’s obligation to pay
+Service Level Credits is further described in Schedule B. Health Net may allocate the Pool Percentage Available for Allocation among Critical Service Levels for the purpose of calculating Service Level Credits, as further described in Schedule B.
+
+7
+
+SUPPLIER PERSONNEL
+
+7.1
+
+Provision of Suitable Personnel
+
+Supplier will
+assign an adequate number of Supplier Personnel to perform the Services who are properly educated, trained, familiar with and fully qualified for the Services they are assigned to perform, and Supplier shall ensure (to the extent reasonably
+possible) that any outgoing Supplier Personnel leaving the Health Net account spend a reasonable period of time training the new Supplier Personnel who will be replacing such outgoing personnel. Supplier is responsible for taking action at its own
+expense such that Supplier Personnel assigned to perform Services have the legal right to work in the countries in which they are assigned to work.
+
+7.2
+
+Screening and Background Checks
+
+Supplier shall, at
+no additional expense to Health Net, and prior to placing any Supplier Personnel at Health Net or on the Health Net account, complete background checks for all such personnel,
+
+Terms and Conditions
+
+12
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+excluding Transitioned Employees (“Background Checks”). Background Checks shall include, without limitation, verification of work
+history, I-9 completion (to the extent required by the laws of the United States), reference checks from at least three (3) prior employers (if such personnel have had three prior employers, and if not then from such personnel’s prior
+employers), drug testing and such other background checks as Health Net may request. Checks shall also identify State, county, federal and other applicable jurisdictions felonies and misdemeanor convictions and verify the social security number of
+such personnel, if applicable to such personnel. The personnel will be asked for education and, with respect to United States resident personnel, the last seven (7) years of residences. Subject to applicable Law, Supplier Personnel may be
+tested for drugs and/or alcohol whenever Supplier or Health Net has reasonable suspicion that the personnel is under the influence of drugs and/or alcohol in the workplace or has violated the substance abuse policy. Such personnel have the right to
+refuse to submit to drug or alcohol testing; however, any personnel who does so will be subject to removal from the Health Net account. Results of Background Checks and drug testing will remain Supplier’s Confidential Information and will not
+be provided to Health Net, but any negative or questionable Background Check or drug test of a personnel will require Supplier to remove or not assign such personnel. Supplier shall hire all Supplier Personnel and other personnel involved in the
+Health Net account strictly in accordance with all Laws applicable to the hiring and employment of individuals including, without limitation, the Fair Labor Standards Act, Immigration Reform and Control Act and all equal employment opportunity Laws.
+
+7.3
+
+Responsibility for Supplier Personnel, Generally
+
+Supplier will manage, supervise and provide direction to Supplier Personnel and cause them to comply with the obligations and restrictions applicable to Supplier under this Agreement. Supplier will make Supplier Personnel aware of, and
+cause them to comply with, Health Net’s safety and security policies that have been made known to Supplier while they are performing Services at Health Net Facilities or accessing Health Net Data or systems. As between Supplier and Health Net,
+Supplier is responsible for all wages, salaries and other amounts due Supplier Personnel, and for all tax withholdings, unemployment insurance premiums, pension and social welfare plan contributions, and other employer obligations with respect to
+Supplier Personnel. Supplier is responsible for the acts and omissions of Supplier Personnel under or relating to this Agreement.
+
+7.4
+
+Key Supplier Positions
+
+(a)
+
+“Key Supplier Positions” means those positions designated as Key Supplier Positions in Schedule D (Key Supplier Positions). Supplier’s Client Partner
+will be one of the Key Supplier Positions. Supplier will cause each of the Supplier Personnel filling the Key Supplier Positions (whether as of the Effective Date, or replacement personnel filling such Key Supplier Position during the Term) to
+devote substantially full time and effort to the provision of the Services. Supplier Personnel approved as of the Effective Date to fill the Key Supplier Positions are listed in Schedule D (Key Supplier Positions).
+
+(b)
+
+Before the initial and each subsequent assignment of an individual to a Key Supplier Position, Supplier will notify Health Net of the proposed assignment, introduce
+the individual to appropriate Health Net representatives and, consistent with Supplier’s personnel practices, provide Health Net a curriculum vitae and other information about the individual reasonably requested by Health Net. Upon request,
+Supplier will provide Health Net representatives an opportunity to meet with the individual. If Health Net in good faith objects to the proposed assignment, the Parties will attempt to resolve Health
+
+Terms and Conditions
+
+13
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Net’s concerns on a mutually agreeable basis. If the Parties have not been able to resolve Health Net’s concerns within five (5) Business
+Days, Supplier may not assign the individual to that position and must propose the assignment of another suitably qualified individual.
+
+(c)
+
+Health Net may from time to time change the positions designated as Key Supplier Positions under this Agreement. However, without Supplier’s consent, the number of Key Supplier
+Positions may not exceed the number designated in Schedule D (Key Supplier Positions) as of the Effective Date.
+
+(d)
+
+Without prior written approval by Health Net, Supplier will not reassign or replace any person assigned to a Key Supplier Position during the *** of his or her assignment to such
+Key Supplier Position (or during such other timeframe for a particular Key Supplier Position that may be stated in Schedule D). Supplier will give Health Net, where reasonably possible, at least sixty (60) days advance notice of a proposed
+change in personnel filling a Key Supplier Position, and will discuss with Health Net any objections Health Net may have. Supplier will arrange***, for the proposed replacement to work side-by-side with the individual being replaced during the
+notice period to effectuate a seamless transfer of knowledge prior to the incumbent leaving the Key Supplier Position. Individuals filling Key Supplier Positions may not be transferred or re-assigned until a suitable replacement has been approved by
+Health Net, and no such re-assignment or transfer may occur at a time or in a manner that would have an adverse impact on delivery of the Services or Health Net’s operations. Supplier will establish and maintain an up-to-date succession plan
+for the individuals serving in Key Supplier Positions. Supplier may remove an individual filling a Key Supplier Position after notification to Health Net for reasons of death, disability, resignation or termination from employment by Supplier, or
+otherwise as mutually agreed by the Parties.
+
+7.5
+
+Removal and Replacement of Supplier Personnel
+
+Health Net may immediately remove any Supplier Personnel from any Health Net Facilities if the person is threatening or abusive, commits a crime, engages in an act of dishonesty while performing Services for Health Net or violates Health
+Net’s policies and procedures pertaining to safety, security or use of Health Net Facilities. If Health Net determines in good faith that the continued assignment to Health Net’s account of any of the Supplier Personnel is not in the best
+interests of Health Net, then Health Net may give Supplier written notice to that effect. After receipt of such a notice, Supplier will have a reasonable period of time (not to exceed ten (10) Business Days) in which to investigate the matters
+stated in the notice, discuss its findings with Health Net and resolve Health Net’s concerns. If, following such process, Health Net requests replacement of the individual, Supplier will replace the individual with another suitably qualified
+person.
+
+7.6
+
+Controlling Turnover of Supplier Personnel
+
+Health
+Net and Supplier agree that it is in their mutual best interests to keep the turnover rate of Supplier Personnel to a reasonably low level. Accordingly, if Health Net believes that Supplier’s turnover rate is excessive and so notifies Supplier,
+Supplier will provide data concerning its turnover rate and meet with Health Net to discuss the reasons for, and impact of, the turnover rate. *** Notwithstanding any turnover of Supplier Personnel, Supplier remains obligated to perform the Services
+in compliance with the requirements of this Agreement.
+
+Terms and Conditions
+
+14
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+7.7
+
+Subcontracting
+
+“Subcontractor”
+means a third party engaged by Supplier to provide products and/or services used by Supplier in rendering the Services, as well as any entity to whom a Subcontractor further subcontracts (or otherwise sub-delegates) any of its subcontracted
+duties or obligations. Supplier may subcontract or delegate the performance of Services only in accordance with the following:
+
+(a)
+
+Supplier may subcontract the performance of Services to any of its wholly-owned Affiliates who are qualified to conduct business in the United States.
+
+(b)
+
+Supplier may, in the ordinary course of business, subcontract for third party services or products (which include services and products from non-wholly owned Supplier Affiliates)
+that satisfy the following conditions: (i) are not dedicated to performance of Services for Health Net, (ii) are not material to a Function constituting a part of the Services, and (iii) do not result in a material change in the way
+Supplier conducts its business; provided (1) such subcontract does not adversely affect Health Net; and (2) in each case Supplier provides at least sixty (60) days prior written notice of the same to Health Net. If Health Net
+expresses concerns to Supplier about a subcontract covered by this paragraph, Supplier will discuss such concerns with Health Net and work to resolve Health Net’s concerns on a mutually acceptable basis.
+
+(c)
+
+Except as provided in Sections 7.7(a) and 7.7(b), Supplier shall not subcontract for performance of, or delegate any of its responsibilities under this Agreement without first
+obtaining the prior written approval of Health Net. When seeking such approval, Supplier will (i) give Health Net reasonable prior written notice specifying the components of the Services affected, the scope of the proposed subcontract, the
+identity and qualifications of the proposed Subcontractor and the results of any due diligence carried out with regard to the proposed Subcontractor; and (ii) at Health Net’s request, provide Health Net a description of the scope and
+material terms (other than financial) of the proposed subcontract. Health Net may approve or reject proposed Subcontractors in its discretion. Health Net may also condition the approval of a proposed Subcontractor on Supplier’s obtaining the
+right from the proposed Subcontractor to assign the related subcontract to Health Net upon expiration/termination of this Agreement, and at such time and upon Health Net’s request, Supplier shall so assign the subcontract to Health Net. Health
+Net may require Supplier to replace any previously approved Subcontractor found, in the reasonable judgment of Health Net, to be unacceptable. Any such Subcontractors approved by Health Net, in its discretion, shall be an “Approved
+Subcontractor” hereunder.
+
+(d)
+
+Approved Subcontractors as of the Effective Date are listed in Schedule P (Approved Subcontractors).
+
+(e)
+
+In any subcontracts entered into by Supplier after the Effective Date for performance of the Services, Supplier will require the Subcontractor to be bound to Supplier by all
+applicable terms of this Agreement and to assume toward Supplier all of the applicable obligations and responsibilities that Supplier, by this Agreement, has assumed toward Health Net.
+
+(f)
+
+Supplier may use Approved Subcontractors to perform the Services to the extent permitted by Health Net’s approval. Supplier is responsible for managing all
+Subcontractors. Supplier remains responsible for all Functions delegated to
+
+Terms and Conditions
+
+15
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Subcontractors to the same extent as if such Functions were to be performed by Supplier acting through its officers, directors, employees, and agents and,
+for purposes of this Agreement, such Functions will be deemed Functions performed by Supplier. Supplier will be Health Net’s sole point of contact regarding the Services, including with respect to payment.
+
+(g)
+
+Supplier may disclose Health Net Confidential Information only to Approved Subcontractors who have agreed in writing to protect the confidentiality of such Confidential Information
+in a manner substantially equivalent to that required of Supplier under this Agreement and to permit both Supplier and Health Net, or both, to enforce such terms directly against such Subcontractor. As between the Parties, Supplier shall be
+responsible for all acts and omissions of (i) Supplier’s independent contractors and other Subcontractors as if they were Supplier’s employees and (ii) any third party to whom Supplier permits access to Health Net Data or Health
+Net Confidential Information.
+
+7.8
+
+Managed Third Parties
+
+“Managed Third
+Parties” are third parties under contract to Health Net or its Affiliates who supply applications Software and tools which are part of the In-Scope Applications and Associated Tools and Software or which will be used by Supplier in
+rendering the Services, all pursuant to the contracts identified in Schedule I. Health Net shall have the right to add additional entities as Managed Third Parties by sending written notice to Supplier. Except where Schedule A (Services)
+provides otherwise, (A) Supplier is responsible for coordinating with the Managed Third Parties, including contacting such parties and working with such parties to obtain patches and resolve problems, and (B) Supplier will notify Health
+Net promptly if Supplier becomes aware that a Managed Third Party is failing to perform or observe its contractual responsibilities to Health Net, or otherwise adversely affecting the Services or Health Net (or its Affiliates), and in addition to
+its obligations in Schedule A, will work with Health Net in an effort to cause the Managed Third Party to meet its contractual obligations.
+
+8
+
+HEALTH NET RESPONSIBILITIES
+
+8.1
+
+Appointment of Health Net Program Management Office (PMO) Personnel
+
+Health Net will designate an individual to serve as Health Net’s “Program Manager”, who will be Supplier’s principal point of contact for obtaining decisions, information, approvals
+and acceptances required from Health Net.
+
+8.2
+
+Health Net Cooperation Duties
+
+(a)
+
+In support of Supplier’s performance of the Services and subject to Section 8.3, Health Net will perform the Functions identified in this Agreement as retained Health Net
+Functions and provide or make available to Supplier the Equipment, Software, Health Net Facilities and other resources that this Agreement specifies are to be provided by Health Net.
+
+(b)
+
+Health Net will cooperate with Supplier, including by making available management decisions, information, approvals and acceptances, as reasonably requested by Supplier so that
+Supplier may accomplish its obligations and responsibilities under this Agreement.
+
+Terms and Conditions
+
+16
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+8.3
+
+Savings Clause
+
+Health Net’s failure to
+perform its responsibilities set forth in this Agreement (or cause them to be performed) will not constitute grounds for termination by Supplier except as provided in Section 16.2 (Termination by Supplier). Supplier’s nonperformance of its
+obligations under this Agreement will be excused if and to the extent (a) such Supplier nonperformance results from Health Net’s failure to perform its responsibilities, and (b) Supplier provides Health Net with reasonable notice of
+such nonperformance and uses Commercially Reasonable Efforts to perform notwithstanding Health Net’s failure to perform. If Supplier’s use of Commercially Reasonable Efforts to perform in such a circumstance would cause Supplier to incur
+significant Out-of-Pocket Expenses, Supplier may so notify Health Net. If it does, Supplier’s obligation to continue its efforts to work around Health Net’s failure to perform will be subject to Health Net agreeing to reimburse Supplier
+for its additional Out-of-Pocket Expenses incurred in the course of such efforts. SUPPLIER ACKNOWLEDGES THAT HEALTH NET WOULD NOT BE WILLING TO ENTER INTO THIS AGREEMENT WITHOUT ASSURANCE THAT THIS AGREEMENT MAY NOT BE TERMINATED BY SUPPLIER AND
+THAT SUPPLIER SHALL NOT HAVE THE RIGHT TO SUSPEND PERFORMANCE OF THE SERVICES EXCEPT, AND ONLY TO THE EXTENT, EXPLICITLY PROVIDED HEREIN.
+
+9
+
+CHARGES
+
+Schedule C (Charges) sets forth all the charges
+payable to Supplier for performing the Services and the associated invoicing and payment procedures and terms. Health Net will not be required to pay Supplier any amounts for or in connection with performing the Services and fulfilling
+Supplier’s obligations under this Agreement other than those amounts expressly payable to Supplier under this Agreement.
+
+9.1
+
+Pass-Through Expenses
+
+(a)
+
+“Pass-Through Expenses” means third party charges that are to be both (i) paid by Health Net (either (A) directly to the third party or (B) to
+Supplier, which, in turn, pays the third party) on an Out-of-Pocket Expenses basis, and (ii) administered by Supplier. Any Pass-Through Expenses shall be agreed upon in accordance with Section 7.1 of Schedule C. Supplier shall arrange
+for delivery by third parties to Supplier of invoices for Pass-Through Expenses, and Supplier promptly shall review such invoices and provide Health Net with the original invoice together with a statement identifying which charges are proper and
+valid and should be paid by Health Net.
+
+(b)
+
+Supplier shall use Commercially Reasonable Efforts to minimize the amount of Pass-Through Expenses. With respect to services or materials paid for on a Pass-Through Expenses basis,
+Health Net reserves the right to: (i) obtain such services or materials directly from a third party; (ii) designate the third party source for such services or materials; (iii) designate the particular services or materials (e.g.,
+equipment make and model) Supplier shall obtain; (iv) designate the terms for obtaining such services or materials (e.g., purchase or lease and lump sum payment or payment over time); (v) require Supplier to identify and consider multiple
+sources for such services or materials or to conduct a competitive procurement; and (vi) review and approve the applicable Pass-Through Expenses before entering into a contract for particular services or materials.
+
+Terms and Conditions
+
+17
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+9.2
+
+Incidental Expenses
+
+Supplier acknowledges that,
+except as may be otherwise provided in this Agreement, expenses that Supplier expects to incur in performing the Services (including travel and lodging, document reproduction and shipping, and long-distance telephone) are included in Supplier’s
+Charges and rates set forth in this Agreement. Accordingly, such Supplier expenses are not separately reimbursable by Health Net unless, on a case-by-case basis for unusual expenses, Health Net has agreed in advance and in writing to reimburse
+Supplier for the expense.
+
+9.3
+
+Taxes
+
+The Parties’ respective
+responsibilities for taxes arising under or in connection with this Agreement shall be as follows:
+
+(a)
+
+Each Party shall be responsible for any personal property taxes on property it owns or leases, for franchise and privilege taxes on its business, and for taxes based on its net
+income or gross receipts.
+
+(b)
+
+Supplier shall be responsible for any sales, use, excise, value-added, services, consumption and other taxes and duties payable by Supplier on the goods or services used or consumed
+by Supplier in providing the Services where the tax is imposed on Supplier’s acquisition or use of such goods or services and the amount of tax is measured by Supplier’s costs in acquiring such goods or services.
+
+(c)
+
+Health Net shall be responsible for any sales, use, excise, value-added, services, consumption or other tax that is assessed on the provision of the Services as a whole, or on any
+particular Service by any governmental or taxing authority within the United States; provided, however, that (i) Supplier invoices reflect on a current basis (and in any event before any such tax becomes due and payable) the amount of any such
+tax in each jurisdiction and the taxable Services to which such tax relates, (ii) if Supplier fails to reflect on its invoice any such tax on a current basis, Supplier shall be financially responsible for any penalties and interest assessed by
+the taxing authority with respect to such tax, and (iii) if Supplier fails to reflect any such tax on an Supplier invoice within *** after the date that such tax is due and payable, Supplier shall be financially responsible for the full amount
+of such tax, including any penalties and interest.
+
+(d)
+
+Supplier shall be responsible for any sales, use, excise, value-added, services, consumption or other tax that is assessed on the provision of the Services as a whole, or on any
+particular Service, by any governmental or taxing authority outside the United States as of the Effective Date or during the Term.
+
+(e)
+
+Supplier shall be responsible for any payments required to compensate Supplier Personnel for compensatory tax treatment resulting from Supplier Personnel traveling
+to perform services, subject to the remainder of this paragraph. In the event that the assignment (or potential assignment) of particular Supplier Personnel to perform Services for Health Net has reached a point such that the continued assignment of
+such particular personnel is likely to trigger compensatory tax treatment of the travel related expenses reimbursed to such particular Supplier Personnel, Supplier may inform Health Net in writing that Supplier is close to becoming subject to
+compensatory tax treatment as a result of such assignment, and shall provide an estimate of the amount of such compensatory tax liability. If Supplier fails to so notify Health Net, Supplier shall remain
+
+Terms and Conditions
+
+18
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+responsible for any amounts resulting from compensatory tax treatment of such particular Supplier Personnel. Following such notice by Supplier, Health Net
+may then elect by sending written notice to Supplier to be financially responsible for any payments required to compensate Supplier with respect to such particular Supplier Personnel in an amount equal to the compensatory taxes assessed to such
+particular Supplier Personnel as the result of such assignment to the Health Net account. If Health Net does not so elect, Supplier shall remain responsible for any amounts resulting from compensatory tax treatment of such particular Supplier
+Personnel, provided, however, Supplier may then relocate such Supplier Personnel to avoid such taxes, and the Parties shall cooperate to make other arrangements so that the Services will be performed without interruption.
+
+(f)
+
+In the event that a sales, use, excise, value added, services, consumption or other tax is assessed on the provision of any of the Services, the Parties shall work together to
+segregate the payments under this Agreement into three (3) payment streams:
+
+(i)
+
+those for taxable Services;
+
+(ii)
+
+those for which Supplier functions merely as a payment agent for Health Net in receiving goods, supplies, or services (including leasing and licensing arrangements); and
+
+(iii)
+
+those for other nontaxable Services.
+
+(g)
+
+The Parties agree to cooperate with each other to enable each to more accurately determine its own tax liability and to minimize such liability to the extent legally permissible.
+Supplier’s invoices shall separately state the amounts of any taxes Supplier is collecting from Health Net, and Supplier shall remit such taxes to the appropriate authorities. Each Party shall provide and make available to the other any resale
+certificates, information regarding out-of-state or out-of-country sales or use of equipment, materials or services, and other exemption certificates or information reasonably requested by the other Party.
+
+(h)
+
+Supplier shall promptly notify Health Net of, and coordinate with Health Net the response to and settlement of, any claim for taxes asserted by applicable taxing authorities for
+which Health Net is responsible hereunder, it being understood that with respect to any claim arising out of a form or return signed by a Party to this Agreement, such Party shall have the right to elect to control the response to and settlement of
+the claim, but the other Party shall have all rights to participate in the responses and settlements that are appropriate to its potential responsibilities or liabilities. If Health Net requests Supplier to challenge the imposition of any tax,
+Supplier shall do so in a timely manner and Health Net shall reimburse Supplier for the reasonable legal fees and expenses it incurs. Health Net shall be entitled to any tax refunds or rebates granted to the extent such refunds or rebates are of
+taxes that were paid by Health Net.
+
+(i)
+
+Supplier is responsible, at its own risk and expense, for determining the extent (if any) to which Supplier will be required to collect and remit national, federal, state or local
+(or foreign) taxes: (i) on (or in respect of) any products or Services provided by Supplier or any of its Subcontractors under this Agreement in the jurisdictions in (or from) which Supplier chooses to provide the Services, or (ii) on (or
+in respect of) Supplier’s charges to Health Net under this Agreement.
+
+Terms and Conditions
+
+19
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+9.4
+
+Benchmarking
+
+(a)
+
+Health Net shall have the right during the Term, beginning on the *** anniversary of the Effective Date, to benchmark the charges for all or a portion of the Services pursuant to
+this Section 9.4, provided that benchmarking of particular Charges cannot be undertaken more than one time in any *** period. Health Net may conduct such a benchmarking pursuant to this Section 9.4 not more *** during the Term.
+
+(b)
+
+A benchmarking under this Section shall be conducted by an independent industry-recognized benchmarking service provider designated by Health Net and approved by Supplier
+(“Benchmarker”). Supplier agrees that Gartner Group, Nautilus Advisors, and Compass Group are acceptable as a Benchmarker. *** The Parties shall reasonably cooperate with the Benchmarker, including, as appropriate, making
+available knowledgeable personnel and pertinent documents and records. Prior to conducting the Benchmarking, Benchmarker, Health Net and Supplier shall enter into commercially reasonable confidentiality agreements to protect the confidential
+information of Benchmarker, Health Net and Supplier. In the event Health Net or any Benchmarker requires either (i) onsite access to Supplier facilities or (ii) direct access to Supplier systems, Health Net or the Benchmarker, as
+applicable, shall comply with all reasonable security guidelines with respect to the benchmarking.
+
+(c)
+
+The Benchmarker shall perform the benchmarking in accordance with Benchmarker’s documented procedures which shall be provided upon request to the Parties prior to the start of
+the benchmarking process. The Benchmarker shall compare the charges under this Agreement for the Services being benchmarked to the costs being incurred in a representative sample of IT operations (as applicable) by or for other entities. The
+Benchmarker shall select the representative sample from entities (i) identified by the Benchmarker and approved by the Parties and (ii) identified by a Party and approved by the Benchmarker. The sample transactions shall be similar to the
+transaction contemplated by this Agreement and the service providers shall be similar to Supplier. The following conditions apply to the representative sample: (A) it shall include not less than *** entities and (B) it may include entities
+that are outsourcing customers of Supplier.
+
+(d)
+
+***
+
+(e)
+
+***
+
+(f)
+
+***
+
+10
+
+INVOICING AND PAYMENT
+
+10.1
+
+Invoicing
+
+(a)
+
+Supplier shall invoice Health Net for all amounts due under this Agreement on a monthly basis in arrears (i.e., Charges for Services delivered in August will be invoiced on the
+invoice delivered to Health Net in September), or as otherwise agreed by the Parties in writing. Each invoice shall, for each Charge on the invoice, cite the specific section of the Agreement on which such Charge is based. Supplier shall include the
+calculations utilized to establish the Charges.
+
+Terms and Conditions
+
+20
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(b)
+
+To the extent a credit may be due Health Net pursuant to this Agreement, Supplier shall provide Health Net with an appropriate credit against amounts then due and owing. If no
+further payments are due to Supplier, Supplier shall pay such amounts to Health Net within *** days.
+
+(c)
+
+Supplier shall render a single consolidated invoice for each month’s Charges showing such details as reasonably specified by Health Net, including as necessary to satisfy
+Health Net’s internal accounting and chargeback requirements (such as allocating Charges among Service components, locations and departments). The form of invoice shall be mutually agreed by the Parties during Transition and any changes to such
+form invoice during the Term must be approved by Health Net.
+
+(d)
+
+Each month’s invoice shall be complete as to the Charges for such month. Supplier may not charge Health Net any additional amounts for a month for which an invoice has been
+rendered, except where a particular month’s invoice (i) indicates that certain Charges are incapable of being determined as of the date of such invoice and (ii) Supplier provides an estimate of such Charges so that Health Net can make
+appropriate accruals, in which event Supplier may includes such Charges on a later invoice, although in no event shall Charges be billed more than *** days after the month during which the invoice for such Charges should have been provided to Health
+Net pursuant to Section 10.1(a)
+
+10.2
+
+Payment Due
+
+Subject to the other provisions of
+this Section 10, invoices provided for under Section 10.1 and properly submitted to Health Net pursuant to this Agreement shall be due and payable by Health Net within *** days after receipt thereof. Any amount due under this Agreement for
+which a time for payment is not otherwise specified shall be due and payable within *** days after receipt of a proper invoice for such amount.
+
+10.3
+
+Accountability
+
+Supplier shall maintain complete
+and accurate records of and supporting documentation for the amounts billable to and payments made by Health Net hereunder in accordance with generally accepted accounting principles applied on a consistent basis. Supplier agrees to provide Health
+Net with documentation and other information with respect to each invoice as may be reasonably requested by Health Net to verify accuracy and compliance with the provisions of this Agreement.
+
+10.4
+
+Proration
+
+Except as may be otherwise provided in
+this Agreement, periodic Charges under this Agreement are to be computed on a calendar month basis, and shall be prorated for any partial month.
+
+10.5
+
+Refundable Items
+
+(a)
+
+Prepaid Amounts. Where Health Net has prepaid for a service or function for which Supplier is assuming Financial Responsibility under this Agreement, Supplier shall refund to
+Health Net, upon either Party identifying the prepayment, that portion of such prepaid expense which is attributable to periods on and after the Effective Date.
+
+Terms and Conditions
+
+21
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(b)
+
+Refunds and Credits. If Supplier should receive a refund, credit or other rebate for goods or services previously paid for by Health Net, Supplier shall promptly notify
+Health Net of such refund, credit or rebate and shall promptly pay the full amount of such refund, credit or rebate, as the case may be, to Health Net.
+
+10.6
+
+Deductions
+
+With respect to any amount to be paid
+by Health Net hereunder, Health Net may deduct from such amount any amount that Supplier is obligated to pay Health Net hereunder.
+
+10.7
+
+Disputed Charges
+
+Subject to Section 10.6,
+Health Net shall pay undisputed Charges when such payments are due under this Section 10 and Schedule C. Health Net may withhold and/or set off payment of particular Charges that Health Net disputes in good faith, and may set off amounts
+due and owing to Health Net as credits against Charges payable to Supplier under this Agreement. If any such disputed Charges have already been paid, Health Net may deduct such disputed Charges from future amounts owed by Health Net to Supplier. If
+an invoiced amount is disputed in good faith by Health Net, then Health Net shall provide written notification to Supplier of the dispute and the basis for such dispute, and the Parties shall utilize the procedures in Section 26.1 to resolve
+the issue. In the event that Charges cover both disputed and undisputed items, Health Net shall pay all undisputed items in accordance with this Agreement. If, after following the procedures in Section 26.1, it is determined that Health Net
+should have paid all or a portion of the disputed amounts, (a) Supplier shall submit to Health Net an invoice for an amount equal to the amount of disputed charges that Health Net should have paid, and (b) Health Net will endeavor to remit
+payment for such invoice as promptly as possible, but in no event more than *** days from receipt of such invoice.
+
+11
+
+TRANSFER OR USE OF RESOURCES
+
+This Section 11 sets forth the
+processes by which certain resources used by Health Net prior to the Effective Date will be transferred or otherwise made available to Supplier for use in providing the Services. RIGHTS OF USE GRANTED BY HEALTH NET TO SUPPLIER UNDER THIS SECTION 11
+ARE GRANTED ON AN ‘AS-IS, WHERE-IS’ BASIS, WITHOUT WARRANTIES OF ANY KIND.
+
+11.1
+
+Transfer of Personnel
+
+Schedule E (Transitioned
+Employees) sets forth general terms and conditions governing the recruitment and transition of existing Health Net personnel to Supplier.
+
+11.2
+
+Health Net Owned Equipment
+
+(a)
+
+“Health Net Owned Equipment” means Equipment owned by Health Net (or a Health Net Affiliate) that is to be made available to Supplier for use in providing
+the Services. The Health Net Owned Equipment is listed or described in Schedule N (Health Net Equipment).
+
+(b)
+
+As of the Effective Date, Health Net grants to Supplier, without sale, the right to use the Health Net Owned Equipment listed or described as retained Health Net
+Owned Equipment in Schedule N (Health Net Equipment) during the Term during its remaining useful life until , for each item of Equipment, the earlier of (A) the cessation or
+
+Terms and Conditions
+
+22
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+termination of the applicable Services, or (B) the expiration of the Term.
+
+11.3
+
+Health Net Leased Equipment
+
+(a)
+
+“Health Net Leased Equipment” means Equipment leased by Health Net (or a Health Net Affiliate) that is to be made available to Supplier for use in providing
+the Services. The Health Net Leased Equipment is listed or described as such in Schedule N (Health Net Equipment).
+
+(b)
+
+As of the Effective Date, Health Net grants to Supplier, without assignment of the lease and solely for the purpose of providing the Services, the right to use the Health Net Leased
+Equipment listed or described as retained Health Net Leased Equipment in Schedule N (Health Net Equipment) during the Term (or the applicable lease term, if shorter) solely to perform the Services. Until the earlier of (A) the cessation or
+termination of the applicable Services, or (B) the end of the applicable lease term, Supplier will comply with the duties imposed on Health Net by the leases for such equipment that have been disclosed to Supplier.
+
+11.4
+
+Health Net Third Party Service Contracts
+
+(a)
+
+“Health Net Third Party Service Contracts” means third party service contracts of Health Net (or a Health Net Affiliate) that are to be made available to
+Supplier for use in providing the Services. The Health Net Third Party Service Contracts are listed in Schedule I (Health Net Third Party Service Contracts).
+
+(b)
+
+Health Net grants to Supplier, without assignment of such contract, but subject to the Parties obtaining any Required Consents pursuant to Section 11.9, the right to use the
+services provided to Health Net under the other Health Net Third Party Service Contracts listed or described in Schedule I (Health Net Third Party Service Contracts) during the applicable contract term solely as necessary to perform the
+Services. Supplier will comply with the duties imposed on Health Net by the Health Net Third Party Contracts that have been disclosed to Supplier.
+
+(c)
+
+When Health Net Third Party Service Contracts are no longer required for performance of the Services, and in any event upon the earlier of (A) the cessation or termination of
+the applicable Services, or (B) the end of the applicable contract term, Supplier will cease use of such Health Net Third Party Service Contracts.
+
+11.5
+
+Health Net Owned Software
+
+(a)
+
+“Health Net Owned Software” means Software owned (i.e., in which the copyright is owned) by Health Net (or a Health Net Affiliate) that is either
+(i) to be made available to Supplier for use in providing the Services (“Health Net Owned Service Delivery Software”), which is listed in Exhibit J-1 to Schedule J (Software), or (ii) In-Scope Applications
+(“Health Net Owned In-Scope Applications”); or (iii) Associated Tools and Software, which are listed in Exhibit J-3 to Schedule J (Software) (“Health Net Owned Associated Tools and Software”).
+
+(b)
+
+Health Net (and each of its Affiliates) retains all of its right, title and interest in and to the Health Net Owned Software. As of the Effective Date, Health Net
+grants to Supplier a fully paid-up, nonexclusive license during the Term to Use the Health Net Owned
+
+Terms and Conditions
+
+23
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Software solely to perform the Services. The Health Net Owned Software will be made available to Supplier in object code form (and, at Health Net’s
+election, Source Code form) in an agreed format, together with available documentation and other related materials. Supplier is not permitted to Use Health Net Owned Software for the benefit of any entity other than Health Net (and other Service
+Recipients under this Agreement) without the prior written consent of Health Net, which may be withheld in Health Net’s discretion.
+
+(c)
+
+When Health Net Owned Software is no longer required for performance of the Services, or in any event upon the earlier of (i) the cessation or termination of the applicable
+Services, or (ii) the expiration of the Term, Supplier will return such Software to Health Net in an agreed format or, at Health Net’s election, destroy it and certify the destruction of all copies in Supplier’s (or any of its
+Subcontractor’s) possession or control.
+
+11.6
+
+Health Net Licensed Software
+
+(a)
+
+“Health Net Licensed Software” means Software owned (i.e., in which the copyright is owned) by a party other than Health Net (or a Health Net
+Affiliate) that is either (i) licensed by Health Net (or a Health Net Affiliate) and is to be made available by Health Net to Supplier for use in providing the Services (“Health Net Licensed Service Delivery Software”),
+which is listed in Exhibit J-2 to Schedule J (Software), or (ii) In-Scope Applications (“Health Net Licensed In-Scope Applications”), or (iii) Associated Tools and Software, which are listed in Exhibit J-3 to
+Schedule J (Software) (“Health Net Licensed Associated Tools and Software”).
+
+(b)
+
+Subject to the Parties having obtained any Required Consents pursuant to Section 11.9 (Required Consents), as of the Effective Date, Health Net grants to Supplier, without
+assignment of the license, such rights during the Term (or the applicable license term, if shorter) as Health Net has (or later obtains) to Use the Health Net Licensed Software solely to perform the Services. The Health Net Licensed Software will be
+made available to Supplier in object code form (and, at Health Net’s election, Source Code form) in an agreed format, together with available documentation and other related materials. Supplier will comply with the duties, including use and
+non-disclosure restrictions, imposed on Health Net (or its Affiliate) by the licenses for the Health Net Licensed Software that have been disclosed to Supplier and any other reasonable restrictions required by Health Net and provided by Health Net
+with respect to such Software. Supplier will not seek to modify or otherwise revoke such terms.
+
+(c)
+
+When Health Net Licensed Software is no longer required for performance of the Services, or in any event upon the earlier of (i) the cessation or termination of the applicable
+Services, or (ii) the expiration of the Term, Supplier will return such Software to Health Net in an agreed format or, at Health Net’s election, destroy it and certify the destruction of all copies in Supplier’s (or any of its
+Subcontractor’s) possession or control.
+
+(d)
+
+In addition, if Health Net assigns its license to any Software to Supplier under this Agreement, then if requested by Health Net upon termination or expiration of this Agreement,
+Supplier shall assign such Software back to Health Net effective as of the date Supplier ceases to provide Services using such license.
+
+Terms and Conditions
+
+24
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+11.7
+
+Health Net Facilities
+
+(a)
+
+“Health Net Facilities” means facilities that are owned or leased by Health Net (or a Health Net Affiliate) that are to be made available to Supplier as
+hereafter described for use in providing the Services. Health Net Facilities are listed as such in Schedule F (Facilities). Health Net shall make Health Net Facilities available for (i) the Transitioned Employees and (ii) the number
+of Supplier Personnel set forth on Exhibit F-1, in accordance with the ramp-up plan set forth in Exhibit F-1. The specific Health Net Facility in which space will be made available is set forth on Schedule F.
+
+(b)
+
+Subject to Health Net having obtained any Required Consents pursuant to Section 11.9, Health Net grants to Supplier the right to access the Health Net Facilities, to the extent
+permitted by applicable lease agreements, solely to perform the Services and as described in Sections 11.7(a) and 11.8 until the earlier of (i) the cessation or termination of the corresponding Service or (ii) the expiration of the Term.
+Supplier will comply with the duties imposed on Health Net (or its Affiliate) by each lease for the Health Net Facilities.
+
+11.8
+
+Terms Applicable to Health Net Facilities, Generally
+
+(a)
+
+The following provisions are applicable with respect to the Health Net Facilities: Health Net retains responsibility for management and maintenance of the building and property
+electrical systems, water, sewer, lights, heating, ventilation and air conditioning (“HVAC”) systems, physical security services and general custodial/landscape services (including monitoring and maintaining the
+uninterruptible power supply (“UPS”) system, air handlers and water chillers that are primary support for the raised-floor environment in Health Net Facilities).
+
+(b)
+
+Supplier is responsible for providing the other facilities and facilities-related support it needs to provide the Services.
+
+(c)
+
+Health Net will inform Supplier of any plans or determination to relocate the Health Net Facilities so that Supplier will have a reasonable amount of time to prepare for and
+implement such relocation as it affects Supplier. Health Net agrees to reimburse Supplier for Supplier’s Out-of-Pocket expenses incurred in such relocation, subject to notice and prior approval by Health Net.
+
+(d)
+
+Supplier may use Health Net Facilities for the sole and exclusive purpose of providing the Services. Any other uses are subject to the prior approval of Health Net in its
+discretion. The use of Health Net Facilities by Supplier does not constitute a leasehold or other property interest in favor of Supplier.
+
+(e)
+
+Supplier will use the Health Net Facilities in an efficient manner and in a manner that is coordinated and does not interfere with Health Net’s business operations. Supplier is
+responsible for any damage to Health Net Facilities resulting from the negligence or intentional misconduct of Supplier (or its Subcontractors or other guests) or other failure to comply with its obligations under this Agreement respecting the
+Health Net Facilities.
+
+(f)
+
+Supplier will keep the Health Net Facilities in good order, not commit or permit waste or damage to them or use them for any unlawful purpose or act. Supplier will
+comply with Health Net’s standard policies and procedures and with applicable leases made available to Supplier regarding access to and use of the Health Net Facilities, including procedures
+
+Terms and Conditions
+
+25
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+for the physical security of the Health Net Facilities.
+
+(g)
+
+Supplier will permit Health Net and its agents and representatives to enter any portions of the Health Net Facilities occupied by Supplier Personnel at any time.
+
+(h)
+
+Supplier may not make improvements or changes involving structural, mechanical or electrical alterations to the Health Net Facilities without Health Net’s prior written
+approval. Any improvements to the Health Net Facilities will become the property of Health Net.
+
+(i)
+
+When Health Net Facilities are no longer required for performance of the Services, or in any event upon expiration or termination of this Agreement (or the applicable lease term, if
+shorter), Supplier will return them to Health Net in substantially the same condition as when Supplier began use of them, subject to reasonable wear and tear.
+
+11.9
+
+Required Consents
+
+(a)
+
+Health Net, with the cooperation of Supplier, is responsible for obtaining Required Consents under any of the leases, contracts or licenses referred to in this Section 11
+(Transfer or Use of Resources). Health Net will work diligently to obtain such Required Consents as soon as practicable after the Effective Date. Health Net will pay any fees (such as transfer or upgrade fees) required to obtain a Required Consent.
+Unless and until any Required Consent has been obtained, Supplier will determine and adopt, subject to Health Net’s prior approval, such alternative approaches as are necessary and sufficient for Supplier to provide the Services without the
+Required Consent.
+
+(b)
+
+If Health Net is not able to obtain any such Required Consent, or if Health Net elects not to obtain a Required Consent because of the cost or other terms required to obtain such
+Required Consent, Health Net reserves the right to remove from the scope of this Agreement any affected In-Scope Applications and in such event (i) the Production Support Charge will be reduced in accordance with Section 4.3 of Schedule C,
+(ii) the Minimum Commitment set forth in Section 7.10 of Schedule C shall be equitably adjusted, and (iii) Health Net shall have the right to rehire Transitioned Employees that are or will perform Services with respect to such
+In-Scope Applications. Health Net’s right to remove In-Scope Applications (and the corresponding adjustment to charges and minimums) shall include the right to remove In-Scope Applications that relate to an In-Scope Application for which a
+Required Consent is not obtained if in Health Net’s reasonable determination such other In-Scope Applications should be grouped together for operational, maintenance or other reasons.
+
+11.10
+
+Health Net Resources Provided to Supplier Personnel Working On-site
+
+(a)
+
+“On-site Health Net Resources” means the reasonable office space, furniture, fixtures, desktop computers, software, telephones, office supplies, and other
+resources to be provided or made available by Health Net (or its Affiliates) to Supplier Personnel assigned by mutual agreement of the Parties to work on-site at facilities of Health Net (or its Affiliates).
+
+(b)
+
+Except as otherwise provided in this Agreement, Health Net will provide to Supplier Personnel located and authorized to work on-site at Health Net Facilities the
+reasonable use of On-site Health Net Resources substantially equivalent to those made available by
+
+Terms and Conditions
+
+26
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Health Net (or its Affiliate) to its own personnel who perform similar functions; provided, however, that Health Net will not be responsible for
+providing any mobile or portable computing or communications devices to Supplier Personnel except as otherwise provided in this Agreement.
+
+(c)
+
+Supplier shall comply and cause Supplier Personnel to comply with Health Net’s policies and procedures regarding access to and use of the On-site Health Net Resources that have
+been disclosed in writing, or otherwise made available, to Supplier, including procedures for the physical and logical security, and shall submit to periodic Health Net compliance inspections and security audits.
+
+(d)
+
+Supplier will use the On-site Health Net Resources in an efficient manner and for the sole purpose of providing the Services. Supplier will be responsible for damage to the On-site
+Health Net Resources caused by the negligence or intentional misconduct of Supplier Personnel. When the On-site Health Net Resources are no longer required for performance of the Services, Supplier will return them to Health Net in substantially the
+same condition as they were in when Supplier began use of them, subject to reasonable wear and tear.
+
+12
+
+RESOURCE ACQUISITIONS DURING THE TERM
+
+12.1
+
+General Responsibility and Compatibility
+
+(a)
+
+Except for any resources for which Health Net has Financial Responsibility pursuant to this Agreement, Supplier is solely responsible (and has Financial Responsibility) for
+providing all Equipment, Software, facilities, personnel, third party services and other resources required to perform and render the Services in accordance with this Agreement.
+
+(b)
+
+Supplier shall provide the Services using tools and processes that are compatible with those used by Health Net and its other service providers to provide other information
+technology services within the Health Net environment. This includes implementing and maintaining interfaces with Heath Net and other service provider problem management, change control, and configuration management systems to the extent required to
+maintain such compatibility.
+
+12.2
+
+Equipment
+
+Health Net shall retain Financial
+Responsibility for Equipment required within its (or its third party service provider’s) data centers to host Health Net Owned Software and Health Net Leased Software. ***
+
+12.3
+
+Software
+
+In addition to Software provided by
+Health Net pursuant to Section 11.5(b) and 11.6(b), Health Net shall provide any additional software development tools that Health Net proposes that Supplier use to provide the Services, ***. With respect to any Software that will be more
+expensive for Health Net to provide to Supplier Personnel to utilize offshore than it would be to use onsite at Health Net Facilities, Health Net reserves the right to require Supplier to use any such Software onsite as requested by Health Net.
+
+Terms and Conditions
+
+27
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+12.4
+
+Network Connectivity
+
+Supplier shall be *** for
+providing network connectivity between facilities necessary to provide the Services, including connectivity from Health Net Facilities or Health Net’s outsourcing vendor facilities to Supplier’s facilities, onshore and offshore. The
+Parties shall work together to determine the bandwidth, access, security and other requirements for such network connectivity. A diagram of the network is attached as Exhibit A-11 to Schedule A and the network connectivity is further described in
+Exhibit A-3 (Solution).
+
+12.5
+
+Health Net Rights to certain Software upon Termination/Expiration
+
+(a)
+
+Supplier Proprietary Items. Supplier shall not, without Health Net’s prior written consent, use any Supplier-owned Software or Supplier Affiliate-owned Software, tools,
+methods, processes, templates or similar items (“Supplier Proprietary Items”) to create, maintain, modify, enhance or create derivative works of any Deliverable or In-Scope Application, ***
+
+(b)
+
+Third Party Software. Supplier shall not utilize any third party owned Software to provide the Services that is not generally available commercial-off-the-shelf Software,
+without Health Net’s prior written approval, which approval Health Net may withhold in its discretion. Without limiting Health Net’s rights under this Section, as a condition to granting such consent, Health Net may require Supplier to
+obtain for Health Net, a perpetual, non-exclusive license for Health Net and its Affiliates (and their respective service providers) to Use such non-commercially available third party Software to provide services similar to the Services to Health
+Net and the service recipients, at no additional charge to Health Net. Such license shall be effective upon the expiration or termination of the Agreement, or portion thereof.
+
+(c)
+
+Relationship to License in Section 15.2(b). Nothing set forth in this Section 12.5 shall limit Health Net’s rights under Section 15.2(b).
+
+13
+
+TRANSITION
+
+13.1
+
+“Transition” Defined
+
+“Transition” means the process (and associated time period, starting on the Effective Date) of migrating performance of the Services from Health Net’s as-is operating environment to Supplier’s initial
+target environment, making the initial planned improvements to the infrastructure used to perform and deliver the Services, and causing any required knowledge transfer from Health Net personnel to Supplier Personnel.
+
+13.2
+
+Transition Plan
+
+(a)
+
+The Transition shall be conducted in accordance with a written plan (the “Transition Plan”) which shall include: (i) a description of
+the operations being transitioned; (ii) a general description of the methods and procedures, personnel and organization Supplier will use to perform the Transition; (iii) a schedule of the Transition activities; (iv) a detailed
+description of the respective roles and responsibilities of Health Net and Supplier; (v) such other information and planning as are necessary to conduct the Transition in accordance with the other terms in this Agreement. A draft of the
+Transition Plan as of the Effective Date is attached to this Agreement as Exhibit A-2 and
+
+Terms and Conditions
+
+28
+
+Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Attachment A-2-1. References to the Transition Plan shall include their respective project plans. Supplier shall be responsible for revising and finalizing
+the Transition Plan, provided that: (A) Supplier shall cooperate and work closely with Health Net in finalizing the plans (including incorporating Health Net’s reasonable comments); and (B) all changes to the plans shall be subject to
+approval by Health Net.
+
+(b)
+
+As part of the Transition, Supplier will also assume responsibility for completing the projects listed or described in Exhibit A-7 (In-Flight Projects), which are in progress as of
+the Effective Date and being performed by resources that are being transferred or made available to Supplier under this Agreement (the “In-Flight Projects”).
+
+13.3
+
+Conduct of the Transition
+
+Beginning on the
+Effective Date, Supplier will carry out and complete the Transition in accordance with the Transition Plan, including its time schedule. Except as otherwise expressly provided in the Transition Plan, Supplier’s responsibilities with respect to
+the Transition include:
+
+(a)
+

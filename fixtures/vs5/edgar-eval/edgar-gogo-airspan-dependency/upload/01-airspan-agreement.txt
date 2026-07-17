@@ -1,0 +1,811 @@
+3
+gogo-ex1015_112.htm
+EX-10.1.5
+
+gogo-ex1015_112.htm
+
+Exhibit 10.1.5
+
+THE USE OF THE FOLLOWING NOTATION IN THIS EXHIBIT INDICATES THAT
+
+THE CONFIDENTIAL PORTION HAS BEEN OMITTED PURSUANT TO ITEM
+
+601(b)(10)(iv) WHEREBY CERTAIN IDENTIFIED INFORMATION HAS BEEN
+
+EXCLUDED BECAUSE IT IS BOTH NOT MATERIAL AND WOULD LIKELY CAUSE
+
+COMPETITIVE HARM TO THE REGISTRANT IF PUBLICLY DISCLOSED: [***]
+
+Execution Copy
+
+MASTER SERVICES AGREEMENT
+
+THIS MASTER SERVICES AGREEMENT (this “Agreement”) is made and entered into as of this November 25, 2019 (the “Effective Date”) by and between Gogo Business Aviation LLC, a Delaware limited liability company, having offices at 105 Edgeview Drive, Broomfield, CO 80021, and its Affiliates (collectively referred to as “Gogo”), and Airspan Networks Inc., a Delaware corporation, having its principal offices at 777 Yamato Road, Suite 310, Boca Raton FL 33431 (“Airspan”).
+
+WITNESSETH:
+
+WHEREAS, Gogo and its Affiliates desire from time to time to engage Airspan to perform certain services; and
+
+WHEREAS, Airspan desires to perform such services for Gogo and its Affiliates.
+
+NOW, THEREFORE, in consideration of the foregoing and the mutual covenants and agreements contained herein, the receipt and sufficiency of which are acknowledged, the Parties hereto hereby agree as follows:
+
+1.
+
+DEFINITIONS. As used herein, the following terms shall have the following respective meanings:
+
+1.1
+
+“Affiliate” means an entity, which directly or indirectly, owns or Controls, is owned or is Controlled by or is under common ownership or Control with, another entity.
+
+1.2
+
+“Airspan Background IP” means Background Intellectual Property owned, controlled, or provided by Airspan or its Affiliates and used or provided in connection with the Services set forth in this Agreement. Airspan Background IP does not include works of authorship created specifically for Gogo or that embody Confidential Information of Gogo or Gogo Background IP.
+
+1.3
+
+“ATG” means air-to-ground.
+
+1.4
+
+“Background Intellectual Property” means all ideas, processes, discoveries, inventions, writings, know-how, designs, techniques, methods, formulae, algorithms, models, source code, procedures and other knowledge or information, which are owned, controlled, or developed by a Party which have been originated, developed or purchased by such Party or its Affiliates, or by third parties that are under contract to such Party or its Affiliates prior to or outside of the scope of the development to be performed under this Agreement.
+
+1.5
+
+“Change of Control Transaction” means a single transaction or series of related transactions with a third party (or group of third parties acting in concert, collectively) (“Buyer”) resulting directly or indirectly in (a) the acquisition, merger, transfer, or assignment, by operation of law or otherwise, of Control of the business or assets of Airspan, (b) the sale, lease, transfer, or other disposition of Control of the business or assets of Airspan relating to this transaction, including any transaction transferring the economic value of such assets to another entity (excluding the grant of security interests in connection with a banking or other loan facility taken by Airspan), (c) the sale of equity securities or rights to acquire equity securities of Airspan in an amount such that such entity would be Controlled by persons other than those holding Control prior to such transaction, and (d) any of the foregoing with respect to the business, equity securities (or rights to acquire equity securities), or assets of Airspan that are relating to or used in connection with the Products and services to be provided under this Agreement or any SOW.
+
+1.6
+
+“Civil Aviation” means all non-military aviation, including both private and commercial aviation.
+
+1.7
+
+“Commercial Release” means the date that Gogo initiates internet communications services on an ATG network based on and using the Products in a full live production implementation.
+
+1.8
+
+“Competitor” means any entity in the cockpit or cabin avionics business in Civil Aviation (e.g., Collins Aerospace, Honeywell, and SatCom Direct) or any Affiliate of such entity.
+
+Execution Copy
+
+1.9
+
+“Confidential Information” means all non-public information in any form or medium whether or not owned by the Party disclosing such information (“Discloser”) provided or disclosed to the other Party (“Recipient”), including the existence of this Agreement and any business relationship between the Parties. Discloser will use reasonable efforts to mark written disclosures as confidential, and to provide written summaries of any Confidential Information provided in non-written form, but failure to do so will not affect the confidential nature of the information provided.
+
+1.10
+
+“Control” (including with correlative meanings, the terms “Controlling,” “Controlled by” and “under common Control with”) means the possession directly or indirectly of the power to direct or cause the direction of the management and policies of an entity, whether through the ownership of voting securities, by trust, management agreement, contract or otherwise; provided, however, that beneficial ownership of fifty percent (50%) or more of the voting securities of an entity will be deemed to be Control of such entity.
+
+1.11
+
+“Data Security Breach” means a breach by Airspan of its obligations as set forth in the applicable SOW or in Section 6 herein that (a) results in the loss or misuse of unencrypted Personally Identifiable Information by Airspan (unless decryption thereof is enabled by Airspan’s grossly negligent act or omission); (b) results in the unauthorized and/or unlawful Processing, disclosure, access, alteration, corruption, transfer, sale or rental, destruction, or use of Personally Identifiable Information by Airspan; or (c) compromises the security, confidentiality, or integrity of Personally Identifiable Information.
+
+1.12
+
+“Deliverables” means any and all documents, designs, specifications, computer programs (in both object code and source code formats), computer systems, data, documentation and other tangible materials authored or prepared by Airspan and delivered to Gogo pursuant to a Statement of Work, including any Airspan Background IP incorporated therein, and
+
+1.13
+
+“Aircraft Deliverables” means any Deliverables used in the aircraft based subsystems of the ATG solution which includes, but is not limited to, [***]. Aircraft Deliverables do not include [***].
+
+1.14
+
+“Ground Station Deliverables” means any Deliverables used exclusively to enable the operation of the ATG ground base station subsystem which includes, but is not limited to, [***].
+
+1.15
+
+“Evaluation SOW” means the ATG Evaluation Statement of Work ATG System Architecture and Specification Definition dated May 31, 2019.
+
+1.16
+
+“Gogo Background IP” means Background Intellectual Property owned, controlled, or provided by Gogo or its Affiliates and used or provided in connection with the Services set forth in this Agreement, including any modifications or customizations thereto whether created by Gogo, Airspan or any third party.
+
+1.17
+
+“IPRs” means all U.S. and foreign copyrights, patents, trademarks and other intellectual property rights, whether registered or unregistered.
+
+1.18
+
+[***].
+
+1.19
+
+“North America” means the continent of North America including, but not limited to, the United States (including its territories and possessions), Canada, Mexico and the Caribbean.
+
+1.20
+
+“Party” means either of Airspan or Gogo and “Parties” means both Airspan and Gogo.
+
+1.21
+
+“Personally Identifiable Information” or “PII” means: (i) any information that identifies or can be used to identify an individual, such as first and last name, social security number or other government issued number or identifier, date of birth, home or other physical address, e-mail address or other online contact information, telephone number, biometric data, mother’s maiden name, or other personally identifiable information; or (ii) any “non-public personal information” as that term is defined in the Gramm-Leach-Bliley Act found at 15 U.S.C. Subchapter 1, §6809(4).
+
+1.22
+
+“Processing” or “Process” means any operation or set of operations that is performed upon Personally Identifiable Information, whether or not by automatic means, including, without limitation, collection, recording, organization,
+
+- 2 -
+
+Execution Copy
+
+storage, access, adaptation, alteration, retrieval, consultation, use, disclosure, dissemination, making available, alignment, combination, blocking, deleting, erasure, or destruction.
+
+1.23
+
+“Products” means the aircraft ATG communication system (and components thereof) which includes, but is not limited to, ground base station components, the airborne line replaceable unit (LRU) with airborne modem and antenna subsystem as further described in the SRS, including all hardware, software, system architectures, technical specifications, and documentation developed under any SOW.
+
+1.24
+
+[***]
+
+1.25
+
+“Services” means certain strategic project services, support services and other services, which shall, from time to time, be rendered by Airspan for Gogo pursuant to a Statement of Work.
+
+1.26
+
+“Specification” means specifications for Services and Deliverables to be provided in a Statement of Work.
+
+1.27
+
+“Statement of Work” or “SOW” means any transaction document (whether or not identified as a SOW) in which a project outline is agreed to by Airspan and Gogo in accordance with the terms and conditions of this Agreement, and preferably in the form attached hereto as Exhibit A. Statements of Work shall be executed by the Parties and shall form a part of this Agreement. The Evaluation SOW shall be deemed a “Statement of Work.”
+
+1.28
+
+“System Requirements Specification” or “SRS” means the document setting forth the specification of system requirements attached to any Statement of Work.
+
+1.29
+
+“Third Party Materials” means any third party hardware, computer programs, specifications, documents, intellectual property rights or any other third party materials.
+
+1.30
+
+“Work Product” means Deliverables created under a Statement of Work (excluding any Airspan Background IP or Third Party Materials incorporated in the Deliverables).
+
+2.
+
+SERVICES.
+
+2.1
+
+Procedures for Engagement of Services.
+
+(a)
+
+The Services to be rendered by Airspan for Gogo pursuant to this Agreement shall be engaged in the following manner. From time to time during the term of this Agreement, Gogo and Airspan may enter into Statements of Work. Each SOW shall include a complete and detailed description of the project, which Gogo wishes Airspan to undertake. For the avoidance of doubt, Airspan shall not perform any Services except under an executed SOW and Gogo shall be under no obligation to pay for any services performed or expenses incurred by Airspan unless such Services or expenses were performed or incurred on the written instructions of Gogo’s Project Manager.
+
+(b)
+
+Upon execution of a SOW: (i) the services described therein shall be deemed “Services” for the purposes of this Agreement, and (ii) Airspan’s provision thereof shall be subject to, and governed by, the terms and conditions of this Agreement.
+
+2.2
+
+Personnel.
+
+(a)
+
+While at a Gogo facility, Airspan’s personnel and subcontractors shall comply with reasonable requests and standard procedures and policies of Gogo. Airspan’s personnel and subcontractors will conduct themselves in a businesslike manner.
+
+(b)
+
+If Gogo determines in good faith that a particular Airspan employee or agent (i) is not conducting him or herself in accordance with Section 2.2(a), or (ii) is not performing the Services as described in this Agreement and the applicable SOW, Gogo may provide Airspan with notice thereof and Airspan shall remove and replace such individual. Gogo reserves the right to deny access to its premises to any such individual. Unless authorized in writing by Gogo, all Airspan personnel performing the Services at or near Gogo’s facilities shall be based in that vicinity, and Gogo shall not be responsible for any travel, mileage or living expenses with respect to such personnel.
+
+(c)
+
+Each Party shall designate one project manager (each, a “Project Manager”) for each SOW, who shall be responsible for providing timely management decisions as required relating to such SOW. Any Project Manager may be replaced from time to time by the designating Party upon written notice to the other Party.
+
+- 3 -
+
+Execution Copy
+
+2.3
+
+Replacement of Personnel.
+
+(a)
+
+If any Airspan employee or subcontractor performing Services hereunder is replaced for the reasons set forth in Section 2.2(b) or by Airspan other than at Gogo’s direction, the choice of replacement personnel shall be subject to Gogo’s approval, and Airspan shall not charge Gogo for the expenses incurred in transitioning the performance of Services to such replacement, which (for daily charged Services) will never be less than one working day.
+
+(b)
+
+If Gogo requests in writing that any Airspan employee or subcontractor be replaced for the reasons set forth in Section 2.2(b)(ii) within two weeks after such employee or subcontractor begins performing Services hereunder, Airspan shall have a reasonable opportunity to address Gogo’s concerns. Thereafter, if Airspan replaces such employee or subcontractor as requested, then Airspan shall not charge Gogo for any Services already performed by such replaced employee or subcontractor after Airspan’s receipt of Gogo’s written request for replacement where the Service has to be reperformed.
+
+2.4
+
+Subcontractors. Airspan may not use subcontractors to perform the Services without Gogo’s prior written consent; provided, however, Airspan shall remain responsible for the performance of the Services, for all of its obligations hereunder, and for all liabilities incurred by a subcontractor.
+
+2.5
+
+Gogo Affiliates. During the term of this Agreement, if any Gogo Affiliate desires to engage Airspan to perform Services hereunder, such Gogo Affiliate may enter into a SOW hereunder.
+
+2.6
+
+Schedule. A SOW may contain a time schedule for completion of the Services required thereunder (the “Schedule”). Unless such time schedule is specified in a SOW as an “estimate” or “target,” Gogo and Airspan expressly acknowledge and agree that, subject to Section 2.8, all Schedules are firm or fixed performance dates, and Airspan shall complete such Services in accordance with the Schedule. Any changes to the Schedule shall be made in accordance with Section 2.7.
+
+2.7
+
+Changes to SOW. Each Party may request changes that affect the scope, duration or any other aspect of the Services relating to any SOW, including changes in the Specifications and Deliverables. Each Party also may request a change in the Schedule without changing the scope of the applicable SOW. The designated Project Manager of the requesting Party will review the proposed change and determine whether to submit it to the other Party. If a Party requests any such change, Airspan shall notify Gogo if it believes that an adjustment in the fees to be paid to Airspan with respect to the applicable SOW, or an adjustment to the applicable Schedule, is required. The Parties’ Project Managers shall then negotiate in good faith a reasonable and equitable adjustment in each or any of the applicable fees, Deliverables, Services, Schedule or Specifications. Airspan shall continue to perform pursuant to the existing SOW, and neither Party shall be bound by any change requested by the other Party, until such change has been accepted in writing by the other Party.
+
+2.8
+
+Gogo’s Obligations. Gogo’s obligations in connection with a particular engagement, if any, shall be set forth in the applicable SOW. Gogo shall cooperate with Airspan in the performance of the Services hereunder. Gogo acknowledges and agrees that Airspan’s performance is dependent in part upon the timely and effective satisfaction of Gogo’s responsibilities in connection with the Services.
+
+2.9
+
+Proprietary Rights.
+
+(a)
+
+[***].
+
+(i)
+
+Ownership of Work Product in [***]. Unless otherwise provided in the applicable Statement of Work, Gogo will own all Work Product in [***] and IPRs in such Work Product, and all such Work Product will constitute Confidential Information of Gogo and will be considered work made for hire owned by Gogo. If any such Work Product is not, by operation of law or otherwise, considered a work made for hire (or if ownership of all right, title and interest of the intellectual property rights therein will not otherwise automatically vest exclusively in Gogo), Airspan hereby assigns and agrees to assign, by way of present assignment of existing and future rights, without further consideration, all its right, title and interest in and to such Work Product (including, without limitation, all IPRs therein), to Gogo, effective immediately upon the creation of such Work Product. Gogo, its successors and assigns, will have the right to obtain and hold in its or their own name copyrights, registrations and any other protection available in the foregoing. Airspan shall
+
+- 4 -
+
+Execution Copy
+
+have the right and Gogo hereby grants Airspan a license to exploit the IPRs in any such Work Product in connection with any work carried out under a Statement of Work including the right to sublicense any subcontractor and supplier to the extent that Airspan requires to perform its obligations under this Agreement.
+
+(ii)
+
+License to Airspan Background IP, [***]. Subject to any restrictions, reservations and other limitations set forth in Section 2.9(a)(iii) or the applicable Statement of Work, Airspan hereby grants to Gogo a worldwide, royalty-free (except as set forth in Section 2.9(a)(iii)), irrevocable, sublicensable, transferable, perpetual license to use, reproduce, practice, adapt, modify, commercialize, make, have made, use, keep, offer to sell, sell, import, and otherwise implement any Airspan Background IP [***]. The license granted in this Section 2.9(a)(ii) is (1) exclusive [***] and (2) non‑exclusive in all other respects. The exclusivity provided for above shall not prevent Airspan from carrying out or subcontracting with any third party to carry out any work required under a Statement of Work or from performing Airspan’s obligations under this Agreement. Except as set forth herein and as is necessary for Gogo to exercise its rights in and to the Services and [***] hereunder, nothing in this Agreement will be deemed to grant to, or confer upon Gogo, expressly or by implication, any rights or license to the Airspan Background IP.
+
+(iii)
+
+Restrictions on Gogo’s Use of Airspan Background IP, [***]. Except as expressly permitted hereunder, Gogo will not: (a) reverse engineer, decompile or disassemble any software in the Airspan Background IP, [***], or any portion thereof that is provided by Airspan only in object code; (b) except as set forth in Section 2.9(a)(iii)(d), below, sublicense, lease, rent, loan or otherwise transfer (except pursuant to Section 12.1) the Airspan Background IP, [***] to any third party other than as part of, or in conjunction with, the commercialization of products purchased from Airspan and incorporating such Airspan Background IP, [***]in accordance with Section 2.9(a)(ii) above; (c) except as set forth in Section 2.9(a)(iii)(d), below, modify, alter, translate or create derivative works of the Airspan Background IP, [***]; or (d) unless and until this Agreement is terminated by Gogo under Sections 7.2(a), 7.2(b), or 7.2(e) or by Airspan under Section 7.2(c) of this Agreement, or the Supply and Product Support Agreement, dated November 25, 2019 (“PSA”) is terminated by Gogo under Sections 8.1(b), 8.1(d) or 8.1(e) of the PSA, Gogo will not exercise its rights under Section 2.9(a)(ii) to adapt, modify, commercialize, make, have made, use, keep, offer to sell, sell, import, and otherwise implement, further develop, or manufacture (or have manufactured) the [***], Airspan Background IP, [***], provided, however that in the event this Agreement is terminated by Gogo under Section 7.2(a) or 7.2(e) of this Agreement, or the PSA is terminated by Gogo under Sections 8.1(d) or 8.1(e) of the PSA, Gogo will pay Airspan a royalty on each third party product containing Airspan Background IP, [***]that Gogo purchases from any party other than Airspan in the amount of [***] of the price set forth in Exhibit B of the PSA for substantially similar Product immediately prior to the event leading to termination of this Agreement.
+
+(iv)
+
+License to Third-Party Materials. If any Third Party Materials are used in connection with or included in any Deliverables, Airspan will obtain a license from the relevant third parties to allow Gogo to include, use, reproduce and practice such Third Party Materials and to commercialize products purchased from Airspan and incorporating such Third Party Materials substantially the same as the license to Airspan Background IP set forth in Section 2.9(a)(ii).
+
+(b)
+
+[***].
+
+(i)
+
+Ownership of [***]. Unless otherwise provided in the applicable Statement of Work, Airspan will own all [***], and all IPRs in those [***], and such [***] will constitute Confidential Information of Airspan. Gogo hereby assigns and agrees to assign, by way of present assignment of existing and future rights, without further consideration, all right, title and interest in and to such [***] (including, without limitation, all IPRs therein), to Airspan, effective immediately upon the creation of such [***]. Airspan, its successors and assigns, will have the right to obtain and hold in its or their own name copyrights, registrations and any other protection available in the foregoing.
+
+- 5 -
+
+Execution Copy
+
+(ii)
+
+License to [***]. Subject to any restrictions, reservations and other limitations set forth in any applicable Statement of Work, Airspan hereby grants to Gogo a fully-paid, worldwide, royalty-free, irrevocable, perpetual license to use, reproduce and practice any Airspan IPRs incorporated in any [***] for the purposes of testing and for further development work and otherwise using the Services in accordance with this Agreement and for the purpose of commercializing Products purchased from Airspan and incorporating such Airspan IPRs (but not for the manufacture of any [***] or any products incorporating any such Airspan IPRs). The license granted in this Section 2.9(b)(ii) is (a) exclusive [***] and (b) non‑exclusive in all other respects. The exclusivity provided for above shall not prevent Airspan from carrying out or subcontracting with any third party to carry out any work required under a Statement of Work or otherwise from performing Airspan’s obligations under this Agreement. Except as set forth herein and as is necessary for Gogo to exercise its rights in and to the Services and [***] hereunder, nothing in this Agreement will be deemed to grant to, or confer upon Gogo, expressly or by implication, any rights or license to the [***] or any Airspan IPRs therein.
+
+(c)
+
+Gogo IP.
+
+(i)
+
+License to Gogo IP for the Purpose of Providing Services. Subject to any restrictions, reservations and other limitations set forth in Section 2.9(c)(iii) or the applicable Statement of Work, Gogo hereby grants to Airspan an irrevocable, sublicensable, royalty free, worldwide license to include, use, reproduce, practice, adapt, modify, make, have made, import, export, keep, commercialize and otherwise implement and exploit any Gogo Background IP and any other Gogo IPRs incorporated in Products solely for the purposes of carrying out any work under a Statement of Work, including the right to sublicense any subcontractor and supplier. Except as set forth herein and in Section 2.9(c)(ii), nothing in this Agreement will be deemed to grant to, or confer upon Airspan, expressly or by implication, any rights or license to the Gogo Background IP or other Gogo IPRs. All Gogo Background IP is Confidential Information of Gogo.
+
+(ii)
+
+License to Gogo Background IP. Subject to any restrictions, reservations and other limitations set forth in Section 2.9(c)(iii) or the applicable Statement of Work, Gogo hereby grants to Airspan an irrevocable, sublicensable, transferrable, royalty bearing (as set forth in Section 3.3), license to include, use, reproduce, practice, adapt, modify, commercialize and otherwise implement any Gogo Background IP that is incorporated within the [***]. The license granted in this Section 2.9(c)(ii) is (1) exclusive to Airspan [***] for the duration of Airspan’s exclusivity set forth in Section 3.2, (2) excludes use [***] other than in collaboration with and for the benefit of Gogo, and, (3) is non-exclusive in all other respects.
+
+(iii)
+
+Restrictions on Airspan’s Use of Gogo IPRs. Except as expressly permitted hereunder, Airspan will not: (a) reverse engineer, decompile or disassemble any software in the Gogo Background IP or Gogo IPRs, or any portion thereof that is provided by Gogo only in object code; (b) sublicense, lease, rent, loan or otherwise transfer (except pursuant to Section 12.1) the Gogo Background IP or Gogo IPRs to any third party, other than as part of or in conjunction with the commercialization and sale of products and services within the licenses granted under Sections 2.9(c)(i) and 2.9(c)(ii); or (c) modify, alter, translate or create derivative works from the Gogo Background IP or Gogo IPRs, other than as part of or in conjunction with the development, commercialization and sale of products and services within the licenses granted under Sections 2.9(c)(i) and 2.9(c)(ii).
+
+(iv)
+
+License to Third-Party Materials. If any Gogo Background IP used in connection with or included in any [***] includes any Third Party Materials, Gogo will obtain a license from the relevant third parties to allow Airspan to include, use, reproduce, practice, adapt, commercialize and otherwise implement such Third Party Materials substantially the same as the license to Gogo Background IP set forth in Sections 2.9(c)(i) and 2.9(c)(ii).
+
+- 6 -
+
+Execution Copy
+
+2.10
+
+Acceptance of Services and Deliverables. Gogo, with Airspan’s cooperation and assistance, may conduct acceptance tests to verify whether the Services and/or Deliverables substantially conform to the applicable Specifications and SOW. Gogo shall have thirty (30) days after completion of the applicable Services or delivery of the applicable Deliverables, or such other period as may be mutually agreed in the applicable SOW (the “Acceptance Period”), to test the Services and Deliverables. If Gogo notifies Airspan of any material non-conformities with the Specifications or applicable SOW in any of the Services or Deliverables (collectively “Non-conformities”) in writing within the applicable Acceptance Period, Airspan shall promptly correct such Non-conformities at Airspan’s own expense. Gogo then shall have the right to test the corrected Services or Deliverables, as upon the initial completion of the applicable Services or Deliverables. If Gogo does not notify Airspan of any material Non-conformities within the Acceptance Period, Gogo shall be deemed to have accepted the Services or Deliverables. Should Airspan fail to correct a Non-conformity within thirty (30) days after receiving written notice of it or such other time period to which the Parties mutually agree, Gogo may terminate the Services under the applicable SOW, and Airspan shall refund the fees and expenses paid by Gogo to Airspan for Non-conforming Services or Deliverables and for any other Services or Deliverables that are reliant on such Non-conformities and rendered of no reasonable utility to Gogo by virtue of the failure of such Airspan to correct such Non-conformities.
+
+3.
+
+EXCLUSIVITY.
+
+3.1
+
+[***] Exclusivity. Airspan hereby grants to Gogo the exclusive right to buy from Airspan, implement, and operate [***]. Further, Airspan covenants not to sell, implement or operate [***] other than in collaboration with and for the benefit of Gogo.
+
+3.2
+
+[***] Exclusivity. Gogo hereby grants to Airspan the exclusive right to buy, implement, and operate ATG connectivity solutions for use in [***] applications in [***]. Further, Gogo covenants not to sell, implement or operate ATG connectivity solutions for use in [***] applications in [***] other than in collaboration with and for the benefit of Airspan.
+
+3.3
+
+Rest of World. Subject to Sections 3.1 and 3.2 above, in all markets other than [***], [***]:
+
+(a)
+
+Each Party may use, sell, offer to sell, market, distribute, resell, license, or otherwise dispose of any ATG connectivity solution.
+
+(b)
+
+Gogo hereby grants to Airspan the non-exclusive right to use, sell, offer to sell, market, distribute, resell, license, or otherwise dispose of any ATG connectivity solution that incorporates or uses know-how developed in connection with this Agreement or any SOW or Gogo intellectual property and Airspan will pay [***] derived from the sale of ATG-related equipment or services in accordance with the scope of this Section 3.3.
+
+(c)
+
+Airspan hereby grants to Gogo the non-exclusive right to use, sell, offer to sell, market, distribute, resell, license, or otherwise dispose of any ATG connectivity solution that incorporates or uses Airspan intellectual property or know-how developed in connection with this Agreement or any SOW.
+
+3.4
+
+Minimum Revenue Commitment. Following the Commercial Release, in the event revenues to Airspan generated by the ATG connectivity solution (including any and all revenues generated under this Agreement or the PSA) is [***], (a) the exclusivity set forth in Sections 2.9(a)(ii), 2.9(b)(ii), 2.9(c)(i), and 3 will terminate and the rights granted therein will become non-exclusive, and (b) the covenants set forth in this Section 3 will expire.
+
+3.5
+
+Termination of Exclusivity. The foregoing exclusivities will terminate, the rights granted in Sections 2.9(a)(ii), 2.9(b)(ii), 2.9(c)(i), and 3 will become non-exclusive, and the covenants set forth in this Section 3 will expire if Gogo fails to achieve Commercial Release, through no fault of Airspan, on or before December 31, 2023.
+
+4.
+
+FEES AND EXPENSES.
+
+4.1
+
+Service Fees. Gogo shall pay Airspan for the provision of Services in accordance with the schedule of fees and charges set forth in the applicable SOW. Airspan shall furnish all labor, materials, services and equipment, and shall perform all of the Services, solely at Airspan’s cost and expense. Except as the Parties otherwise agree in writing, without right to reimbursement from Gogo, Airspan shall pay or cause to be paid all contributions, payments, taxes and deductions for social security, old age retirement benefits, unemployment insurance, and annuities, pension or welfare fund payments required by any labor union or by any governmental body, and all
+
+- 7 -
+
+Execution Copy
+
+withholding taxes, measured by or related to the wages, salaries or other compensation paid to persons employed or engaged by Airspan in connection with the performance of such Services under this Agreement. In connection with the foregoing, Airspan shall comply with all laws and regulations applicable to Airspan and/or to persons employed or engaged by Airspan.
+
+4.2
+
+Expenses. Gogo shall reimburse Airspan for its reasonable out-of-pocket costs and expenses specifically authorized in the applicable SOW or otherwise authorized in advance in writing by Gogo in connection with the Services and in accordance with Gogo’s written reimbursement policy. Airspan shall provide documentation of all expenses greater than $75 for which Airspan requests reimbursement on a monthly basis, prior to the generation of any invoice on which such expenses are listed. Notwithstanding anything to the contrary herein, Gogo shall not be required to reimburse Airspan for any expenses to the extent that Airspan has not presented an expense report verifying such expenses within 75 days after such expenses were incurred.
+
+4.3
+
+Records; Audit. Airspan shall maintain adequate records of the fees and expenses charged to Gogo with respect to the Services under each SOW for at least seven (7) years after completion of the applicable SOW. Airspan shall make such records available to Gogo during normal business hours upon reasonable advance written notice. Airspan shall cooperate in any audit of such records that Gogo may undertake; provided, however, that any such audit shall be at Gogo’s sole expense. If, as a result of such audit, it is determined that Airspan has overcharged Gogo, Gogo shall notify Airspan of the amount of such overcharge, and Airspan shall credit to Gogo the amount of such overcharge. In addition, if any such audit reveals an overcharge that is equal to or greater than 10% of the amounts billed for the period of time audited, Airspan shall reimburse Gogo for all costs related to the audit.
+
+4.4
+
+Payment Terms. Airspan shall issue an invoice to Gogo on or any time after the completion or delivery and only in accordance with these payment terms. Gogo shall pay all properly invoiced amounts due to Airspan via ACH transfer within sixty (60) days after Gogo’s receipt of such invoice, except for any amounts disputed by Gogo in good faith. All payments hereunder will be in US dollars unless otherwise agreed to in writing. In the event of a payment dispute, Gogo shall deliver a written statement to Airspan no later than ten (10) business days prior to the date payment is due on the disputed invoice listing all disputed items and providing a reasonably detailed description of each disputed item. Amounts not so disputed are deemed accepted and must be paid, notwithstanding disputes on other items, within the period set forth in this Section 4. The Parties shall seek to resolve all such disputes expeditiously and in good faith. Airspan shall continue performing its obligations under this Agreement notwithstanding any such dispute.
+
+4.5
+
+Taxes. Gogo is liable to Airspan only for taxes, which Airspan is required to collect from Gogo by law. Airspan’s invoices shall list taxes separately.
+
+5.
+
+CONFIDENTIALITY.
+
+5.1
+
+Obligations. Subject to Section 5.2, Recipient agrees that it will use Discloser’s Confidential Information only for the purpose of discharging its obligations and exercising its rights under this Agreement or any SOW (the “Permitted Purpose”) and only during the term of this Agreement, and it will hold Discloser’s Confidential Information in strict confidence and not disclose it to any third party except as approved in writing by Discloser. Recipient will protect Discloser’s Confidential Information using the same degree of care that Recipient uses to protect its confidential materials of a similar nature, but in no case will Recipient employ less than a commercially reasonable degree of care. Recipient will not reverse engineer or attempt to derive the composition or underlying information, structure or ideas of Discloser’s Confidential Information. Recipient will only permit access to Discloser’s Confidential Information to those of its employees, authorized representatives, or airline partners (collectively, the “Representatives”) who have a need to know such Confidential Information for the Permitted Purpose, have been informed of the confidential nature of the Confidential Information, and are bound by written confidentiality obligations no less restrictive than those contained herein. All of Recipient’s Representatives shall only use the Confidential Information for the Permitted Purpose and will be responsible for the disclosure and use of Confidential Information as though they were Recipient, and Recipient will be responsible for all violations of this Agreement resulting from the actions of its Representatives. Recipient will immediately notify Discloser upon discovery of any loss or unauthorized disclosure of Discloser’s Confidential Information.
+
+5.2
+
+Exclusions. Recipient has no obligations under this Agreement with respect to any portion of Discloser’s Confidential Information if Recipient can establish that: (a) it was publicly available at the time it was
+
+- 8 -
+
+Execution Copy
+
+communicated to Recipient by Discloser; (b) it became publicly available subsequent to the time it was communicated to Recipient by Discloser through no fault of Recipient, or Recipient’s Representatives; (c) it was in Recipient’s possession free of any obligation of confidence at the time it was communicated to Recipient by Discloser; (d) it was rightfully communicated to Recipient free of any obligation of confidence subsequent to the time it was communicated to Recipient by Discloser; or (e) it was developed by employees or agents of Recipient independently of and without reference to Discloser’s Confidential Information. In any dispute with respect to these exclusions, Recipient shall have the burden of proof, and such proof shall be by clear and convincing evidence. Recipient will not be in violation of this Agreement with regard to a disclosure that is in response to a requirement of applicable law, an order by a court or other governmental body, or to the extent required by the Securities and Exchange Commission in a securities filing, provided that, if feasible, Recipient provides Discloser with reasonable prior written notice of such disclosure to permit Discloser to seek confidential treatment of such information or otherwise contest or limit the disclosure thereof.
+
+5.3
+
+No License Granted. Except as expressly provided otherwise in this Agreement, Discloser will retain all right, title and interest in and to its own Confidential Information. The Parties recognize and agree that, except as expressly provided otherwise in this Agreement, nothing contained in this Agreement will be construed as granting any property rights, by license or otherwise, to any of Discloser’s Confidential Information, or to any work based on such Confidential Information. Recipient has no obligation to comment on any of Discloser’s Confidential Information, but Discloser may exploit any feedback received from Recipient without obligation to Recipient. Recipient will not make, have made, use or sell for any purpose any product or other item using, incorporating, or derived from any of Discloser’s Confidential Information.
+
+5.4
+
+Restrictions. Recipient will not reproduce Discloser’s Confidential Information in any form except as required to accomplish the Permitted Purpose. Any reproduction of any Confidential Information will remain Discloser’s property and will contain any and all confidential or proprietary notices or legends that appear on the original. Neither Party will communicate any information to the other in violation of its confidentiality obligations to any third party.
+
+5.5
+
+Recipient’s obligations of confidentiality hereunder will continue in full force and effect for five (5) years from the initial date of disclosure of such Confidential Information, or in the case of any trade secret, for as long as such Confidential Information remains a trade secret. Upon written request of Discloser, Recipient will promptly destroy or return to Discloser all of Discloser’s Confidential Information in any form (including electronic media and including Recipient’s notes or materials that incorporate any of Discloser’s Confidential Information), except as described in the following sentence. Recipient shall not, in connection with the foregoing obligations, be required to delete Confidential Information held electronically in archive or backup systems in accordance with general systems archiving or backup policies, and Recipient’s obligations under this Agreement will continue to apply to such Confidential Information.
+
+5.6
+
+The terms and conditions of this Section 5 shall survive expiration or any termination of this Agreement or applicable attachment.
+
+6.
+
+DATA PRIVACY AND SECURITY.
+
+6.1
+
+Without limiting the generality of Airspan’s obligations elsewhere in this Agreement, Airspan is fully responsible for any authorized or unauthorized Processing of Personally Identifiable Information (“PII”) or Gogo Confidential Information in its possession or in the possession of its officer, director, employee, agent, subsidiary, affiliate, or any other person or entity acting on behalf of Airspan (“Airspan Personnel”). Airspan shall: (a) not use or disclose to any other party any PII of Gogo, except in accordance with this Agreement or as otherwise required by law (collectively, the “Permitted Uses or Disclosures”); (b) instruct each Airspan Personnel to Process PII solely in compliance with the Permitted Uses or Disclosures; (c) ensure that such Processing is conducted only by Airspan’s Personnel who have a legitimate business reason to Process such PII and have been appropriately trained and bound by legally enforceable and commercially reasonable confidentiality obligations; (d) Process PII only in accordance with applicable privacy and data protection laws; and (e) implement and maintain administrative, physical and technical safeguards (“Safeguards”) that prevent any Processing of PII that this Agreement does not expressly authorize, including, without limitation, an information security program that meets best industry practice to safeguard PII or Gogo Confidential Information. Such information security program would include: (i) adequate
+
+- 9 -
+
+Execution Copy
+
+physical security of all premises in which PII will be processed and/or stored; (ii) reasonable precautions taken with respect to the employment of and access given to any Airspan Personnel engaged by Airspan to perform any part of the Services hereunder, including security clearances that assign specific access privileges to individuals; and (iii) an appropriate network security program, including encryption or other secure form approved in advance by Gogo, of any PII that is Processed by Airspan or Airspan Personnel. Such network security program shall include, without limitation, (a) appropriate access controls and data integrity controls, including without limitation, ensuring that (i) authentication credentials have an expiration period that allows time for the transfer of data, but are not continuously left open; (ii) password complexity standards are implemented to protect Gogo Confidential Information from malicious access; and (iii) a process is implemented to log individual access to PII; (b) testing and auditing of all controls; and (c) appropriate corrective action and incident response plans. Gogo hereby instructs Airspan, and Airspan hereby agrees to Process PII only as reasonably necessary and proportionate to perform Airspan’s obligations under this Agreement.
+
+6.2
+
+Upon request from Gogo, Airspan will provide evidence that it has established and maintains technical and organizational security measures governing the Processing of PII (appropriate to the Processing and the nature of the PII to be protected) and Airspan agrees to provide Gogo with, copies of and/or reasonable information concerning Airspan’s technical and organizational security measures relevant to the services provided under this Agreement. Upon reasonable notice, not more than annually, during normal business hours and with minimal disruption of Airspan’s business, Gogo, using a third-party auditor, shall have the right to conduct onsite inspections and/or audits of Airspan’s technical and organizational security measures except in the case of a shared environment, and Airspan agrees to reasonably cooperate with such Gogo auditor regarding such inspections or audits.
+
+6.3
+
+Airspan shall notify Gogo promptly in the event of any disclosure of PII not authorized herein, or upon Airspan’s knowledge of any other Data Security Breach (but in no event later than three business days after such Data Security Breach). In the event of a Data Security Breach, Airspan shall (i) promptly provide to Gogo a detailed description of the incident, the data accessed, the identity of affected third parties, if any, and such other information as Gogo may request concerning the Data Security Breach; (ii) assist Gogo in investigating, remedying and taking any other action Gogo deems necessary regarding any Data Security Breach and any dispute, inquiry or claim that concerns the Data Security Breach; (iii) take prompt actions that such Data Security Breach or potential Data Security Breach will not recur; and (iv) cooperate with Gogo and any law enforcement or regulatory official investigating such Data Security Breach. Notwithstanding the foregoing, to the extent not prohibited by applicable law, Gogo shall make the final decision on notifying Gogo’s employees, service vendors and/or the general public of such Data Security Breach or any other breach related to security, which is not a Data Security Breach, and the implementation of the remediation plan. If a notification to Gogo’s Gogo is required under any applicable law, guidelines or best practice, then in addition to all other costs arising out of or in connection with such Data Security Breach, and without prejudice to all other rights and remedies available to Gogo under this Agreement, at law or in equity, Airspan shall reimburse Gogo for all reasonable notification, credit monitoring, and government penalty related costs incurred by Gogo and its Affiliates arising out of or in connection with any such Data Security Breach.
+
+7.
+
+TERM AND TERMINATION.
+
+7.1
+
+Term. This Agreement shall commence on the Effective Date and shall continue in full force and effect until terminated in accordance with Section 7.2.
+
+7.2
+
+Termination.
+
+(a)
+
+Gogo or Airspan may terminate this Agreement and all SOWs hereunder, immediately upon written notice of termination, in the event of a material breach of this Agreement by the other Party, if such breach continues uncured for a period of thirty (30) days after written notice of such breach; provided, however, that Gogo or Airspan, as applicable, may also choose to terminate only the SOW related to the applicable breach.
+
+(b)
+
+Gogo or Airspan may terminate this Agreement and all SOWs hereunder, immediately upon written notice of termination to the other Party, in the event the other Party: (i) becomes insolvent; (ii) makes an assignment for the benefit of creditors; (iii) files a voluntary bankruptcy petition; (iv) acquiesces to any involuntary bankruptcy petition; (v) is adjudicated bankrupt; (vi) stops or suspends payment of all or a
+
+- 10 -
+
+Execution Copy
+
+material part of its debts or is unable to pay its debts as they fall due; (vii) ceases to carry on all or a substantial part of its business; (viii) begins negotiations for, takes any proceedings concerning, proposes or makes any agreement for the deferral, rescheduling or other readjustment, reorganization, compromise, general assignment of or an arrangement or composition with or for the benefit of some or all of its creditors of all or substantially all of its debts, or for a moratorium in respect of or affecting all or substantially all of its debts; (ix) takes any step with a view to the administration, winding up or bankruptcy of the Party; or (x) takes any step to enforce security over, or a distress, execution or other similar process is levied or served against all or substantially all of the assets or undertaking of, the Party including the appointment of a receiver, administrative receiver, trustee in bankruptcy, manager or similar officer.
+
+(c)
+
+Gogo or Airspan may terminate this Agreement for any or no reason upon thirty (30) days written notice to the other Party, provided that there are no then-current SOWs.
+
+(d)
+
+Gogo may terminate any SOW for any or no reason upon notice to Airspan except as specified in a SOW.
+
+(e)
+
+Gogo may terminate this Agreement and all SOWs hereunder in connection with the consummation of a Change of Control Transaction as set forth in Section 12.2(b)(iii).
+
+7.3
+
+Consequences of Termination. Upon any termination of this Agreement:
+
+(a)
+
+Prior to the effective date of such termination, a final invoice including all fees and charges for Services performed and expenses incurred prior to and including the effective date of termination (including for Sections 7.2(c) and 7.2(d), all non-cancellable commitments as pre-approved by Gogo), shall be generated as set forth in each applicable SOW, and Gogo shall pay such bill in accordance with Section 4.4.
+
+(b)
+
+Airspan shall deliver all existing Deliverables and all Deliverables-in-progress to Gogo.
+
+(c)
+
+If the Agreement is terminated by Gogo under Sections 7.2(a), 7.2(b) or 7.2(e) or terminated by Airspan for convenience under Section 7.2(d), or the PSA is terminated by Gogo under Sections 8.1(b), 8.1(d) or 8.1(e) of the PSA, in order to provide Gogo continuity for its business, including manufacturing, procuring, and supporting the Products, Airspan will [***].
+
+(d)
+
+Each Party shall return to the other Party all Confidential Information of the other Party (including all copies thereof) and all other papers, materials and other property of the other Party in such Party’s possession, and certify that it has deleted such Confidential Information from all of its electronic media, provided, however, that both Parties may retain whatever Confidential Information of the other Party that is necessary to exercise any of such Party’s surviving rights or obligations hereunder. Airspan may retain one copy of such Confidential Information, as required, for archival purposes only.
+
+(e)
+
+Notwithstanding any termination of this Agreement, Airspan may not terminate any of the licenses granted to Gogo hereunder, for any reason under any circumstances. For the avoidance of doubt, in the event that Gogo breaches this Agreement, Airspan’s sole and exclusive remedies will be to seek damages and/or injunctive relief or, if Gogo has undisputed invoices that are more than 90 days overdue, to suspend performance of its Services until such overdue invoices are paid.
+
+(f)
+
+Sections 4.3, 4.5, 5, 6, 7.3, 9, 10, 11, 12.3, 12.6, 12.7, 12.8, 12.10, 12.11, 12.12, 12.13, 12.14, 12.15, 12.16 (to the extent set forth therein), 12.17, 12.18, and 12.19, and any other provision that should naturally extend beyond the termination of this Agreement shall survive termination of this Agreement for any reason.
+
+8.
+
+INSURANCE.
+
+8.1
+
+Airspan shall maintain during the term of this Agreement, at its own expense, with insurance companies rated A- VIII or better by A.M. Best, the following insurance coverage: (a) Workers’ Compensation including Occupational Disease insurance, in compliance with the statutory requirements of the state, province or other jurisdiction in which the work is performed, and Employers’ Liability insurance with an insured limit of at least $1,000,000 per occurrence; (b) Commercial General Liability insurance on an occurrence basis with a minimum amount of $1,000,000 per occurrence and $2,000,000 in the aggregate for bodily injury including death, personal injury, and property damage including loss of use and also covering products/completed operations liability, broad form property damage, independent contractor coverage, and contractual liability. Cross-liability coverage as would be achieved under the standard ISO separation of insured’s clause shall be included; (c) Umbrella or Excess Liability
+
+- 11 -
+
+Execution Copy
+
+insurance on an occurrence basis of at least $5,000,000 per occurrence; (d) Auto liability insurance covering all vehicles owned by or registered in the name of Airspan or its affiliates and including liability for hired, rented or other non-owned vehicles with a minimum insured limit of $1,000,000 per occurrence; and (e) Professional Liability or Errors and Omissions insurance with a limit not less than $5,000,000.
+
+8.2
+
+The Workers’ Compensation and Occupational Disease insurance coverage in Section 8.1(a) above shall include a waiver of subrogation against Gogo. Insurance coverage in Section 8.1(b) above shall (i) name Gogo, its parent, subsidiaries and affiliates as additional insured; (ii) designate Gogo as primary with respect to, and not contributing to or in excess of, any other similar insurance maintained by Gogo; and (iii) include a waiver of subrogation against Gogo. Insurance coverage in Section 8.1(c) and Section 8.1(d) above shall (i) name Gogo, its parent, subsidiaries and affiliates as an additional insured; and (ii) include a waiver of subrogation against Gogo.
+
+8.3
+
+For all above mentioned policies such endorsements shall be evidenced on a certificate of insurance furnished to Gogo and must provide Gogo with at least 30 days written notice in the event of cancellation of any such policy.
+
+8.4
+
+Airspan will ensure that any company, vendor or subcontractor being engaged for work under this Agreement, including without limitation under any Statement of Work, is bound to the same terms under this Section and that appropriate Certificates of Insurance or other evidence of such insurance coverage shall be provided to Gogo.
+
+9.
+
+WARRANTIES.
+
+9.1
+
+Violation of Law. Airspan represents and warrants to Gogo that as of the date of performance, Airspan’s performance of the Services does not and shall not violate any law, rule, or regulation applicable to Airspan in its role as a service provider.
+
+9.2
+
+Professional Standards. Airspan represents and warrants to Gogo that: (a) all Services will be performed and all Deliverables delivered by Airspan in a good and workmanlike manner in accordance with applicable industry standards and practices and the Specifications for such Services and Deliverables set forth in the applicable Statement of Work; (b) Airspan possesses the necessary equipment, personnel and other expertise necessary to provide the Services and Deliverables as set forth herein and in the Statement of Work; (c) Airspan personnel rendering the Services and developing the Deliverables shall have the appropriate technical skills, training, experience and expertise to enable Airspan to perform its responsibilities hereunder; and (d) Airspan will not utilize or disclose and confidential or proprietary information of a third party in providing the Services hereunder.
+
+9.3
+
+Viruses. Airspan represents and warrants to Gogo that its performance of the Services will not intentionally introduce viruses or other harmful elements designed to disrupt the orderly operation of, or impair the integrity of data files resident on, any of Gogo’s hardware. Airspan further represents and warrants that it shall use generally and commercially available (in the United States) and reasonably current and comprehensive virus detection/scanning programs, from a reputable vendor of anti-virus software, to protect Gogo’s systems and data. Airspan further represents and warrants to Gogo that, as of the date each Deliverable is delivered to Gogo, such Deliverable shall not contain any such virus or other harmful element.
+
+9.4
+
+THESE WARRANTIES ARE GOGO’S EXCLUSIVE WARRANTIES AND REPLACES ALL OTHER WARRANTIES OR CONDITIONS, EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OR CONDITIONS OF MERCHANTABILITY, NON-INFRINGEMENT, AND FITNESS FOR A PARTICULAR PURPOSE. Unless a SOW specifies otherwise Airspan shall not include in any Services or Deliverable any non-Airspan services or non-Airspan products. If identified as such in a SOW, then Airspan provides such non-Airspan services and non-Airspan products WITHOUT WARRANTIES OF ANY KIND; provided, however, that to the extent permissible, Airspan shall pass through to Gogo any warranties provided to Airspan by non-Airspan companies.
+
+10.
+
+INDEMNIFICATION.
+
+10.1
+
+Indemnification by Airspan.
+
+(a)
+
+Airspan shall indemnify, defend (at Airspan’s expense) and hold Gogo, its Affiliates and their respective officers, directors, agents and employees harmless from and against any court costs, reasonable attorneys’ fees and expenses, settlement expenses, court-awarded damages and reasonable costs of investigation arising out of or resulting from: (i) any bodily injury or real or tangible personal property damage arising
+
+- 12 -
+
+Execution Copy
+
+out of Airspan’s negligence or willful misconduct; (ii) damages resulting from the breach of Airspan’s data privacy and security obligations set forth in this Agreement; and (iii) any third-party claim that such third party’s patent, trademark, trade secret, copyright or trade dress right is infringed, misappropriated or violated by any Deliverable or a claim that it was developed utilizing that third party’s confidential or proprietary information that would constitute a breach of a non-disclosure agreement (including any Airspan Background IP incorporated into a Deliverable). To the extent permissible, Airspan shall pass through to Gogo any indemnification provided to Airspan by non-Airspan companies for such non-Airspan services and non-Airspan products, along with any warranties (likewise, to the extent permissible), further to its obligation under Section 9.4 of this Agreement.
+
+(b)
+
+If any of the Deliverables or any portion thereof is held, or in Airspan’s reasonable opinion is likely to be held, in any such suit to constitute an infringement, misappropriation or violation of the rights (including breach of a non-disclosure agreement) of a third party, Airspan shall promptly, at its expense and option, either: (i) secure for Gogo the right to continue the use of such Deliverable; or (ii) replace such Deliverable with a substantially equivalent item that is not subject to any such claim, or modify such Deliverable so that it becomes no longer subject to any such claim; provided, however, that after any such replacement or modification, the Deliverable must continue to substantially conform to the Specifications, and further provided, that any such modified or replaced Deliverable shall be subject to all Airspan warranties contained herein. If Airspan is unable to procure the right to continued use of such Deliverable, or to modify or replace such Deliverable, as provided in clauses (i) and (ii) of the immediately preceding sentence, then Gogo shall return such Deliverable to Airspan, and Airspan shall refund to Gogo the amount paid to Airspan for such Deliverables. In addition, if SOW are specifically identified as phases of the same project in each of the applicable SOW, and Airspan fails to correct an infringement, misappropriation or violation in one of the phases, Airspan shall refund to Gogo (A) all amounts paid to Airspan for the applicable Deliverable, and (B) all amounts paid to Airspan for other Deliverables that are part of the same project but are rendered to be of no reasonable utility to Gogo without the applicable Deliverable.
+
+10.2
+
+Indemnification by Gogo. Gogo shall indemnify, defend (at Gogo’s expense) and hold Airspan, its Affiliates and their respective officers, directors, agents and employees harmless from and against any claims, losses, damages, liabilities or expenses (including reasonable attorneys’ fees and expenses) that a court finally awards or that are included in a settlement approved by Gogo arising out of or resulting from any bodily injury or real or tangible personal property damage arising out of Gogo’s negligence or willful misconduct.
+
+10.3
+
+Indemnification Procedures. Promptly after receipt by an indemnified party of a notice of any claim or the commencement of any action, such indemnified party shall: (a) notify the indemnifying party in writing of any such claim; (b) provide the indemnifying party with reasonable assistance to settle or defend such claim, at the indemnifying party’s own expense; and (c) grant to the indemnifying party the right to control the defense and/or settlement of such claim, at the indemnifying party’s own expense; provided, however, that: (i) the failure to so notify, provide assistance and grant authority and control shall only relieve the indemnifying party of its obligation to the indemnified party to the extent that the indemnifying party is prejudiced thereby; (ii) the indemnifying party shall not, without the indemnified party’s consent (such consent not to be unreasonably withheld or delayed), agree to any settlement that: (A) makes any admission on behalf of the indemnified party; or (B) consents to any injunction against the indemnified party (except an injunction relating solely to the indemnified party’s continued use of any infringing Deliverable or Gogo Background IP); and (iii) the indemnified party shall have the right, at its expense, to monitor any legal proceeding through legal counsel of its choosing, but shall have no right to settle a claim without the indemnifying party’s written consent.
+
+11.
+
+LIMITATION OF LIABILITY.
+
+11.1
+
+Limitation of Liability. EXCEPT IN CONNECTION WITH (a) SECTION 5, (b) SECTION 10, AND (c) EITHER PARTY’S INFRINGEMENT OR VIOLATION OF THE OTHER PARTY’S OR A THIRD PARTY’S INTELLECTUAL PROPERTY RIGHTS, IN NO EVENT SHALL EITHER PARTY, ITS AFFILIATES, OR THEIR RESPECTIVE DIRECTORS, OFFICERS, AGENTS, SUBCONTRACTORS OR EMPLOYEES, BE LIABLE TO THE OTHER PARTY FOR ANY REASON, WHETHER IN CONTRACT OR IN TORT, FOR ANY DIRECT DAMAGES ARISING OUT OF OR BASED UPON THIS AGREEMENT (INCLUDING ALL
+
+- 13 -
+
+Execution Copy
+
+STATEMENTS OF WORK) EXCEEDING [***], REGARDLESS OF THE FORM IN WHICH ANY LEGAL OR EQUITABLE ACTION MAY BE BROUGHT.
+
+11.2
+
+No Consequential Damages. EXCEPT IN CONNECTION WITH (a) SECTION 5, (b) SECTION 10, AND (c) EITHER PARTY’S INFRINGEMENT OR VIOLATION OF THE OTHER PARTY’S OR A THIRD PARTY’S INTELLECTUAL PROPERTY RIGHTS, IN NO EVENT SHALL EITHER PARTY, ITS AFFILIATES, OR THEIR RESPECTIVE DIRECTORS, OFFICERS, AGENTS, SUBCONTRACTORS OR EMPLOYEES, BE LIABLE TO THE OTHER PARTY UNDER ANY THEORY OF TORT, CONTRACT, STRICT LIABILITY OR OTHER LEGAL OR EQUITABLE THEORY FOR EXEMPLARY, PUNITIVE, INDIRECT, SPECIAL, LOST PROFITS, ECONOMIC, CONSEQUENTIAL, LOSS OR DAMAGE TO DATA OR SIMILAR DAMAGES, EACH OF WHICH IS HEREBY EXCLUDED BY AGREEMENT OF THE PARTIES REGARDLESS OF WHETHER OR NOT SUCH PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+12.
+
+GENERAL.
+
+12.1
+
+Assignment. Neither Party may assign or transfer its rights or obligations in this agreement (by operation of law or otherwise), in whole or in part, to any person or entity without the prior written consent of the other Party, which consent shall not be unreasonable withheld; provided, however, that Gogo may assign such rights or obligations to (a) a successor or surviving corporation resulting from a merger, consolidation, sale of assets or stock or other corporate reorganization, or (b) its parent or affiliate, upon condition that the assignee will assume all of the Party’s obligations hereunder. Any attempt to assign or delegate in violation of this clause will be void.
+
+12.2
+
+Change of Control.
+
+(a)
+
+If Airspan receives a bona fide offer with respect to a proposed Change of Control Transaction [***], prior to entering into any legally binding commitment with respect to a Change of Control Transaction, subject to Gogo providing an undertaking to maintain such information in strict confidence and to use it solely for the purposes of Section 12.2(b) below, Airspan will deliver a written notice to Gogo specifying in reasonable detail [***] (the “Proposed Transaction”). As part of any Proposed Transaction, the Buyer (or surviving entity or successor in interest, as applicable) must be required to assume, in writing, all of the obligations of Airspan under the Agreement.
+
+(b)
+
+With respect to a Proposed Transaction:
+
+(c)
+
+[***].
+
+(d)
+
+[***].
+
+(e)
+
+If Airspan consummates the Change of Control Transaction, Gogo may, in its sole discretion, terminate this Agreement and all SOWs hereunder.
+
+(f)
+
+The [***] and all the provisions of this Section 12.2 shall expire upon the first to occur of the following:
+
+(i)
+
+Airspan’s or its direct or indirect parent company’s securities are offered to the public or listed for trading on a recognized public securities exchange;
+
+(ii)
+
+Gogo’s ATG network developed under this Agreement is decommissioned; and
+
+(iii)
+
+The termination of exclusivity pursuant to Sections 3.4 or 3.5 hereof.
+
+12.3
+
+Bankruptcy.
+
+(a)
+
+The Parties intend that all licenses granted under this Agreement are, for purposes of Section 365(n) of Title 11 of the United States Code, as amended from time to time (the “Bankruptcy Code”), licenses of rights to “intellectual property,” as that term is defined in section 101 of the Bankruptcy Code. Nothing in this agreement limits the licensee’s rights under section 365(n). The foregoing does not constitute an election under section 365(n).
+
+(b)
+
+With respect to any proposed or purported assumption or assignment of any right or duty under this Agreement by a Party or any Affiliate during or in connection with any bankruptcy proceeding related to that Party or Affiliate, the Parties agree and stipulate as follows:
+
+- 14 -
+
+Execution Copy
+
+(i)
+
+This Agreement is an executory agreement under Section 365 of the Bankruptcy Code;
+
+(ii)
+
+This Agreement is personal to the Parties and their Affiliates. Except for the licenses granted herein, as a licensor of intellectual property (as that term is defined in Section 101 of the Bankruptcy Code) under this Agreement, in entering this Agreement and granting the rights it grants under this Agreement, each Party has, in its efforts to protect its own valuable intellectual property, relied on the particular skills and business qualities of the recipients of such rights. Such skills and business qualities include the expected future innovation of the other Party and its Affiliates licensed under this Agreement, and the particular market segments addressed by the other Party and its Affiliates in their businesses. Therefore, the Parties agree that in the event of any Party’s entry into bankruptcy proceedings of any kind (including without limitation the entry into bankruptcy proceedings of any kind by any Affiliate), this Agreement is of the type described in Section 365(c)(1) of the Bankruptcy Code because U.S. patent and copyright law prohibits the assignment of a patent or copyright license without the consent of the licensor, and thus this Agreement may not be assumed or assigned in bankruptcy by a Party or any of its Affiliates without the consent of the other Party to this Agreement.
+
+(iii)
+
+Any purported assignment, assumption or transfer in violation of this Section 12.3 shall be deemed a material breach of this Agreement and shall be null and void. Subject to the provisions of this Section 12.3, this Agreement shall be binding upon and inure to the benefit of the Parties, their Affiliates and their permitted successors and assigns.
+
+(c)
+
+In connection with any bankruptcy petition filed by or against a Party or any Affiliate of such Party, such Party will make an election under Section 365(a) of the Bankruptcy Code to assume or reject this Agreement within five (5) business days following the filing of bankruptcy petition by or against such Party or Affiliate. The Parties acknowledge and agree that any assignment or assumption of this Agreement under Section 365 of the Bankruptcy Code constitutes a Change of Control Transaction.
+
+12.4
+
+Financial Information. Airspan will provide Gogo quarterly unaudited financial statements and annual audited financial statements at the time as such reports are provided to its equity holders.
+
+12.5
+
+Relationship. The relationship between the Parties to this Agreement is and shall be that of independent contractors. It is expressly agreed that nothing in this Agreement shall be construed to create or imply a partnership, joint venture, agency relationship or contract of employment. Neither Party shall have the authority to make any statement, representation nor commitment of any kind, or to take any action that shall be binding on the other Party except as authorized in writing by the Party to be bound. Personnel supplied by Airspan hereunder are not Gogo’s employees or agents, and Airspan assumes full responsibility for: (a) their acts, (b) compensation of Airspan personnel, and (c) the payment of worker’s compensation, disability benefits, or unemployment insurance or for withholding or paying employment related taxes for any such Airspan personnel.
+
+12.6
+
+Entire Agreement; Binding Effect; Amendment; Order of Precedence. This Agreement (together with the Exhibits, and SOW(s) hereto) constitutes the entire agreement between Airspan and Gogo regarding the subject matter hereof. All prior or contemporaneous agreements, proposals, understandings and communications between Airspan and Gogo regarding the subject matter hereof, whether oral or written, are superseded by and merged into this Agreement. Neither this Agreement nor any SOW hereto may be modified or amended except by a written instrument executed by both Airspan and Gogo. In the event of any inconsistency between the terms of this Agreement and any SOW issued under this Agreement, the terms and conditions of the SOW shall govern and control. Additional or different terms in any written communication from Airspan (such as an invoice or purchase order) are void.
+
+12.7
+
+Severability. If any one or more of the provisions contained in this Agreement shall for any reason be held to be invalid, illegal or unenforceable in any respect, the remaining provisions of this Agreement shall be enforceable to the maximum extent possible.
+
+- 15 -
+
+Execution Copy
+
+12.8
+
+Notices. Each Party must provide notices or other communications to the other Party in writing by: (i) certified mail, hand delivery or delivery by a courier service to the address below set forth (or such other address as may have been furnished by or on behalf of such Party by like notice), (ii) facsimile with receipt of a “transmission ok” acknowledgement, or (iii) e-mail. Communications sent by facsimile or e-mail shall be deemed effectively served upon dispatch, if receipt is confirmed electronically. Communications sent by certified mail or courier service shall be deemed effectively served three (3) calendar days after deposit. All other general correspondence may be communicated by electronic means (e-mail).
+
+Gogo
+
+Airspan
+
+Gogo Business Aviation LLC
+
+105 Edgeview Drive, Suite 300
+
+Broomfield, CO 80021
+
+Attn: General Counsel
+
+eMail: legalnotices@gogoair.com
+
+AIRSPAN NETWORKS INC.
+
+777 Yamato Road, Suite 310
+
+Boca Raton, FL 33431
+
+Attn: Chief Financial Officer
+
+eMail: contracts@airspan.com
+
+12.9
+
+Waiver. No waiver by either Party of a breach of any term, provision or condition of this Agreement by the other Party shall constitute a waiver of any succeeding breach of the same or any other provision hereof. No such waiver shall be valid unless executed in writing by the Party making the waiver.
+
+12.10
+
+Counterparts. This Agreement may be executed in counterparts, each of which shall be deemed an original, and all of which together shall constitute one instrument.
+
+12.11
+
+Headings. The section and subsection headings used in this Agreement are intended for reference purposes only and shall not affect the interpretation or construction of any provision of this Agreement.
+
+12.12
+
+Construction. Each Party acknowledges that this Agreement was drafted jointly by the Parties, and it shall be construed neither against nor in favor of either Party. The term “including” or “include”, as used in this Agreement, shall mean “including, but not limited to”.
+
+12.13
+
+Third Party Beneficiaries. Nothing contained in this Agreement is intended to confer nor shall confer upon any person (other than the Parties hereto and their permitted assigns) any rights, benefits or remedies of any kind or character whatsoever, and no such person shall be deemed a third party beneficiary under or by reason of this Agreement.
+
+12.14
+
+Accrued Rights. The termination or expiration of this Agreement shall not effect or prejudice either Party’s accrued rights hereunder.
+
+12.15
+
+Governing Law, Venue and Language. THIS AGREEMENT SHALL BE GOVERNED BY AND CONSTRUED IN ACCORDANCE WITH THE LAWS OF THE STATE OF nEW yORK, WITHOUT REGARD TO PRINCIPLES OF CONFLICTS OF LAW. THE UNITED NATIONS CONVENTION ON CONTRACTS FOR THE INTERNATIONAL SALE OF GOODS SHALL NOT APPLY TO THIS AGREEMENT. VENUE FOR ANY LEGAL ACTION ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL BE EXCLUSIVELY THE STATE OR FEDERAL COURTS LOCATED IN THE BOROUGH OF MANHATTAN, NEW YORK CITY, NEW YORK. THE PARTIES HEREBY CONSENT TO THE JURISDICTION OF SUCH COURTS. NOTHING IN THIS AGREEMENT AFFECTS ANY STATUTORY RIGHTS OF CONSUMERS THAT CANNOT BE WAIVED OR LIMITED BY CONTRACT. THE PARTIES WAIVE JURY TRIAL WITH RESPECT TO ANY DISPUTE UNDER THIS AGREEMENT.
+
+12.16
+
+Solicitation of Employees. Either Party may hire any personnel of the other Party who has responded to publicity for a position that has been publicized through local or national newspapers, Internet postings, radio or television advertising, job fairs, notices to colleges or technical schools, or placement professionals. Except as provided above, during the term of this Agreement or any SOW and for a period of 6 months thereafter, neither Party shall solicit any of the other Party’s employees or contractors who has been employed or engaged by the other Party over the preceding 12 month period and specifically worked on or in connection with this Agreement or any SOW.
+
+12.17
+
+Dispute Resolution. Prior to initiating formal dispute resolution procedures with respect to any dispute, the Parties shall attempt to resolve such dispute informally, as follows: (a) the Parties’ respective project managers for the applicable SOW shall attempt in good faith to resolve all disputes. If the project managers are unable to resolve a
+
+- 16 -
+
+Execution Copy
+
+dispute in an amount of time that both Parties deem reasonable under the circumstances, then upon written notice to the other Party, either Party may refer the dispute to the applicable senior corporate executives for resolution pursuant to Section 12.17(b); (b) within five (5) business days after receipt of a written notice under Section 12.17(a), the designated senior corporate executives shall discuss the problem and negotiate in good faith in an effort to resolve the dispute without the necessity of any formal dispute resolution proceeding. All negotiations shall be strictly confidential and used solely for the purposes of settlement. Any materials prepared by one Party for these proceedings shall not be used as evidence by the other Party in any subsequent litigation; provided, however, the underlying facts supporting such materials may be subject to discovery. Notwithstanding the foregoing, each Party shall be entitled to injunctive relief from a court of competent jurisdiction without the need to post any bond or demonstrate actual damages in the event of a breach or anticipatory breach by the other Party that would cause irreparable injury and damage.
+
+12.18
+
+Jury Trial Wavier. Each Party waives any right to a jury trial in any proceeding arising out of or related to this Agreement.
+
+12.19
+
+Press Releases. Neither Party shall issue any press release concerning this Agreement without the other’s consent. Neither Party may use the name, trade name, trademark, logo, acronym or other designation of the other in connection with any press release, advertising, publicity materials or otherwise without the prior written consent of the other Party. The Parties will coordinate on the timing and content of any public and Gogo-facing press releases, announcements and communications regarding this Agreement or any SOW. Any and all public announcements must be pre-approved by Gogo as to timing and content.
+
+12.20
+
+Export Laws. Each Party will comply with applicable import and export control laws and regulations, including those of the United States that prohibit or limit export for certain uses or to certain end users.
+
+12.21
+
+Third Party Code of Conduct. Airspan shall comply with Gogo’s Third Party Code of Conduct in the performance of the Services hereunder. The Third Party Code of Conduct is located at http://www.gogoair.com/policies.
+
+[Signature Page Follows]
+
+- 17 -
+
+Execution Copy
+
+IN WITNESS WHEREOF the Parties hereto, by their duly authorized representatives, have executed this Agreement as of the date first set forth above.
+
+GOGO BUSINESS AVIATION LLC
+
+AIRSPAN NETWORKS INC.
+
+By:
+
+/s/ Sergio Aguirre
+
+By:
+
+/s/ Eric Stonestrom
+
+Name:
+
+Sergio Aguirre
+
+Name:
+
+Eric Stonestrom
+
+Title:
+
+President
+
+Title:
+
+President & CEO
+
+- 18 -

@@ -1,0 +1,84 @@
+2
+itos-ex10_14.htm
+EX-10.14
+
+EX-10
+
+Exhibit 10.14
+
+Execution Version
+
+Amendment No. 1 to Collaboration and LICENSE AGREEMENT
+
+This Amendment No. 1 (“Amendment No. 1”) to the Collaboration and License Agreement dated June 11, 2021 (the “Agreement”) between GLAXOSMITHKLINE INTELLECTUAL PROPERTY (No. 4) LIMITED, a company registered in England and Wales (registered number 11721880) and having business offices at 980 Great West Road, Brentford, Middlesex TW8 9GS United Kingdom (“GSK”), and iTeos Belgium S.A., a public limited company having an office at Rue des Frères Wright, 29, B-6041 Gosselies Belgium (“ITEOS”) is effective as of January 24, 2022 (“Amendment Effective Date”). Each of GSK and ITEOS may be referred to herein as a “Party” and together, the “Parties.”
+
+RECITALS
+
+WHEREAS, GSK and ITEOS desire to amend the Agreement as set forth herein in accordance with Section 17.10.
+
+NOW, THEREFORE, for good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the Parties agree as follows:
+
+1.
+Definitions. Capitalized terms used but not defined herein shall have the meaning set forth in the Agreement.
+
+2.
+The following sentence is hereby added to the definition of Licensed Product: “Licensed Product does not include, and GSK is not granted right to, any pharmaceutical product that is comprised of or contains any compound, antibody, or other pharmaceutically active ingredient owned or Controlled by ITEOS or any of its Affiliates, in each case, that is not a Licensed Antibody.”
+
+3.
+The following sentence is hereby added to Section 9.6 after the third sentence of such section: “Notwithstanding any provision to the contrary set forth in this Agreement, nothing in this Agreement will be interpreted to grant to GSK any rights to any compound, antibody, or other pharmaceutically active ingredient owned or Controlled by ITEOS or any of its Affiliates other than a Licensed Antibody.”
+
+4.
+Table 12.6 is hereby deleted in its entirety and replaced with the following table:
+
+Table 12.6 – Development Deadlines
+
+Development Milestone Event
+
+Deadline for Achievement
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+1
+
+Exhibit 10.14
+
+Execution Version
+
+5.
+Counterparts. The Parties hereby confirm and agree that, as amended herein, the Agreement remains in full force and effect. This Amendment No. 1 may be executed and delivered (including by PDF or any other electronically transmitted signatures) in counterparts, each of which shall be deemed an original, but all of which together shall constitute one and the same instrument.
+
+IN WITNESS WHEREOF, each Party has caused this Amendment No. 1 to be duly executed by its authorized representative on the Amendment Effective Date.
+
+iTeos Belgium, S.A.
+
+/s/ [***]
+
+Name: [***]
+
+Title: Director
+
+/s/ [***]
+
+Name: [***]
+
+Title: Director
+
+GLAXOSMITHKLINE INTELLECTUAL PROPERTY NO. 4 LIMITED
+
+/s/ [***]
+
+Name: [***]
+
+Title: Corporate Director
+
+2

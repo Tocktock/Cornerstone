@@ -1,0 +1,152 @@
+EX-10.32
+32
+tm2135648d1_ex10-32.htm
+EXHIBIT 10.32
+
+Exhibit 10.32
+
+JPMC Agreement No. CW232350
+
+Amendment 2 to Master Services Agreement CW232350
+
+This Amendment (“Amendment”)
+to the Master Services Agreement (JPMC Agreement No. CW232350 “Agreement”) is made and entered into as of June 6,
+2019 (“Amendment Effective Date”) by JPMorgan Chase Bank, National Association (“JPMC”) and CompoSecure,
+L.L.C., a Delaware limited liability company (“Supplier”).
+
+JPMC and Supplier have entered into the Agreement.
+JPMC and Supplier now wish to amend the Agreement to amend and restate restrictions on Supplier’s use of information provided to
+Supplier in connection with the Agreement and any schedule or other contracting document (each, a “Schedule”) to which
+the terms and conditions of the Agreement apply. NOW THEREFORE, in consideration of the foregoing premises and the promises, terms
+and conditions set forth below and other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged,
+JPMC and Supplier, intending to be legally bound, agree as follows:
+
+A. The following is added at the end of the Article
+7. Confidentiality section of the Agreement, and supersedes any conflicting provision of the Agreement and all Schedules:
+
+1.
+
+Limitations on Use of JPMC Confidential Information.
+
+(a)
+
+JPMC hereby grants Supplier a non-exclusive, non-perpetual, revocable, non-sublicensable, limited right
+to use JPMC Confidential Information solely for JPMC’s benefit to provide goods, services, licensed materials and other deliverables
+(“Deliverables”) to JPMC pursuant to the applicable contracting document during the term of that document. JPMC reserves
+all other rights in the JPMC Confidential Information.
+
+(b)
+
+Supplier will disclose JPMC Confidential Information only to Supplier’s and its direct and indirect
+subcontractors’ employees, consultants, agents or any other individuals acting on Supplier’s behalf, solely for the purpose
+of providing Deliverables to JPMC and only to those who are obligated to maintain the confidentiality of JPMC Confidential Information
+upon confidentiality and use limitation terms no less onerous than those contained in this Agreement. Supplier may only pass through rights
+to use JPMC Confidential Information to subcontractors to the extent the Supplier is expressly allowed to do so in writing by JPMC (e.g.,
+under this Agreement or the Schedule) for the expressly stated purpose.
+
+(c)
+
+Supplier will not attempt to (i) identify or re-identify any person or entity whose information may
+be included in any de-identified or aggregated information or data that it receives in connection with this Agreement or any Schedule,
+or (ii) decrypt or unmask any encrypted or masked information or data that Supplier receives in connection with this Agreement or
+any Schedule.
+
+(d)
+
+Supplier will not (i) use or reference any JPMC Confidential Information, or any aggregate data or
+performance data derived from JPMC Confidential Information or JPMC’s access to or use of Deliverables, for any purpose that is
+not expressly authorized under this Agreement or the Schedule; or (ii) except to the extent reasonably required for the provision
+of the Deliverables, or as otherwise expressly authorized by JPMC, use JPMC Confidential Information to contact any person, and in no
+event will any such contact involve marketing or solicitation of products or services.
+
+(e)
+
+All limitations and restrictions in this section apply during the term of this Agreement, during the term
+of each Schedule and after each such term.
+
+1
+
+JPMC Agreement No. CW232350
+
+B. Section 2.3 “Termination for Convenience”
+included in the Agreement is hereby amended and restated in full, as follows:
+
+Section 2.3 Termination for Convenience.
+
+Subject to continued compliance
+with applicable exclusivity restrictions and required minimum purchase obligations by JPMC and other provisions set forth in Amendment
+2 to Schedule Five CW876787 and any future applicable Schedule, or amendment thereto, if any such restrictions or obligations are in effect
+at the time JPMC gives notice to Supplier, JPMC may terminate this Agreement or any Schedule(s) for convenience, in whole or in part,
+at any time and without liability by giving Supplier at least thirty (30) days prior written notice of the termination date.
+
+C. Section 14.2 “Assignment” included
+in the Agreement is hereby amended and restated in full, as follows:
+
+Section 14.2 Assignment.
+
+Neither party may assign any rights
+or delegate any obligations under this Agreement without the prior written consent of the other party, which consent will not be unreasonably
+withheld or delayed. Notwithstanding that consent, any assignment by Supplier that is not accompanied by an assumption agreement executed
+by the assignee will be null and void. Notwithstanding the foregoing, (1) JPMC may assign this Agreement, any Schedule, or any of its
+rights under each of the preceding, in whole or in part, without Supplier's consent (a) to any existing or future JPMC entity; or (b)
+to another JPMC Affiliate or to an acquirer or successor-in-interest to JPMC or one of its Affiliates in the case of a JPMC merger, acquisition,
+divestiture, consolidation or corporate reorganization (whether or not JPMC is the surviving entity); and (2) Supplier may assign this
+Agreement, any Schedule, or any of its rights under each of the preceding, in whole or in part, without JPMC’s consent but with
+written notice to JPMC, to any acquirer or successor-in-interest to Supplier by merger, acquisition, consolidation or corporate reorganization
+(whether or not Supplier is the surviving entity); provided that (i) the assignee can demonstrate to JPMC’s reasonable satisfaction
+that it has the ability (financially, technically and operationally) to perform under this Agreement, (ii) the assignee is not a competitor
+of JPMorgan Chase & Co., as reasonably determined by JPMC and (iii) the assignee is not, and has not been, involved in any litigation
+with JPMC. Any assignment or attempted assignment contrary to this Section 14.2 will be a material breach of this Agreement and null and
+void. This Agreement and each Schedule will be binding upon the successors, legal representatives and permitted assigns of the parties.
+For purposes of this Section 14.2, any merger or other combination by operation of law with respect to Supplier constitutes an assignment.
+
+D. Except as amended by this Amendment, the Agreement
+and each Schedule remain in full force and effect. Terms with initial capital letters not defined in this Amendment have the definitions
+given in the Agreement. By executing this Amendment, JPMC and Supplier ratify the terms of the Agreement and each Schedule, as modified
+by this Amendment. If any provision of this Amendment conflict with any provision of the Agreement or any Schedule, the provision of this
+Amendment will control, even if a Schedule states that it or any of its provisions control over a conflicting provision of the Agreement.
+This Amendment may be executed in one or more counterparts, each of which will be deemed an original, together constituting the same instrument.
+All references in the Agreement to “this Agreement” or the like are deemed to refer to the Agreement, as amended by this Amendment.
+
+(signatures follow on next page)
+
+2
+
+JPMC Agreement No. CW232350
+
+IN WITNESS WHEREOF, JPMC and Supplier have
+caused duly authorized representatives of their respective companies to execute this Amendment as of the Amendment Effective Date.
+
+JPMorgan Chase Bank, National Association
+
+CompoSecure, L.L.C.
+
+By:
+
+/s/ illegible
+
+By:
+
+/s/ Jonathan C. Wilk
+
+Printed Name:
+
+Doug Roginson
+
+Printed Name:
+
+Jonathan C. Wilk
+
+Title:
+
+Vice President
+
+Title:
+
+CEO
+
+The parties acknowledge
+and agree that this Amendment may be signed using a digital image of the signing party’s hand-written signature and that such electronic
+signature will be considered legally binding.
+
+3

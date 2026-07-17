@@ -1,0 +1,1353 @@
+2
+itos-ex101_116.htm
+EX-10.1
+
+itos-ex101_116.htm
+
+Exhibit 10.1**
+
+Certain information (indicated by “[***]”) and schedules have been excluded from this agreement because such information (i) is not material and (ii) would be competitively harmful if publicly disclosed.
+
+COLLABORATION AND LICENSE AGREEMENT
+
+Between
+
+GLAXOSMITHKLINE INTELLECTUAL PROPERTY (No. 4) LIMITED
+
+And
+
+ITEOS belgium s.a.
+
+Table of Contents
+
+Article 1 Definitions
+
+1
+
+Article 2 Effectiveness
+
+29
+
+Article 3 DEVELOPMENT Program
+
+29
+
+Article 4 Regulatory matters
+
+44
+
+Article 5 Manufacturing and supply
+
+47
+
+Article 6 COMMERCIALIZATION; MEDICAL AFFAIRS
+
+49
+
+Article 7 Management of the Collaboration
+
+63
+
+Article 8 Financial Provisions
+
+73
+
+Article 9 Licenses; EXCLUSIVITY
+
+87
+
+Article 10 CONFIDENTIALITY; Publications and Presentations
+
+93
+
+Article 11 INTELLECTUAL PROPERTY
+
+98
+
+Article 12 Term and Termination
+
+104
+
+Article 13 Effects of Expiration or Termination
+
+106
+
+Article 14 Representations and Warranties AND Covenants
+
+112
+
+Article 15 Indemnification
+
+115
+
+Article 16 DISPUTE RESOLUTION
+
+118
+
+Article 17 MISCELLANEOUS
+
+120
+
+SCHEDULES
+
+SCHEDULE 1.84 – EOS-448 Antibody
+
+SCHEDULE 1.250 – Third Party Component Contracts
+
+SCHEDULE 3.2 – Initial Global Development Plan
+
+SCHEDULE 3.12 – Form of Material Transfer Record
+
+SCHEDULE 8.3.1 – Pre-Tax Profit or Loss Schedule
+
+SCHEDULE 8.11 – Form of Invoice
+
+SCHEDULE 10.6 – Press Release
+
+SCHEDULE 14.2.1 – ITEOS Background Patents
+
+-i-
+
+COLLABORATION AND LICENSE AGREEMENT
+
+This Collaboration and License Agreement (the “Agreement”) is made and entered into as of June 11, 2021 (“Execution Date”) and is effective as of the Effective Date (as defined below), between GLAXOSMITHKLINE INTELLECTUAL PROPERTY (No. 4) LIMITED, a company registered in England and Wales (registered number 11721880) and having business offices at 980 Great West Road, Brentford, Middlesex TW8 9GS United Kingdom (“GSK”), and iTeos Belgium S.A., a public limited company having an office at Rue des Frères Wright, 29, B-6041 Gosselies Belgium (“ITEOS”). GSK and ITEOS are sometimes referred to individually as a “Party” and collectively as the “Parties.”
+
+BACKGROUND
+
+WHEREAS, GSK, among other things, conducts programs to discover, develop, manufacture and commercialize innovative pharmaceutical medicines;
+
+WHEREAS, ITEOS, among other things, conducts programs to discover and develop therapeutic products for the treatment and prevention of diseases; and
+
+WHEREAS, GSK and ITEOS desire to enter into this Agreement to collaborate with respect to the Development Program and the Commercialization of Licensed Products that may result therefrom, consistent with the terms and conditions set forth herein.
+
+NOW, THEREFORE, for good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the Parties agree as follows:
+
+Article 1
+Definitions
+
+Capitalized terms used in this Agreement, whether used in the singular or plural, shall have the meanings set forth below, unless otherwise specifically indicated herein.
+
+1.1
+
+“AAA Rules” has the meaning set forth in Section 16.2 (Arbitration).
+
+1.2
+
+“ACCME Standards” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.3
+
+“Accounting Standards” means, with respect to GSK, IFRS, and with respect to ITEOS, GAAP, in each case, as consistently applied by the applicable Party and its Affiliates, as the same may be changed from time to time by the Parties.
+
+1.4
+
+“Acquiree” has the meaning set forth in Section 9.12.3(b) (New Affiliate Exception).
+
+1.5
+
+“Acquiror” has the meaning set forth in Section 9.12.3(a) (New Affiliate Exception).
+
+1.6
+
+“Additional Development Activities” has the meaning set forth in Section 3.4.1 (Additional Development Proposals).
+
+1.7
+
+“Additional Development Proposal” has the meaning set forth in Section 3.4.1 (Additional Development Proposals).
+
+1.8
+
+“Affiliate” means, with respect to a given Party, any corporation, firm, limited liability company, partnership or other entity that directly or indirectly controls, or is controlled by, or is under common control with such Party. For the purposes of this Section 1.8 (Affiliate), “control” means ownership, directly or indirectly through one or more Affiliates, of more than fifty percent (50%) of the shares of stock entitled to vote for the election of directors, in the case of a corporation, or more than fifty percent (50%) of the equity interests in the case of any other type of legal entity, or status as a general partner in the case of any partnership, or any other arrangement whereby a corporation or other entity controls or has the right to control the board of directors or equivalent governing body or management of another corporation or other entity.
+
+1.9
+
+“Agreement” has the meaning set forth in the preamble.
+
+1.10
+
+“Alliance Manager” has the meaning set forth in Section 7.8 (Alliance Managers).
+
+1.11
+
+“Allowable Expenses” has the meaning set forth in the Pre-Tax Profit or Loss Schedule.
+
+1.12
+
+“AMA” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.13
+
+“Applicable Law” means, individually and collectively, any and all laws, statutes, ordinances, rules, directives and regulations of any governmental or regulatory authority within the applicable jurisdiction that may be in effect from time to time that apply to a Party’s activities or obligations under or in connection with this Agreement, including, if applicable, GMP, GLP, GCP, the FD&C Act, the Prescription Drug Marketing Act of 1987, the Generic Drug Enforcement Act of 1992 (21 U.S.C. § 335a et seq.), the Anti-Kickback Statute (42 U.S.C. § 1320a-7b et seq.), the False Claims Act (31 U.S.C. § 3729 et seq.), Civil Monetary Penalties Law (42 U.S.C. § 1320a-7a), the Patient Protection and Affordable Care Act (42 U.S.C. § 18001 et seq.), the Social Security Act (42 U.S.C. Chapter 7), the Antifraud and Abuse Amendment to the Social Security Act, Federal Program Fraud Civil Remedies Act (31 U.S.C. § 3801 et seq.), FCPA, Data Protection Laws, and all applicable implementing regulations for the foregoing, and all applicable state laws and the laws of the District of Columbia corresponding to any of the foregoing, all as amended from time to time.
+
+1.14
+
+“Approved Labeling” means, with respect to a Licensed Product: (a) the Regulatory Authority-approved full prescribing information for such Licensed Product; and (b) the Regulatory Authority-approved labels and other written, printed, or graphic materials on any container, wrapper, or any package insert that is used with or for such Licensed Product.
+
+1.15
+
+“Arising Technology” means all Patents and Know-How invented, discovered, created or developed by or on behalf of a Party solely or the Parties jointly in connection with the exercise of its or their rights or performance of its or their obligations under this Agreement.
+
+-2-
+
+1.16
+
+“Background Technology” of a Party means, in the case of GSK, the GSK Background Technology, and in the case of ITEOS, the ITEOS Background Technology.
+
+1.17
+
+“Balancing Payment” has the meaning set forth in Section 8.3.5(b) (Quarterly Reconciliation Payment).
+
+1.18
+
+“Bankruptcy Code” means Title 11 of the United States Code.
+
+1.19
+
+“Benchmark Countries” has the meaning set forth in Section 1.181 (Net Sales).
+
+1.20
+
+“Biosimilar Product” means with respect to a given Licensed Product in a particular country in the Territory, any product sold by a Third Party not authorized by GSK or its Affiliates or its or their Sublicensees that is approved by the applicable Regulatory Authority for such country through any application or submission filed with a Regulatory Authority for Regulatory Approval of a biological product determined to be biosimilar or interchangeable to such Licensed Product, including an application filed under 42 U.S.C. § 262(k) or any similar provisions in a country outside the United States, based in reliance, at least in part, on data generated for a Regulatory Approval of such Licensed Product.
+
+1.21
+
+“BLA” means a Biologics License Application (as more fully defined in 21 C.F.R. 601.2 et seq. or its successor regulation) and all amendments and supplements thereto filed with the FDA.
+
+1.22
+
+“BPCIA” has the meaning set forth in Section 11.3.1 (Notification of Infringement).
+
+1.23
+
+“Breaching Party” has the meaning set forth in Section 12.3.1 (Termination for Material Breach).
+
+1.24
+
+“Business Day” means a day that is not (a) a Saturday, Sunday or a day on which banking institutions in New York, New York or London, United Kingdom are required by Applicable Law to remain closed, or (b) the nine (9) consecutive calendar days beginning on December 24 through and including January 1 of each Calendar Year to the extent those days are not included in (a) in this Section 1.24.
+
+1.25
+
+“Calendar Quarter” means the respective periods of three (3) consecutive calendar months ending on March 31, June 30, September 30 and December 31.
+
+1.26
+
+“Calendar Year” means each successive period of twelve (12) months commencing on January 1 and ending on December 31.
+
+1.27
+
+“CDA” means that certain Mutual Confidential Disclosure Agreement between GlaxoSmithKline LLC and iTeos Belgium SA [***].
+
+1.28
+
+“Cessation” has the meaning set forth in Section 12.5 (Termination for Cessation of Development or Commercialization).
+
+1.29
+
+“Change of Control” means, with respect to a Party, an event or transaction or series of events or transactions by which: (a) any Third Party (or group of Third Parties acting in
+
+-3-
+
+concert) becomes the beneficial owner, directly or indirectly, of more than fifty percent (50%) of the outstanding securities of such Party or the total voting power of such securities normally entitled to vote in elections of directors; (b) (i) such Party reorganizes, consolidates or comes under common control with, or merges into another entity, or (ii) any entity reorganizes, consolidates or comes under common control with, or merges into, such Party, in either event of the foregoing ((i) or (ii)) where more than fifty percent (50%) of the total voting power of the securities outstanding of the surviving entity normally entitled to vote in elections of directors is not held by the parties holding at least fifty percent (50%) of the outstanding shares of such Party immediately preceding such consolidation or merger; or (c) such Party conveys, transfers or leases to a Third Party all or substantially all of its assets or business relating to this Agreement.
+
+1.30
+
+“Clinical Manufacturing” or “Clinical Manufacture” means Manufacture of a Licensed Product (including the cost of Manufacturing Licensed Antibody contained in Licensed Product) or acquisition of such Licensed Antibody and Licensed Product from a CMO, in each case, for use in Clinical Trials.
+
+1.31
+
+“Clinical Manufacture Costs” means Manufacturing Costs of the Manufacture of a given Licensed Product (including the cost of Manufacturing Licensed Antibody contained in Licensed Product) or other compound, antibody, or product Controlled by GSK, in each case, for clinical use of such Licensed Product or other compound, antibody, or product Controlled by GSK, as applicable, anywhere in the Territory.
+
+1.32
+
+“Clinical Trial” means any study in humans to obtain information regarding a pharmaceutical product, including information relating to the safety, tolerability, pharmacological activity, pharmacokinetics, dose ranging, or efficacy of such product, including a Registration Study.
+
+1.33
+
+“CMC Development” means the following Development activities: test method development and stability testing, process development, control strategy and process validation, process scale-up, formulation development, delivery system development, quality assurance and quality control development, and other related activities, in each case, pertaining to Development of a process to Manufacture Licensed Antibody and Licensed Products.
+
+1.34
+
+“CMOs” has the meaning set forth in Section 1.167.2 (Manufacturing Cost).
+
+1.35
+
+“CMS” has the meaning set forth in Section 6.9.5 (Reporting).
+
+1.36
+
+“Co-Administration Studies” means clinical studies for co-administration (not co-formulation) of pharmaceutical products (that are not Licensed Products) together with the EOS-448 Sole Active Product.
+
+1.37
+
+“Co-Administration Therapy” means the use or method of using the EOS-448 Sole Active Product and at least one other pharmaceutical product together in either concomitant or sequential administration. For the avoidance of doubt, a Co-Administration Therapy (a) will not be considered a Co-Formulated Product hereunder and (b) will not be considered
+
+-4-
+
+a Combination Product hereunder unless such Co-Administration Therapy is sold and invoiced under a single invoiced price.
+
+1.38
+
+“Co-Chair” has the meaning set forth in Section 7.6.1 (Membership).
+
+1.39
+
+“Co-Formulated Product” has the meaning set forth in Section 1.181 (Net Sales).
+
+1.40
+
+“Collaboration In-License” has the meaning set forth in Section 9.11.3 (New Collaboration In-Licenses).
+
+1.41
+
+“Combination Product” means a Licensed Product that includes a Licensed Antibody in combination with one or more pharmaceutically active ingredients that is not any other Licensed Antibody (the “Other Component(s)”), whether in a single formulation finished form, co-packaged, or as separate products otherwise sold and invoiced under a single invoiced price.
+
+1.42
+
+“Commercial Manufacturing” or “Commercial Manufacture” means Manufacture of a Licensed Product (including the cost of Manufacturing Licensed Antibody contained in Licensed Product) or acquisition of such Licensed Antibody and Licensed Product from a CMO, in each case, for Commercialization of such Licensed Product in the Territory.
+
+1.43
+
+“Commercialization” means any and all activities directed to the preparation for sale of, offering for sale of, or sale of a given Licensed Product, including activities related to marketing, promoting, selling, distributing, seeking, obtaining, and maintaining Reimbursement Approvals, and importing and exporting such Licensed Product, launch preparation activities and interacting with Regulatory Authorities regarding any of the foregoing, but excluding, in each case (a) for clarity, interactions with Regulatory Authorities regarding Clinical Trials, obtaining Regulatory Approvals, and other Development activities (including for clarity Manufacturing activities related to Development) and (b) activities directed to Development, Manufacturing, or Medical Affairs. “Commercialize” and “Commercializing” shall have their correlative meanings.
+
+1.44
+
+“Commercialization Excess Costs” has the meaning set forth in the Pre-Tax Profit or Loss Schedule.
+
+1.45
+
+“Commercialization Permitted Overage” has the meaning set forth in the Section 8.3.5(c) (Overruns).
+
+1.46
+
+“Commercialization Plan” means the Global Strategic Launch Plan and the Joint Commercialization Plan.
+
+1.47
+
+“Commercialization Report” has the meaning set forth in Section 6.8 (Commercialization Reporting).
+
+1.48
+
+“Commercially Reasonable Efforts” means such efforts that are consistent with the efforts and resources normally used by GSK (in the case of GSK) or ITEOS (in the case of ITEOS) in the exercise of its reasonable business discretion relating to Development and Commercialization of a compound, antibody, or product owned by it or to which it has
+
+-5-
+
+exclusive rights, with similar characteristics as the applicable relevant Licensed Antibody and Licensed Product hereunder, that is of similar market potential at a similar stage in its development or product life as such Licensed Antibody or Licensed Product, taking into account issues of patent coverage, safety and efficacy, product profile, the competitiveness of the marketplace, the proprietary position, the regulatory structure involved, profitability, and other relevant factors, including technical, legal, scientific or medical factors. For purposes of clarity, it is anticipated that the level of effort may be different for different markets and may change over time, reflecting changes in the status of the product and the market(s) involved.
+
+1.49
+
+“Committed Development Spend” has the meaning set forth in Section 3.2.3 (Shared Development Costs).
+
+1.50
+
+“Committed Studies” has the meaning set forth in Section 3.2.1 (Global Development Plan).
+
+1.51
+
+“Committee” means, individually, the JSC, the JDC, the JCC and the Financial Working Group or any other Subcommittee established as set forth in Section 7.5 (Other Subcommittees).
+
+1.52
+
+“Committee Deadlock” has the meaning set forth in Section 7.7.1 (Committee Decision Making).
+
+1.53
+
+“Companion Diagnostic” means a product designed for use in a diagnostic biomarker assay tailored or optimized for use with a Licensed Product, for predicting or monitoring the suitability of such Licensed Product for prophylactic or therapeutic use in human patients or defined subpopulations thereof. A Companion Diagnostic shall be intended for use (a) as a means to select or monitor the patient population for the conduct of clinical studies of such Licensed Product, (b) to predict predisposition to treatment in clinical use with such Licensed Product, or (c) to predict or monitor potential safety considerations in clinical use with such Licensed Product. Use of a Companion Diagnostic to guide use of the Licensed Product will be contingent on appropriate Regulatory Approvals for such uses as deemed necessary by the FDA or other similar Regulatory Authority with appropriate jurisdiction.
+
+1.54
+
+“Competing Product” has the meaning set forth in Section 11.3.1 (Notification of Infringement).
+
+1.55
+
+“Compliance Officers” has the meaning set forth in Section 6.9.1 (Establishment of Compliance Program).
+
+1.56
+
+“Confidential Information” means any technical, business or other information provided by or on behalf of one Party (the “Disclosing Party”) to the other Party (the “Receiving Party”) in connection with this Agreement, whether prior to, on, or after the Effective Date, including under the CDA.
+
+-6-
+
+1.57
+
+“Control” (including variations such as “Controlled,” “Controlling” and the like) means, (a) with respect to any Know-How, Patent, material, information or other intellectual property, the possession (whether by sole or joint ownership or license or otherwise, other than the licenses granted hereunder) of the ability to grant access, right to use, license or sublicense or other right to Exploit such Know-How, Patent, material, information or other intellectual property as set forth in this Agreement, or (b) with respect to any compound, antibody or product, the possession by a Party of the ability (whether by sole or joint ownership, license or otherwise, other than the licenses granted hereunder) to grant a license or sublicense under Patents that claim such compound, antibody or product or under Know-How that is used in connection with the Exploitation of such compound, antibody, or product, in each case ((a) and (b)), without violating the terms of any agreement or other arrangement with any Third Party, or any Applicable Law. Notwithstanding any provision to the contrary set forth in this Agreement, a Party and its Affiliates will not be deemed to “Control” any Know-How, Patent, material, information, other intellectual property, compound, antibody or product, that, prior to the consummation of a Change of Control of such Party, is owned or in-licensed by a Third Party (or an Affiliate of such Third Party) that becomes an Affiliate of such acquired Party after the Effective Date as a result of such Change of Control unless (i) prior to the consummation of such Change of Control, such acquired Party or any of its Affiliates also Controlled such Know-How, Patents, material, information, other intellectual property, compound, antibody or product, (ii) any such Know-How, Patents, material, information, other intellectual property, compound, antibody or product arise from participation by employees or consultants of such Third Party in any activities conducted under this Agreement after such Change of Control, or (iii) the Know-How, Patents, material, information, other intellectual property, compound, antibody or product, owned or in-licensed by such Third Party were not used in the performance of activities under this Agreement prior to the consummation of such Change of Control, but after the consummation of such Change of Control, such acquired Party or any of its Affiliates actually uses any such Know-How, Patents, material, information, other intellectual property, compound, antibody or product, in the performance of its obligations or exercise of its rights under this Agreement, in each of which cases ((i) through (iii)), such Know-How, Patents, material, information, other intellectual property, compound, antibody or product, will be deemed “Controlled” by such Party for purposes of this Agreement.
+
+1.58
+
+“Controlling Party” has the meaning set forth in Section 11.2.1 (Subject Patents).
+
+1.59
+
+“Cost Share End Date” has the meaning set forth in Section 6.7.3 (Effects of Opt-Out).
+
+1.60
+
+“Cost Share Start Date” has the meaning set forth in Section 8.3.1 (Pre-Tax Profit or Loss).
+
+1.61
+
+“Cover” or “Covered” or “Covering” means, with respect to a particular subject matter at issue and a relevant Patent, that the manufacture, use, sale, offer for sale, or importation of such subject matter would fall within the scope of one or more claims in such Patent.
+
+-7-
+
+1.62
+
+“Currency Gains and Losses” means the gain or loss resulting from changes in exchange rates between the functional currency and the foreign currency in which the transaction is denominated, to the extent specifically identifiable to a Licensed Product for which costs are shared by the Parties hereunder and shall only include the currency gains and losses realized between the end of a Calendar Quarter and the date of invoice payment for that Calendar Quarter.
+
+1.63
+
+“Data” means pre-clinical data (including computational validation, genetic data (including genotype, phenotype and genetic sequencing data), in vitro and in vivo data), clinical data (including enrollment data, broad data sets, study and investigator reports, both preliminary and final, statistical analyses, expert opinions and reports, safety and other electronic databases), and regulatory, Manufacturing, biological, chemical, pharmacological, toxicological, pharmaceutical, physical, analytical, safety and quality control data, information and documentation, whether in written or electronic form.
+
+1.64
+
+“Data Protection Law” means all applicable laws, rules and regulations, including, to the extent applicable, the United States Health Insurance Portability and Accountability Act of 1996 and its implementing regulations (“HIPAA”), the California Consumer Privacy Act of 2018 (“CCPA”), and any applicable supranational or national legislation relating to privacy and data protection, direct marketing or the interception or communication of electronic messages, in each case as amended, consolidated, re-enacted or replaced from time to time, including, to the extent applicable, European Data Protection Laws.
+
+1.65
+
+“Data Security Breach” has the meaning set forth in Section 10.5 (Data Breach).
+
+1.66
+
+“Data Sharing Initiative” means GSK’s policy initiative (as may be amended from time to time), known at the Effective Date as the “SHARE Initiative”, to provide researchers with access to Clinical Trial and study information, including anonymized patient level data, as such initiative is described on https://www.clinicalstudydatarequest.com/.
+
+1.67
+
+[***].
+
+1.68
+
+“Detail” or “Detailing” means, with respect to a Licensed Product, the communication made by a Sales Representative during a Sales Call (a) involving face-to-face contact or virtual meetings (such as through videoconference) with healthcare professionals, (b) describing in a fair and balanced manner the FDA-approved uses and other relevant characteristics of the Licensed Product being detailed, (c) using approved Promotional Materials in an effort to inform healthcare professionals on the Licensed Product for its FDA-approved uses in a manner consistent with Applicable Law, and (d) made at a healthcare professional’s office or other appropriate venues (including audio or video teleconference) conducive to pharmaceutical product informational communication where the principal objective is to place an emphasis on the Licensed Product with such healthcare professional.
+
+1.69
+
+“Development” means any and all research and development activities conducted that are necessary for developing, seeking, obtaining, or maintaining Regulatory Approvals for Licensed Products, which include pre-clinical studies and non-clinical studies, Clinical
+
+-8-
+
+Trials, quality of life assessments, translational research, Companion Diagnostic development, pharmacoeconomics, regulatory affairs, Manufacturing process development, formulation development and activities performed in support of the CMC (chemistry, manufacturing and controls, or equivalent) section of an IND or BLA and other Regulatory Filings, including all CMC Development. For clarity, Development excludes Commercialization, Manufacturing, and Medical Affairs activities. “Develop” and “Developing” shall have their correlative meanings.
+
+1.70
+
+“Development and Filing Milestone” has the meaning set forth in Section 8.4 (Development and Filing Milestones).
+
+1.71
+
+“Development and Filing Milestone Payments” has the meaning set forth in Section 8.4 (Development and Filing Milestones).
+
+1.72
+
+“Development Costs” means the [***] incurred by a Party or its Affiliates, Sublicensees or subcontractors after the Effective Date in the performance of the respective Shared Global Development Activities of such Party [***] to the Development of a Licensed Product, to the extent incurred in accordance with the Global Development Plan and Global Development Budget. Development Costs include, to the extent set forth in the Global Development Plan and corresponding Global Development Budget (a) costs for other materials (e.g., non-Licensed Product comparator drugs and placebo obtained for use in Development of the Licensed Products), (b) all filing fees required for and other costs associated with, any Regulatory Filings for Licensed Products [***] (c) [***] (i) [***] (ii) CMC Development, [***] (d) Clinical Manufacture Costs, (e) Manufacturing Costs [***], (h) Patent Costs [***]. Development Costs excludes all costs incurred in connection with Commercialization of or performance of Medical Affairs activities [***] for Licensed Products. Development Costs do not include any costs or expenses incurred by GSK in connection with the performance of the GSK Sole Development Activities.
+
+1.73
+
+“Development Excess Costs” has the meaning set forth in Section 8.2.2(b) (Overruns).
+
+1.74
+
+“Development FTE Costs” means, as applicable with respect to any period, the FTE Rate for the performance of Development activities, multiplied by the actual total number of FTEs (or portion thereof) directly devoted to performing such Development activities in accordance with the Global Development Plan under this Agreement, during such period. The calculation of the number of FTEs for purposes of determining Development FTE Costs will be documented by the Parties in a manner designed to ensure proper reporting and auditing of such information in accordance with this Agreement.
+
+1.75
+
+“Development Program” has the meaning set forth in Section 7.2.1 (Establishment of the JDC).
+
+1.76
+
+“Development Reports” has the meaning set forth in Section 3.6 (Development Reporting).
+
+1.77
+
+“Disclosing Party” has the meaning set forth in Section 1.56 (Confidential Information).
+
+1.78
+
+“Dispute” has the meaning set forth in Section 16.1 (Dispute Resolution).
+
+-9-
+
+1.79
+
+“Dollars” or “$” means the official currency of the United States of America.
+
+1.80
+
+“DOJ” has the meaning set forth in Section 2.2 (HSR Filing).
+
+1.81
+
+“Effective Date” has the meaning set forth in Section 2.1 (Effectiveness of the Agreement).
+
+1.82
+
+“EMA” means the European Medicines Agency, or any successor entity thereto performing similar functions for the European Union.
+
+1.83
+
+“Entity” has the meaning set forth in Section 8.10.4 (No Partnership).
+
+1.84
+
+“EOS-448 Antibody” means the antibody targeting TIGIT known internally by ITEOS as EOS-448, the structure of which is set forth on Schedule 1.84.
+
+1.85
+
+“EOS-448 Sole Active Product” means the pharmaceutical product that contains a Licensed Antibody as the sole active ingredient, in all forms, presentations, strengths, doses and formulations.
+
+1.86
+
+“European Data Protection Laws” means the General Data Protection Regulation 2016/679, the e-Privacy Directive 2002/58/EC, the e-Privacy Regulation 2017/003 once it takes effect, and any relevant law, statute, declaration, decree, directive, legislative enactment, order, ordinance, regulation, rule or other binding instrument that implements, replaces, adds to, amends, extends, reconstitutes or consolidates such laws from time to time, including the Data Protection Act 2018 of the United Kingdom, in each case as amended, consolidated, re-enacted or replaced from time to time.
+
+1.87
+
+“European Union” means the economic, scientific and political organization of member states in Europe, as it may be constituted from time to time, and notwithstanding any provision to the contrary set forth in this Agreement, will include the United Kingdom for purposes of this Agreement.
+
+1.88
+
+“Excluded Commercialization Activities” has the meaning set forth in Section 1.236 (Shared Commercialization Activities).
+
+1.89
+
+“Exclusive Sublicense” has the meaning set forth in Section 9.3 (Sublicenses).
+
+1.90
+
+“Execution Date” has the meaning set forth in the preamble.
+
+1.91
+
+“Existing CMO” means [***].
+
+1.92
+
+“Existing CMO Agreement” has the meaning set forth in Section 5.1.2 (Clinical Supply).
+
+1.93
+
+“Expansion” has the meaning set forth in Section 1.203 (Phase 2 Adaptive Study).
+
+-10-
+
+1.94
+
+“Exploit” means Develop, have Developed, make, have made, use, have used, perform Medical Affairs, have performed Medical Affairs, offer for sale, have offered for sale, sell, have sold, export, have exported, import, have imported, Manufacture, have Manufactured, Commercialize, have Commercialized or otherwise exploit. “Exploitation” and “Exploiting” will be construed accordingly.
+
+1.95
+
+“FDA” means the U.S. Food and Drug Administration, or any successor entity thereto performing similar functions in the United States.
+
+1.96
+
+“Field” means any use or purpose, including the treatment, palliation, diagnosis or prevention of any human or animal disease.
+
+1.97
+
+“Financial Report” has the meaning set forth in Section 8.3.2 (Reporting Generally).
+
+1.98
+
+“Financial Working Group” has the meaning set forth in Section 7.4 (Financial Working Group).
+
+1.99
+
+“First Commercial Sale” means, with respect to a given Licensed Product in a country, the first commercial sale in an arms-length transaction of such Licensed Product by or on behalf of GSK, its Affiliate or Sublicensee in such country following receipt of applicable Regulatory Approval of such Licensed Product in such country; provided, however, that First Commercial Sale shall not include any transfer of a product (a) between or among GSK and its Affiliates or its Sublicensees, unless the Affiliate or Sublicensee is the last entity in the distribution chain of such product, or (b) for purposes of patient assistance programs, treatment IND sales, named patient sales or compassionate use sales, provided, that in case of (b), such product is sold at a price no greater than GSK’s Manufacturing Costs for such Licensed Product.
+
+1.100
+
+“First No Opt-Out Period” means, with respect to a Licensed Product, the time period commencing on the Effective Date and ending on [***].
+
+1.101
+
+“Force Majeure” means any event beyond the reasonable control of the affected Party, including: embargoes; war or acts of war, including terrorism; insurrections, riots, or civil unrest; strikes, lockouts or other labor disturbances; epidemics (including pandemics), the spread of infectious diseases, and quarantines; fire, floods, earthquakes or other acts of nature; impossibility to obtain materials, components, drug substance, utilities, equipment, supplies, fuel or other required materials, receipt of warning letters, or loss, infection or failure of cell banks (in each case, due to reasons other than the affected Party’s negligence or willful misconduct or any other cause within the reasonable control of the affected Party); or acts, omissions, or delays in acting by any Governmental Authority (including the refusal of any Regulatory Authority to issue required Regulatory Approvals due to reasons other than the affected Party’s negligence or willful misconduct or any other cause within the reasonable control of the affected Party), and failure of plant or machinery (provided that such failure could not have been prevented by the exercise of skill, diligence, and prudence that would be reasonably and ordinarily expected from a skilled and experienced person engaged in the same type of undertaking under the same or similar circumstances). The Parties agree the effects of the COVID-19 pandemic that is ongoing
+
+-11-
+
+as of the Effective Date (including related government orders) may be invoked as a Force Majeure for the purposes of this Agreement even though the pandemic is ongoing and those effects may be reasonably foreseeable (but are not known for certain) as of the Effective Date. In addition, a Force Majeure may include reasonable measures affirmatively taken by a Party or its Affiliates to respond to any epidemic, pandemic, or spread of infectious disease (including the COVID-19 pandemic), such as requiring employees to stay home, closures of facilities, delays of Clinical Trials, or cessation of activities in response to an epidemic or other Force Majeure event.
+
+1.102
+
+“FTC” has the meaning set forth in Section 2.2 (HSR Filing).
+
+1.103
+
+“FTE” means, with respect to employees of a Party or its Affiliates, the equivalent of the work of one (1) full time person for one (1) year (consisting of at least [***] hours per year). Overtime, and work on weekends, holidays and the like shall not be counted with any multiplier (e.g., time-and-a-half or double time) toward the number of hours that are used to calculate the FTE contribution. If any person works partially on other work in a given Calendar Year, then the full-time equivalent to be attributed to such person’s work hereunder shall be equal to the percentage of such person’s total work time in such Calendar Year that such person spent working on activities contemplated under this Agreement. FTE efforts shall not include the work of general corporate personnel. Each Party shall track FTEs of its personnel using such Party’s standard practices and methodologies and in a manner designed to ensure proper reporting and auditing of such information in accordance with this Agreement.
+
+1.104
+
+“FTE Rate” means, unless otherwise agreed by the unanimous decision of the Financial Working Group or by the Parties in writing, commencing on the Effective Date, (a) with respect to Development activities, [***] per FTE and (b) with respect to Commercialization activities at a rate to be agreed by the Financial Working Group prior to commencement of Commercialization activities by either Party. The FTE Rate shall be increased or decreased on the first day of every January starting in 2023 by a percentage equivalent to the change over the preceding twelve (12)-month period in the Consumer Price Index for All Urban Consumers (All Items), or any successor to such published measure, not seasonally adjusted, as published by the U.S. Department of Labor Bureau of Labor Statistics. For clarity, the FTE Rate includes “fully burdened” base salary, target bonus (yearly bonus based on achievement of personal/corporate targets), plus benefits including holiday allowance, pension, medical, risk, share-based payments and other remuneration-based benefits, tax and social security; however, the FTE Rate does not include or cover costs for facilities, travel expenses and IT allocation.
+
+1.105
+
+“GAAP” means generally acceptable accounting standards, principles, and procedures as issued by the Financial Accounting Standards Board (FASB).
+
+1.106
+
+“GCP” means all applicable Good Clinical Practice standards for the design, conduct, performance, monitoring, auditing, recording, analyses and reporting of clinical trials, including, as applicable, (a) FDA regulations and guidelines for good clinical practice, as promulgated by the FDA under 21 CFR Parts 50, 54, 56, 312 and 812, (b) as set forth in European Commission Directive 2001/20/EC relating to the implementation of good
+
+-12-
+
+clinical practice in the conduct of clinical trials on medicinal products for human use, and brought into law by European Commission Directive 2005/28/EC laying down the principles and detailed guidelines for good clinical practice for investigational medicinal products, (c) the International Conference on Harmonisation of Technical Requirements for Registration of Pharmaceuticals for Human Use (“ICH”) Harmonised Tripartite Guideline for Good Clinical Practice (CPMP/ICH/135/95) and any other guidelines for good clinical practice for trials on medicinal products in the EU, (d) the Declaration of Helsinki (2008), and (e) any further amendments or clarifications with respect to any of the foregoing and any equivalents thereto in the country in which clinical studies of a product are conducted.
+
+1.107
+
+“Global Development Budget” means the budget of all [***] to be incurred from and after the Effective Date in the performance of any Shared Global Development Activities under the Global Development Plan for any Licensed Antibodies and Licensed Products, including (a) a budget, broken down by Calendar Quarters and at a level of detail agreed by the JDC, for the estimated [***] expected to be incurred by each Party in the given Calendar Year with respect to such Shared Global Development Activities under the Global Development Plan and (b) for subsequent Calendar Years, a [***], of the estimated [***] to be incurred in connection with such Shared Global Development Activities under the applicable Global Development Plan [***] for such Licensed Antibodies and Licensed Products. The Global Development Budget will not include any costs or expenses to be incurred by GSK in connection with the performance of the GSK Sole Development Activities.
+
+1.108
+
+“Global Development Plan” means the written plan setting forth (a) (i) all Development activities (including Clinical Trials) for any Licensed Antibodies and Licensed Products (including Combination Products), in each case, through the completion of Registration Studies and any other Development activities necessary to obtain and maintain Regulatory Approvals for such Licensed Products in the U.S. and the European Union, including process development activities, CMC activities, formulation development, Companion Diagnostic development, and any post-Regulatory Approval studies and other non-clinical and pre-clinical studies and Clinical Trials, activities related to value-evidence outcomes, patient-focused outcomes and epidemiology, in each case, the data from which may be used to obtain or maintain Regulatory Approval in both the U.S. and the European Union (the activities described in this clause (a)(i), the “Shared Global Development Activities”), and (ii) all Development activities (including Clinical Trials), other than activities described in the foregoing clause (a)(i), that are necessary or desirable to obtain and maintain Regulatory Approvals of each Licensed Product in the Net Sales Territory, including all proposed post-Regulatory Approval studies and all other non-clinical and pre-clinical studies and Clinical Trials, activities related to value-evidence outcomes, patient-focused outcomes and epidemiology, in each case, the data from which will be used solely to obtain or maintain Regulatory Approval in the Net Sales Territory (the activities described in this clause (a)(ii), the “GSK Sole Development Activities”), (b) the estimated timelines for the performance and completion of such activities described in clause (a), (c) the regulatory strategy for obtaining and maintaining Regulatory Approval for Licensed Products in the Territory, (d) the supplies of Licensed Antibodies and Licensed Products (or components thereof including Other Components Controlled by GSK), comparator
+
+-13-
+
+drugs and placebo, in each case, needed to perform such Development activities, and (e) the Global Development Budget, in each case ((a) through (e)), as the same may be amended from time-to-time in accordance with this Agreement. The initial Global Development Plan is attached as Schedule 3.2 of this Agreement.
+
+1.109
+
+“Global Strategic Launch Plan” has the meaning set forth in Section 6.1 (Global Strategic Launch Plan).
+
+1.110
+
+“GLP” means all applicable Good Laboratory Practice standards, including, as applicable: (a) FDA regulations and guidelines for good laboratory practice, as promulgated by the FDA under 21 CFR Part 58; (b) European Commission Directive 2004/10/EC relating to the application of the principles of good laboratory practices, as may be amended from time to time as well as any Rules Governing Medicinal Products in the European Community Vol. III, ISBN 92.825 9619-2 (ex-OECD principles of GLP); and (c) any further amendments or clarifications with respect to any of the foregoing and any equivalents thereto in the country in which pre-clinical or clinical studies of a product are conducted.
+
+1.111
+
+“GMP” means all applicable Good Manufacturing Practices, including: (a) the applicable part of quality assurance to ensure that products are consistently produced and controlled in accordance with the quality standards appropriate for their intended use, as defined in European Commission Directive 2003/94/EC laying down the principles and guidelines of good manufacturing practice; (b) the principles detailed in the U.S. Current Good Manufacturing Practices, 21 C.F.R. Sections 210, 211, 601, 610 and 820; (c) the Rules Governing Medicinal Products in the European Community, Volume IV Good Manufacturing Practice for Medicinal Products; (d) the principles detailed in the ICH Q7A guidelines; and (e) the equivalent Applicable Laws in any relevant country, each as may be amended and applicable from time to time.
+
+1.112
+
+“Government Official” (where “government” means all levels and subdivisions of governments, i.e., local, regional, national, administrative, legislative, executive, or judicial, and royal or ruling families) means (a) any officer or employee of a government or any department, agency or instrumentality of a government (which includes public enterprises, and entities owned or controlled by the state); (b) any officer or employee of a public international organization such as the World Bank or United Nations; (c) any officer or employee of a political party, or any candidate for public office; (d) any individual defined as a government or public official under Applicable Laws (including anti-bribery and corruption laws) and not already covered by any of the above; or (e) any individual acting in an official capacity for or on behalf of any of the above. “Government Official” includes any individual with close family members who are Government Officials (as defined above) with the capacity, actual or perceived, to influence or take official decisions affecting the business of a Party.
+
+-14-
+
+1.113
+
+“Governmental Authority” means any multinational, federal, national, state, provincial, local or other entity, office, commission, bureau, agency, political subdivision, instrumentality, branch, department, authority, board, court, arbitral or other tribunal, official or officer, exercising executive, judicial, legislative, police, regulatory, administrative or taxing authority, or functions of any nature pertaining to government.
+
+1.114
+
+“GSK” has the meaning set forth in the preamble.
+
+1.115
+
+“GSK Arising Know-How” has the meaning set forth in Section 11.1.3 (Ownership by GSK).
+
+1.116
+
+“GSK Arising Patents” has the meaning set forth in Section 11.1.3 (Ownership by GSK).
+
+1.117
+
+“GSK Arising Technology” means GSK Arising Know-How and GSK Arising Patents.
+
+1.118
+
+“GSK Background Know-How” means any Know-How Controlled by GSK or its Affiliates as of the Effective Date or during the Term, other than pursuant to this Agreement.
+
+1.119
+
+“GSK Background Patents” means any Patents Controlled by GSK or its Affiliates as of the Effective Date or during the Term, other than pursuant to this Agreement.
+
+1.120
+
+“GSK Background Technology” means the GSK Background Know-How and the GSK Background Patents.
+
+1.121
+
+“GSK CMO Agreement” has the meaning set forth in Section 5.1.5 (Second Source).
+
+1.122
+
+“GSK Indemnitees” has the meaning set forth in Section 15.1.1 (Indemnification by ITEOS).
+
+1.123
+
+“GSK Patents” has the meaning set forth in Section 11.2.3 (GSK Patent Prosecution and Costs).
+
+1.124
+
+“GSK Sole Development Activities” has the meaning set forth in Section 1.108 (Global Development Plan).
+
+1.125
+
+“GSK Technology” means (a) all GSK Background Technology, (b) all GSK Arising Technology Controlled by GSK or any of its Affiliates during the Term, and (c) GSK’s joint ownership interest in Joint Arising Technology Controlled by GSK during the Term, in each case ((a) through (c)), that [***] and the terms of this Agreement.
+
+1.126
+
+“Guidelines” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.127
+
+“HSR Act” has the meaning set forth in Section 2.2 (HSR Filing).
+
+1.128
+
+“HSR Clearance Date” has the meaning set forth in Section 2.2 (HSR Filing).
+
+1.129
+
+“HSR Filings” has the meaning set forth in Section 2.2 (HSR Filing).
+
+-15-
+
+1.130
+
+“Human Biological Samples” means any human biological material (including any derivative or progeny thereof), including any portion of an organ, any tissue, skin, bone, muscle, connective tissue, blood, cerebrospinal fluid, cells, gametes, or sub-cellular structures such as DNA, or any derivative of such biological material such as stem cells or cell lines; and any human biological product, including hair, nail clippings, teeth, urine, feces, breast milk and sweat.
+
+1.131
+
+“IFRS” means the International Financial Reporting Standards as adopted by the United Kingdom, applied on a consistent basis.
+
+1.132
+
+“Increased Withholding Taxes” has the meaning set forth in Section 8.10.2 (Tax Matters).
+
+1.133
+
+“IND” means an Investigational New Drug Application (including any amendments thereto) filed with the FDA pursuant to 21 CFR Part 312, or any equivalent filing with any relevant Regulatory Authority in any jurisdiction.
+
+1.134
+
+“Indemnifying Party” has the meaning set forth in Section 15.1.3 (Indemnification Procedures).
+
+1.135
+
+“Indemnitee” has the meaning set forth in Section 15.1.3 (Indemnification Procedures).
+
+1.136
+
+“Indication” means a separate and distinct disease, disorder or medical condition that a Licensed Product is intended to treat, prevent, cure or ameliorate in the indications section of the Approved Labeling for such Licensed Product, or that is the subject of a Clinical Trial and where it is intended that the data and results of such Clinical Trial (if successful) will be used to support a Regulatory Filing and Regulatory Approval that is intended to result in distinct labeling in the indications section of the Approved Labeling relevant to usage of such Licensed Product in such disease, disorder or medical condition that is separate and distinct from another disease, disorder, or medical condition. For clarity, each different patient population or line of therapy will be deemed a different Indication.
+
+1.137
+
+“Infringement” has the meaning set forth in Section 11.3.1 (Notification of Infringement).
+
+1.138
+
+“Infringement Notice” has the meaning set forth in Section 11.3.1 (Notification of Infringement).
+
+1.139
+
+“Initiation” means, with respect to any Clinical Trial, the first patient dosed for the first time in such Clinical Trial.
+
+1.140
+
+“Institutional Review Board” means an institutional review board (“IRB”) or independent ethics committee (“IEC”) that reviews the methods proposed for research and development activities to ensure such methods satisfy ethical requirements.
+
+-16-
+
+1.141
+
+“Internal Policies” means, with respect to a Party, such Party’s health care compliance, ethical, reputational, anti-bribery and corruption and other policies applicable to such Party’s activities under this Agreement, and any standard operating procedures implementing such policies, including the codes of conduct of any self-regulatory body of which that Party is a member.
+
+1.142
+
+“ITEOS” has the meaning set forth in the preamble.
+
+1.143
+
+“ITEOS [***] Agreement” means that certain [***].
+
+1.144
+
+“ITEOS Arising Know-How” has the meaning set forth in Section 11.1.4 (Ownership by ITEOS).
+
+1.145
+
+“ITEOS Arising Patents” has the meaning set forth in Section 11.1.4 (Ownership by ITEOS).
+
+1.146
+
+“ITEOS Arising Technology” means ITEOS Arising Know-How and ITEOS Arising Patents.
+
+1.147
+
+“ITEOS Background Agreements” means, collectively: [***].
+
+1.148
+
+“ITEOS Background Know-How” means any Know-How Controlled by ITEOS or its Affiliates as of the Effective Date or during the Term, other than pursuant to this Agreement.
+
+1.149
+
+“ITEOS Background Patents” means any Patents Controlled by ITEOS or its Affiliates as of the Effective Date or during the Term, other than pursuant to this Agreement.
+
+1.150
+
+“ITEOS Background Technology” means the ITEOS Background Know-How and the ITEOS Background Patents.
+
+1.151
+
+“ITEOS Indemnitees” has the meaning set forth in Section 15.1.2 (Indemnification by GSK).
+
+1.152
+
+“ITEOS Phase 1 Clinical Study” means IO-002 Study that is a multicenter, open-label, dose-escalation Phase I/IIa clinical study to evaluate the safety and tolerability, PK, PD, and antitumor activity of EOS884448 in participants with advanced cancers (ClinicalTrials.gov Identifier: NCT04335253).
+
+1.153
+
+“ITEOS Retained Rights” has the meaning set forth in Section 9.1 (License Grant to GSK).
+
+1.154
+
+“ITEOS Technology” means (a) all ITEOS Background Technology, (b) all ITEOS Arising Technology Controlled by ITEOS or any Affiliate during the Term, and (c) ITEOS’s interest in Joint Arising Technology Controlled by ITEOS during the Term, in each case ((a) through (c)), that are [***].
+
+1.155
+
+“Joint Arising Technology” has the meaning set forth in Section 11.1.5 (Joint Ownership).
+
+-17-
+
+1.156
+
+“Joint Commercialization Budget” has the meaning set forth in Section 6.2 (Joint Commercialization Plans).
+
+1.157
+
+“Joint Commercialization Committee” or “JCC” has the meaning set forth in Section 7.3.1 (Establishment of JCC).
+
+1.158
+
+“Joint Commercialization Plan” has the meaning set forth in Section 6.2 (Joint Commercialization Plans).
+
+1.159
+
+“Joint Development Committee” or “JDC” has the meaning set forth in Section 7.2.1 (Establishment of the JDC).
+
+1.160
+
+“Joint Steering Committee” or “JSC” has the meaning set forth in Section 7.1.1 (Establishment of JSC).
+
+1.161
+
+“Know-How” means any information or materials, whether proprietary or not and whether patentable or not, including confidential trade secrets, models, discoveries, inventions, ideas, Data and other types of data, databases, results, assays, instructions, processes, techniques, documentation, equipment, technology, quality control analysis, specifications, transportation and storage requirement, concepts, methods, procedures, designs, compositions, plans, documents, formulas, algorithms, Materials, inventions, computational models, human-relevant disease models, computer software (including source code), predictive model implementations, data analytic tools, biotechnology hardware and associated algorithms and methodologies, methods of use, expert knowledge and information.
+
+1.162
+
+“Knowledge of ITEOS” or “ITEOS’s Knowledge” means the actual knowledge by ITEOS’s senior management [***]. For this purpose, “senior management” means ITEOS’s officers as defined under Rule 16a-1(f) of the Securities Exchange Act of 1934 (or amendment thereto or replacement or successor law) as of the Execution Date.
+
+1.163
+
+“Licensed Antibody” means (a) the EOS-448 Antibody and (b) any other [***] in each case ((a) and (b)), that have been generated by or on behalf of ITEOS.
+
+1.164
+
+“Licensed Product” means any pharmaceutical product that is comprised of or contains a Licensed Antibody, in all forms, presentations, strengths, doses and formulations, and includes the EOS-448 Sole Active Product and Combination Products.
+
+1.165
+
+“Losses” has the meaning set forth in Section 15.1.1 (Indemnification by ITEOS).
+
+1.166
+
+“Manufacture” means all activities related to the synthesis, making, production, processing, purifying, formulating, filling, finishing, packaging, serialization, labeling, shipping, and holding of any product, or any component or intermediate thereof, including process qualification and validation, scale-up, qualification, validation, pre-clinical, clinical and commercial capacity reservation, production, and analytic development, product characterization, stability testing, quality assurance, and quality control, but, in each case, excluding activities directed to Development, Medical Affairs, or Commercialization. “Manufacturing” shall have a correlative meaning.
+
+-18-
+
+1.167
+
+“Manufacturing Cost” means:
+
+1.167.1
+
+With respect to GSK as the Manufacturing Party, with respect to a Licensed Product or other compound, antibody, or product Controlled by GSK and supplied to ITEOS pursuant to this Agreement, GSK’s reasonable and necessary Standard Costs of Goods Manufactured plus Cost Variances and a standard manufacturing markup of [***] to cover the costs of global shared services for support activities such as quality, procurement, information technology, human resource, and finance, determined in accordance with applicable Accounting Standards, and the terms and conditions of this Agreement, incurred in Manufacturing or acquisition of such Licensed Product, in each case, to the extent directly attributable and reasonably allocable (subject to discussion and agreement by the Financial Working Group) to such Licensed Product or other compound, antibody, or product Controlled by GSK, which shall include the following costs incurred by a Party or its Affiliates:
+
+(a)
+
+“Standard Cost of Goods Manufactured” are, as calculated in accordance with applicable Accounting Standards, consistently applied by the Manufacturing Party in accordance with its standard accounting practice for public financial reporting purposes, budgeted unit costs of direct materials, direct labor, Third Party fees, depreciation of Manufacturing equipment (including buildings, fixtures, and fittings and a reasonable allocation of indirect expenses and overhead connected therewith (to the extent allocable to forecasted production of materials for use in or sale of such product recorded as an expense by GSK or its Affiliates)), which allocation is made in a manner consistent with such allocations applied to other products made in the same production center, and consistent with customary practice. Examples of reasonably allocable indirect manufacturing costs include power, rent and rates, quality, and regulatory; and
+
+(b)
+
+“Cost Variances” are actual costs of Manufacturing versus Standard Cost of Goods Manufactured and include direct materials variances (including material usage variances and purchase price variances), direct labor variances, and indirect expenses and overhead variances (to the extent allocable to forecasted production of materials for use in or sale of such product recorded as an expense by GSK or its Affiliates), which allocation is made in a manner consistent with customary practice (including volume variances, variable overhead spending variances and fixed overhead spending variances).
+
+1.167.2
+
+To the extent Licensed Products or other compounds, antibodies, or products Controlled by GSK are Manufactured by Third Party contract manufacturing organizations and similar contractors (collectively, “CMOs”), the Out-of-Pocket Costs invoiced by and paid to such CMO(s) for the Manufacture of such product, plus a Manufacturing mark-up of [***].
+
+-19-
+
+1.167.3
+
+With respect to ITEOS as the Manufacturing Party, (a) for such Licensed Product (or components thereof) Manufactured by a Third Party, the Out-Of-Pocket Costs paid by ITEOS or its Affiliates to a Third Party for Manufacturing of such Licensed Product, or any component thereof; and (b) for such Licensed Product (or components thereof) Manufactured by ITEOS or its Affiliates, the reasonable internal costs and direct Out-of-Pocket Costs recorded as an expense by ITEOS or its Affiliates in connection with the Manufacture, including supply chain management, of such Licensed Product, in each case ((a) and (b)), plus a Manufacturing mark-up of [***].
+
+Manufacturing Cost shall not include capital costs or costs associated with physical plant improvements. Subject to the foregoing, all Manufacturing Costs shall be calculated on a pro-rata basis based on the use of the components of Manufacturing activities devoted to the Licensed Products as opposed to all other products using the same components. In addition, Manufacturing Costs shall exclude costs that result from the gross negligence or willful misconduct of a Party, its Affiliates, Sublicensees or Third Party manufacturers or a failure by a Party, its Affiliates, Sublicensees or Third Party manufacturers to follow the documented manufacturing process or any other Manufacturing defect arising from such Manufacture of the applicable Licensed Product.
+
+1.168
+
+“Manufacturing Tech Transfer Plan” has the meaning set forth in Section 5.2 (Manufacturing Technology Transfer).
+
+1.169
+
+“Marketing Approval Application” or “MAA” means a BLA or any corresponding application in the applicable country or jurisdiction outside of the United States, including, with respect to the European Union, an application for Regulatory Approval filed with the EMA pursuant to the centralized approval procedure or with the applicable national Regulatory Authority of a country in the European Union with respect to the mutual recognition procedure, decentralized procedure or any other national approval.
+
+1.170
+
+“Marketing Materials” means Promotional Materials, Regulatory Filings relating to Promotional Materials, and training program and related materials contemplated by Section 6.10.4 (Product Specific Training).
+
+1.171
+
+“Material Safety or Commercialization Concern” means, with respect to an activity for a Licensed Antibody or Licensed Product, that such activity may [***].
+
+1.172
+
+“Materials” means any chemical or biological substances, including any biological or chemical compounds, drug products, Human Biological Samples, or other materials, regardless of the route of transfer, that are supplied by a Party or its nominee to the other Party or its nominee for use in the conduct of activities under this Agreement, including activities set forth in the Global Development Plan.
+
+1.173
+
+“Materials Receiving Party” has the meaning set forth in Section 3.12.1 (Material Transfers).
+
+1.174
+
+“Materials Transferring Party” has the meaning set forth in Section 3.12.1 (Material Transfers).
+
+-20-
+
+1.175
+
+“Medical Affairs” means, with respect to a product, any and all activities performed by or on behalf of a Party’s or its Affiliates’ medical affairs departments interacting with physicians or other healthcare professionals who may utilize or conduct research related to a drug or biological product, including: supporting continuing medical education and other medical programs and communications; Health Economics and Outcomes Research (HECOR, HEMAR); pharmacovigilance, publication and dissemination of publications; fulfillment of medical information responses to external inquiries or complaints; development and execution of disease awareness education including symposia and digital education initiatives; sponsorship and booth exhibition at key congresses; natural history and real world evidence studies; supporting educational fellowships and research grants, scientific research agreements and investigator initiated trials (following Regulatory Approval); medical resourcing, training and allocation; medical and scientific platform and content development; conducting appropriate activities involving opinion leaders (including communications and engagement); conducting medical science liaison activities; advisory boards or other consulting programs (to the extent related to medical affairs or clinical guidance); field based medical science liaisons, medical affairs clinical trial management, medical doctors in field (separate from medical science liaisons); establishing patient registries and expanded access programs; life cycle management activities and clinical research.
+
+1.176
+
+“Medical Affairs Content” means all written, printed, graphic, electronic, audio or video matter, in each case, intended for use or used by a Party or its Affiliates, Sublicensees or subcontractors in connection with the conduct of Medical Affairs activities related to the Licensed Products in the Profit-Sharing Territory.
+
+1.177
+
+“Medical Affairs Materials” means the Medical Affairs Content, Regulatory Filings relating to Medical Affairs Content, and training program and related materials contemplated by Section 6.4.4 (Medical Affairs Training).
+
+1.178
+
+“More Conservative Approach” means the approach or position described in the written proposal provided by a Party’s Senior Executive to the Designated Executives with respect to the resolution of a Committee Deadlock regarding a Material Safety or Commercialization Concern, which approach or position, in the aggregate, [***].
+
+1.179
+
+“MTR” has the meaning set forth in Section 3.12.1 (Material Transfers).
+
+1.180
+
+“Negotiation Period” has the meaning set forth in Section 3.5.3 (Limitation On Third Party Combinations).
+
+-21-
+
+1.181
+
+“Net Sales” means, with respect to a Licensed Product during a stated time period, the gross invoiced sales amounts for such Licensed Product sold by or on behalf of GSK, its Affiliates or Sublicensees in arm’s length transactions to Third Parties (but not including sales relating to transactions by and between GSK, its Affiliates or Sublicensees unless the Affiliate or Sublicensee is the last entity in the distribution chain of such Licensed Product) less the following deductions from such gross amounts which are actually incurred, allowed, paid, accrued or specifically allocated to the extent that such amounts are deducted from gross invoiced sales amounts as reported by GSK in its financial statements in accordance with IFRS, applied on a consistent basis:
+
+[***]
+
+Upon any sale or other disposal of the Licensed Product that should be included within Net Sales for any consideration other than an exclusively monetary consideration on bona fide arm’s length terms, then for purposes of calculating the Net Sales under this Agreement, the Licensed Product shall be deemed to be sold exclusively for money at the average sales price during the applicable reporting period generally achieved for the Licensed Product in the country in which such sale or other disposal occurred.
+
+Notwithstanding the foregoing, (i) Net Sales shall not include disposals of the Licensed Product for, or use of the Licensed Product in, clinical or pre-clinical trials undertaken as part of Development contemplated under this Agreement, given as free samples, or distributed at no charge to patients unable to purchase the Licensed Product, and (ii) Net Sales shall not include amounts for any Licensed Product distributed for compassionate, named patient or similar use provided at a price no greater than GSK’s Manufacturing Costs for such Licensed Product for such purpose.
+
+The Licensed Products that will be Developed under this Agreement are anticipated to be sold either as: (1) a Licensed Product with a sole active ingredient that may be co-administered with other products (for example, the EOS-448 Sole Active Product, which is not a Combination Product under this Agreement), (2) a Combination Product that is in a single formulation finished form (i.e., a co-formulated Licensed Product) (a “Co-Formulated Product”), or (3) other Combination Products.
+
+In the event of (X) a Combination Product sale in a country where not all of the active ingredient components in that Combination Product are also sold separately in that country (as sole active ingredient products), or (Y) a Combination Product sale that is a Co-Formulated Product, then the Net Sales of such Combination Product for the purposes of determining royalty payments and ROW Net Sales Milestones and U.S. Net Sales Milestones, as well as with respect to the calculation of Net Sales of Combination Products for the purpose of determining Pre-Tax Profit or Loss for the Profit-Sharing Territory (if applicable), shall be determined by [***].
+
+In the event of a sale of a Combination Product that is not a Co-Formulated Product in a country where all of the active ingredient components in that Combination Product are also sold separately in that country (as sole active ingredient products), then the Net Sales of such Combination Product, for the purposes of determining royalty payments and ROW
+
+-22-
+
+Net Sales Milestones and U.S. Net Sales Milestones, as well as also with respect to the calculation of Net Sales of Combination Products for the purpose of determining Pre-Tax Profit or Loss for the Profit-Sharing Territory (if applicable), shall be determined by multiplying the Net Sales of such Combination Product by the fraction, A/(A+B) where A is the weighted (by sales volume) average sale price in a particular country of the Licensed Product containing the relevant Licensed Antibody(ies) as the sole active ingredient(s) when sold separately in finished form in such country and B is the weighted average sale price in that country of the product containing Other Components as the sole active ingredient when sold separately in finished form.
+
+1.182
+
+“Net Sales Territory” means the Territory excluding the Profit-Sharing Territory; provided, that from and after the Cost Share End Date, “Net Sales Territory” means the entire Territory (including the U.S.).
+
+1.183
+
+“Non-Breaching Party” has the meaning set forth in Section 12.3.1 (Termination for Material Breach).
+
+1.184
+
+“Notice of Dispute” has the meaning set forth in Section 16.1.1 (Dispute Resolution).
+
+1.185
+
+“Notice Period” has the meaning set forth in Section 3.5.3 (Limitation On Third Party Combinations).
+
+1.186
+
+“[***] Agreement” means that certain [***].
+
+1.187
+
+“October 2021 Campaign” has the meaning set forth in Section 5.1.2 (Clinical Supply).
+
+1.188
+
+“OIG” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.189
+
+“OPDP” means the FDA’s Office of Prescription Drug Promotion (formerly Division of Drug Marketing, Advertising and Communications) or its successor entity.
+
+1.190
+
+“Opt-Out Notice” has the meaning set forth in Section 6.7.1 (ITEOS Opt-Out Right).
+
+1.191
+
+“Other Component(s)” has the meaning set forth in Section 1.41 (Combination Product).
+
+1.192
+
+“Out-Of-Pocket Costs” means the actual amounts paid by a Party or its Affiliate to a Third Party for specific external activities conducted for the Licensed Antibodies or Licensed Products.
+
+1.193
+
+“Party” or “Parties” has the meaning set forth in the preamble.
+
+1.194
+
+“Patent Challenge” has the meaning set forth in Section Error! Reference source not found. (Termination for Patent Challenge).
+
+1.195
+
+“Patent Costs” means all out-of-pocket expenses (including reasonable attorneys’ fees) incurred in the preparation, prosecution, filing and maintenance of Patents.
+
+1.196
+
+“Patent Liaisons” has the meaning set forth in Section 7.9 (Patent Liaisons).
+
+-23-
+
+1.197
+
+“Patents” means all patents and pending patent applications (including inventor’s certificates and utility models) and any patents issuing therefrom, in any country in the Territory, including any and all provisionals, non-provisionals, substitutions, continuations, continuations-in-part, divisional and other continuing applications, supplementary protection certificates, renewals, and any and all reissues, extensions, registrations, reexaminations, confirmations, registrations and patents of addition on any of the foregoing.
+
+1.198
+
+“Payee” has the meaning set forth in Section 8.10.2 (Tax Matters).
+
+1.199
+
+“Payor” has the meaning set forth in Section 8.10.2 (Tax Matters).
+
+1.200
+
+“Permitted Overage” has the meaning set forth in Section 8.2.2(a) (Overruns).
+
+1.201
+
+“Person” means any natural person, corporation, firm, business trust, joint venture, association, organization, company, partnership or other business entity, or any government, or any agency or political subdivisions thereof.
+
+1.202
+
+“Personally Identifiable Information (PII)” means information that can be used to identify an individual, either alone or when combined with other personal or identifying information that is linked or linkable to a specific individual, which may include (alone or in combination): (a) a first and last name; (b) a home or other physical address, including street name and name of city or town; (c) an email address or other online contact information, such as an instant messaging user identifier or a screen name that reveals an individual’s email address; (d) a telephone number; (e) a social security number; (f) a bank, loan, or credit card account number; (g) a persistent identifier, such as a customer number held in a “cookie” or processor serial number, that is combined with other available data that identifies an individual consumer; or (h) any information that is combined with any of (a) through (g) above.
+
+1.203
+
+“Phase 2 Adaptive Study” means a Phase 2 Clinical Study that is not considered a Registration Study until it meets the criteria set within the protocol to expand to become a Registration Study at the pre-defined interim analysis (such meeting of such criteria, the “Expansion”).
+
+1.204
+
+“Phase 2 Clinical Study” means a Clinical Trial of an investigational product in subjects with the primary objective of characterizing its activity in a specific disease state as well as generating more detailed safety, tolerability, pharmacokinetics, pharmacodynamics, and dose finding information as described in 21 C.F.R. 312.21(b), or a comparable Clinical Trial prescribed by the relevant Regulatory Authority in a country other than the Unites States.
+
+1.205
+
+“PhRMA” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.206
+
+“PhRMA Code” has the meaning set forth in Section 6.9.3 (Applicable Laws and Guidelines).
+
+1.207
+
+“Potential In-License” has the meaning set forth in Section 9.11.2 (Potential In-License).
+
+-24-
+
+1.208
+
+“Pre-Tax Profit or Loss” has the meaning set forth in the Pre-Tax Profit or Loss Schedule.
+
+1.209
+
+“Pre-Tax Profit or Loss Schedule” means the schedule set forth in Schedule 8.3.1 attached hereto.
+
+1.210
+
+“Product Claims” means a notice, claim, demand, suit or cause of action alleging or relating to, in whole or in part, bodily injury or personal injury arising from any act or omission connected with the Manufacture, Development, Commercialization or use of a Licensed Product in the Profit-Sharing Territory, including relating to alleged defects in the applicable Licensed Product resulting from an alleged intrinsic or latent problem or defect in the efficacy or safety of such Licensed Product.
+
+1.211
+
+“Product Marks” means the trademarks for use in connection with the Commercialization of any Licensed Product, including trademarks, generic names, international nonproprietary names, trade dress, style of packaging and Internet domain names used in connection with the Commercialization of such Licensed Product.
+
+1.212
+
+“Product Training Materials” has the meaning set forth in Section 6.10.4 (Product Specific Training).
+
+1.213
+
+“Profit-Sharing Term” means the Term, unless and until the Cost Share End Date occurs.
+
+1.214
+
+“Profit-Sharing Territory” means the United States, unless and until the Cost Share End Date occurs.
+
+1.215
+
+“Promotional Materials” means all written, printed, graphic, electronic, audio or video matter, including journal advertisements, sales visual aids, reprints, direct mail, direct-to-consumer advertising, and digital technologies including Internet and social media postings, Internet sites, email and broadcast advertisements, in each case, intended for use or used by either Party or its Affiliates, Sublicensees or subcontractors in connection with any advertising, marketing or promotion of the Licensed Products or a disease state related to the Licensed Products.
+
+1.216
+
+“Proof of Concept Trial” means a Clinical Trial that is designed to establish, for (a) a Licensed Product as part of a Co-Administration Therapy, or (b) a Licensed Product in a particular Indication, in each case ((a) and (b)), safety and initial evidence of efficacy that would be supportive of moving forward with additional Clinical Trials for such Licensed Product as part of such a Co-Administration Therapy, or for such Licensed Product in such Indication, as applicable.
+
+1.217
+
+“Proposed Additional Development” has the meaning set forth in Section 3.4.1 (Additional Development Proposals).
+
+1.218
+
+“Publication Strategy” has the meaning set forth in Section 10.8.1 (Publication Strategy).
+
+1.219
+
+“R&D Compliance Officer” has the meaning set forth in Section 3.13 (R&D Ethics & Compliance).
+
+-25-
+
+1.220
+
+“Receiving Party” has the meaning set forth in Section 1.56 (Confidential Information).
+
+1.221
+
+“Registration Study” means, with respect to a given Licensed Product, any pivotal Clinical Trial of such Licensed Product designed to establish safety and efficacy of such Licensed Product in patients with the disease or condition being studied for purposes of filing a BLA with the FDA or, with respect to a jurisdiction other than the United States, a similar clinical trial for the purpose of enabling the filing of a Marketing Approval Application equivalent to a BLA with the applicable Regulatory Authority(ies) in such jurisdiction.
+
+1.222
+
+“Regulatory Approval” means, with respect to a Licensed Product in a particular regulatory jurisdiction in the Territory, all approvals, licenses, registrations or authorizations of any Regulatory Authority, necessary for the Manufacturing, use, storage, import, export, transport, or Commercialization of such Licensed Product in such jurisdiction, including approval of the Marketing Approval Application for such Licensed Product in such jurisdiction.
+
+1.223
+
+“Regulatory Authority” means the FDA, the EMA or any regulatory body with similar regulatory authority in any other jurisdiction anywhere in the world.
+
+1.224
+
+“Regulatory Exclusivity” means, with respect to a particular Licensed Product in a country in the Territory, exclusive marketing rights conferred by a Regulatory Authority in such country with respect to such Licensed Product, excluding any rights in such country conferred by or based on any Patents.
+
+1.225
+
+“Regulatory Filing” means any filing, registration, or regulatory application or submission filed with a Regulatory Authority, including authorizations, approvals, Marketing Approval Applications, Regulatory Approvals, or clearances arising from the foregoing, and all notifications, communications, correspondence made to, received from, or otherwise conducted with a Regulatory Authority, as well as minutes of any material meetings, telephone conferences or discussions with such Regulatory Authority, in each case related to Exploiting a pharmaceutical or biologic product in a particular country or jurisdiction.
+
+1.226
+
+“Regulatory Responsible Party” has the meaning set forth in Section 4.1.3 (Regulatory Responsibilities).
+
+1.227
+
+“Reimbursement Approval” means an approval, agreement, determination, or other decision by the applicable Governmental Authority that establishes prices charged to end-users for biopharmaceutical products that a pharmaceutical or biologic product will be reimbursed by the Governmental Authorities or Regulatory Authorities in the Territory or any other approvals related to pricing, reimbursement or access to a pharmaceutical or biologic product (including all activities related to tenders and contracts).
+
+1.228
+
+“ROW Net Sales Milestones” has the meaning set forth in Section 8.5.1 (ROW Net Sales Milestones).
+
+-26-
+
+1.229
+
+“ROW Net Sales Milestone Payments” has the meaning set forth in Section 8.5.1 (ROW Net Sales Milestones).
+
+1.230
+
+“Royalty Term” has the meaning set forth in Section 8.7.1 (Net Sales Royalties).
+
+1.231
+
+“Sales Call” means a personal visit (whether by face-to-face contact or virtual meetings (such as through videoconference)) by a Sales Representative to (a) one or more healthcare professional(s) having prescribing authority, or (b) key opinion leaders or “thought leaders” that are respected individuals that through their professional status have significant impact or influence on prescribing decisions, in each case ((a) and (b)), with the purpose of promoting the Licensed Product in order to cause such healthcare professional, opinion leader, or thought leader to prescribe such Licensed Product.
+
+1.232
+
+“Sales Representatives” means pharmaceutical sales representatives employed or contracted for by a Party or its Affiliates to conduct Detailing and other marketing efforts with respect to the Licensed Products in accordance with the terms of this Agreement.
+
+1.233
+
+“Second No Opt-Out Period” means, with respect to a Licensed Product, the time period commencing on the date that is [***] after the first filing date of a BLA in the U.S. for such Licensed Product and ending [***] following the First Commercial Sale of such Licensed Product in the Territory.
+
+1.234
+
+“Selected Product” has the meaning set forth in Section 9.12.1 (Mutual Exclusivity Covenant).
+
+1.235
+
+“Senior Executive” has the meaning set forth in Section 16.1.1 (Dispute Resolution).
+
+1.236
+
+“Shared Commercialization Activities” means all Commercialization activities that the Parties intend to conduct with respect to the Licensed Product in the Profit-Sharing Territory during the Profit-Sharing Term, including activities related to [***]. Shared Commercialization Activities exclude [***] (collectively, (a) through (f), the “Excluded Commercialization Activities”).
+
+1.237
+
+“Shared Global Development Activities” has the meaning set forth in Section 1.108 (Global Development Plan).
+
+1.238
+
+“Subcommittee” has the meaning set forth in Section 7.5 (Other Subcommittees).
+
+1.239
+
+“Subcommittee Deadlock” has the meaning set forth in Section 7.7.1 (Committee Decision Making).
+
+1.240
+
+“Subject Patents” has the meaning set forth in Section 11.2.1 (Subject Patents).
+
+1.241
+
+“Sublicensee” has the meaning set forth in Section 9.3 (Sublicenses).
+
+1.242
+
+“Target” means T cell immunoreceptor with Ig and immunoreceptor tyrosine-based inhibition motif domains (also known or referred to as TIGIT).
+
+-27-
+
+1.243
+
+“Target BLA Filing Date” has the meaning set forth in Section 6.2 (Joint Commercialization Plans).
+
+1.244
+
+“Tax” or “Taxes” means any present or future taxes, levies, imposts, duties, charges, assessments or fees of any nature (including interest, penalties and additions thereto) imposed by a taxing authority.
+
+1.245
+
+“Term” has the meaning set forth in Section 12.1 (Term).
+
+1.246
+
+[***]
+
+1.247
+
+“Territory” means all countries and territories in the world.
+
+1.248
+
+“Third Party” means a Person other than (a) ITEOS and its Affiliates, and (b) GSK and its Affiliates.
+
+1.249
+
+“Third Party Combination Product” means a Combination Product where one or more Other Components is controlled by a Third Party and licensed to GSK or its Affiliates.
+
+1.250
+
+“Third Party Component Contracts” means those contracts, in existence as of the Effective Date, by and between GSK and a Third Party and listed on Schedule 1.250.
+
+1.251
+
+“Third Party Infringement Claim” has the meaning set forth in Section 11.4.1 (Notice; Control).
+
+1.252
+
+“Third Party IP” has the meaning set forth in Section 9.11 (New Third Party In-Licenses).
+
+1.253
+
+“United States” or “U.S.” means the United States and its territories and possessions.
+
+1.254
+
+“U.S. Net Sales Milestones” has the meaning set forth in Section 8.5.2 (U.S. Net Sales Milestones Following Opt-Out).
+
+1.255
+
+“U.S. Net Sales Milestone Payments” has the meaning set forth in Section 8.5.2 (U.S. Net Sales Milestones Following Opt-Out).
+
+1.256
+
+“Valid Patent Claim” means a claim of (a) any issued, unexpired Patent that shall not have lapsed, been revoked, cancelled or abandoned, been donated to the public, finally disclaimed, nor held finally invalid or unenforceable by a court of competent jurisdiction in an unappealed or unappealable decision and which has not been held unenforceable through disclaimer or otherwise, or (b) any patent application within such Patents (including patent applications covering or claiming joint inventions) that has been pending for less than [***] since the first action on the merits in the relevant jurisdiction.
+
+1.257
+
+“VAT” means any value added, sales, use, purchase, turnover or consumption tax as may be applicable in any relevant jurisdiction, including value added tax chargeable under legislation implementing EU Council Directive 2006/112/EC.
+
+-28-
+
+Article 2
+Effectiveness
+
+2.1
+
+Effectiveness of the Agreement. This Agreement shall become effective as of the HSR Clearance Date (the “Effective Date”).
+
+2.2
+
+HSR Filing. Both Parties (or their Affiliates) shall file the appropriate notices (the “HSR Filings”) under the Hart Scott Rodino Antitrust Improvements Act (“HSR Act”) within ten (10) Business Days after the Execution Date. The Parties shall promptly make required filings to obtain clearance under the HSR Act for the consummation of this Agreement and the transactions contemplated hereby and shall keep each other apprised of the status of any communications with, and any inquiries or requests for additional information from, the United States’ Federal Trade Commission (“FTC”) or the Antitrust Division of the United States Department of Justice (“DOJ”) and shall comply promptly with any reasonable FTC or DOJ inquiry or request of this nature; provided that [***]. Each Party shall be responsible for paying the filing fees it incurs in connection with the HSR Filings. As used herein, the “HSR Clearance Date” means the earlier of (a) the date on which the FTC or DOJ shall notify the Parties of early termination of the waiting period under the HSR Act or (b) the date on which the applicable waiting period under the HSR Act expires; provided that, if the FTC or DOJ commences any investigation by means of a second request or otherwise, HSR Clearance Date means the date on which any investigation opened by the FTC or DOJ has been terminated, without action to prevent the Parties from implementing the transactions contemplated by this Agreement with respect to the United States. Notwithstanding any other provisions of this Agreement to the contrary, either Party may terminate its obligation under this Section 2.2 (HSR Filing), and this Agreement shall be void and of no further effect upon notice to the other Party, if the HSR Clearance Date has not occurred on or before the date that is [***] after the date on which both Parties have made their respective HSR Filings and the initial waiting period under the HSR Act has commenced.
+
+Article 3
+DEVELOPMENT Program
+
+3.1
+
+General.
+
+3.1.1
+
+Global Development. The Party to which a particular Development activity is allocated under the Global Development Plan will lead the performance thereof and all Clinical Trials and Development activities for the Licensed Antibody and Licensed Product in the Territory will be conducted by the Parties as set forth in the Global Development Plan.
+
+3.1.2
+
+Development for the Net Sales Territory. As between the Parties, GSK, either itself or as it may determine, by and through its Affiliates, Sublicensees or subcontractors, will be responsible for performing all GSK Sole Development Activities for the Licensed Antibody and Licensed Products set forth in the Global Development Plan, at GSK’s sole cost and expense. Prior to commencing any GSK Sole Development Activities, GSK will include such GSK Sole Development
+
+-29-
+
+Activities in the Global Development Plan for each applicable Licensed Product (or an update thereto) and provide such Global Development Plan to the JDC to review, discuss and recommend modifications. ITEOS’s representatives on the JDC may comment thereon, and GSK will consider ITEOS’s comments in good faith, but the JDC will not have an approval right with respect to any GSK Sole Development Activities included in the Global Development Plan. Notwithstanding the foregoing or any other provision to the contrary set forth in this Agreement, if ITEOS reasonably believes that any GSK Sole Development Activity under the Global Development Plan or update thereto may reasonably give rise to a [***]. If the JDC or the Parties’ respective [***] are unable to resolve such matter, then the matter will be resolved in accordance with Section 7.7.2(c) (Resolution of Material Concerns).
+
+3.1.3
+
+ITEOS Phase 1 Clinical Study. ITEOS shall conduct the ITEOS Phase 1 Clinical Study at its sole cost and expense, unless the Parties agree otherwise.
+
+3.2
+
+Global Development.
+
+3.2.1
+
+Global Development Plan. Attached as Schedule 3.2 is the initial Global Development Plan for Licensed Antibodies and Licensed Products (including the corresponding Global Development Budget). Such initial Global Development Plan comprises all Development activities contemplated by the Parties with respect to the Licensed Antibodies and Licensed Products as of the Effective Date and the Parties will discuss, through the JDC, and add additional details (including, with respect to Clinical Trials, study design and protocol, proposed enrollment criteria, the number of patients to be included, the endpoints to be measured, and the statistical design and powering, as needed) to the Global Development Plan (and corresponding Global Development Budget) following the Effective Date in accordance with this Agreement, and each update to the Global Development Plan to add any additional Clinical Trials will include such details. The Clinical Trials set forth in the initial Global Development Plan attached hereto (other than any GSK Sole Development Activities therein) are the Clinical Trials that the Parties are committing to conduct as of the Effective Date (the “Committed Studies”). The Parties also plan to add additional non-clinical Development activities to the Global Development Plan following the Effective Date. The Global Development Plan and Global Development Budget will be updated by the Parties and submitted to the JDC for review and comment not less frequently than annually during the Term, in November of each Calendar Year. In addition, either Party may propose updates to the Global Development Plan and corresponding Global Development Budget from time to time during the Term. Each updated Global Development Budget will be provided to the Financial Working Group prior to being reviewed by the JDC or JSC. The JDC will review, discuss and propose modifications to each update to the Global Development Plan and Global Development Budget and, in turn, submit such updates (as such update may be modified on the recommendation of the JDC) to the Global Development Plan and Global Development Budget to the JSC to review, discuss and determine whether to approve. Each such update to the Global Development Plan and corresponding Global Development Budget will
+
+-30-
+
+become effective and will supersede the previous Global Development Plan and corresponding Global Development Budget upon approval thereof by the JSC. Any such updates or amendments to the Global Development Plan and Global Development Budget may be memorialized in the JDC and JSC meeting minutes until the next annual update to the Global Development Plan and Global Development Budget.
+
+3.2.2
+
+Performance under Global Development Plan. Without limiting the JDC’s rights to prepare, review and discuss, or the JSC’s rights to review, discuss and determine whether to approve each Global Development Plan and update thereto (other than the GSK Sole Development Activities), the Party to whom a particular Development activity is allocated under the Global Development Plan will have the right, without seeking JDC review or JSC approval, to make operational decisions with respect to the implementation and performance of such Development activity to the extent consistent with the then-current Global Development Plan and Global Development Budget.
+
+3.2.3
+
+Shared Development Costs. Except as set forth in Section 3.4 (Additional Development), and further subject to Section 6.7 (ITEOS Opt-Out), the Parties will share Development Costs incurred in the performance of Shared Global Development Activities undertaken in accordance with the Global Development Plan and Global Development Budget, with GSK bearing sixty percent (60%) of such Development Costs and ITEOS bearing forty percent (40%) of such Development Costs. Reconciliation and sharing of Development Costs shall be managed in accordance with Section 8.2 (Sharing of Development Costs). The Parties agree to initially spend an aggregate amount of [***] (the “Committed Development Spend”) under the Global Development Budget to undertake the Committed Studies (including as these may be amended or replaced with comparable Clinical Trials of similar scope through an update to the Global Development Plan in accordance with Section 3.2.1 (Global Development Plan)) provided for in the Global Development Plan and any other Clinical Trials that the Parties agree to include in the Global Development Plan that can be conducted within the Committed Development Spend. In addition, if agreed pursuant to an update to the Global Development Plan and Global Development Budget in accordance with Section 3.2.1 (Global Development Plan), then the Parties may also agree to add additional Development activities to the Global Development Plan or spend more than the Committed Development Spend.
+
+3.3
+
+Development Diligence. Each Party will use Commercially Reasonable Efforts to perform the obligations assigned to it under the Global Development Plan. GSK (directly, or through its Affiliates, its or their Sublicensees and subcontractors) will use Commercially Reasonable Efforts to Develop the Licensed Products in the Field in the Territory, including to obtain and maintain Regulatory Approval of Licensed Products in the Field in the United Kingdom, Germany, Italy, France, Spain, China, Japan, and, in the event that ITEOS has delivered an Opt-Out Notice, the United States.
+
+-31-
+
+3.4
+
+Additional Development.
+
+3.4.1
+
+Additional Development Proposals. Subject to Section 3.5 (Limits on Development; No Other Development), if either Party proposes to Develop a Licensed Product that the Parties previously agreed to Develop under the Global Development Plan (including a Co-Formulated Product), either as (i) a Licensed Product for a new Indication, or (ii) a Licensed Product as part of a Co-Administration Study (i.e., an existing Co-Administration Therapy in a new Indication or a new Co-Administration Therapy in a new or existing Indication), in each case of (i) or (ii), other than in Indications or in Co-Administration Studies set forth in the then-current Global Development Plan (each, “Proposed Additional Development”), then the proposing Party will present to the JDC to review and discuss, and submit, within [***], to the JSC to review, discuss and determine whether to approve a proposal to add such Proposed Additional Development to the Global Development Plan, including the countries in which such activities would be conducted (which will include at least the U.S. or the European Union) and the allocation of performance of such activities between the Parties (an “Additional Development Proposal”). Each Additional Development Proposal will describe in reasonable detail the applicable non-clinical studies, pre-clinical studies and Clinical Trials, in each case, that the proposing Party desires to conduct as part of such Proposed Additional Development, including a synopsis of the Clinical Trial or other activities, the proposed enrollment criteria, the number of patients to be included, the endpoints to be measured, and the statistical design and powering (the “Additional Development Activities”), as well as a proposed timeline and budget (which budget will include the expected Development FTE Costs, Out-Of-Pocket Costs and Manufacturing Costs to be incurred in the conduct of such Additional Development Activities) and an analysis of the business opportunity and revenue potential for such Additional Development Activities.
+
+3.4.2
+
+JSC Decision Regarding Proposed Additional Development. The JSC will review, discuss and determine whether to approve an Additional Development Proposal within [***] after receipt thereof from the JDC.
+
+(a)
+
+JSC Approval. If the JSC approves an Additional Development Proposal (or a modified version thereof), then upon such an approval the JDC will update the Global Development Plan (and corresponding Global Development Budget) to include such Additional Development Activities set forth in such Additional Development Proposal (as the same may be amended by the JDC or JSC upon such approval).
+
+-32-
+
+(b)
+
+No JSC Approval. If the JSC fails to approve an Additional Development Proposal (or a modified version thereof) regarding a Licensed Product in a new Indication or any Co-Administration Studies for any Licensed Product or an appropriate update to the Global Development Budget to account for the performance thereof, then such Proposed Additional Development will not be included in the Global Development Plan or corresponding Global Development Budget and the provisions of Section 3.4.3 (Independent Performance of Additional Development) will apply.
+
+3.4.3
+
+Independent Performance of Additional Development.
+
+(a)
+
+Independent Development Activities. If the JSC fails to approve for inclusion in the Global Development Plan the Proposed Additional Development proposed by either Party (or any modified version thereof), then the proposing Party will have the right, subject to Section 3.5.2 (Material Adverse Development), upon written notice to the other Party, to conduct such Additional Development Activities set forth in the Additional Development Proposal at its own cost and expense. The proposing Party will conduct such Additional Development Activities in accordance with the applicable Additional Development Proposal (including the budget therein) previously provided to the JDC and JSC that the JSC declined to approve. No Development activities included in an Additional Development Proposal may be included in or contemplated by the Global Development Plan if not approved by the JSC. Each applicable Party undertaking any such Additional Development Activities will keep the JDC reasonably informed of any progress and results of activities for such Additional Development Activities undertaken by it or on its behalf, including any and all Data and intellectual property arising from such activities, through its employees on the JDC and the Patent Liaisons, as applicable, at each regularly scheduled meeting thereof.
+
+(b)
+

@@ -1,0 +1,374 @@
+21
+vcka-20220331xex10d43.htm
+EXHIBIT 10.43
+
+​
+
+Exhibit 10.43
+
+MASTER SERVICES AGREEMENT
+
+This MASTER SERVICES AGREEMENT (“Agreement”), is effective 23 November 2020 (the “Effective Date”), by and between AARDVARK THERAPEUTICS INC., a Delaware corporation, having a principal place of business at 12707 High Bluff Drive, Suite 200, San Diego, California 92130-2035 (“Aardvark”) (on behalf of itself and its Affiliates and subsidiaries) and TULEX, a Delaware corporation having a principal place of business at or address at 5 Cedar Brook Drive, Cranbury, NJ 08512 (“Service Provider”). Aardvark and Service Provider may be referred to herein individually as a “party” or, collectively, as the “parties”.
+
+WHEREAS, Aardvark is in the business of developing, pre-clinically and clinically, manufacturing and licensing pharmaceutical products;
+
+WHEREAS, Service Provider is in the business of developing and manufacturing pharmaceutical formulations; and
+
+WHEREAS, Aardvark and Service Provider desire to enter into this Agreement to provide the terms and conditions upon which Aardvark may engage Service Provider from time-to-time to provide services, as described herein.
+
+Now THEREFORE, in consideration of the mutual promises and covenants hereinafter set forth, and for other good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the parties hereto agree as follows:
+
+1.SCOPE OF AGREEMENT.
+
+1.1Scope of Agreement. As a “master” form of contract, this Agreement allows the parties to contract for services projects through the issuance of SOWs (as discussed in Section 1.2 below), without having to re-negotiate the basic terms and conditions contained herein. This Agreement covers the provision of services by Service Provider and Service Provider’s Affiliates for Aardvark and Aardvark’s Affiliates (see Section 1.4) and accordingly, this Agreement enables Aardvark and its Affiliates to contract efficiently with Service Provider and its Affiliates on a global basis covering a broad range of services.
+
+1.2Statements of Work. The specific details of each services project under this Agreement (each “Project”) shall be specified in writing in a Statement of Work (“SOW”) in a format substantially similar to Exhibit A, attached hereto and incorporated by reference. Each SOW shall detail the services to be performed thereunder (the “Services”) and shall be subject to all of the terms and conditions of this Agreement, in addition to all other terms and conditions, if any, specified in the particular SOW. The parties shall attach a copy of each SOW as an exhibit to this Agreement.
+
+1.3Amendments and Conflicts. Any change to a SOW shall be documented in a written amendment mutually agreed upon and executed by the parties (an “Amendment”). Each party acknowledges that an Amendment may necessitate a change in the delivery schedule and/or fees due under the applicable SOW. No Amendment will be binding upon either party until it is signed by the authorized representatives of both parties. Each SOW, Amendment and
+
+Page 1 of 17
+
+​
+
+purchase order (if any) will be governed by the terms of this Agreement. In the event of any inconsistency or conflict between the terms and conditions of this Agreement and those of a SOW, Amendment or purchase order (if any), this Agreement will control.
+
+2.COMPENSATION AND EXPENSES.
+
+2.1Fees, Expenses and Payment Terms. Aardvark will pay Service Provider fees, pass-through costs, and expenses in accordance with the applicable SOW(s). Unless otherwise agreed to in a particular SOW, the following shall apply: (a) Aardvark shall reimburse Service Provider for those reasonable and necessary expenses and pass-through costs incurred in the performance of the Services which are approved by Aardvark in advance and in writing; (b) Service Provider will invoice Aardvark monthly within thirty (30) days of the end of the month during which the Services were performed, provided, however that the Services performed were within the budget of its relevant SOW; and (c) Aardvark shall pay each undisputed invoice within forty five (45) days of receipt. If Aardvark disputes any portion of an invoice received from Service Provider, such as outside of a budget in a SOW, then Aardvark shall so notify Service Provider in writing of the disputed amounts and shall pay the undisputed amounts as set forth in the preceding sentence and the parties shall use good faith efforts to reconcile the disputed amounts as soon as practicable. Except as otherwise agreed upon by Aardvark in an Amendment, Service Provider agrees to accept the foregoing amounts as payment in full for performance of the Services specified in the applicable SOW(s) and further agrees that the amounts specified in an SOW are the maximum amounts due for the Services performed thereunder unless otherwise agreed upon by Aardvark in an Amendment.
+
+2.2Taxes. Service Provider shall be responsible for all applicable taxes, tariffs and duties, including withholding, value added, stamp, income (e.g., payroll and employment taxes) and any other similar charges assessed by any government authority with respect to the Services rendered by Service Provider under this Agreement. Aardvark shall be entitled to withhold from any payment due to Service Provider any taxes that Aardvark is required to pay on behalf of Service Provider, and such payment shall decrease by an equivalent amount the payment due to Service Provider.
+
+2.3Transparency Reporting. Any payment or benefit provided by Service Provider to a healthcare professional or a teaching institution directly or indirectly on behalf of Aardvark must comply with (a) the policy and law for the country, region or state in which the healthcare professional/teaching institution resides and/or practices medicine, and (b) the specific requirements of any governmental agency which requires Aardvark to publicly report certain payments and benefits. Service Provider shall maintain records of and provide to Aardvark, in a format specified by Aardvark, all information requested by Aardvark to enable Aardvark to report benefits provided by Service Provider to healthcare professionals or teaching institutions directly or indirectly on behalf of Aardvark.
+
+3.REPRESENTATIONS AND WARRANTIES.
+
+3.1By Aardvark. Aardvark represents and warrants that the following statements are true and correct as of the Effective Date and will continue to be true and correct for the duration of the term of this Agreement:
+
+​
+
+Page 2 of 17
+
+​
+
+(a)Aardvark has full right, power and authority to enter into and perform this Agreement without the consent of any third party; and
+
+(b)Aardvark will comply with all laws, regulations and ordinances applicable to its performance under this Agreement.
+
+3.2By Service Provider. Service Provider represents and warrants that the following statements are true and correct as of the Effective Date and will continue to be true and correct for the duration of the term of this Agreement:
+
+(a)Service Provider has full right, power and authority to enter into this Agreement, and perform its obligations thereunder, without the consent, approval or authorization of any third party;
+
+(b)Service Provider will render the Services in accordance with high professional standards and in compliance with the terms of this Agreement, the terms of the applicable SOW(s) (including each Project schedule and Project budget contained therein) and agreed upon standard operating procedures;
+
+(c)Service Provider will comply with all laws, regulations and ordinances applicable to its performance under this Agreement, and has obtained (or before performing the Services will obtain) all governmental permits and licenses required for it to perform the Services and its other obligations under this Agreement;
+
+(d)Service Provider shall have sufficient staff to perform the Services and the personnel assigned to perform such Services shall have the requisite qualifications, expertise and experience, and Service Provider shall verify the identity of all such personnel;
+
+(e)Service Provider will not, in the course of performing the Services, infringe or misappropriate, and neither the work product resulting from such Services nor any element thereof will infringe or misappropriate, any intellectual property right of any other person;
+
+(f)If applicable, Service Provider will make available to Aardvark, or to the responsible regulatory authority, relevant records, programs and data as may be reasonably requested by Aardvark for purposes related to any regulatory applications, including INDs and new drug applications (NDAs);
+
+(g)Service Provider is not a party to any agreement which would prevent it from fulfilling its obligations under this Agreement or impose conflicting obligations on Service Provider, and Service Provider agrees that during the term of this Agreement it will not enter into any agreement to provide services which would in any way prevent it from providing the Services contemplated under this Agreement or SOWs or impose conflicting obligations on Service Provider;
+
+(h)Service Provider will not disclose to Aardvark, or bring onto Aardvark’s premises, any confidential or proprietary information of any third party; and
+
+​
+
+Page 3 of 17
+
+​
+
+(i)Service Provider is duly organized, validly existing and in good standing under the laws of its jurisdiction and all jurisdictions in which its conduct of business requires.
+
+3.3Remedy. In the event any portion of the Services fails to conform to the warranties set forth in Section 3.2(b), Service Provider will, within thirty (30) days of receipt of notice from Aardvark detailing the applicable nonconformance, correct or re-perform such nonconforming Services without additional cost to Aardvark; provided, however that Aardvark specifically reserves its right to pursue all other remedies to which it may be entitled.
+
+4.CONFIDENTIALITY.
+
+4.1Information Defined. “Information” means any information, whether or not designated as confidential, disclosed to one party (“Recipient”) by the other party (“Discloser”), either directly or indirectly in writing, orally, electronically or by delivery of tangible objects, including, but not limited to confidential or proprietary information, including without limitation, (a) concepts, ideas, inventions, models, diagrams, designs, data, documents, research, studies, analyses, forecasts, processes, procedures, systems, technology, intellectual property, trade secrets, business plans or opportunities, business strategies, marketing plans or opportunities, marketing strategies, product development plans or opportunities, future projects or products, projects or products under consideration, and information relating to finances, costs, prices, suppliers, vendors, customers and employees, and (b) any information that contains, reflects, or is based upon, in whole or in part, any Information furnished to Recipient by Discloser, including without limitation any notes, analyses, compilations, studies, interpretations, memoranda or other documents or tangible objects. Information may also include information previously disclosed to Discloser by third parties. Service Provider will not disclose any trade secrets to Aardvark, without Aardvark’s prior written consent.
+
+4.2Nondisclosure and Confidentiality Obligations. Recipient agrees that it will and will cause its directors, officers, employees, agents and advisors to: (a) hold Discloser’s Information in strict confidence using the same standard of care as it uses to protect its own confidential information of a similar nature, but in no event less than reasonable care; (b) not disclose the Information of Discloser to any third party without Discloser’s prior written consent, except as expressly permitted under this Agreement; and (c) limit access to Discloser’s Information to those of its employees or agents having a need to know for purposes of performance hereunder who are bound by confidentiality obligations at least as restrictive as those set forth herein. Any trade secrets of a party will also be entitled to all of the protections and benefits under the Defend Trade Secrets Act (18 U.S.C § 1836 et seq.), and any other like state laws or regulations, as applicable. Notwithstanding the foregoing, Recipient may make disclosures as required or requested by a court of law or any governmental entity or agency, provided that Recipient provides Discloser with reasonable prior notice to enable Discloser to seek confidential treatment of such information through a protective order or otherwise.
+
+4.3Use of Information. Recipient agrees that it will not use Discloser’s Information other than as necessary for the provision of Services, or, in the case of Aardvark, in connection with the use and receipt of the Services. Information disclosed by Discloser under this Agreement shall, in all respects, remain the sole property of Discloser and nothing contained
+
+​
+
+Page 4 of 17
+
+​
+
+herein shall be construed as granting or conferring to Recipient any license, interest, ownership rights, or intellectual property rights in such Information.
+
+4.4Exclusions. The restrictions on the use and disclosure of Information shall not apply to any of Discloser’s Information (or portion thereof) which (a) is or becomes publicly known through no act or omission of Recipient; (b) is lawfully received from a third party without restriction on disclosure; (c) is already known by Recipient at the time it is disclosed by Discloser, as shown by Recipient’s written records; or (d) is independently developed by Recipient without reference to or reliance upon Discloser’s Information, as shown by Recipient’s contemporaneous written records.
+
+4.5Nondisclosure and Confidentiality Period. Recipient’s confidentiality obligations as set forth above shall continue in full force and effect for the term of this Agreement and for five (5) years from the expiration or termination of this Agreement, except for any trade secret recognized as such under the Uniform Trade Secret Act for which Recipient’s obligations with respect to use and disclosure shall continue unless and until the applicable Information of Discloser falls within an exception set forth in Section 4.4.
+
+4.6Injunctive Relief. Recipient acknowledges that a breach or threatened breach of this Section 4 would cause irreparable harm to Discloser, the extent of which would be difficult to ascertain and may not be adequately compensable by monetary damages. Accordingly, Recipient agrees that, in addition to any other remedies to which Discloser may be legally entitled, Discloser shall have the right to immediate injunctive or other equitable relief, without the need to post any bond or additional security, in the event of a breach or threatened breach of this Section 4 by Recipient or any of its representatives.
+
+4.7Personal Information Security and Privacy Compliance. Notwithstanding anything contained herein to the contrary, in the event Service Provider receives any information in connection with this Agreement that relates to an identifiable individual, including first and last name, social security number, other government-issued identifiers, date of birth, e-mail address, IP address, credit card number and/or financial account number, then Service Provider shall comply with, and be subject to, the Personal Information Security and Privacy Compliance Addendum, attached hereto and incorporated by reference.
+
+4.8Publicity. In addition to its other confidentiality obligations under this Agreement, Service Provider shall not make any announcement, take or release any photographs (except for its internal operation purposes for performance under this Agreement) or release any information concerning this Agreement or any part thereof or with respect to its business relationship with Aardvark, to any member of the public, press, business entity, or any official body, except as required by applicable law, rule, injunction, or administrative order, unless prior written consent is obtained from Aardvark. If Service Provider determines it is obligated by law or a governmental authority to make any such announcement or release, Service Provider shall promptly notify Aardvark and cooperate with Aardvark to ensure that suitable confidentiality obligations are afforded such information. Project results may not be published or referred to, in whole or in part, by Service Provider or its Affiliates without the prior written consent of Aardvark. Service Provider shall not use any of Aardvark’s trademarks or tradenames without the prior written consent of Aardvark.
+
+​
+
+Page 5 of 17
+
+​
+
+4.9Return of Materials. Upon Discloser’s request or upon termination or expiration of this Agreement, Recipient will promptly (a) return to Discloser, or if so directed by Discloser, destroy all tangible embodiments of, Discloser’s Information (in every form and medium); (b) permanently erase all electronic files containing or summarizing any of Discloser’s Information (except for any computer records or files that have been created and are maintained pursuant to Recipient’s normal disaster recovery procedures and the removal of which is not technically reasonable); and (c) if so directed by Discloser, confirm to Discloser in writing that Recipient has fully complied with the foregoing obligations. Notwithstanding the foregoing, Recipient shall be permitted to retain one (1) copy of Discloser’s Information for its legal archives (subject to a continuing obligation of confidentiality) or as otherwise required by applicable laws, regulations and ordinances.
+
+5.AARDVARK MATERIALS. From time to time, Aardvark may provide to Service Provider certain products, samples, and other materials (collectively “Aardvark Materials”) to be used by Service Provider in connection with the Services. Aardvark Materials will at all times remain the sole and exclusive property of Aardvark, and Service Provider neither has nor acquires any right or property interest in such Aardvark Materials. Service Provider agrees to hold all Aardvark Materials for the sole benefit of Aardvark and will only use such Aardvark Materials for the purpose of providing Services hereunder. Service Provider assumes liability for, and bears all risks of damage or loss to, Aardvark Materials while such Aardvark Materials are in Service Provider’s custody and/or control.
+
+6.TERM AND TERMINATION.
+
+6.1Term. This Agreement shall commence on the Effective Date and shall continue for a period of five (5) years from the Effective Date, unless terminated early by either party in accordance with this Agreement.
+
+6.2Termination.
+
+(a)This Agreement may be terminated at any time by mutual written agreement of Aardvark and Service Provider.
+
+(b)Either party may terminate this Agreement or any SOW by written notice (i) in the event the other party is in material breach of any obligation under this Agreement or such SOW, which default is incapable of cure or which, being capable of cure, has not been cured within fifteen (15) days (or such other time period expressly stated herein or the applicable SOW) after receipt of notice of such breach; or (ii) in the event the other party shall formally declare bankruptcy, insolvency, reorganization, liquidation, or receivership; or shall have instigated against it bankruptcy, insolvency, reorganization, liquidation, or receivership proceedings, and shall fail to remove itself from such proceedings within ten (10) days from the date of institution of such proceedings. In addition, this Agreement or any SOW may be terminated by Aardvark at any time (A) without cause upon thirty (30) days prior written notice to Service Provider or (B) immediately upon written notice in the event Service Provider is dissolved or undergoes a change in control, where “control” means the ability to vote fifty percent (50%) or more of the voting securities of any entity or otherwise having the ability to direct the policies and decisions of an entity. Any notice of termination shall specify the
+
+​
+
+Page 6 of 17
+
+​
+
+applicable SOW(s) that are being terminated or that this Agreement is being terminated in its entirety. The termination or expiration of a single SOW shall not cause the automatic termination of this Agreement or of any other SOW.
+
+(c)In the event this Agreement or any SOW is terminated for reasons other than material breach by Service Provider, Aardvark shall pay Service Provider, pursuant to Section 2, for all Services successfully performed pursuant to any unfinished SOW prior to such termination, and any non-cancelable expenses incurred in connection with Service Provider’s performance hereunder; provided, however, in the event of any such termination by Aardvark, if payments under a terminated SOW are milestone-based, and the SOW is terminated after costs have been incurred by Service Provider toward achieving a milestone, but that milestone has not yet been completed, Aardvark will pay Service Provider’s standard fees/rates (unless fees/rates are set forth in the SOW) for actual work performed toward that milestone prior to termination instead of any amounts due upon achievement of such milestone up to a maximum amount not to exceed the milestone achievement payment amount. Upon receipt of a termination notice, Service Provider shall promptly cease performing any work not necessary for the orderly close out of the affected Project(s) or for the fulfillment of regulatory requirements and will use commercially reasonable efforts to minimize any non-cancelable expenses. Notwithstanding anything contained herein to the contrary, upon termination of this Agreement for any reason, any amounts prepaid by Aardvark for Services not yet performed shall be immediately refunded to Aardvark.
+
+(d)Upon the expiration or termination of this Agreement or any SOW, or upon Aardvark’s earlier request, Service Provider shall immediately deliver to Aardvark or Aardvark’s designee (or dispose of as instructed by Aardvark) all Aardvark Materials under the impacted Project(s) and all Work Product (as defined below), including any tangible items of work in process, notes, plans and other materials related in any way to Service Provider’s performance under the impacted Project(s), and disclose to Aardvark all Inventions (as defined below).
+
+(e)Expiration or termination of this Agreement for any reason shall not release either party from liability which, at said time, has already incurred to the other party and nothing herein shall affect or be construed or operate as a waiver of the right of the party aggrieved by any breach of this Agreement to be compensated for any injury or damage resulting therefrom which is incurred before or after such expiration or termination.
+
+(f)In the event a SOW is still in effect upon the expiration of this Agreement, such SOW shall remain in effect and shall continue to be governed by the terms and conditions of this Agreement unless and until such SOW is completed or otherwise terminated in accordance with this Agreement.
+
+(g)Except as otherwise expressly set forth herein, the following provisions will survive expiration or termination of this Agreement pursuant to their terms, together with any other provisions necessary for their construction and enforcement: Sections 2.3 (Transparency Reporting), 3 (Representations and Warranties), 4 (Confidentiality), 6.2 (Termination), 7 (Ownership of Work Product and Inventions), 8 (Compliance), 9
+
+​
+
+Page 7 of 17
+
+​
+
+(Indemnification), 10 (Limitation of Liability), 11 (Audits) and 13 (Miscellaneous), and any other provision of this Agreement that by its terms would survive expiration or termination.
+
+7.OWNERSHIP OF WORK PRODUCT AND INVENTIONS.
+
+7.1Work Product and Inventions. Subject to Section 7.2, Aardvark owns all rights, including all intellectual property rights in and to (a) all deliverables and any other work product prepared by or created by Service Provider under this Agreement (collectively “Work Product”) and (b) all ideas, inventions, technologies, discoveries, improvements, know-how and techniques that Service Provider conceives, reduces to practice, or develops, alone or in conjunction with others, as a result of performing the Services under this Agreement or through the use of Aardvark’s Confidential Information (collectively “Inventions”). Service Provider will and hereby does assign, transfer, and convey to Aardvark all of Service Provider’s (and will cause its subcontractors and personnel to assign, transfer, and convey the entirety of their) right, title and interest in and to the Work Product and Inventions, including any intellectual property rights in the Work Product and Inventions throughout the world. Service Provider understands and agrees that Service Provider has no right to use the Work Product and/or Inventions except as necessary to perform Services for Aardvark.
+
+7.2Assignment and Waiver of Other Rights. If any intellectual property rights, including moral rights, in the Work Product and/or Inventions cannot (as a matter of law) be assigned by Service Provider to Aardvark as provided in Section 7.1, then (a) Service Provider unconditionally and irrevocably waives the enforcement of such rights and all claims and causes of action of any kind against Aardvark with respect to such rights; and (b) to the extent Service Provider cannot (as a matter of law) make such waiver, Service Provider unconditionally grants to Aardvark an exclusive, perpetual, irrevocable, worldwide, fully-paid license, with the right to sublicense through multiple levels of sub-licensees, under any and all such rights (i) to reproduce, create derivative works of, distribute, publicly perform, publicly display, digitally transmit and otherwise use the Work Product and Inventions in any medium or format, whether now known or hereafter discovered; (ii) to use, make, have made, sell, offer to sell, import, and otherwise exploit any product or service based on, embodying, incorporating or derived from the Work Product and Inventions; and (iii) to exercise any and all other present or future rights in the Work Product and Inventions.
+
+7.3Cooperation and Assistance; Power of Attorney. Service Provider will promptly disclose all Inventions to Aardvark. Service Provider will, at Aardvark’s request, (a) cooperate with and assist Aardvark, both during and after the term of this Agreement, in perfecting, maintaining, protecting and enforcing Aardvark’s rights in the Work Product and Inventions; and (b) execute and deliver to Aardvark any documents deemed necessary or appropriate by Aardvark in its discretion to perfect, maintain, protect, or enforce Aardvark’s rights in the Work Product and Inventions or otherwise carry out the purpose of this Agreement. Aardvark will reimburse Service Provider for any reasonable out-of-pocket expenses actually incurred by Service Provider in fulfilling its obligations under this Section 7.3. If Aardvark is unable for any reason to secure Service Provider’s signature on any document needed in connection with the actions described in this Section, then Service Provider hereby irrevocably designates and appoints Aardvark and its duly authorized officers and agents as Service Provider’s agent and attorney-in-fact to act on Service Provider’s behalf solely for the limited
+
+​
+
+Page 8 of 17
+
+​
+
+purpose of executing, delivering and filing any and all documents with the same legal force and effect as if executed by Service Provider, and Service Provider acknowledges that this appointment is coupled with an interest.
+
+8.COMPLIANCE.
+
+8.1Aardvark Rules and Procedures. Service Provider agrees to comply with applicable requirements of Aardvark’s vendor qualification system, including completing qualification questionnaires or permitting Aardvark, or its appointed representative, to conduct periodic qualification audits in accordance with Article 11. While on Aardvark’s premises, if applicable, Service Provider agrees to comply with Aardvark’s then-current access rules and procedures, including those procedures pertaining to safety, confidentiality, and security.
+
+8.2Federal Healthcare Eligibility.
+
+(a)Service Provider represents, warrants and covenants that it is not, and it is not currently using, and will not in the future use, to perform the Services hereunder, the services of any person or entity, excluded or debarred pursuant to the Generic Drug Enforcement Act of 1992, 21 U.S.C. §335a, as amended, or any similar state law or regulation, excluded by the Office of Inspector General pursuant to 42 U.S.C. § 1320a-7, et seq., or any state agency from participation in any Federal or state health care program or otherwise disqualified or restricted by the U.S. Food and Drug Administration pursuant to 21 C.F.R. 312.70 or any other regulatory authority(a “Debarred Person”). Service Provider shall immediately notify Aardvark in writing if it becomes aware that any person or entity (including Service Provider) who is performing Services hereunder is or becomes a Debarred Person or to its knowledge, if any action, suit, claim, investigation, or other legal or administrative proceeding is pending or threatened, that would make any person or entity (including Service Provider) performing Services hereunder a Debarred Person, and Service Provider shall ensure that such person or entity does not perform Services under this Agreement.
+
+(b)Service Provider represents, warrants and covenants that, during the term of this Agreement, Service Provider will not hire or employ to provide Services under this Agreement any person or entity listed on the General Services Administration’s List of Parties Excluded from Federal Programs or on the U.S. Department of Health and Human Services Office of Inspector General’s List of Excluded Individuals/Entities (each an “Excluded Person”). To prevent hiring or engaging Excluded Persons, Service Provider shall screen all prospective employees or subcontractors prior to engaging them to perform Services by (i) requiring each such person or entity to disclose to Service Provider whether the person or entity is an Excluded Person and (ii) appropriately querying the General Services Administration’s List of Parties Excluded from Federal Programs and the U.S. Department of Health and Human Services Office of Inspector General’s List of Excluded Individuals/Entities with respect to such person or entity. Service Provider shall also query such lists at least annually to ensure that each person or entity providing Services under this Agreement does not appear on any such lists. Service Provider shall immediately notify Aardvark in writing if it becomes aware that Service Provider, any employee of Service Provider, or any other person or entity providing Services under this Agreement is or will become an Excluded Person, or if to its knowledge, any action, suit, claim, investigation, or other legal or administrative proceeding is
+
+​
+
+Page 9 of 17
+
+​
+
+pending or threatened, that would make the Service Provider, any employee of the Service Provider or any other person or entity providing Services under this Agreement an Excluded Person, and Service Provider shall ensure that such person or entity does not perform Services under this Agreement.
+
+8.3Anti-Bribery. Service Provider shall comply with all applicable anti-bribery laws and regulations, including, without limitation, the U.S. Foreign Corrupt Practices Act of 1977, as amended, or the U.K. Bribery Act of 2010, as amended and shall not cause Aardvark to be in breach of any of the anti-bribery laws and regulations in the countries where Aardvark operates. Without limiting the generality of the foregoing, in performing the Services, neither Service Provider nor any of its officers, directors, employees, agents or other representatives will pay, offer or promise to pay, or authorize the payment of, any money, or give or promise to give, or authorize the giving of, any services or anything else of value, either directly or through a third party, to any official or employee of any governmental authority or instrumentality, or of a public international organization, or of any agency or subdivision thereof, or to any political party or official thereof or to any candidate for political office, or to any other company, person or entity, corruptly for the purpose of (a) influencing any act or decision of that person in his/her official capacity, including a decision to fail to perform his/her official functions with such governmental agency or instrumentality or such public international organization, or such political party, or any other company, person or entity, or to perform such functions improperly; (b) inducing such person to use his/her influence with such governmental agency or instrumentality or such public international organization or such political party, or any other company, person or entity to affect or influence any act or decision thereof; or (c) securing any improper advantage.
+
+9.INDEMNIFICATION.
+
+9.1Mutual Indemnity. Each party (the “Indemnifying Party”) agrees to defend the other party, its Affiliates and each of their respective officers, directors, employees, contractors and agents (each an “Indemnified Party”) from and against any action, claim, suit, investigation or other proceeding brought by a third party (a “Claim”) to the extent such Claim arises out of the Indemnifying Party’s breach of this Agreement or an SOW or the negligence or willful misconduct on the part of the Indemnifying Party, its officers, directors, employees, agents or other representatives in connection with this Agreement. The Indemnifying Party will indemnify and hold harmless the Indemnified Party from any liabilities, losses, damages, judgments, awards, fines, penalties, costs and expenses (including reasonable attorneys’ fees and costs of defense) incurred by or levied against such Indemnified Party as a result of such Claim.
+
+9.2General Conditions of Indemnification. The Indemnifying Party’s obligations under Section 9.1 are conditioned upon the Indemnified Party (a) providing written notice to the Indemnifying Party of any Claim within thirty (30) days after the Indemnified Party has knowledge of such Claim (except that failure to timely provide such notice will relieve the Indemnifying Party of its obligations only to the extent the Indemnifying Party is materially prejudiced as a direct result of such delay); (b) giving the Indemnifying Party sole control over the defense thereof and any related settlement negotiations; and (c) cooperating and, at the Indemnifying Party’s request and expense, assisting in such defense. Notwithstanding the foregoing, the Indemnified Party may participate at its own expense in the defense and any
+
+​
+
+Page 10 of 17
+
+​
+
+settlement discussions and will have the right to approve any settlement agreement that involves an admission of fault by the Indemnified Party or imposes non-monetary obligations on the Indemnified Party; provided, however, that such approval will not be unreasonably withheld.
+
+10.LIMITATION OF LIABILITY. TO EXCEPT FOR ANY BREACH OF SECTION 4 (CONFIDENTIALITY), TO THE EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL EITHER PARTY BE LIABLE TO THE OTHER FOR ANY INDIRECT, INCIDENTAL, CONSEQUENTIAL, EXEMPLARY, SPECIAL OR PUNITIVE DAMAGES, INCLUDING ANY DAMAGES FOR LOSS OF PROFIT OR INCOME, ARISING FROM OR RELATING TO THIS AGREEMENT, WHETHER IN CONTRACT, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, EVEN IF SUCH PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES; PROVIDED, HOWEVER, THAT THIS LIMITATION SHALL NOT APPLY TO EACH PARTY’S (A) BREACH OF SECTION 4; (B) BREACH OF SECTION 7; (C) INDEMNIFICATION OBLIGATIONS UNDER SECTION 9; OR (D) GROSS NEGLIGENCE, WILLFUL MISCONDUCT OR FRAUD.
+
+11.RECORDS AND AUDITS. Service. Provider shall maintain complete and accurate records related to this Agreement and SOWs for a period of five (5) years after expiration or termination of this Agreement or completion of an SOW, the period set forth in the applicable SOW, or the period required by applicable law, whichever is longer. During the term of this Agreement and for three (3) years thereafter, Aardvark’s authorized representative(s) and governmental regulatory authorities, to the extent allowed by law, shall be permitted to inspect and audit Service Provider’s premises, records, processes, and computing and/or network equipment, software, and systems used by Service Provider in connection with this Agreement, for quality assurance purposes and to confirm Service Provider’s compliance with the terms of this Agreement and each SOW. Any such Aardvark audit will be conducted at Aardvark’s sole expense, during Service Provider’s regular business hours and upon reasonable prior notice to Service Provider. In the event an audit reveals Service Provider’s noncompliance, Service Provider shall immediately implement appropriate corrective action at Service Provider’s expense. Service Provider’s failure to timely implement such corrective action (if any) shall result in Aardvark having the right to immediately terminate this Agreement and/or the applicable SOW(s) upon written notice to Service Provider.
+
+12.INSURANCE. Service Provider, at its sole cost and expense, will maintain the following insurance coverages: (a) general liability insurance with limits of at least $1,000,000 per occurrence, which coverage must include bodily injury, personal injury, and broad form property damage; products-completed operations; (b) auto/vehicle liability insurance with limits of at least $300,000 per occurrence, which coverage must include bodily injury, personal injury and property damage; and (c) workers’ compensation insurance compliant with the applicable state’s compensation laws. In addition, if the Services being performed by Service Provider under this Agreement include professional services, then Service Provider, at its sole cost and expense, will maintain professional liability or errors and omissions insurance with limits of at least $1,000,000 per claim. Professional liability or errors and omissions insurance on claims-made policy forms must have retroactive dates on or prior to contract date and maintain coverage for three (3) years or an extended reporting period coverage to cover claims. Service Provider will list Aardvark as an “additional insured”; Service Provider’s coverage will be primary and Aardvark’s policy will be non-contributory to Services Provider; and Service Provider will have
+
+​
+
+Page 11 of 17
+
+​
+
+a waiver of subrogation in favour of Aardvark on its general liability policy and will furnish to Aardvark, upon request, certificates of insurance and such other documentation evidencing such policies. All of said certificates under this Section will include a provision whereby thirty (30) days’ notice must be received by Aardvark prior to coverage cancellation by Service Provider or the applicable insurer.
+
+13.MISCELLANEOUS.
+
+13.1Governing Law. This Agreement shall be governed by the internal laws of the State of California without regard to conflicts of law principles.
+
+13.2Dispute Resolution. The parties agree that any and all disputes, claims or controversies arising out of or relating to this Agreement that are not resolved by their mutual agreement (a) shall be brought by a party in such party’s individual capacity, and not as a plaintiff or class member in any purported class or representative proceeding and (b) shall be submitted to final and binding arbitration before JAMS (formerly Judicial Arbitration and Mediation Services), or its successor, pursuant to the United States Arbitration Act, 9 U.S.C. Sec. 1 et seq. Either party may commence the arbitration process called for in this Section by filing a written demand for arbitration with JAMS, with a copy to the other party. The arbitration will be conducted in accordance with the provisions of JAMS’ Comprehensive Arbitration Rules and Procedures in effect at the time of filing of the demand for arbitration. The parties will cooperate with JAMS and with one another in selecting a single arbitrator from JAMS’ panel of neutrals, and in scheduling the arbitration proceedings, which shall take place in San Diego, California, and in the English language. The parties agree that they will participate in the arbitration in good faith, and that they will share equally in its costs. The arbitrators will have the authority to award fees and expenses, including reasonable attorney’s fees, to a Party. The arbitration shall be governed by the Federal Arbitration Act, 9 U.S.C. §§ 1 et seq., and judgment upon the award rendered by the arbitrator(s) may be entered by any court having jurisdiction thereof. The arbitration shall be conducted in San Diego, California, and in the English language. The Parties further agree that the arbitration shall be kept confidential and that the existence of the arbitration proceeding and any element of it (including but not limited to any pleadings, briefs or other documents submitted or exchanged, any testimony or other oral submissions, and any awards) shall not be disclosed beyond the tribunal, JAMS, the parties, their counsel, accountants and auditors, insurers and re-insurers, and any person or entity necessary to the conduct of the proceeding. The confidentiality obligations in this Section 13.2 shall not apply (i) if disclosure is required by law, or injudicial or administrative proceedings, or (ii) as far as disclosure is necessary to enforce the rights arising out of the arbitration award. Without otherwise limiting the requirements imposed by this Section 13.2, a party may seek from any court having jurisdiction any interim or provisional relief that may be necessary to protect its interests hereunder, pending the resolution of any dispute in accordance with this Section 13.2.
+
+13.3Quality Agreement. If applicable, the parties shall execute a written quality agreement between the parties (the “Quality Agreement”). Upon execution, the Quality Agreement shall be incorporated herein by this reference. The Quality Agreement may be updated from time to time upon the mutual written agreement of the parties. To the extent that any terms of the Quality Agreement are inconsistent with the terms set forth in this Agreement, the terms of the Quality Agreement shall control with respect to all quality related issues, and
+
+​
+
+Page 12 of 17
+
+​
+
+with respect to all other issues, including allocation of risk, liability and financial responsibility, the provisions of this Agreement shall prevail.
+
+13.4Relationship of Parties. The relationship of the parties established under this Agreement is that of independent contractors and neither party is a partner, employee, agent or joint venture partner of or with the other, and neither party has the right or authority to assume or create any obligation on behalf of the other party.
+
+13.5Assignment and Subcontracting. Except as stated above in Section 1.4, neither party shall have the right to assign this Agreement or any of the rights or obligations hereunder without the prior written consent of the other party; provided, however, Aardvark may assign this Agreement to an Affiliate or a successor to that area of its business to which this Agreement is related. Except as stated above in Section 1.4, Service Provider will not subcontract or otherwise delegate any of its obligations under this Agreement without Aardvark’s express prior written consent on a case-by-case basis. Upon receipt of such consent, before allowing any subcontractor to begin performing services, Service Provider will enter into a binding written agreement with such subcontractor that protects Aardvark’s rights and interests to at least the same degree as this Agreement. Service Provider will be responsible for (a) the direction and coordination of the services of each subcontractor and (b) each subcontractor’s acts or omissions as if such were the acts or omissions of Service Provider hereunder. Aardvark will have no obligation to pay any subcontractor directly.
+
+13.6Notices. All notices required in connection with this Agreement will be in writing and deemed effectively given: (a) upon personal delivery to the party to be notified; (b) on the date on which such notice is delivered by email with confirmation that the email has been received and read; or (c) one (1) business day after deposit with a nationally/intemationally recognized overnight courier that provides tracking and verification of delivery. All notices shall be sent to the following addresses or at such other address(es) as a party may designate by advance written notice to the other party.
+
+​
+
+If to Aardvark:
+
+Aardvark Therapeutics, Inc.
+12707 High Bluff Drive, Suite 200, San Diego, CA 92130
+Attention: Zhenhuan Zheng
+Email: […***…]
+
+With a copy to:
+Aardvark Therapeutics, Inc.
+2707 High Bluff Drive, Suite 200, San Diego, CA 92130
+Attention: General Counsel
+Email: […***…]
+
+​
+
+​
+
+Page 13 of 17
+
+​
+
+If to Service
+Provider:
+
+Tulex Pharmaceuticals, Inc.
+5 Cedar Brook Drive, Cranbury, NJ 08512
+Attention: Yu-Hsing Tu
+Email: […***…]
+
+With a copy to:
+Tulex Pharmaceuticals, Inc.
+5 Cedar Brook Drive, Cranbury, NJ 08512
+Attention: Yu-I Ising Tu
+Email: […***…]
+
+​
+
+13.7Force Majeure. Neither party shall be liable for any breach of this Agreement or for any delay or failure of performance resulting from any cause beyond such party’s reasonable control, including the weather, civil disturbances, acts of civil or military authorities or acts of God. The party claiming relief under this Section shall promptly notify the other party in writing, but in no event later than ten (10) calendar days of the occurrence, should any such cause arise and shall promptly take steps to remedy any delay or failure in performance upon removal of the circumstances causing such delay or failure.
+
+13.8Construction. The headings used for the sections of this Agreement are for information purposes and convenience only and in no way define, limit, construe or describe the scope or extent of the sections. The word “including” or any variation thereof means “including, without limitation” and will not be construed to limit any general statement that such word or variation thereof follows. The language used in this Agreement will be deemed to be the language chosen by the parties to express the parties’ collective mutual intent, and no rule of strict construction will be applied against any party.
+
+13.9Entire Agreement; Severability; Waiver. This Agreement, together with each SOW and the schedules and exhibits, attached thereto, each of which is incorporated herein, collectively constitutes the entire agreement between the parties and supersedes any prior or contemporaneous understandings, agreements or representations by or among the parties, written or oral, that may have related in any way to the subject matter of this Agreement. This Agreement may only be amended by the execution and delivery of a written instrument by or on behalf of each of the parties hereto. Any alterations or amendments to this Agreement (including any handwritten changes) will be null and void except by an instrument in writing, signed by authorized representatives of both parties. If any provision of this Agreement is held by an arbitrator or court of competent jurisdiction to be void or unenforceable, such provision will be deemed modified and will be interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law and the remaining provisions of this Agreement will continue in full force and effect. Any waiver or failure to enforce any provision of this Agreement by either party on one or more occasion shall not be deemed a waiver of any other provision or of such provision on any other occasion.
+
+13.10Counterparts. This Agreement may be executed in two (2) counterparts, each of which shall be deemed an original but all of which taken together shall constitute one and the same instrument. Signatures to this Agreement transmitted by email, portable document format
+
+​
+
+Page 14 of 17
+
+​
+
+(.pdf) or by any other electronic means intended to preserve the original graphic and pictorial appearance of this Agreement shall have the same effect as the physical delivery of the paper document bearing the original signatures.
+
+13.11Further Assurances. Each party shall execute and deliver to the other party such instruments and other documents, and shall take such other actions, as such other party may reasonably request at any time for the purpose of carrying out or evidencing any of the transactions contemplated hereby.
+
+13.12Remedies. Except as expressly set forth herein, the exercise of any remedies hereunder shall be cumulative and in addition to, and not in limitation of, any other remedies available to such party at law or in equity.
+
+​
+
+[Signature Page Follows]
+
+​
+
+Page 15 of 17
+
+​
+
+IN WITNESS WHEREOF, this Agreement has been executed by the parties hereto through their duly authorized representatives as of the Effective Date.
+
+​
+
+AARDVARK THERAPEUTICS INC.
+
+TULEX PHARMACEUTICALS INC.
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+By:
+
+/s/ Tien-Li Lee
+
+​
+
+By:
+
+/s/ Yu-Hsing Tu
+
+Name:
+
+Tien-Li Lee
+
+​
+
+Name:
+
+Yu-Hsing Tu
+
+Title:
+
+CEO
+
+​
+
+Title:
+
+President
+
+​
+
+​
+
+​
+
+Page 16 of 17
+
+​
+
+Exhibit A – Statement of Work
+
+Page 17 of 17

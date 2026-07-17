@@ -1,0 +1,2930 @@
+2
+dex101.htm
+MASTER AGREEMENT BETWEEN HEALTH NET, INC. AND INTERNATIONAL BUSINESS MACHINES
+
+Master Agreement between Health Net, Inc. and International Business Machines
+
+Exhibit 10.1
+
+Final Execution Version
+
+MASTER AGREEMENT
+
+Between
+
+Health Net, Inc.
+
+and
+
+International Business
+Machines Corporation
+
+Dated
+
+August 19, 2008
+
+The mark *** indicates that text has been redacted pursuant to a request for confidential treatment under Rule
+24b-2 of the Securities Exchange Act of 1934, as amended, and filed separately with Securities and Exchange Commission.
+
+General Terms and Conditions-
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+TABLE OF CONTENTS
+
+1. PREAMBLE
+
+1
+
+1.1
+
+BACKGROUND AND PURPOSE
+
+1
+
+1.2
+
+OBJECTIVES
+
+1
+
+1.3
+
+STRUCTURE OF AGREEMENT
+
+2
+
+1.4
+
+CONSTRUCTION OF PREAMBLE
+
+5
+
+2. DEFINITIONS
+
+5
+
+2.1
+
+DEFINED TERMS
+
+5
+
+2.2
+
+OTHER TERMS
+
+9
+
+3. SERVICES
+
+9
+
+3.1
+
+PROVISION OF SERVICES DURING TRANSITION
+
+9
+
+3.2
+
+PROVISION OF THE STEADY-STATE SERVICES
+
+9
+
+3.3
+
+IMPLIED SERVICES
+
+10
+
+3.4
+
+EVOLUTION OF THE SERVICES
+
+10
+
+3.5
+
+USERS OF THE SERVICES
+
+10
+
+3.6
+
+SERVICES NOT EXCLUSIVE; VARIABLE
+
+11
+
+3.7
+
+COOPERATION AND COORDINATION WITH OTHER PARTIES
+
+11
+
+3.8
+
+NEW SERVICES
+
+12
+
+4. TERM AND REGULATORY APPROVALS
+
+12
+
+4.1
+
+INITIAL TERM
+
+12
+
+4.2
+
+RENEWAL TERMS
+
+12
+
+4.3
+
+REGULATORY APPROVALS AND FEDERAL BUSINESS
+
+12
+
+5. PERFORMANCE
+
+13
+
+5.1
+
+PERFORMANCE, GENERALLY
+
+13
+
+5.2
+
+PLACE OF PERFORMANCE
+
+13
+
+5.3
+
+TIME OF PERFORMANCE
+
+13
+
+5.4
+
+MANNER OF PERFORMANCE
+
+14
+
+5.5
+
+QUALITY ASSURANCE AND CONTINUOUS IMPROVEMENT
+
+15
+
+5.6
+
+USER SATISFACTION
+
+15
+
+6. SERVICE LEVELS
+
+15
+
+6.1
+
+GENERAL
+
+15
+
+6.2
+
+FAILURE TO PERFORM
+
+15
+
+7. SUPPLIER PERSONNEL
+
+16
+
+7.1
+
+PROVISION OF SUITABLE PERSONNEL
+
+16
+
+7.2
+
+SCREENING AND BACKGROUND CHECKS
+
+16
+
+7.3
+
+RESPONSIBILITY FOR SUPPLIER PERSONNEL, GENERALLY
+
+17
+
+7.4
+
+KEY SUPPLIER POSITIONS
+
+17
+
+7.5
+
+REMOVAL AND REPLACEMENT OF SUPPLIER PERSONNEL
+
+18
+
+7.6
+
+CONTROLLING TURNOVER OF SUPPLIER PERSONNEL
+
+18
+
+7.7
+
+SUBCONTRACTING
+
+18
+
+7.8
+
+MANAGED THIRD PARTIES
+
+19
+
+8. HEALTH NET RESPONSIBILITIES
+
+20
+
+8.1
+
+APPOINTMENT OF HEALTH NET PROGRAM MANAGEMENT OFFICE (PMO) PERSONNEL
+
+20
+
+8.2
+
+HEALTH NET COOPERATION DUTIES
+
+20
+
+8.3
+
+SAVINGS CLAUSE
+
+20
+
+General Terms and Conditions-
+
+ii
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+9. CHARGES
+
+20
+
+9.1
+
+PASS-THROUGH EXPENSES
+
+21
+
+9.2
+
+INCIDENTAL EXPENSES
+
+22
+
+9.3
+
+TAXES
+
+22
+
+9.4
+
+BENCHMARKING
+
+24
+
+10. INVOICING AND PAYMENT
+
+29
+
+10.1
+
+INVOICING
+
+29
+
+10.2
+
+PAYMENT DUE
+
+30
+
+10.3
+
+ACCOUNTABILITY
+
+31
+
+10.4
+
+PRORATION
+
+31
+
+10.5
+
+REFUNDABLE ITEMS
+
+31
+
+10.6
+
+DEDUCTIONS
+
+31
+
+10.7
+
+DISPUTED CHARGES
+
+31
+
+11. TRANSFER OR USE OF RESOURCES
+
+32
+
+11.2
+
+TRANSFER OF PERSONNEL
+
+32
+
+11.3
+
+HEALTH NET OWNED EQUIPMENT
+
+32
+
+11.4
+
+HEALTH NET LEASED EQUIPMENT
+
+33
+
+11.5
+
+HEALTH NET THIRD PARTY SERVICE CONTRACTS
+
+34
+
+11.6
+
+HEALTH NET OWNED SOFTWARE
+
+34
+
+11.7
+
+HEALTH NET LICENSED SOFTWARE
+
+35
+
+11.8
+
+INTENTIONALLY OMITTED
+
+36
+
+11.9
+
+HEALTH NET FACILITIES
+
+36
+
+11.10
+
+TERMS APPLICABLE TO HEALTH NET FACILITIES, GENERALLY
+
+36
+
+11.11
+
+REQUIRED CONSENTS
+
+38
+
+11.12
+
+HEALTH NET RESOURCES PROVIDED TO SUPPLIER PERSONNEL WORKING
+ON-SITE
+
+38
+
+12. RESOURCE ACQUISITIONS DURING THE TERM
+
+39
+
+12.1
+
+GENERAL RESPONSIBILITY AND COMPATIBILITY
+
+39
+
+12.2
+
+EQUIPMENT
+
+39
+
+12.3
+
+THIRD PARTY SERVICES
+
+40
+
+12.4
+
+SOFTWARE
+
+40
+
+12.5
+
+NETWORK CONNECTIVITY
+
+41
+
+12.6
+
+HEALTH NET APPROVAL OF CERTAIN RESOURCE ACQUISITIONS
+
+41
+
+12.7
+
+HEALTH NET RIGHTS TO CERTAIN SOFTWARE UPON
+TERMINATION/EXPIRATION
+
+42
+
+13. TRANSITION AND TRANSFORMATION
+
+46
+
+13.1
+
+“TRANSITION” DEFINED
+
+46
+
+13.2
+
+SUPPLIER SOLUTION DESCRIPTION AND TRANSITION PLAN
+
+46
+
+13.3
+
+CONDUCT OF THE TRANSITION AND TRANSFORMATION
+
+47
+
+13.4
+
+HEALTH NET COOPERATION AND SUPPORT
+
+47
+
+13.5
+
+COMPLETION OF TRANSITION AND TRANSFORMATION
+
+47
+
+14. DATA SECURITY AND PROTECTION
+
+48
+
+14.1
+
+“HEALTH NET DATA” DEFINED
+
+48
+
+14.2
+
+HEALTH NET DATA, GENERALLY
+
+48
+
+14.3
+
+DATA SECURITY
+
+48
+
+14.4
+
+COMPLIANCE WITH DATA PRIVACY AND DATA PROTECTION LAWS,
+REGULATIONS AND POLICIES
+
+49
+
+14.5
+
+IMPORT/EXPORT CONTROLS
+
+50
+
+14.6
+
+COMPLIANCE WITH GRAMM-LEACH-BLILEY (“GLB ACT”)
+
+50
+
+15. INTELLECTUAL PROPERTY RIGHTS
+
+51
+
+15.1
+
+DEFINED TERMS
+
+51
+
+General Terms and Conditions-
+
+iii
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+15.2
+
+INDEPENDENT IP
+
+51
+
+15.3
+
+DEVELOPED MATERIALS
+
+52
+
+15.4
+
+INTELLECTUAL PROPERTY RIGHTS AGREEMENTS WITH SUPPLIER PERSONNEL
+
+53
+
+15.5
+
+OTHER OBLIGATIONS AND RIGHTS REGARDING WORK PRODUCT
+
+53
+
+15.6
+
+MENTAL IMPRESSIONS
+
+53
+
+16. TERMINATION
+
+54
+
+16.1
+
+TERMINATION BY HEALTH NET
+
+54
+
+16.2
+
+TERMINATION DUE TO ADVERSE CHANGES IN SUPPLIER’S
+FINANCIAL CIRCUMSTANCES
+
+56
+
+16.3
+
+TERMINATION BY SUPPLIER
+
+56
+
+16.4
+
+EXTENSION OF TERMINATION/EXPIRATION DATE
+
+57
+
+16.5
+
+PARTIAL TERMINATION
+
+57
+
+16.6
+
+DISENGAGEMENT ASSISTANCE
+
+57
+
+16.7
+
+SURVIVAL
+
+59
+
+16.8
+
+BID ASSISTANCE
+
+60
+
+16.9
+
+TERMINATION OF THE CROSS TOWER SERVICES OR THE NETWORK
+SERVICES TOWERS
+
+60
+
+17. GOVERNANCE AND MANAGEMENT
+
+61
+
+17.1
+
+GOVERNANCE STRUCTURE AND PROCESSES
+
+61
+
+17.2
+
+MEETINGS
+
+61
+
+17.3
+
+REPORTS
+
+62
+
+17.4
+
+PROCEDURES MANUAL
+
+62
+
+17.5
+
+CHANGE CONTROL
+
+63
+
+17.6
+
+ANNUAL TECHNOLOGY PLAN
+
+64
+
+18. AUDITS AND RECORDS
+
+65
+
+18.1
+
+AUDIT RIGHTS
+
+65
+
+18.2
+
+AUDIT FOLLOW-UP
+
+66
+
+18.3
+
+CONFIDENTIALITY OF AUDITS
+
+66
+
+18.4
+
+RECORDS RETENTION
+
+66
+
+18.5
+
+SUPPLIER AUDITS
+
+67
+
+18.6
+
+FINANCIAL REPORTS
+
+68
+
+18.7
+
+OVERCHARGES
+
+68
+
+19. REPRESENTATIONS, WARRANTIES AND COVENANTS OF SUPPLIER
+
+68
+
+19.1
+
+WORK STANDARDS
+
+68
+
+19.2
+
+MAINTENANCE
+
+69
+
+19.3
+
+EFFICIENCY AND COST-EFFECTIVENESS
+
+69
+
+19.4
+
+TECHNOLOGY
+
+69
+
+19.5
+
+DELIVERABLES
+
+69
+
+19.6
+
+DOCUMENTATION
+
+69
+
+19.7
+
+COMPATIBILITY
+
+70
+
+19.8
+
+NON-INFRINGEMENT
+
+70
+
+19.9
+
+VIRUSES
+
+71
+
+19.10
+
+DISABLING CODE
+
+71
+
+19.11
+
+COMPLIANCE WITH HEALTH NET POLICIES AND PROCEDURES
+
+71
+
+19.12
+
+COMPLIANCE WITH LAWS; EXPORT CONTROL
+
+71
+
+19.13
+
+CORPORATE SOCIAL RESPONSIBILITY
+
+71
+
+19.14
+
+SUBCONTRACTOR CONFIDENTIALITY AND ASSIGNMENT
+
+72
+
+19.15
+
+NO IMPROPER INDUCEMENTS
+
+72
+
+20. MUTUAL REPRESENTATIONS AND WARRANTIES; DISCLAIMER
+
+72
+
+20.1
+
+MUTUAL REPRESENTATIONS AND WARRANTIES
+
+72
+
+21. CONFIDENTIALITY
+
+73
+
+General Terms and Conditions-
+
+iv
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+21.1
+
+“CONFIDENTIAL INFORMATION” DEFINED
+
+73
+
+21.2
+
+OBLIGATIONS OF CONFIDENTIALITY
+
+74
+
+21.3
+
+NO IMPLIED RIGHTS
+
+75
+
+21.4
+
+COMPELLED DISCLOSURE
+
+75
+
+21.5
+
+CONFIDENTIAL TREATMENT OF THIS AGREEMENT
+
+75
+
+21.6
+
+DISCLOSURE OF INFORMATION CONCERNING TAX TREATMENT
+
+75
+
+21.7
+
+RETURN OR DESTRUCTION
+
+75
+
+21.8
+
+DURATION OF CONFIDENTIALITY OBLIGATIONS
+
+76
+
+22. INSURANCE
+
+76
+
+23. INDEMNIFICATION
+
+76
+
+23.1
+
+“CLAIM” AND “LOSSES” DEFINED
+
+76
+
+23.2
+
+INDEMNIFICATION BY SUPPLIER
+
+77
+
+23.3
+
+INFRINGEMENT CLAIMS
+
+78
+
+23.4
+
+INDEMNIFICATION BY HEALTH NET
+
+78
+
+23.5
+
+INDEMNIFICATION PROCEDURES
+
+79
+
+23.6
+
+SUBROGATION
+
+80
+
+24. LIABILITY
+
+80
+
+24.1
+
+GENERAL INTENT
+
+80
+
+24.2
+
+LIMITATIONS OF LIABILITY
+
+80
+
+24.3
+
+FORCE MAJEURE
+
+82
+
+25. RULES OF CONSTRUCTION
+
+83
+
+25.1
+
+ENTIRE AGREEMENT
+
+83
+
+25.2
+
+CONTRACTING PARTIES; NO THIRD PARTY BENEFICIARIES
+
+83
+
+25.3
+
+CONTRACT AMENDMENTS AND MODIFICATIONS
+
+84
+
+25.4
+
+GOVERNING LAW
+
+84
+
+25.5
+
+RELATIONSHIP OF THE PARTIES
+
+84
+
+25.6
+
+CONSENTS AND APPROVALS
+
+84
+
+25.7
+
+WAIVER
+
+84
+
+25.8
+
+REMEDIES CUMULATIVE
+
+84
+
+25.9
+
+REFERENCES
+
+85
+
+25.10
+
+RULES OF INTERPRETATION
+
+85
+
+25.11
+
+ORDER OF PRECEDENCE
+
+85
+
+25.12
+
+SEVERABILITY
+
+85
+
+25.13
+
+COUNTERPARTS
+
+86
+
+25.14
+
+READING DOWN
+
+86
+
+26. DISPUTE RESOLUTION
+
+86
+
+26.1
+
+INFORMAL DISPUTE RESOLUTION
+
+86
+
+26.2
+
+LITIGATION
+
+87
+
+26.3
+
+CONTINUED PERFORMANCE
+
+87
+
+26.4
+
+EQUITABLE REMEDIES
+
+87
+
+26.5
+
+WAIVER OF JURY TRIAL
+
+87
+
+26.6
+
+DISCLAIMER OF UNIFORM COMPUTER INFORMATION TRANSACTIONS ACT
+
+88
+
+27. GENERAL
+
+88
+
+27.1
+
+BINDING NATURE AND ASSIGNMENT
+
+88
+
+27.2
+
+NONDISCRIMINATION
+
+89
+
+27.3
+
+NOTICES
+
+89
+
+27.4
+
+NON-SOLICITATION OF EMPLOYEES
+
+90
+
+27.5
+
+LEGAL COMPLIANCE
+
+90
+
+27.6
+
+COVENANT OF GOOD FAITH
+
+90
+
+General Terms and Conditions-
+
+v
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+27.7
+
+PUBLIC DISCLOSURES
+
+90
+
+27.8
+
+SERVICE MARKS
+
+91
+
+27.9
+
+MUTUALLY NEGOTIATED
+
+92
+
+General Terms and Conditions-
+
+vi
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Master Agreement
+
+This Master Agreement, effective as of August 19, 2008 (the “Effective Date”), is entered into by and between Health Net, Inc. (“Health Net”), a Delaware
+corporation with its principal place of business located at 21650 Oxnard Street, Woodland Hills, CA 91367 and International Business Machines Corporation (“IBM” or “Supplier”), a New York corporation
+with a place of business located at Route 100, Somers, NY 10589, U.S.A. (each, a “Party” and collectively, the “Parties”). The Parties agree that the following terms and conditions shall apply to the
+services to be provided by IBM to Health Net under this Agreement, in consideration of certain payments to be made by Health Net, all as more specifically described below.
+
+1.
+
+PREAMBLE
+
+1.1
+
+Background and Purpose
+
+This Agreement is made and
+entered into with reference to the following:
+
+(a)
+
+Health Net is among the nation’s largest publicly traded managed health care companies. Its mission is to help people be healthy, secure and comfortable. The company’s
+health plans and government contracts subsidiaries provide health benefits to approximately 6.7 million individuals across the country through group, individual, Medicare, Medicaid and TRICARE and Veterans Affairs programs.
+
+(b)
+
+Supplier has acknowledged that Supplier is a leading provider of outsourcing services and have the skills, qualifications and experience necessary to perform and manage the
+information technology and telecomunications services required by Health Net under the framework of this Agreement in an efficient and controlled manner, with a high degree of quality and responsiveness resulting in the consolidation,
+rationalization and standardization of Health Net’s information technology and telecommunications infrastructure services.
+
+(c)
+
+Supplier specializes, amongst other things, in performing for others the types of services contemplated to be performed under the framework of this Agreement. Supplier acknowledges
+that it is skilled and experienced in providing similar services for others.
+
+(d)
+
+After a comprehensive evaluation and negotiation process, Health Net has selected Supplier to provide the Services during the Term of the Agreement, and Supplier desires to provide
+to Health Net the Services through the execution of this Agreement and the attached schedules, exhibits and appendices, all of which are governed by the terms and conditions set forth in this Agreement.
+
+1.2
+
+Objectives
+
+(a)
+
+Health Net and Supplier have agreed upon the following over-arching goals and objectives as those they expect to be accomplished by their execution of this Agreement and the
+performance of Services entered into pursuant to the Agreement:
+
+General Terms and Conditions-
+
+1
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(i)
+
+A seamless transition of outsourced services to Supplier from Health Net and incumbent vendors in a manner that will minimize business disruption and business risk to Health Net;
+
+(ii)
+
+A service delivery environment that is scalable and responsive to change;
+
+(iii)
+
+Quality of service consistent with that of the world’s leading providers of similar services and continuous improvement;
+
+(iv)
+
+A service delivery environment and Services that keep pace with modernization and consumerization of technology;
+
+(v)
+
+Lighter, simpler, and effective IT solutions;
+
+(vi)
+
+Supplier accountability for integration among IT&T service providers to Health Net and service-wide responsibility for the Services; and
+
+(vii)
+
+Services and solutions that are continuously aligned to Health Net business needs and imperatives – i.e., a Service Delivery Environment and platform that will support
+rapid scalability, growth, and change in the composition and location of Health Net’s businesses.
+
+(b)
+
+The goals and objectives set out in this Section 1.2(a) are intended to be a general introduction to, and statement of the spirit of, this Agreement. While they do not expand
+or reduce the scope of the Parties’ express obligations under this Agreement, Supplier’s performance under this Agreement will be measured, in part, based on the extent to which Supplier’s performance causes or contributes to the
+achievement of them. Further, to the extent that the terms of this Agreement do not address a particular circumstance, are unclear or ambiguous, or require the Parties to discuss, negotiate or agree on a particular matter, such terms will be
+negotiated in good faith to be in accordance with, and each Party will endeavor to act to give the fullest possible effect to, the goals and objectives set out in this Section 1.2(a).
+
+1.3
+
+Structure of Agreement
+
+This document (the
+“General Terms and Conditions”) sets out the basic terms and conditions under which the Parties will conduct the transactions contemplated by this Agreement. In addition, there will be a number of Schedules and Exhibits
+attached to the Terms and Conditions, including:
+
+Schedule A (Services)
+
+Exhibit A-1 (Equipment Refresh Plan)
+
+Exhibit A-2 (Transition Description)
+
+Exhibit A-3 (Solution Description)
+
+Exhibit A-3-1 (Transformation Key Health Net Dependencies)
+
+Exhibit A-4 (Transition & Transformation Plans)
+
+Attachment A-4-1 (Transition Project Plan)
+
+Attachment A-4-2 (Transformation Project Plan)
+
+General Terms and Conditions-
+
+2
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Exhibit A-5 (Existing DR Contracts)
+
+Exhibit A-6 (HNFS Requirements)
+
+Attachment
+A-6-1 (HNFS Requirements Exceptions)
+
+Exhibit A-7 (Change Control Process)
+
+Exhibit A-8 (Citrix Enabled Applications)
+
+Exhibit A-9 (Asset Tracking Information)
+
+Exhibit A-10 (Project Framework)
+
+Attachment A-10-1 (Deliverable Acceptance Procedures)
+
+Exhibit A-11 (In Flight Projects)
+
+Exhibit A-12 (System Decommissioning Questionnaire)
+
+Exhibit A-13 (Facilities Services Responsibility Matrix)
+
+Schedule B (Service Levels)
+
+Exhibit B-1 (Service Level Metrics)
+
+Exhibit B-2 (Formula Definitions)
+
+Exhibit
+B-3 (Remedy Incident and Problem Priority Definitions)
+
+Exhibit B-4 (Scheduled Maintenance)
+
+Exhibit B-5 (Service Request Priority Definitions)
+
+Schedule C (Charges)
+
+Exhibit C-1 (Resource Units)
+
+Exhibit C-2 (Resource Baselines)
+
+Exhibit C-3 (Annual Service Charge)
+
+Exhibit C-4 (ARC / RRC Rates)
+
+Exhibit C-5
+(Time & Materials Rates)
+
+Exhibit C-6 (Pure Pass Through and Managed As Pass-Through Expenses)
+
+Exhibit C-7 (Form Invoice)
+
+Exhibit C-8
+(Termination Charges)
+
+Exhibit C-9 (IMAC Counting Rules)
+
+Exhibit C-10 (Joint Verification Process)
+
+Exhibit C-11 (ITG Budget)
+
+Schedule D (Key Supplier Positions)
+
+Schedule
+E (Transitioned Employees)
+
+Exhibit E-1 (Affected Employees)
+
+Exhibit E-2 (Affected Employees on Leave)
+
+Schedule F (Health Net Facilities)
+
+Schedule G (Governance)
+
+Schedule H
+(Insurance)
+
+Schedule I (Third Party Service Contracts)
+
+Exhibit I-1 (Third Party Service Contracts to be Assigned to IBM)
+
+General Terms and Conditions-
+
+3
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Exhibit I-2 (Third Party Service Contracts Managed In ASC)
+
+Exhibit I-3 (Third Party Service Contracts Managed As Pass Through)
+
+Exhibit I-4 (Third Party Service Contracts As Pure Pass Through)
+
+Exhibit I-5 (Third Party Service
+Contracts to be Retained by Health Net)
+
+Schedule J (Software)
+
+Exhibit J-1 (Health Net Software)
+
+Exhibit
+J-1-1 (Assumed)
+
+Exhibit J-1-2 (Managed In ASC)
+
+Exhibit J-1-3 (Managed As Pass Through Expense)
+
+Exhibit J-1-4 (Retained)
+
+Exhibit J-1-5 (Pure Pass Through Expense)
+
+Exhibit J-2 (Supplier Software)
+
+Exhibit J-2-1 (Supplier Provided Software (Commercially Available))
+
+Exhibit J-2-2 (Supplier Provided Software (Non-Commercially Available))
+
+Exhibit J-2-3 (Supplier Proprietary Delivery Tools)
+
+Exhibit J-2-4 (Supplier Third Party Software used to
+provide the Services (Commercially Available))
+
+Exhibit J-2-5 (Supplier Third Party Software used to provide the Services (Non-Commercially
+Available))
+
+Exhibit J-3 (Health Net Proprietary Software)
+
+Schedule K (Business Associate Addendum)
+
+Schedule L (Disengagement Assistance)
+
+Schedule M [INTENTIONALLY LEFT BLANK]
+
+Schedule N (Equipment)
+
+Exhibit N-1 (Health Net Owned Equipment to be Purchased by Supplier)
+
+Exhibit N-1-1 (Desktops)
+
+Exhibit N-1-2
+(Assets from GE Profile)
+
+Exhibit N-1-3 (Mid Range Owned Assets)
+
+Exhibit N-1-4 (Mainframe Owned Assets)
+
+Exhibit N-1-5 (Voice Network)
+
+Exhibit N-1-6 (Voice Call Manager)
+
+Exhibit N-1-7 (Video Conferencing)
+
+Exhibit
+N-1-8 (iSeries)
+
+Exhibit N-2 (Health Net Leased Equipment to be Assumed by Supplier (i.e., take assignment and title of Asset))
+
+Exhibit N-3 (Health Net Owned Equipment that Health Net Will Retain)
+
+Exhibit N-4 (Health Net Leased Equipment that Health Net Will Retain)
+
+Exhibit N-5 (Health Net Leased
+Equipment to be paid by Supplier and retained in Health Net’s name)
+
+General Terms and Conditions-
+
+4
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Schedule O (Policies and Procedures)
+
+Schedule P (Approved Subcontractors)
+
+Schedule Q (Outline of Policies and Procedures)
+
+Schedule R [INTENTIONALLY LEFT BLANK]
+
+Schedule S (Asset Responsibility Matrix)
+
+Schedule T (Form Bill of Sale)
+
+Schedule U (Glossary)
+
+Schedule V (Supplier Competitors)
+
+Schedule W (Reports)
+
+Schedule X (Audits)
+
+1.4
+
+Construction of Preamble
+
+The provisions of this
+Section 1 are intended to provide a general introduction to this Agreement and a context in which to interpret this Agreement’s terms and conditions in circumstances where their meanings are unclear or ambiguous. It is not intended to
+alter the plain meaning of this Agreement or to expand the scope of the Parties’ express obligations under it.
+
+2.
+
+DEFINITIONS
+
+2.1
+
+Defined Terms
+
+The following capitalized terms,
+when used in this Agreement, will have the meanings given them below:
+
+(a)
+
+“Affiliate” means, with respect to an entity, any other entity or person Controlling, Controlled by or under common Control with such entity.
+
+(b)
+
+“Agreement” shall mean the Services Agreement between Health Net and Supplier contemplated by this Term Sheet, including its schedules,
+exhibits, and appendices, as the same may be amended by the Parties from time to time in accordance with Section 25.3.
+
+(c)
+
+“Application” or “Application Software” means Software that performs specific End User-related data processing, data management and
+telecommunications tasks.
+
+(d)
+
+“Beneficiary” means a person who has enrolled in and/or is eligible to receive services under a Benefit Program at the time services are rendered. The
+Parties acknowledge that the term “member” may be used by Health Net and for purposes of this Agreement, the term Beneficiary includes the term “member” wherever used.
+
+(e)
+
+“Benefit Program” means a plan offered by Health Net or its Affiliates whereby Health Net or a Health Net Affiliate is obligated to provide or arrange for
+health care services, or compensation therefor, to Beneficiaries in accordance with the provisions contained in such plans.
+
+General Terms and Conditions-
+
+5
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(f)
+
+“Commercially Available” shall mean Software that the applicable software vendor routinely licenses to the general public through separately established
+standard terms and conditions and standard rates, and for which such software vendor provides ongoing maintenance and updates.
+
+(g)
+
+“Commercially Reasonable Efforts” means taking all such steps and performing in such a manner as a well managed company would undertake where it was acting
+in a determined, prudent and reasonable manner to achieve a particular desired result for its own benefit.
+
+(h)
+
+“Contract Year” means any consecutive twelve (12) month period commencing on March 1, 2009, or any anniversary thereof during the Term. If the
+final Contract Year is less than twelve (12) months, non-specific references to amounts and other requirements for such Contract Year shall be appropriately and equitably pro-rated.
+
+(i)
+
+“Control” and its derivatives, such as “Controlling” means with regard to any entity the legal, beneficial or equitable ownership,
+directly or indirectly, of: (i) fifty percent (50%) or more of the capital stock (or other ownership interest if not a stock corporation) of such entity ordinarily having voting rights; or (ii) (A) twenty percent (20%) or
+more of the capital stock (or other ownership interest if not a stock corporation) and (B) either (1) a greater percentage than any other juridical person wherein such person has the power to exercise, directly or indirectly, a controlling
+influence on the entity’s management or policies, or (2) management control in fact or by agreement.
+
+(j)
+
+“Deliverable” means any tangible Work Product produced in the course of performing the Services that is listed or described in this Agreement, or in a
+project plan or service request document executed pursuant to this Agreement, or that is otherwise required to be delivered by Supplier to Health Net in order to satisfy Supplier’s obligations with respect to any item to be provided by Supplier
+under this Agreement or in project plan or other service request document. For the avoidance doubt, Deliverable include all reports delivered to Health Net, the Procedures Manual and any training materials created or provided in order to fulfill
+IBM’s training obligations under this Agreement.
+
+(k)
+
+“Disengagement Assistance” means, collectively, the Functions that Health Net requests from Supplier or that are otherwise required to enable an orderly
+transfer of Services from Supplier to Health Net or its designees without unreasonable interruption or adverse effect to Health Net in connection with the cessation of any Services, or the expiration or earlier termination (for any reason) of this
+Agreement, in whole or in part, including the Functions described in Section 16.6 and Schedule L (Disengagement Assistance).
+
+(l)
+
+“Disengagement Assistance Period” shall mean the period of time that Supplier is obligated to provide Disengagement Assistance pursuant to
+Section 16.6(b).
+
+(m)
+
+“Documentation” means written materials (including materials published on an Internet or Intranet site or otherwise online) that are
+available or necessary to instruct or assist End Users, operators or systems personnel in the installation, development, maintenance, operation, use or modification of any Equipment,
+
+General Terms and Conditions-
+
+6
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Software, system, or Deliverable (including applicable functional and technical specifications), as such documentation is updated from time to time.
+
+(n)
+
+“Effective Date” has the meaning set forth in the preamble.
+
+(o)
+
+“End Users” means direct users of the Services provided under this Agreement.
+
+(p)
+
+“Equipment” means any computer and telecommunications machines or other hardware (without regard to the entity owning or leasing it) used by the Supplier in
+the provision of the Services, including all associated attachments, features, accessories and peripheral devices.
+
+(q)
+
+“Financial Responsibility” has the meaning given in Section 2.1(e) of Schedule C.
+
+(r)
+
+“Former Health Net Affiliate” means: (i) any entity affiliated with Health Net at any time
+during the Term (such designation expiring at the end of the twenty-fourth (24th) month after the date that such entity ceases to Control, be
+Controlled by, or be under common Control with, Health Net); or (ii) the purchaser of all or substantially all of the assets of any line of business of Health Net or its Affiliates (such designation (A) applying only with respect to the
+business so acquired; and (B) expiring at the end of the twenty-fourth (24th) month after the date of such purchase.) At Health Net’s
+option, each Former Health Net Affiliate shall be deemed to be an Affiliate of Health Net.
+
+(s)
+
+“Health Net Facility” means a Health Net office or business location at which, or with respect to which, Supplier performs the Services. The Health Net
+Facilities are set forth in Schedule F (Facilities).
+
+(t)
+
+“IT Infrastructure” means the Equipment and Software (regardless of ownership) that comprise the infrastructure of Health Net’s and its
+Affiliates’ information technology organizations.
+
+(u)
+
+“Law” means: (i) any applicable law, statute, regulation, ordinance or subordinate legislation in force from time to time to which a Party or any of its
+Affiliates is subject; (ii) the common law as applicable to the Parties or any of their Affiliates from time to time; (iii) any binding court order, judgement or decree (including consent agreements); and (iv) any applicable
+directive, policy, rule or order that is binding on a Party or any of its Affiliates and that is made or given by any government, an agency thereof, or any regulatory body; of any country, the European Union, or other national, federal,
+commonwealth, state, provincial or local jurisdiction, and of any exchange or association (including the New York Stock Exchange and the National Association of Securities Dealers) whose regulations are binding on either Party pursuant to a
+self-regulating mechanism approved by a governmental entity.
+
+(v)
+
+“Non-Commercially Available” shall mean Software that is not Commercially Available.
+
+(w)
+
+“Out-of-Pocket Expenses” means reasonable, demonstrable and actual out-of-pocket expenses incurred by Supplier for Equipment, materials,
+supplies or services provided to or for Health Net as identified in this Agreement, but not
+
+General Terms and Conditions-
+
+7
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+including Supplier’s actual or allocated overhead costs, administrative expenses or other mark-ups.
+
+(x)
+
+“Required Consents” means such consents as may be required for (i) the assignment to a Party, or the grant to a Party of rights of access and use, of
+resources otherwise provided to or licensed by the other Party, and (ii) with respect to any resource (e.g., Software, Equipment, third party services) for which the corresponding contract is to be assigned to Health Net or its designee
+pursuant to Disengagement Assistance (including any resource existing as of the Effective Date and assigned to Supplier, as well as any resource utilized or introduced after the Effective Date during the Term), the disclosure of the corresponding
+contract terms to Health Net or its designee, or the assignment of such contract to Health Net or it designee, as part of Disengagement Assistance.
+
+(y)
+
+“Service Commencement Date” shall mean one-hundred and eighty (180) days following the Effective Date unless the Parties agree to another date through
+an amendment to this Agreement.
+
+(z)
+
+“Service Tower” has the meaning given in Schedule C (Charges).
+
+(aa)
+
+“Software” means program code (in both object code and Source Code forms) and all supporting documentation, media, on-line help facilities and tutorials,
+including any update, enhancement, modification, releases and Derivative Work of any item comprising Software.
+
+(bb)
+
+“Source Code” means the computer code of Software in programming languages, including all comments and procedural code, and all related development documents
+(e.g., flow charts, schematics, statements of principles of operations, End User manuals, architectural standards, Documentation, and any other specification that are used to create or that comprise the computer code, of the Software concerned.
+
+(cc)
+
+“Systems Software” means those programs or programming (including the supporting Documentation, media, on-line help facilities and tutorials)
+that perform (i) tasks basic to the functioning of Equipment and which are required to operate the Applications Software or a system; or (ii) tasks other than as performed by Applications Software of a system. If programs or programming
+are not Applications Software, they are deemed to be Systems Software. Systems Software includes mainframe, midrange and desktop operating systems, server operating systems, network operating systems, systems utilities (including measuring and
+monitoring tools), data security Software and telecommunications monitors.
+
+(dd)
+
+“Supplier Personnel” means, collectively, any and all personnel furnished or engaged by Supplier to perform any part of the Services, including: (i) the
+employees of Supplier; (ii) Subcontractors; and (iii) the employees of such Subcontractors.
+
+(ee)
+
+“Supplier Software” means Software owned by Supplier or any Supplier Affiliate. Software owned by Supplier Affiliates shall be treated as Supplier Software
+rather than third party Software under this Agreement.
+
+General Terms and Conditions-
+
+8
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(ff)
+
+“Use” means to access, use, copy, maintain, modify, enhance, perform, display, distribute and create derivative works; provided, when used in the context of
+a Software license, the right to create derivative works shall only apply to Software for which Health Net is expressly granted a right to (i) use or obtain Source Code or (ii) create derivative works.
+
+2.2
+
+Other Terms
+
+Other capitalized terms used in this
+Agreement but not defined above are defined where they are used and have the meanings there indicated, or such terms appear in the Glossary attached to the Agreement. Those terms, acronyms, and phrases utilized in the information technology or
+health and wellness industry which are not otherwise defined in this Agreement shall be interpreted in accordance with their generally understood meaning in such industry or business context.
+
+3.
+
+SERVICES
+
+3.1
+
+Provision of Services During Transition
+
+(a)
+
+Starting on the Effective Date, Supplier shall begin performing Services required to conduct the Transition.
+
+(b)
+
+Starting on the Effective Date, Supplier shall (i) assume the Health Net Equipment leases, Third Party Service Contracts and Health Net Licensed Software pursuant to
+Section 11, and (ii) as Affected Employees are transitioned to IBM, commence assuming responsibility for meeting Service Levels as provided in Schedule B (Service Levels) and its Exhibits thereto.
+
+(c)
+
+Starting on October 16, 2008 and continuing until the Service Commencement Date, Supplier shall:
+
+(i)
+
+hire certain Transitioned Employees as provided in Schedule E, and assume responsibility for all functions performed by such employees in the ordinary course of their
+responsibilities prior to the date of transfer to Supplier;
+
+(ii)
+
+assume responsibility for managing and performing the Services, with the assistance of Affected Employees retained by Health Net;
+
+(iii)
+
+assume responsibility for meeting certain Service Levels as provided in Schedule B; and
+
+(iv)
+
+assume responsibility for managing and performing In-Flight Projects.
+
+3.2
+
+Provision of the Steady-State Services
+
+Starting on
+the Service Commencement Date, Supplier will provide the following services, functions and responsibilities, as they may be supplemented, enhanced, modified or replaced (collectively, the “Services”):
+
+(a)
+
+the functions, responsibilities, activities and tasks (collectively, “Functions”) described in Schedule A (Services) or elsewhere in this Agreement;
+
+General Terms and Conditions-
+
+9
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(b)
+
+any Functions performed during the *** preceding the Effective Date by Health Net’s or its Affiliates’ personnel (including employees and contractors) in the ordinary
+course of their responsibilities who were transitioned to Supplier or displaced, or whose Functions were displaced, as a result of this Agreement even if the Functions are not specifically described in this Agreement; and
+
+(c)
+
+performance, management, and completion of the projects listed or described in Exhibit A-11 (In-Flight Projects), the Transition and Transformation as described in Exhibits A-2,
+A-3, and A-4, and any projects set forth in this Agreement or any project plans, Work Orders, or other similar document executed by the Parties.
+
+3.3
+
+Implied Services
+
+If any Functions, related to the
+Services, other than those retained by Health Net under this Agreement, are required for the proper performance and provision of the Services, regardless of whether they are specifically described in the Agreement, they shall be deemed to be implied
+by and included within the scope of the Services to be provided by Supplier to the same extent and in the same manner as if specifically described in the Agreement. Except as otherwise expressly provided in the Agreement, Supplier shall be
+responsible for providing the facilities, personnel and other resources as necessary to provide the Services.
+
+3.4
+
+Evolution of the Services
+
+Throughout the Term,
+Supplier will seek to improve the quality, efficiency and effectiveness of the Services to keep pace with technological advances and support Health Net’s (and its Affiliates’) evolving business needs and efforts to maintain competitiveness
+in the markets in which it (and they) competes. Without limiting the generality of the foregoing, Supplier will: (i) identify and apply ‘best practice’ techniques and methodologies in performing and delivering the Services,
+(ii) train Supplier Personnel in new techniques and technologies used generally within Supplier’s organization or the IT services industry and approved by Health Net for use in rendering the Services; and (iii) make investments to
+maintain the currency of the tools, infrastructure and other resources used by Supplier to render the Services. Changes in the Services pursuant to this Section 3.4 will not be considered New Services.
+
+3.5
+
+Users of the Services
+
+(a)
+
+Supplier will provide the Services to Health Net and, as designated by Health Net from time to time, its Affiliates, Former Health Net Affiliates, licensees, customers, providers,
+contractors and other entities with whom Health Net has a business relationship with Health Net which is broader than the mere resale of Services (each such entity a “Service Recipient”) for the Charges provided in Schedule
+C. For purposes of this Agreement, Services provided to such entities shall be deemed to be Services provided to Health Net.
+
+(b)
+
+With respect to Former Health Net Affiliates, Supplier will continue to provide the Services being provided as of the date of divestiture to such Former Health Net
+Affiliates under this Agreement as is requested by Health Net for as long as such entity continues to meet the definition of “Former Health Net Affiliate” (or such shorter period of time designated by Health Net). There shall be no
+additional charge or fee (i.e., in addition to the Charges for the actual Services as
+
+General Terms and Conditions-
+
+10
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+provided in this Agreement) for the provision of Services to Former Health Net Affiliates; provided if Health Net requires Supplier to make changes to its
+operations in order to continue providing Services to a Former Health Net Affiliate (e.g., create a separate infrastructure environment), the Parties shall allocate any incremental costs required to implement such changes through the Change Control
+Process.
+
+3.6
+
+Services Not Exclusive; Variable
+
+(a)
+
+This Agreement is non-exclusive. Nothing in this Agreement shall be construed to limit in any way Health Net’s ability to request that other third parties provide, or propose
+to provide, services that are the same as or similar to the Services. Health Net (and its Affiliates) may contract with other suppliers for any products and services, including products and services that are similar to or competitive with the
+Services or that formerly were part of the Services. In the case of Health Net’s withdrawal of portions of the Services from Supplier, the Charges shall be reduced in accordance with this Agreement, including the unit rates and charging
+methodologies provided in Schedule C (Charges), or otherwise in an equitable manner to the extent such unit rates and charging methodologies do not apply to the withdrawn portions of the Services.
+
+(b)
+
+The Services are variable in volume. Such variations are provided for in the charging mechanisms set forth in Schedule C (Charges). Supplier shall be responsible for adjusting the
+resources used to provide the Services to accommodate the changes in volume (regardless of the amount of time remaining in the Term) in such a manner as to comply with all Service Levels. Supplier shall not be entitled to receive an adjustment to
+the Charges resulting from such variations in volume except as set forth in Schedule C (Charges).
+
+(c)
+
+Except as set forth in Section 4.5 of Schedule C (Charges), Health Net (and its Affiliates), make no commitment for any minimum or maximum volume, scope, or value of the
+Services under this Agreement or to any minimum or maximum payments to be made to Supplier.
+
+3.7
+
+Cooperation and Coordination with Other Parties
+
+(a)
+
+If Health Net performs itself, or retains a third party to perform, any services that interface or interact with the Services, or that formerly were part of the Services, Supplier
+will cooperate and coordinate with Health Net or such third party as reasonably required for Health Net or the third party to perform such services. Supplier’s cooperation and coordination will include, as applicable: (i) providing
+reasonable access to the facilities being used by Supplier to provide the Services as necessary for Health Net or the third party to perform its work; (ii) providing reasonable access to the Equipment and Software used in providing the Services
+to the extent permitted under any applicable agreements with third parties; and (iii) providing such information regarding the operating environment, system constraints and other operating parameters as a person with reasonable commercial
+skills and expertise would find reasonably necessary for Health Net or the third party to perform its work.
+
+(b)
+
+Third parties retained by Health Net who utilize Supplier’s resources shall comply with Supplier’s reasonable security and confidentiality requirements
+and,
+
+General Terms and Conditions-
+
+11
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+as relevant, with Supplier’s reasonable work standards, methodologies and procedures, if provided in writing by Supplier to Health Net and such third
+parties. Supplier shall immediately notify Health Net if an act or omission of such a third party may cause a problem or delay in providing the Services and shall work with Health Net to prevent or circumvent such problem or delay.
+
+3.8
+
+New Services
+
+(a)
+
+“New Services” means functions, responsibilities, activities, and tasks Health Net requests Supplier to perform under this Agreement:
+
+(i)
+
+that are materially different from, and in addition to, the Services, and
+
+(ii)
+
+for which there is no existing charging mechanism in this Agreement.
+
+(b)
+
+Supplier will not perform any additional functions, responsibilities, activities, or tasks that would constitute New Services prior to informing Health Net what the additional
+charges would be for performing them, and receiving Health Net’s authorization to proceed. Additionally, if Supplier does perform additional functions, responsibilities, activities, or tasks without Health Net’s prior authorization, they
+will be deemed to have been performed as part of the Services at no charge.
+
+4.
+
+TERM AND REGULATORY APPROVALS
+
+4.1
+
+Initial Term
+
+The term of this Agreement shall
+commence on the Effective Date and expire on February 14, 2014 unless it is terminated earlier or is extended pursuant to the terms of this Agreement (such period, together with all extensions thereof, the “Term”).
+
+4.2
+
+Renewal Terms
+
+By giving notice to Supplier no less
+than three months prior to the then-existing expiration date of the Agreement, Health Net may extend the Term for a period designated by Health Net of up to six (6) months on the terms and conditions (including pricing) then in effect. Health
+Net shall have three (3) such extension options of up to six months each.
+
+4.3
+
+Regulatory Approvals and Federal Business
+
+(a)
+
+Health Net’s obligations under this Agreement are conditioned upon Health Net obtaining regulatory consents and approvals from the appropriate governmental or other regulatory
+body necessary or advisable for Health Net to obtain in order to proceed with the transactions contemplated by this Agreement. In the event that Health Net is not able to obtain such a consent or approval, Health Net shall have the right to remove
+any impacted services from the scope of this Agreement without charge, and the Parties shall cooperate to make such changes as may be necessary to remove such Services from scope, subject to Section 4.5 and Section 10 in Schedule C.
+
+(b)
+
+Supplier shall comply with provisions arising out of Health Net’s contracts for federal business, including restrictions against providing services from offshore and audit
+requirements.
+
+General Terms and Conditions-
+
+12
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+5.
+
+PERFORMANCE
+
+5.1
+
+Performance, Generally
+
+Supplier is responsible for
+managing and successfully performing, completing, and delivering the Services, subject to the overall direction of Health Net and with the cooperation and support of Health Net as specified in this Agreement.
+
+5.2
+
+Place of Performance
+
+(a)
+
+Supplier will perform the Services primarily at the Health Net Facilities described in Section 2 of Schedule F (Facilities), and the Supplier facilities and Approved
+Subcontractor facilities described in Sections 3 and 4 of Schedule F (Facilities), respectively, (the “Supplier Facilities”). During the Term, Supplier will not change any location from which it provides Services to Health
+Net, or materially reallocate the volume or nature of work processed between locations from which it provides Services to Health Net, without Health Net’s prior written approval, which may be granted or withheld in Health Net’s discretion.
+Supplier will manage any approved relocations in accordance with this Agreement and a migration plan to be prepared by Supplier and approved by Health Net. Prior to seeking Health Net’s approval of any proposed relocation, Supplier will fully
+examine and evaluate the risks and anticipated effects of the contemplated relocation on the Services and Health Net, including the operational, technical, security, regulatory, and other effects, and will prepare and submit to Health Net an
+analysis of the effects. Supplier will be responsible for all costs, taxes and other expenses incurred by Supplier, and any new or additional costs, taxes and other expenses incurred by Health Net and reasonably demonstrated to Supplier that are
+related to any Supplier-initiated relocation of an operational facility from which the Services are provided.
+
+(b)
+
+Restrictions on Offshore Services.
+
+(i)
+
+Exhibit A-3 (Solution Description) describes certain Services Supplier is permitted to perform from locations outside the United States. Supplier shall not perform any other
+Services from a location outside the United States without Health Net’s prior written consent, which may be granted or withheld in Health Net’s discretion.
+
+(ii)
+
+Schedule F shows the address of the Supplier Facilities outside the United States from which Supplier shall provide Services. Supplier shall not relocate the specific location
+(i.e., facility) from which Supplier provides such Services without Health Net’s prior written consent.
+
+5.3
+
+Time of Performance
+
+(a)
+
+Supplier will (and will provide the resources necessary to) perform and complete the Services diligently and in a timely manner and in accordance with any applicable time schedules
+set forth in this Agreement.
+
+(b)
+
+Supplier will promptly notify Health Net upon becoming aware of any circumstances that may reasonably be expected to jeopardize the timely and successful completion
+(or delivery) of any Service, project or Deliverable.
+
+General Terms and Conditions-
+
+13
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Supplier will use Commercially Reasonable Efforts to avoid or minimize any delays in performance and will inform Health Net of the steps Supplier is taking
+or will take to do so, and the projected actual completion (or delivery) time.
+
+(c)
+
+If Supplier believes a delay in performance by Health Net (or a third party service provider Health Net is responsible for managing) has caused or will cause Supplier to be unable
+to perform its obligations on time, Supplier will promptly so notify Health Net and use Commercially Reasonable Efforts to perform its obligations on time notwithstanding Health Net’s (or its third party service provider’s) failure to
+perform. If Supplier’s use of Commercially Reasonable Efforts to perform on time in such a circumstance would cause Supplier to incur significant Out-of-Pocket Expenses, Supplier will so notify Health Net. In that case, Supplier’s
+obligation to continue its efforts to work around the Health Net-caused delay will be subject to Health Net agreeing to reimburse Supplier for its additional Out-of-Pocket Expenses incurred in the course of such efforts.
+
+5.4
+
+Manner of Performance
+
+Except as this Agreement
+expressly provides otherwise, Supplier will perform the Services at least at the same level and with at least the same degree of accuracy, quality, timeliness, responsiveness and efficiency as was provided prior to the Effective Date by or for
+Health Net and other Service Recipients and in compliance with the following:
+
+(a)
+
+all applicable Service Levels;
+
+(b)
+
+the Procedures Manual;
+
+(c)
+
+applicable standards, policies and procedures of Health Net (and its Affiliates) listed in Schedule O (Health Net Policies and Procedures) which the Parties acknowledge have been
+disclosed to Supplier prior to the Effective Date, and any new or amended Health Net standards, policies and procedures disclosed to Supplier after the Effective Date. If compliance with any new or revised Health Net standards, policies and
+procedures requires Supplier to incur additional costs, and such compliance is not otherwise required by Supplier under this Agreement, then the following shall apply:
+
+(i)
+
+if such compliance requires Supplier to perform additional functions that would be considered New Services or Projects under this Agreement, then the corresponding processes for
+authorizing and pricing New Services and Projects shall apply; or
+
+(ii)
+
+if such compliance requires Supplier to change the manner in which it provides existing Services, then such Changes shall be implemented through the Change Control Process.
+
+(d)
+
+Laws for which Supplier is responsible pursuant to Section 27.5; and
+
+(e)
+
+In cases where this Agreement does not prescribe or otherwise regulate the manner of Supplier’s performance of the Services, proven best practices followed by the leading
+providers of similar services as required under Section 19.1.
+
+General Terms and Conditions-
+
+14
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+5.5
+
+Quality Assurance and Continuous Improvement
+
+In
+performing the Services, Supplier will follow commercially reasonable quality assurance procedures designed to ensure that the Services are performed with a high degree of professional quality and reliability. Such procedures shall include
+checkpoint reviews, testing, acceptance, and other procedures for Health Net to confirm the quality of Supplier’s performance. Supplier, as part of its total quality management process, will provide continuous quality assurance and quality
+improvement through: (i) the identification and application of proven techniques and tools from other installations within its operations; and (ii) the implementation of concrete programs, practices and measures designed to improve
+performance (including the Service Levels). Supplier will utilize project management tools, including productivity aids and project management systems, as appropriate in performing the Services.
+
+5.6
+
+User Satisfaction
+
+(a)
+
+Working in consultation with Health Net, Supplier will conduct a survey annually (or on such other frequency as the Parties may agree) of an agreed percentage of Health Net’s
+internal user community (i.e., not including Health Net customers). The surveys will be designed to determine the level of satisfaction with the Services and identify areas where satisfaction could be improved. The surveys will include
+representative samples of each major category of Health Net internal users and an agreed number of in-depth, face-to-face or telephone interviews. Health Net and Supplier will mutually agree on the form and content of the surveys, which will be no
+less thorough than those used customarily by Supplier. The Parties will jointly review the results of the surveys, and Supplier will develop and carry out a plan to improve satisfaction in areas where Health Net considers it to be lower than it
+should be.
+
+(b)
+
+Health Net’s satisfaction with the Services will be taken into account by Supplier in its performance appraisals of Supplier Personnel.
+
+6.
+
+SERVICE LEVELS
+
+6.1
+
+General
+
+Quantitative performance standards for
+certain of the Services (“Service Levels”) are set forth in Schedule B (Service Levels).
+
+6.2
+
+Failure to Perform
+
+(a)
+
+Supplier will place an amount equal to the Amount at Risk (as defined in Schedule B) at risk each month for Service Level Credits. Supplier’s obligation to pay Service Level
+Credits is further described in Schedule B.
+
+(b)
+
+Health Net may allocate two hundred fifty (250) percentage points among Critical Service Levels for the purpose of calculating Service Level Credits, as further described in
+Schedule B.
+
+(c)
+
+The total Service Level Credits payable in any calendar month will not exceed the Amount at Risk for such month.
+
+General Terms and Conditions-
+
+15
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(d)
+
+Upon notice to Supplier, Health Net may, in its sole discretion, (i) change the designation of any Service Level to a Critical Service Level, or change the designation of any
+Critical Service Level to a non-Critical Service Level; and (ii) change the Weighting Factors for the existing or newly designated Critical Service Levels; provided that (i) Health Net may provide only one such notice during any calendar
+quarter (which notice may contain multiple changes) and (ii) the total Weighing Factors may not exceed *** percentage points.
+
+(e)
+
+Health Net shall have the right to add new Service Levels and Critical Service Levels pursuant to Schedule B (Service Levels).
+
+7.
+
+SUPPLIER PERSONNEL
+
+7.1
+
+Provision of Suitable Personnel
+
+Supplier will
+assign an adequate number of Supplier Personnel to perform the Services who are properly educated, trained, familiar with and fully qualified for the Services they are assigned to perform, and Supplier shall ensure (to the extent reasonably
+possible) that any outgoing Supplier Personnel leaving the Health Net account spend a reasonable period of time training the new Supplier Personnel who will be replacing such outgoing personnel. Supplier is responsible for taking action at its own
+expense such that Supplier Personnel assigned to perform Services have the legal right to work in the countries in which they are assigned to work.
+
+7.2
+
+Screening and Background Checks
+
+(a)
+
+Supplier shall, at no additional expense to Health Net, and prior to placing any Supplier Personnel at Health Net or on the Health Net account, complete background checks for all
+such personnel (“Background Checks”). Background Checks shall include I-9 completion, screening in State, county, federal and other applicable jurisdictions to identify felonies and misdemeanor convictions and verify the
+social security number of such personnel, if applicable to such personnel, and any other screening required to comply with applicable Law. If requested by Health Net, Supplier shall perform additional background checks of Supplier Personnel at
+Health Net’s expense.
+
+(b)
+
+The personnel will be asked for education and, with respect to United States resident personnel, the last seven (7) years of residences. Subject to applicable Law, Supplier
+Personnel may be tested for drugs and/or alcohol whenever Supplier or Health Net has reasonable suspicion that the personnel is under the influence of drugs and/or alcohol in the workplace or has violated the substance abuse policy. Such personnel
+have the right to refuse to submit to drug or alcohol testing, however, personnel who do so will be subject to removal from the Health Net account. Results of Background Checks and drug testing will remain Supplier’s Confidential Information
+and will not be provided to Health Net, but any negative or questionable Background Check or drug test of a personnel will require Supplier to remove or not assign such personnel. Supplier shall hire all Supplier Personnel and other personnel
+involved in the Health Net account strictly in accordance with all Laws applicable to the hiring and employment of individuals including, without limitation, the Fair Labor Standards Act, Immigration Reform and Control Act and all equal employment
+opportunity Laws.
+
+General Terms and Conditions-
+
+16
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+7.3
+
+Responsibility for Supplier Personnel, Generally
+
+Supplier will manage, supervise and provide direction to Supplier Personnel and cause them to comply with the obligations and restrictions applicable to Supplier under this Agreement. Supplier will make Supplier Personnel aware of, and
+cause them to comply with, Health Net’s safety and security policies that have been made known to Supplier while they are performing Services at Health Net Facilities or accessing Health Net Data or systems. As between Supplier and Health Net,
+Supplier is responsible for all wages, salaries and other amounts due Supplier Personnel, and for all tax withholdings, unemployment insurance premiums, pension and social welfare plan contributions, and other employer obligations with respect to
+Supplier Personnel. Supplier is responsible for the acts and omissions of Supplier Personnel under or relating to this Agreement.
+
+7.4
+
+Key Supplier Positions
+
+(a)
+
+“Key Supplier Positions” means those positions designated as Key Supplier Positions in Schedule D (Key Supplier Positions). Supplier’s Project PE will
+be one of the Key Supplier Positions. Supplier will cause each of the Supplier Personnel filling the Key Supplier Positions (whether as of the Effective Date, or replacement personnel filling such Key Supplier Position during the Term) to devote
+substantially full time and effort to the provision of the Services. Supplier Personnel approved as of the Effective Date to fill the Key Supplier Positions are listed in Schedule D (Key Supplier Positions).
+
+(b)
+
+Before the initial and each subsequent assignment of an individual to a Key Supplier Position, Supplier will notify Health Net of the proposed assignment, introduce the individual
+to appropriate Health Net representatives and, consistent with Supplier’s personnel practices, provide Health Net a curriculum vitae and other information about the individual reasonably requested by Health Net. Upon request, Supplier will
+provide Health Net representatives an opportunity to meet with the individual. If Health Net in good faith objects to the proposed assignment, the Parties will attempt to resolve Health Net’s concerns on a mutually agreeable basis. If the
+Parties have not been able to resolve Health Net’s concerns within five (5) Business Days, Supplier may not assign the individual to that position and must propose the assignment of another suitably qualified individual.
+
+(c)
+
+Health Net may from time to time change the positions designated as Key Supplier Positions under this Agreement. However, without Supplier’s consent, the number of Key Supplier
+Positions may not exceed the number designated in Schedule D (Key Supplier Positions) as of the Effective Date, except as set forth in Footnote 3 of Schedule D.
+
+(d)
+
+Supplier will not reassign or replace any person assigned to a Key Supplier Position during the time period described in Footnote 1 to Schedule D. Supplier will
+give Health Net, where reasonably possible, at least ninety (90) days advance notice of a proposed change in personnel filling a Key Supplier Position, and will discuss with Health Net any objections Health Net may have. Supplier will arrange,
+at no charge, for the proposed replacement to work side-by-side with the individual being replaced during the notice period to effectuate a seamless transfer of knowledge prior to the incumbent leaving the Key Supplier Position. Individuals filling
+Key Supplier Positions may not be transferred or re-assigned until a suitable replacement has been approved by Health Net, and no
+
+General Terms and Conditions-
+
+17
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+such re-assignment or transfer may occur at a time or in a manner that would have an adverse impact on delivery of the Services or Health Net’s
+operations. Supplier will establish and maintain an up-to-date succession plan for the individuals serving in Key Supplier Positions.
+
+7.5
+
+Removal and Replacement of Supplier Personnel
+
+Health Net may immediately remove any Supplier Personnel from any Health Net Facilities if the person is threatening or abusive, commits a crime, engages in an act of dishonesty while performing Services for Health Net or violates Health
+Net’s policies and procedures pertaining to safety, security or use of Health Net Facilities. If Health Net determines in good faith that the continued assignment to Health Net’s account of any of the Supplier Personnel is not in the best
+interests of Health Net, then Health Net may give Supplier written notice to that effect. After receipt of such a notice, Supplier will have a reasonable period of time (not to exceed ten (10) Business Days) in which to investigate the matters
+stated in the notice, discuss its findings with Health Net and resolve Health Net’s concerns. If, following such process, Health Net requests replacement of the individual, Supplier will replace the individual with another suitably qualified
+person.
+
+7.6
+
+Controlling Turnover of Supplier Personnel
+
+Health
+Net and Supplier agree that it is in their mutual best interests to keep the turnover rate of Supplier Personnel to a reasonably low level. Accordingly, if Health Net believes that Supplier’s turnover rate is excessive and so notifies Supplier,
+Supplier will provide data concerning its turnover rate and meet with Health Net to discuss the reasons for, and impact of, the turnover rate. If appropriate, Supplier will submit to Health Net its proposals for reducing the turnover rate and the
+Parties will mutually agree on a program to bring the turnover rate down to an acceptable level. In any event, Supplier will use Commercially Reasonable Efforts to keep the turnover rate to a reasonably low level. Notwithstanding any turnover of
+Supplier Personnel, Supplier remains obligated to perform the Services in compliance with the requirements of this Agreement.
+
+7.7
+
+Subcontracting
+
+“Subcontractor”
+means a third party engaged by Supplier to provide products and/or services used by Supplier in rendering the Services, as well as any entity to whom a Subcontractor further subcontracts (or otherwise sub-delegates) any of its subcontracted
+duties or obligations. Supplier may subcontract or delegate the performance of Services only in accordance with the following:
+
+(a)
+
+Supplier may subcontract the performance of Services to any of its wholly-owned Affiliates who are qualified to conduct business in the United States.
+
+(b)
+
+Except as provided in Section 7.7(a), Supplier shall not subcontract for performance of, or delegate any of its responsibilities under this Agreement without
+first obtaining the prior written approval of Health Net, provided such approval shall not be required for subcontracts with an annual contract value of less than $500,000. When seeking such approval, Supplier will (i) give Health Net
+reasonable prior written notice specifying the components of the Services affected, the scope of the proposed subcontract, the identity and qualifications of the proposed Subcontractor and the results of any due diligence carried out with regard to
+the proposed Subcontractor; and (ii) at Health Net’s request, provide Health Net a description of the scope. Health Net may approve or reject proposed Subcontractors in its discretion. Health Net may require Supplier to
+
+General Terms and Conditions-
+
+18
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+replace any previously approved Subcontractor found, in the reasonable judgment of Health Net, to be unacceptable. Any such Subcontractors approved by Health
+Net, in its discretion, shall be an “Approved Subcontractor” hereunder.
+
+(c)
+
+IBM shall provide Health Net with a quarterly report identifying (i) each subcontract with an annual spend of greater than $500,000, including subcontracts that began below
+$500,000 and grew during the term; and (ii) the annual spend of such subcontract (expressed as a percentage of the then-current Annual Services Charge).
+
+(d)
+
+Approved Subcontractors as of the Effective Date are listed in Schedule P (Approved Subcontractors).
+
+(e)
+
+In any subcontracts entered into by Supplier after the Effective Date for performance of the Services, Supplier will require the Subcontractor to be bound to Supplier by all
+applicable terms of this Agreement and to assume toward Supplier all of the applicable obligations and responsibilities that Supplier, by this Agreement, has assumed toward Health Net.
+
+(f)
+
+Supplier may use Approved Subcontractors to perform the Services to the extent permitted by Health Net’s approval. Supplier is responsible for managing all Subcontractors.
+Supplier remains responsible for all Functions delegated to Subcontractors to the same extent as if such Functions were to be performed by Supplier acting through its officers, directors, employees, and agents and, for purposes of this Agreement,
+such Functions will be deemed Functions performed by Supplier. Supplier will be Health Net’s sole point of contact regarding the Services, including with respect to payment.
+
+(g)
+
+Supplier may disclose Health Net Confidential Information only to Approved Subcontractors who have agreed in writing to protect the confidentiality of such Confidential Information
+in a manner substantially equivalent to that required of Supplier under this Agreement and to permit both Supplier and Health Net, or both, to enforce such terms directly against such Subcontractor. As between the Parties, Supplier shall be
+responsible for all acts and omissions of (i) Supplier’s independent contractors and other Subcontractors as if they were Supplier’s employees (including acts and omissions of such independent contractors and other Subcontractors for
+purposes of determining Supplier’s liability under this Agreement or responsibility for indemnity claims made under this Agreement) and (ii) any third party to whom Supplier permits access to Health Net Data or Health Net Confidential
+Information.
+
+7.8
+
+Managed Third Parties
+
+“Managed Third
+Parties” are third parties under contract to Health Net or its Affiliates who supply products and services used by Supplier in rendering the Services. Examples of Managed Third Parties are the suppliers under the Health Net contracts
+referenced in Section 11 (Transfer and Use of Resources) that have not been assigned to Supplier. Except where Schedule A (Services) provides otherwise, Supplier is responsible for coordinating with and managing the performance of the
+Managed Third Parties. Supplier’s responsibilities with respect to Managed Third Parties are set forth in Schedule A.
+
+General Terms and Conditions-
+
+19
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+8.
+
+HEALTH NET RESPONSIBILITIES
+
+8.1
+
+Appointment of Health Net Program Management Office (PMO) Personnel
+
+(a)
+
+Health Net will designate an individual to serve as Health Net’s “Program Manager”, who will be Supplier’s principal point of contact for obtaining
+decisions, information, approvals and acceptances required from Health Net.
+
+(b)
+
+Health Net will also designate individuals to serve in the Health Net PMO roles described in the Contract Governance Plan pursuant to Schedule G (Governance).
+
+8.2
+
+Health Net Cooperation Duties
+
+(a)
+
+In support of Supplier’s performance of the Services and subject to Section 8.3, Health Net will perform the Functions identified in this Agreement as retained Health Net
+Functions and provide or make available to Supplier the Equipment, Software, Health Net Facilities and other resources that this Agreement specifies are to be provided by Health Net.
+
+(b)
+
+Health Net will cooperate with Supplier, including by making available management decisions, information, approvals and acceptances, as reasonably requested by Supplier so that
+Supplier may accomplish its obligations and responsibilities under this Agreement.
+
+8.3
+
+Savings Clause
+
+Health Net’s failure to
+perform its responsibilities set forth in this Agreement (or cause them to be performed) will not constitute grounds for termination by Supplier except as provided in Section 16.3 (Termination by Supplier). Supplier’s nonperformance of its
+obligations under this Agreement will be excused if and to the extent (a) such Supplier nonperformance results from Health Net’s failure to perform its responsibilities, and (b) Supplier provides Health Net with reasonable notice of
+such nonperformance and uses Commercially Reasonable Efforts to perform notwithstanding Health Net’s failure to perform. If Supplier’s use of Commercially Reasonable Efforts to perform in such a circumstance would cause Supplier to incur
+significant Out-of-Pocket Expenses, Supplier may so notify Health Net. If it does, Supplier’s obligation to continue its efforts to work around Health Net’s failure to perform will be subject to Health Net agreeing to reimburse Supplier
+for its additional Out-of-Pocket Expenses incurred in the course of such efforts. SUPPLIER ACKNOWLEDGES THAT HEALTH NET WOULD NOT BE WILLING TO ENTER INTO THIS AGREEMENT WITHOUT ASSURANCE THAT THIS AGREEMENT MAY NOT BE TERMINATED BY SUPPLIER AND
+THAT SUPPLIER SHALL NOT HAVE THE RIGHT TO SUSPEND PERFORMANCE OF THE SERVICES EXCEPT, AND ONLY TO THE EXTENT, EXPLICITLY PROVIDED HEREIN.
+
+9.
+
+CHARGES
+
+Schedule C (Charges) sets forth all
+the Charges payable to Supplier for performing the Services and the associated invoicing and payment procedures and terms. Health Net will not be required to pay Supplier any amounts for or in connection with performing the Services and fulfilling
+Supplier’s obligations under this Agreement other than those amounts payable to Supplier under Schedule C (Charges) and the following Sections: Section 5.3 (Time of Performance);
+
+General Terms and Conditions-
+
+20
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Section 8.3 (Savings Clause); Section 11.10 (Terms Applicable to Health Net Facilities, Generally); Section 16.1 (Termination by Health Net);
+Section 16.4 (Extension of Termination Date); and Section 18.4 (Records Retention).
+
+9.1
+
+Pass-Through Expenses
+
+(a)
+
+“Managed As Pass-Through Expenses” means third party charges that are to be both (A) paid by IBM and reimbursed by Health Net on an Out-of-Pocket
+Expenses basis, and (B) administered by Supplier. All Managed As Pass-Through Expenses are identified in Schedules I, J and N. Additional Managed As Pass-Through Expenses may be added pursuant to Exhibit C-10 to Schedule C or as otherwise
+mutually agreed by the Parties. Supplier shall arrange for delivery by third parties to Supplier of invoices for Managed As Pass-Through Expenses, and Supplier promptly shall review such invoices and provide Health Net with the original invoice
+together with a statement identifying which charges are proper and valid and should be paid by Supplier as set forth above. Supplier will pay Managed As Pass-Through Expenses invoices on time and will be responsible for any late fees, interest, or
+other similar payments incurred, unless late payment is due to the fault of Health Net. Supplier shall track the payment status of Managed As Pass-Through Expenses and provide a consolidated report of such status upon Health Net’s request.
+
+(b)
+
+“Pure Pass-Through Expenses” means third party charges for which (i) Health Net shall retain responsibility for all obligations for such
+contracts, including obligations to review each invoice for accuracy; and (ii) Supplier’s only obligation with regard to such Pure Pass-Through Expenses shall be as a payment agent and as set forth below. All Pure Pass-Through Expenses are
+identified in Schedules I, J and N. Additional Pure Pass-Through Expenses may be added pursuant to Exhibit C-10 to Schedule C or as otherwise mutually agreed by the Parties. So long as Health Net provides to Supplier the invoice for a Pure
+Pass-Through Expense and the funds to be used for the payment of such invoice within a period of time prior to the due date of such invoice that is reasonably sufficient to enable Supplier to pay such invoice prior to such due date, Supplier will
+pay such Pure Pass-Through Expense invoice on time and will be responsible for any late fees, interest, or other similar payments incurred due to Supplier’s failure to pay such invoice on time. Except as set forth above, Supplier shall have no
+further obligations with regard to such payment (implied or otherwise). Supplier shall track the payment status of Pure Pass-Through Expenses and provide a consolidated report of such status upon Health Net’s request.
+
+(c)
+
+Supplier shall use Commercially Reasonable Efforts to minimize the amount of Managed As Pass-Through Expenses. With respect to services or materials paid for on a
+Managed As Pass-Through Expenses basis, Health Net reserves the right to: (i) obtain such services or materials directly from a third party; (ii) designate the third party source for such services or materials; (iii) designate the
+particular services or materials (e.g., equipment make and model) Supplier shall obtain; (iv) designate the terms for obtaining such services or materials (e.g., purchase or lease and lump sum payment or payment over time); (v) require
+Supplier to identify and consider multiple sources for such services or materials or to conduct a competitive procurement; and (vi) review and approve the applicable
+
+General Terms and Conditions-
+
+21
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Managed As Pass-Through Expenses before entering into a contract for particular services or materials.
+
+9.2
+
+Incidental Expenses
+
+Supplier acknowledges that,
+except as may be otherwise provided in this Agreement, expenses that Supplier expects to incur in performing the Services (including travel and lodging, document reproduction and shipping, and long-distance telephone) are included in Supplier’s
+Charges and rates set forth in this Agreement. Accordingly, such Supplier expenses are not separately reimbursable by Health Net unless, on a case-by-case basis for unusual expenses, Health Net has agreed in advance and in writing to reimburse
+Supplier for the expense.
+
+9.3
+
+Taxes
+
+The Parties’ respective
+responsibilities for taxes arising under or in connection with this Agreement shall be as follows:
+
+(a)
+
+Each Party shall be responsible for any personal property taxes on property it owns or leases, for franchise and privilege taxes on its business, and for taxes based on its net
+income or gross receipts.
+
+(b)
+
+Supplier shall be responsible for any sales, use, excise, value-added, services, consumption and other taxes and duties payable by Supplier on the goods or services used or consumed
+by Supplier in providing the Services where the tax is imposed on Supplier’s acquisition or use of such goods or services and the amount of tax is measured by Supplier’s costs in acquiring such goods or services.
+
+(c)
+
+Health Net shall be responsible for any sales, use, excise, value-added, services, consumption or other tax existing as of the Effective Date that is assessed on the provision of
+the Services as a whole, or on any particular Service by any governmental or taxing authority within the United States; provided, however, that (i) Supplier invoices reflect on a current basis (and in any event before any such tax becomes due
+and payable) the amount of any such tax in each jurisdiction and the taxable Services to which such tax relates, (ii) if Supplier fails to reflect on its invoice any such tax on a current basis, Supplier shall be financially responsible for any
+penalties and interest assessed by the taxing authority with respect to such tax, and (iii) if Supplier fails to reflect any such tax on a Supplier invoice within *** after such tax should have been invoiced, Supplier shall be financially
+responsible for the full amount of such tax, including any penalties and interest. Subject to Health Net’s right to terminate the Agreement relating to taxes set forth in Section 16.1(h), Health Net shall bear the responsibility for any
+sales, use, excise, value-added, services, consumption or other tax becoming applicable during the Term (or that is increased during the Term) that is assessed on the provision of the Services as a whole, or on any particular Service by any
+governmental or taxing authority within the United States (subject to items (i)-(iii) above).
+
+(d)
+
+Supplier shall be responsible for any sales, use, excise, value-added, services, consumption or other tax that is assessed on the provision of the Services as a whole, or on any
+particular Service by any governmental or taxing authority outside the United States as of the Effective Date or during the Term.
+
+General Terms and Conditions-
+
+22
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(e)
+
+Supplier shall be responsible for any payments required to compensate Supplier Personnel for compensatory tax treatment resulting from Supplier Personnel traveling to perform
+services, subject to the remainder of this paragraph. In the event that the assignment (or potential assignment) of particular Supplier Personnel to perform Services for Health Net has reached a point such that the continued assignment of such
+particular personnel is likely to trigger compensatory tax treatment of the travel related expenses reimbursed to such particular Supplier Personnel, Supplier may inform Health Net in writing that Supplier is close to becoming subject to
+compensatory tax treatment as a result of such assignment, and shall provide an estimate of the amount of such compensatory tax liability. If Supplier fails to so notify Health Net, Supplier shall remain responsible for any amounts resulting from
+compensatory tax treatment of such particular Supplier personnel. Following such notice by Supplier, Health Net may then elect by sending written notice to Supplier to be financially responsible for any payments required to compensate Supplier with
+respect to such particular Supplier Personnel in an amount equal to the compensatory taxes assessed to such particular Supplier Personnel as the result of such assignment to the Health Net account. If Health Net does not so elect, Supplier shall
+remain responsible for any amounts resulting from compensatory tax treatment of such particular Supplier Personnel, provided, however, Supplier may then relocate such personnel to avoid such taxes, and the Parties shall cooperate to make other
+arrangements so that the Services will be performed without interruption.
+
+(f)
+
+In the event that a sales, use, excise, value added, services, consumption or other tax is assessed on the provision of any of the Services, the Parties shall work together to
+segregate the payments under this Agreement into three (3) payment streams:
+
+(i)
+
+those for taxable Services;
+
+(ii)
+
+those for which Supplier functions merely as a payment agent for Health Net in receiving goods, supplies, or services (including leasing and licensing arrangements); and
+
+(iii)
+
+those for other nontaxable Services.
+
+(g)
+
+The Parties agree to cooperate with each other to enable each to more accurately determine its own tax liability and to minimize such liability to the extent legally permissible.
+Supplier’s invoices shall separately state the amounts of any taxes Supplier is collecting from Health Net, and Supplier shall remit such taxes to the appropriate authorities. Each Party shall provide and make available to the other any resale
+certificates, information regarding out-of-state or out-of-country sales or use of equipment, materials or services, and other exemption certificates or information reasonably requested by the other Party.
+
+(h)
+
+Supplier shall promptly notify Health Net of, and coordinate with Health Net the response to and settlement of, any claim for taxes asserted by applicable taxing
+authorities for which Health Net is responsible hereunder, it being understood that with respect to any claim arising out of a form or return signed by a Party to this Agreement, such Party shall have the right to elect to control the response to
+and settlement of the claim, but the other Party shall have all rights to participate
+
+General Terms and Conditions-
+
+23
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+in the responses and settlements that are appropriate to its potential responsibilities or liabilities. If Health Net requests Supplier to challenge the
+imposition of any tax, Supplier shall do so in a timely manner and Health Net shall reimburse Supplier for the reasonable legal fees and expenses it incurs. Health Net shall be entitled to any tax refunds or rebates granted to the extent such
+refunds or rebates are of taxes that were paid by Health Net.
+
+(i)
+
+Supplier is responsible, at its own risk and expense, for determining the extent (if any) to which Supplier will be required to collect and remit national, federal, state or local
+(or foreign) taxes: (i) on (or in respect of) any products or Services provided by Supplier or any of its Approved Subcontractors under this Agreement in the jurisdictions in (or from) which Supplier chooses to provide the Services, or
+(ii) on (or in respect of) Supplier’s charges to Health Net under this Agreement.
+
+9.4
+
+Benchmarking
+
+(a)
+
+Benchmark Towers: For purposes of this Section 9.4, the “Network Towers” shall mean the Service Towers (as defined in Schedule C) for
+(1) Voice Network Services and (2) Data Network Services; and the “IT Towers” shall mean all Service Towers other than the Network Towers.
+
+(b)
+
+Frequency. Health Net shall have the right at any time during the Term, beginning March 1, 2010, to benchmark the Charges for one or more Service Towers, each benchmark
+to be of all the Services within such Service Tower in the aggregate, provided that benchmarking of Charges for a particular Service Tower cannot be initiated (i) more than one (1) time in any ***period or (ii) more than *** times
+during the Term, and further provided that Health Net shall not be permitted to benchmark the Cross Tower Services Tower separately, but Cross Tower Services Charges attributable to a Service Tower being benchmarked shall be factored into the
+Charges for such benchmarked Service Tower in conducting the benchmarking for such Service Tower. The Parties acknowledge that for purposes of applying the time periods above, a benchmarking shall begin after a contract with a Benchmarker has been
+executed and the Benchmarker has commenced performance of services under that contract (each a “Benchmarking Commencement Date”). For example, Health Net may initiate the benchmarking process in 2009 provided the Benchmarking
+Commencement Date does not occur until March 1, 2010.
+
+(c)
+
+Engagement of Benchmarker and Cooperation. A benchmarking under this Section shall be conducted by an independent industry-recognized benchmarking service provider designated
+by Health Net and approved by Supplier (“Benchmarker”), subject to the following:
+
+(i)
+
+Subject to Section 9.4(c)(v), the Benchmarker shall not be a Supplier Competitor as set forth in Schedule V (Supplier Competitors).
+
+(ii)
+
+The Benchmarker will execute a tripartite agreement with Health Net and Supplier which shall reflect the requirements set forth in this Agreement. Neither Party
+shall have the right to require terms in such tripartite agreement that either (A) are materially different from the applicable confidentiality provisions set out in this Agreement, or (B) are not set out
+
+General Terms and Conditions-
+
+24
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+in this Agreement but would cause unreasonable delay in executing such tripartite agreement.
+
+(iii)
+
+The Benchmarker shall not be compensated on a contingency fee or incentive basis.
+
+(iv)
+
+Prior to conducting the benchmark, the Benchmarker will execute appropriate confidentiality agreements with Health Net and Supplier, which will (A) be consistent with the
+confidentiality provisions of this Agreement and (B) prohibit the Benchmarker from using data provided by Health Net and Supplier for any purpose other than conducting the benchmark of the Services.
+
+(v)
+
+The Parties agree that Gartner, Inc. and Nautilus Advisors, LLC are acceptable Benchmarkers.
+
+(vi)
+
+The Parties shall each be responsible for fifty percent (50%) of the charges for the Benchmarker.
+
+(vii)
+
+The Parties shall cooperate with the Benchmarker, including, as appropriate, promptly making available knowledgeable personnel and pertinent documents and records.
+
+(d)
+
+Benchmark Process. The Benchmarker shall perform the benchmarking in accordance with the following benchmark process (the “Benchmark Process”):
+
+(i)
+
+The Benchmarker will conduct the benchmark using a Representative Sample (defined below).
+
+(ii)
+
+Prior to performing the benchmark comparison, the Benchmarker will provide and review the Benchmarker’s methodology with Health Net and Supplier, and will explain the
+normalization approach that will be applied.
+
+(iii)
+
+Health Net and Supplier will work with the Benchmarker to appropriately document any changes they mutually agree to make to the Benchmarker’s methodology.
+
+(iv)
+
+The Benchmarker shall make adjustments to data relating to each of the Comparators in the Representative Sample to the extent necessary to account for differences between the
+Services provided to Health Net and the services provided to the respective Comparators that may impede a true “like-for-like” comparison, taking into consideration the following normalization factors:
+
+(A)
+
+scope and nature of services;
+
+(B)
+
+respective services environments;
+
+(C)
+
+the hardware or software used or required to provide the services;
+
+General Terms and Conditions-
+
+25
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(D)
+
+geographic disparity of services delivery locations (including the percentage of services delivered outside the United States) and recipient locations;
+
+(E)
+
+industry differences affecting information technology costs;
+
+(F)
+
+volume of services being provided;
+
+(G)
+
+duration of the contractual commitment;
+
+(H)
+
+service levels;
+
+(I)
+
+complexity factors (including operating environment);
+
+(J)
+
+degree of standardization;
+
+(K)
+
+financial engineering, investments and allocations;
+
+(L)
+
+financing provided by Supplier;
+
+(M)
+
+any additional or value added services performed by Supplier and not received by the Comparator(s) (or performed for Comparators and not for Health Net) including Health Net’s
+or the Comparators’ unique requirements, limitations and human resources terms and conditions; and
+
+(N)
+
+any other relevant factors.
+
+(v)
+
+The Benchmarker will meet with Health Net and Supplier to explain how the normalization was performed on each Comparator in the Representative Sample and will provide Health Net and
+Supplier the pre-adjustment and post-adjustment Comparator data in a format customarily disclosed by the Benchmarker, to the extent such data can be disclosed while preserving the confidentiality of the Comparators. Each Party shall have the right
+to raise objections to the normalization performed by the Benchmarker within twenty (20) days after such meeting (the “Normalization Objection Period”), provided however that if Health Net and Supplier in good faith are
+unable to agree upon a resolution of any such objection within twenty (20) days after the conclusion of such Normalization Objection Period, then the Benchmarker shall proceed as it deems appropriate in its professional judgment and the
+benchmarking shall continue as described below.
+
+(vi)
+
+Neither Health Net nor Supplier will be required to disclose to the Benchmarker actual performance against Service Levels or other actual performance comparison.
+
+(vii)
+
+During the thirty (30) day period after the Benchmarker completes the data gathering, but before the Benchmarker has concluded the Benchmark analysis, Health Net and Supplier
+will have an opportunity to consult with the Benchmarker about how such data gathering activities conformed to the agreed Benchmark process.
+
+General Terms and Conditions-
+
+26
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(viii)
+
+Health Net and Supplier agree to participate jointly in all discussions with the Benchmarker and to cooperate reasonably with the Benchmarker in the benchmark activities; provided,
+however, in no event will Supplier be required to provide the Benchmarker with Supplier data about Supplier’s underlying actual costs and/or cost structure (unless the charges are based on “cost-plus” or are for Managed As
+Pass-Through or Pure Pass-Through pricing) or data from other Supplier customers.
+
+(ix)
+
+Health Net and Supplier agree that all information provided to or obtained from the Benchmarker will be provided to both Health Net and Supplier, unless otherwise agreed.
+
+(x)
+
+Health Net and Supplier agree that the benchmark will be conducted in a manner that will not unreasonably disrupt either Party’s operations or performance of the Services.
+
+(e)
+
+Representative Sample.
+
+(i)
+
+The Benchmarker shall compare the Charges under this Agreement for the Services being benchmarked to the charges being incurred in a representative sample of IT operations (as
+applicable and in accordance with the Benchmark Process hereunder) by or for other outsourced entities that have outsourced information technology services comparable to the Services to be benchmarked (“Representative
+Sample”). “Comparator” shall mean an entity within the Representative Sample.
+
+(ii)
+
+The Benchmarker shall select the Representative Sample from entities identified by the ***.
+
+(iii)
+
+The Representative Sample shall include not less than ***, and may include entities that are outsourcing customers of Supplier.
+
+(iv)
+
+The Representative Sample used by the Benchmarker for the Benchmark will be reasonably current (generally based on services provided to Health Net and the Comparators no more than
+eighteen (18) months prior to the start of the Benchmark).
+
+(f)
+
+Performance and Output of Benchmark. The Benchmarker is to conduct a benchmarking as promptly as is prudent in the circumstances. At the conclusion of the
+benchmarking process the Benchmarker shall issue an initial report of its findings and conclusions to Health Net and Supplier no later than ninety (90) days from the conclusion of the benchmark. Health Net and Supplier will review the initial
+report and raise any issues with the Benchmarker regarding such report within thirty (30) days following receipt (the “Review Period”). The Benchmarker will review the issues and any materials provided by either Party
+and will use reasonable efforts to resolve such issues with Health Net and Supplier, provided that if Health Net and Supplier in good faith are unable to agree upon a resolution of any issue within thirty (30) days after the conclusion of the
+Review Period, then ***. Upon conclusion of the Review Period, and discussion of issues (if any) raised by either Party within the thirty (30) day period described in the prior sentence, the Benchmarker will submit a final benchmark report,
+including any approved revisions (“Final Benchmarker
+
+General Terms and Conditions-
+
+27
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Report”). Absent fraud, the Final Benchmarker Report shall be final and binding on the Parties.
+
+(g)
+
+Adjustments Based on Final Benchmarker Report.
+
+(i)
+
+The Benchmarker shall determine if Health Net’s Charges fall within the top quartile, as calculated using the MSExcel “QUARTILE” Function as (viewed from the
+perspective most favorable to Health Net) of charges in the Representative Sample for each benchmarked Service Tower (“Benchmark Level”).
+
+(ii)
+
+If in the Final Benchmarker Report, the aggregate Charges to Health Net under this Agreement for the Service Tower that is the subject of the benchmark are higher than the Benchmark
+Level for such Service Tower, and the difference between the Benchmark Level and the current Contract Year’s aggregate Charges for the benchmarked Service Tower that were in effect as of the Effective Date is equal to, or less than ***
+
+(iii)
+
+If in the Final Benchmarker Report, the Charges to Health Net under this Agreement for the Service Tower that is the subject of the benchmark is in the aggregate higher than the
+Benchmark Level for such Service Tower, and the difference between the Benchmark Level and the aggregate Charges for the benchmarked Service Tower are greater than the *** then Supplier will ***reduce such Charges for such Services Tower for the
+remainder of the Term to bring the Charges for such benchmarked Service Tower within *** without requiring modifications to any Service Levels or other terms under this Agreement; subject to the following limitations (“Benchmarking
+Adjustment Caps”), unless otherwise agreed:
+
+(A)
+
+Supplier shall not be required to reduce the aggregate Charges for a benchmarked Service Tower that is one of the IT Towers pursuant to this Section 9.4 following any
+individual benchmark or multiple benchmarks by more *** the Charges that were in effect as of the Effective Date for such Services Tower in a Contract Year; and in no event shall the total of any and all adjustments to the Charges for all benchmarks
+that are performed on all IT Towers in aggregate exceed *** the total Charges for all IT Towers that were in effect as of the Effective Date for any Contract Year; and
+
+(B)
+
+Supplier shall not be required to reduce the aggregate Charges for a benchmarked Service Tower that is one of the Network Towers pursuant to this Section 9.4 following any
+individual benchmark or multiple benchmarks by more than *** of the Charges that were in effect as of the Effective Date for such Services Tower in a Contract Year.
+
+(C)
+
+The IT Towers and Network Towers for purposes of benchmarking are separate and distinct; a benchmark in one pool shall have no effect on the calculation or adjustment limitations on
+the other.
+
+General Terms and Conditions-
+
+28
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+(D)
+
+The Benchmark Adjustment Caps shall be calculated separately for each Contract Year of the Term. For example, ***.
+
+(E)
+
+***
+
+(iv)
+
+In addition, and without limiting Supplier’s obligation under Section 9.4(g)(iii) above, if following each individual benchmark of a Service Tower an adjustment in excess
+of one (or if applicable, both) Benchmarking Adjustment Caps is required to bring the Charges for such Service Tower within the Benchmark Deadband, and Supplier is unwilling to make such adjustment for the portion in excess of the applicable
+Benchmarking Adjustment Cap(s), then Health Net may terminate the affected benchmarked Service Tower (including the applicable portion of the Cross Tower Services Tower) by providing Supplier at least ninety (90) days notice and paying the Wind
+Down Costs and Balance Sheet Items for such Service Tower as set forth in Schedule C (Charges); provided that if a Service Tower to be terminated is a Network Tower, Health Net shall terminate all Service Towers that are Network Towers (rather than
+terminate one Network Tower but not the other Network Tower).
+
+(v)
+
+Any changes made to the Charges pursuant to a Benchmark will take effect on a prospective basis thirty (30) days following the Benchmarker’s delivery of the Final
+Benchmark Report.
+
+10.
+
+INVOICING AND PAYMENT
+
+10.1
+
+Invoicing
+
+(a)
+
+Supplier shall invoice Health Net for all amounts due under this Agreement on a monthly basis as follows: Supplier shall
+submit two (2) invoices to Health Net by the tenth (10th) day of each month. The first invoice shall include the Annual Services Charge
+for the current month (“ASC Invoice”); the second invoice shall include ARCs and RRCs, Managed As Pass-Through Expenses, Pure Pass-Through Expenses and any other Charges payable under this Agreement for Services delivered in
+the prior month (“Variable Charge Invoice”). Each invoice shall, for each charge on the invoice, cite the specific section of the Agreement on which such charge is based. Supplier shall include the calculations utilized to
+establish the Charges.
+
+(b)
+
+To the extent a credit may be due Health Net pursuant to this Agreement, Supplier shall provide Health Net with an appropriate credit against amounts then due and owing. If no
+further payments are due to Supplier, Supplier shall pay such amounts to Health Net within thirty (30) days.
+
+(c)
+
+Supplier shall render a consolidated ASC Invoice and consolidated Variable Charge Invoice for each month’s Charges showing such details as reasonably specified
+by Health Net, including as necessary to satisfy Health Net’s internal accounting and chargeback requirements (such as allocating charges among Service components, locations and departments). The approved form of invoice as of the Effective
+Date is attached as Exhibit C-7 to Schedule C (“Form Invoice”). Any changes to such Form Invoice must be approved by Health Net. Supplier agrees that it shall maintain the chargeback capability and processes that
+
+General Terms and Conditions-
+
+29
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+Health Net has in place as of the Effective Date. Charges for Services relating to Health Net’s Federal Services business shall be separately
+identifiable on each invoice.
+
+(d)
+
+Each month’s invoices shall be complete as to the Charges for such month, except as provided in the remainder of this Section. Supplier may not charge Health Net any additional
+amounts for a month for which an invoice has been rendered more than *** after such additional amounts should have been invoiced pursuant to Section 10.1(a), except:
+
+(i)
+
+With respect to Managed As Pass-Through Expenses, Supplier may include such Managed As Pass-Through Expenses on a later invoice, although in no event shall any such expenses be
+billed more than *** after such expense was due and payable to the third party vendor; and
+
+(ii)
+
+With respect to charges for Services rendered by AT&T to Health Net, Supplier may include such AT&T invoice amounts on a later invoice, although in no event shall these be
+billed more than *** after such amounts should have been invoiced pursuant to Section 10.1(a).
+
+(iii)
+
+With respect to the expenses and charges described in Section 10.1(d)(i) and Section 10.1(d)(ii) above, Supplier shall use Commercially Reasonable Efforts to bill such
+amounts sooner than the time permitted under such Sections. Supplier shall notify Health Net if Supplier is unable to bill any such expense or charge prior to the due date of such expense or charge, including due to a failure to receive the invoice
+from the third party vendor. For clarity, (A) this Section 10.1(d)(iii) shall not apply to Pure Pass-Through Expenses, and (ii) if Supplier satisfies the conditions set forth in this Section and is still unable to provide the invoice
+for any Managed As Pass-Through Expense item prior to the due date for such item, then Supplier shall be relieved from the limitations set forth in Section 10.1(d)(i) above with respect to such Managed As Pass-Through Expense item, but not the
+limitations set forth in Section 10.1(d)(ii) above with respect to AT&T charges.
+
+(e)
+
+All charges shall be invoiced and payable in U.S. currency in accordance with the charges set forth in the applicable pricing schedule. Supplier shall bear any and all currency
+fluctuation risks inherent in its election to provide elements of the Services from offshore locations.
+
+10.2
+
+Payment Due
+
+Subject to the other provisions of this Section 10, invoices provided for under Section 10.1 and properly submitted to Health Net by the tenth (10th
+) day of the month pursuant to Section 10.1 and other terms of this Agreement shall be due and payable by Health Net twenty (20) days following receipt for the ASC Invoice and thirty
+(30) days following receipt for the Variable Charge Invoice (each a “Payable Date”). Any amount due under this Agreement for which a time for payment is not otherwise specified shall be due and payable within *** days
+after receipt of a proper invoice for such amount. If any undisputed payments or portions thereof payable under this Agreement are not received by Supplier within five (5) business days after the Payable Date, (a) Supplier shall promptly
+notify Health Net of the non-payment; and (b) Health Net shall pay Supplier simple (non-compounded) interest on the unpaid amounts for each day between
+
+General Terms and Conditions-
+
+30
+
+Health Net / IBM Confidential
+
+Final Execution Version
+
+and including the sixth (6th) day after the Payable

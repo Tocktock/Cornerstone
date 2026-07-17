@@ -1,0 +1,535 @@
+
+Medi-Cal is a public health insurance program that provides health care services for low-income individuals residing in California, and is financed by the state of California and the federal government. As of December 31, 2014, through HNCS, we had Medi-Cal operations in 12 California counties: Fresno, Kern, Kings, Los Angeles, Madera, Riverside, Sacramento, San Bernardino, San Diego, San Joaquin, Stanislaus and Tulare. We are the sole commercial plan contractor with DHCS to provide Medi-Cal services in Los Angeles County, California. As of December 31, 2014, 848,898 of our Medi-Cal members resided in Los Angeles County, representing approximately 53% of our Medi-Cal membership.
+
+In November 2012, we entered into a state-sponsored health plans rate settlement agreement (the "Agreement") with DHCS to settle certain rate disputes related to prior years. Under the Agreement, DHCS agreed, among other things, to the extension of all of our Medi-Cal managed care contracts existing on the date of the Agreement, including our contract with DHCS to provide Medi-Cal services in Los Angeles County, for an additional five years from their existing expiration dates. As a result, our agreement to provide Medi-Cal services in Los Angeles County is currently scheduled to expire by its terms on March 31, 2019. The Agreement also established an account to track retrospective premium adjustments on all of our state-sponsored health care programs, including Medi-Cal, which includes our seniors and persons with disabilities population—also referred to as the aged, blind and disabled (“SPDs”), our participation in the dual eligibles demonstration portion of the CCI that began in April 2014 and Medi-Cal expansion populations (our “state-sponsored health care programs”) that also began in 2014. These retrospective premium adjustments are designed to help maintain minimum pretax margins with respect to our Medi-Cal operations. For additional information on the Agreement, see Note 2 to our consolidated financial statements, under the heading "Health Plan Services Revenue Recognition," to our consolidated financial statements included as part of this Annual Report on Form 10-K.
+
+Arizona
+
+In March 2013, we were awarded a contract by the Arizona Health Care Cost Containment System ("AHCCCS") to administer Medicaid benefits in Maricopa County, Arizona, beginning on October 1, 2013. AHCCCS uses federal, state and county funds to provide health care coverage to the State’s acute and long-term care Medicaid populations, low income groups and small businesses. Since 1982, when it became the first statewide Medicaid managed care system in the nation, AHCCCS has operated under a federal Section 1115 Medicaid waiver authority that allows for the operation of a total managed care model. AHCCCS contracts for acute care services in seven geographic service areas that include 15 Arizona counties. Our contract for Maricopa County has an initial term of three years with two additional one-year extensions. In accordance with AHCCCS contractual requirements, we established a subsidiary, Health Net Access, Inc., whose sole activity is to perform the obligations under the AHCCCS contract.
+
+AHCCCS makes monthly prospective capitation payments to contracted health plans responsible for the delivery of care to members. As with our monthly fee under Medi-Cal, the monthly fee is based on prepaid payment rates that are required by federal law to be actuarially sound, and ultimately determined by the State. The State considers a combination of various factors in setting these rates, including, without limitation, geographic area, a member's health status, age, gender, county or region, benefit mix and member eligibility category.
+
+Medicaid Expansion and Recent State Legislation
+
+In connection with the ACA, the federal government extended funds to those states that opted to expand Medicaid eligibility from a pool that included residents with incomes up to 100% of the federal poverty level (“FPL”) to an expanded pool of residents with incomes up to 133% of the FPL. Both Arizona and California are amongst the states that have opted into this “Medicaid expansion,” which has increased and is expected to continue to increase our Medicaid membership.
+
+California also recently enacted a bill under which DHCS expanded the list of benefits that we are required to provide to our Medi-Cal population. Under this legislation, which became effective as of January 1, 2014, we began administering certain mental health outpatient benefits to all our Medi-Cal members, including those newly eligible as a result of Medicaid expansion, and closely coordinating mental health and substance abuse services activities with county mental health departments.
+
+5
+
+California Coordinated Care Initiative
+
+In 2012, the California legislature enacted the Coordinated Care Initiative, or “CCI.” The stated purpose of the CCI is to provide a more efficient health care delivery system and improved coordination of care to individuals that are fully eligible for Medicare and Medi-Cal benefits, or "dual eligibles," as well as to all Medi-Cal only beneficiaries who rely on long-term services and supports, or “LTSS,” which includes institutional long-term care and home and community-based services and other support services.
+
+In participating counties, the CCI established a voluntary “dual eligibles demonstration,” also referred to as the “Cal MediConnect” program, to coordinate medical, behavioral health, long-term institutional, and home- and community-based services for dual eligibles through a single health plan, and requires that all Medi-Cal beneficiaries in participating counties join a Medi-Cal managed care health plan to receive their Medi-Cal benefits, including LTSS. The DHCS selected eight counties to participate in the CCI, including Los Angeles and San Diego counties. On April 4, 2012, DHCS selected us to participate in the dual eligibles demonstration for both Los Angeles and San Diego counties. In December 2013, HNCS entered into a three-way agreement with DHCS and CMS, which was subsequently amended on January 13, 2014 (the “Cal MediConnect Contract”). Among other things, under the Cal MediConnect Contract we have received and expect to continue to receive prospective blended capitated payments to provide coverage for dual eligibles in Los Angeles and San Diego Counties.
+
+In January 2014, CMS and DHCS informed us that based on its readiness assessments, we were able to enroll members beginning April 1, 2014, and could begin marketing for the dual eligibles demonstration in accordance with the guidelines and timeframes for Los Angeles and San Diego counties. Active enrollment in Los Angeles and San Diego counties for the dual eligible demonstrations commenced on April 1, 2014, and is scheduled to conclude at the end of 2017. During the active enrollment period, dual eligibles in Los Angeles County are able to either choose among us, the local health plan initiative, or one of three other health plans for benefits under the dual eligibles demonstration. On July 1, 2014, DHCS began automatically enrolling dual eligibles in Los Angeles County who have not selected a health plan, which we refer to as “passive enrollment.” Dual eligibles also may choose to “opt out” of the demonstration at any time. Such dual eligibles will then continue to receive Medicare services through either fee-for-service Medicare or the Medicare Advantage program, but will receive Medi-Cal benefits through a managed care health plan as required under the CCI. During the active enrollment period in San Diego County, dual eligibles are able to select to receive benefits from any one of four health plan options, including us, or “opt out” of the demonstration. Passive enrollment in San Diego County began on May 1, 2014. Based on our understanding of the passive enrollment methodology, we estimate that Health Net will receive approximately 47% and 20–25% of the passively enrolled dual eligibles in Los Angeles County and San Diego County, respectively. As of December 31, 2014, we had 16,426 dual eligibles members.
+
+Health Net’s participation in the CCI, and the dual eligibles demonstration in particular, represents a significant business opportunity for us, but is subject to a number of risks inherent in untested health care initiatives, particularly those that involve new populations with limited cost experience. See “Item 1A. Risk Factors—Our participation in the dual eligibles demonstration portion of the California Coordinated Care Initiative in Los Angeles and San Diego Counties may prove to be unsuccessful for a number of reasons” for a discussion of some of the risks associated with our participation in the CCI.
+
+The managed care services provided by HNCS to enrollees under the Cal MediConnect Contract include medical, prescription drug, LTSS, and behavioral health services. HNCS’s responsibilities under the Cal MediConnect Contract also include providing traditional managed care services, including quality improvement, grievance and appeals, provider network establishment, and utilization management functions. HNCS also performs care coordination, case management services and health risk assessments, and develops individualized care plans for enrollees. We have developed our model for managing LTSS, building on our internal expertise and utilizing expert vendor resources to fulfill certain functions, including the risk stratification and health risk assessment (HRA) services required under the program. We have also developed our provider network for LTSS, including contracting with and training a variety of ancillary providers and capitated provider groups with a demonstrated capability for managing long-term care patients.
+
+Compensation. Under the Cal MediConnect Contract, we are compensated on a capitated, prospective per-member-per-month basis, subject to CMS and DHCS modification of the capitation rates, which are currently based on the historical fee-for-service cost for providing care to dual eligibles. The Cal MediConnect Contract includes a risk adjustment process that adjusts the capitation payment to HNCS based on the health characteristics of the enrollee population, and includes risk corridor provisions that limit our upside financial gains and reduce our downside financial risk. DHCS and CMS also withhold a portion of capitation payments pending and payable upon satisfaction of certain pre-established quality standards. The financial performance of the Cal MediConnect Contract is included in the calculation of the settlement account that was established pursuant to the terms of the Settlement Agreement entered
+
+6
+
+into by DHCS, HNCS and Health Net of California, Inc. on November 2, 2012, which is further discussed above under the heading “—Western Region Operations Segment—Medicaid and Related Products.”
+
+Term and Termination. Assuming that no party elects to terminate or not to renew the Cal MediConnect Contract, the dual eligibles demonstration will continue through December 31, 2017. CMS or DHCS may immediately terminate the Cal MediConnect Contract for various reasons, or may terminate for no reason with 180 days’ prior written notice.
+
+Western Region Exchanges
+
+The ACA required the establishment of state-run or federally facilitated “exchanges” where individuals and small groups may purchase health coverage. California and Oregon received approval by the U.S. Department of Health and Human Services (“HHS”) and began operating state-run exchanges in 2013. HHS operates the exchange in Arizona.
+
+We currently participate as Qualified Health Plans ("QHPs") in the exchanges in California and Arizona. Open enrollment for the coverage year beginning January 1, 2015 began on October 1, 2014 and ended on February 15, 2015. Continued participation in these exchanges and future participation in any other exchanges in the states in which we operate may be conditioned on the approval of the applicable state or federal government regulator, which could result in the exclusion of some carriers from the exchanges. Certain factors to be considered for continued participation in the exchanges may be subject to change. We believe the exchanges represent a significant commercial business opportunity for us, and the growth we experienced through the first open enrollment period demonstrated that our tailored network products are particularly well suited to the exchange environment as demonstrated by the 21% of market share we acquired in the first year of the exchanges with 81% of that concentrated in our tailored network offerings as of December 31, 2014. As of December 31, 2014, we had approximately 269,784 active individual members through the California, Arizona and Oregon exchanges, including 182,962 in our Silver tier HMO product, CommunityCareSM.
+
+We have made and are continuing to make significant efforts to design and implement a cohesive operational and economic strategy with respect to the exchanges and the ACA’s other relevant provisions, including premium stabilization provisions designed to apportion risk amongst insurers. Implementation of the exchanges remains ongoing, as significant portions of the insurance market, including small business groups, are expected to enter the exchanges for the first time in 2015. Moreover, in the second year of the exchanges, we expect that the marketplace will react to the pricing data, information and other feedback that is and becomes available following the completion of the first year of the exchanges. Accordingly, we will need to continue to monitor this market and remain nimble in our strategic approach. This changing framework may alter the economics and structure of our participation in the exchanges, and if we are not able to successfully adapt to any such changes in certain areas of our markets, our financial condition, cash flows and results of operations may be adversely affected. For a discussion of the risks related to the exchanges, and the state and federal government actions impacting the exchanges and the effect on our competitive landscape, see “Item 1A. Risk Factors—Federal health care reform legislation has had and will continue to have an adverse impact on the costs of operating our business and a failure to successfully execute our operational and strategic initiatives with respect thereto could adversely affect our business, cash flows, financial condition and results of operations,” and “—Various health insurance reform proposals are also emerging at the state level, which could have an adverse impact on us.”
+
+In the Arizona individual market we offer HMO products in three counties and PPO plans statewide both through the exchange and off- exchange. We offer HMO and PPO products to small business groups statewide both through the exchange and off-exchange. We currently operate in 13 of 19 exchange rating regions in California in the individual market, and in all 19 California exchange rating regions in the small business health options program (“SHOP”). In Southern California, we offer HMO and HSP products in the individual market that collectively cover all metal tiers and the catastrophic category level and offer PPO and EPO products that collectively cover all metal tiers in the SHOP. Outside of Southern California, we offer EPO products in the individual market that cover all metal tiers and the catastrophic category level and offer PPO and EPO products that collectively cover all metal tiers in the SHOP.
+
+Medicare Products
+
+We provide a wide range of Medicare products, including Medicare Advantage plans with and without prescription drug coverage and Medicare supplement products that supplement traditional fee-for-service Medicare coverage. Our subsidiaries have a number of contracts with the Centers for Medicare & Medicaid Services (“CMS”) under the Medicare Advantage program authorized under Title XVIII of the Social Security Act of 1935, as amended.
+
+Medicare Advantage Products
+
+As of December 31, 2014, we were one of the nation's largest Medicare Advantage contractors based on membership of 274,781 members. We contract with CMS under the Medicare Advantage program to provide Medicare
+
+7
+
+Advantage products directly to Medicare beneficiaries and through employer and union groups. We provide or arrange health care benefits for services normally covered by Medicare, plus a broad range of health care benefits for services not covered by traditional Medicare, usually in exchange for a fixed monthly premium per member from CMS that varies by the county in which the member resides, demographic factors of the member such as age, gender and institutionalized status, and the health status of the member. Any benefits that are not covered by Medicare may result in an additional monthly premium charged to the enrollee or through portions of payments received from CMS that may be allocated to these benefits, according to CMS regulations and guidance. Many of our Medicare Advantage members pay no monthly premium to us for these additional benefits.
+
+Our portfolio of Medicare Advantage plans focuses on simplicity so that members can use benefits with minimal paperwork and receive coverage that starts immediately upon enrollment. We also provide Medicare supplemental coverage to 28,801 members as of December 31, 2014 through either individual Medicare supplement policies or employer group sponsored coverage.
+
+We provide Medicare Advantage plans in select counties in Arizona, California, Oregon and Washington, and provide prescription drug benefits in most of our Medicare Advantage plan offerings. We also provide multiple types of Medicare Advantage Special Needs Plans, including dual eligible Special Needs Plans (designed for low income Medicare beneficiaries) in Arizona and California, chronic condition Special Needs Plans (designed for beneficiaries with congestive heart failure and diabetes) in California, Oregon and Arizona. These plans provide access to additional health care and prescription drug coverage.
+
+CMS developed the Medicare Advantage Star Ratings system to help consumers choose among competing plans, awarding between one and five stars to Medicare Advantage plans based on performance in certain measures of quality. The Star Ratings are used by CMS to award quality bonus payments to Medicare Advantage plans. Beginning with the 2014 Star Rating (calculated in 2013), Medicare Advantage plans were required to achieve a minimum of 4 Stars to qualify for a quality bonus payment in 2015. The methodology and measures included in the Star Ratings system can be modified by CMS annually and Star Ratings thresholds are based on performance of Medicare Advantage plans nationally.
+
+For the 2015 Star rating (calculated in 2014 for the 2016 payment year), our California HMO and Oregon HMO and PPO contracts with CMS were measured at 4.0 Stars, our Arizona HMO contract was measured at 3.5 Stars and our California PPO contract was measured at 3.0 Stars. See "Item 1A. Risk Factors—Medicare programs represent a significant portion of our business and are subject to risk" for additional information on our star ratings.
+
+Indemnity Insurance Products
+
+We offer insured PPO, EPO and indemnity products as “stand-alone” products and as part of multiple option products in various markets. These products are offered by our health and life insurance subsidiaries, which are licensed to sell insurance in 49 states and the District of Columbia. Through these subsidiaries, we also offer auxiliary non-health products such as life, accidental death and dismemberment, dental, vision and behavioral health insurance. Our health and life insurance products are provided throughout most of our service areas.
+
+Other Specialty Services and Products
+
+We offer pharmacy benefits, behavioral health, dental and vision products and services (mostly through strategic relationships with third parties), as well as managed care products related to cost containment for hospitals, health plans and other entities as part of our Western Region Operations segment.
+
+Pharmacy Benefit Management
+
+We provide pharmacy benefit management (“PBM”) services to Health Net members through our subsidiary, Health Net Pharmaceutical Services (“HNPS”). As of December 31, 2014, HNPS provided integrated PBM services to approximately 3.0 million Health Net members who have pharmacy benefits, including approximately 269,000 of our Medicare members and approximately 16,000 of our dual eligibles members.
+
+HNPS manages these benefits in an effort to achieve the highest quality outcomes at the lowest cost for Health Net members. HNPS contracts with national health care providers, vendors, drug manufacturers and pharmacy distribution networks (directly and indirectly through a third party vendor), oversees pharmacy claims and administration, reviews and evaluates new FDA-approved drugs for safety and efficacy and manages data collection efforts to facilitate our health plans' disease management programs. In addition, HNPS provides affiliated health plans various services including development of benefit designs, cost and trend management, sales and marketing support,
+
+8
+
+and management delivery systems. HNPS outsources certain capital and labor-intensive functions of pharmacy benefit management, such as claims processing, mail order services and pharmacy network services.
+
+Behavioral Health
+
+We administer and arrange for behavioral health benefits and services through our subsidiary, Managed Health Network, Inc., and its subsidiaries (collectively “MHN”). MHN offers behavioral health, and substance abuse programs on an insured and self-funded basis to groups in various states, and these programs and services are included as a standard part of most of our commercial health plans. MHN's benefits and services are also sold in conjunction with other commercial and Medicare products and on a stand-alone basis to unaffiliated health plans and employer groups. In addition, MHN administers employee assistance programs (“EAPs”) for groups in several states. Through our EAPs, we assess and refer employees of employer groups to a variety of non-medical services and information designed to improve workplace productivity. MHN also holds contracts with the U.S. Department of State (“State Department”) and the U.S. Agency for International Development (“USAID”) to provide EAP counseling services tailored for State Department and USAID employees and family members while posted overseas. In addition, effective January 1, 2014, we are required to administer certain mental health outpatient benefits to all our Medi-Cal members, including those newly eligible as a result of Medicaid expansion.
+
+MHN's products and services were provided to approximately 7.1 million individuals as of December 31, 2014, with approximately 147,000 individuals under risk-based programs, approximately 2.8 million individuals under self-funded programs and approximately 4.1 million individuals under EAPs, including those who are also covered under other MHN programs. In 2014, MHN's total revenues were $46.6 million. Of that amount, $3.0 million represented revenues from business with MHN affiliates and $43.6 million represented revenues from non-affiliate business. The foregoing excludes results and information related to MHN's administration and monitoring of the non-medical counseling program for the Department of Defense under the DoD sponsored Military Family and Life Counseling (“MFLC”) program formerly Military Family and Life Consultant program, which is reported in our Government Contracts reportable segment. See “—Government Contracts Segment—Other Department of Defense Contracts.”
+
+Dental and Vision
+
+We do not underwrite or administer stand-alone dental or vision products other than the stand-alone dental products that we underwrite in Oregon and Washington. During 2014 our current and prospective group plan members in Arizona and California had the option to elect private label dental products through a strategic relationship with Dental Benefit Providers, Inc. (“DBP”) and private label vision products through a strategic relationship with EyeMed Vision Care LLC (“EyeMed”). Those stand-alone dental products were underwritten and administered by DBP affiliated companies and the stand-alone vision products were underwritten by Fidelity Security Life Insurance Company and administered by EyeMed affiliated companies. DBP also administers dental products and coverage we provide to our members in Oregon and Washington, as well as to Medicaid enrollees in Arizona. Liberty Dental Plans of California, Inc. serves as the underwriter and administrator for the dental services we provide to our Medi-Cal enrollees. Vision Service Plan serves as the underwriter and administrator for the vision services we provide to our Medi-Cal enrollees in California and Medicaid enrollees in Arizona.
+
+Government Contracts Segment
+
+Our Government Contracts segment includes our government-sponsored managed care federal contract with the DoD under the TRICARE program in the North Region and other health care and behavioral health government contracts. On April 1, 2011, we began delivery of administrative services under the Managed Care Support Contract (“T-3 contract”) for the TRICARE North Region. Under the T-3 contract for the TRICARE North Region, we provide various types of administrative services including: provider network management, referral management, medical management, disease management, enrollment, customer service, clinical support service, and claims processing.
+
+Our Government Contracts segment also includes other health care and behavioral health government contracts, and subcontracts that we administer for the DoD, the U.S. Department of Veterans Affairs (“VA”) and certain other federal, state and local government entities. Certain components of these contracts are subcontracted to unrelated third parties.
+
+Amounts receivable under government contracts are comprised primarily of contractually defined billings, accrued contract incentives under the terms of the contract and amounts related to change orders for services not originally specified in the contract. In general, government receivables are estimates and are subject to government audit and negotiation. See “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these
+
+9
+
+programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+TRICARE
+
+Our wholly owned subsidiary, Health Net Federal Services, LLC (“HNFS”), is a Managed Care Support Contractor in the North Region for the DoD TRICARE program. We have been serving the DoD since 1988 under the TRICARE program and its predecessor programs, and we believe we have established a solid history of operating performance in this line of business. We believe there will continue to be further opportunities to serve the DoD and other governmental organizations, such as the VA, in the future.
+
+We began providing services under the T-3 contract on April 1, 2011. The T-3 contract for the North Region covers Connecticut, Delaware, Illinois, Indiana, Kentucky (except Fort Campbell), Maine, Maryland, Massachusetts, Michigan, New Hampshire, New Jersey, New York, North Carolina, Ohio, Pennsylvania, Rhode Island, Vermont, Virginia, West Virginia, Wisconsin and the District of Columbia. In addition, the contract covers portions of the states of Iowa and Missouri.
+
+As a Managed Care Support Contractor for the T-3 contract for the TRICARE North Region, we provide administrative services to approximately 2.8 million Military Health System (“MHS”) eligible beneficiaries. Eligible active duty service members and their families, retired service members and their families, survivors of retired service members, and qualified former spouses are able to choose from a variety of TRICARE program options, including TRICARE Prime, which is similar to a conventional HMO plan. Non-active duty service members can select, on a case-by-case basis, to utilize TRICARE Extra, which is similar to a conventional PPO plan, or TRICARE Standard, which is similar to a conventional indemnity plan.
+
+Under TRICARE Prime, enrollees pay an enrollment fee (which is zero for active duty service members and their families) and select a primary care physician from our contracted provider network. The primary care physicians are responsible for making referrals to specialists and hospitals. Active duty service members and their families enrolled in TRICARE Prime have no copayments. However, all other TRICARE Prime enrollees are subject to copayments for medical services. TRICARE Prime enrollees may opt, on a case-by-case basis, for a Point-of-Service option in which they are allowed to self-refer to a network or non-network provider, but incur a deductible and a cost-share. The Point of Service option is not available for active duty service members.
+
+Under TRICARE Extra, eligible beneficiaries receive services from a TRICARE network provider but incur a deductible and cost-share that may be greater than the TRICARE Prime copayment. Beneficiaries utilizing TRICARE Extra realize a five percent cost-share savings over TRICARE Standard. Under TRICARE Standard, eligible beneficiaries receive services from a TRICARE authorized provider, either participating or non-participating, but incur a deductible and higher cost-share than under TRICARE Prime or TRICARE Extra. In addition, TRICARE offers premium-based health plans for eligible beneficiaries. Qualified Selected Reserve members may purchase TRICARE Reserve Select (“TRS”), which is a TRICARE Standard benefit. TRS members have the same costs as active duty family members. Qualified retired Reserve members may purchase TRICARE Retired Reserve (“TRR”), also a TRICARE Standard benefit. TRR members have the same costs as retired service members. TRICARE Young Adult (“TYA”) is available for purchase by eligible young adults under age 26. TRICARE currently offers a TYA Standard plan and a TYA Prime plan.
+
+The T-3 contract has five one-year option periods. We are currently in option period 5, which commenced on April 1, 2014 and is scheduled to end on March 31, 2015. In June 2014, at the request of the DoD, we submitted a proposal to add three additional one-year option periods to the T-3 contract. We currently expect negotiations relating to this proposal to conclude on or prior to March 31, 2015. If the negotiations conclude as expected, we expect the DoD to exercise the first of the three one-year options by that date. If all three one-year option periods are ultimately exercised, the T-3 contract would conclude on March 31, 2018. The DoD intends to re-procure managed care support services for the TRICARE program for the period beginning in 2017, and, to that end, released a draft Request for Proposals on November 3, 2014. The T-3 contract services are currently structured as cost reimbursement arrangements for health care costs plus administrative fees received in the form of fixed prices, fixed unit prices, and contingent fees and payments based on various incentives and penalties.
+
+For additional information regarding our previous TRICARE contract for the North Region and the T-3 contract for the North Region, see “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations” and “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+10
+
+Military Family and Life Counseling Program.
+
+Our wholly owned subsidiary, MHN Government Services, is party to a MFLC contract that was awarded by the Department of Defense to implement, administer and monitor the non-medical counseling MFLC program. The contract was initially awarded in August of 2012 and is a second-generation contract under the MFLC program. The contract has a five-year term that includes a 12-month base period and four 12-month option periods. The DoD has exercised the first and second option periods under the contract, and the second option period is scheduled to end on August 14, 2015. For the year ended December 31, 2014, revenues from the MFLC contract were $119.7 million. For additional information on the risks associated with our MFLC contract, see “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+Patient Centered Community Care Program
+
+In September 2013, VA awarded HNFS a contract under its new Patient Centered Community Care (“PC3”) program. The PC3 program provides eligible veterans coordinated, timely access to care through a comprehensive network of non-VA providers who meet VA quality standards when a local VA medical center cannot readily provide the care. We support VA in providing care to veterans in three of the six PC3 program regions. These three regions, Regions 1, 2 and 4, encompass all or portions of 37 states, the District of Columbia, Puerto Rico and the Virgin Islands. The PC3 contract term includes a base period of performance through September 30, 2014 and four one-year option periods that may be exercised by VA. On September 23, 2014, VA exercised option period 1 which commenced on October 1, 2014 and is scheduled to end on September 30, 2015. In addition to the one-year option periods, VA has the ability to extend the PC3 program contract an additional two years and six months based on VA's need.
+
+In August 2014, VA expanded our PC3 contract to include primary care services for veterans who are unable to obtain primary care at a VA medical center in the three PC3 regions in which we operate. In addition, in November 2014, we modified our PC3 contract to further expand our services with VA in support of the Veterans Access, Choice and Accountability Act of 2014 (“VACAA”). VACAA allows eligible veterans who live more than 40 miles from a VA facility or are unable to get a VA appointment within 30 days of their preferred date, or within 30 days of the date determined medically necessary by their physician, to obtain approved care in their community instead. The VACAA modification to our PC3 contract (the "VACAA modification") expires no later than September 30, 2017. The VACAA modification includes, among other things, the production and distribution of the new Veterans Choice Card, which allows veterans to elect to receive care outside of VA when they qualify. As a result, approximately 5 million veterans have been provided with a Veterans Choice Card. Moreover, in connection with the VACAA modification, we operate a call center to assist veterans in determining their eligibility to use the card, and to help educate them on the VACAA. We also assist eligible veterans in obtaining an appointment with a community provider meeting VACAA requirements. We provide these services in the three PC3 regions in which we operate.
+
+For the year ended December 31, 2014, revenues from the PC3 contract were approximately $24.7 million. For additional information on the risks associated with our PC3 contract, see “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+Divested Operations and Services Segment
+
+Prior to the first quarter of 2012, our Divested Operations and Services reportable segment included the operations of our businesses that provided administrative services to UnitedHealth Group and its affiliates in connection with the Northeast Sale, which was completed on December 11, 2009. For information about the Northeast Sale, see Note 3 to our consolidated financial statements included as part of this Annual Report on Form 10-K (our "consolidated financial statements").
+
+Due to the sale of our Medicare stand-alone prescription drug plan business on April 1, 2012, starting with the first quarter of 2012, Divested Operations and Services reportable segment included transition-related revenues and expenses related to the sale of our Medicare PDP business to an affiliate of CVS Caremark.
+
+As of December 31, 2012, we had substantially completed the administration and run-out of both of our divested businesses.
+
+11
+
+Provider Relationships
+
+The following table sets forth the number of primary care physicians, specialist physicians and other health professionals contracted either directly with our HMOs or through our contracted participating physician groups (“PPGs”) as of December 31, 2014. We have a number of physicians and other health professionals who are contracted providers for both HMOs and PPOs in our Western Region Operations, as follows:
+
+Primary Care Physicians (includes both HMO and PPO physicians)
+
+27,207
+
+Specialist Physicians (includes both HMO and PPO physicians)
+
+61,882
+
+Health Professionals - Other (includes both HMO and PPO)
+
+35,029
+
+Total
+
+124,118
+
+Under our California HMO, EPO, HSP and POS plans, all members are required to select, or otherwise will be assigned to, a PPG and generally also a primary care physician from within the PPG. In our other plans, including all of our plans outside of California, members may be required to select a primary care physician from the broader HMO network panel of primary care physicians. The primary care physicians and PPGs assume overall responsibility for the care of members. Medical care provided directly by such physicians includes the treatment of illnesses not requiring referral, and may include physical examinations, routine immunizations, maternity and childcare, and other preventive health services. The primary care physicians and PPGs are responsible for making referrals (approved by the HMO's or PPG's medical director as required under the terms of our various plans and PPG contracts) to specialists and hospitals. Additionally, our tailored network products utilize a network that is smaller than our broader HMO network but contains a comprehensive array of physicians, specialists, hospitals and ancillary providers. Certain of our HMOs offer enrollees “open access” plans under which members are not required to secure prior authorization for access to network physicians in certain specialty areas, or “open panels” under which members may access any physician in the network, or network physicians in certain specialties, without first consulting their primary care physician.
+
+PPG and physician contracts generally are for a period of at least one year and are automatically renewable unless terminated, with certain requirements for maintenance of good professional standing and compliance with our quality, utilization and administrative procedures. In California, PPGs generally receive a monthly capitation payment for every member assigned to it. The capitation payment represents payment in full for all medical and ancillary services specified in the provider agreements. For these capitation payment arrangements, in cases where the capitated PPG cannot provide the health care services needed, such PPGs generally contract with specialists and other ancillary service providers to furnish the requisite services under capitation agreements or negotiated fee schedules with specialists. Outside of California, most of our HMOs reimburse physicians according to a discounted fee-for-service schedule, although several have capitation arrangements with certain providers and provider groups in their market areas. A provider group's financial instability or failure to pay secondary providers for services rendered could lead secondary providers to demand payment from us, even though we have made our regular capitated payments to the provider group. Depending on state law and the regulatory environment, it may be necessary for us to pay such claims.
+
+In our PPO plans, members are not required to select a primary care physician and generally do not require prior authorization for specialty care. For services provided under our PPO products and the out-of-network benefits of our POS products, we ordinarily reimburse physicians pursuant to discounted fee-for-service arrangements.
+
+HNFS maintains a network of qualified physicians, facilities, and ancillary providers in the prime service areas of our T-3 contract for the TRICARE North Region. Services are provided on a fee-for-service basis. As of December 31, 2014, HNFS had 223,222 physicians, 3,862 facilities and 20,693 ancillary providers in its TRICARE network. HNFS also maintains a provider network comprised of approximately 49,270 providers in Regions 1, 2, and 4 in support of VA’s PC3 program.
+
+Our behavioral health subsidiary, MHN, maintains a provider network comprised of approximately 58,811 psychiatrists, psychologists and other clinical categories of providers nationwide. Substantially all of these providers are contracted with MHN on an individual or small practice group basis and are paid on a discounted fee-for-service basis. Members who wish to access certain behavioral health services contact MHN and are referred to contracted providers for evaluation or treatment services. If a member needs inpatient services, MHN maintains a network of approximately 1,384 facilities.
+
+In addition to the physicians that are in our networks, we have also entered into agreements with various third parties that have networks of physicians contracted to them (“Third Party Networks”). In general, under a Third Party Network arrangement, Health Net is licensed by the third party to access its network providers and pay the claims of these physicians pursuant to the pricing terms of their contracts with the Third Party Network.
+
+12
+
+Hospital Relationships
+
+Our health plan subsidiaries arrange for hospital care primarily through contracts with selected hospitals in their service areas. These hospital contracts generally have multi-year terms or annual terms with automatic renewals and provide for payments on a variety of bases, including capitation, per diem rates, case rates and discounted fee-for-service schedules.
+
+Covered hospital-based care for our members is comprehensive. It includes the services of hospital-based physicians, nurses and other hospital personnel, room and board, intensive care, laboratory and x-ray services, diagnostic imaging and generally all other services normally provided by acute-care hospitals. Our nurses and medical directors are involved in a wide variety of medical management activities on behalf of our HMO and, to a somewhat lesser extent, PPO members. These activities can include discharge planning and case management, which often involves the coordination of community support services, including visiting nurses, physical therapy, durable medical equipment and home intravenous therapy.
+
+Ancillary and Other Provider Relationships
+
+Our health plan subsidiaries arrange for ancillary and other provider services, such as ambulance, laboratory, radiology, home health, chiropractic, acupuncture and other various therapy providers primarily through contracts with selected providers in their service areas. These contracts generally have multi-year terms or annual terms with automatic renewals and provide for payments on a variety of bases, including capitation, per diem rates, case rates and discounted fee-for-service schedules. In certain cases, these provider services are included in contracts our health plan subsidiaries have with PPGs and hospitals.
+
+See “Item 1A. Risk Factors—If we fail to develop and maintain satisfactory relationships on competitive terms with the hospitals, provider groups and other providers that provide services to our members, our profitability could be adversely affected” for additional information on the risks associated with our provider relationships.
+
+Additional Information Concerning Our Business
+
+Competition
+
+We operate in a highly competitive environment in an industry currently subject to ongoing significant changes resulting from the ACA, business consolidations, new strategic alliances, market pressures, and regulatory and legislative reform including but not limited to the federal health care reform legislation described below in “—Government Regulation”. Our primary competitors include managed health care companies, insurance companies, HMOs, third party administrators, self-funded groups and provider owned plans. Our health plans face substantial competition from both for-profit and nonprofit health plans that offer HMO, PPO, self-funded and traditional indemnity insurance products (including self-insured employers and union trust funds). We also face substantial competition from both for-profit and nonprofit health plans, as well as other non-health plan companies with respect to our contracts with state and federal government agencies, including our T-3, MFLC and PC3 contracts with the federal government, as well as our Medicaid and dual eligibles contracts, each of which may be subject to periodic re-competition. Some of our competitors have substantially larger enrollment and greater financial resources than we do. We believe that the principal competitive features affecting our ability to retain and increase membership include the range and prices of benefit plans offered, size and quality of provider network, quality of service, responsiveness to customer demands, financial stability, comprehensiveness of coverage, diversity of product offerings, market presence and reputation. The relative importance of each of these factors and the identity of our key competitors varies by market and product. We believe that we compete effectively against other health care industry participants.
+
+Our primary commercial and Medicare competitors in California are Kaiser Permanente, Anthem Blue Cross of California, Blue Shield of California, and United/PacifiCare. Together, these four plans and Health Net account for approximately 82% of the insured commercial and Medicare market in California. Based on the number of 2014 enrollees, Kaiser is the largest managed health care company in California and Anthem Blue Cross of California is the largest PPO provider in California. In addition, two of the major national managed care companies, Aetna, Inc. and CIGNA Corp., are active in California, with a significant share of the self-insured market.
+
+In Arizona, our primary commercial and Medicare competitors are BlueCross BlueShield of Arizona, Aetna, Inc., Cigna Corp., UnitedHealth Group, Inc., Anthem, Inc. and Humana, Inc.
+
+In the California and Arizona Medicaid markets, we compete for members with other entities that have been awarded Medicaid contracts in the same counties, and if an applicable Medicaid county or region is put up for bid, we
+
+13
+
+generally compete for state Medicaid contracts with other managed health care companies, both for profit and not-for-profit.
+
+Our Oregon health plan competes primarily with Regence Blue Cross Blue Shield of Oregon, Kaiser Permanente, Moda Health Plan, Inc., Providence Health Plan, and PacificSource Health Plans.
+
+With respect to the T-3 contract for the TRICARE North Region, and our MFLC and PC3 contracts, our primary competitors in the bidding process include Humana, United HealthGroup, Inc., Aetna, Inc., Anthem, Inc., Magellan Health Services, ValueOptions, Inc. and TriWest Healthcare Alliance, among others.
+
+If we fail to compete effectively to maintain or increase our market share, our results of operations, financial condition and cash flows could be materially adversely affected. For additional information on competitive conditions in our business, see “Item 1A. Risk Factors—The markets in which we do business are highly competitive. If we do not design and price our product offerings competitively, our membership and profitability could decline.”
+
+Cognizant Transaction
+
+On November 2, 2014, we entered into a Master Services Agreement (as subsequently amended and restated, the "Master Services Agreement") with Cognizant Healthcare Services, LLC, a wholly owned subsidiary of Cognizant Technology Solutions Corporation (collectively, "Cognizant"). Under the terms of the Master Services Agreement, Cognizant will, among other things, provide us with certain consulting, technology and administrative services in the following areas: claims management, membership and benefits configuration, customer contact center services, information technology, quality assurance, appeals and grievance services, and non-clinical medical management support (collectively, the "BP and IT Services"). We will retain responsibility for our security policies and regulatory oversight.
+
+Concurrent with executing the Master Services Agreement, we entered into an asset purchase agreement with Cognizant (the "Asset Purchase Agreement"), through which Cognizant will purchase certain software assets and related intellectual property from us for $50 million. These assets will include one of our claims processing systems, which will be used to perform a portion of the BP and IT Services. See Note 3 to our consolidated financial statements under the heading “Assets Held for Sale” for additional information on the assets sold in this transaction.
+
+The transaction, including the related asset purchase (the "Cognizant Transaction"), is expected to close in the first half of 2015, subject to the receipt of required regulatory approvals. We expect that certain of our employees will become employees of Cognizant or its subcontractors, and that certain positions will be eliminated, as part of the Cognizant Transaction.
+
+The initial term of the Master Services Agreement is seven years, commencing on the later of (i) ten business days following final regulatory approval of the Cognizant Transaction, and (ii) March 1, 2015 (the "Commencement Date"). We have two options to extend the Master Services Agreement for one year each by giving notice to Cognizant no less than three months prior to the end of the then existing term.
+
+We will pay Cognizant for the BP and IT Services through a combination of fixed and variable fees, with the variable fees fluctuating based on our actual need for such services. Based on the currently projected usage of BP and IT Services over the initial term of the Master Services Agreement, we expect to pay Cognizant approximately $2.8 billion, subject to price adjustments described in the Master Services Agreement. The Master Services Agreement is expected to generate approximately $150 million to $200 million in annual general and administrative and depreciation expense savings for us by 2017.
+
+Some of the BP and IT Services will be provided on our premises, while other BP and IT Services will be performed at Cognizant facilities. Cognizant will provide us with transition services required to migrate those activities that will be performed at Cognizant facilities. The anticipated cost of such transition services is included in the expected cost of the BP and IT Services over the initial term described above.
+
+To protect our expectations regarding Cognizant’s performance, the Master Services Agreement has minimum service levels that Cognizant must meet or exceed. Failure to meet these minimum service levels will result in service level credits to us as described in the Master Services Agreement.
+
+We retain the right to terminate the Master Services Agreement, in whole or in part, for, among other things, cause, convenience (including prior to the Commencement Date), certain performance failures, failure to obtain regulatory approvals, changes in law, force majeure, a change in the control of either Cognizant or us, a termination of the associated Business Associate Agreement, an adverse change in Cognizant’s financial condition, if Cognizant becomes a competitor of ours or if damages paid by Cognizant to us pursuant to the Master Services Agreement exceed a certain level. If we terminate the Master Services Agreement prior to the Commencement Date, we shall pay
+
+14
+
+Cognizant a break-up fee of $10 million. If we terminate the Master Service Agreement following the Commencement Date for reasons other than cause, a termination of the associated Business Associate Agreement, a change in the control of Cognizant or Cognizant becoming a competitor of ours, we shall pay Cognizant termination fees calculated on a sliding scale that reduces over time and based on the applicable termination event, and such fees could be material. For example, the maximum termination fee payable by us pursuant to the Master Services Agreement is $300 million, which would be triggered in the event we terminated for convenience during the first year of the term of the Master Services Agreement. In addition, in the event we experience a change in control during the first year of the term of the Master Services Agreement, the maximum termination fee payable is $130 million, assuming that we (or our successor) elect to terminate the Master Services Agreement.
+
+We also retain the right to obtain disengagement assistance from Cognizant to facilitate the transition of BP and IT Services from Cognizant, regardless of whether the Master Services Agreement expires or is terminated. We will pay for the disengagement assistance through a combination of pre-determined charges and hourly fees for services for which there is no pre-determined charge. In addition, in the event of termination or expiration of the Master Services Agreement, we also retain the right to license at fair market value the software platform utilized by Cognizant in the performance of the BP and IT Services.
+
+Cognizant has in the past provided, and may provide in the future, services to us under separate agreements. Some of these historical services are included in the BP and IT Services that will be provided by Cognizant under the Master Services Agreement.
+
+The Cognizant Transaction is subject to certain risks and uncertainties, including with respect to the receipt of required regulatory approvals, which are discussed in further detail in "Item 1A. Risk Factors."Marketing and Sales
+
+We market our products and services to individuals and employer groups through internal sales staff, independent brokers, agents and consultants and through the Internet and the new ACA-mandated exchanges. For our group health business, we market our products and services utilizing a three-step process. We first market to potential employer groups, group insurance brokers and consultants. We then provide information directly to employees once the employer has selected our health coverage. Finally, we engage members and employers in marketing for member and group retention. For our large group business, in general, we solicit enrollees from the employee base directly during “open enrollment” periods when employees are permitted to change health care programs. We use a variety of techniques to attract new enrollees and retain existing members, which at times include, without limitation, direct mail, work day and health fair presentations and telemarketing. Similar methods are used by our Medicare business to market to eligible individuals. Our sales efforts are supported by our marketing division, which engages in product research and development, multicultural marketing, advertising and communications, and member education and retention programs. Several states in which we operate, including California and Arizona, have launched health insurance exchanges in response to the ACA. The establishment of the exchanges under the ACA created a new competitive insurance marketplace for individuals and small businesses. As these exchanges mature, we intend to refine and enhance our exchange related marketing strategies.
+
+Premiums for each employer group are generally contracted on a yearly basis and are payable monthly. We consider numerous factors in setting our monthly premiums, including changes in benefit design to address employer group needs and anticipated health care utilization rates as forecast by us based on the demographic composition of, and our prior experience in, our service areas. Premiums are also affected by applicable state and federal law and regulations that may directly or indirectly affect premium setting including, for example, premium loads for ACA-related taxes and fees assessed to health plans. Also, for policy years beginning January 1, 2014 and beyond, the ACA does not allow rating based on claims experience for small group and individual business. See “Item 1A. Risk Factors—We face competitive and regulatory pressure to contain premium prices. If the premiums we charge are insufficient to cover our health care costs, it could have a material adverse effect on our business, financial condition or results of operations” for additional information on regulations and legislation impacting our premium setting. Mandated benefits (requiring the coverage of certain benefits as a matter of law, whether desired by the group or not) also impact premiums. For example, in California and elsewhere, the ACA has impacted the scope of “essential health benefits” that health plans are required to offer, and mental health parity laws have generally broadened mental health benefits under health insurance policies offered by us and other carriers.
+
+The ACA eliminated medical underwriting for medical insurance coverage decisions, including with respect to preexisting conditions (known as “guaranteed issue”). For additional detail on these and other requirements of the ACA, as well as certain associated risks, see “—Government Regulation—Health Care Reform Legislation and Implementation” and “Item 1A. Risk Factors—Federal health care reform legislation has had and will continue to have an adverse impact on the costs of operating our business and a failure to successfully execute our operational and
+
+15
+
+strategic initiatives with respect thereto could adversely affect our business, cash flows, financial condition and results of operations.”
+
+Information Technology
+
+Our business depends significantly on effective and efficient information systems. The information gathered and processed by our information management systems assists us in, among other things, pricing our services, monitoring utilization and other cost factors, processing provider claims, billing our customers on a timely basis, identifying accounts for collection and detecting fraud, security threats and other risks. Our customers and providers also depend upon our information systems for membership verification, claims status and other information. We have many different information systems that support our various lines of business and we develop new systems as needed to keep pace with continuing changes in technology and to support our operational needs, including potential business expansions. These systems require the ongoing commitment of significant resources for continual maintenance, upgrading and enhancement to meet our operational needs, evolving industry and regulatory standards, compliance with legal requirements (such as the ACA and ICD-10 (as defined below) and changing customer preferences).
+
+We have partnered with third parties to support our information technology systems and to help design, build, test, implement and maintain our information management systems, and in November 2014 we announced the Cognizant Transaction, which would significantly increase the scope of services provided to us by third parties, subject to regulatory approval of the transaction. For additional information on the Cognizant transaction, see "—Cognizant Transaction" and “Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations.” Our merger, acquisition and divestiture activity also requires transitions to or from, and the integration of, various information management systems within our overall enterprise architecture.
+
+CMS recently adopted a new coding set for diagnoses, commonly referred to as ICD-10, which significantly expanded the number of codes utilized in claims processing. TheICD-10 coding set is currently required to be implemented by October 2015. We incurred significant expenses in 2014 to implement and support the ICD-10 coding set, and expect to incur incremental costs ahead of the required implementation date. In addition, our implementation and support of the requirements of the ACA and the CCI, including the dual eligibles demonstration, have required, and will continue to require the expenditure of significant resources as we continue to adapt to the changing guidance.
+
+For additional information on our information technology and associated risks, see “Item 1A. Risk Factors—We are subject to a number of risks in connection with our decision to enter into a master services agreement with Cognizant for the performance of a significant portion of our business process and information technology activities,” Item 1A. Risk Factors—If we fail to effectively maintain our information management systems, it could adversely affect our business,” “Item 1A. Risk Factors—We are subject to risks associated with outsourcing services and functions to third parties” and “Item 1A. Risk Factors—If we or our business associates that handle certain information on our behalf fail to comply with requirements relating to patient privacy and information security, among other things, our reputation and business operations could be materially adversely affected.”
+
+Medical Management
+
+We believe that managing health care costs is an essential function for a managed care company. Among the medical management techniques we utilize to contain the growth of health care costs are pre-authorization or certification for certain outpatient services and inpatient hospitalizations and a concurrent review of active inpatient hospital stays and discharge planning. We believe that this authorization process, along with the inherent features of a capitation payment model, helps to reduce inappropriate use of medical resources and achieve efficiencies in referring cases to the most appropriate providers. We provide multiple models of care management and case management to our members, and also contract with third parties to manage certain conditions such as neonatal intensive care unit admissions and stays, as well as chronic conditions such as asthma, diabetes, chronic obstructive pulmonary disease, coronary artery disease and congestive heart failure. These techniques are widely used in the managed care industry and are accepted practices in the medical profession.
+
+Accreditation
+
+We pursue accreditation for certain of our health plans from the National Committee for Quality Assurance (“NCQA”) and URAC. NCQA and URAC are independent, non-profit organizations that review and accredit HMOs and other health care organizations. HMOs that apply for accreditation of particular product lines receive accreditation if they comply with review requirements and quality standards. The Medicare line of business of our California HMO has received NCQA accreditation with a score of “commendable.” HN California's commercial HMO/POS, HNL's PPO and our Arizona HMO's commercial lines of business and HN California’s Medi-Cal line of business received NCQA
+
+16
+
+accreditation with a score of “accredited.” Our MHN subsidiary has received a URAC accreditation status of “full” for both Health Utilization Management and Health Network, which is the highest status awarded by URAC.
+
+Government Regulation
+
+Our business is subject to comprehensive federal regulation and state regulation in the jurisdictions in which we do business. These laws and regulations govern how we conduct our businesses and result in additional requirements, restrictions and costs to us. Certain of these laws and regulations are discussed below.
+
+New laws and regulations, or changes in the interpretation of existing laws and regulations, including as a result of changes in the political climate, could have an adverse effect on us. In the event we fail to comply with, or fail to respond quickly and appropriately to changes in, applicable law and regulations, our business, results of operations, financial condition and cash flows could be materially and adversely affected. For additional information, see “Item 1A. Risk Factors—Our businesses are subject to laws and significant rules and regulations, which increases our cost of doing business and could impact our financial performance by restricting our ability to conduct business or adversely affecting our ability to grow our businesses” and “Item 1A. Risk Factors—Federal and state audits, reviews and investigations of us and our subsidiaries could have a material adverse effect on our operations, financial condition and cash flows.”
+
+Health Care Reform Legislation and Implementation
+
+The ACA transformed the U.S. health care system through a series of complex initiatives. While we have experienced significant growth in our revenues and membership in certain products as a result of the ACA, the measures initiated by the ACA and the associated preparation and implementation of these measures have had, and will continue to have an adverse impact on our revenues and the costs of operating our business and could materially adversely affect our business, cash flows, financial condition and results of operations. Due in part to the scope and complexity of these initiatives, as well as their ongoing implementation, the ultimate impact of the ACA on us remains difficult to predict.
+
+•
+
+The ACA imposes significant fees, assessments and taxes on us and other health insurers, health plans and industry participants. Among others, the ACA imposes a significant non-deductible tax (technically called a “fee”) on health insurers, effective for calendar years beginning after December 31, 2013. In 2014, this “health insurer fee” was assessed at a total of $8 billion nationwide. In 2015, it is expected to be assessed at a total of $11.3 billion nationwide in 2015 and will increase annually thereafter. The health insurer fee will be allocated pro rata amongst industry participants based on a ratio of net health insurance premiums written for the previous calendar year to total net premiums written for the U.S. health insurance industry, subject to certain exceptions and adjustments. In September 2014, we paid the federal government a lump sum of $141.4 million for our portion of the health insurer fee.
+
+•
+
+The ACA also required the establishment of state-run or federally facilitated “exchanges” where individuals and small groups may purchase health coverage. We are participating as QHPs in the currently operating exchanges in California and Arizona. For further information on these exchanges, see the discussion above under the heading “—Segment Information—Western Region Operations Segment—Western Region Exchanges.”
+
+•
+
+The ACA also contains premium stabilization provisions designed to apportion risk amongst insurers. These stabilization provisions include a permanent risk adjustment provision applicable to the individual and small group markets that became effective at the beginning of 2014, which will effectively transfer funds from health plans with relatively lower risk enrollees to plans with relatively higher risk enrollees to help protect against the consequences of adverse selection. Other premium stabilization provisions include the temporary reinsurance and risk corridors programs, which seek to ease the transition into the post-ACA market by helping to stabilize rates and protect against rate uncertainty in the initial years of the ACA. To adapt to this economic framework, we have dedicated significant resources and incurred significant general and administrative costs to implement numerous strategic and operational initiatives both within and outside the exchanges that, among other things, have required us to focus on and manage different populations of potential members than we have in the past. The final determination and settlement of amounts due or payable from these premium stabilization provisions will not occur until 2015, and there is no assurance that the strategy we have executed will be successful or that the investments we have made to incorporate these provisions will be profitable.
+
+•
+
+The ACA allowed extended funds to those states that opted to expand Medicaid eligibility from a pool that included residents with incomes up to 100% of the federal poverty level (“FPL”) to an expanded pool of
+
+17
+
+residents with incomes up to 133% of the FPL. Medicaid expansion has driven a significant increase in our Medicaid enrollment in 2014. For additional discussion of Medicaid expansion and our Medicaid program, see the discussion above under the heading “—Segment Information—Western Region Operations Segment—Medicaid and Related Products.”
+
+For further information on certain of the provisions above and how they have impacted our operations in 2014, see Note 2 to our consolidated financial statements under the heading “Accounting for Certain Provisions of the ACA” and “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Western Region Operations Reportable Segment.”
+
+Other provisions of the ACA include, among other things:
+
+•
+
+imposing an excise tax on high premium insurance policies;
+
+•
+
+requiring premium rate reviews in certain lines of business;
+
+•
+
+stipulating a minimum medical loss ratio (as adopted by the Secretary of HHS);
+
+•
+
+limiting Medicare Advantage payment rates;
+
+•
+
+increasing mandated “essential health benefits” in some lines of business;
+
+•
+
+specifying certain actuarial value and cost-sharing requirements;
+
+•
+
+eliminating medical underwriting for medical insurance coverage decisions, including “guaranteed availability” with respect to individual and group coverage;
+
+•
+
+limiting the ability of health plans to vary premiums based on assessments of underlying risk in the individual and small group markets;
+
+•
+
+increasing restrictions on rescinding coverage;
+
+•
+
+prohibiting some annual and all lifetime limits on amounts paid on behalf of or to our members;
+
+•
+
+limiting the tax-deductible amount of compensation paid to health insurance executives;
+
+•
+
+requiring that most individuals obtain health care coverage or pay a penalty, commonly referred to as the “individual mandate”;
+
+•
+
+imposing a sales tax on medical device manufacturers; and
+
+•
+
+increasing fees on pharmaceutical manufacturers.
+
+The schedule for implementation of the provisions of the ACA generally varies from as early as enactment to as late as 2018. A number of potentially significant provisions of the ACA became effective January 1, 2014, including the health insurer fee, the operation of QHPs purchased through the exchanges, the premium stabilization provisions described above, the guaranteed availability requirement, Medicaid expansion and the individual mandate. Other provisions, such as the excise tax on certain high-premium insurance policies, and the employer mandate for certain small- and mid-size employers, will not take effect until a later date. However, some of these provisions have had an earlier impact on our operations, including in connection with the setting of our premium rates and general and administrative expenses incurred in preparation for the ACA as discussed above.
+
+Certain legal and legislative challenges to the ACA remain including, but not limited to litigation in Arizona related to Medicaid expansion and a challenge to the validity of premium tax credits on federally-facilitated exchanges that is currently scheduled to be heard in the U.S. Supreme Court.
+
+We and other health insurance companies face uncertainty and execution risk due to the multiple, complex ACA implementations that are required in abbreviated time frames in new markets. Additionally, in many cases, our operational and strategic initiatives must be implemented in evolving regulatory environments and without the benefit of established market data. In addition, the lack of operating experience in these new marketplaces for insurers and, in certain cases, providers and consumers, increases the likelihood of a dynamic marketplace that may require us to adjust our operating and strategic initiatives over time, and there is no assurance that insurers, including us, will be able to do so successfully. Our execution risk encapsulates, among other things, our simultaneous participation in the exchanges, Medicaid expansion and the CCI, as described under the heading “—Segment Information—Western Region Operations—California Coordinated Care Initiative” above. These initiatives require us to effectively incorporate new and expanded populations and, among other things, required us to effectively and efficiently restructure our provider network to, among other things, meet the ACA’s dynamic environment. Any delay or failure by us to execute our operational and strategic initiatives with respect to health care reform or otherwise appropriately react to the legislation, implementing regulations, actions of our competitors and the changing marketplace could result in operational
+
+18
+
+disruptions, disputes with our providers or members, increased exposure to litigation, regulatory issues, damage to our existing or potential member relationships or other adverse consequences.
+
+Due to the magnitude, scope, complexity and remaining uncertainties of the ACA, including the continuing modification and interpretation of the ACA rules and the operational risks involved with simultaneous implementation of multiple initiatives in new markets without established market data, we cannot predict the ultimate impact on our business of future regulations and laws, including state laws, implementing the ACA. Depending in part on its ultimate requirements, the ACA could have a material adverse effect on our business, financial condition, cash flows and results of operations.
+
+For additional discussions of risks and uncertainties related to the ACA, see "Item 1A. Risk Factors."
+
+Other Federal Laws and Regulation
+
+Medicare Legislation and Regulation. Comprehensive legislation, specifically Title XVIII of the Social Security Act of 1935, as amended, governs our Medicare program. In addition, our Medicare contracts are subject to regulation by CMS. CMS has the right to audit Medicare contractors and the health care providers and administrative contractors who provide certain services on their behalf to determine the quality of care being rendered and the degree of compliance with CMS' contracts and regulations.
+
+See “—Segment Information—Western Region Operations—Medicare Products” for more information on our Medicare business and see “Item 1A. Risk Factors—Federal and state audits, reviews and investigations of us and our subsidiaries could have a material adverse effect on our operations, financial condition and cash flows” for a description of certain regulatory risks associated with our Medicare business.
+
+Medicaid and Related Legislation. Federal law has also implemented other health programs that are partially funded by the federal government, such as the Medicaid program (known as Medi-Cal in California). Our Medicaid programs are regulated and administered in California by the DHCS and in Arizona by AHCCCS. Federal funding remains critical to the viability of these programs. Federal law permits the federal government to oversee and, in some cases, to enact, regulations and other requirements that must be followed by states with respect to these programs. Medicaid is administered at the federal level by CMS. The dual eligibles demonstrations under the CCI are regulated and administered in Los Angeles and San Diego counties by CMS and DHCS.
+
+See the discussion above under the heading “—Western Region Operations Segment—Medicaid Expansion and Recent State Legislation,” "—Western Region Operations Segment—California Coordinated Care Initiative," and “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+Privacy Regulations. State, federal, and local laws and regulations govern the privacy and security of Protected Health Information (“PHI”), Personal Information (“PI”), and other categories of legally protected data that our businesses handle. Such laws and regulations include, but are not limited to: the Health Insurance Portability and Accountability Act (“HIPAA”) and the Health Information Technology for Economic and Clinical Health Act of 2009 (“HITECH Act”) along with implementing regulations for both (collectively, “HIPAA Rules”); the Federal Trade Commission Act; the privacy provisions in the federal Gramm-Leach-Bliley Financial Modernization Act of 1999 (the “Gramm-Leach-Bliley Act”); state privacy and security laws such as the California Confidentiality of Medical Information Act, the California Online Privacy Protection Act, and state laws that specifically regulate the use and disclosure of social security numbers; and state breach notification laws that require providing notification in the event of a breach of PI (such as Cal. Code § 1798.82). Privacy and security laws and regulations often change due to new or amended legislation, regulations or administrative interpretation. A variety of state and federal regulators enforce these laws, including but not limited to HHS, the Federal Trade Commission, state attorneys general, and other state regulators.
+
+The HIPAA Rules impose privacy and security obligations regarding PHI on Covered Entities (which refers to certain health plans, health care clearinghouses and providers) including but not limited to:
+
+•
+
+complying with various requirements and restrictions related to the use, storage and disclosure of PHI,
+
+•
+
+implementing internal policies and procedures to maintain the privacy and security of PHI,
+
+19
+
+•
+
+entering into written agreements with those entities that provide services to or on behalf of a Covered Entity and use, disclose, transmit, or maintain PHI in connection with these services (known as “Business Associates”), and
+
+•
+
+notifying individuals and regulatory authorities (and in some cases, the media) if PHI is compromised.
+
+These regulations also establish significant criminal penalties and civil sanctions for non-compliance. These requirements have evolved over time through the enactment and subsequent implementation of the HITECH Act (which enhanced enforcement, set additional limitations on the use and disclosure of PHI, and imposed additional potential penalties for non-compliance) and the Genetic Information Nondiscrimination Act of 2008 (“GINA”) (which clarified that genetic information is protected under the HIPAA Privacy Rule and prohibited most health plans from using or disclosing genetic information for underwriting purposes).
+
+Most recently, on January 17, 2013, HHS issued a final rule (“Omnibus rule”) that strengthened the privacy and security protections for PHI by modifying the HIPAA Privacy, Security, and Enforcement Rules and implementing statutory amendments required by the HITECH Act and GINA. For example, the Omnibus rule enhances an individual’s privacy protections, provides individuals new rights with respect to their PHI, strengthens the government’s ability to enforce the HIPAA Rules, sets limits on how information is used and disclosed for marketing and fundraising purposes, and prohibits the sale of an individuals’ health information without their permission. In addition, the Omnibus rule expanded the definition of which entities must be classified as a Business Associate and imposed on Business Associates many of the same privacy and security standards for protecting PHI that apply to Covered Entities. The final Omnibus Rule was effective on March 26, 2013. See “Item 1A. Risk Factors—We must comply with requirements relating to patient privacy and information security, including requiring through contract that business associates that handle certain information on our behalf comply with relevant privacy and security requirements, including, but not limited to HIPAA” and “—We must comply with requirements relating to patient privacy and information security, including requiring through contract that business associates that handle certain information on our behalf comply with relevant privacy and security requirements, including, but not limited to HIPAA” for additional information about the risks related to privacy and security breaches.
+
+The Gramm-Leach-Bliley Act generally requires insurers to provide customers with notice regarding how their personal health and financial information is used and, in certain circumstances, gives customers the opportunity to “opt out” of having their information shared with non-affiliated third parties. Like HIPAA, this law sets a “floor” standard, allowing states to adopt more stringent requirements governing privacy protection. In addition, we process and maintain personal card data, particularly in connection with our individual exchange business. As a result, we are subject to the requirements under the Payment Card Industry (“PCI”) Data Security Standard, which is a multifaceted security standard that is designed to protect credit card account data as mandated by payment card industry entities.
+
+Other state and federal laws and regulations, including some of the laws noted above, impose similar privacy and security requirements as the HIPAA Rules and the Gramm-Leach-Bliley Act.
+
+ERISA. Many employee benefit plans are governed by the Employee Retirement Income Security Act of 1974, as amended (“ERISA”). Employment-sponsored health coverage generally is such an employee benefit plan. ERISA is administered and regulated, in large part, by the U.S. Department of Labor. ERISA contains disclosure requirements for documents that define benefits and coverage, among other requirements. ERISA also provides that, in certain instances, federal law will preempt state law in the regulation and governance of certain benefit plans and employer groups, including the availability of legal remedies under state law. Regulations established by the U.S. Department of Labor provide additional rules for claims payment and member appeals under health care plans governed by ERISA.
+
+Other Federal Regulations. We must comply with, and are affected by, laws and regulations relating to the award, administration and performance of U.S. Government contracts. Government contract laws and regulations affect how we do business with our customers and, in some instances, impose added costs on our business. In addition, because of our activities to support our MFLC contract and certain outsourcing arrangements we have with third party vendors, for example, we are also subject to the U.S. Foreign Corrupt Practices Act (“FCPA”) and similar worldwide anti-corruption laws, including the U.K. Bribery Act of 2010, which generally prohibit companies and their intermediaries from making improper payments to non-U.S. officials for the purpose of obtaining or retaining business. A violation of specific laws and regulations by us or our agents could result in, among other things, the imposition of fines and penalties on us, changes to our business practices, the termination of our contracts or debarment from bidding on contracts. See “—Segment Information—Government Contracts Segment—Other Department of Defense Contracts” for additional information on our MFLC contract and “Item 1A. Risk Factors—We are subject to risks associated with outsourcing services and functions to third parties” for additional information on our outsourcing activities.
+
+20
+
+State Laws and Regulations
+
+Our Western Region Operations operating subsidiaries are subject to extensive state regulation. Set forth below are the principal regulatory agencies that govern these health plans and insurance companies.
+
+Company
+
+Regulatory Agency
+
+Health Net of Arizona, Inc.
+
+Arizona Department of Insurance
+
+Health Net Access, Inc.
+
+Arizona Health Care Cost Containment System
+
+Health Net of California, Inc.
+
+California Department of Managed Health Care
+
+Health Net Community Solutions, Inc.
+
+California Department of Health Care Services and California Department of Managed Health Care
+
+Health Net Health Plan of Oregon, Inc.
+
+Oregon Department of Consumer and Business Services and Washington State Office of the Insurance Commissioner
+
+Health Net Life Insurance Company
+
+California Department of Insurance generally, and the Department of Insurance of each state in which it does business
+
+Managed Health Network
+
+California Department of Managed Health Care
+
+Insurance and HMO laws impose a number of financial requirements and restrictions on our regulated subsidiaries, which vary from state to state. They generally include certain minimum capital and deposit and/or reserve requirements, restrictions on dividends and other distributions to the parent corporations and affiliated corporations. See “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources—Statutory Capital Requirements.” These financial requirements are subject to change, which may require us to commit additional capital to certain regulated subsidiaries or may limit our ability to move capital through dividends and other distributions. In addition, some state insurance laws require regulated companies to provide to the insurance regulator, upon request, a summary description of its enterprise risk management framework, to undertake an Own Risk and Solvency Assessment ("ORSA") and to provide information on the entity's capital and solvency position.
+
+While there are state-by-state variations, HMO regulation generally is extremely comprehensive. Among the areas regulated by these HMO regulatory agencies are:
+
+•
+
+Adequacy of financial resources, network of health care providers and administrative operations;
+
+•
+
+Sales and enrollment requirements, disclosure documents and notice requirements;
+
+•
+
+Product offerings, including the scope of mandatory benefits and required offerings of benefits that are optional coverages;
+
+•
+
+Procedures for member grievance resolution and medical necessity determinations;
+
+•
+
+Accessibility of providers, handling of provider claims (including out-of-network claims) and adherence to timely and accurate payment and appeal rules;
+
+•
+
+Linguistic and cultural accessibility standards, governance requirements and reporting requirements; and
+
+•
+
+Implementation of some provisions of the ACA.
+
+PPO regulation also varies by state, and while these regulations generally cover all or most of the subject areas referred to above, the regulation of PPO products and carriers tends to be less intensive than regulation of HMOs.
+
+Variations in state regulation also arise in connection with the intensity of government oversight. Variations include: the need to file or have affirmatively approved certain proposals before use or implementation by the health plan; the degree of review and comment by the regulatory agency; the amount and type of reporting by the health plan to the regulatory agency; the extent and frequency of audit or other examination; and the authority and extent of investigative activity, enforcement action, corrective action authority, and penalties and fines. In addition, as discussed in further detail above under the heading “—Health Care Reform Legislation and Implementation,” the ACA required the establishment of health insurance exchanges that act as markets for the purchase of subsidized health insurance. States were given the option of establishing these exchanges on their own or allowing the federal government to fully or partially operate the exchange. We currently participate as QHPs in the exchanges in California, which elected to
+
+21
+
+operate its own exchange, and Arizona, which elected the establishment of a federally-facilitated exchange. Participation in these and other exchanges in the states in which we operate is conditioned on the continued approval of the applicable state or federal government regulator. The factors considered for inclusion on the exchanges may be subject to additional changes in future years, which could impact some carriers’ decision on participation in the exchanges.
+
+State regulations also may be more stringent than federal regulations that are applicable to us, and various health insurance reform proposals have been implemented at the state level, including laws and regulations that implement portions of the ACA. The interaction of new federal regulations and the implementation efforts of the various states in which we do business will continue to create substantial uncertainty for us and other health insurance companies about the requirements under which we must operate. For additional information, see “—Segment Information—Government Regulation—Health Care Reform Legislation and Implementation.”
+
+Intellectual Property
+
+We have registered and maintain various trademarks that we use in our businesses, including marks and names incorporating the “Health Net” phrase, and from time to time we apply for additional registrations of such marks. We utilize these and other marks and names in connection with the marketing and identification of products and services. We believe such marks and names are valuable and material to our marketing efforts.
+
+Employees
+
+As of December 31, 2014, Health Net, Inc. and its subsidiaries employed 7,922 persons on a full-time basis and 92 persons on a part-time or temporary basis. These employees perform a variety of functions, including, among other things, provision of administrative services for employers, providers and members; negotiation of agreements with physician groups, hospitals, pharmacies and other health care providers; handling of claims for payment of hospital and other services; and provision of data processing services. Our employees are not unionized and we have not experienced any work stoppages since our inception. We consider our relations with our employees to be very good.
+
+Dependence Upon Customers
+
+The federal government is the primary customer of our Government Contracts segment, with premiums and fees accounting for approximately 96% of our Government Contracts revenue and 4% of our total revenues in 2014. Premiums and fees from the federal government in connection with our TRICARE North Region contract accounted for 72%, 75% and 61% of our Government Contracts revenue in 2014, 2013 and 2012, respectively, and 3%, 4% and 4% of total revenues in 2014, 2013 and 2012, respectively. In addition, the federal government and the state of California are significant customers of our Western Region Operations segment as a result of our contract with CMS for coverage of Medicare-eligible individuals and our contracts with California state agencies for the federally-subsidized Medicaid program and the dual eligibles demonstration under the CCI. Medicare premiums accounted for 23%, 27% and 27% of our Western Region Operations segment health plan services premium revenues in 2014, 2013 and 2012, respectively, and 22%, 25% and 25% of our total revenues in 2014, 2013 and 2012, respectively. Medicaid premiums, including CHIP, accounted for 36%, 23% and 19% of our Western Region Operations segment health plan services premium revenues in 2014, 2013 and 2012, respectively, and 34%, 22% and 17% of our total revenues in 2014, 2013 and 2012, respectively. Dual eligibles premium revenues accounted for 1% of health plan services premiums and 1% of our total revenues in 2014. For a discussion of risks associated with our increasing dependence on government funded revenues, see “Item 1A. Risk Factors—Government programs represent an increasing share of our revenues. If we are unable to effectively administer these programs, if we do not effectively adapt to changes to these programs, or if we experience a significant reduction in revenues from these government programs, it could have a material adverse effect on our business, financial condition or results of operations.”
+
+Shareholder Rights Plan
+
+On July 27, 2006, our Board of Directors adopted a shareholder rights plan pursuant to a Rights Agreement with Wells Fargo Bank, N.A. (the "Rights Agent"), dated as of July 27, 2006 (the "Rights Agreement").
+
+In connection with the Rights Agreement, on July 27, 2006, our Board of Directors declared a dividend distribution of one right (a "Right") for each outstanding share of Common Stock to stockholders of record at the close of business on August 7, 2006 (the "Record Date"). Our Board of Directors also authorized the issuance of one Right for each share of common stock issued after the Record Date and prior to the earliest of the Distribution Date (as defined below) the redemption of the Rights and the expiration of the Rights and, in certain circumstances, after the Distribution Date. Subject to certain exceptions and adjustment as provided in the Rights Agreement, each Right
+
+22
+
+entitles the registered holder to purchase from us one one-thousandth (1/1000th ) of a share of Series A Junior Participating Preferred Stock, par value of $0.001 per share, at a purchase price of $170.00 (the "Purchase Price"). The terms of the Rights are set forth in the Rights Agreement.
+
+Rights will attach to all Common Stock certificates representing shares outstanding and no separate certificates evidencing the Rights will be distributed. Subject to certain exceptions contained in the Rights Agreement, the Rights will separate from the Common Stock upon the earliest of (i) 10 days following the public announcement of any person, together with its affiliates and associates (an Acquiring Person), becoming the beneficial owner of 15% or more of the outstanding Common Stock, (ii) 10 business days following the commencement of a tender or exchange offer that would result in any person, together with its affiliates and associates, becoming the beneficial owner of 15% or more of the outstanding Common Stock or (iii) 10 business days following the determination by our Board of Directors that a person, together with its affiliates and associates, has become the beneficial owner of 10% or more of the Common Stock and that such person is an “Adverse Person,” as defined in the Rights Agreement (the earliest of such dates being called the “Distribution Date”). The Rights Agreement provides that certain passive institutional investors that beneficially own less than 20% of the outstanding shares of the Common Stock shall not be deemed to be Acquiring Persons.
+
+The Rights will first become exercisable on the Distribution Date and will expire at the close of business on July 31, 2016 unless such date is extended or the Rights are earlier redeemed or exchanged by us as described below.
+
+Subject to certain exceptions contained in the Rights Agreement, in the event that any person shall become an Acquiring Person or be declared to be an Adverse Person, then the Rights will “flip-in” and entitle each holder of a Right, other than any Acquiring Person or Adverse Person and such person’s affiliates and associates, to purchase, upon exercise at the then-current exercise price of such Right, that number of shares of Common Stock having a market value of two times such exercise price.
+
+In addition, and subject to certain exceptions contained in the Rights Agreement, in the event that we are acquired in a merger or other business combination in which the Common Stock does not remain outstanding or is changed or 50% of the assets, cash flow or earning power of the Company is sold or otherwise transferred to any other person, the Rights will “flip-over” and entitle each holder of a Right, other than an Acquiring Person or an Adverse Person and such person’s affiliates and associates, to purchase, upon exercise at the then current exercise price of such Right, such number of shares of common stock of the acquiring company which at the time of such transaction would have a market value of two times such exercise price.
+

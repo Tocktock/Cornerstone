@@ -1831,6 +1831,10 @@ class ProductUiRoutesTest(unittest.TestCase):
                     "evidence_chunk_ref": "evidence_chunk:chunk-1",
                     "snippet": "Exact source span for the first statement.",
                     "span": {"start": 10, "end": 52},
+                    "speaker_context": {
+                        "label": "지역경제과장 손순희",
+                        "source_span": {"char_start": 0, "char_end": 9},
+                    },
                 }
             ],
             "key_point_citations": [
@@ -1847,6 +1851,9 @@ class ProductUiRoutesTest(unittest.TestCase):
         self.assertEqual(receipt["unresolved_citation_count"], 1)
         self.assertIn("Evidence chunk", html)
         self.assertIn("10-52", html)
+        self.assertIn("Speaker at span start", html)
+        self.assertIn("지역경제과장 손순희", html)
+        self.assertIn("preceding source context 0-9", html)
         self.assertIn("Exact source span for the first statement.", html)
         self.assertIn("Unresolved citation ref", html)
         self.assertIn("Unsupported or unresolved", html)

@@ -1,0 +1,727 @@
+11
+a1012-azmaster.htm
+EX-10.12
+
+Document
+
+Exhibit 10.12
+
+MASTER SERVICES AGREEMENT — FINAL EXECUTION VERSION
+
+Certain identified information has been excluded from the exhibit because it is both (i) not material and (ii) would likely cause competitive harm to the Company, if publicly disclosed. Double asterisks denote omissions.
+
+MASTER SERVICES AGREEMENT
+
+between
+
+ASTRAZENECA PHARMACEUTICALS LP
+
+and
+
+EMERGENT MANUFACTURING OPERATIONS BALTIMORE, LLC
+
+DATE: July 24, 2020
+
+TABLE OF CONTENTS
+
+Page
+
+PART A: GENERAL TERMS
+
+3
+
+1. Agreement and Product Schedules
+
+3
+
+2. Affiliates
+
+8
+
+3. Service Provider Obligations
+
+9
+
+4. Intellectual Property
+
+10
+
+5. Delivery
+
+11
+
+6. Non-Conformance
+
+11
+
+7. Product Recall
+
+13
+
+8. Representations and Warranties
+
+13
+
+9. Payment
+
+15
+
+10. Taxes
+
+16
+
+11. Confidentiality and Use of Name
+
+17
+
+12. Indemnity
+
+19
+
+13. Insurance
+
+22
+
+14. Term and Termination
+
+22
+
+15. Assignment, Transfer and Subcontracting
+
+23
+
+16. Notices
+
+24
+
+17. Regulatory Matters
+
+25
+
+18. General
+
+25
+
+PART B: WAYS OF WORKING
+
+30
+
+19. AstraZeneca Expectations
+
+30
+
+20. Product Security
+
+31
+
+21. Health, Safety and Environment
+
+32
+
+22. FFDCA Requirements
+
+32
+
+23. Records and Inspections. Monitoring and Right to Audit.
+
+33
+
+24. Change Procedure
+
+34
+
+PART C: DEFINITIONS
+
+34
+
+PART D1: ASTRAZENECA FLOWDOWN TERMS
+
+42
+
+PART D2: SERVICE PROVIDER FLOWDOWN TERMS
+
+43
+
+PART E: USE OF [**] CELL LINE
+
+44
+
+Page | 1
+
+MASTER SERVICES AGREEMENT
+
+This Master Services Agreement (this “Agreement”) is entered into as of July 24, 2020 (the “Effective Date”) by and between:
+
+(1) ASTRAZENECA PHARMACEUTICALS LP, a Delaware limited partnership with offices at 1800 Concord Pike, Wilmington, Delaware 19803, USA (“AstraZeneca”); and
+
+(2) EMERGENT MANUFACTURING OPERATIONS BALTIMORE, LLC, a Delaware limited liability company, with an office at 5901 East Lombard Street, Baltimore, Maryland, 21224 (“Service Provider”).
+
+Background
+
+(A) AstraZeneca intends to research, develop, manufacture and commercialize its vaccine product candidate known as ChAdOx1 nCOV-19 (AZD1222) (the “Product”).
+
+(B) AstraZeneca and Service Provider are parties to that certain Master Services Agreement, dated June 10, 2020 (the “Short Form Agreement”) and adjoining Work Order #5997-01 (“Work Order #5997-01”), pursuant to which Service Provider is currently providing AstraZeneca technology transfer, scale-up, process performance qualification, and capacity commitment services in respect of manufacturing Product bulk drug substance by Service Provider.
+
+(D) The Short Form Agreement contemplated that AstraZeneca and Service Provider would use commercially reasonable efforts to agree a more detailed master services agreement setting forth certain additional services and activities to be performed by Service Provider.
+
+(E) AstraZeneca and Service Provider now wish to enter into this Agreement, with the effect that the Short Form Agreement shall be superseded and replaced in its entirety in respect of ongoing activities as of the Effective Date; provided that Work Order #5997-01 shall remain in full force and effect and be incorporated in its entirety, and made a part of, this Agreement as a Product Schedule, with all references to Product Schedule or Development Product Schedule in this Agreement applying to Work Order #5997-01.
+
+Integral Agreement
+
+This Agreement is comprised of (i) Part A (General Terms), (ii) Part B (Ways of Working), (iii) Part C (Definitions), (iv) Part D (Flowdown Terms) and Part E ([**] License Requirements), each of which is an integral part of this Agreement and which, taken together, and subject to the provisions of Clause 18.7, form the entirety of this Agreement.
+
+Page | 1
+
+Execution
+
+This Agreement is executed as of the Effective Date by the authorized representatives of the Parties.
+
+SIGNED for and on behalf of
+
+AstraZeneca Pharmaceuticals LP
+
+By: /s/ Jarrett Palmer
+
+Name: Jarrett Palmer
+
+Title: Operations – BES Director
+
+SIGNED for and on behalf of
+
+Emergent Manufacturing Operations Baltimore, LLC
+
+By: /s/ Syed T Husain
+
+Name: Syed T Husain
+
+Title: SVP & CDMO BU Head
+
+Page | 2
+
+Agreement
+
+The Parties, intending to be legally bound, agree as follows:
+
+PART A: GENERAL TERMS
+
+1.Agreement and Product Schedules
+
+1.1. Agreement. This Agreement sets out the terms on which Service Provider agrees to perform certain activities related to the manufacture of the Product, and under which AstraZeneca agrees to engage Service Provider to perform such services pursuant to the applicable Product Schedules.
+
+1.2 Product Schedules.
+
+1.2.1 AstraZeneca and Service Provider may enter into:
+
+(a) Development Product Schedules for the development activities and services in relation to the Product;
+
+(b) Manufacturing Product Schedules for the manufacture of commercial Batches of the Product;
+
+(c)Tech Transfer Product Schedules pursuant to which Service Provider would provide technology transfer services as described in Clause 1.4.3
+
+1.2.2 Each Product Schedule, once signed, shall be incorporated into, and form a part of this Agreement. Notwithstanding any other provisions, in case of any conflict between a Product Schedule and this Agreement, the Product Schedule shall prevail, provided that the QAA shall prevail for all matters concerning quality.
+
+1.2.3 As of the Effective Date, Work Order #5997-01 is hereby incorporated in its entirety, and made a part of, this Agreement as a Product Schedule, with all references to Product Schedule or Development Product Schedule in this Agreement applying to Work Order #5997-01.
+
+1.2.4 The Parties intend to enter into their first Manufacturing Product Schedule effective as of the Effective Date (“Product Schedule #5997-02”) for the manufacturing of the number of commercial Batches of Product as set forth in Product Schedule #5997-02, on the terms set forth herein and in Product Schedule #5997-02.
+
+1.3 Capacity Reservation.
+
+1.3.1 The Parties acknowledge that AstraZeneca reserved the Initial Period Capacities of Service Provider for AstraZeneca pursuant to Section 1.3(a) of the Short Form Agreement. Service Provider hereby acknowledges its obligation to reserve the capacity to manufacture up to the number of Batches of the Product specified on Work
+
+Page | 3
+
+Order #5997-01 constituting the Initial Period Capacities in exchange for payment of the AZ Initial Capacity Commitment Fee as set forth in Work Order #5997-01. Pursuant to Product Schedule #5997-02, AstraZeneca is purchasing and Service Provider is agreeing to manufacture, the initial Batches of Product drug substance (the “Initial Batches”), the capacity for which was reserved by the Initial Period Capacities, and in respect of [**] for which the credit of the AZ Initial Capacity Commitment Fee is applied. For clarity, the Initial Batches are comprised of [**] of Service Provider’s Bayview facility and [**] of Service Provider’s Bayview facility.
+
+1.3.2 Pursuant to Product Schedule #5997-02, in addition to the Initial Batches, AstraZeneca is purchasing and Service Provider is agreeing to manufacture, (a) [**] of Service Provider’s Bayview facility and [**] of Service Provider’s Bayview facility (collectively, the “Additional Batches”). The fees and costs for the Additional Batches are set forth on Product Schedule #5997-02 and will be payable by AstraZeneca in accordance with the terms of this Agreement and Product Schedule #5997-02.
+
+1.3.3 Furthermore, AstraZeneca, may, subject to the approval of the United States Government, and otherwise at its sole option, and in accordance with the terms set forth in Product Schedule #5997-02, elect to purchase, and upon such election, Service Provider agrees to manufacture, [**] of Service Provider’s Bayview facility (which Batches, the “Extended Batches”, shall be in addition to the Initial Batches and the Additional Batches), by delivering written notice to Service Provider (the “Batch Exercise Notice”) on or before [**] (the “Option Deadline”). Notwithstanding the foregoing, the Parties acknowledge and agree that: (i) the United States Government may require or direct Service Provider to offer or use the capacity for the Extended Batches to or for third party(ies) at any time, including prior to the Option Deadline; and (ii) if the United States Government does not consent (or indicates to AstraZeneca or Service Provider it will not provide such consent) or AstraZeneca does not deliver the Batch Exercise Notice by the Option Deadline, Service Provider may offer and/or use the capacity for the Extended Batches to or for other customers of Service Provider or use such capacity for its own products at no additional cost to AstraZeneca and at no penalty to Service Provider. Pursuant to the Task Order, the United States Government has agreed to pay Service Provider the price to reserve the capacity for the Extended Batches.
+
+1.3.4 The AZ Initial Capacity Commitment Fee is non-refundable, but fully creditable against the Service fees (but not the pass-through costs or other out-of-pocket costs or expenses), on a per-Batch of Product basis, as specifically allocated to the AZ Initial Period Capacity and as set forth in Product Schedule #5997-02. Capacity commitment fees indicated to be funded by the United States Government (in this Master Services Agreement and/or in a Product Schedule) (“BARDA Capacity Commitment Fees”) are also fully creditable, solely upon the consent (and then only to the extent of the consent) of the United States Government, and the Service fees set forth in Product Schedule #5997-02 assume such United States Government consent and are net of such credit (i.e. have already been reduced to account for the credit) on a per-Batch of Product basis. For clarity, it is the intent of AstraZeneca and Service Provider that (i) subject to
+
+Page | 4
+
+the terms of this Clause 1.3.4 and payments due upon termination in accordance with Clause 14.7, the entire amount of the AZ Initial Capacity Commitment Fee and any BARDA Capacity Commitment Fees on a Product Schedule are intended as upfront amounts and, with respect to such BARDA Capacity Commitment Fees, subject to the consent of the United States Government to be credited against future Service fees payable by AstraZeneca, and (ii) notwithstanding the foregoing, Service Provider may be required to credit some or all of the BARDA Capacity Commitment Fees to the US Government, and nothing in this Clause 1.3.4 (or a Product Schedule) shall require Service Provider to credit to AstraZeneca any amount of such BARDA Capacity Commitment Fees that Service Provider is required to credit to the United States Government. The mechanics by which the BARDA Capacity Commitment Fees are creditable against Service fees pursuant to this Clause 1.3.4 will be set forth in the applicable Product Schedule.
+
+1.4 Technology Transfer.
+
+1.4.1 Service Provider acknowledges that pursuant to the Short Form Agreement and Work Order #5997-01, AstraZeneca is transferring certain AstraZeneca Background Technology and technologies of AstraZeneca to Service Provider to enable Service Provider to commence specific activities in connection with the development and/or manufacture of the Product, including the Services (as defined in the Short Form Agreement) thereunder.
+
+1.4.2 During the Term, AstraZeneca shall undertake such additional technical transfer services as are necessary and agreed with respect to a Product Schedule to enable Service Provider to provide the Services contemplated by such Product Schedule.
+
+1.4.3 The Parties agree that AstraZeneca may, during the term of this Agreement or upon termination or expiration of this Agreement, designate and qualify a Third Party to manufacture bulk drug substance Product. In connection therewith, Service Provider shall provide the assistance and support described in this Clause 1.4 for a period not to exceed [**]. If AstraZeneca, using commercially reasonable efforts, is unable to qualify a Third Party without participation by Service Provider, Service Provider shall provide AstraZeneca reasonable assistance and support (including providing AstraZeneca Background Technology in Service Provider’s possession and technical assistance and cooperation by employees of Service Provider) as necessary to assist in qualifying such Third Party as set forth in a Tech Transfer Product Schedule executed by both Parties which shall provide for the scope of services and fees and expenses to be paid to Service Provider by AstraZeneca for such consultation and assistance. AstraZeneca shall pay Service Provider for all fees charged and expenses incurred in providing such services, which fees and expenses shall be documented in such Tech Transfer Product Schedule.
+
+1.5 Grant Funding and Sublicense Requirements.
+
+1.5.1 The Parties acknowledge and agree that this Agreement will be considered to be a US Government subcontract pursuant to AstraZeneca OTA (Other Transactional Agreement) with the U.S. Department of Health and Human Services (“HHS”), Contract
+
+Page | 5
+
+# (provided upon the OTA execution), and Service Provider further understands that its performance of services under this Agreement will be subject to certain additional government requirements. These requirements will be outlined in AstraZeneca OTA with US Government, upon its execution. To the extent applicable to Service Provider’s activities under this Agreement, the Service Provider agrees to comply with relevant US Government terms and conditions, as documented in an amendment to this Agreement adding such terms and conditions to Part D1 of this Agreement (the “AstraZeneca Flowdown Terms”).
+
+1.5.2 The Parties acknowledge and agree that, in the event this Agreement is considered to be a United States Government subcontract pursuant to the Task Order, this Agreement will be considered to be a United States Government subcontract pursuant to the Task Order and AstraZeneca further understands that its performance under this Agreement may be subject to certain additional government requirements. To the extent applicable to AstraZeneca’s activities under this Agreement, AstraZeneca agrees to comply with relevant United States Government terms and conditions, as documented in an amendment to this Agreement adding such terms and conditions to Part D2 of this Agreement as notified to it by Service Provider as set forth in Part D2 of this Agreement (the “Service Provider Flowdown Terms”).
+
+1.5.3 While not known with any particularity at this time, it is understood by the Parties that in addition to Clauses 1.5.1 and 1.5.2, certain government agencies may require, in connection with funding requirements in support of a Product Schedule, that AstraZeneca and/or Service Provider comply with applicable and additional contractual provisions (the “Additional Flowdown Terms”). In such event, the Parties agree during the Term of this Agreement to consider in good faith and not unreasonably refuse to enter into an amendment to this Agreement to include any mutually agreed upon Additional Flowdown Terms. If the Parties do not, after such good faith consideration, enter into an amendment to this Agreement to include any mutually agreed upon Additional Flowdown Terms, the matter shall be escalated for consideration to a senior management member of each Party.
+
+1.5.4 Service Provider acknowledges that any use of [**] cell line (“[**] Cells”) in the course of performing its obligations under the Agreement is subject to the additional conditions set forth in Part E of this Agreement (“[**] Cell Licence Requirements”). To the extent applicable to Service Provider’s activities under this Agreement, the Service Provider agrees to comply with the [**] Cell Licence Requirements. In the event of a conflict between the [**] Cell Licence Requirements and the terms of this Agreement, the [**] Cell Licence Requirements will control.
+
+1.6 QAA. Within [**] of execution of this Agreement, and in any event, prior to the release of any Product by Service Provider pursuant to this Agreement or any Product Schedule, the Parties will enter into a QAA setting forth, as appropriate, quality assurance provisions, the respective roles and allocation of responsibility of the Parties with respect
+
+Page | 6
+
+to the applicable processes and standards and procedures for handling deviations and related matters.
+
+1.7 AstraZeneca Materials. AstraZeneca shall deliver to Service Provider the items specifically set forth in the Product Schedule as being provided by AstraZeneca to Service Provider, together with any other tangible items, information or documentation in AstraZeneca’s possession which is necessary to assist Service Provider in connection with the Services, including but not limited to any active pharmaceutical ingredient, master cell bank, plasma, component or raw materials (collectively, the “AstraZeneca Materials”). Unless otherwise stated in a Product Schedule, AstraZeneca shall deliver to Service Provider the AstraZeneca Materials free of charge in a timely manner and in sufficient quantities to perform the Services. AstraZeneca shall at all times retain legal title and risk of loss to the AstraZeneca Materials. AstraZeneca is responsible for ensuring any components and materials that are necessary or used by Service Provider to perform the Services, including but not limited to the AstraZeneca Materials, are suitable and of appropriate quality for the Product, regardless of whether such components or materials are supplied to Service Provider directly by the applicable material manufacturer or by AstraZeneca. The Product Schedule and the Quality Agreement set forth any testing to be performed by Service Provider on such components and materials. Subject to such testing obligations, Service Provider shall not be liable for any defect in AstraZeneca Materials or any defect in any other components or materials existing as of the date of delivery to Service Provider (“AstraZeneca Defective Materials”).
+
+1.8 Delays. The Parties acknowledge that portions of the work to be performed are experimental in nature and may not have been fully validated within generally accepted standards of the pharmaceutical industry. To the extent assumptions or information change, or there are unexpected results or events or delays, including but not limited to delays in receipt of materials or information from AstraZeneca, timelines may be impacted. If Service Provider anticipates any delay in the timelines specified in any Product Schedule, whether beyond the reasonable control of either Party, due to a Force Majeure, or otherwise (a “Delay”), or Service Provider becomes aware of any actually occurring Delay, it shall promptly notify AstraZeneca in writing. If AstraZeneca anticipates any Delay or becomes aware of any actually occurring Delay, AstraZeneca will promptly notify Service Provider in writing. Unless Service Provider is reasonably able to eliminate an anticipated Delay such that the deliverables under any applicable Product Schedule will be delivered in accordance with the estimated schedule set forth on such Product Schedule, the Parties shall promptly convene to discuss steps that can be taken to mitigate such Delay and agree upon revised timeline(s).
+
+1.9 Development Under Work Order #5997-01. Notwithstanding Clause 8.1.2, AstraZeneca acknowledges that certain portions of the Services to be performed under Work Order #5997-01 are experimental in nature and/or may not have been fully validated within general accepted standards of the pharmaceutical industry, including without limitation any non-cGMP Batches. Service Provider shall not be considered to be in breach of its obligations under this Agreement or otherwise held responsible for not
+
+Page | 7
+
+reaching the desired outcome as set forth in Work Order #5997-01 for such non-cGMP Services under Work Order #5997-01 and AstraZeneca shall be responsible for all fees and costs associated with such Services, except to the extent such failure was caused by Service Provider’s gross negligence or willful misconduct. If it is determined that failure to reach the desired outcome for the non-cGMP activities as set forth in Work Order #5997-01 was caused by Service Provider’s gross negligence or willful misconduct, then Service Provider shall, at AstraZeneca’s request and option, as AstraZeneca’s sole and exclusive remedy (subject to Clause 12.5.5) and as soon as it is commercially practical to do so following receipt of any required materials at Service Provider’s sole cost and expense (excluding, subject to Clause 12.5.1, costs or expenses for AstraZeneca’s Materials but including shipping and transport costs), either (i) re-perform such Services; or (ii) provide AstraZeneca a credit for the amounts paid by AstraZeneca to Service Provider for such Services. AstraZeneca is solely responsible for determining suitability of product for use in humans and final release of product for use in humans.
+
+1.10 PPQ Batches. If it is determined that a process performance qualification (“PPQ”) Batch does not meet the Product specifications set forth in the master batch record (“Specifications”) as a result of Service Provider’s failure to follow cGMP, then Service Provider shall, at AstraZeneca’s request and option, and as AstraZeneca’s sole and exclusive remedy (subject to Clause 12.5.5), and as soon as it is commercially practical to do so following receipt of any required materials at Service Provider’s sole cost and expense (excluding, subject to Clause 12.5.1, costs or expenses for AstraZeneca’s Materials including shipping and transport costs), either (i) re-perform such PPQ Batch; or (ii) provide AstraZeneca a credit for the amounts paid by AstraZeneca to Service Provider for such PPQ Batch. If a PPQ Batch fails to meet Specifications for any cause other than Service Provider’s gross negligence, willful misconduct or failure to follow cGMP, then Service Provider shall have no liability to AstraZeneca with respect to such Batch and AstraZeneca shall pay Service Provider for such Batch.
+
+1.11 Non-Exclusive. The engagement of the Service Provider by AstraZeneca for Product related manufacturing services shall be on a non-exclusive basis. AstraZeneca shall at all times have the right, at its sole discretion, to engage suppliers and other service providers in relation to the Product. The Parties further acknowledge and agree that Service Provider and/or its Affiliates may develop and manufacture products competitive to the Products. Except for the intellectual property provisions, obligations of confidentiality and non-use and capacity reservation requirements set forth in this Agreement, nothing herein restricts Service Provider and/or its Affiliates from developing, manufacturing, supplying or in any other manner exploiting any and all such competitive products.
+
+1.12 Duration. AstraZeneca and Service Provider may enter into Product Schedules at any time during the Term.
+
+2.Affiliates
+
+2.1 Affiliates. Affiliates of the Parties may enter into:
+
+Page | 8
+
+2.1.1 Development Product Schedules for the development activities in relation to the Product;
+
+2.1.2 Manufacturing Product Schedules for the manufacture of commercial Batches of the Product;
+
+2.1.3 Tech Transfer Product Schedules for technology transfer services as described in Clause (any Product Schedule described in Clauses 2.1.1, 2.1.2 or 2.1.3 an “Affiliate Product Schedule”).
+
+Each Affiliate Product Schedule, once signed, shall be incorporated into, and form a part of this Agreement. For so long as any Affiliate Product Schedule remains in force, each Affiliate of a Party that has entered into such Affiliate Product Schedule shall be deemed to be bound by the terms of this Agreement. For the avoidance of doubt, no Affiliate of a Party shall be bound by the terms of this Agreement unless such Affiliate has entered into an Affiliate Product Schedule.
+
+3.Service Provider Obligations
+
+3.1 Service Provider’s Performance. Service Provider shall perform the specific services and activities set forth in each Product Schedule (“Services”), in accordance with all of the terms of this Agreement and the applicable:
+
+3.1.1 Purchase Order; provided such Purchase Order is consistent with, does not modify or add to the terms (including with respect to aggregate quantities of Product and estimated timelines) of this Agreement or Product Schedule;
+
+3.1.2 QAA; and
+
+3.1.3 Product Schedule.
+
+3.2 Changes. Any amendments or modifications to the scope of Services or pricing shall be set forth in writing in a Change Order mutually agreed upon and signed by both Parties. Furthermore, any change or modification to the manufacturing process or Specifications for Product will be made only in accordance with the change control provisions of the QAA. The Change Order shall detail the requested changes to the Services, responsibility, duty, cost, estimated timelines or other relevant matters to be modified and shall only become effective when executed by both Parties. Both Parties agree to act in good faith and promptly when considering a Change Order request proposed by the other Party. Notwithstanding the foregoing, each Party shall respond to all Change Order requests submitted by the other Party within [**] (or a longer period agreed upon by the Parties in writing) of such other Party’s submission of a written Change Order request to such Party. Unless otherwise agreed to by the Parties, Service Provider will continue performing the Services as set forth in the applicable Product Schedule to the extent reasonably practicable and will not implement the Services as outlined in a Change Order request unless and until such Change Order is signed by both
+
+Page | 9
+
+Parties. All mutually executed Change Orders will be implemented as soon as commercially practicable to do so. AstraZeneca shall be responsible for payment of any price increase resulting from any such Change Order.
+
+4.Intellectual Property
+
+4.1 Background Technology of Service Provider. All Intellectual Property, results, data, inventions and information (i) owned or otherwise controlled by Service Provider on the effective date of the Short Form Agreement, or (ii) developed by Service Provider independently of this Agreement or the Short Form Agreement (collectively, “Service Provider Background Technology”) shall be and remain the sole and exclusive property of Service Provider.
+
+4.2 Background Technology of AstraZeneca. All Intellectual Property, results, data, inventions and information (i) owned or otherwise controlled by AstraZeneca on the effective date of the Short Form Agreement, or (ii) developed by AstraZeneca independently of this Agreement or the Short Form Agreement (collectively, “AstraZeneca Background Technology”) shall be and remain the sole and exclusive property of AstraZeneca. AstraZeneca grants to Service Provider a royalty-free, nonexclusive right for the Term (with no right to sub-license, except to Service Provider’s Affiliates) to use AstraZeneca’s Background Technology to the extent necessary and for the sole purpose of performing its obligations under this Agreement.
+
+4.3 Ownership of Foreground Technology:
+
+4.3.1 All Intellectual Property and Improvements discovered or developed in the performance of the Services (“Foreground Technology”), solely by or on behalf of Service Provider or jointly with AstraZeneca, that relate to and are not severable from: (i) the Product or (ii) any AstraZeneca Materials or AstraZeneca Confidential Information, and which do not relate generally to developing, formulating, manufacturing, filling, processing, packaging, analyzing or testing pharmaceutical products generally, will (in the case of (i)-(ii) herein) be solely owned by AstraZeneca (“AstraZeneca Foreground Technology”). As between the Parties, Service Provider will own any and all Foreground Technology that is not owned by AstraZeneca in the preceding sentence, including but not limited to any improvements or modifications to Service Provider Background Technology (“Service Provider Foreground Technology”). Service Provider hereby grants to AstraZeneca a nonexclusive, perpetual, fully paid-up, royalty-free, worldwide, sub-licensable license to use the Service Provider Foreground Technology, but only to the extent necessary or useful for AstraZeneca or its Affiliates to develop, manufacture, commercialize or otherwise exploit the Product manufactured by Service Provider under this Agreement.
+
+4.3.2 Service Provider will ensure that AstraZeneca acquires, to the extent legally permissible, all rights, title and interest in and to any AstraZeneca Foreground Technology generated by Service Provider employees or agents, and hereby assigns to AstraZeneca all rights, title and interest in and to any and all AstraZeneca Foreground Technology.
+
+Page | 10
+
+AstraZeneca will ensure that Service Provider acquires, to the extent legally permissible, all rights, title and interest in and to any Service Provider Foreground Technology generated by AstraZeneca employees or agents, and hereby assigns to Service Provider all rights, title and interest in and to any and all Service Provider Foreground Technology. Each Party agrees that such technology of each Party is commercially valuable to such Party and agrees not to disclose such technology of the other Party to any other party without the other Party’s prior written consent. AstraZeneca hereby grants to Service Provider a royalty-free nonexclusive license to the AstraZeneca Background Technology and/or the AstraZeneca Foreground Technology during the Term as useful or necessary for Service Provider to provide the Services or Deliverables.
+
+4.4 Know-How and Improvements:
+
+4.4.1 If AstraZeneca provides AstraZeneca’s Know-How or other AstraZeneca Information to Service Provider to enable it to manufacture and supply the Product, Service Provider shall use any such AstraZeneca Know-How or other AstraZeneca Information provided by AstraZeneca solely for the purpose of performing its obligations under this Agreement.
+
+4.4.2 Service Provider shall promptly disclose to AstraZeneca all Improvements that Service Provider develops or discovers in the performance of this Agreement relating to the Product.
+
+4.5 Trademark. Except as is otherwise licensed under Clauses 4.2, 4.3 or 4.4, neither Party shall acquire any rights or license on the other Party’s trademarks, unless such other Party provides prior written consent.
+
+5.Delivery
+
+5.1 Time of Delivery: Within [**] after the Release Date, Service Provider shall deliver the Product or cause the Product to be delivered as set forth in Section 6.3 below.
+
+5.2 No Early Delivery: Service Provider shall not deliver Product before the Release Date unless specifically authorized in writing by a representative of each Party to deliver under quarantine.
+
+5.3 Delivery: Any Product delivered by Service Provider to AstraZeneca hereunder shall be delivered Ex Works Service Provider’s facility (INCOTERMS 2020). Title to and risk of loss of Product delivered hereunder will transfer from Service Provider to AstraZeneca when the Service Provider makes the Batch available for pick up by AstraZeneca’s designated carrier, Ex Works Service Provider’s facility. AstraZeneca is solely responsible for all shipping costs. For clarity, Batches delivered hereunder will be deemed to be delivered on the date that all requirements for release of such Batch that are within Service Provider’s control are completed, even if Service Provider agrees to store the delivered Product. Service Provider shall have no obligation to store any Batch of Product at its facility for a period longer than [**] after its applicable Release Date, except
+
+Page | 11
+
+as agreed upon by Service Provider in writing, including in respect of the mutually agreed storage fee.
+
+6.Non-Conformance
+
+6.1 Service Provider shall not be liable to AstraZeneca for any failure of Product to meet Specifications except (i) with respect to PPQ Batches as specified in Clause 1.10, or (ii) with respect to all other Batches, as specified in this Clause 6.
+
+6.2 Defects. Subject to Clause 7, AstraZeneca shall notify Service Provider in writing of any Product that fails to meet Specifications (a “Defect”) within [**] of discovery of such Defect by AstraZeneca, but no later than [**] after delivery of such Product to AstraZeneca.
+
+6.3 Investigation of a Defect. In any case where AstraZeneca provides Service Provider with a notice in respect of a Defect in accordance with Clause 6.2, AstraZeneca shall provide Service Provider with a reasonable opportunity to inspect and/or test such Product, such period not to exceed [**]. In the event that AstraZeneca does not notify Service Provider of a Defect within the notification periods set forth in Clause 6.2, AstraZeneca will be deemed to have accepted the applicable Batch(es). In the event that Service Provider does not notify AstraZeneca of the results of its inspection and/or test of a Product Defect within the foregoing [**] period, Service Provider will be deemed to have accepted that the subject Product has a Defect.
+
+6.4 Testing for Defects. In the event of any dispute as to whether the Product may be rightfully rejected by AstraZeneca by reason of a Defect, such Product shall be tested for conformance with the applicable Specifications by an independent testing organization mutually acceptable to both Parties which analysis shall be binding on AstraZeneca and Service Provider solely for the purpose of determining whether such Product met Specifications. The Party who was wrong pays for the costs associated with the independent testing. AstraZeneca shall not under any circumstances dispose of any Product claimed by AstraZeneca or determined by independent testing organization to be non-conforming to Specifications without Service Provider’s prior written consent. All or part of any delivery of Product determined to have been rightfully rejected by AstraZeneca shall be held by AstraZeneca for disposition by Service Provider, at Service Provider’s expense.
+
+6.5 Liability for Defective Product. If AstraZeneca provides notice of a Defect within the time periods set forth in Clause 6.2 and it is determined that such Batch does not meet Specifications solely as a result of Service Provider’s negligence, willful misconduct and/or failure to follow cGMP, then Service Provider shall, at Service Provider’s option, as AstraZeneca’s sole and exclusive remedy and subject to Clause 12.5, either: (i) replace the non-conforming Batch at no additional charge to AstraZeneca other than the original Batch price as soon as commercially practicable to do so following receipt of any required AstraZeneca-supplied materials at no cost to Service Provider; or (ii) credit or refund to AstraZeneca the amount paid by AstraZeneca for such defective
+
+Page | 12
+
+Batch. If a Batch fails to meet Specifications for any cause other than solely Service Provider’s negligence, willful misconduct and/or failure to follow cGMP, then Service Provider shall have no liability to AstraZeneca with respect to such Batch and AstraZeneca shall pay Service Provider for such Batch and any fees associated with any dispute regarding such Batch (including any arbitration fees). The Parties agree that manufacturing deviations and investigations that occur during the Services and do not cause a Batch to be non-compliant with Specifications shall not be deemed to cause a Batch to be non-conforming. Service Provider shall not be liable for any non-conformity arising from AstraZeneca’s written instructions or AstraZeneca Defective Materials, unless Service Provider utilized such AstraZeneca Defective Materials in manufacturing the Product despite the fact the Service Provider knew or should have known as a result of Service Provider’s testing obligations referenced in Clause 1.7 that such AstraZeneca Materials were Defective AstraZeneca Materials.
+
+6.6 Exclusive Remedies: AstraZeneca’s remedies under Clause 1.10, this Clause 6 and Clause 12.5 (as applicable) shall be AstraZeneca’s exclusive remedies with respect to Defects.
+
+7.Product Recall
+
+As set forth in the QAA, AstraZeneca shall notify Service Provider promptly if any Product manufactured by Service Provider hereunder is the subject of a recall, market withdrawal, field alert or correction, or seizure (a “Recall”). AstraZeneca shall (a) bear the cost of, and be responsible for conducting or responding to, all Recalls of Product, (b) remain obligated to pay Service provider in accordance with this Agreement for any Services provided by Service Provider related to the Product Batches that are subject to a Recall, and (c) reimburse Service Provider for its out-of-pocket expenses related to the Recall, if any; provided, however, that if the Recall is the result of an undiscovered Defect the provisions of Clause 6.5 shall apply in respect of subclause (b) and to the extent the Recall is caused solely by Service Provider’s failure to follow cGMP, subclause (c) shall not apply.
+
+8.Representations and Warranties
+
+8.1 Service Provider represents, warrants and undertakes that:
+
+8.1.1 Service Provider is duly formed and validly existing under the laws of its jurisdiction of formation and has all requisite power and authority to execute and deliver this Agreement and to perform its obligations hereunder.
+
+8.1.2 The Services will conform to industry standards of workmanship, Applicable Laws and Regulations, and if applicable, cGMP and the QAA, by individuals who are appropriately trained and qualified.
+
+8.1.3 Service Provider, its employees and agents, have, and will continue to have the knowledge, experience and skill to provide, and will provide, the Services in a professional and timely manner.
+
+Page | 13
+
+8.1.4 Service Provider will use commercially reasonable efforts to sufficiently staff each project set forth in a Product Schedule to ensure the completion of the Services as set forth in the applicable Product Schedule.
+
+8.1.5 The performance of Service Provider’s obligations to AstraZeneca under this Agreement will not breach or be in conflict with any contractual obligation it has to any Third Party.
+
+8.1.6 Solely to the extent Service Provider incorporates Service Provider Background Technology into the Product, to the best of Service Provider’s knowledge, the Service Provider Background Technology does not infringe any Intellectual Property rights of any Third Party.
+
+8.1.7 Title to the Product will not be subject to any security interest, lien or other encumbrance due to any action or inaction of Service Provider.
+
+8.1.8 All manufactured Product will, as at date of delivery by Service Provider, conform to the Certificate of Analysis.
+
+8.1.9 All materials supplied by AstraZeneca shall be handled in accordance with the Safety and Data Sheet and safety regulations as supplied in writing by AstraZeneca.
+
+8.1.10 EXCEPT FOR THE REPRESENTATION AND WARRANTY AND COVENANTS SET FORTH IN THIS CLAUSE 8.1, SERVICE PROVIDER HEREBY DISCLAIMS ALL REPRESENTATIONS, CONDITIONS, WARRANTIES, AND STATEMENTS IN RESPECT OF THE SERVICES AND PRODUCT PROVIDED HEREUNDER, WHETHER EXPRESS OR IMPLIED, CUSTOM OF THE TRADE OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY SUCH REPRESENTATIONS, CONDITIONS, WARRANTIES OR STATEMENTS RELATING TO MERCHANTABILITY, NON-INFRINGEMENT OR FITNESS FOR A PARTICULAR PURPOSE. SERVICE PROVIDER HAS NOT PARTICIPATED IN THE RESEARCH AND DEVELOPMENT OF THE PRODUCT, NOR HAS SERVICE PROVIDER IN ANY WAY EVALUATED THE PRODUCT’S SAFETY OR EFFICACY IN HUMANS OR OTHERS.
+
+8.2 AstraZeneca represents, warrants and undertakes that:
+
+8.2.1 AstraZeneca is duly formed and validly existing under the laws of its jurisdiction of formation and has all requisite power and authority to execute and deliver this Agreement and to perform its obligations hereunder.
+
+8.2.2 The execution, delivery or performance of this Agreement will not contravene Applicable Laws and Regulations and AstraZeneca shall perform its obligations and responsibilities hereunder in accordance with all Applicable Laws and Regulations.
+
+Page | 14
+
+8.2.3 AstraZeneca shall act to ensure the timely delivery of data and materials, including the AstraZeneca Materials, to Service Provider, so as to permit Service Provider to perform its obligations hereunder, in all cases in accordance with the applicable Product Schedule.
+
+8.2.4 AstraZeneca shall not offer, pay, request or accept any bribe, inducement, kickback or facilitation payment, and shall not make or cause another to make any offer or payment to any individual or entity for the purpose of influencing a decision for the benefit of Service Provider.
+
+8.2.5 AstraZeneca owns or has the right to provide to Service Provider in connection with the performance of the Services all AstraZeneca Materials.
+
+8.2.6 All AstraZeneca Materials have been or will be manufactured in accordance with cGMP and relevant specifications, and no specific safe handling instructions are applicable to any such items, except as disclosed to Service Provider in writing by AstraZeneca in sufficient time for review by Service Provider and prior to delivery to Service Provider.
+
+8.2.7 All Product delivered by Service Provider to AstraZeneca will be stored, labeled, distributed, sold and/or used or disposed of by AstraZeneca in a safe and responsible manner, and in accordance with all Applicable Laws and Regulations.
+
+8.2.8 The Product and the manufacturing, processing, use or distribution thereof, will not, to AstraZeneca’s knowledge, violate the intellectual property rights of any third party, and AstraZeneca is not, to its knowledge, engaged in the theft or misuse of any third party’s confidential or trade secret information regarding the manufacturing, processing, use or distribution of Product, nor does AstraZeneca have notice of any claim of a third party regarding any such violation, theft or misuse.
+
+8.3 Promptly Inform AstraZeneca: Service Provider shall endeavor to inform AstraZeneca promptly in writing of any event that to the best of Service Provider’s knowledge may adversely affect Service Provider’s ability to perform its obligations under this Agreement.
+
+8.4 DISCLAIMER: EXCEPT FOR THE REPRESENTATIONS AND WARRANTIES SET FORTH IN CLAUSE 8.2 AND THE COVENANTS SET FORTH IN CLAUSE 1.7, ALL OTHER WARRANTIES OR (WITH RESPECT TO THE ASTRAZENECA MATERIALS, COVENANTS), BOTH EXPRESS AND IMPLIED, CUSTOM OF THE TRADE OR OTHERWISE ARE EXPRESSLY DISCLAIMED, INCLUDING WITHOUT LIMITATION ANY REPRESENTATIONS, CONDITIONS, WARRANTIES OR STATEMENTS OF MERCHANTABILITY, NONINFRINGEMENT OR FITNESS FOR A PARTICULAR PURPOSE.
+
+9.Payment
+
+Page | 15
+
+9.1 The Price payable by AstraZeneca in respect of the Product:
+
+9.1.1 is set forth and payable as set forth in the applicable Product Schedule;
+
+9.1.2 is based on the assumptions and information set out in the applicable Product Schedule;
+
+9.1.3 unless otherwise set forth in the applicable Product Schedule, shall remain fixed for the term of the applicable Product Schedule; and
+
+9.1.4 is payable in United States Dollars.
+
+9.2 Purchase Orders: AstraZeneca, or an Affiliate of AstraZeneca, shall submit to Service Provider one or more Purchase Orders in respect of the Services under each Product Schedule in accordance with the applicable timelines set forth therein. For clarity, (i) AstraZeneca is obligated to purchase (i.e. and to pay for, regardless of whether AstraZeneca purchases) all Services set forth in a Product Schedule pursuant to the terms of this Agreement (and subject to Clause 14.7) and the Product Schedule; and (ii) Service Provider has no obligation to accept Purchase Orders for Services not set forth in a Product Schedule.
+
+9.3 Invoices: Service Provider shall issue an invoice to AstraZeneca or the Affiliate of AstraZeneca issuing the Purchase Order, as applicable, for the Price of all Services delivered in respect of the Product Schedules in accordance with the timing set forth in the Product Schedule. Each invoice shall contain a reference to the relevant Purchase Order number, shall comply with Applicable Laws and Regulations regarding information required on a valid invoice and shall state Service Provider’s registered Tax number. The Parties agree that amounts due under a Product Schedule shall not be set off against another or applied to sums due as a result of the performance of other Product Schedules without the prior written consent of the other Party.
+
+9.4 Payment Period: AstraZeneca shall pay all invoices within [**]. The payment period begins on the date of receipt of the invoice, except:
+
+9.4.1 Pursuant to Clauses 1.10 or 6.5; or
+
+9.4.2 Where AstraZeneca has a bona fide dispute in respect of the invoice, in which case AstraZeneca shall pay all undisputed amounts within the time period set forth above and shall pay any amount found to be due upon resolution of a dispute promptly upon resolution of the dispute (or as otherwise determined under Clause 17.11).
+
+9.5 Interest: If a Party fails to pay any amount due under this Agreement within [**] after payment is due and a written reminder has been sent, the other Party may be entitled to charge interest until actual payment at no more than [**] percent per annum above the base lending rate of the Bank of England prevailing from time to time until payment is made. Such interest shall accrue on a daily basis from the due date until the
+
+Page | 16
+
+date of actual payment of the overdue amount and shall be payable on demand. Interest shall not accrue on payments that are contested in good faith.
+
+9.6 Right to Suspend: Except as set out and agreed in a Product Schedule or pursuant to Clause 17.2 (Force Majeure), Service Provider shall not be entitled at any time to suspend the provision of the whole or any part of the supply of Product.
+
+10.Taxes
+
+10.1 Taxes: The Parties agree that all charges under this Agreement are exclusive of all taxes, levies, duties, contribution, withholding or impost of whatever nature (including related fines, penalties, surcharges of interest) (“Taxes”, each “Tax”) imposed or payable to any government, state or municipality or any local, state, federal or other fiscal, revenue, customs or excise authority, body or official anywhere in the world (“Tax Authority”) including (but not limited to) value added or goods and service taxes or other similar taxes computed by reference to turnover that are required by law to be disclosed as a separate item on the relevant invoice (“GST”) that are the responsibility of AstraZeneca under this Agreement. Notwithstanding the foregoing, Service Provider shall be responsible for any taxes payable to any Tax Authority based on its income.
+
+10.2 GST Invoice: Where either Party is required under this Agreement to make a supply (“GST Supplying Party”) to the other Party (“GST Receiving Party”) for Tax purposes, and Tax is chargeable on such supply, the GST Supplying Party shall provide the GST Receiving Party with an invoice (“Tax Invoice”) including such particulars as are required by any law imposing Tax and such other information as required to claim any credit allowed under a law imposing Tax in respect of such supply. All Prices are exclusive of GST, which, if payable, shall be borne and paid against provision by the Service Provider of a valid Tax Invoice.
+
+10.3 Excess: To the extent, in any circumstances, the GST Receiving Party has paid GST to the GST Supplying Party which it subsequently transpired was in excess of the GST actually due, the GST Supplying Party shall repay to the GST Receiving Party the excess amount.
+
+10.4 Tax Deductions: If a deduction or withholding for or on account of Tax (“Tax Deduction”) is required by law to be made by AstraZeneca, the amount of payment due from AstraZeneca to Service Provider shall be equal to the payment which would have been due if no Tax Deduction had been required less the Tax Deduction. AstraZeneca shall not be required to make an increased payment to Service Provider for a Tax Deduction. AstraZeneca shall co-operate reasonably with Service Provider to notify Service Provider when AstraZeneca believes a Tax Deduction is required and in connection with any proposed actions of Service Provider to reduce or recover the Tax Deduction (e.g., by completing prescribed forms) provided that AstraZeneca shall not dispense or apply a reduced rate of Tax Deduction unless Service Provider has provided evidence, in a form satisfactory to AstraZeneca of authorization to do so.
+
+Page | 17
+
+10.5 Audits; Disputes; Requests for Information: The Parties shall reasonably work together with respect to audits, disputes or requests for information with respect to Taxes (e.g., provision of relevant information and documents) in connection with this Agreement.
+
+11.Confidentiality and Use of Name
+
+11.1 Confidential Information: Neither Party shall, at any time, without the other Party’s prior written consent, disclose to any Third Party any of the other Party’s Confidential Information or the fact that the Services are being conducted hereunder. Each Party shall use such Confidential Information solely for the purposes for which it was provided, including provision of the Services. Each Party shall take all reasonable precautions to prevent any unauthorized use or disclosure of the Confidential Information. For clarity, Confidential Information shall include any information (a) relating to the terms of this Agreement, and (b) defined as “Confidential Information” in the Short Form Agreement, and this Clause 11 shall likewise apply to any such information disclosed under the Short Form Agreement. All Service Provider Information is the Confidential Information of Service Provider. All AstraZeneca Information is the Confidential Information of AstraZeneca. The financial terms of this Agreement are the Confidential Information of the Parties. Confidential Information does not include any information that (i) the receiving Party can prove was known to it prior to the date of this Agreement and any other agreement between the Parties hereto; (ii) the receiving Party can prove was lawfully obtained from a Third Party without any obligation of confidentiality; (iii) is or becomes part of the public domain other than through any act or omission of the receiving Party; or (iv) is independently developed by the receiving Party without use of or reference to the disclosing Party’s Confidential Information, as evidenced by the receiving Party’s business records.
+
+11.2 Required Disclosure: Notwithstanding other provisions of this Agreement, a Party may disclose Confidential Information of the other Party to the extent and to the Persons required under Applicable Laws and Regulations, provided that such Party (a) first gives prompt notice of such disclosure requirement to the other Party so as to enable the other Party to seek any limitations on or exemptions from such disclosure requirement, (b) reasonably cooperates at the other Party’s request and expense in any such efforts by the other Party, and (c) only discloses that portion of such Confidential Information as is legally required.
+
+11.3 Authorized Disclosure:
+
+11.3.1 Notwithstanding other provisions of this Agreement, a Party or its Affiliate may also disclose Confidential Information of the other Party to the extent such disclosure is reasonably necessary to its officers, directors, employees, agents, consultants, contractors, licensees, sublicensees, attorneys, accountants, lenders, insurers or licensors on a need-to- know basis for the sole purpose of performing its obligations or exercising its rights under this Agreement or any Product Schedule; provided that in each case, the recipient is bound by obligations of confidentiality and non-use no less stringent than
+
+Page | 18
+
+those contained in this Agreement. For clarity, and in furtherance of the foregoing, a Party may disclose Confidential Information of the other Party to any Person that has executed a written definitive agreement with AstraZeneca that pertains to the research, development, manufacture or commercialization of the Product; provided that, the recipient is bound by obligations of confidentiality and non-use no less stringent than those contained in this Agreement; and provided further, AstraZeneca shall not be permitted to disclose any Service Provider Background Technology and neither Party shall be permitted to disclose the financial terms of this Agreement and/or any Product Schedule.
+
+11.3.2 Service Provider understands and acknowledges that AstraZeneca is in negotiations of a proposal in response to HSS Request for Proposal Number BAA-18-100-SOL-00003 “Broad Agency Announcement for the Advanced Research and Development of Chemical, Biological, Radiological, and Nuclear Medical Countermeasures”: Area of Interest #8.3, ChAdOx1: Manufacturing and Clinical Evaluation of a COVID-19 Vaccine (the “RFP”).
+
+11.3.3 Service Provider further understands and agrees that AstraZeneca may provide Confidential Information provided in response to this RFP (including information exchanged pursuant to an existing confidentiality or nondisclosure agreement) to representatives or agents of the U.S. Government in connection with AstraZeneca’s proposal for the Product. AstraZeneca further understands and agrees that Service Provider may provide Confidential Information provided under this Agreement (including information exchanged pursuant to an existing confidentiality or nondisclosure agreement) to representatives or agents of the U.S. Government in connection with the Task Order. Each Party takes commercially reasonable steps to restrict their disclosure by the U.S. Government under applicable public disclosure / transparency laws. Each Party, however, shall have no liability for the U.S. Government’s release of any Confidential Information.
+
+11.4 Return of Confidential Information: Upon the earlier of the termination of this Agreement or at a Party’s request for any reason at any time, the other Party shall (a) immediately cease all use of the other Party’s Confidential Information disclosed thereunder and (b) promptly, at the requestor’s instruction, either return to the requestor or destroy the other Party’s Confidential Information disclosed thereunder, including any copies, extracts, summaries or derivative works thereof, and certify in writing to the requestor the completion of such return and/or destruction, provided, however, that such Party may retain one copy solely for archival purposes.
+
+11.5 Publicity: Except as required by Applicable Laws and Regulations, neither of the Parties shall use the name of the other Party (or of the other Party’s Affiliate) for promotional purposes without the prior written consent of the Party whose name is proposed to be used, such consent not to be unreasonably withheld or delayed, nor shall either Party disclose the existence or substance of this Agreement (except as already previously disclosed through a prior written mutually agreed disclosure). In particular, neither Party shall make any publications, presentations or public disclosures related to this Agreement and the subject matter thereof without the other Party’s prior review and
+
+Page | 19
+
+written approval, such approval not to be unreasonably withheld or delayed; provided, for clarity, AstraZeneca is in no way restricted by this Section from making any publications, presentations or public disclosures related to the Product or AstraZeneca’s COVID-19 program generally, which do not specifically include details of this Agreement or Service Provider’s performance hereunder.
+
+12.Indemnity
+
+12.1 Indemnification by AstraZeneca: AstraZeneca shall indemnify, defend and hold harmless Service Provider, its Affiliates, and their respective directors, officers, employees and agents (the “Service Provider Indemnitees”) from and against any and all losses, damages, costs and expenses, including reasonable attorneys’ fees arising out of claims by third parties as a result of: (i) [**] or (ii) AstraZeneca’s breach of this Agreement, including without limitation, any representations, warranties and covenants herein, or (iii) any use, handling or disposal of any product produced by Service Provider for AstraZeneca, including without limitation, any product liability claim; or (iv) any alleged or actual infringement or misappropriation of third party intellectual property rights in the Product or any portion thereof, or manufacture of the Product, or resulting from, use of any AstraZeneca provided information, data, or property in the performance of the Services; except in each case to the extent that (A) such third party claim is based upon the negligence or willful misconduct of Service Provider or a Service Provider Indemnitee or breach of this Agreement by Service Provider; (B) Service Provider is indemnified by the U.S. Government in respect of any such losses, damages, costs or expenses; or (C) Service Provider has an obligation to indemnify AstraZeneca pursuant to Clause 12.2, as to which third party claims each Party shall indemnify the other to the extent of its respective liability for such third party claims. Service Provider must promptly notify AstraZeneca of a covered claim, must tender to AstraZeneca (and/or its insurer) full authority to defend or settle (for monetary damages) the claim, and must reasonably cooperate with the defense at AstraZeneca’s request and expense.
+
+12.2 Indemnification by Service Provider: Subject to Clause 12.5, Service Provider shall indemnify, defend and hold harmless AstraZeneca, its Affiliates, and their respective directors, officers, employees, and agents (the “AstraZeneca Indemnitees”) from and against any and all losses, damages, costs and expenses, including reasonable attorneys’ fees arising out of claims by third parties as a result of (i) [**]; or (ii) Service Provider’s breach of this Agreement, including without limitation, any representations, warranties and covenants herein; or (iii) any alleged or actual infringement or misappropriation of third party intellectual property rights resulting from use of any Service Provider provided information, data or property in the performance of the Services, except in each case to the extent that (A) such third party claim is based upon the negligence or willful misconduct of AstraZeneca or a AstraZeneca Indemnitee or breach of this Agreement by AstraZeneca; (B) AstraZeneca is indemnified by the U.S. Government in respect of any such losses, damages, costs or expenses, or (C) AstraZeneca has an obligation to indemnify Service Provider pursuant to Clause 12.1, as to which third party claims each Party shall indemnify the other to the extent of its respective liability for such third party claims.
+
+Page | 20
+
+AstraZeneca must promptly notify Service Provider of a covered claim, must tender to Service Provider (and/or its insurer) full authority to defend or settle (for monetary damages) the claim, and must reasonably cooperate with the defense at Service Provider’s request and expense.
+
+12.3 The foregoing indemnification rights shall apply only to Third Party Losses.
+
+12.4 All indemnification obligations in this Agreement are conditioned upon the Party seeking indemnification:
+
+12.4.1 promptly notifying the indemnifying Party in writing of any claim or liability of which the Party seeking indemnification becomes aware (including a copy of any related complaint, summons, notice or other instrument); provided, however, that failure to provide such written notice within a reasonable period shall not relieve the indemnifying Party of its obligations under this Clause 12 except to the extent, if any, the indemnifying Party is prejudiced by such failure,
+
+12.4.2 allowing the indemnifying Party, if the indemnifying Party so requests, to conduct and control the defense of any such claim or liability and any related settlement negotiations (at the indemnifying Party’s expense); provided, that the indemnifying Party shall promptly provide and continuously maintain such defense,
+
+12.4.3 cooperating with the indemnifying Party in the defense of any such claim or liability and any related settlement negotiations (at the indemnifying Party’s expense) and
+
+12.4.4 not compromising or settling any claim or liability without prior written consent of the indemnifying Party.
+
+12.5 LIMITATION OF LIABILITY. NOTWITHSTANDING ANYTHING TO THE CONTRARY IN THIS AGREEMENT, TO THE MAXIMUM EXTENT PERMITTED BY LAW:
+
+12.5.1 EXCEPT TO THE EXTENT CAUSED SOLELY BY SERVICE PROVIDER’S GROSS NEGLIGENCE, FRAUD OR WILLFUL MISCONDUCT, IN NO EVENT SHALL SERVICE PROVIDER HAVE ANY LIABILITY FOR THE LOSS OR DAMAGE, THE REPLACEMENT, OR THE COST OR VALUE, OF ANY ASTRAZENECA MATERIALS (AS DEFINED ABOVE). WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, AND EXCEPT TO THE EXTENT CAUSED SOLELY BY SERVICE PROVIDER’S GROSS NEGLIGENCE, FRAUD OR WILLFUL MISCONDUCT, SERVICE PROVIDER HAS NO LIABILITY FOR THE ASTRAZENECA MATERIALS DURING THE PROCESSING OR MANUFACTURING OF PRODUCT NOR FOR ANY LOSS OR DAMAGE OF ASTRAZENECA MATERIALS CAUSED BY A CONFORMING OR NONCONFORMING BATCH.
+
+Page | 21
+
+12.5.2EXCEPT WITH RESPECT TO A PARTY’S MATERIAL BREACH OF ITS CONFIDENTIALITY OBLIGATIONS UNDER CLAUSE 11.1, IN NO EVENT SHALL EITHER PARTY BE LIABLE UNDER THIS AGREEMENT TO THE OTHER PARTY FOR THE COST OF SUBSTITUTE SERVICES, DAMAGES FOR DELAYS, LOSS OF USE, DATA, REVENUE OR PROFIT OR ANY CONSEQUENTIAL, INCIDENTAL, INDIRECT, EXEMPLARY, SPECIAL OR PUNITIVE DAMAGES, INCLUDING ANY DAMAGES FOR BUSINESS INTERRUPTION, WHETHER ARISING OUT OF BREACH OF CONTRACT, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, REGARDLESS OF WHETHER SUCH DAMAGES WERE FORESEEABLE AND WHETHER OR NOT SUCH PARTY WAS ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. FOR AVOIDANCE OF DOUBT, THE PARTIES AGREE THAT ANY CLAIM BY SERVICE PROVIDER FOR ANY PORTION OF THE CAPACITY COMMITMENT FEE OR ANY OTHER FEES OWED BY ASTRAZENECA AND NOT PAID IN ACCORDANCE WITH THIS AGREEMENT SHALL NOT BE EXCLUDED BY THIS CLAUSE 12.5.
+
+12.5.3 IN ADDITION TO THE FOREGOING, EXCEPT FOR SERVICE PROVIDER’S (A) BREACH OF ITS RESERVED CAPACITY OBLIGATION HEREUNDER WHICH SHALL BE AS SET FORTH IN CLAUSE 12.5.4 BELOW, SERVICE PROVIDER’S AGGREGATE LIABILITY TO ASTRAZENECA HEREUNDER, FOR ANY REASON WHATSOEVER, INCLUDING WITHOUT LIMITATION FOR ANY AND ALL BREACHES OF ITS OBLIGATIONS UNDER THIS AGREEMENT, IS LIMITED TO [**].
+
+12.5.4 FURTHERMORE, SERVICE PROVIDER’S AGGREGATE LIABILITY TO ASTRAZENECA SOLELY WITH RESPECT TO A BREACH BY SERVICE PROVIDER OF ITS OBLIGATION TO RESERVE CAPACITY PURSUANT TO WORK ORDER #5997-01 SHALL BE LIMITED TO [**]. FOR CLARITY, SERVICE PROVIDER SHALL HAVE NO LIABILITY TO ASTRAZENECA FOR A BREACH OF RESERVED CAPACITY OBLIGATIONS TO THE EXTENT CAUSED BY A UNITED STATES GOVERNMENT DIRECTION OR REQUIREMENT.
+
+12.5.5 NOTWITHSTANDING THE PROVISIONS OF THIS CLAUSE 12.5.5, NOTHING IN THIS AGREEMENT SHALL OPERATE TO EXCLUDE OR RESTRICT EITHER PARTY’S LIABILITY FOR FRAUD, GROSS NEGLIGENCE OR WILLFUL MISCONDUCT.
+
+13.Insurance
+
+Each Party agrees to keep in full force and effect and maintain at its sole cost and expense insurance coverage in types and amounts commensurate in its industry for the performance of services substantially similar to the services by similarly-sized companies, and as otherwise prudent or required by law. Each Party agrees to provide the other party with certificates of insurance if requested to do so by the other Party.
+
+14.Term and Termination
+
+Page | 22
+
+14.1 Term of the Agreement: This Agreement shall commence on the Effective Date and shall end on the third (3rd) anniversary of the Effective Date unless sooner terminated in accordance with the terms hereof (the “Term”). The Term may be extended upon written agreement by AstraZeneca and Service Provider. Any uncompleted Product Schedules shall continue notwithstanding the expiry of this Agreement.
+
+14.2 Term of Product Schedule: Each Product Schedule shall remain in force for the period set forth in the Product Schedule, unless terminated earlier under this Clause 14.
+
+14.3 Termination for Convenience: This Agreement or a Product Schedule may be terminated by AstraZeneca at any time upon thirty (30) days prior written notice to Service Provider.
+
+14.4 Material Breach: This Agreement or a Product Schedule may be terminated by either Party, either in whole or in part with respect to all or a portion of any Product Schedule, upon the material breach of this Agreement by the other Party, which material breach continues unremedied for [**] after delivery to the non-breaching Party of notice of the material breach.
+
+14.5 Insolvency Events: This Agreement and all Product Schedules may be terminated by either Party immediately upon written notice to the other Party in the event the other Party suffers an Insolvency Event.
+
+14.6 Illegal Trade, Money Laundering: This Agreement and all Product Schedules may be terminated by a Party immediately upon written notice to the other Party if the other Party or any employee of the other Party with the knowledge of the other Party is convicted of a crime involving illegal trade, counterfeiting or money laundering or is not so convicted but there is sufficient evidence of their involvement in illegal trade or counterfeiting including negligence or failure to establish necessary preventive controls.
+
+14.7 Payment upon Termination: In the event of a termination of this Agreement or a Product Schedule pursuant to this Clause 14, AstraZeneca shall pay all outstanding amounts for all work performed and in process in accordance with the terms of this Agreement and any Product Schedule through the date of termination, plus all reasonable, bona fide and duly documented non-cancellable out-of-pocket costs and expenses incurred by Service Provider on behalf of AstraZeneca in connection with this Agreement and the Product Schedule and/or as a result of such termination (collectively “Accrued Amounts”). In addition, if this Agreement is terminated for any reason other than by AstraZeneca pursuant to Clauses 14.4, 14.5 or 14.6, AstraZeneca shall pay Service Provider: [**].
+
+14.8 Survival of Rights and Obligations: The expiration or termination of this Agreement or a Product Schedule shall be without prejudice to any rights or obligations that may have accrued prior to such expiration or termination. Notwithstanding expiration or termination of this Agreement for any reason, the rights and obligations under Clauses 4, 7, 8.1.10, 8.4, 9.4, 9.5, 10, 11, 12, 13, 14.7, 14.8, 16, 17, 18, 20.1, 20.2, 23, Part C
+
+Page | 23
+
+(solely to the extent the definitions contained therein are used in provisions that expressly survive the expiration or termination of this Agreement), Parts D and E (solely to the extent the provisions therein expressly survive the expiration or termination of this Agreement) will survive.
+
+15.Assignment, Transfer and Subcontracting
+
+15.1 Assignment: Neither Party may assign this Agreement or any of its rights or obligations without the prior written consent of the other Party and any purported assignment in contravention of this Clause shall be null and void, provided, however, that either Party may assign this Agreement to a corporate Affiliate or to any corporation with which it may merge or consolidate or to which it may assign substantially all of its assets or that portion of its business to which this Agreement pertains without obtaining the agreement of the other Party. Subject to the preceding sentence, this Agreement will be binding upon, inure to the benefit of, and be enforceable by, the Parties and their respective successors and permitted assigns. Any attempted assignment, delegation or subcontracting in violation of this Clause 15.1 shall be void and of no effect.
+
+15.2 Subcontracting: Service Provider may subcontract its obligations under this Agreement to an Affiliate and to any non-Affiliate who is identified in a Product Schedule. Otherwise, Service Provider shall not subcontract its obligations under this Agreement to any Person without the prior written consent of AstraZeneca. Such consent shall not relieve Service Provider from any liability or obligation under this Agreement and Service Provider shall be responsible for the acts or omissions of its subcontractors as fully as if they were its own. Service Provider’s subcontractors shall comply with all the applicable terms and conditions of this Agreement. Service Provider shall be liable for any breach of its obligations under this Agreement resulting from actions and/or omissions of its Third Party subcontractors, unless otherwise agreed in this Agreement or the Product Schedule.
+
+16.Notices
+
+16.1 Form of Notice: Any notices given hereunder shall be sent by email (with a confirmation copy sent via overnight courier) or via overnight courier to the following addresses (or such other address as a Party may designate as a notice address in a prior written notice to the other Party) and shall be deemed delivered when received (or if received on a weekend or holiday, on the next Business Day thereafter) as follows. This Clause 16.1 is not intended to govern the day-to-day business communications necessary between the Parties in performing their obligations under the terms of this Agreement.
+
+Page | 24
+
+16.2 Address for Notice:
+
+Service Provider
+
+To:
+
+With a copy to:
+
+Emergent Manufacturing Operations Baltimore, LLC
+400 Professional Drive, Suite 400 Gaithersburg, MD 20879
+Attention: Syed Husain, Senior Vice President, BU Head, CDMO
+
+Emergent BioSolutions Inc.
+400 Professional Drive, Suite 400 Gaithersburg, MD 20879
+Attention: General Counsel
+
+AstraZeneca
+
+To:
+
+With a copy to (which shall not constitute effective notice):
+
+AstraZeneca Pharmaceuticals LP 1800 Concord Pike, Wilmington, Delaware 19803, USA
+Attention: [**]
+
+Email: legalnotices@astrazeneca.com Attention: Legal Department
+
+17.Regulatory Matters
+
+17.1 Regulatory Documentation. Any AstraZeneca requests for documents or other work product that do not exist as of the date of such request, or other substantive requests for assistance in compiling any filing for a Regulatory Authority, shall be subject to a
+
+Page | 25
+
+mutually agreeable Product Schedule (or amendment thereto) setting forth additional Services and the amounts payable by AstraZeneca therefor.
+
+17.2 Regulatory Communications and Correspondence. Any and all communications from the FDA or other Regulatory Authorities related to the manufacture of the Product at the Service Provider facility that are addressed to Service Provider shall be handled in accordance with the terms and conditions of the QAA (if applicable), or shall be handled by Service Provider, incorporating any and all reasonable comments from AstraZeneca as necessary after provision by Service Provider with, to the extent regulatory timelines reasonably permit, a sufficient period of time for such review and comment.
+
+17.3 Regulatory Authorities. AstraZeneca shall be solely responsible for handling all filings with, and complaints and communications from, Regulatory Authorities with respect to the Product. As reasonably requested by AstraZeneca, Service Provider shall cooperate in resolving such complaints and responding to such communications to the extent they pertain to Service Provider’s manufacture of the Product, and AstraZeneca shall reimburse Service Provider for all reasonable costs and expenses incurred by Service Provider in connection with any such assistance. For clarity, under no circumstance shall Service Provider be required to sign, as an applicant or in any other capacity, any filing with any Regulatory Authority in any country relating to the approval, sale, use or distribution of Product.
+
+18.General
+
+18.1 Relationship of Parties: All employees and agents of Service Provider that perform Services under this Agreement are employees and agents, respectively, of Service Provider and not AstraZeneca during the Term and shall at all times be directed solely by Service Provider. Service Provider is acting in the capacity of independent contractor hereunder and not as employee of AstraZeneca.
+
+18.2 Force Majeure. If either Party fails to fulfill its obligations hereunder (other than an obligation for the payment of money), when such failure is due to an event of Force Majeure, then said failure shall be excused for the duration of such event and for such a time thereafter as is reasonable to enable the Parties to resume performance under the affected Product Schedule. In the event of Force Majeure, the provisions of Clause 1.8 shall apply.
+
+18.3 Independent Contractor. Each of the Parties is an independent contractor and nothing herein contained shall be deemed to constitute the relationship of partners, joint venturers nor of principal and agent between the Parties. Neither Party shall have any right or authority whatsoever to incur any liability or obligation (express or implied) or otherwise act in any manner in the name or on the behalf of the other, or to make any promise, warranty or representation binding on the other.
+
+Page | 26
+
+18.4 Allocations of Risk. Each provision of this Agreement that provides for a limitation if liability, disclaimer of warranties or exclusion of damages is to allocate the risks of this Agreement between the Parties and each Party acknowledges that such allocation of risk is reflected in the pricing offered by Service Provider to AstraZeneca and is an essential element of the basis of the bargain between the Parties.
+
+18.5 Waivers: No failure or delay by any Party in enforcing any provision of this Agreement shall be deemed a waiver of that Party’s rights to later enforce that provision or any other provision of this Agreement. To be effective, any waiver must be in writing and signed by the waiving Party. No single or partial exercise of any right or remedy provided under this Agreement shall prevent or restrict the further exercise of that or any other right or remedy.
+
+18.6 Severability: If any provision or part-provision of this Agreement is or becomes invalid, illegal or unenforceable, it shall be deemed modified to the minimum extent necessary to make it valid, legal and enforceable. If such modification is not possible, the relevant provision or part-provision shall be deleted. Any modification to or deletion of a provision or part-provision shall not affect the validity and enforceability of the rest of this Agreement.
+
+18.7 Entire Agreement: This Agreement, the Product Schedules and the QAA constitute the entire agreement between the Parties, and supersedes all prior agreements, arrangements and understandings between them, whether written or oral, with respect to the subject matter hereof.
+
+18.8 No Reliance: Each Party confirms that it is not relying on any statement, assurance, warranty or representation (whether made innocently or negligently) of the other Party except as specifically set out in this Agreement. This Clause 18.8 is not intended to limit or exclude liability for fraud or fraudulent misrepresentation.
+
+18.9 Amendments and Modifications: This Agreement, or any of its Exhibits, may not be altered, amended or modified except by a written document signed by the Parties. Each Agreement formed by the entry into a Product Schedule or an Affiliate Product Schedule may only be amended or modified by way of the authorized representative of the relevant entities signing an amendment or modification to the relevant Product Schedule or Affiliate Product Schedule and such amendment or modification shall not impact any other Product Schedule or Affiliate Product Schedule. AstraZeneca’s use of purchase orders is for its convenience only and no purchase order shall modify or supersede the terms of this Agreement or of any Product Schedule. If the terms of a Product Schedule conflict with the terms of this Agreement, the terms of this Agreement shall control over the conflicting terms of the Product Schedule, unless specifically stated otherwise in the Product Schedule. If this Agreement conflicts with the terms of the QAA with respect to any quality-related matters, then the QAA shall control. If this Agreement conflicts with the QAA with respect to any matters not related to quality, then this Agreement shall control.
+
+Page | 27
+
+18.10 Third Parties: The provisions of this Agreement are for the sole benefit of the Parties and their successors and permitted assigns, and they shall not be construed as conferring any rights in any other Persons except as otherwise provided in this Agreement. No one other than a Party to this Agreement, their successors and permitted assigns, has any right to enforce any of its terms.
+
+18.11 Performance Through Affiliates: Each Party may discharge any obligations and exercise any right hereunder through any of its Affiliates. Each Party hereby guarantees the performance by its Affiliates of such Party’s obligations under this Agreement, and shall cause its Affiliates to comply with the provisions of this Agreement in connection with such performance. Any breach by a Party’s Affiliate of any of such Party’s obligations under this Agreement shall be deemed a breach by such Party, and the other Party may proceed directly against such Party without any obligation to first proceed against such Party’s Affiliate.
+
+18.12 Counterparts: This Agreement may be executed in two counterparts, each of which will be deemed an original and all of which will together be deemed to constitute one agreement. The Parties agree that the execution of this Agreement by industry standard electronic signature software and/or by exchanging PDF signatures shall have the same legal force and effect as the exchange of original signatures, and that in any proceeding arising under or relating to this Agreement, each Party hereby waives any right to raise any defense or waiver based upon execution of this Agreement by means of such electronic signatures or maintenance of the executed agreement electronically.
+
+18.13 Waiver of Jury Trial. TO THE FULLEST EXTENT PERMITTED BY LAW, THE PARTIES HERETO HEREBY IRREVOCABLY WAIVE THE RIGHT TO A TRIAL BY JURY IN ANY ACTION RELATED TO THIS AGREEMENT.
+
+18.14 Choice of Law; Dispute Resolution.
+
+18.14.1 Choice of Law. This Agreement shall be governed by and construed in accordance with the laws of the State of Delaware, excluding any conflicts or choice of law rule or principle that might otherwise refer construction or interpretation of this Agreement to the substantive law of another jurisdiction. The Parties agree to exclude the application to this Agreement of the United Nations Convention on Contracts for the International Sale of Goods.
+
+18.14.2 Service. Each Party further agrees that service of any process, summons, notice or document by registered mail to its address set forth in Clause 16.2 shall be effective service of process for any action, suit or proceeding brought against it under this Agreement in or before any court or other tribunal, including in respect of the alternative dispute resolution procedures contemplated by Clause 18.14.3.
+
+18.14.3 Dispute Resolution.
+
+Page | 28
+
+a.If a dispute arises between the Parties in connection with or relating to this Agreement, a Product Schedule, a Purchase Order or any other document or instrument delivered in connection herewith (a “Dispute”), then either Party shall have the right to refer such Dispute to representatives of the Parties who have the authority to settle the Dispute for attempted resolution by good faith negotiations during a period of [**]. Any final decision mutually agreed to by such representatives in writing shall be conclusive and binding on the Parties.
+
+b.If such representatives are unable to resolve any such Dispute within such [**] period, either Party shall be free to institute binding arbitration in accordance with Clause 18.14.3(c) upon written notice to the other Party (an “Arbitration Notice”) and seek such remedies as may be available.
+
+c.Upon receipt of an Arbitration Notice by a Party, the applicable Dispute shall be resolved by final and binding arbitration before a panel of three (3) experts with relevant industry experience (the “Arbitrators”). Each of Service Provider and AstraZeneca shall promptly select one (1) Arbitrator, which selections shall in no event be made later than [**] after the notice of initiation of arbitration. The third Arbitrator shall be chosen promptly by mutual agreement of the Arbitrator chosen by Service Provider and the Arbitrator chosen by AstraZeneca, but in no event later than [**] after the date that the last of such Arbitrators was appointed. The Arbitrators shall determine what discovery will be permitted, consistent with the goal of reasonably controlling the cost and time that the Parties must expend for discovery; provided that the Arbitrators shall permit such discovery as they deem necessary to permit an equitable resolution of the dispute. The arbitration shall be administered by the American Arbitration Association (or its successor entity) in accordance with the then current Commercial Rules of the American Arbitration Association including the Procedures for Large, Complex Commercial Disputes (including the Optional Rules for Emergency Measures of Protection), except as modified in this Agreement. The arbitration shall be held in Wilmington, Delaware, and the Parties shall use reasonable efforts to expedite the arbitration if requested by either Party. The Arbitrators shall, within [**] after the conclusion of the arbitration hearing, issue a written award and statement of decision describing the essential findings and conclusions on which the award is based, including the calculation of any damages awarded. The decision or award rendered by the Arbitrators shall be final and non-appealable, and judgment may be entered upon it in accordance with Applicable Laws and Regulations in the State of Delaware or any other court of competent jurisdiction. The Arbitrators shall be authorized to award compensatory damages, but shall not be authorized to reform,
+
+Page | 29
+
+modify or materially change this Agreement or any other agreements contemplated hereunder.
+
+d.Each Party shall bear its own counsel fees, costs, and disbursements arising out of the dispute resolution procedures described in this Clause 18.14.3, and shall pay an equal share of the fees and costs of the Arbitrators and all other general fees related to any arbitration described in Clause 18.14.3; provided, however, the Arbitrators shall be authorized to determine whether a Party is the prevailing Party, and if so, to award to that prevailing Party reimbursement for its reasonable counsel fees, costs and disbursements (including expert witness fees and expenses, photocopy charges or travel expenses) or the fees and costs of the Arbitrators. Unless the Parties otherwise agree in writing, during the period of time that any arbitration proceeding described in Clause 18.14.3 is pending under this Agreement, the Parties shall continue to comply with all those terms and provisions of this Agreement that are not the subject of such pending arbitration proceeding. Nothing contained in this Agreement shall deny any Party the right to seek injunctive or other equitable relief from a court of competent jurisdiction in the context of a bona fide application to prevent irreparable harm involving a Party’s Confidential Information, and such an action may be filed and maintained notwithstanding any ongoing arbitration proceeding. All arbitration proceedings and decisions of the Arbitrator under this Clause 18.14.3 shall be deemed Confidential Information of both Parties under Clause 11.
+
+18.15 Interpretation: Except where the context expressly requires otherwise, (a) the use of any gender herein shall be deemed to encompass references to either or both genders, and the use of the singular shall be deemed to include the plural (and vice versa), (b) the words “include,” “includes” and “including” shall be deemed to be followed by the phrase “without limitation,” (c) the word “will” shall be construed to have the same meaning and effect as the word “shall,” (d) any definition of or reference to any agreement, instrument or other document herein shall be construed as referring to such agreement, instrument or other document as from time to time amended, supplemented or otherwise modified (subject to any restrictions on such amendments, supplements or modifications set forth herein), (e) any reference herein to any Person shall be construed to include the Person’s successors and assigns, (f) the words “herein,” “hereof” and “hereunder,” and words of similar import, shall be construed to refer to this Agreement in its entirety and not to any particular provision hereof, (g) all references herein to Clauses Parts shall be construed to refer to Clauses and Parts of this Agreement, and references to this Agreement include all Exhibits and Schedules hereto, (h) all references to a number of days, unless otherwise specified, such number refers to calendar days, (i) provisions that require that a Party or the Parties “agree,” “consent” or “approve” or the like shall require that such agreement, consent or approval be specific and in writing, whether by email, written agreement, letter, approved minutes or otherwise (but excluding instant messaging), (j) references to any specific law, rule or regulation, or article, section or other
+
+Page | 30
+
+division thereof, shall be deemed to include the then-current amendments thereto or any replacement or successor law, rule or regulation thereof, (k) the term “or” shall be interpreted in the inclusive sense commonly associated with the term “and/or,” (l) section headings are for convenient reference and shall not affect the interpretation of this Agreement and (m) any monetary amounts in this Agreement and in any Product Schedules are, unless otherwise indicated, denominated in United States Dollars.
+
+PART B: WAYS OF WORKING
+
+19.AstraZeneca Expectations
+
+19.1 Authorization: Service Provider recognizes AstraZeneca’s commitment to work only with suppliers and service providers who embrace the standards of ethical behavior consistent with AstraZeneca’s Expectations of Third Parties Handbook, a copy of which can be found on www.astrazeneca.com or by clicking the “Resources” tab on https://www.astrazeneca.com/sustainability.html, as amended from time to time, and in particular those principles in the Section “Anti-Bribery and Anti-Corruption” as amended from time to time.
+
+19.2 Service Provider Conduct: Each party shall comply with all Applicable Laws and Regulations in connection with its obligations under this Agreement including applicable cGMP standards. Each Party (i) shall perform this Agreement to ethical standards consistent with those set out in its respective Code of Conduct (its “Ethical Standards”), (ii) will not take any action that will cause the other Party to be in breach of any Applicable Laws and Regulations for the prevention of fraud, bribery and corruption, racketeering, money laundering, terrorism, including the US Foreign Corrupt Practices Act and the UK Bribery Act, (iii) will not offer, pay, request or accept any bribe, inducement, kickback or facilitation payment, and will not make or cause another to make any offer or payment to any individual or entity for the purpose of influencing a decision for the benefit of such Party, and (iv) will use reasonable efforts to cause its Affiliates, suppliers and subcontractors performing services for such Party or its Affiliates to operate their business in compliance with all Applicable Laws and Regulations, as amended from time to time.
+
+19.3 Improvement Plan: In the event a Party fails to meet or maintain its Ethical Standards, the Parties will agree upon what measures should be taken by such Party to improve such Party’s performance (the “Improvement Plan”). If the Parties are unable to agree upon an Improvement Plan or the relevant Party does not implement the Improvement Plan within an agreed reasonable timescale (not to exceed [**] months), the other Party will be entitled to terminate this Agreement with immediate effect and be relieved of any obligations under this Agreement.
+
+19.4 Trade Controls: Each Party represents, warrants and undertakes that it is not on any applicable official national or international sanctioned party lists and that performance of this Agreement will not violate applicable embargo regulations. Each Party has the right, at such Party’s sole expense, to conduct screening checks of the other
+
+Page | 31
+
+Party, including verification of the other Party’s identity, including full name, country location and address, against official national and international sanctioned party lists and embargo regulations.
+
+19.5 Export Controls. This Agreement is made subject to any restrictions under the export control laws, rules and regulations concerning the export of products, materials or technical information either from the United States of America or to a foreign national within the United States of America (e.g., a “deemed export” applying to transfers solely within the United States of America) which may be imposed upon or related to Service Provider or AstraZeneca from time to time by the government of the United States of America. AstraZeneca shall be responsible for performing all activities and procedures as may be necessary for the importation of the AstraZeneca Materials required to be provided by AstraZeneca to Service Provider hereunder, and for any and all exportation of Product. AstraZeneca shall be solely responsible for, and shall pay, all associated duties, taxes and costs and shall comply with all applicable import and export laws.
+
+20.Product Security
+
+20.1 Destruction of Waste: Service Provider shall destroy all Waste which is not delivered to AstraZeneca so it cannot be used or enter the supply chain on AstraZeneca and Service Provider mutually acceptable timelines, during and upon termination or expiry of the Term. Such Waste shall be secured and reconciled by Service Provider pending destruction. Service Provider shall keep a record of destruction of any Waste and promptly issue certificates of destruction. The records shall be kept for a period of at least [**] and made available to AstraZeneca on request.
+
+20.2 Standard Operating Procedures: Service Provider shall maintain standard operating procedures and full records detailing production amounts and the delivery of produced Product bulk drug substance to AstraZeneca to ensure that the security of the supply chain is secured, maintained and controlled. Such records and standard operating procedures relating to Product security shall be kept for a period of at least [**] and made available to AstraZeneca on request.
+
+20.3 Subcontractors: Service Provider shall include in all of its contracts with its subcontractors involved in the manufacture, supply or handling (including, to the extent any such Services are included in a Product Schedule, storage, warehousing, distribution and transportation) of Product or AstraZeneca Materials, provisions substantially identical to this Clause 20.
+
+20.4 Security Measures: Service Provider will implement reasonable security precautions to prevent any loss or theft of, or damage or unauthorized access to the Product while in the control of Service Provider and shall ensure that stocks of Product are kept separate from and clearly distinguished from other stocks and supplies held by Service Provider.
+
+Page | 32
+
+20.5 Suspect Samples: At the request of AstraZeneca, Service Provider shall support AstraZeneca in the authentication of suspect samples, including batch checks, responding to requests for information, for example to be sent to AstraZeneca operations sites for use in authentication work, so as to enable prompt authentication in accordance with AstraZeneca standards and strategy.
+
+20.6 IT Security: In performing its obligations and exercising its rights under this Agreement, each Party will ensure that it and each of its Affiliate(s) performing or requiring Services hereunder will maintain administrative, technical, and physical measures, controls, tools, systems, policies and procedures which it deems to be appropriate for the protection of the other Party’s Confidential Information and to prevent interference with its obligations hereunder. Service Provider shall work with AstraZeneca in good faith to mitigate the potential occurrence of any Security Incidents and any risks related thereto or arising therefrom, in connection with the Services, including working with key government agencies from the United States who may provide cyber security services to AstraZeneca and AstraZeneca’s supply chain partners, including Service Provider. Each Party will notify the other Party, in writing, of any Security Incident affecting or which may affect any information technology infrastructure and data and/or facilities owned, leased and/or used by and/or provided for use by such Party or any Affiliate, which may affect the delivery of the Services, without undue delay and in any event within [**] after such Party becomes aware of such Security Incident. Such notification will be, in the first instance, sent by e-mail to the following e-mail address: [**] and immediately followed up by telephone to [**].
+
+20.7 Security Breaches: Any diversion, theft, tampering, substitution or other breach of the security of the Product (including suspicious returns), machinery, other tools of production or product security information pertaining to this Agreement or the relevant Product Schedule shall be reported to AstraZeneca (copying the AstraZeneca [**]) within [**] of discovery of such incident. Service Provider shall, at AstraZeneca’s cost and expense, provide all reasonable assistance to AstraZeneca during any investigation that AstraZeneca may initiate in relation to such incident.
+
+21.Health, Safety and Environment
+
+21.1 Service Provider will be solely responsible for implementing and maintaining health and safety procedures for the performance of Services and for the handling of any Waste used in or generated by the Services. Service Provider, in consultation with AstraZeneca, will develop safety and handling procedures for Product; provided, however, that AstraZeneca will have no responsibility for Manufacturer’s health and safety program.
+
+21.2 Incident Reporting: Service Provider shall as soon as it becomes aware promptly report to AstraZeneca in writing any event or occurrence at the Service Provider’s site where Services are being performed under a Product Schedule which is reasonably likely to affect the provision of the Product or the performance of this Agreement.
+
+Page | 33
+
+22.FFDCA Requirements
+
+Each Party represents, warrants and undertakes to the other Party that it: (a) is not currently excluded, debarred, suspended or otherwise ineligible to participate in U.S. federal healthcare programs or in federal procurement or non-procurement programs pursuant to Section 306 of the FFDCA, and no debarment is pending or no debarment proceedings have been initiated, (b) has not been charged with or convicted of a criminal offense that falls within the scope of 42 U.S.C. §1320a 7(a), 1320a-7(b)(1)-(3) related to the provision of healthcare items or services, but has not yet been excluded, debarred, suspended or otherwise declared ineligible, (c) is not debarred or subject to debarment under 21 U.S.C. §335(a), and (d) is not otherwise subject to any restrictions or sanctions by the FDA (an “Ineligible Person”). Each Party agrees to promptly disclose in writing to the other Party if it becomes aware that it or any of its employees or agents is or becomes an Ineligible Person, or if any action or investigation is pending or, to the best of such Party’s knowledge, threatened, relating thereto, at which point the other Party shall have the right to terminate this Agreement for material breach pursuant to Clause 14.6.
+
+23.Records and Inspections. Monitoring and Right to Audit.
+
+23.1 Records: For purposes of this Agreement, “Records” will mean information created, received or recorded in any format by Service Provider in the performance of Service Provider’s obligations under this Agreement. Service Provider will maintain and retain complete organized and accurate Records of all equipment and sites used and services provided, including records of raw materials, manufacture, testing, storage and delivery of the Product.
+
+23.2 Protection Against Destruction. Service Provider will act consistently with industry standards to ensure that Records are protected from destruction or damage and are maintained within Service Provider’s control during the term of the relevant Product Schedule for [**] thereafter, or for a longer period of time as requested by AstraZeneca and agreed to by Service Provider and as otherwise specified in the relevant QAA or this Agreement. AstraZeneca or its authorized representatives, will be permitted to examine and obtain copies of such Records at AstraZeneca’s expense.
+

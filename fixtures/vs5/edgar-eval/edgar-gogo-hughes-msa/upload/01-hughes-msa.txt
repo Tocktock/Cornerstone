@@ -1,0 +1,483 @@
+2
+gogo-ex10_1.htm
+EX-10.1
+
+EX-10.1
+
+Exhibit 10.1
+
+THE USE OF THE FOLLOWING NOTATION IN THIS EXHIBIT INDICATES THAT
+
+THE CONFIDENTIAL PORTION HAS BEEN OMITTED PURSUANT TO ITEM
+
+601(b)(10)(iv) WHEREBY CERTAIN IDENTIFIED INFORMATION HAS BEEN
+
+EXCLUDED BECAUSE IT IS BOTH NOT MATERIAL AND WOULD LIKELY CAUSE
+
+COMPETITIVE HARM TO THE REGISTRANT IF PUBLICLY DISCLOSED: [***]
+
+MASTER SERVICES AGREEMENT
+
+THIS MASTER SERVICES AGREEMENT (this “Agreement”) is made and entered into as of May 21, 2022 (the “Effective Date”) by and between Gogo Business Aviation LLC, a Delaware limited liability company, having offices at 105 Edgeview Drive, Broomfield, CO 80021, and its Affiliates (collectively referred to as “Customer”), and Hughes Network Systems, LLC, a Delaware limited liability company, having its principal offices at 11717 Exploration Lane, Germantown, MD 20876 (“Consultant”).
+
+WITNESSETH:
+
+WHEREAS, Customer wishes to engage Consultant to perform certain services; and
+
+WHEREAS, Consultant desires to perform such services for Customer.
+
+NOW, THEREFORE, in consideration of the foregoing and the mutual covenants and agreements contained herein, the receipt and sufficiency of which are acknowledged, the parties hereto hereby agree as follows:
+
+1. DEFINITIONS. As used herein, the following terms shall have the following respective meanings:
+
+1.1 “Affiliate” means an entity, which directly or indirectly, owns or controls, is owned or is controlled by or is under common ownership or control with, another entity. As used in this Section 1.1, “control” means the power to direct the management or affairs of an entity, and “ownership” means the beneficial ownership of more than 50% of the voting equity securities or other equivalent voting interests of the entity.
+
+1.2 “Confidential Information” means all non-public information in any form or medium whether or not owned by the Party disclosing such information (“Discloser”) to the other Party (“Recipient”), including the existence of this Agreement and any business relationship between the Parties. Discloser will use reasonable efforts to mark written disclosures as confidential, and to provide written summaries of any Confidential Information provided in non-written form, but failure to do so will not affect the confidential nature of the information provided.
+
+1.3 “Consultant Background IP” means [***].
+
+1.4 “Consultant Foreground IP” shall mean [***]:
+
+(a) [***]
+
+(b) [***]
+
+(c) [***]
+
+(d) [***]
+
+(e) [***]
+
+(f) [***]
+
+1.5 “Customer Background IP” means all IP, owned, controlled, or licensable by Customer as of the Effective Date, or which Customer comes to own, control, or have the right to license from a third party independently of this Agreement or any applicable SOW. Customer Background IP does not include any Customer Foreground IP, Consultant Background IP, or Consultant Foreground IP.
+
+1.6 “Customer Foreground IP” shall mean all IP created, conceived, authored, developed or reduced to practice by or on behalf of Customer (either solely or jointly by Customer, or by others acting under contract with or otherwise on behalf of Customer) as a result of or arising from either party’s performance under this Agreement or any applicable SOW relating to any of the following (in each case excluding any Customer Background IP and Consultant Background IP):
+
+(a) [***]
+
+(b) [***]
+
+(c) [***]
+
+(d) [***]
+
+(e) [***]
+
+(f) [***]
+
+Proprietary & Confidential
+
+1
+
+(g) [***]
+
+(h) [***]
+
+(i) [***]
+
+(j) [***]
+
+1.7 “Customer Materials” are any computer programs, specifications, content, Customer Background IP or other materials provided by Customer to Consultant.
+
+1.8 “Data Security Breach” means a breach by Consultant of its obligations as set forth in the applicable SOW or in Section 5 herein that (a) results in the loss or misuse of unencrypted Personally Identifiable Information by Consultant (unless decryption thereof is enabled by Consultant’s grossly negligent act or omission); (b) results in the unauthorized and/or unlawful Processing, disclosure, access, alteration, corruption, transfer, sale or rental, destruction, or use of Personally Identifiable Information by Consultant; or (c) compromises the security, confidentiality, or integrity of Personally Identifiable Information.
+
+1.9 “Deliverables” means those items to be delivered to Customer as specifically listed in an applicable SOW.
+
+1.10 “Intellectual Property” or “IP” means all ideas, information, concepts, discoveries, inventions, methods or processes, specifications, technology, software and other works of authorship, improvements and know how (whether or not patentable and whether or not reduced to practice), and all associated rights in and to any patents, patent applications (including any reissues, continuations, continuations-in-part, revisions, extensions and reexaminations thereof), copyrights and trade secrets, and all rights in and to any proprietary or confidential information.
+
+1.11 “Personally Identifiable Information” or “PII” means: (i) any information that identifies or can be used to identify an individual, such as first and last name, social security number or other government issued number or identifier, date of birth, home or other physical address, e-mail address or other online contact information, telephone number, biometric data, mother’s maiden name, or other personally identifiable information; or (ii) any “non-public personal information” as that term is defined in the Gramm-Leach-Bliley Act found at 15 U.S.C. Subchapter 1, §6809(4).
+
+1.12 “Processing” or “Process” means any operation or set of operations that is performed upon Personally Identifiable Information, whether or not by automatic means, including, without limitation, collection, recording, organization, storage, access, adaptation, alteration, retrieval, consultation, use, disclosure, dissemination, making available, alignment, combination, blocking, deleting, erasure, or destruction.
+
+1.13 “Services” means certain strategic project services, support services and other services, which shall, from time to time, be rendered by Consultant for Customer pursuant to a Statement of Work.
+
+1.14 “Specification” means specifications for Services and Deliverables to be provided in a Statement of Work.
+
+1.15 “Statement of Work” or “SOW” means any transaction document (whether or not identified as a SOW) in which each project outline agreed to by Consultant and Customer in accordance with the terms and conditions of this Agreement, and preferably in the form attached hereto as Exhibit A. Statements of Work shall be executed by the parties and shall form a part of this Agreement.
+
+2. SERVICES.
+
+2.1 Procedures for Engagement of Services.
+
+(a) The Services to be rendered by Consultant for Customer pursuant to this Agreement shall be engaged in the following manner. From time to time during the term of this Agreement, Customer and Consultant may enter into Statements of Work. Each SOW shall include a complete and detailed description of the project, which Customer wishes Consultant to undertake. For the avoidance of doubt, Consultant shall not perform any Services except under an executed SOW, and Customer shall be under no obligation to pay for any services performed or expenses incurred by Consultant that were not authorized in a SOW.
+
+(b) Upon execution of a SOW: (i) the services described therein shall be deemed “Services” for the purposes of this Agreement, and (ii) Consultant’s provision thereof shall be subject to, and governed by, the terms and conditions of this Agreement.
+
+2.2 Personnel.
+
+(a) While at a Customer facility, Consultant’s personnel and subcontractors shall comply with reasonable requests and standard procedures and policies of Customer which have been provided or notified to Consultant in writing. Consultant’s personnel and subcontractors will conduct themselves in a businesslike manner.
+
+(b) If Customer determines in good faith that a particular Consultant employee or agent is not conducting him or herself in accordance with Section 2.2(a), Customer shall provide Consultant with notice thereof and Consultant shall remove and replace such individual. Customer reserves the right to deny access to its premises to any such individual. Unless authorized in writing by Customer, Customer shall not be responsible for any travel, mileage or living expenses with respect to such personnel.
+
+(c) Each party shall designate one project manager (each, a “Project Manager”) for each SOW, who shall be responsible for providing timely management decisions as required relating to such SOW. Any Project Manager may be replaced from time to time by the designating party upon written notice to the other party.
+
+Proprietary & Confidential
+
+2
+
+2.3 Replacement of Personnel.
+
+(a) Subject to Section 2.3(b), if any Consultant employee or subcontractor performing Services hereunder is replaced for any reason, the choice of replacement personnel shall be subject to Customer’s approval, which approval shall not be unreasonably withheld, conditioned or delayed, and Consultant shall not charge Customer for the expenses incurred in transitioning the performance of Services to such replacement, which will occur promptly.
+
+(b) If Customer requests in writing that any Consultant employee or subcontractor be replaced for the reasons set forth in Section 2.2(b), Consultant shall have a reasonable opportunity to address Customer’s concerns. Thereafter, in the case of cost-reimbursement or time-and-materials contracts, if Consultant replaces such employee or subcontractor as requested, then Consultant shall not charge Customer for any Services performed by such replaced employee or subcontractor, provided that the amount not charged shall not exceed one week’s charges plus any charges for Services performed by such replaced employee or subcontractor after Consultant’s receipt of Customer’s written request for replacement.
+
+2.4 Subcontractors. Consultant may not use subcontractors to perform the Services without Customer’s prior written consent, which consent may be provided in an applicable SOW and not be unreasonably withheld, conditioned or delayed; provided, however, Consultant shall remain responsible for the performance of the Services and the performance of its subcontractors, for all of its obligations hereunder, and Customer shall not be responsible to any of Consultant’s subcontractor for any liabilities incurred by a subcontractor in connection with an applicable SOW.
+
+2.5 Customer Affiliates. During the term of this Agreement, if any Customer Affiliate desires to engage Consultant to perform Services hereunder, such Customer Affiliate may enter into a SOW hereunder.
+
+2.6 Schedule.
+
+(a) A SOW may contain a time schedule for completion of the Services required thereunder (the “Schedule”). Unless otherwise specified in a SOW, Customer and Consultant expressly acknowledge and agree that, subject to Section 2.8, all Schedules are firm or fixed performance dates, and Consultant shall complete such Services in accordance with the Schedule. Any changes to the Schedule shall be made in accordance with Section 2.7.
+
+(b) The date for completion of any activity on any such Schedule shall be extended on a day-for-day basis if Consultant can establish to the reasonable satisfaction of Customer that:
+
+(i) the cause of such delay was a factor outside of the reasonable control of Consultant (including Customer’s failure to complete a Customer obligation and delays or interruptions caused by OneWeb); and,
+
+(ii) Consultant would have completed such activity but for such factor; and,
+
+(iii) Consultant used commercially reasonable efforts to perform such activity notwithstanding the presence and impact of such factor; and,
+
+(iv) Consultant is without material fault in causing such factor.
+
+2.7 Changes to SOW. Each party may request changes that affect the scope, duration or any other aspect of the Services relating to any SOW, including changes in the Specifications and Deliverables. Each party also may request a change in the Schedule without changing the scope of the applicable SOW. The designated Project Manager of the requesting party will review the proposed change and determine whether to submit it to the other party. If a party requests any such change, Consultant shall notify Customer if it believes that an adjustment in the fees to be paid to Consultant with respect to the applicable SOW, or an adjustment to the applicable Schedule, is required. The parties’ Project Managers shall then negotiate in good faith a reasonable and equitable adjustment in each or any of the applicable fees, Deliverables, Services, Schedule or Specifications. Consultant shall continue to perform pursuant to the existing SOW, and neither party shall be bound by any change requested by the other party, until such change has been accepted in writing by the other party.
+
+2.8 Customer’s Obligations.
+
+(a) Customer’s obligations in connection with a particular engagement, if any, shall be set forth in the applicable SOW. Customer shall cooperate with Consultant in the performance of the Services hereunder. Customer acknowledges and agrees that Consultant’s performance is dependent in part upon the timely and effective satisfaction of Customer’s responsibilities in connection with the Services.
+
+(b) Customer-Furnished Items and Facilities. With respect to all hardware, software, documentation, data or other items or materials furnished to Consultant by Customer (“CFI”) pursuant to an applicable SOW, the following terms and conditions shall apply:
+
+i) Title to such CFI shall at all times remain with Customer.
+
+ii) The Consultant shall return such CFI to Customer when it is no longer required in connection with the performance of the applicable SOW, or in the event of termination of this Agreement. The costs associated with returning the property shall be borne by the Customer.
+
+Proprietary & Confidential
+
+3
+
+iii) The Consultant shall bear the risk of loss of or damage to such CFI from the time that it arrives on the premises of Consultant for so long as it remains in Consultant’s custody, except for any loss or damage caused by Customer or its agents or representatives. When the CFI is returned to Customer pursuant to Section 2.8(b)(ii), the risk of loss or damage while in transit shall be borne by Consultant.
+
+iv) Customer hereby grants to Consultant any necessary licenses solely for such use of the CFI as expressly permitted under this Agreement (including licenses to any third party materials included in the CFI). Customer represents and warrants that it possesses the requisite rights to grant to Consultant the foregoing rights and licenses in and to the CFI.
+
+(c) With respect to any facilities provided by Customer or any of its other contractors pursuant to this Agreement, regardless of the purpose, Customer shall exercise all reasonable care to ensure that such facilities are suitable for the purpose intended.
+
+2.9 Proprietary Rights.
+
+(a) All Consultant Background IP shall remain the sole and exclusive property of Consultant.
+
+(b) All Customer Background IP shall remain the sole and exclusive property of Customer.
+
+(c) All Consultant Foreground IP shall be the sole and exclusive property of Consultant and Customer hereby transfers, grants, conveys, assigns, and relinquishes exclusively to Consultant all of Customer’s worldwide right, title and interest in and to such Consultant Foreground IP.
+
+(d) All Customer Foreground IP shall be the sole and exclusive property of Customer and Consultant hereby transfers, grants, conveys, assigns, and relinquishes exclusively to Customer all of Consultants worldwide right, title and interest in and to such Customer Foreground IP.
+
+(e) [***]
+
+(f) Subject to the terms and conditions of this Agreement, Customer grants to Consultant a fully paid up, irrevocable, worldwide, nonexclusive right and license during the Term in and to the Customer Background IP and Customer Foreground IP to the extent necessary for Consultant’s performance under this Agreement.
+
+(g) Each party grants only the licenses and rights specified in this Agreement and applicable SOWs. No other licenses or rights (including licenses or rights under patents) are granted either directly, by implication, or otherwise.
+
+2.10 Acceptance of Services and Deliverables. Customer, with Consultant’s cooperation and assistance, may conduct acceptance tests to verify whether the Services and/or Deliverables substantially conform to the applicable Specifications as set forth in the applicable SOW. Customer shall have [***] after completion of the applicable Services or delivery of the applicable Deliverables, or such other period as may be mutually agreed in the applicable SOW (the “Acceptance Period”), to notify Contractor of its acceptance or rejection of the relevant Services and Deliverables. If Customer notifies Consultant of any material non-conformities with the Specifications in any of the Services or Deliverables (collectively “Non-conformities”) in writing within the applicable Acceptance Period, Consultant shall promptly correct such Non-conformities at Consultant’s own expense. Customer then shall have the right to test the corrected Services or Deliverables, as upon the initial completion of the applicable Services or Deliverables. If Customer does not notify Consultant of any material Non-conformities within the Acceptance Period, Customer shall be deemed to have accepted the Services or Deliverables. Should Consultant fail to correct a Non-conformity within [***] after receiving written notice of it or such time period to which the parties mutually agree, Customer may terminate the Services under the applicable SOW, and Consultant shall refund the fees and expenses paid by Customer to Consultant for Non-conforming Services or Deliverables and any other Services or Deliverables that are thereby rendered to be of no reasonable utility to Customer and Customer shall return any such non-conforming Deliverables to Consultant.
+
+2.11 Delivery, Consultant Deliverables, Title and Assumption of Risk. Delivery of Deliverables shall be as set forth in an applicable SOW. Title to all Deliverables shall pass to Customer upon acceptance thereof by Customer pursuant to Section 2.10. The Consultant warrants to Customer that it has and will deliver good title to all such deliverable items, free from any claim, lien, pledge, mortgage, security interest, or other encumbrances. With respect to each such Deliverable, the risk of loss or damage shall be borne by Consultant up to the time of delivery into Customer’s custody as specified in the applicable SOW. After such delivery, Customer shall bear the risk of loss or damage, except for any loss or damage caused by Consultant or any of its subcontractors. Notwithstanding the passing of title or documents and reports, Customer’s rights to use the information contained therein shall be subject to Section 2.9.
+
+3. FEES AND EXPENSES.
+
+3.1 Service Fees. Customer shall pay Consultant for the provision of Services in accordance with the schedule of fees and charges set forth in the applicable SOW. Consultant shall furnish all labor, materials, services and equipment, and shall perform all of the Services, solely at Consultant’s cost and expense. Except as the parties otherwise agree in writing, without right to reimbursement from Customer, Consultant shall pay or cause to be paid all contributions, payments, taxes and deductions for social security, old age retirement benefits, unemployment insurance, and annuities, pension or welfare fund payments required by any labor union or by any governmental body, and all withholding taxes, measured by or related to the wages, salaries or other compensation paid to persons employed or engaged by Consultant in connection with the performance of such Services under this Agreement. In connection with the foregoing, Consultant shall comply with all laws and regulations applicable to Consultant and/or to persons employed or engaged by Consultant.
+
+3.2 Expenses. Customer shall reimburse Consultant for its reasonable out-of-pocket costs and expenses specifically authorized in the applicable SOW or otherwise authorized in advance in writing by Customer in connection with the Services and in accordance with Customer’s written reimbursement policy. Consultant shall provide documentation of all expenses greater than [***] for which Consultant requests reimbursement on a monthly basis, prior to the generation of any invoice on which such expenses are listed. Notwithstanding anything to
+
+Proprietary & Confidential
+
+4
+
+the contrary herein, Customer shall not be required to reimburse Consultant for any expenses to the extent that Consultant has not presented an expense report verifying such expenses within [***] after such expenses were incurred.
+
+3.3 Records; Audit. Consultant shall maintain adequate records of all amounts charged to Customer with respect to the Services under each SOW for at least [***] after completion of the applicable SOW. For purposes of clarification, except with respect to a cost-reimbursement or time-and-materials SOW, amounts charged shall not include, and Company shall have no right of access to or audit of, Consultant’s detailed rate and cost information (of a type that is not ordinarily provided to any other commercial customer or third party including the Consultant’s process for building up the applicable labor rates, overhead or fixed price elements). Consultant shall make such records available to Customer during normal business hours upon reasonable advance written notice. Consultant shall cooperate in any audit of such records that Customer may undertake; provided, however, that any such audit shall be at Customer’s sole expense. [***]
+
+3.4 Payment Terms. Consultant shall issue an invoice to Customer on or any time after the completion or delivery or as set forth in an applicable SOW and only in accordance with the Terms. Customer shall pay all properly invoiced amounts due to Consultant via ACH transfer within [***] after Customer's receipt of such invoice, except for any amounts disputed by Customer in good faith. All payments hereunder will be in US dollars unless otherwise agreed to in writing. In the event of a payment dispute, Customer shall deliver a written statement to Consultant no later than [***] prior to the date payment is due on the disputed invoice listing all disputed items and providing a reasonably detailed description of each disputed item. Amounts not so disputed are deemed accepted and must be paid, notwithstanding disputes on other items, within the period set forth in this Section 3. The parties shall seek to resolve all such disputes expeditiously and in good faith. Consultant shall continue performing its obligations under the SOW notwithstanding any such dispute.
+
+3.5 Taxes. Customer is liable to Consultant only for taxes, which Consultant is required to collect from Customer by law. Consultant’s invoices shall list taxes separately.
+
+4. CONFIDENTIALITY.
+
+4.1 Obligations. Subject to Section 4.2, Recipient agrees that it will only use Discloser’s Confidential Information only in the performance of its obligations under this Agreement (the “permitted purpose”) and only during the term of this Agreement, and it will hold Discloser’s Confidential Information in strict confidence and not disclose it to any third party except as approved in writing by Discloser. Recipient will protect Discloser’s Confidential Information using the same degree of care that Recipient uses to protect its confidential materials of a similar nature, but in no case will Recipient employ less than a commercially reasonable degree of care. Recipient will not reverse engineer or attempt to derive the composition or underlying information, structure or ideas of Discloser’s Confidential Information. Recipient will only permit access to Discloser’s Confidential Information to those of its and its Affiliates’ employees, officers, directors, contractors, subcontractors, authorized representatives, or airline partners (collectively, the “Representatives”) who have a need to know for the permitted purpose, have been informed of the confidential nature of the Confidential Information, and are bound by written confidentiality obligations no less restrictive than those contained herein. All of Recipient’s Representatives shall only use the Confidential Information for the permitted purpose and will be responsible for the disclosure and use of Confidential Information as though they were Recipient, and Recipient will be responsible for all violations of this Agreement resulting from the actions of its Representatives. Recipient will immediately notify Discloser upon discovery of any loss or unauthorized disclosure of Discloser’s Confidential Information.
+
+4.2 Exclusions. Recipient has no obligations under this Agreement with respect to any portion of Discloser’s Confidential Information if Recipient can establish that: (a) it was publicly available at the time it was communicated to Recipient by Discloser; (b) it became publicly available subsequent to the time it was communicated to Recipient by Discloser through no fault of Recipient, or Recipient’s Representatives; (c) it was in Recipient’s possession free of any obligation of confidence at the time it was communicated to Recipient by Discloser; (d) it was rightfully communicated to Recipient free of any obligation of confidence subsequent to the time it was communicated to Recipient by Discloser; or (e) it was developed by employees or agents of Recipient independently of and without reference to Discloser’s Confidential Information. In any dispute with respect to these exclusions, Recipient shall have the burden of proof, and such proof shall be by clear and convincing evidence. Recipient will not be in violation of this Agreement with regard to a disclosure that is in response to a requirement of applicable law, an order by a court or other governmental body, or to the extent required by the Securities and Exchange Commission in a securities filing, provided that, if feasible, Recipient provides Discloser with reasonable prior written notice of such disclosure to permit Discloser to seek confidential treatment of such information or otherwise contest or limit the disclosure thereof.
+
+4.3 Restrictions. Recipient will not reproduce Discloser’s Confidential Information in any form except as required to accomplish the permitted purpose. Any reproduction of any Confidential Information will remain Discloser’s property and will contain any and all confidential or proprietary notices or legends that appear on the original. Neither Party will communicate any information to the other in violation of its confidentiality obligations to any third party.
+
+4.4 Recipient’s obligations of confidentiality hereunder will continue in full force and effect for five (5) years from the initial date of disclosure of such Confidential Information, or in the case of any trade secret, for as long as such Confidential Information remains a trade secret. Upon written request of Discloser, Recipient will promptly destroy or return to Discloser all of Discloser’s Confidential Information in any form (including electronic media and including Recipient’s notes or materials that incorporate any of Discloser’s Confidential Information), except as described in the following sentence. Recipient shall not, in connection with the foregoing obligations, be required to delete Confidential Information held electronically in archive or backup systems in accordance with general systems archiving or backup policies, and Recipient’s obligations under this Agreement will continue to apply to such Confidential Information.
+
+4.5 The terms and conditions of this Section 4 shall survive expiration or any termination of this Agreement or applicable attachment.
+
+5. DATA PRIVACY AND SECURITY.
+
+5.1 Without limiting the generality of Consultant’s obligations elsewhere in this Agreement, Consultant is fully responsible for any authorized or unauthorized Processing of Personally Identifiable Information (“PII”) in its possession or in the possession of its officer, director, employee, agent, subsidiary, affiliate, or any other person or entity acting on behalf of Consultant (“Consultant Personnel”). Consultant shall:
+
+Proprietary & Confidential
+
+5
+
+(a) not use or disclose to any other party any PII of Customer, except in accordance with this Agreement or as otherwise required by law (collectively, the “Permitted Uses or Disclosures”); (b) instruct each Consultant Personnel to Process PII solely in compliance with the Permitted Uses or Disclosures; (c) ensure that such Processing is conducted only by Consultant’s Personnel who have a legitimate business reason to Process such PII and have been appropriately trained and bound by legally enforceable and commercially reasonable confidentiality obligations; (d) Process PII only in accordance with applicable privacy and data protection laws; and (e) implement and maintain administrative, physical and technical safeguards (“Safeguards”) that prevent any Processing of PII that this Agreement does not expressly authorize, including, without limitation, an information security program that meets best industry practice to safeguard PII. Such information security program would include: (i) adequate physical security of all premises in which PII will be processed and/or stored; (ii) reasonable precautions taken with respect to the employment of and access given to any Consultant Personnel engaged by Consultant to perform any part of the Services hereunder, including security clearances that assign specific access privileges to individuals; and (iii) an appropriate network security program, including encryption or other secure form approved in advance by Customer, of any PII that is Processed by Consultant or Consultant Personnel. Such network security program shall include, without limitation, (a) appropriate access controls and data integrity controls, including without limitation, ensuring that (i) authentication credentials have an expiration period that allows time for the transfer of data, but are not continuously left open; (ii) password complexity standards are implemented to protect PII from malicious access; and (iii) a process is implemented to log individual access to PII; (b) testing and auditing of all controls; and (c) appropriate corrective action and incident response plans. Customer hereby instructs Consultant, and Consultant hereby agrees to Process PII only as reasonably necessary and proportionate to perform Consultant’s obligations under this Agreement.
+
+5.2 Upon request from Customer, Consultant will provide evidence that it has established and maintains technical and organizational security measures governing the Processing of PII (appropriate to the Processing and the nature of the PII to be protected) and Consultant agrees to provide Customer with, copies of and/or reasonable information concerning Consultant’s technical and organizational security measures relevant to the services provided under this Agreement. Upon reasonable notice, not more than annually, during normal business hours and with minimal disruption of Consultant’s business, Customer, using a third-party auditor, shall have the right to conduct onsite inspections and/or audits of Consultant’s technical and organizational security measures except in the case of a shared environment, and Consultant agrees to reasonably cooperate with such Customer auditor regarding such inspections or audits.
+
+5.3 Consultant shall notify Customer promptly in the event of any disclosure of PII not authorized herein, or upon Consultant’s knowledge of any other Data Security Breach (but in no event later than three business days after such Data Security Breach). In the event of a Data Security Breach, Consultant shall (i) promptly provide to Customer a detailed description of the incident, the data accessed, the identity of affected third parties, if any, and such other information as Customer may request concerning the Data Security Breach; (ii) assist Customer in investigating, remedying and taking any other action Customer deems necessary regarding any Data Security Breach and any dispute, inquiry or claim that concerns the Data Security Breach; (iii) take prompt actions that such Data Security Breach or potential Data Security Breach will not recur; and (iv) cooperate with Customer and any law enforcement or regulatory official investigating such Data Security Breach. Notwithstanding the foregoing, to the extent not prohibited by applicable law, Customer shall make the final decision on notifying Client customers, employees, service vendors and/or the general public of such Data Security Breach or any other breach related to security, which is not a Data Security Breach, and the implementation of the remediation plan. If a notification to Customer’s customer is required under any applicable law, guidelines or best practice, then in addition to all other costs arising out of or in connection with such Data Security Breach, and without prejudice to all other rights and remedies available to Customer under this Agreement, at law or in equity, Consultant shall reimburse Customer for all reasonable notification, credit monitoring, and government penalty related costs incurred by Customer and its Affiliates arising out of or in connection with any such Data Security Breach.
+
+6. TERM AND TERMINATION.
+
+6.1 Term. This Agreement shall commence on the Effective Date and shall continue in full force and effect until terminated in accordance with Section 6.2.
+
+6.2 Termination.
+
+(a) Customer or Consultant may terminate this Agreement and all SOWs hereunder, immediately upon written notice of termination, in the event of a material breach of this Agreement by the other party, if such breach remains uncured for a period of [***] after written notice of such breach (or such longer period of time that the parties may, in good faith, agree); provided, however, that Customer or Consultant, as applicable, may also choose to terminate only the SOW related to the applicable breach subject to the same cure rights.
+
+(b) Customer or Consultant may terminate this Agreement and all SOWs hereunder, immediately upon written notice of termination to the other party, in the event the other party: (i) becomes insolvent; (ii) makes an assignment for the benefit of creditors; (iii) files a voluntary bankruptcy petition; (iv) acquiesces to any involuntary bankruptcy petition; or (v) is adjudicated bankrupt, and in such party is unable to or fails to continue to perform all of its obligations under this Agreement or the applicable SOW.
+
+(c) Customer or Consultant may terminate this Agreement for any or no reason upon thirty (30) days written notice to the other party, provided that there are no then-current SOWs.
+
+(d) Customer may terminate any SOW for any reason or for no reason upon thirty (30) days written notice to Consultant except as specified in a SOW.
+
+6.3 Consequences of Termination. Upon the termination of this Agreement:
+
+(a) Within [***] after the effective date of such termination (and if applicable, without prejudice to Section 6.3(c)), a final invoice including all fees and charges for Services performed and expenses incurred prior to and including the effective date of termination shall be generated as set forth in each applicable SOW, and Customer shall pay such bill in accordance with Section 3.4.
+
+Proprietary & Confidential
+
+6
+
+(b) Consultant shall deliver all existing Deliverables and all Deliverables-in-progress to Customer. Upon Customer’s compliance with its obligations pursuant to Section 6.3(a) and, if applicable, Section 6.3(c), Customer shall be deemed to have paid Consultant for the applicable Deliverables (including, without limitation, any Deliverables-in-progress).
+
+(c) If the Agreement is terminated by Customer under Section 6.2(b) (a “Triggering Event”), Consultant will [***].
+
+(d) Each party shall return to the other party all Confidential Information of the other party (including all copies thereof) and all other papers, materials and other property of the other party in such party’s possession, and certify that it has deleted such Confidential Information from all of its electronic media, provided, however, that both parties may retain whatever Confidential Information of the other party that is necessary to exercise any of such party’s surviving rights or obligations hereunder. Consultant may retain one copy of such Confidential Information, as required, for archival purposes only.
+
+(e) Sections 3.3, 3.5, 4, 5, 6.3, 8, 9, 10, 11.3, 11.4, 11.5, 11.8, 11.9, 11.10, 11.11, 11.12, 11.13, 11.14 (to the extent set forth therein), 11.15 and 11.17, and any other provision that should naturally extend beyond the termination of this Agreement shall survive termination of this Agreement for any reason.
+
+7. INSURANCE.
+
+7.1 [***]
+
+7.2 The [***] insurance coverage in 7.1(a) above shall include a waiver of subrogation against Customer. Insurance coverage in 7.1(b) above shall (i) name Customer, its parent, subsidiaries and affiliates as additional insured; (ii) designate Customer as primary with respect to, and not contributing to or in excess of, any other similar insurance maintained by Customer; and (iii) include a waiver of subrogation against Customer. Insurance coverage in 7.1(c) and 7.1(d) above shall (i) name Customer, its parent, subsidiaries and affiliates as an additional insured; and (ii) include a waiver of subrogation against Customer.
+
+7.3 For all above mentioned policies such endorsements shall be evidenced on a certificate of insurance furnished to Customer and must provide at least [***] written notice in the event of cancellation of any such policy.
+
+7.4 Consultant will use commercially reasonable efforts to ensure that any company, vendor or subcontractor being engaged for work under this Agreement, including without limitation under any Statement of Work, is bound to the same or substantially similar terms, as appropriate, under this Section and that appropriate Certificates of Insurance or other evidence of such insurance coverage shall be provided to Customer.
+
+8. WARRANTIES.
+
+8.1 Violation of Law. Consultant represents and warrants to Customer that as of the date of performance, Consultant’s performance of the Services does not and shall not violate any law, rule, or regulation applicable to Consultant in its role as a service provider.
+
+8.2 Professional Standards. Consultant represents and warrants to Customer that: (a) all Services will be performed and all Deliverables delivered by Consultant in a good and workmanlike manner in accordance with applicable industry standards and practices and the Specifications for such Services and Deliverables set forth in the applicable Statement of Work; (b) Consultant possesses the necessary equipment, personnel and other expertise necessary to provide the Services and Deliverables as set forth herein and in the Statement of Work; and (c) Consultant personnel rendering the Services and developing the Deliverables shall have the appropriate technical skills, training, experience and expertise to enable Consultant to perform its responsibilities hereunder.
+
+8.3 Viruses. Consultant represents and warrants to Customer that its performance of the Services will not intentionally introduce viruses or other harmful elements designed to disrupt the orderly operation of, or impair the integrity of data files resident on, any of Customer’s hardware. Consultant further represents and warrants that it shall use generally and commercially available (in the United States) and reasonably current and comprehensive virus detection/scanning programs, from a reputable vendor of anti-virus software, to protect Customer’s systems and data. Consultant further represents and warrants to Customer that, as of the date each Deliverable is delivered to Customer, such Deliverable shall not contain any such virus or other harmful element.
+
+8.4 EXCEPT AS SPECIFICALLY SET FORTH HEREIN, CONSULTANT NEITHER MAKES NOR ASSUMES ANY LIABILITY UNDER ANY WARRANTIES (WHETHER EXPRESS, IMPLIED OR STATUTORY) ON OR WITH RESPECT TO SERVICES AND DELIVERABLES, INCLUDING, WITHOUT LIMITATION, ANY IMPLIED WARRANTIES OR CONDITIONS OF MERCHANTABILITY, NON-INFRINGEMENT, OR FITNESS FOR A PARTICULAR PURPOSE.
+
+9. INDEMNIFICATION.
+
+9.1 Indemnification by Consultant.
+
+(a) Consultant shall indemnify, defend (at Consultant’s expense) and hold Customer, its Affiliates and their respective officers, directors, agents and employees harmless from and against any court costs, reasonable attorneys’ fees and expenses, settlement expenses, court-awarded damages and reasonable costs of investigation arising out of or resulting from: [***]
+
+(b) [***]
+
+9.2 Indemnification by Customer. Customer shall indemnify, defend (at Customer’s expense) and hold Consultant, its Affiliates and their respective officers, directors, agents and employees harmless from and against any court costs, reasonable attorneys’ fees and expenses, settlement expenses, court-awarded damages and reasonable costs of investigation arising out of or resulting from (i) any bodily injury or real or tangible personal property damage arising out of Customer’s negligence or willful misconduct; and (ii) any third-party claim that such third party’s patent, trademark, trade secret, copyright or trade dress right is infringed, misappropriated or violated by any Customer Materials.
+
+Proprietary & Confidential
+
+7
+
+9.3 Indemnification Procedures. Promptly after receipt by an indemnified party of a notice of any claim or the commencement of any action, such indemnified party shall: (a) notify the indemnifying party in writing of any such claim; (b) provide the indemnifying party with reasonable assistance to settle or defend such claim, at the indemnifying party’s own expense; and (c) grant to the indemnifying party the right to control the defense and/or settlement of such claim, at the indemnifying party’s own expense; provided, however, that: (i) the failure to so notify, provide assistance and grant authority and control shall only relieve the indemnifying party of its obligation to the indemnified party to the extent that the indemnifying party is prejudiced thereby; (ii) the indemnifying party shall not, without the indemnified party’s consent (such consent not to be unreasonably withheld or delayed), agree to any settlement that: (A) makes any admission on behalf of the indemnified party; or (B) consents to any injunction against the indemnified party (except an injunction relating solely to the indemnified party’s continued use of any infringing Deliverable or Customer Materials); and (iii) the indemnified party shall have the right, at its expense, to monitor any legal proceeding through legal counsel of its choosing, but shall have no right to settle a claim without the indemnifying party’s written consent.
+
+10. LIMITATION OF LIABILITY.
+
+10.1 Limitation of Liability. EXCEPT IN CONNECTION WITH (a) SECTION 4, (b) SECTION 9, AND (c) EITHER PARTY’S INFRINGEMENT OR VIOLATION OF THE OTHER PARTY’S INTELLECTUAL PROPERTY RIGHTS, IN NO EVENT SHALL EITHER PARTY, ITS AFFILIATES, OR THEIR RESPECTIVE DIRECTORS, OFFICERS, AGENTS, SUBCONTRACTORS OR EMPLOYEES, BE LIABLE TO THE OTHER PARTY FOR ANY REASON, WHETHER IN CONTRACT OR IN TORT, FOR ANY DIRECT DAMAGES ARISING OUT OF OR BASED UPON THIS AGREEMENT (INCLUDING ALL STATEMENTS OF WORK) EXCEEDING [***] REGARDLESS OF THE FORM IN WHICH ANY LEGAL OR EQUITABLE ACTION MAY BE BROUGHT.
+
+10.2 No Consequential Damages. EXCEPT IN CONNECTION WITH (a) A BREACH OF SECTION 4, (b) SECTION 9, AND (c) EITHER PARTY’S INFRINGEMENT OR VIOLATION OF THE OTHER PARTY’S INTELLECTUAL PROPERTY RIGHTS, IN NO EVENT SHALL EITHER PARTY, ITS AFFILIATES, OR THEIR RESPECTIVE DIRECTORS, OFFICERS, AGENTS, SUBCONTRACTORS OR EMPLOYEES, BE LIABLE TO THE OTHER PARTY UNDER ANY THEORY OF TORT, CONTRACT, STRICT LIABILITY OR OTHER LEGAL OR EQUITABLE THEORY FOR EXEMPLARY, PUNITIVE, INDIRECT, SPECIAL, LOST PROFITS, ECONOMIC, CONSEQUENTIAL, LOSS OR DAMAGE TO DATA OR SIMILAR DAMAGES, EACH OF WHICH IS HEREBY EXCLUDED BY AGREEMENT OF THE PARTIES REGARDLESS OF WHETHER OR NOT SUCH PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES
+
+11. GENERAL.
+
+11.1 Assignment. Neither Party may assign or transfer its rights or obligations in this agreement (by operation of law or otherwise), in whole or in part, to any person or entity without the prior written consent of the other Party, which consent shall not be unreasonably withheld; provided, however, that a Party may assign such rights or obligations upon written notice to the non-assigning Party to (a) a successor or surviving corporation resulting from a merger, consolidation, sale of assets or stock or other corporate reorganization, or (b) its parent or Affiliate, in each of (a) and (b) upon conditions that the assignee will assume all of the Party’s obligations hereunder, is fully capable of fulfilling the assignor’s obligations under this Agreement, and does not engage in a business that is competitive with the business of the non-assigning Party. Any attempt to assign or delegate in violation of this clause will be void.
+
+11.2 Relationship. The relationship between the parties to this Agreement is and shall be that of independent contractors. It is expressly agreed that nothing in this Agreement shall be construed to create or imply a partnership, joint venture, agency relationship or contract of employment. Neither party shall have the authority to make any statement, representation nor commitment of any kind, or to take any action that shall be binding on the other party except as authorized in writing by the party to be bound. Personnel supplied by Consultant hereunder are not Customer’s employees or agents, and Consultant assumes full responsibility for: (a) their acts, (b) compensation of Consultant personnel, and (c) the payment of worker’s compensation, disability benefits, or unemployment insurance or for withholding or paying employment related taxes for any such Consultant personnel.
+
+11.3 Entire Agreement; Binding Effect; Amendment; Order of Precedence. This Agreement (together with the Exhibits, and SOW(s) hereto) constitutes the entire agreement between Consultant and Customer regarding the subject matter hereof. All prior or contemporaneous agreements, proposals, understandings and communications between Consultant and Customer regarding the subject matter hereof, whether oral or written, are superseded by and merged into this Agreement. Neither this Agreement nor any SOW hereto may be modified or amended except by a written instrument executed by both Consultant and Customer. In the event of any inconsistency between the terms of this Agreement and any SOW issued under this Agreement, the terms and conditions of the SOW shall govern and control. Additional or different terms in any written communication from Consultant (such as an invoice or purchase order) are void.
+
+11.4 Severability. If any one or more of the provisions contained in this Agreement shall for any reason be held to be invalid, illegal or unenforceable in any respect, the remaining provisions of this Agreement shall be enforceable to the maximum extent possible.
+
+11.5 Notices. Each party must provide notices or other communications to the other party in writing by: (i) certified mail, hand delivery or delivery by a courier service to the address below set forth (or such other address as may have been furnished by or on behalf of such party by like notice), (ii) facsimile with receipt of a “transmission ok” acknowledgement, or (iii) e-mail. Communications sent by facsimile or e-mail shall be deemed effectively served upon dispatch, if receipt is confirmed electronically. Communications sent by certified mail or courier service shall be deemed effectively served [***] after deposit. All other general correspondence may be communicated by electronic means (e-mail).
+
+Proprietary & Confidential
+
+8
+
+Customer
+
+Consultant
+
+Gogo Business Aviation LLC
+
+Hughes Network Systems, LLC
+
+105 Edgeview Drive, Suite 300
+
+11717 Exploration Lane
+
+Broomfield, CO 80021
+
+Attn: General Counsel
+
+Germantown, Maryland 20876
+
+Attn: General Counsel
+
+11.6 Waiver. No waiver by either party of a breach of any term, provision or condition of this Agreement by the other party shall constitute a waiver of any succeeding breach of the same or any other provision hereof. No such waiver shall be valid unless executed in writing by the party making the waiver.
+
+11.7 Counterparts. This Agreement may be executed in counterparts, each of which shall be deemed an original, and all of which together shall constitute one instrument.
+
+11.8 Headings. The section and subsection headings used in this Agreement are intended for reference purposes only and shall not affect the interpretation or construction of any provision of this Agreement.
+
+11.9 Construction. Each party acknowledges that this Agreement was drafted jointly by the parties, and it shall be construed neither against nor in favor of either party. The term “including” or “include”, as used in this Agreement, shall mean “including, but not limited to”.
+
+11.10 Third Party Beneficiaries. Nothing contained in this Agreement is intended to confer nor shall confer upon any person (other than the parties hereto and their permitted assigns) any rights, benefits or remedies of any kind or character whatsoever, and no such person shall be deemed a third party beneficiary under or by reason of this Agreement.
+
+11.11 Accrued Rights. The termination or expiration of this Agreement shall not effect or prejudice either party’s accrued rights hereunder.
+
+11.12 Governing Law, Venue and Language. THIS AGREEMENT SHALL BE GOVERNED BY AND CONSTRUED IN ACCORDANCE WITH THE LAWS OF THE STATE OF Colorado, WITHOUT REGARD TO PRINCIPLES OF CONFLICTS OF LAW. THE UNITED NATIONS CONVENTION ON CONTRACTS FOR THE INTERNATIONAL SALE OF GOODS SHALL NOT APPLY TO THIS AGREEMENT. VENUE FOR ANY LEGAL ACTION ARISING OUT OF OR RELATING TO THIS AGREEMENT SHALL BE EXCLUSIVELY THE STATE OR FEDERAL COURTS LOCATED IN DENVER, COLORADO. THE PARTIES HEREBY CONSENT TO THE JURISDICTION OF SUCH COURTS. NOTHING IN THIS AGREEMENT AFFECTS ANY STATUTORY RIGHTS OF CONSUMERS THAT CANNOT BE WAIVED OR LIMITED BY CONTRACT. THE PARTIES WAIVE JURY TRIAL WITH RESPECT TO ANY DISPUTE UNDER THIS AGREEMENT.
+
+11.13 Solicitation of Employees. Either party may hire any personnel of the other party who has responded to publicity for a position that has been publicized through local or national newspapers, Internet postings, radio or television advertising, job fairs, notices to colleges or technical schools, or placement professionals.
+
+11.14 Dispute Resolution. Prior to initiating formal dispute resolution procedures with respect to any dispute, the parties shall attempt to resolve such dispute informally, as follows: (a) the parties’ respective project managers for the applicable SOW shall attempt in good faith to resolve all disputes. If the Project Managers are unable to resolve a dispute in an amount of time that both parties deem reasonable under the circumstances, then upon written notice to the other party, either party may refer the dispute to the applicable senior corporate executives for resolution pursuant to Section 11.14(b); (b) within [***] after receipt of a written notice under Section 11.14(a), the designated senior corporate executives shall discuss the problem and negotiate in good faith in an effort to resolve the dispute without the necessity of any formal dispute resolution proceeding. All negotiations shall be strictly confidential and used solely for the purposes of settlement. Any materials prepared by one party for these proceedings shall not be used as evidence by the other party in any subsequent litigation; provided, however, the underlying facts supporting such materials may be subject to discovery.
+
+11.15 Jury Trial Wavier. Each Party waives any right to a jury trial in any proceeding arising out of or related to this Agreement.
+
+11.16 Press Releases. Neither party shall issue any press release concerning this Agreement without the other’s consent. Neither party may use the name, trade name, trademark, logo, acronym or other designation of the other in connection with any press release, advertising, publicity materials or otherwise without the prior written consent of the other party.
+
+11.17 Export Laws. Each party will comply with applicable import and export control laws and regulations, including those of the United States that prohibit or limit export for certain uses or to certain end users.
+
+11.18 Third Party Code of Conduct. Consultant shall comply with Customer’s Third Party Code of Conduct in the performance of the Services hereunder. The Third Party Code of Conduct is located at http://www.gogoair.com/policies.
+
+11.19 Force Majeure. Either party hereto shall be excused for delays or interruptions in the performance of its obligations under this Agreement or applicable SOW to the extent such delays or interruptions are otherwise not foreseeable and beyond the reasonable control of such party, including but not limited to delays or interruptions due to war (whether or not actually declared), sabotage, insurrection, rebellion, riot or other act of civil disobedience, act of a public enemy, failure of or delay in transportation, any governmental act, judicial action, priorities given U.S. Government procurements, labor dispute, shortage of labor, fuel, raw material or machinery, fire, accident, explosion, epidemic,
+
+Proprietary & Confidential
+
+9
+
+pandemic, quarantine, storm, flood, earthquake, or other Acts of God (“Force Majeure”). The parties specifically agree that rain, snow or other ordinary weather conditions (excluding tornadoes, hurricanes, and other major storms) do not constitute Force Majeure conditions. If any such Force Majeure occurs, the party affected by such Force Majeure shall promptly notify the other party in writing and use its best efforts to abate the effect of such Force Majeure and restore compliance with the terms of an Agreement as soon as possible.
+
+IN WITNESS WHEREOF the parties hereto, by their duly authorized representatives, have executed this Agreement as of the date first set forth above.
+
+GOGO BUSINESS AVIATION LLC
+
+HUGHES NETWORK SYSTEMS LLC
+
+By:
+
+/s/ Sergio Aguirre
+
+By:
+
+/s/ Sean P. Fleming
+
+Name:
+
+Sergio Aguirre
+
+Name:
+
+Sean P. Fleming
+
+Title:
+
+President and COO
+
+Title:
+
+VP & Assoc. Gen. Counsel
+
+Proprietary & Confidential
+
+10
+
+Exhibit A
+
+STATEMENT OF WORK
+
+Number - ______________
+
+This Statement of Work (“SOW”) is entered into on __________, 202_ and is governed under the Master Services Agreement (“Agreement”), dated ______, 202_, between Gogo Business Aviation LLC (“Customer”), and Hughes Network Systems LLC (“Consultant”). The terms and conditions of this SOW shall prevail over any conflicting terms or conditions of the Agreement. The responsibilities of Customer and Consultant are defined below. Capitalized terms not defined herein shall have their meanings as set forth in the Agreement.
+
+1. Scope and Objectives
+
+2. Schedule
+
+3. Overview of Tasks to be Performed by Consultant
+
+4. Deliverables
+
+5. Location for Performance of Services
+
+6. Services and Deliverables Warranties, if any
+
+7. Customer Responsibilities
+
+8. Assumptions
+
+9. Compensation
+
+10. Payment of Fees:
+
+10.1. In accordance with the provisions of Section 3, payment of fees shall be as follows:
+
+10.2. If all or a portion of this SOW is for a fixed fee, then the assumed hourly rate shall be $________.
+
+10.3. The total fees and expenses under this Statement of Work shall not exceed $________.
+
+10.4. Consultant agrees that the above fees and expenses constitute Consultant’s entire remuneration for the Services, provided however that Consultant will be reimbursed for reasonable travel and out-of-pocket expenses in accordance with Customer’s travel policy for consultants.
+
+11. Additional or Alternative Termination Rights and Short Notice Period Determination, if any:
+
+12. Knowledge Transfer Plan, if any:
+
+13. Additional Terms and Conditions:
+
+14. Project Managers:
+
+15. Expenses Entry: Actual travel and living expenses are in addition to the above fees and shall not be more than [ ]% of the total fees paid for Services under this SOW. Subject to Section 3 of the Agreement, travel and living expenses will be invoiced to Customer monthly. Payment of expenses will be due in full [***] after receipt of itemized invoice.
+
+IN WITNESS WHEREOF the parties hereto, by their duly authorized representatives, have executed this Agreement as of the date first set forth above.
+
+GOGO BUSINESS AVIATION LLC
+
+HUGHES NETWORK SYSTEMS LLC
+
+By:
+
+___________________________
+
+By:
+
+___________________________
+
+Name:
+
+___________________________
+
+Name:
+
+___________________________
+
+Title:
+
+___________________________
+
+Title:
+
+___________________________
+
+Proprietary & Confidential
+
+11

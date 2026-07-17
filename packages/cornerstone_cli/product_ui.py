@@ -4686,6 +4686,17 @@ def _citation_item_for_ref(ref: str, source_items: list[dict[str, str]], record:
         item["artifact_ref"] = artifact_ref
         item["snippet"] = str(link.get("snippet") or base.get("snippet") or "")
         item["span"] = _format_span(link.get("span"))
+        speaker_context = (
+            link.get("speaker_context")
+            if isinstance(link.get("speaker_context"), dict)
+            else {}
+        )
+        item["speaker_label"] = str(speaker_context.get("label") or "")
+        item["speaker_span"] = (
+            _format_span(speaker_context.get("source_span"))
+            if speaker_context
+            else ""
+        )
         return item
     return None
 
@@ -4714,6 +4725,13 @@ def _citation_disclosure_for_refs(
         open_attr = " open" if initially_open and index == 1 else ""
         ref_kind = item.get("ref_kind") or _citation_ref_kind(item.get("ref", ""))
         span = item.get("span") or "Whole source"
+        speaker_context = (
+            f'<p class="cs-citation-context"><strong>Speaker at span start:</strong> '
+            f'{h(item["speaker_label"])} '
+            f'<span class="cs-muted">(preceding source context {h(item.get("speaker_span") or "recorded")})</span></p>'
+            if item.get("speaker_label")
+            else ""
+        )
         cards.append(
             f"""
 <details class="cs-citation-card"{open_attr}>
@@ -4725,6 +4743,7 @@ def _citation_disclosure_for_refs(
     <span class="cs-citation-action">Inspect source</span>
   </summary>
   <div class="cs-citation-body">
+    {speaker_context}
     <p class="cs-citation-snippet"><strong>Source snippet:</strong> {h(_truncate(item["snippet"], 260))}</p>
     <p class="cs-muted"><strong>Why this supports the finding:</strong> this recorded source span is the cited support for this draft finding; inspect it before use.</p>
     <div class="cs-citation-meta" aria-label="Full provenance">

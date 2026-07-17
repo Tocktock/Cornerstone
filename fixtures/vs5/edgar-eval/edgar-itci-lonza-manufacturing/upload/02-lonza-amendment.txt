@@ -1,0 +1,270 @@
+3
+d436875dex1032.htm
+EX-10.3(2)
+
+EX-10.3(2)
+
+Exhibit 10.3(2)
+
+CERTAIN INFORMATION IDENTIFIED BY “[***]” HAS BEEN EXCLUDED FROM THE EXHIBIT BECAUSE IT IS BOTH NOT MATERIAL AND IS THE TYPE OF
+INFORMATION THAT THE REGISTRANT TREATS AS PRIVATE OR CONFIDENTIAL.
+
+AMENDMENT NO. 1
+
+to
+
+the Master Services Agreement
+
+dated 10 January 2017
+
+between
+
+LONZA LTD
+
+and
+
+ITI LIMITED
+
+Confidential
+
+THIS AMENDMENT NO. 1 (“Amendment 1”) is entered into on the 19 day of December 2022 (the
+“Amendment 1 Effective Date”)
+
+BETWEEN
+
+1.
+
+Lonza Ltd, of Muenchensteinerstrasse 38, CH-4002 Basel,
+Switzerland (hereinafter referred to as “Lonza”) and
+
+2.
+
+ITI Limited, 2 Church Street, Hamilton HM 11, Bermuda (hereinafter referred to as “Customer”).
+
+WHEREAS
+
+A.
+
+Lonza and Customer have entered into a Master Services Agreement, dated 10 January 2017, as amended
+various times via several Addenda (together the “Agreement”), under which Lonza is required to manufacture the Product, as defined in the Agreement.
+
+B.
+
+Parties wish to extend the term of the Agreement and change several other sections.
+
+NOW THEREFORE in consideration of the above premises and the mutual covenants herein, it is agreed hereby by the Parties to amend the Agreement as follows:
+
+1.
+
+Capitalized terms used but not otherwise defined herein shall have the meanings afforded to them in the
+Agreement.
+
+2.
+
+Clause 6.4 of the Agreement will be deleted and shall hereby be replaced with the following new clause
+6.4.
+
+Minimum Volume Commitment and Dedicated Supply. Customer undertakes to purchase from Lonza a minimum of
+[***] of Product per calendar year (to be manufactured in the same campaign), commencing in 2025 (with first delivery in 2026) until the end of the Term. If Customer fails to purchase such minimum, Customer shall be invoiced the Price per kilo for
+the number of kilo’s below the minimum before the end of the applicable calendar year end.
+
+In addition to the above, Lonza
+will reserve for each above forecasted campaign additional capacity for Customer, sufficient for the manufacture of [***] of Product, starting in 2025 (for first delivery in 2026) until the end of the Term. Customer may order this [***] by notifying
+Lonza in writing at least 18 months prior to the estimated Commencement Date of the Step [***] intermediate campaign.
+
+Confidential
+
+3.
+
+Clause 7.2 of the Agreement will be deleted and shall hereby be replaced with the following new clause
+7.2.
+
+7.2 Storage step [***] Intermediate. Lonza will store the step [***] intermediate Batches at its Facility upon
+release at no further cost. Customer acknowledges that due to the long storage of the step [***] Intermediate, the sale of the step [***] Intermediate is subject to Swiss VAT and Customer hereby agrees to pay Lonza for any required VAT charges that
+become due. Upon exportation of the Product (i.e. final Product) outside of Switzerland, Lonza shall refund the VAT paid for the stored step [***] Intermediate, subject to the applicable law.
+
+Storage batches of Product. Customer shall arrange for shipment and take delivery of such Batch from the Facility, at Customer’s
+expense, within [***] after Release or pay applicable storage costs. Lonza shall provide storage on a bill and hold basis for such Batch(es) at no charge for [***]; provided that any additional storage beyond [***] will be subject to availability
+and, if available, will be charged to Customer and will be subject to a separate agreement. In addition to Section 8.2, Customer shall be responsible for all value added tax (VAT) and any other applicable taxes, levies, import, duties and fees
+of whatever nature imposed as a result of any storage. Within five (5) days following a written request from Lonza, Customer shall provide Lonza with a letter in form satisfactory to Lonza confirming the bill and hold status of each stored
+Batch.
+
+4.
+
+Clause 8.3 of the Agreement will be deleted and shall hereby be replaced with the following new clause
+8.3.
+
+8.3 Lonza shall issue invoices to Customer as follows:
+
+Steps [***] intermediate [***]: [***] of the Price for these [***] steps will be invoiced upon placing the order at Lonza’s
+third party supplier [***] and [***] of these [***] steps will be invoiced upon receipt of the steps by Lonza;
+
+Steps [***] (FCC
+Facility): [***] of the Price for these steps will be invoiced upon commencement of step and [***] of these steps will be invoiced upon completion of step [***]; and
+
+Steps [***] (final Product): [***] of the Price will be invoiced upon completion of the final step, i.e. upon Release of the Product.
+
+Pricing Table is provided in Appendix 1.
+
+Micronisation activities will be invoiced as per an applicable separate Project Plan.
+
+All invoices are strictly net and payment must be made within [***] of date of invoice. Payment shall be made without deduction, deferment, set-off, lien or counterclaim.
+
+5.
+
+Clause 14.1 of the Agreement will be deleted and shall hereby be replaced with the following new clause
+14.1.
+
+14.1 Term. This Agreement shall commence on the Effective Date and will end on 31 December 2028,
+unless terminated earlier as provided herein or extended by mutual written consent of the Parties (the “Term”). Notwithstanding the foregoing, each Project Plan may have separate term and termination provisions so long
+as the term of any Project Plan does not extend beyond the Term.
+
+Confidential
+
+6.
+
+Remainder of Agreement. All other terms and conditions of the Agreement shall remain in full force and
+effect.
+
+7.
+
+Entire Agreement. This Amendment 1 and the Agreement supersede all other prior agreements,
+understandings, representations and warranties, oral or written between the Parties hereto in respect of the subject matter hereof. In the event of a conflict between the terms and conditions of this Amendment 1 and the Agreement, the terms and
+conditions of the Agreement shall prevail.
+
+IN WITNESS WHEREOF the Parties have caused this Amendment 1 to be executed by their
+representatives thereunto duly authorised as of the dates below, effective as of the Amendment 1 Effective Date.
+
+[Signatures follow on
+next page]
+
+Confidential
+
+Signed for and on behalf of
+LONZA LTD.
+
+Signed for and on behalf of
+ITI LIMITED
+
+/s/ Bart A.M. van Aarnhem
+
+/s/ Lawrence Hineline
+
+Bart A.M. van Aarnhem
+
+Lawrence Hineline
+
+TITLE: Associate General Counsel
+
+TITLE: CFO
+
+DATE: 20-Dec-2022 | 12:25:01 CET
+
+DATE: December 19, 2022
+
+/s/ Marie Leblanc
+
+/s/ Michael Halstead
+
+Marie Leblanc
+
+Michael Halstead
+
+TITLE: Head of Sales EMEA, Small Molecules
+
+TITLE: General Counsel
+
+DATE: 20-Dec-2022 | 11:54:38 CET
+
+DATE: December 19, 2022
+
+Confidential
+
+Appendix 1
+
+Pricing Table
+
+Component
+
+Quantity
+needed for
+2000Kg
+annual
+campaigns
+of Product
+
+Price
+(CHF) per
+Kg for
+2000Kg
+annual
+campaigns
+of Product
+
+Quantity
+needed for
+3000Kg
+annual
+campaigns
+of Product
+
+Price
+(CHF)
+per Kg for
+3000Kg
+annual
+campaigns
+of Product
+
+Product
+Price for
+2000Kg
+annual
+campaigns
+
+Product
+Price for
+3000Kg
+annual
+campaigns
+
+Step [***] Intermediate
+(INH-001-2)
+
+[***]
+
+[***]
+
+Step [***] Intermediate
+(INH-001-2)
+
+[***]
+
+[***]
+
+Step [***] Intermediate
+
+[***]
+
+[***]
+
+Step [***] Intermediate
+
+[***]
+
+[***]
+
+Product
+
+[***]
+
+Product
+
+[***]
+
+*
+
+Note: Step [***] Intermediate includes the Step [***] (INH-001-2) material and is enough for 2 API Campaigns)
+
+Payments made for intermediates will be
+credited against Product pricing.

@@ -4,13 +4,25 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+PACKAGES_DIR = ROOT / "packages"
+if str(PACKAGES_DIR) not in sys.path:
+    sys.path.insert(0, str(PACKAGES_DIR))
+
+from cornerstone_cli.vs5_corpus import (  # noqa: E402
+    load_vs5_corpus,
+    validate_vs5_corpus_freeze,
+)
+
+
 REPORT_PATH = ROOT / "reports/scenario/vs5-citation-grounded-brief-2026-07-12.json"
-CORPUS_PATH = ROOT / "fixtures/vs5/eval/manifest.json"
+CORPUS_RELATIVE_PATH = "fixtures/vs5/edgar-eval/manifest.json"
+CORPUS_FREEZE_RELATIVE_PATH = "fixtures/vs5/edgar-eval/freeze.json"
 STATE_DIR = ROOT / "tmp/scenario-state/vs5-citation-grounded-brief"
 FAITHFULNESS_PATH = ROOT / "reports/human-gates/vs5/faithfulness-review.prefilled.json"
 USEFULNESS_PATH = ROOT / "reports/human-gates/vs5/usefulness-review.prefilled.json"
@@ -23,18 +35,6 @@ EXTERNAL_ROUND_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-round.te
 EXTERNAL_RUNTIME_EVIDENCE_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-runtime-evidence.template.json"
 EXTERNAL_EVIDENCE_AUDIT_TEMPLATE_PATH = ROOT / "reports/human-gates/vs5/external-evidence-audit.template.json"
 VS4_H01_PATH = ROOT / "reports/human-gates/vs4/filled-records/VS4-H01.review-record.json"
-SELECTED_CASE_IDS = (
-    "vendor-renewal-01",
-    "vendor-renewal-03",
-    "vendor-renewal-04",
-    "vendor-renewal-06",
-    "policy-change-02",
-    "policy-change-05",
-    "policy-change-06",
-    "project-risk-01",
-    "project-risk-05",
-    "project-risk-07",
-)
 
 
 def _load(path: Path) -> dict[str, Any]:
@@ -44,33 +44,92 @@ def _load(path: Path) -> dict[str, Any]:
     return value
 
 
-def _sha256(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+def _load_bound_corpus() -> tuple[dict[str, Any], dict[str, Any]]:
+    corpus, binding = load_vs5_corpus(ROOT, CORPUS_RELATIVE_PATH)
+    validate_vs5_corpus_freeze(ROOT, CORPUS_FREEZE_RELATIVE_PATH, binding)
+    return corpus, binding
 
 
-def _source_ref_by_artifact(corpus: dict[str, Any]) -> dict[str, str]:
-    refs: dict[str, str] = {}
+def _human_review_case_ids(corpus: dict[str, Any]) -> tuple[str, ...]:
+    raw_case_ids = corpus.get("human_review_case_ids")
+    if not isinstance(raw_case_ids, list):
+        raise ValueError("The VS5 corpus does not declare human_review_case_ids.")
+    case_ids = tuple(str(case_id).strip() for case_id in raw_case_ids)
+    if len(case_ids) != 10 or len(set(case_ids)) != 10 or any(not case_id for case_id in case_ids):
+        raise ValueError("The VS5 human-review sample must contain exactly ten unique case IDs.")
+    return case_ids
+
+
+def _source_bindings_by_case(
+    corpus: dict[str, Any],
+) -> dict[str, dict[str, dict[str, Any]]]:
+    bindings: dict[str, dict[str, dict[str, Any]]] = {}
     for case in corpus.get("cases", []):
         case_id = str(case.get("id") or "")
+        case_bindings = bindings.setdefault(case_id, {})
         for source in case.get("sources", []):
             text = str(source.get("text") or "")
             artifact_id = f"art_{hashlib.sha256(text.encode('utf-8')).hexdigest()}"
-            refs[artifact_id] = f"{case_id}:{source.get('name') or 'source'}"
-    return refs
+            source_ref = str(source.get("source_ref") or source.get("upload_path") or "")
+            if not source_ref:
+                raise ValueError(f"Corpus source has no upload source_ref: {source.get('source_id')}")
+            binding = {
+                "source_ref": source_ref,
+                "source_id": str(source.get("source_id") or ""),
+                "source_url": str(source.get("source_url") or ""),
+                "filing_index_url": str(source.get("filing_index_url") or ""),
+                "accession_number": str(source.get("accession_number") or ""),
+                "form_type": str(source.get("form_type") or ""),
+                "filing_date": str(source.get("filing_date") or ""),
+                "raw_path": str(source.get("raw_path") or ""),
+                "raw_sha256": str(source.get("raw_sha256") or ""),
+                "normalized_path": str(source.get("normalized_path") or ""),
+                "normalized_sha256": str(source.get("normalized_sha256") or ""),
+                "upload_path": str(source.get("upload_path") or ""),
+                "upload_sha256": str(source.get("upload_sha256") or ""),
+            }
+            existing = case_bindings.get(artifact_id)
+            if existing is not None and existing != binding:
+                raise ValueError(
+                    f"One case maps identical upload text to multiple sources: {case_id}:{artifact_id}"
+                )
+            case_bindings[artifact_id] = binding
+    return bindings
 
 
-def _selected_records() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, str]]:
+def _required_source_binding(
+    source_bindings: dict[str, dict[str, dict[str, Any]]],
+    case_id: str,
+    artifact_id: str,
+) -> dict[str, Any]:
+    binding = source_bindings.get(case_id, {}).get(artifact_id)
+    if not case_id or not artifact_id or binding is None:
+        raise ValueError(
+            "Runtime artifact is not bound to this case's corpus upload: "
+            f"{case_id or 'missing-case'}:{artifact_id or 'missing-artifact'}"
+        )
+    return dict(binding)
+
+
+def _selected_records(
+    corpus: dict[str, Any],
+    corpus_binding: dict[str, Any],
+    review_case_ids: tuple[str, ...],
+) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, dict[str, dict[str, Any]]]]:
     report = _load(REPORT_PATH)
-    corpus = _load(CORPUS_PATH)
-    manifest_sha256 = _sha256(CORPUS_PATH)
-    if str(report.get("corpus", {}).get("manifest_sha256") or "") != manifest_sha256:
+    report_corpus = report.get("corpus")
+    if not isinstance(report_corpus, dict):
+        raise ValueError("The VS5 report has no corpus binding.")
+    if report_corpus.get("binding") != corpus_binding:
+        raise ValueError("VS5 report and exact corpus binding do not match.")
+    if report_corpus.get("manifest_sha256") != corpus_binding["manifest_sha256"]:
         raise ValueError("VS5 report and corpus manifest hash do not match.")
     rows = {str(row.get("case_id") or ""): row for row in report.get("case_results", [])}
-    missing = [case_id for case_id in SELECTED_CASE_IDS if case_id not in rows]
+    missing = [case_id for case_id in review_case_ids if case_id not in rows]
     if missing:
         raise ValueError(f"Selected cases are missing from the current report: {missing}")
     selected: list[dict[str, Any]] = []
-    for case_id in SELECTED_CASE_IDS:
+    for case_id in review_case_ids:
         row = rows[case_id]
         brief_id = str(row.get("brief_id") or "")
         brief_path = STATE_DIR / "briefs" / f"{brief_id}.json"
@@ -80,12 +139,12 @@ def _selected_records() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str,
         if str(brief.get("brief_id") or "") != brief_id:
             raise ValueError(f"Brief identity mismatch: {brief_path}")
         selected.append({"case_result": row, "brief": brief})
-    return report, selected, _source_ref_by_artifact(corpus)
+    return report, selected, _source_bindings_by_case(corpus)
 
 
 def _faithfulness_reviews(
     selected: list[dict[str, Any]],
-    source_refs: dict[str, str],
+    source_bindings: dict[str, dict[str, dict[str, Any]]],
     corpus: dict[str, Any],
 ) -> list[dict[str, Any]]:
     cases = {str(case.get("id") or ""): case for case in corpus.get("cases", [])}
@@ -117,13 +176,31 @@ def _faithfulness_reviews(
                     raise ValueError(f"Citation link missing for {citation_ref}")
                 artifact_ref = str(link.get("artifact_ref") or "")
                 artifact_id = artifact_ref.split(":", 1)[1] if artifact_ref.startswith("artifact:") else ""
+                chunk_id = (
+                    citation_ref.split(":", 1)[1]
+                    if citation_ref.startswith("evidence_chunk:")
+                    else ""
+                )
+                chunk_path = STATE_DIR / "evidence" / "chunks" / f"{chunk_id}.json"
+                if not chunk_path.exists():
+                    raise ValueError(f"Citation chunk missing for {citation_ref}")
+                chunk = _load(chunk_path)
+                if (
+                    str(chunk.get("artifact_id") or "") != artifact_id
+                    or chunk.get("span") != link.get("span")
+                ):
+                    raise ValueError(f"Citation link/chunk mismatch for {citation_ref}")
                 source_evidence.append(
                     {
                         "citation_ref": citation_ref,
-                        "source_ref": source_refs.get(artifact_id, f"{result['case_id']}:source"),
+                        **_required_source_binding(
+                            source_bindings,
+                            str(result["case_id"]),
+                            artifact_id,
+                        ),
                         "artifact_id": artifact_id,
-                        "span": link.get("span"),
-                        "source_excerpt": str(link.get("snippet") or ""),
+                        "span": chunk.get("span"),
+                        "source_excerpt": str(chunk.get("text") or ""),
                     }
                 )
             statement_reviews.append(
@@ -150,6 +227,7 @@ def _faithfulness_reviews(
                 "decision_question": brief.get("decision_question"),
                 "statements": statement_reviews,
                 "generated_missing_evidence": list(brief.get("missing_evidence") or []),
+                "generated_conflicts_risks": list(brief.get("conflicts_risks") or []),
                 "generated_recommended_next_steps": list(brief.get("recommended_next_steps") or []),
                 "planted_expectations": {
                     "gap_terms": list(case.get("gap_terms") or []),
@@ -199,15 +277,41 @@ def _usefulness_sample(
             for row in brief.get("load_bearing_statements", [])
             if isinstance(row, dict) and str(row.get("statement") or "").strip()
         ]
-        source_set = [
-            {
-                "name": str(source.get("name") or "source"),
-                "text": str(source.get("text") or ""),
-                "sha256": hashlib.sha256(str(source.get("text") or "").encode("utf-8")).hexdigest(),
-            }
-            for source in case.get("sources", [])
-            if isinstance(source, dict)
-        ]
+        source_set = []
+        for source in case.get("sources", []):
+            if not isinstance(source, dict):
+                continue
+            text = str(source.get("text") or "")
+            text_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
+            if text_sha256 != str(source.get("upload_sha256") or ""):
+                raise ValueError(
+                    f"Loaded source text no longer matches upload_sha256: {source.get('source_id')}"
+                )
+            source_set.append(
+                {
+                    "name": str(source.get("name") or "source"),
+                    "source_id": str(source.get("source_id") or ""),
+                    "source_ref": str(source.get("source_ref") or source.get("upload_path") or ""),
+                    "source_url": str(source.get("source_url") or ""),
+                    "final_url": str(source.get("final_url") or ""),
+                    "accession_number": str(source.get("accession_number") or ""),
+                    "form_type": str(source.get("form_type") or ""),
+                    "filing_date": str(source.get("filing_date") or ""),
+                    "exhibit_number": str(source.get("exhibit_number") or ""),
+                    "document_name": str(source.get("document_name") or ""),
+                    "retrieved_at": str(source.get("retrieved_at") or ""),
+                    "verified_at": str(source.get("verified_at") or ""),
+                    "raw_path": str(source.get("raw_path") or ""),
+                    "raw_sha256": str(source.get("raw_sha256") or ""),
+                    "normalized_path": str(source.get("normalized_path") or ""),
+                    "normalized_sha256": str(source.get("normalized_sha256") or ""),
+                    "upload_path": str(source.get("upload_path") or ""),
+                    "upload_sha256": str(source.get("upload_sha256") or ""),
+                    "upload_bytes": source.get("upload_bytes"),
+                    "text": text,
+                    "sha256": text_sha256,
+                }
+            )
         sample.append(
             {
                 "case_id": result["case_id"],
@@ -232,14 +336,18 @@ def _usefulness_sample(
     return sample
 
 
-def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list[dict[str, Any]]:
+def _answer_reviews(
+    corpus: dict[str, Any],
+    source_bindings: dict[str, dict[str, dict[str, Any]]],
+    review_case_ids: tuple[str, ...],
+) -> list[dict[str, Any]]:
     cases = {str(case.get("id") or ""): case for case in corpus.get("cases", [])}
     answers = {}
     for path in (STATE_DIR / "answers").glob("*.json"):
         answer = _load(path)
         answers[str(answer.get("question") or "")] = answer
 
-    def review_entry(question: str, *, answerable: bool) -> dict[str, Any]:
+    def review_entry(case_id: str, question: str, *, answerable: bool) -> dict[str, Any]:
         answer = answers.get(question)
         if answer is None:
             raise ValueError(f"Current Ask record is missing for question: {question}")
@@ -261,7 +369,7 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
             source_evidence.append(
                 {
                     "citation_ref": citation_ref,
-                    "source_ref": source_refs.get(artifact_id, "source"),
+                    **_required_source_binding(source_bindings, case_id, artifact_id),
                     "artifact_id": artifact_id,
                     "span": chunk.get("span"),
                     "source_excerpt": str(chunk.get("text") or ""),
@@ -281,7 +389,7 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
                 source_evidence.append(
                     {
                         "citation_ref": evidence_ref,
-                        "source_ref": source_refs.get(artifact_id, "source"),
+                        **_required_source_binding(source_bindings, case_id, artifact_id),
                         "artifact_id": artifact_id,
                         "span": chunk.get("span"),
                         "source_excerpt": str(chunk.get("text") or ""),
@@ -306,7 +414,7 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
         return entry
 
     reviews = []
-    for case_id in SELECTED_CASE_IDS:
+    for case_id in review_case_ids:
         case = cases.get(case_id)
         if case is None:
             raise ValueError(f"Selected corpus case is missing: {case_id}")
@@ -314,8 +422,16 @@ def _answer_reviews(corpus: dict[str, Any], source_refs: dict[str, str]) -> list
             {
                 "case_id": case_id,
                 "archetype": case.get("archetype"),
-                "answerable": review_entry(str(case.get("answerable_question") or ""), answerable=True),
-                "unanswerable": review_entry(str(case.get("unanswerable_question") or ""), answerable=False),
+                "answerable": review_entry(
+                    case_id,
+                    str(case.get("answerable_question") or ""),
+                    answerable=True,
+                ),
+                "unanswerable": review_entry(
+                    case_id,
+                    str(case.get("unanswerable_question") or ""),
+                    answerable=False,
+                ),
             }
         )
     return reviews
@@ -331,8 +447,13 @@ def build_inputs() -> tuple[
     dict[str, Any],
     dict[str, Any],
 ]:
-    report, selected, source_refs = _selected_records()
-    corpus = _load(CORPUS_PATH)
+    corpus, corpus_binding = _load_bound_corpus()
+    review_case_ids = _human_review_case_ids(corpus)
+    report, selected, source_bindings = _selected_records(
+        corpus,
+        corpus_binding,
+        review_case_ids,
+    )
     model_stack = report.get("model_stack")
     revision = str((model_stack or {}).get("pipeline_sha256") or "")
     faithfulness = _load(FAITHFULNESS_PATH)
@@ -341,7 +462,9 @@ def build_inputs() -> tuple[
             "status": "HUMAN_REQUIRED",
             "reviewed_at": None,
             "reviewer": {"name": None, "role": None, "is_owner": None},
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
             "selected_brief_count": len(selected),
@@ -351,10 +474,10 @@ def build_inputs() -> tuple[
                 "Set material_overstatement to true for any contradiction, inversion, unsupported consequence, or dropped qualifier that changes meaning.",
                 "Review bottom-line decision_synthesis as a cited assessment, not as a sourced fact; reject it if its rationale does not support the recommendation.",
                 "Every recommended_next_steps row must be present in statements, remain presented_as_fact=false, cite its factual basis, and avoid inventing an approver, signer, owner, obligation, or deadline.",
-                "Compare generated_missing_evidence with every planted gap term and generated conflict statement with every planted contradiction term; complete all gap_and_conflict_review fields.",
+                "Review generated_missing_evidence and generated_conflicts_risks together as the uncertainty surface: missing_evidence is for absent information, while known failures and unresolved conditions belong in conflicts_risks. Confirm every planted gap and contradiction term appears in the appropriate section, then complete all gap_and_conflict_review fields.",
                 "Do not change automated_anchor_status; it is mechanical context only and never decides the human judgment.",
             ],
-            "brief_reviews": _faithfulness_reviews(selected, source_refs, corpus),
+            "brief_reviews": _faithfulness_reviews(selected, source_bindings, corpus),
             "decision": None,
         }
     )
@@ -365,7 +488,9 @@ def build_inputs() -> tuple[
         {
             "status": "HUMAN_REQUIRED",
             "reviewed_at": None,
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
             "brief_sample": brief_sample,
@@ -402,11 +527,13 @@ def build_inputs() -> tuple[
             "status": "HUMAN_REQUIRED",
             "reviewed_at": None,
             "reviewer": {"name": None, "role": None, "is_owner": None},
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
-            "selected_case_count": len(SELECTED_CASE_IDS),
-            "answer_reviews": _answer_reviews(corpus, source_refs),
+            "selected_case_count": len(review_case_ids),
+            "answer_reviews": _answer_reviews(corpus, source_bindings, review_case_ids),
             "decision": None,
         }
     )
@@ -416,8 +543,10 @@ def build_inputs() -> tuple[
             "status": "HUMAN_REQUIRED",
             "reviewed_at": None,
             "reviewer": {"name": None, "role": None, "is_owner": None},
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
-            "case_count": report["corpus"]["case_count"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
+            "case_count": corpus_binding["case_count"],
             "target_cohort_fit": None,
             "domain_specific_and_non_generic": None,
             "messy_input_is_realistic": None,
@@ -430,7 +559,9 @@ def build_inputs() -> tuple[
     external_session_template.update(
         {
             "status": "HUMAN_REQUIRED_EXTERNAL",
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
         }
@@ -440,7 +571,9 @@ def build_inputs() -> tuple[
     external_round_template.update(
         {
             "status": "HUMAN_REQUIRED_EXTERNAL",
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
             "prerequisite": {
@@ -456,7 +589,9 @@ def build_inputs() -> tuple[
     external_evidence_audit_template.update(
         {
             "status": "HUMAN_REQUIRED_EXTERNAL",
-            "corpus_manifest_sha256": report["corpus"]["manifest_sha256"],
+            "corpus_manifest_sha256": corpus_binding["manifest_sha256"],
+            "corpus_bundle_sha256": corpus_binding["bundle_sha256"],
+            "corpus_source_manifest_sha256": corpus_binding["source_files"]["manifest_sha256"],
             "model_stack": model_stack,
             "prompt_retrieval_revision": revision,
         }

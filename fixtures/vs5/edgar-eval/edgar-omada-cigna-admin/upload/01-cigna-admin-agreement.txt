@@ -1,0 +1,481 @@
+25
+d785770dex105a.htm
+EX-10.5(A)
+
+EX-10.5(a)
+
+[***] Certain information in this document has been excluded pursuant to Regulation S-K, Item 601(b)(10). Such excluded information is not material and would likely cause competitive harm to the registrant if publicly disclosed.
+
+Exhibit 10.5(a)
+
+ADMINISTRATIVE SERVICES AGREEMENT
+
+This
+agreement (the “Admin Agreement”) is between, the Omada Health, Inc. (“Omada”) and Cigna Health and Life Insurance Company (“CHLIC”) and is effective as of January 1, 2020 (the “Effective
+Date”).
+
+W I T N E S S E T H
+
+WHEREAS, Omada and CHLIC’s Affiliate, Cigna Corporate Services, LLC, have entered into a Master Services Agreement (the
+“Agreement”), pursuant to which Omada provides digital behavior change program services and coaching (the “Omada Covered Services”) to “Enrolled Participants” (as defined below); and
+
+WHEREAS, Omada has requested that CHLIC provide certain services to Omada which are intended to (i) ensure that Screened
+Participants, CHLIC Existing Clients and CHLIC Prospective Clients are aware of and have the ability to take advantage of the Omada Covered Services, and (ii) encourage the use of Omada Covered Services by Screened Participants, and
+(iii) facilitate Omada’s performance of the Omada Covered Services as described herein; and
+
+WHEREAS, CHLIC is willing to
+provide the requested services to Omada on such terms as CHLIC and Omada shall mutually agree,
+
+NOW, THEREFORE, in consideration of
+the foregoing premises and the mutual promises and covenants contained herein, CHLIC and Omada hereby agree as follows:
+
+SECTION 1 - ADDITIONAL
+DEFINITIONS
+
+“[***]” shall have the meaning given such term in Statement of Work No. 1 to the Agreement.
+
+“Applicable Law” means, with respect to a party to this Admin Agreement, the state, federal and international laws and regulations that apply
+to its obligations under this Admin Agreement.
+
+“Bundled Program” shall mean Omada’s personalized behavior change program for
+Covered Members living with Type 2 diabetes and hypertension that includes aspects of both the Type 2 Program and the Hypertension Program.
+
+“CHLIC Existing Client” means an employer or other group that sponsors a group health plan that is currently insured and or administered by
+CHLIC as identified to Omada by CHLIC (the “CHLIC Existing Client Information”).
+
+“CHLIC Prospective Client” means an
+employer or other group that sponsors a group health plan and which has an outstanding request for proposal to CHLIC to insure and or administer its group health plan as identified to Omada by CHLIC (the “CHLIC Prospective Client
+Information”).
+
+“Cigna Affiliate” shall have the same meaning as set forth in the Agreement.
+
+“Enrolled Participants” shall mean any Screened Participants who are eligible for and elect
+to enroll in the Omada Covered Services under Statement of Work No. 1 to the Agreement.
+
+“Hypertension Program” shall mean
+Omada’s personalized behavior change program designed to support individuals in managing hypertension and sustaining and achieving healthy blood pressure.
+
+“[***]” shall have the meaning given such term in Statement of Work No. 1 to the Agreement.
+
+“[***]” shall mean the date on which the [***].
+
+“Screened Participants” means individuals covered under individual and group insurance policies issued by CHLIC and self-insured group health
+plans administered by CHLIC that have been identified by CHLIC as potentially benefitting from the Omada Covered Services.
+
+“Type 2
+Program” shall mean Omada’s personalized behavior change program for individuals living with Type 2 diabetes.
+
+SECTION 2 - OBLIGATIONS
+OF CHLIC
+
+2.01
+
+Cigna Services
+
+While this Admin Agreement is in effect, CHLIC shall provide the services described in Exhibit A to:
+
+•
+
+explain the availability of Omada Covered Services to CHLIC Existing Clients and CHLIC Prospective Clients; and
+
+•
+
+encourage the use of Omada Covered Services by Screened Participants that CHLIC has identified as potentially
+benefitting from the Omada Covered Services, and facilitate enrollment of Screened Participants in the Omada Covered Services.
+
+The services described in Exhibit A are hereinafter referred to as the “Cigna Services.”
+
+2.02.
+
+Representations and Warranties
+
+CHLIC represents and warrants that (i) it will perform the Cigna Services in a professional and workmanlike manner in accordance with generally prevailing
+industry standards; (ii) it will comply with all Applicable Laws in performing its obligations hereunder, and (iii) neither it nor any of its employees, contractors, officers, directors, Downstream Entities (as defined in 42 CFR 423.4) or
+any major shareholders ([***]% or more) are on the list of excluded individuals/entities as published by the Office of the Inspector General of the U.S. Department of Health and Human Services, nor are on the list of debarred contractors as
+published in the System for Award Management by the General Services Administration.
+
+Cigna Health and Life Insurance Company
+
+2
+
+2.03 Compliance with Anti-Kickback Regulations. Omada and CHLIC understand and agree that, for
+purposes of any applicable anti-kickback and similar laws and regulations, the Fees payable by Omada to CHLIC as described in this Admin Agreement are intended to satisfy the requirements of the safe harbor for personal services at 42 CFR §
+1001.952(d), as well as any other safe harbors that may apply.
+
+2.04
+
+Disclaimer
+
+Cigna makes no representations or warranties regarding the Cigna Services except as otherwise expressly provided in this Admin Agreement.
+
+SECTION 3 - OBLIGATIONS OF OMADA
+
+In addition to
+the compensation obligations set forth in Section 5, when performing outreach activities for the Omada Covered Services to CHLIC Existing Clients or CHLIC Prospective Clients, Omada representatives shall follow the Rules of Engagement set forth
+in Annex D of Statement of Work No. 1 to the Agreement, as amended (the “Rules of Engagement”).
+
+SECTION 4 – EFFECTIVE
+DATE AND TERMINATION
+
+4.01
+
+Effective Date
+
+This Admin Agreement shall be effective on January 1, 2020 (the “Effective Date”) and shall continue until it is
+terminated in accordance with Section 4.02 below (the “Term”).
+
+4.02
+
+Termination
+
+This Admin Agreement shall terminate upon the earliest of the following dates:
+
+a.
+
+The effective date of any regulatory action which prohibits either party from performing its obligations under
+this Admin Agreement;
+
+b.
+
+The date specified by the non-breaching party in a written notice of
+termination of this Admin Agreement if the other party breaches this Admin Agreement and fails to cure such breach within thirty (30) days after receipt of written notice thereof by the non- breaching
+party;
+
+c.
+
+Notwithstanding any other provision in this Admin Agreement, at the option of either party at any time for any
+reason, on the date specified in a written notice to the other of its intention to terminate this Admin Agreement, said notice to be given at least [***] days prior to the specified termination date in conjunction with the termination of Statement
+of Work No. 1 to the Agreement.
+
+Cigna Health and Life Insurance Company
+
+3
+
+d.
+
+The effective date of the termination or expiration of the Agreement; or
+
+e.
+
+Any other date mutually agreed to by Omada and CHLIC.
+
+SECTION 5 - COMPENSATION
+
+5.01
+
+CHLIC’s Compensation
+
+In consideration for the performance of the Cigna Services, Omada will pay CHLIC the amounts set forth below for [***] the applicable Omada
+program on or after the Effective Date of this Admin Agreement (the “Fees”):
+
+•
+
+Hypertension Program. For [***] the Hypertension Program, Omada shall pay CHLIC (a) [***] and (b) [***]
+upon each monthly anniversary thereafter (provided that the [***] under the Agreement) until the [***]. For the avoidance of doubt, the Fees set forth herein do not apply to [***] the DPP+Hypertension Program (as defined in Statement of Work
+No. 1 to the Agreement). (Omada shall pay CHLIC for [***] the DPP+Hypertension Program pursuant to the terms set forth in the Ancillary Services Agreement by and between Omada and Cigna Health Corporation dated May 31, 2018.)
+
+•
+
+Type 2 Program. For [***] the Type 2 Program, Omada shall pay CHLIC a (a) [***] and (b) [***] upon each
+monthly anniversary thereafter (provided that the [***] under the Agreement) until the [***].
+
+•
+
+Bundled Program. For [***] the Bundled Program, Omada shall pay CHLIC (a) a [***] and (b) [***] upon
+each monthly anniversary thereafter (provided that the [***] under the Agreement) until the [***].
+
+Cigna Health and Life Insurance Company
+
+4
+
+If at any point after the [***], whether due to changes in [***] as described in Statement
+of Work No. 1 to the Agreement or otherwise, [***], then the monthly fees for that [***] shall update to reflect the change in circumstances with the next monthly fee billed for that [***] and all monthly fees thereafter. Omada shall not be
+required to pay monthly fees set forth above for [***].
+
+Within [***] days following the end of each [***] during which this Admin
+Agreement is in effect, Omada shall generate a report of all [***] during such [***], including [***] data fields to be separately agreed upon by the parties in writing and the total number of [***] as of such date (the “Invoice
+Report”), which CHLIC agrees will be used only for payment purposes as contemplated by 45 CFR 164.506. Omada will calculate the Fees payable to CHLIC based on the Invoice Report and pay such Fee to CHLIC. Omada will securely deliver the
+Invoice Report to CHLIC in connection with payment of the Fees. CHLIC shall be responsible for any taxes associated with the provision of the Cigna Services hereunder.
+
+Omada’s obligation to make any payment of the Fees under this Admin Agreement for Cigna Services performed through the effective date of
+termination of this Admin Agreement shall survive termination of this Admin Agreement.
+
+5.02 Records. CHLIC will maintain adequate
+administrative records related to the Cigna Services performed under this Admin Agreement, including all records required by applicable law for CHLIC to maintain, during the Term and for [***] thereafter, unless a longer retention period is required
+by applicable law. CHLIC will cooperate with Omada on a timely basis in connection with any reasonable request by Omada to review such records.
+
+SECTION 6 – INDEMNIFICATION
+
+Each party agrees to
+indemnify, defend and hold harmless the other party, its agents and its employees from and against any and all claims, actions, demands, proceedings, damages, liabilities, fines, losses or expenses, including reasonable defense costs and legal fees,
+incurred in connection with third party claims arising directly from or in connection with (i) any material breach of the Agreement or (ii) any grossly negligent acts or omissions or willful misconduct or fraud committed or failed to be
+performed by the other party, its employees or agents.
+
+The indemnified party will notify the indemnifying party as promptly as practicable of any claims
+for which the indemnifying party is obligated to provide indemnification hereunder, and the indemnifying party will confirm to the indemnified party no less than [***] days prior to the date on which a response to such claim is due, that the
+indemnifying party will control the defense of such claim. The indemnified party may, at its own expense, participate in the defense of such claim with its own counsel. No settlement of a claim that involves a remedy other than the payment of money
+by the indemnifying party or requires any admission of fault on the part of indemnified party will be entered into without the prior written consent of the indemnified party.
+
+Cigna Health and Life Insurance Company
+
+5
+
+SECTION 6. LIMITATION OF LIABILITY
+
+WITH THE EXCEPTION OF ANY LIABILITY ARISING FROM A [***] OF THIS AGREEMENT, NEITHER PARTY WILL BE LIABLE TO THE OTHER FOR (A) ANY INDIRECT, INCIDENTAL,
+SPECIAL OR CONSEQUENTIAL DAMAGES (INCLUDING LOST REVENUE, PROFITS OR SAVINGS) ARISING OUT OF OR RELATING TO ITS PERFORMANCE UNDER THIS AGREEMENT OR (B) ANY PUNITIVE DAMAGES (TO THE EXTENT SUCH EXCLUSION IS ALLOWED UNDER APPLICABLE LAW). THE
+FOREGOING LIMITATIONS OF LIABILITY SHALL APPLY TO ANY THEORY OF LIABILITY, WHETHER BASED ON WARRANTY, CONTRACT, STATUTE, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, AND WHETHER OR NOT THE LIABLE PARTY HAS BEEN INFORMED OF THE POSSIBILITY OF ANY SUCH
+DAMAGE, AND EVEN IF A REMEDY SET FORTH HEREIN IS FOUND TO HAVE FAILED OF ITS ESSENTIAL PURPOSE. WITH THE EXCEPTION OF ANY LIABILITY ARISING FROM A [***] OF THIS AGREEMENT, IN NO EVENT SHALL EITHER PARTY’S TOTAL LIABILITY HEREUNDER EXCEED [***].
+
+SECTION 7 - GENERAL PROVISIONS
+
+7.01
+
+Confidentiality
+
+The information shared under this Admin Agreement are Confidential Information (as defined in the Omada Agreement) subject to the
+confidentiality obligations set forth in the Omada Agreement.
+
+The CHLIC Existing Client Information and the CHLIC Prospective Client
+Information provided by CHLIC to Omada pursuant to this Admin Agreement may contain Confidential Information (as such term is defined in the Omada Agreement) of CHLIC. With respect to such information that is Confidential Information, Omada shall:
+
+a.
+
+Treat the CHLIC Existing Client Information and the CHLIC Prospective Client Information as confidential and
+shall not disclose the CHLIC Existing Client Information, nor the CHLIC Prospective Client Information, nor any portion thereof to any third party without the express written consent of CHLIC;
+
+b.
+
+Disclose the Existing Client Information, and the CHLIC Prospective Client Information and any portion thereof
+only to
+
+Cigna Health and Life Insurance Company
+
+6
+
+such of its own employees as may be required to comply with the Rules of Engagement or otherwise perform its obligations under the Omada Participating Provider Agreements; and
+
+c.
+
+Use the CHLIC Existing Client Information and the CHLIC Prospective Client Information only for purposes of
+complying with the Client Account Rules of Engagement specified in Annex D or otherwise perform its obligations under the Agreement.
+
+7.02
+
+Medical Records
+
+The parties agree to maintain the confidentiality of the medical records of Screened Participants and Enrolled Participants and any other
+records containing individually identifiable information with respect to Screened Participants and Enrolled Participants in accordance with applicable state and federal law.
+
+7.03
+
+Use of Names
+
+Except as necessary in the performance of their duties under this Admin Agreement or as otherwise contemplated by the Agreement, neither party
+shall use the other’s name, logo, service mark, trademarks or other identifying information without its prior written approval.
+
+7.04
+
+Dispute Resolution
+
+It is understood and agreed that any dispute between the parties arising from or relating to the performance or interpretation of this Admin
+Agreement (“Controversy”) shall be resolved exclusively pursuant to the following mandatory dispute resolution procedures:
+
+a.
+
+Any Controversy shall first be referred to an executive level employee of each party who shall meet and confer
+with his/her counterpart to attempt to resolve the dispute (“Executive Review”) as follows: The disputing party shall initiate Executive Review by giving the other party written notice of the Controversy and shall specifically
+request Executive Review of said Controversy in such notice. Within [***] calendar days of any party’s written request for Executive Review, the receiving party shall submit a written response. Both the notice and response shall include a
+statement of each party’s position and a summary of the evidence and arguments supporting its position. Within [***] calendar days of any party’s request for Executive Review, an executive level employee of each party shall be designated
+by the party to meet and confer with his/her counterpart to attempt to resolve the dispute. Each representative shall have full authority to resolve the dispute.
+
+b.
+
+In the event that a Controversy has not been resolved within [***] calendar days of the request of Executive
+Review under Section 8.05.a, above, the disputing party shall initiate mediation by providing written notice to the other party, which shall be conducted in New York City, New York, in accordance with the American
+
+Cigna Health and Life Insurance Company
+
+7
+
+Arbitration Association mediation rules (“Mediation”). Each party shall assume its own costs and attorneys’ fees, and the compensation and expenses of the mediator and any administrative fees or
+costs associated with the mediation proceeding shall be borne equally by the parties.
+
+c.
+
+In the event that a Controversy has not been resolved by Executive Review or Mediation, the Controversy shall
+be settled exclusively by binding arbitration. The arbitration shall be conducted in the same location as noted in Section 8.05.b above, in accordance with the American Arbitration Association Arbitration Rules, and which to the extent of the
+subject matter of the arbitration, shall be binding not only on all parties to this Admin Agreement but on any other entity controlled by, in control of or under common control with the party to the extent that such affiliate joins in the
+arbitration, and judgment on the award rendered by the arbitrator may be entered in any court having jurisdiction thereof. Each party shall assume its own costs and attorneys’ fees, and the compensation and expenses of the arbitrator and any
+administrative fees or costs associated with the arbitration proceeding shall be borne equally by the parties. The decision of the arbitrator shall be final, conclusive and binding, and no action at law or in equity may be instituted by either party
+other than to enforce the award of the arbitrator.
+
+d.
+
+The parties intend this dispute resolution procedure described above to be a private undertaking and agree that
+an arbitration conducted under this provision will not be consolidated with an arbitration involving other plans administered in whole or in part by CHLIC or other Cigna Affiliate, or third parties not parties to this Admin Agreement. The arbitrator
+will be without power to conduct arbitration on a class or representative basis. The parties waive their right to participate in a class action or representative proceeding. The arbitrator may award declaratory or injunctive relief only in favor of
+the individual party seeking relief and only to the extent necessary to provide relief warranted by that party’s individual claim. All issues are for the arbitrator to decide, except the courts will decide those issues relating to the scope and
+enforceability of the arbitration provision.
+
+7.05
+
+Relationship of Parties
+
+The relationship of the parties under this Admin Agreement shall be neither that of employer and employee nor that of principal and agent. It
+is understood that each party and its employees and agents will act hereunder as independent contractors, and shall not have any claim under this Admin Agreement or otherwise against the other party as a joint venturer or partner. During the term of
+this Admin Agreement, each party shall be fully responsible and liable for any and all state and federal income and other taxes to which payments made by the other party may become subject.
+
+7.06
+
+Entire Agreement
+
+This Admin Agreement, together with the provisions of the Agreement incorporated by reference hereunder, and specified exhibits and attachments
+hereto as well as any
+
+Cigna Health and Life Insurance Company
+
+8
+
+subsequent amendments represent the entire agreement between the parties hereto and
+supersede any and all previous written or oral agreements or understandings regarding the subject matter. No modification or amendment hereto shall be valid unless in writing and signed by an authorized person of each of the parties.
+
+7.07
+
+Assignment and Subcontracting
+
+Neither CHLIC nor Omada may assign any right, interest, or obligation hereunder without the express written consent of the other party except
+that CHLIC may assign any right, interest, or responsibility under this Admin Agreement to any Cigna Affiliate. This Section shall not prevent CHLIC from subcontracting specific obligations pursuant to this Admin Agreement, provided that CHLIC
+remains fully responsible for the provision of the subcontracted services to Omada in accordance with the terms set forth herein.
+
+7.08
+
+Amendment
+
+No amendment to this Admin Agreement shall be effective unless agreed to in writing by CHLIC and Omada.
+
+7.9
+
+Severability
+
+If any provision or any part of a provision of this Admin Agreement is held invalid or unenforceable by a court of competent jurisdiction, such
+invalidity or unenforceability shall not invalidate or render unenforceable any other portion of this Admin Agreement.
+
+7.10
+
+Force Majeure
+
+[***] shall not be liable for any failure to meet any of the obligations or provide any of the [***] for any period of time to the extent such
+failure to perform is due to any contingency beyond the reasonable control of [***], its employees, officers, or directors or designees. Such contingencies include, but are not limited to, acts or omissions of any person or entity not employed or
+reasonably controlled by [***], its employees, officers, or directors, acts of God, fires, epidemics and pandemics, wars, accidents, labor disputes or shortages, and governmental laws, ordinances, rules or regulations, whether valid or invalid.
+
+7.11
+
+Waiver
+
+No course of dealing or failure of either party to strictly enforce any term, right or condition of this Admin Agreement shall be construed as
+a waiver of such term, right or condition. Waiver by either party of any default shall not be deemed a waiver of any other default.
+
+7.12
+
+Survival
+
+Provisions contained in this Admin Agreement that by their sense and context are intended to survive completion of performance, termination or
+cancellation of this Admin Agreement shall so survive.
+
+Cigna Health and Life Insurance Company
+
+9
+
+7.13
+
+Notices
+
+Except as otherwise provided, all notices or other communications hereunder shall be in writing and shall be deemed to have been duly made when
+(a) delivered in person, (b) delivered to an agent, such as an overnight or similar delivery service, (c) delivered electronically, or (d) deposited in the United States mail, postage prepaid, and addressed as follows:
+
+To CHLIC:
+
+Cigna Health and Life
+Insurance Company
+
+900 Cottage Grove Road
+
+Hartford, CT 06152
+
+Attention:
+Chief Counsel, Legal Department
+
+To Omada:
+
+Omada Health, Inc.
+
+500 Sansome
+Street, Suite 200
+
+San Francisco, CA 94111
+
+Attention: Legal Department
+
+The
+address to which notices or communications may be given by either party may be changed by written notice given by one party to the other pursuant to this Section.
+
+7.14
+
+Headings
+
+Article, section, or paragraph headings contained in this Admin Agreement are for reference purposes only and shall not affect the meaning or
+interpretation of this Admin Agreement.
+
+7.15
+
+Counterparts
+
+This Admin Agreement may be executed in counterparts, each of which shall be deemed to be an original, but all of which together shall
+constitute one and the same agreement.
+
+7.16
+
+Governing Law/Compliance with Laws
+
+This Admin Agreement shall be construed in accordance with the laws of the State of New York without regard to conflict of rules, and parties
+consent to the venue and jurisdiction of its courts. The parties shall perform their obligations under this Admin Agreement in conformance with all Applicable Laws and regulatory requirements.
+
+Cigna Health and Life Insurance Company
+
+10
+
+IN WITNESS WHEREOF, the parties hereto have caused this Admin Agreement to be executed by their
+respective duly authorized representatives.
+
+Cigna Health and Life Insurance Company
+
+Omada Health, Inc.
+
+Signature: /s/ Dawn M. Salan
+
+Signature: /s/ Sean Duffy
+
+Print Name: Dawn M. Salan
+
+Print Name: Sean Duffy
+
+Title: Managing Director, GP & TPM
+
+Title: CEO
+
+Date: 6/25/2020 | 9:07 AM PDT
+
+Date: 6/24/2020 | 15:00 PM PDT
+
+Cigna Health and Life Insurance Company
+
+11
+
+EXHIBIT A
+
+CHLIC SERVICES
+
+Cigna Health and Life Insurance Company
+
+12

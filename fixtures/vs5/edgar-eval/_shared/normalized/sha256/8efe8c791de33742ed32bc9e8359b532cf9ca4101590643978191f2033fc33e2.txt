@@ -1,0 +1,184 @@
+EX-10
+3
+svra-ex10_33.htm
+EX-10.33
+
+EX-10
+
+Exhibit 10.33
+
+Certain identified information in this document has been excluded because it is both (i) not material and (ii) would likely cause competitive harm if publicly disclosed. [***] indicates where such information has been omitted.
+
+AMENDMENT No. 1 TO MANUFACTURE AND SUPPLY AGREEMENT
+
+This Amendment No. 1 to the Manufacture and Supply Agreement (“Amendment No. 1”), dated December 7, 2022 (“Effective Date”), is entered into by and between Savara ApS, a Denmark private limited company having a principal place of business at c/o Lundgrens Advokatpartnerselskab, Tuborg Boulevard 12, 2900 Hellerup, Denmark (“Savara”) and GEMABIOTECH SAU, a corporation organized under the laws of Argentina, having a principal place of business at Avenida del Libertador 2740, Olivos, Province of Buenos Aires, Argentina (“GEMA”) (each referred herein by name, or individually, as a “Party” or collectively, as the “Parties”).
+
+WHEREAS, Savara and GEMA entered into a Master Services Agreement dated April 26, 2019 (the “Agreement”) providing for Savara to engage GEMA to manufacture the API (as defined in the Agreement) and GEMA to achieve commercial compliance and manufacture and supply the API; and
+
+WHEREAS, the parties now wish to amend the Agreement to modify certain terms of the Agreement.
+
+NOW THEREFORE, in consideration of the recitals set forth above, the mutual covenants, terms and conditions set forth below, and other good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the Parties agree as follows:
+
+1.
+Exhibit 6.1. The Pricing and Milestone Schedule attached to the Agreement as Exhibit 6.1 is hereby replaced in its entirety by Exhibit 6.1 attached hereto.
+
+2.
+Capitalized terms used but not defined in this Amendment No. 1 shall have the meaning as ascribed to them in the Agreement. Upon execution, this Amendment No. 1 shall be made part of the Agreement and shall be incorporated therein by reference. Except as provided herein, all other terms and conditions of the Agreement shall remain in full force and effect.
+
+IN WITNESS WHEREOF, the parties have caused this Amendment No. 1 to the Agreement to be executed on the Effective Date set forth above.
+
+Savara ApS
+
+GEMABIOTECH SAU
+
+By:
+
+/s/ Dave Lowrance
+
+By:
+
+/s/ Juan Ceriani
+
+Name:
+
+Dave Lowrance
+
+Name:
+
+Juan Ceriani
+
+Title:
+
+CFO
+
+Title:
+
+General Manager
+
+Date:
+
+12/7/2022
+
+Date:
+
+12/7/22
+
+Exhibit Error! Reference source not found.
+
+Pricing and Milestone Schedule
+
+Purchase Price of API:
+
+Prior to Market Authorization: $[***] per gram of Molgramostim API (Currently being review by the Parties)
+
+Following Market Authorization: $[***] per gram of Molgramostim API (Currently being review by the Parties)
+
+Milestone Payments
+
+Milestone Event
+
+Activities
+
+Milestone Payment
+
+(in USD)
+
+1
+
+Completed/Paid
+
+Effective date of the Agreement
+
+Batch N°18-GMCF-031-010 Release
+
+Batch N°18-GMCF-031-010 Samples Characterization
+
+$[***]
+
+2
+
+Completed/Paid
+
+Validations stage 1 completion
+
+Protocol for Upstream Characterization Upstream Characterization Final Report
+
+Protocol for Downstream Characterization Downstream Characterization Final Report
+
+$[***]
+
+New Analytical Methods Development Report
+
+New Analytical Methods Development SOPs
+
+3
+
+Validations of analytical method completion
+
+Validation or Revalidation of IPC Protocol
+
+Completed/Paid
+
+Validation or Revalidation of IPC Final Report
+
+Validation or Revalidation of Analytical Techniques for DS Protocols
+
+Validation or Revalidation of Analytical Techniques for DS Final Report
+
+$[***]
+
+4
+
+Validations stage 2 completion
+
+Reference standard, manufacturing and testing protocol Reference standard, manufacturing and report
+
+Stability study protocol Stability study start-up
+
+Completed/Paid
+
+Protocols for Validation GMP batch
+
+Validation of GMP batch (including 3 batches –up to120 gr) CoA Validation of GMP batch Final Report
+
+$[***]
+
+Activities related to preparation for technology transfer and
+
+5
+
+Batch fermentation [$***]
+
+Expected Q4 2022
+
+Execution of Amendment No. 1
+
+Preparation for FDA Audit [$***]
+
+Facility improvements for GMP compliance [$***]
+
+$[***]
+
+6
+
+Expected
+
+[***]
+
+Approval of FDA Audit
+
+$[***]
+
+7
+
+Expected
+
+[***]
+
+Marketing Authorization
+
+$[***]
+
+Total Potential Milestone Payments
+
+$[***]

@@ -1,0 +1,2323 @@
+
+13
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+4. Property, plant and equipment
+
+Property, plant and equipment consisted of the following:
+
+September 30, 2020
+
+December 31, 2019
+
+Land and improvements
+
+$
+
+51.2
+
+$
+
+46.5
+
+Buildings, building improvements and leasehold improvements
+
+280.6
+
+234.8
+
+Furniture and equipment
+
+352.2
+
+334.2
+
+Software
+
+56.6
+
+55.7
+
+Construction-in-progress
+
+112.8
+
+81.5
+
+Property, plant and equipment, gross
+
+853.4
+
+752.7
+
+Accumulated depreciation
+
+(246.9)
+
+(210.4)
+
+Total property, plant and equipment, net
+
+$
+
+606.5
+
+$
+
+542.3
+
+5. Leases
+
+The Company has operating leases for corporate offices, research and development facilities and manufacturing facilities. We determine if an arrangement is a lease at inception. Operating leases are included in right-of-use ("ROU") assets and liabilities.
+
+ROU assets represent the Company's right to use an underlying asset for the lease term and lease liabilities represent the Company's obligation to make lease payments arising from the lease. Operating lease ROU assets and liabilities are recognized at commencement date based on the present value of lease payments over the lease term. As most of the Company's leases do not provide an implicit rate, the Company uses an incremental borrowing rate based on the information available at commencement date in determining the present value of lease payments. The Company uses an implicit rate when readily determinable. At the beginning of a lease, the operating lease ROU asset also includes any concentrated lease payments expected to be paid and excludes lease incentives. The Company's lease ROU asset may include options to extend or terminate the lease when it is reasonably certain that the Company will exercise those options.
+
+Lease expense for lease payments is recognized on a straight-line basis over the lease term. The Company has lease agreements with lease and non-lease components, which are accounted for separately. The Company's leases have remaining lease terms of 1 year to 15 years, some of which include options to extend the leases for up to 5 years, and some of which include options to terminate the leases within 1 year.
+
+The components of lease expense were as follows:
+
+Three Months Ended September 30,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+2020
+
+2019
+
+Operating lease cost:
+
+Amortization of right-of-use assets
+
+$
+
+1.1
+
+$
+
+0.8
+
+$
+
+3.2
+
+$
+
+2.1
+
+Interest on lease liabilities
+
+0.2
+
+0.1
+
+0.8
+
+0.4
+
+Total operating lease cost
+
+$
+
+1.3
+
+$
+
+0.9
+
+$
+
+4.0
+
+$
+
+2.5
+
+14
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+Supplemental balance sheet information related to leases was as follows:
+
+(In millions, except lease term and discount rate)
+
+Balance Sheet location
+
+September 30, 2020
+
+December 31, 2019
+
+Operating lease right-of-use assets
+
+Other assets
+
+$
+
+23.4
+
+$
+
+24.7
+
+Operating lease liabilities, current portion
+
+Other current liabilities
+
+4.4
+
+3.6
+
+Operating lease liabilities
+
+Other liabilities
+
+20.7
+
+22.1
+
+Total operating lease liabilities
+
+$
+
+25.1
+
+$
+
+25.7
+
+Operating leases:
+
+Weighted average remaining lease term (years)
+
+7.4
+
+8.0
+
+Weighted average discount rate
+
+4.2
+
+%
+
+4.2
+
+%
+
+6. Intangible assets
+
+The Company's intangible assets consist of products acquired via business combinations or asset acquisitions. The following tables summarize the Company's intangible assets for the periods ended September 30, 2020 and December 31, 2019:
+
+September 30, 2020
+
+(in millions)
+
+Estimated Life
+
+Cost
+
+Accumulated Amortization
+
+Net
+
+Products
+
+9-22 years
+
+$
+
+798.0
+
+$
+
+123.9
+
+$
+
+674.1
+
+Customer relationships
+
+8 years
+
+28.6
+
+25.6
+
+3.0
+
+Contract development and manufacturing
+
+8 years
+
+5.5
+
+4.5
+
+1.0
+
+Total intangible assets
+
+$
+
+832.1
+
+$
+
+154.0
+
+$
+
+678.1
+
+December 31, 2019
+
+(in millions)
+
+Estimated Life
+
+Cost
+
+Accumulated Amortization
+
+Net
+
+Products
+
+9-22 years
+
+$
+
+788.0
+
+$
+
+82.2
+
+$
+
+705.8
+
+Customer relationships
+
+8 years
+
+28.6
+
+23.0
+
+$
+
+5.6
+
+Contract development and manufacturing
+
+8 years
+
+5.5
+
+4.0
+
+$
+
+1.5
+
+Total intangible assets
+
+$
+
+822.1
+
+$
+
+109.2
+
+$
+
+712.9
+
+During the nine months ended September 30, 2020 and 2019, the Company achieved a sales milestone that resulted in a $10.0 million obligation related to the Company's asset acquisition of raxibacumab in October 2017. As of September 30, 2020 there are no remaining contractual obligations for sales milestones related to the raxibacumab acquisition.
+
+During the nine months ended September 30, 2020 and 2019, the Company recorded amortization expense for intangible assets of $44.8 million and $43.9 million, respectively. During the three months ended September 30, 2020 and 2019, the Company recorded amortization expense for intangible assets of $15.0 million and $14.7 million, respectively. As of September 30, 2020, the weighted average amortization period remaining for intangible assets was 13 years.
+
+In-process research and development ("IPR&D") assets are considered to be indefinite-lived until the completion or abandonment of the associated research and development efforts. During the three months ended September 30, 2020, the Company concluded that its IPR&D intangible asset, AP004 (Naloxone prefilled syringe), currently has de minimis value and as such the Company has recorded an impairment charge of $29.0 million during the three and nine months ended September 30, 2020. The impairment charge is reflected as a component of research and development expense on the consolidated statement of operations.
+
+15
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+Goodwill was $266.5 million and $266.6 million for the periods ended September 30, 2020 and December 31, 2019, respectively. The change in the balance during the period was due to foreign currency translation adjustments.
+
+7. Contingent consideration
+
+Contingent consideration liabilities associated with business combinations are measured at fair value. These liabilities represent an obligation of the Company to transfer additional assets to the selling shareholders and owners if future events occur or conditions are met. These liabilities associated with business combinations are measured at fair value at inception and at each subsequent reporting date. The changes in the fair value are primarily due to the expected amount and timing of future net sales, which are inputs that have no observable market (Level 3).
+
+The following table is a reconciliation of the beginning and ending balance of contingent considerations and is based on level 3 significant unobservable inputs.
+
+Balance at December 31, 2019
+
+$
+
+29.2
+
+Change in fair value
+
+31.3
+
+Settlements
+
+(2.2)
+
+Balance at September 30, 2020
+
+$
+
+58.3
+
+The recurring Level 3 fair value measurements for the Company's contingent consideration liability include the following significant unobservable inputs:
+
+Contingent Consideration Liability
+
+Fair Value as of September 30, 2020
+
+Valuation Technique
+
+Unobservable Input
+
+Range
+
+Weighted Average
+
+Revenue milestone and royalty based
+
+$58.3 million
+
+Discounted cash flow
+
+Discount rate
+
+2.5% - 8.6%
+
+4.2%
+
+Probability of payment
+
+50% - 100%
+
+75.0%
+
+Projected year of payment
+
+2020 - 2028
+
+2022
+
+8. Derivative instruments and hedging activities
+
+Risk management objective of using derivatives
+
+The Company is exposed to certain risks arising from both its business operations and economic conditions. The Company principally manages its exposures to a wide variety of business and operational risks through management of its core business activities. The Company manages economic risks, including interest rate, liquidity, and credit risk primarily by managing the amount, sources, and duration of its assets and liabilities and the use of derivative financial instruments. Specifically, the Company has entered into interest rate swaps to manage exposures that arise from the Company's senior secured credit agreement's payments of variable interest rate debt.
+
+Accounting policy for derivative instruments and hedging activities
+
+The Company entered into interest rate swaps in June 2019. The Company's interest rate swaps qualify for hedge accounting as cash flow hedges. All derivatives are recorded on the balance sheet at fair value. Hedge accounting provides for the matching of the timing of gain or loss recognition on these interest rate swaps with the recognition of the changes in interest expense on the Company's variable rate debt. For derivatives designated as cash flow hedges of interest rate risk, the gain or loss on the derivative is recorded in accumulated other comprehensive income and subsequently reclassified into interest expense in the same period during which the hedged transaction affects earnings. Amounts reported in accumulated other comprehensive income related to derivatives will be reclassified to interest expense as interest payments are made on the Company’s variable-rate debt. The cash flows from the designated interest rate swaps are classified as a component of operating cash flows, similar to interest expense. If current fair values of designated interest rate swaps remained static over the next twelve months, the Company would reclassify $5.7 million of net deferred losses from accumulated other comprehensive loss to the statement of operations over the next twelve month period. All outstanding cash flow hedges mature in October 2023.
+
+16
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+As of September 30, 2020, the Company had the following outstanding interest rate derivatives that were designated as cash flow hedges of interest rate risk:
+
+Number of Instruments
+
+Notional
+
+Interest rate swaps
+
+7
+
+$
+
+350.0
+
+The table below presents the fair value of the Company’s derivative financial instruments designated as hedges as well as their classification on the balance sheet.
+
+Asset Derivatives
+
+Liability Derivatives
+
+September 30, 2020
+
+December 31, 2019
+
+September 30, 2020
+
+December 31, 2019
+
+Balance Sheet Location
+
+Fair Value
+
+Balance Sheet Location
+
+Fair Value
+
+Balance Sheet Location
+
+Fair Value
+
+Balance Sheet Location
+
+Fair Value
+
+Interest Rate Swaps
+
+Other Current Assets
+
+$
+
+—
+
+Other Current Assets
+
+$
+
+—
+
+Other Current Liabilities
+
+$
+
+5.6
+
+Other Current Liabilities
+
+$
+
+—
+
+Other Assets
+
+$
+
+—
+
+Other Assets
+
+$
+
+—
+
+Other Liabilities
+
+$
+
+10.7
+
+Other Liabilities
+
+$
+
+2.0
+
+The valuation of the interest rate swaps is determined using widely accepted valuation techniques, including discounted cash flow analysis on the expected cash flows of each interest rate swap. This analysis reflects the contractual terms of the interest rate swaps, including the period to maturity, and uses observable market-based inputs, including interest rate curves and implied volatilities. The fair values of interest rate swaps are determined using the market standard methodology of netting the discounted future fixed cash payments (or receipts) and the discounted expected variable cash receipts (or payments). The variable cash payments (or receipts) are based on an expectation of future interest rates (forward curves) derived from observable market interest rate curves. To comply with the provisions of ASC 820, Fair Value Measurement, we incorporate credit valuation adjustments in the fair value measurements to appropriately reflect both our own nonperformance risk and the respective counterparty’s nonperformance risk. These credit valuation adjustments were concluded to not be significant inputs for the fair value calculations for the periods presented. In adjusting the fair value of our derivative contracts for the effect of nonperformance risk, we have considered the impact of netting and any applicable credit enhancements, such as the posting of collateral, thresholds, mutual puts and guarantees. The valuation of interest rate swaps fall into Level 2 in the fair value hierarchy.
+
+The table below presents the effect of cash flow hedge accounting on accumulated other comprehensive income.
+
+Hedging derivatives
+
+Cumulative Amount of Gain/(Loss) Recognized in OCI on Derivative
+
+Location of Gain or (Loss) Reclassified from Accumulated OCI into Income
+
+Amount of Gain/(Loss) Reclassified from Accumulated OCI into Income
+
+September 30,
+
+December 31,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+2020
+
+2019
+
+Interest Rate Swaps
+
+$
+
+(16.3)
+
+$
+
+2.0
+
+Interest expense
+
+$
+
+(2.5)
+
+$
+
+0.5
+
+17
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+9. Debt
+
+The components of debt are as follows:
+
+September 30, 2020
+
+December 31, 2019
+
+Term loan due 2023
+
+$
+
+427.5
+
+$
+
+435.9
+
+Revolver loan due 2023
+
+—
+
+373.0
+
+3.875% Senior Unsecured Notes due 2028
+
+450.0
+
+—
+
+2.875% Convertible Senior Notes due 2021
+
+10.6
+
+10.6
+
+Other
+
+3.0
+
+3.0
+
+Total debt
+
+891.1
+
+822.5
+
+Current portion of long-term debt, net of debt issuance costs
+
+(30.9)
+
+(12.9)
+
+Unamortized debt issuance costs
+
+(11.7)
+
+(11.2)
+
+Non-current portion of debt
+
+$
+
+848.5
+
+$
+
+798.4
+
+As of September 30, 2020, the Company had approximately $1.8 million and $3.7 million of debt issuance costs associated with the revolver loan that were classified as other current assets and other assets, respectively, on the Company's consolidated balance sheets because there was no outstanding revolver balance at period end. As of December 31, 2019, the Company had approximately $1.8 million and $5.0 million of debt issuance costs associated with the revolver loan that were classified as debt, current portion and debt, net of current portion, respectively, on the Company's consolidated balance sheets because there was an outstanding revolver balance at period end.
+
+3.875% Senior Unsecured Notes due 2028
+
+On August 7, 2020, the Company completed its offering of $450 million aggregate principal amount of 3.875% Senior Unsecured Notes due 2028 (the “2028 Notes”) of which the majority of the net proceeds were used to pay down the Revolving Credit Facility (as defined below). Interest on the 2028 Notes is payable on February 15th and August 15th of each year until maturity, beginning on February 15, 2021. The 2028 Notes will mature on August 15, 2028.
+
+On or after August 15, 2023, the Company may redeem the 2028 Notes, in whole or in part, at the redemption prices set forth in the related Indenture, plus accrued and unpaid interest. Prior to August 15, 2023 the Company may redeem all or a portion of the 2028 Notes at a redemption price equal to 100% of the principal amount of the 2028 Notes plus a “make-whole” premium and accrued and unpaid interest. Prior to August 15, 2023, the Company may redeem up to 40% of the aggregate principal amount of the 2028 Notes using the net cash proceeds of certain equity offerings at the redemption price set forth in the related Indenture. Upon the occurrence of a change of control, the Company must offer to repurchase the 2028 Notes at a purchase price of 101% of the principal amount of such 2028 Notes plus accrued and unpaid interest.
+
+Negative covenants in the Indenture governing the 2028 Notes, among other things, limit the ability of the Company to incur indebtedness and liens, dispose of assets, make investments, enter into certain merger or consolidation transactions and make restricted payments.
+
+18
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+Senior secured credit agreement
+
+Also on August 7, 2020, the Company entered into a Second Amendment (the “Credit Agreement Amendment”) to its senior secured credit agreement, dated October 15, 2018, with multiple lending institutions relating to the Company’s senior secured credit facilities (the “Credit Agreement,” and as amended, the “Amended Credit Agreement”), consisting of a senior revolving credit facility (the “Revolving Credit Facility”) and senior term loan facility (the “Term Loan Facility,” and together with the Revolving Credit Facility, the “Senior Secured Credit Facilities”). The Credit Agreement Amendment amended, among other things, the definition of incremental facilities limit, the consolidated net leverage ratio financial covenant by increasing the maximum level, increased the permissible applicable margins based on the Company’s consolidated net leverage ratio and increased the commitment fee that the Company is required to pay in respect of the average daily unused commitments under the Revolving Credit Facility, depending on the Company’s consolidated net leverage ratio.
+
+The Amended Credit Agreement includes (i) a Revolving Credit Facility of $600 million with a maturity date of October 13, 2023, and (ii) a Term Loan Facility with a principal amount of $450 million. The Company may request incremental term loan facilities or increases in the Revolving Credit Facility (each an "Incremental Loan") as long as certain requirements involving our net leverage ratio will be maintained on a pro forma basis. Borrowings under the Revolving Credit Facility and the Term Loan Facility bear interest at a rate per annum equal to (a) a eurocurrency rate plus a margin ranging from 1.25% to 2.25% per annum, depending on the Company's consolidated net leverage ratio or (b) a base rate (which is the highest of the prime rate, the federal funds rate plus 0.50%, and a eurocurrency rate for an interest period of one month plus 1% plus a margin ranging from 0.25% to 1.25%, depending on the Company's consolidated net leverage ratio. The Company is required to make quarterly payments on the last business day of each calendar quarter under the Amended Credit Agreement for accrued and unpaid interest on the outstanding principal balance, based on the above interest rates. In addition, the Company is required to pay commitment fees ranging from 0.15% to 0.35% per annum, depending on the Company's consolidated net leverage ratio, for the average daily unused commitments under the Revolving Credit Facility. The Company is to repay the outstanding principal amount of the Term Loan Facility in quarterly installments on the last business day of each calendar quarter based on an annual percentage equal to 2.5% of the original principal amount of the Term Loan Facility during each of the first two years of the Term Loan Facility, 5% of the original principal amount of the Term Loan Facility during the third year of the Term Loan Facility and 7.5% of the original principal amount of the Term Loan Facility during each year of the remainder of the term of the Term Loan Facility until the maturity date of the Term Loan Facility, at which time the entire unpaid principal balance of the Term Loan Facility will be due and payable. The Company has the right to prepay the Term Loan Facility without premium or penalty. The Revolving Credit Facility and the Term Loan Facility mature on October 13, 2023.
+
+The Amended Credit Agreement also requires mandatory prepayments of the Term Loan Facility in the event the Company or its Subsidiaries (a) incur indebtedness not otherwise permitted under the Amended Credit Agreement or (b) receive cash proceeds in excess of $100 million during the term of the Credit Agreement from certain dispositions of property or from casualty events involving their property, subject to certain reinvestment rights. The financial covenants under the Amended Credit Agreement currently require the quarterly presentation of a minimum consolidated 12-month rolling debt service coverage ratio of 2.50 to 1.00, and a maximum consolidated net leverage ratio of 4.50 to 1.00 (subject to an increase to 5.00 to 1.00 for an applicable four quarter period, at the election of the Company, in connection with a permitted acquisition having an aggregate consideration in excess of $75.0 million). Negative covenants in the Amended Credit Agreement, among other things, limit the ability of the Company to incur indebtedness and liens, dispose of assets, make investments, enter into certain merger or consolidation transactions and make restricted payments. As of the date of these financial statements, the Company is in compliance with all affirmative and negative covenants.
+
+2.875% Convertible senior notes due 2021
+
+On January 29, 2014, the Company issued 2.875% convertible senior notes due 2021 (the "Notes"). The Notes bear interest at a rate of 2.875% per year, payable semi-annually in arrears on January 15 and July 15 of each year. The Notes mature on January 15, 2021.
+
+19
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+10. Revenue recognition
+
+The Company operates as one operating segment. Therefore, results of its operations are reported on a consolidated basis for purposes of segment reporting, consistent with internal management reporting. The Company's revenues disaggregated by the major sources were as follows:
+
+Three Months Ended September 30, 2020
+
+Three Months Ended September 30, 2019
+
+U.S.
+Government
+
+Non-U.S.
+Government
+
+Total
+
+U.S.
+Government
+
+Non-U.S.
+Government
+
+Total
+
+Product sales, net
+
+$
+
+102.4
+
+$
+
+99.8
+
+$
+
+202.2
+
+$
+
+170.2
+
+$
+
+86.0
+
+$
+
+256.2
+
+Contract development and manufacturing services
+
+85.9
+
+71.2
+
+157.1
+
+—
+
+20.0
+
+20.0
+
+Contracts and grants
+
+24.9
+
+1.0
+
+25.9
+
+35.6
+
+—
+
+35.6
+
+Total revenues
+
+$
+
+213.2
+
+$
+
+172.0
+
+$
+
+385.2
+
+$
+
+205.8
+
+$
+
+106.0
+
+$
+
+311.8
+
+Nine Months Ended September 30, 2020
+
+Nine Months Ended September 30, 2019
+
+U.S. Government
+
+Non-U.S. Government
+
+Total
+
+U.S. Government
+
+Non-U.S. Government
+
+Total
+
+Product sales, net
+
+$
+
+390.5
+
+$
+
+258.4
+
+$
+
+648.9
+
+$
+
+338.1
+
+$
+
+254.6
+
+$
+
+592.7
+
+Contract development and manufacturing services
+
+130.5
+
+120.9
+
+251.4
+
+—
+
+54.6
+
+54.6
+
+Contracts and grants
+
+67.6
+
+4.5
+
+72.1
+
+94.3
+
+4.1
+
+98.4
+
+Total revenues
+
+$
+
+588.6
+
+$
+
+383.8
+
+$
+
+972.4
+
+$
+
+432.4
+
+$
+
+313.3
+
+$
+
+745.7
+
+Contract liabilities
+
+When performance obligations are not transferred to a customer at the end of a reporting period, cash received associated with amounts allocated to those performance obligations is reflected as contract liabilities on the consolidated balance sheets and is deferred until control of these performance obligations is transferred to the customer. The following table presents the rollforward of the contract liability balances:
+
+December 31, 2019
+
+$
+
+88.9
+
+Deferral of revenue
+
+60.0
+
+Revenue recognized
+
+(69.0)
+
+September 30, 2020
+
+$
+
+79.9
+
+20
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+Transaction price allocated to remaining performance obligations
+
+During the nine months ended September 30, 2020, the Company entered into a number of multi-year contract development and manufacturing services arrangements for the production of developmental vaccines. The Company's performance obligations associated with these arrangements include technology transfer activities, stand-ready obligations, suite-reservations and drug substance manufacturing. The Company has determined that the technology transfer, stand-ready and suite-reservation performance obligations are satisfied over time; the drug substance manufacturing performance obligations are satisfied when the goods have been released, legal title has passed and the goods are in the customer's possession.
+
+The suite-reservation performance obligations are considered an operating lease as the customer obtains substantially all of the economic benefits of the identified asset and has the right to direct its use. The associated revenue is recognized on a straight-line basis over the term of the lease. The remaining term on the Company's operating lease performance obligations approximates 2.5 years. The Company utilizes a cost-plus model to determine the stand-alone selling price of the lease component to allocate contract consideration between the lease and non-lease components. During the three and nine months ended September 30, 2020, the Company's lease revenues were $18.1 million, which is included within contract development and manufacturing services in the condensed consolidated statement of operations. The Company did not recognize lease revenue during the three and nine months ended September 30, 2019. The Company has allocated contracted operating lease revenues due under our long-term CDMO service arrangements as follows:
+
+September 30, 2020
+
+2020 (1)
+
+$
+
+12.4
+
+2021
+
+74.8
+
+2022
+
+74.8
+
+2023
+
+15.7
+
+$
+
+177.7
+
+(1) As of September 30, 2020, amount represents the three months ending December 31, 2020.
+
+As of September 30, 2020, the Company expects future revenues of approximately $2.2 billion associated with all performance obligations described above that have not been satisfied and all other arrangements entered into by the Company. The Company expects to recognize a majority of these revenues within the next 24 months. However, the amount and timing of revenue recognition for unsatisfied performance obligations can materially change due to timing of funding appropriations from the USG and the overall success of the Company's development activities associated with its PHT procured product candidates that are then receiving development funding support from the USG under development contracts. In addition, the amount of future revenues associated with unsatisfied performance obligations excludes the value associated with unexercised option periods in the Company's contracts.
+
+Contract assets
+
+The Company considers unbilled accounts receivables and deferred costs associated with revenue generating contracts, which are not included in inventory or property, plant and equipment, as contract assets. As of September 30, 2020 and December 31, 2019, the Company had contract assets associated with deferred costs of $40.8 million and $34.0 million, respectively, which is reflected as a component of other assets on the Company's consolidated balance sheets.
+
+Accounts receivable
+
+Accounts receivable, including unbilled accounts receivable contract assets, consist of the following:
+
+September 30, 2020
+
+December 31, 2019
+
+Billed, net
+
+$
+
+166.0
+
+$
+
+227.3
+
+Unbilled
+
+30.1
+
+43.4
+
+Total, net
+
+$
+
+196.1
+
+$
+
+270.7
+
+As of September 30, 2020 and December 31, 2019, allowances for doubtful accounts were $0.7 million and de minimis.
+
+21
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+11. Income taxes
+
+On March 27, 2020, the President of the United States signed into law the Coronavirus Aid, Relief and Economic Security Act (the “CARES Act”). The CARES Act, among other things, includes provisions relating to refundable payroll tax credits, deferment of employer side social security payments, net operating loss carryback periods, alternative minimum tax credit refunds, modifications to the net interest deduction limitations and technical corrections to tax depreciation methods for qualified improvement property. The Company has assessed the impact of the CARES Act and we do not expect there to be a material impact to our consolidated financial statements.
+
+The effective tax rate for the Company, which excludes discrete adjustments, was 29% and 27% for the nine months ended September 30, 2020 and 2019, respectively. The effective tax rate for the Company, excluding the impact of the non-deductible contingent consideration expense, was 25% and 24% for the nine months ended September 30, 2020 and 2019, respectively. For the nine months ended September 30, 2020 and 2019, the Company recorded a discrete tax benefit of $9.9 million and $2.9 million, respectively. The discrete tax benefits in 2020 were primarily due to activity associated with equity awards while the discrete tax benefits in 2019 were primarily due to return to provision adjustments. For the three months ended September 30, 2020 and 2019, the Company recorded a discrete tax benefit (expense) of $3.3 million and $(0.2) million, respectively, primarily due to the finalization of positions taken on the Company's income tax filings and activity associated with equity awards.
+
+12. Net income per share
+
+The following table presents the calculation of basic and diluted net income per share:
+
+Three Months Ended September 30,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+2020
+
+2019
+
+Numerator:
+
+Net income
+
+$
+
+39.5
+
+$
+
+43.2
+
+$
+
+119.7
+
+$
+
+7.6
+
+Denominator:
+
+Weighted-average number of shares—basic
+
+53.0
+
+51.6
+
+52.5
+
+51.4
+
+Dilutive securities—equity awards
+
+1.3
+
+0.7
+
+1.1
+
+0.9
+
+Weighted-average number of shares—diluted
+
+54.3
+
+52.3
+
+53.6
+
+52.3
+
+Net income per share - basic
+
+$
+
+0.75
+
+$
+
+0.84
+
+$
+
+2.28
+
+$
+
+0.15
+
+Net income per share - diluted
+
+$
+
+0.73
+
+$
+
+0.83
+
+$
+
+2.23
+
+$
+
+0.15
+
+Basic net income per share is computed by dividing net income by the weighted average number of shares of common stock outstanding during the period. Diluted income per share is computed using the treasury method by dividing net income by the weighted average number of shares of common stock outstanding during the period, adjusted for the potential dilutive effect of other securities if such securities were converted or exercised and are not anti-dilutive.
+
+The following table presents the share-based awards that are not considered in the diluted net income per share calculation because the exercise price of the awards was greater than the average per share closing price during the three and nine months ended September 30, 2020 and 2019.
+
+Three Months Ended September 30,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+2020
+
+2019
+
+Anti-dilutive stock awards
+
+—
+
+1.0
+
+—
+
+1.0
+
+22
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+13. Stock-based compensation
+
+During the nine months ended September 30, 2020, the Company granted stock options to purchase 0.4 million shares of common stock and 0.8 million restricted and performance stock units under the Emergent BioSolutions Inc. Stock Incentive Plan. Typically, the stock option and restricted stock unit grants vest over three equal annual installments beginning on the day prior to the anniversary of the grant date. The performance stock units settle in stock at the end of the three-year performance period based on the Company's results compared to the performance criteria. During the nine months ended September 30, 2020, the Company issued a broad-based fully vested equity award of approximately 0.2 million shares to employees below the senior vice president level that was valued at $14.7 million and is recorded as share-based compensation expense.
+
+Stock-based compensation expense was recorded in the following financial statement line items:
+
+Three Months Ended September 30,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+2020
+
+2019
+
+Cost of product sales and contract development and manufacturing services
+
+$
+
+2.0
+
+$
+
+0.9
+
+$
+
+10.8
+
+$
+
+2.3
+
+Research and development
+
+0.6
+
+1.1
+
+6.9
+
+3.2
+
+Selling, general and administrative
+
+7.4
+
+4.1
+
+23.3
+
+15.5
+
+Total stock-based compensation expense
+
+$
+
+10.0
+
+$
+
+6.1
+
+$
+
+41.0
+
+$
+
+21.0
+
+14. Commitments and contingencies
+
+ANDA Litigation - Perrigo 4mg
+
+On September 14, 2018, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.), Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Emergent BioSolutions Ireland Limited (formerly known as Adapt Pharma Limited) (collectively, "Adapt Pharma") and Opiant Pharmaceuticals, Inc. (“Opiant”), received notice from Perrigo UK FINCO Limited Partnership (“Perrigo”), that Perrigo had filed an Abbreviated New Drug Application ("ANDA"), with the United States Food and Drug Administration, seeking regulatory approval to market a generic version of NARCAN®(naloxone hydrochloride) Nasal Spray 4mg/spray before the expiration of U.S. Patent Nos. 9,211,253, (the “‘253 Patent”), 9,468,747 (the “‘747 Patent”), 9,561,177, (the “‘177 Patent”), 9,629,965, (the “‘965 Patent”) and 9,775,838 (the “‘838 Patent”). On or about October 25, 2018, Perrigo sent a subsequent notice letter relating to U.S. Patent No. 10,085,937 (the “'937 Patent”). Perrigo’s notice letters assert that its generic product will not infringe any valid and enforceable claim of these patents. On October 25, 2018, Emergent BioSolutions’ Adapt Pharma subsidiaries and Opiant (collectively, the “Plaintiffs”) filed a complaint for patent infringement of the ‘253, ‘747, ‘177, ‘965, and ‘838 Patents against Perrigo in the United States District Court for the District of New Jersey arising from Perrigo’s ANDA filing with the FDA. Plaintiffs filed a second complaint against Perrigo on December 7, 2018, for the infringement of the ‘937 Patent. On February 12, 2020, Adapt Pharma and Perrigo entered into a settlement agreement to resolve the ongoing litigation. Under the terms of the settlement, Perrigo has received a nonexclusive license under Adapt Pharma's patents to make, have made, and market its generic naloxone hydrochloride nasal spray under its own ANDA. Perrigo’s license will be effective as of January 5, 2033 or earlier under certain circumstances including circumstances related to the outcome of the current litigation against Teva (as defined below) or litigation against future ANDA filers. The Perrigo settlement agreement is subject to review by the U.S. Department of Justice and the Federal Trade Commission, and entry of an order dismissing the litigation by the U.S. District Court for the District of New Jersey.
+
+ANDA Litigation - Teva 2mg
+
+On or about February 27, 2018, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Teva Pharmaceuticals Industries Limited and Teva Pharmaceuticals USA, Inc. (collectively "Teva") that Teva had filed an ANDA with the FDA seeking regulatory approval to market a generic version of NARCAN® (naloxone hydrochloride) Nasal Spray 2 mg/spray before the expiration of U.S. Patent No. 9,480,644, (the “‘644 Patent”) and U.S. Patent No. 9,707,226, (the “‘226 Patent”). Teva’s notice letter asserts that the commercial manufacture, use or sale of its generic drug product described in its ANDA will not infringe the ‘644 Patent or the ‘226 Patent, or that the ‘644 Patent and ‘226 Patent are invalid or unenforceable. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant
+
+23
+
+EMERGENT BIOSOLUTIONS INC.
+
+NOTES TO CONDENSED CONSOLIDATED FINANCIAL STATEMENTS
+
+(unaudited, in millions, except share and per share amounts)
+
+filed a complaint for patent infringement against Teva in the United States District Court for the District of New Jersey. This case is currently stayed pending the outcome of the appeal of the NARCAN® Nasal Spray 4 mg/spray case.
+
+ANDA Litigation - Teva 4mg
+
+On or about September 13, 2016, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Teva that Teva had filed an ANDA with the FDA seeking regulatory approval to market a generic version of NARCAN® (naloxone hydrochloride) Nasal Spray 4 mg/spray before the expiration of the ‘253 Patent. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant received additional notices from Teva relating to the ‘747, the ‘177, the ‘965, the ‘838, and the ‘937 Patents. Teva’s notice letters assert that the commercial manufacture, use or sale of its generic drug product described in its ANDA will not infringe the ‘253, the ‘747, the ‘177, the ‘965, the ‘838, or the ‘937 Patent, or that the ‘253, the ‘747, the ‘177, the ‘965, the ‘838, and the ‘937 Patents are invalid or unenforceable. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant filed a complaint for patent infringement against Teva in the United States District Court for the District of New Jersey with respect to the ‘253 Patent. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant also filed complaints for patent infringement against Teva in the United States District Court for the District of New Jersey with respect to the ‘747, the ‘177, the ‘965, the ‘838 Patents. All five proceedings have been consolidated. As of the date of this filing, Adapt Pharma Inc., Adapt Pharma Operations Limited, and Opiant, have not filed a complaint related to the ‘937 Patent. Closing arguments took place on February 26, 2020. In the complaints described in the paragraphs above, the Plaintiffs sought, among other relief, orders that the effective date of FDA approvals of the Teva ANDA products and the Perrigo ANDA product be a date not earlier than the expiration of the patents listed for each product, equitable relief enjoining Teva and Perrigo from making, using, offering to sell, selling, or importing the products that are the subject of Teva and Perrigo’s respective ANDAs, until after the expiration of the patents listed for each product, and monetary relief or other relief as deemed just and proper by the court. On June 5, 2020, the U.S. District Court for the District of New Jersey issued an unfavorable ruling against Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant in the consolidated case. Emergent filed a Notice of Appeal on July 23, 2020, after the U.S. District Court for New Jersey ruled on June 5, 2020 in favor of Teva, appealing the District Court decision to the Court of Appeals for the Federal Circuit. Emergent has also filed suit in the Federal Court in Canada against Teva Pharmaceuticals (on July 23, 2020). The litigation in Canada is related to Teva Pharmaceuticals’ recent filing of an abbreviated new drug submission (“ANDS”) in Canada seeking to manufacture and sell a generic form of NARCAN® Nasal Spray ahead of the expiry of the Canadian patent covering our product. Emergent, through its subsidiaries, has filed suit within the prescribed time period following notice from Teva of its ANDS filing in Canada.
+
+Inter Partes Review (“IPR”)
+
+On or about February 19, 2019, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Nalox-1 Pharmaceuticals LLC that it had filed fifteen petitions for inter partes review of the ‘253 Patent, the ‘747 Patent, the ‘177 Patent, the ‘965 Patent, and the ‘838 Patent with the Patent Trial and Appeal Board (“PTAB”) of the United States Patent and Trademark Office. Nalox-1’s petitions assert that each of the foregoing patents are unpatentable as obvious in view of prior art. Three of these petitions, IPR Nos. 2019-00685, 2019-00688, and 2019-00694, were instituted on August 27, 2019, September 9, 2019, and September 11, 2019, respectively. The oral hearing for the three instituted IPR proceedings was held before the PTAB on May 19, 2020. On August 21, 2020, the PTAB issued its final written decisions for the above-listed IPRs confirming that claims of U.S. patents in the NARCAN® Nasal Spray patent portfolio are not unpatentable as obvious in view of prior art.
+
+ITEM 2. MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+The following discussion and analysis of our financial condition and results of operations should be read in conjunction with our unaudited condensed consolidated financial statements and accompanying notes and other financial information included elsewhere in this quarterly report on Form 10-Q and our
+
+audited consolidated financial statements and related notes included in our Annual Report on Form 10-K for the year ended December 31, 2019. Some of the information contained in this discussion and analysis or set forth elsewhere in this quarterly report on Form 10-Q, includes information with respect to our plans and strategy for our business and financing, as well as forward-looking statements that involve risks and uncertainties. You should carefully review the "Special Note Regarding Forward-Looking Statements" and "Risk Factors" sections of this quarterly report on Form
+
+24
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+(unaudited, amounts in millions, except share and per share amounts)
+
+10-Q for a discussion of important factors that could cause actual results to differ materially from the results described in or implied by the forward-looking statements contained in the following discussion and analysis.
+
+Business Overview
+
+We are a global life sciences company focused on providing to civilian and military populations a portfolio of innovative preparedness and response products and solutions that address accidental, deliberate and naturally occurring PHTs.
+
+We are currently focused on the following five distinct PHT categories: CBRNE, EID, travel health, emerging health crises, acute/emergency care; and CDMO. We have a product portfolio of ten products (vaccines, therapeutics, and drug-device combination products) that contribute a substantial portion of our revenue. We also have two procured product candidates that are procured under special circumstances by certain government agencies, although they are not approved by the FDA or any other health agency. Additionally, we have a development pipeline consisting of a diversified mix of both pre-clinical and clinical stage product candidates (vaccines, therapeutics, devices and combination products). Finally, we have a fully-integrated portfolio of contract development and manufacturing services. Our CDMO service offerings cover development services, drug substance manufacturing and drug product manufacturing across pharmaceutical and biotechnology industries as well as the USG and non-governmental organizations. The majority of our revenue comes from the following products and procured product candidates:
+
+Vaccines
+
+•Anthrax vaccines, including our AV7909 (Anthrax Vaccine Adsorbed with Adjuvant) procured product candidate being developed as a next-generation anthrax vaccine for post-exposure prophylaxis and BioThrax® (Anthrax Vaccine Adsorbed), the only vaccine licensed by the FDA for the general use prophylaxis and post-exposure prophylaxis of anthrax disease;
+
+•ACAM2000® (Smallpox (Vaccinia) Vaccine, Live), the only single-dose smallpox vaccine licensed by the FDA for active immunization against smallpox disease for persons determined to be at high risk for smallpox infection;
+
+•Vivotif® (Typhoid Vaccine Live Oral Ty21a), the only oral vaccine licensed by the FDA for the prevention of typhoid fever; and
+
+•Vaxchora® (Cholera Vaccine, Live, Oral), the only single-dose oral vaccine approved by the FDA and EMA for the prevention of cholera.
+
+Devices
+
+•NARCAN® (naloxone HCl) Nasal Spray, the first needle-free formulation of naloxone approved by the FDA and Health Canada, for the emergency treatment of known or suspected opioid overdose as manifested by respiratory and/or central nervous system depression;
+
+•RSDL® (Reactive Skin Decontamination Lotion Kit), the only medical device cleared by the FDA to remove or neutralize the following chemical warfare agents from the skin: tabun, sarin, soman, cyclohexyl sarin, VR, VX, mustard gas and T-2 toxin; and
+
+•Trobigard®, a combination drug-device auto-injector procured product candidate that contains atropine sulfate and obidoxime chloride. It has not been approved by the FDA or any similar health regulatory body, but is procured by certain authorized government buyers under special circumstances for potential use as a nerve agent countermeasure.
+
+Therapeutics
+
+•raxibacumab (Anthrax Monoclonal), the first fully human monoclonal antibody therapeutic licensed by the FDA for the treatment and prophylaxis of inhalational anthrax;
+
+•Anthrasil® (Anthrax Immune Globulin Intravenous (Human)), the only polyclonal antibody therapeutic licensed by the FDA and Health Canada for the treatment of inhalational anthrax;
+
+•BAT® (Botulism Antitoxin Heptavalent (A,B,C,D,E,F,G)-(Equine)), the only heptavalent antibody therapeutic licensed by the FDA and Health Canada for the treatment of botulism; and
+
+•VIGIV (Vaccinia Immune Globulin Intravenous (Human)), the only polyclonal antibody therapeutic licensed by the FDA and Health Canada to address certain complications from smallpox vaccination.
+
+Contract Development and Manufacturing Services
+
+Our CDMO business unit consists of a fully integrated molecule-to-market contract
+
+25
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+(unaudited, amounts in millions, except share and per share amounts)
+
+development and manufacturing services business, with offerings across development services, drug substance manufacturing and drug product manufacturing. These services include process development, formulation and analytical development, and packaging for supply. Our customers for such services include pharmaceutical and biotechnology organizations as well as the USG and non-governmental organizations ranging from small to mid to large whose programs range from clinical stage to commercial stage. We compete for CDMO service business with a number of biopharmaceutical product development organizations, contract manufacturers of biopharmaceutical products and university research laboratories. We also compete with in-house research, development and support service departments of other biopharmaceutical companies.
+
+Highlights and Business Accomplishments for 2020
+
+•On January 13, 2020, received agreement from the EMA and FDA on the company’s proposed development plan to use Serum Neutralizing Antibodies (SNA) as surrogate endpoint to predict likely clinical benefit of CHIKV VLP, the company’s chikungunya virus virus-like particle (VLP) vaccine candidate, in a Phase 3 safety and immunogenicity study anticipated in late 2020.
+
+•On January 31, 2020, received positive opinion and subsequent approval from EMA of Vaxchora® (Cholera Vaccine, Live, Oral), the company’s cholera vaccine, making it the only single-dose oral vaccine indicated for active immunization against disease caused by Vibrio cholerae serogroup 01 in adults and children from 6 years of age across all 27 member states of the European Union and the European Economic Area countries.
+
+•On March 10, 2020, signed a development and manufacturing agreement with Novavax, Inc. for an experimental vaccine candidate for COVID-19.
+
+•On March 11, 2020, initiated development of two investigational plasma-derived therapies. COVID-Human Immune Globulin (COVID-HIG) is being developed as a human plasma-derived therapy candidate for potential treatment of COVID-19 in severe hospitalized and high-risk patients, and COVID-Equine Immune Globulin (COVID-EIG) is being developed as an equine plasma-derived therapy candidate for potential treatment of severe disease in humans.
+
+•On March 18, 2020, signed a development and manufacturing agreement with Vaxart, Inc. to produce its experimental oral vaccine candidate for COVID-19.
+
+•On March 31, 2020, signed an agreement with Novavax, Inc. to manufacture NanoFluTM, its seasonal influenza vaccine candidate.
+
+•On April 2, 2020, announced HHS funding valued at $14.5 million to support the development of COVID-Human Immune Globulin (COVID-HIG) for treatment, which will be included in at least one of the studies of the National Institute of Allergy and Infectious Diseases (NIAID), part of the National Institutes of Health, evaluating potential treatments for COVID-19.
+
+•On April 23, 2020, announced an initial agreement, valued at $135 million, to be the U.S. manufacturing partner of Johnson & Johnson's lead COVID-19 vaccine candidate.
+
+•On May 28, 2020, announced the exercise by the HHS of the first of nine annual contract options, valued at $176 million, to procure doses of ACAM2000® (Smallpox (Vaccine, Live) into the U.S. Strategic National Stockpile (SNS).
+
+•On June 1, 2020, announced an agreement to join the USG's Warp Speed Program in public-private CDMO partnership for COVID-19 vaccine development and manufacturing. The agreement has a contract value of $628 million and includes manufacturing capacity valued at $542.7 million and $85.5 million for expansion of viral and non-viral CDMO drug product fill/finish capacity.
+
+•On June 11, 2020, announced an agreement to be the U.S. manufacturing partner for AstraZeneca's COVID-19 vaccine candidate to provide large-scale manufacturing capacity through 2020. The agreement has a contract value of $87 million.
+
+•On June 18, 2020, announced the $75 million acquisition and planned expansion of a property adjacent to our Canton, Massachusetts live viral drug substance development and manufacturing facility. The expansion will increase advanced therapy (viral vector and gene therapy) capability, which is expected to be available beginning in 2023.
+
+26
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+(unaudited, amounts in millions, except share and per share amounts)
+
+•On July 2, 2020, further announced signing a large scale drug substance manufacturing agreement for Johnson & Johnson's lead COVID-19 vaccine candidate for up to five years beginning in 2021. The first two years are valued at approximately $480 million, with the remaining three years providing flexible capacity.
+
+•On July 6, 2020, announced the award of approximately $34.6 million by the U.S. Department of Defense Joint Program Executive Office and formed collaboration with Mount Sinai Health System and ImmunoTek Bio Centers to advance COVID-Human Immune Globulin (COVID-HIG) for potential post-exposure prophylaxis in populations at high risk of COVID-19.
+
+•On July 14, 2020, announced the exercise by BARDA of the contract option, valued at $258 million, to procure additional doses of AV7909 (anthrax vaccine adsorbed with adjuvant) for delivery into the SNS over 12 months.
+
+•On July 27, 2020, further announced the signing of a large-scale drug substance manufacturing agreement for AstraZeneca's COVID-19 vaccine candidate, valued at approximately $174 million through 2021.
+
+•On August 7, 2020, announced the completion of an offering of $450 million in aggregate principal amount 3.875% Senior Unsecured Notes due in 2028. The Company utilized the proceeds from the offering to repay $353 million outstanding under its revolving credit facility with the remainder to be utilized for general corporate purposes.
+
+•On October 8, 2020, announced the initiation of a Phase 3 clinical trial to evaluate the safety, tolerability, and efficacy of hyperimmune globulin products, including our COVID-19 Human Immune Globulin, as a potential treatment in adult patients hospitalized with COVID-19.
+
+Financial Operations Overview
+
+Revenues
+
+We generate product revenues from the sale of our marketed products and procured product candidates which include vaccines, therapeutics and devices which have been described above. The USG is the largest purchaser of our CBRNE products and primarily purchases our products for the SNS, a national repository of medical countermeasures including critical antibiotics, vaccines, chemical antidotes, antitoxins, and other critical medical supplies. The USG primarily purchases our products under long-term, firm fixed-price procurement contracts. Our opioid overdose reversal product, NARCAN® Nasal Spray and our travel health products, comprising Vivotif and Vaxchora, are sold commercially through wholesalers and distributors, physician-directed or standing order prescriptions at retail pharmacies, as well as to other state and local community healthcare agencies, practitioners and hospitals.
+
+We also generate revenue from our CDMO business unit, which is based on our established development and manufacturing infrastructure, technology platforms and expertise. Our services include a fully integrated molecule-to-market contract development and manufacturing services business offering across development services, drug substance and drug product for small to mid to large pharmaceutical and biotechnology industry and government agencies/non-governmental organizations.
+
+We have received contracts and grants funding from the USG and other non-governmental organizations to perform research and development activities, particularly related to programs addressing certain CBRNE threats and EIDs.
+
+Our revenue, operating results and profitability vary quarterly based on the timing of production and deliveries and the nature of our business to provide large scale bundles of products and services as needs arise. During 2020, our revenues from the sales of our vaccine products that target travelers have also declined due to the reduction of international travel caused by the COVID-19 pandemic. We expect continued variability in our quarterly financial statements.
+
+27
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+(unaudited, amounts in millions, except share and per share amounts)
+
+Critical Accounting Policies and Estimates
+
+During the nine months ended September 30, 2020, there have been no significant changes to our critical accounting policies and estimates contained in our Annual Report on Form 10-K for the year ended December 31, 2019, as filed with the SEC, (see Note 2 to the accompanying condensed consolidated financial statements).
+
+28
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+Results of Operations
+
+Three Months Ended September 30,
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+$ Change
+
+% Change
+
+2020
+
+2019
+
+$ Change
+
+% Change
+
+Product sales net:
+
+NARCAN Nasal Spray
+
+$
+
+88.8
+
+$
+
+75.0
+
+$
+
+13.8
+
+18
+
+%
+
+$
+
+233.8
+
+$
+
+213.5
+
+$
+
+20.3
+
+10
+
+%
+
+Anthrax vaccines
+
+73.9
+
+40.3
+
+33.6
+
+83
+
+%
+
+258.1
+
+79.9
+
+178.2
+
+NM
+
+ACAM2000
+
+1.0
+
+112.1
+
+(111.1)
+
+(99)
+
+%
+
+71.0
+
+164.1
+
+(93.1)
+
+(57
+
+%)
+
+Other product sales
+
+38.5
+
+28.8
+
+9.7
+
+34
+
+%
+
+86.0
+
+135.2
+
+(49.2)
+
+(36)
+
+%
+
+Total product sales, net
+
+202.2
+
+256.2
+
+(54.0)
+
+(21)
+
+%
+
+648.9
+
+592.7
+
+56.2
+
+9
+
+%
+
+Contract development and manufacturing services
+
+157.1
+
+20.0
+
+137.1
+
+NM
+
+251.4
+
+54.6
+
+196.8
+
+NM
+
+Contracts and grants
+
+25.9
+
+35.6
+
+(9.7)
+
+(27)
+
+%
+
+72.1
+
+98.4
+
+(26.3)
+
+(27)
+
+%
+
+Total revenues
+
+385.2
+
+311.8
+
+73.4
+
+24
+
+%
+
+972.4
+
+745.7
+
+226.7
+
+30
+
+%
+
+Operating expenses:
+
+Cost of product sales and contract development and manufacturing services
+
+149.0
+
+108.0
+
+41.0
+
+38
+
+%
+
+355.7
+
+300.7
+
+55.0
+
+18
+
+%
+
+Research and development
+
+84.4
+
+53.4
+
+31.0
+
+58
+
+%
+
+175.0
+
+163.4
+
+11.6
+
+7
+
+%
+
+Selling, general and administrative
+
+75.5
+
+65.0
+
+10.5
+
+16
+
+%
+
+221.2
+
+201.3
+
+19.9
+
+10
+
+%
+
+Amortization of intangible assets
+
+15.0
+
+14.7
+
+0.3
+
+2
+
+%
+
+44.8
+
+43.9
+
+0.9
+
+2
+
+%
+
+Total operating expenses
+
+323.9
+
+241.1
+
+82.8
+
+34
+
+%
+
+796.7
+
+709.3
+
+87.4
+
+12
+
+%
+
+Income from operations
+
+61.3
+
+70.7
+
+(9.4)
+
+(13
+
+%)
+
+175.7
+
+36.4
+
+139.3
+
+NM
+
+Other income (expense):
+
+Interest expense
+
+(7.6)
+
+(10.3)
+
+2.7
+
+(26
+
+%)
+
+(22.6)
+
+(29.3)
+
+6.7
+
+(23
+
+%)
+
+Other, net
+
+1.3
+
+(1.5)
+
+2.8
+
+NM
+
+1.3
+
+(1.2)
+
+—
+
+—
+
+%
+
+Total other income (expense), net
+
+(6.3)
+
+(11.8)
+
+5.5
+
+(47
+
+%)
+
+(21.3)
+
+(30.5)
+
+6.7
+
+(22
+
+%)
+
+Income before provision (benefit) for income taxes
+
+55.0
+
+58.9
+
+(3.9)
+
+(7
+
+%)
+
+154.4
+
+5.9
+
+148.5
+
+NM
+
+Income tax provision (benefit)
+
+15.5
+
+15.7
+
+(0.2)
+
+(1
+
+%)
+
+34.7
+
+(1.7)
+
+36.4
+
+NM
+
+Net income
+
+$
+
+39.5
+
+$
+
+43.2
+
+$
+
+(3.7)
+
+(9
+
+%)
+
+$
+
+119.7
+
+$
+
+7.6
+
+$
+
+112.1
+
+NM
+
+NM - Not meaningful
+
+29
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+Total Revenues
+
+Legend
+
+NARCAN nasal spray
+
+Other product sales
+
+Anthrax vaccines
+
+Contract development and manufacturing services
+
+ACAM2000
+
+Contracts and Grants
+
+Product Sales, net
+
+NARCAN Nasal Spray
+
+The increase in NARCAN Nasal Spray sales for the three and nine months ended September 30, 2020 was primarily due to an increase in sales to the U.S. public interest markets.
+
+Anthrax Vaccines
+
+The increase in anthrax vaccine sales for the three and nine months ended September 30, 2020 was primarily due to the transition of SNS deliveries from BioThrax to a more consistent cadence of deliveries of AV7909 and increases in pricing. There were limited sales of anthrax vaccines during the three and nine months ended September 30, 2019 in anticipation of the USG's transition from BioThrax to AV7909. Deliveries of AV7909 began in September of 2019.
+
+ACAM2000
+
+The decrease in ACAM2000 sales for the three and nine months ended September 30, 2020 was due to timing of deliveries to the SNS partially offset by increases in pricing. ACAM2000 product sales are made under a long-term procurement contract. The fluctuations in ACAM2000 revenue are dictated by the timing and delivery of orders to the USG.
+
+Other Product Sales
+
+The Company's other product sales increased during the three months ended September 30, 2020, primarily due to an increase in sales of BAT and VIGIV partially offset by a decline in sales of our travel health vaccines, Vaxchora and Vivotif which were impacted by the reduction of global travel. During the nine months ended September 30, 2020 other product sales decreased primarily due to a decline in sales of raxibacumab, and our travel health vaccines due to the reduction of global travel. These declines were partially offset by an increase in sales of BAT and VIGIV.
+
+Contract Development and Manufacturing Services
+
+The increase in contract development and manufacturing services revenue for the three and nine months ended September 30, 2020 is largely due to the contribution of recently announced arrangements across development, drug substance, and drug product services with industry and government customers, most notably the Company's public-private partnership with BARDA in support of the USG's Operation Warp Speed Program as well as arrangements with Johnson & Johnson and AstraZeneca.
+
+30
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+Contracts and Grants
+
+The decrease in contracts and grants revenue for the three and nine months ended September 30, 2020 is due to the completion of developmental activities associated with our AV7909 procured product candidate partially offset by increases in development awards related to the Company's COVID related product candidates.
+
+Cost of Product Sales and Contract Development and Manufacturing Services
+
+Cost of Product Sales and Contract Development and Manufacturing Services
+
+l
+
+Gross profit margin for product sales and contract development and manufacturing services
+
+Cost of product sales and contract development and manufacturing services increased for the three and nine months ended September 30, 2020, primarily due to an increase in product sales and contract development and manufacturing services, a charge of $13.8 million related to a write-down of inventory balances due to the expected expiration of a portion of the Company's travel health vaccines, as well as increased charges of $23.3 million and $18.9 million related to the Company's contingent consideration liabilities, as compared to the three and nine months ended September 30, 2019, respectively. Additionally, during the nine months ended September 30, 2020, the Company granted a special broad-based, immediately vested equity award to employees below the senior vice president level which occurred in the second quarter of 2020 contributing to the increase in selling, general and administrative expenses during the period.
+
+Research and Development Expenses (Gross and Net)
+
+Research and Development expense
+
+l
+
+Research and Development expense, net of contracts and grants revenue
+
+The increase in research and development expenses during the three and nine months ended September 30, 2020 is mostly due to the impairment of our IPR&D intangible asset of $29 million. Additionally, the Company increased spending due to COVID-HIG related product candidates. These increases were partially offset by decreases in spending for development activities associated with our AV7909 procured product candidate.
+
+31
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+Selling, General and Administrative Expenses
+
+Selling, General and Administrative
+
+l
+
+SG&A as a percentage of total revenue
+
+The increase in selling, general and administrative expenses for the three and nine months ended September 30, 2020 is primarily due to an increase in staffing costs to support the Company's growth. Additionally, during the nine months ended September 30, 2020, the Company granted a special broad-based, immediately vested equity award to employees below the senior vice president level which occurred in the second quarter of 2020 contributing to the increase in selling, general and administrative expenses during the period.
+
+Amortization of Intangible Assets
+
+Amortization of intangible assets for the three and nine months ended September 30, 2020 was consistent with the three and nine months ended September 30, 2019.
+
+Other Income (Expense), Net
+
+Interest expense
+
+Other income (expense)
+
+Total other income (expense), net decreased for the three and nine months ended September 30, 2020 due primarily to a decrease in interest expense related to a decline in interest rates period over period offset by an increase in outstanding debt.
+
+Income Tax Provision (Benefit)
+
+Income tax provision (benefit)
+
+l
+
+Effective tax rate
+
+32
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+During the three and nine months ended September 30, 2020 and 2019, taxes increased mostly because of increases in income. Additionally, the estimated effective tax rate was 29% and 27%, respectively. Excluding the impact of non-deductible contingent consideration expense the effective tax rate was 26% and 25%, respectively. The actual effective tax rate includes the effects of discrete tax benefits of $9.9 million and $2.9 million during the nine months ended September 30, 2020 and 2019, respectively.
+
+33
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+Liquidity and Capital Resources
+
+Sources of Liquidity
+
+We have historically financed our operating and capital expenditures through cash on hand, cash from operations, debt financing and development funding. We also obtain financing from the sale of our common stock upon exercise of stock options. We have operated profitably for each of the last five years through the period ended December 31, 2019. As of September 30, 2020, we had unrestricted cash and cash equivalents of $415.0 million and capacity under our revolving credit facility of $597.1 million. As of September 30, 2020, we believe that we have sufficient liquidity to fund our operations over the next 12 months.
+
+Cash Flows
+
+The following table provides information regarding our cash flows for the nine months ended September 30, 2020 and 2019:
+
+Nine Months Ended September 30,
+
+2020
+
+2019
+
+Net cash provided by (used in):
+
+Operating activities
+
+$
+
+290.9
+
+$
+
+65.9
+
+Investing activities
+
+(115.0)
+
+(60.8)
+
+Financing activities
+
+71.8
+
+22.0
+
+Effect of exchange rate changes on cash, cash equivalents and restricted cash
+
+(0.5)
+
+(0.1)
+
+Net increase in cash, cash equivalents and restricted cash
+
+$
+
+247.2
+
+$
+
+27.0
+
+Operating Activities
+
+Net cash provided by operating activities of $290.9 million for the nine months ended September 30, 2020 was due to net income excluding non-cash items of $305.2 million offset by working capital changes of $14.3 million.
+
+Net cash provided by operating activities of $65.9 million for the nine months ended September 30, 2019 was due to net income excluding non-cash items of $121.0 million offset by working capital changes of $55.1 million.
+
+The cash flows from operating activities increased $225.0 million during the nine months ended September 30, 2020 largely due to an increase in net income excluding non-cash items of $184.2 million and changes in working capital of $40.8 million.
+
+Investing Activities
+
+Net cash used in investing activities largely relates to purchases of property, plant and equipment and was $115.0 million and $60.8 for the nine months ended September 30, 2020 and 2019, respectively. We also made a milestone payment related to an asset acquisition of $10.0 million in each of the nine months ended September 30, 2020 and 2019 relating to our acquisition of raxibacumab in October 2017. The cash used in
+
+investing activities increased during the nine months ended September 30, 2020 largely due to infrastructure and equipment investments related to our CDMO arrangements and the purchase of a building near our Canton, Massachusetts facility.
+
+Financing Activities
+
+Net cash provided by financing activities of $71.8 million for the nine months ended September 30, 2020 was primarily due to proceeds from the $450.0 million Senior Unsecured Notes and net employee share-based compensation activity of $13.8 million offset by payments of $381.4 on the term loan and revolving credit facility and $8.4 million of debt issuance costs.
+
+Net cash provided by financing activities of $22.0 million for the nine months ended September 30, 2019 was primarily due to net $26.6 million of receipts on the term loan and credit facility, primarily offset by net cash used in employee share-based compensation activity of $0.9 million and payments of $3.7 million related contingent consideration arrangements.
+
+The cash flows provided by financing activities increased $49.8 million during the nine months ended September 30, 2020 due to an increase in net receipts on the Senior Unsecured Notes, term loan and revolving credit facility of $42.0 million and
+
+34
+
+EMERGENT BIOSOLUTIONS INC.
+
+MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERATIONS
+
+an increase in net cash provided by net employee share-based compensation activity of $14.7 million.
+
+Funding Requirements
+
+We expect to continue to fund our anticipated operating expenses, capital expenditures, debt service requirements and any future repurchase of our common stock from the following sources:
+
+▪existing cash and cash equivalents;
+
+▪net proceeds from the sale of our products and contract development and manufacturing services;
+
+▪development contracts and grants funding; and
+
+▪our Senior Secured Credit Facilities and any other lines of credit we may establish from time to time.
+
+There are numerous risks and uncertainties associated with product sales and with the development and commercialization of our product candidates. We may seek additional external financing to provide additional financial flexibility. Our future capital requirements will depend on many factors, including (but not limited to):
+
+▪the level, timing and cost of product sales and contract development and manufacturing services;
+
+▪the extent to which we acquire or invest in and integrate companies, businesses, products or technologies;
+
+▪the acquisition of new facilities and capital improvements to new or existing facilities;
+
+▪the payment obligations under our indebtedness;
+
+▪the scope, progress, results and costs of our development activities;
+
+▪our ability to obtain funding from collaborative partners, government entities and non-governmental organizations for our development programs;
+
+▪the extent to which we adopt a share repurchase program and repurchase shares of our common stock and;
+
+▪the costs of commercialization activities, including product marketing, sales and distribution.
+
+If our capital resources are insufficient to meet our future capital requirements, we will need to finance our cash needs through public or private equity or debt offerings, bank loans or collaboration and licensing arrangements.
+
+If we raise funds by issuing equity securities, our stockholders may experience dilution. Public or bank debt financing, if available, may involve agreements that include covenants, like those contained in our Senior Unsecured Notes due 2028 and the Senior Secured Credit Facilities, which could limit or restrict our ability to take specific actions, such as incurring additional debt, making capital expenditures, pursuing acquisition opportunities, buying back shares or declaring dividends. If we raise funds through collaboration and licensing arrangements with third parties, it may be necessary to relinquish valuable rights to our technologies or product candidates or grant licenses on terms that may not be favorable to us.
+
+We are not restricted under the terms of the indenture governing our 2.875% Convertible Senior Notes due 2021 from incurring additional debt, securing existing or future debt, recapitalizing our debt or taking a number of other actions that could have the effect of diminishing our ability to make payments on our indebtedness. However, our Senior Secured Credit Facilities restrict our ability to incur additional indebtedness, including secured indebtedness.
+
+Economic conditions, including market volatility and adverse impacts on financial markets as a result of the COVID-19 pandemic, may make it more difficult to obtain financing on attractive terms, or at all. If financing is unavailable or lost, our business, operating results, financial condition and cash flows would be adversely affected, and we could be forced to delay, reduce the scope of or eliminate many of our planned activities.
+
+Unused Credit Capacity
+
+Available room under the revolving credit facility for the periods ended September 30, 2020 and December 31, 2019 was:
+
+(in millions)
+
+Total Capacity
+
+Outstanding Letters of Credit
+
+Outstanding Indebtedness on Revolving Credit Facility
+
+Unused Capacity
+
+September 30, 2020
+
+$600.0
+
+(2.9)
+
+—
+
+$597.1
+
+December 31, 2019
+
+$600.0
+
+(2.2)
+
+(373.0)
+
+$224.8
+
+35
+
+EMERGENT BIOSOLUTIONS INC.
+
+ITEM 3. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK
+
+For a discussion of additional risks arising from our operations, see “Item 1A-Risk Factors” in this quarterly report.
+
+Market Risk
+
+We have interest rate and foreign currency market risk. Because of the short-term maturities of our cash and cash equivalents, we believe that an increase in market rates would likely not have a significant impact on the realized value of our investments.
+
+Interest Rate Risk
+
+We have debt with a mix of fixed and variable rates of interest. Floating rate debt carries interest based generally on the eurocurrency, as defined in our Amended Credit Agreement, plus an applicable margin. We manage our interest rate risk in part by entering into interest rate swap arrangements to convert a portion of our indebtedness from variable interest rates to a fixed rate. For debt that we have not hedged through our interest rate swap arrangements increases in interest rates could increase the associated interest payments that we are required to make on this debt.
+
+We have assessed our exposure to changes in interest rates by analyzing the sensitivity to our operating results assuming various changes in market interest rates. A hypothetical increase of one percentage point in the eurocurrency rate as of September 30, 2020 would increase our interest expense by approximately $0.8 million annually.
+
+Foreign Currency Exchange Rate Risk
+
+We have exposure to foreign currency exchange rate fluctuations worldwide and primarily with respect to the Euro, Canadian dollar, Swiss franc and British pound. We manage our foreign currency exchange rate risk primarily by incurring operating expenses in the local currency in the countries in which we operate, to the extent practicable. We currently do not hedge our foreign currency exchange exposure, and the movement of foreign currency exchange rates could have an adverse or positive impact on our results of operations.
+
+ITEM 4. CONTROLS AND PROCEDURES
+
+Evaluation of Disclosure Controls and Procedures
+
+Our management, with the participation of our chief executive officer and chief financial officer, evaluated the effectiveness of our disclosure controls and procedures as of September 30, 2020. The term "disclosure controls and procedures," as defined in
+
+Rules 13a-15(e) and 15d-15(e) under the Securities Exchange Act of 1934 (the Exchange Act), means controls and other procedures of a company that are designed to ensure that information required to be disclosed by a company in the reports that it files or submits under the Exchange Act is recorded, processed, summarized and reported, within the time periods specified in the SEC's rules and forms. Disclosure controls and procedures include, without limitation, controls and procedures designed to ensure that information required to be disclosed by a company in the reports that it files or submits under the Exchange Act is accumulated and communicated to the company's management, including its principal executive and principal financial officers, as appropriate to allow timely decisions regarding required disclosure. Management recognizes that any controls and procedures, no matter how well designed and operated, can provide only reasonable assurance of achieving their objectives and management necessarily applies its judgment in evaluating the cost-benefit relationship of possible controls and procedures. Based on the evaluation of our disclosure controls and procedures as of September 30, 2020, our chief executive officer and chief financial officer concluded that, as of such date, our disclosure controls and procedures were effective at the reasonable assurance level.
+
+Changes in Internal Control Over Financial Reporting
+
+There have been no changes in our internal control over financial reporting, as defined in Rules 13a-15(f) and 15d-15(f) under the Exchange Act that occurred during the quarter ended September 30, 2020 that have materially affected, or are reasonably likely to materially affect, our internal control over financial reporting.
+
+PART II. OTHER INFORMATION
+
+ITEM 1. LEGAL PROCEEDINGS
+
+ANDA Litigation - Perrigo 4mg
+
+On September 14, 2018, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.), Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Emergent BioSolutions Ireland Limited (formerly known as Adapt Pharma Limited) (collectively, Adapt Pharma) and Opiant Pharmaceuticals, Inc. (Opiant), received notice from Perrigo UK FINCO Limited Partnership (Perrigo), that Perrigo had filed an Abbreviated New Drug Application (ANDA), with the United States Food and Drug Administration, seeking regulatory approval to market a generic version of NARCAN®(naloxone hydrochloride) Nasal Spray 4mg/spray before the expiration of U.S. Patent Nos. 9,211,253, (the ‘253 Patent), 9,468,747 (the ‘747 Patent), 9,561,177, (the
+
+36
+
+EMERGENT BIOSOLUTIONS INC.
+
+‘177 Patent), 9,629,965, (the ‘965 Patent) and 9,775,838 (the ‘838 Patent). On or about October 25, 2018, Perrigo sent a subsequent notice letter relating to U.S. Patent No. 10,085,937 (the ‘937 Patent). Perrigo’s notice letters assert that its generic product will not infringe any valid and enforceable claim of these patents. On October 25, 2018, Emergent BioSolutions’ Adapt Pharma subsidiaries and Opiant (collectively, the Plaintiffs) filed a complaint for patent infringement of the ‘253, ‘747, ‘177, ‘965, and ‘838 Patents against Perrigo in the United States District Court for the District of New Jersey arising from Perrigo’s ANDA filing with the FDA. Plaintiffs filed a second complaint against Perrigo on December 7, 2018, for the infringement of the ‘937 Patent. On February 12, 2020, Adapt Pharma and Perrigo entered into a settlement agreement to resolve the ongoing litigation. Under the terms of the settlement, Perrigo has received a nonexclusive license under Adapt Pharma’s patents to make, have made, and market its generic naloxone hydrochloride nasal spray under its own ANDA. Perrigo’s license will be effective as of January 5, 2033 or earlier under certain circumstances including circumstances related to the outcome of the current litigation against Teva (as defined below) or litigation against future ANDA filers. The Perrigo settlement agreement is subject to review by the U.S. Department of Justice and the Federal Trade Commission, and entry of an order dismissing the litigation by the U.S. District Court for the District of New Jersey.
+
+ANDA Litigation - Teva 2mg
+
+On or about February 27, 2018, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Teva Pharmaceuticals Industries Limited and Teva Pharmaceuticals USA, Inc. (collectively Teva) that Teva had filed an ANDA with the FDA seeking regulatory approval to market a generic version of NARCAN® (naloxone hydrochloride) Nasal Spray 2 mg/spray before the expiration of U.S. Patent No. 9,480,644, (the ‘644 Patent) and U.S. Patent No. 9,707,226, (the ‘226 Patent). Teva’s notice letter asserts that the commercial manufacture, use or sale of its generic drug product described in its ANDA will not infringe the ‘644 Patent or the ‘226 Patent, or that the ‘644 Patent and ‘226 Patent are invalid or unenforceable. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant filed a complaint for patent infringement against Teva in the United States District Court for the District of New Jersey. This case is currently stayed pending the outcome of the appeal of the NARCAN® Nasal Spray 4 mg/spray case.
+
+ANDA Litigation - Teva 4mg
+
+On or about September 13, 2016, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Teva that Teva had filed an ANDA with the FDA seeking regulatory approval to market a generic version of NARCAN® (naloxone hydrochloride) Nasal Spray 4 mg/spray before the expiration of the ‘253 Patent. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant received additional notices from Teva relating to the ‘747, the ‘177, the ‘965, the ‘838, and the ‘937 Patents. Teva’s notice letters assert that the commercial manufacture, use or sale of its generic drug product described in its ANDA will not infringe the ‘253, the ‘747, the ‘177, the ‘965, the ‘838, or the ‘937 Patent, or that the ‘253, the ‘747, the ‘177, the ‘965, the ‘838, and the ‘937 Patents are invalid or unenforceable. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant filed a complaint for patent infringement against Teva in the United States District Court for the District of New Jersey with respect to the ‘253 Patent. Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant also filed complaints for patent infringement against Teva in the United States District Court for the District of New Jersey with respect to the ‘747, the ‘177, the ‘965, the ‘838 Patents. All five proceedings have been consolidated. As of the date of this filing, Adapt Pharma Inc., Adapt Pharma Operations Limited, and Opiant, have not filed a complaint related to the ‘937 Patent. Closing arguments took place on February 26, 2020. In the complaints described in the paragraphs above, the Plaintiffs sought, among other relief, orders that the effective date of FDA approvals of the Teva ANDA products and the Perrigo ANDA product be a date not earlier than the expiration of the patents listed for each product, equitable relief enjoining Teva and Perrigo from making, using, offering to sell, selling, or importing the products that are the subject of Teva and Perrigo’s respective ANDAs, until after the expiration of the patents listed for each product, and monetary relief or other relief as deemed just and proper by the court. On June 5, 2020, the U.S. District Court for the District of New Jersey issued an unfavorable ruling against Adapt Pharma Inc. and Adapt Pharma Operations Limited and Opiant in the consolidated case. Emergent filed a Notice of Appeal on July 23, 2020, after the U.S. District Court for New Jersey ruled on June 5, 2020 in favor of Teva, appealing the District Court decision to the Court of Appeals for the Federal Circuit. Emergent has also filed suit in the Federal Court in Canada against Teva Pharmaceuticals (on July 23, 2020). The litigation in Canada is related to Teva Pharmaceuticals’ recent filing of an abbreviated new drug submission (ANDS) in Canada seeking to manufacture and sell a generic form of NARCAN® Nasal Spray ahead of the expiry of the
+
+37
+
+EMERGENT BIOSOLUTIONS INC.
+
+Canadian patent covering our product. Emergent, through its subsidiaries, has filed suit within the prescribed time period following notice from Teva of its ANDS filing in Canada.
+
+Inter Partes Review ("IPR")
+
+On or about February 19, 2019, Emergent Devices Inc. (formerly known as Adapt Pharma Inc.) and Emergent Operations Ireland Limited (formerly known as Adapt Pharma Operations Limited) and Opiant received notice from Nalox-1 Pharmaceuticals LLC that it had filed fifteen petitions for inter partes review of the '253 Patent, the '747 Patent, the '177 Patent, the '965 Patent, and the '838 Patent with the Patent Trial and Appeal Board (PTAB) of the United States Patent and Trademark Office. Nalox-1’s petitions assert that each of the foregoing patents are unpatentable as obvious in view of prior art. Three of these petitions, IPR Nos. 2019-00685, 2019-00688, and 2019-00694, were instituted on August 27, 2019, September 9, 2019, and September 11, 2019, respectively. The oral hearing for the three instituted IPR proceedings was held before the PTAB on May 19, 2020. On August 21, 2020, the PTAB issued its final written decisions for the above-listed IPRs confirming that claims of U.S. patents in the NARCAN® Nasal Spray patent portfolio are not unpatentable as obvious in view of prior art.
+
+ITEM 1A. RISK FACTORS
+
+You should carefully consider the following risk factors in addition to the other information in this Quarterly Report on Form 10-Q when evaluating our business because these risk factors may have a significant impact on our business, financial condition, operating results or cash flows. If any of the risks described below or in subsequent reports we file with the SEC actually occur, they may materially harm our business, financial condition, operating results or cash flows. Additional risks and uncertainties that we have not yet identified or that we presently consider to be immaterial may also materially harm our business, financial condition, operating results or cash flows. Discussion of these factors is incorporated by reference into and considered an integral part of Part I, Item 2, “Management’s Discussion and Analysis of Financial Conditions and Results of Operations.”
+
+GLOBAL PANDEMIC RISK
+
+The COVID-19 coronavirus pandemic could have a material adverse impact on our business, results of operations and financial performance.
+
+In December 2019, a novel strain of coronavirus, SARS-CoV-2, was reported to have surfaced. Since then, the SARS-CoV-2 virus has been determined to cause the disease COVID-19. COVID-19 has spread worldwide, including in the United States, Canada and
+
+Europe. The World Health Organization declared the COVID-19 coronavirus outbreak as a global pandemic on March 11, 2020. The pandemic has caused various governments, including in the United States at Federal and state levels, to impose restrictions on people and businesses, such as quarantines, closures, cancellations and travel restrictions. Significant disruptions due to the COVID-19 pandemic have impacted and in the future could severely impact our business and operations, including as a result of:
+
+•diversion of government funding away from our primary procured products and product candidates resulting from changes in government priorities;
+
+•limitation of company operations, including reduced productivity resulting from remote work and prolonged office closures as well as a potential adverse impact on our manufacturing operations if a significant number of our manufacturing employees contract the disease;
+
+•potential delays or difficulties in receiving raw and other materials from third party suppliers to manufacture our products and product candidates as the pandemic has resulted in the extended shutdown of certain businesses which may in turn result in disruptions or delays to our supply chain;
+
+•potential delays delivering products to our customers which may lead to a decline in sales of our government or commercially procured products that may consequently negatively impact our revenues;
+
+•further declines to our revenues from the sales of our vaccine products that target travelers due to the significant reduction to international travel caused by the COVID-19 pandemic;
+
+•potential delays or disruptions in our key clinical trials; and
+
+•limitations in employee resources that would otherwise be focused on our business.
+
+The global pandemic caused by COVID-19 continues to rapidly evolve. The full extent to which the COVID-19 pandemic will impact our business, results of operations and our financial condition will depend on future developments, which are highly uncertain and cannot be predicted or reasonably estimated with confidence at this time, such as the duration of the pandemic, potential mutations of the virus and the impact of such mutations, travel restrictions and social distancing policies and requirements in the United States and other countries, business closures or business disruptions and the effectiveness of actions
+
+38
+
+EMERGENT BIOSOLUTIONS INC.
+
+taken in the United States and other countries to mitigate and treat the disease.
+
+Due to the widespread impact of the pandemic, it is possible that our consolidated financial results for 2020 and future fiscal quarters may be negatively impacted, including as a result of increased government regulation and introduction of mitigation and prevention measures. The pandemic has already caused significant disruptions in the financial markets, and may continue to cause such disruptions, which could impact our ability to raise additional funds through public offerings and may also impact the volatility of our stock price and trading in our stock. In addition, the COVID-19 pandemic has adversely affected, and is expected to continue to adversely affect the United States and the global economy, having resulted in an economic downturn and recession that has impacted demand for our travel vaccines and could impact demand for our products. Such events that are generally outside of our control could have a material adverse impact on our business, operating results and financial conditions.
+
+GOVERNMENT CONTRACTING RISKS
+
+We currently derive a substantial portion of our revenue from USG procurement of AV7909 and ACAM2000 and have historically derived a substantial portion of our revenue from USG procurement of BioThrax. If the USG’s demand for and/or funding for procurement of AV7909 and BioThrax or ACAM2000 is substantially reduced, our business, financial condition, operating results and cash flows would be materially harmed.
+
+We derive a substantial portion of our current and expected future revenues from USG procurement of AV7909. As AV7909 is a product development candidate, there is a higher level of risk that we may encounter challenges causing delays or an inability to deliver AV7909 than with BioThrax, which may have a material effect on our ability to generate and recognize revenue.
+
+The success of our business and our future operating results are significantly dependent on anticipated funding for the procurement of our anthrax vaccines and the terms of such sales to the USG, including the price per dose, the number of doses and the timing of deliveries. We have no certainty that funding will be made available for the procurement of our anthrax vaccines. If priorities for the SNS change generally or with respect to our anthrax vaccines, funding to procure future doses of AV7909 or BioThrax may be delayed, limited or not available, BARDA may never complete the anticipated full transition to stockpiling AV7909 in support of anthrax preparedness, and our future business, financial condition, operating results and cash flows could be materially harmed.
+
+In addition, we currently derive a substantial portion of our revenues from sales of ACAM2000 to the USG. If priorities for the SNS change with respect to ACAM2000 or the USG decides not to exercise additional options under our ACAM2000 contract our future business, financial condition, operating results and cash flows could be materially harmed.
+
+Although a pre-EUA submission package related to AV7909 has been submitted to the FDA, we may not receive an EUA and eventual FDA licensure in a timely manner or at all. Delays in our ability to achieve a favorable outcome from the FDA could prevent us from realizing the full potential value of our BARDA contract for the advanced development and procurement of AV7909.
+
+In collaboration with us, the CDC filed with the FDA a pre-EUA submission package related to AV7909, which enables FDA review of data in anticipation of a request for an EUA. This submission triggered BARDA to exercise its first contract option (valued at approximately $261 million) in July 2019 to procure 10 million doses of AV7909 and another option in July 2020 to procure additional doses (valued at approximately $258 million) for inclusion into the SNS in support of anthrax preparedness.
+
+Notwithstanding, the FDA may decide that our data are insufficient and require additional pre-clinical, clinical or other studies. If we are unsuccessful in obtaining an EUA and, ultimately, FDA licensure, in a timely manner or at all, we may not be able to realize the full potential value of the contract, which could have a material adverse effect on our future business, financial condition, operating results and cash flows. Furthermore, prior to FDA licensure, if we obtain an EUA, the EUA could be terminated if the emergency determination underlying the EUA terminates.
+
+Our USG procurement and development contracts require ongoing funding decisions by the USG. Simultaneous reduction or discontinuation of funding of these contracts could cause our business, financial condition, operating results and cash flows to suffer materially.
+
+The USG is the principal customer for our PHT-focused MCMs and is the primary source of funds for the development of most of our product candidates in our development pipeline, most notably our AV7909 procured product candidate. We anticipate that the USG will also be a principal customer for those MCMs that we successfully develop within our existing product development pipeline, as well as those we acquire in the future. Additionally, a significant portion of our revenue comes from USG development contracts and grants. Over its lifetime, a USG procurement or development program may be implemented through the award of many different individual contracts and subcontracts. The funding for such government
+
+39
+
+EMERGENT BIOSOLUTIONS INC.
+
+programs is subject to Congressional appropriations, generally made on a fiscal year basis, even for programs designed to continue for several years. For example, sales of BioThrax to be supplied under our procurement contract with the CDC are subject to the availability of funding, mostly from annual appropriations. These appropriations can be subject to political considerations, changes in priorities due to global pandemics, the results of elections and stringent budgetary constraints.
+
+Additionally, our government-funded development contracts typically give the USG the right, exercisable in its sole discretion, to extend these contracts for successive option periods following a base period of performance. The value of the services to be performed during these option periods may constitute the majority of the total value of the underlying contract. For example, the September 2016 contract award from BARDA for the development and delivery to the SNS of AV7909 for post-exposure prophylaxis of anthrax disease consists of a five-year base period of performance valued at approximately $200 million. The contract award also includes options for the delivery of additional doses of AV7909 to the SNS and options for an additional clinical study and post-marketing commitments, which, if both were to be exercised in full, would increase the total contract value to up to $1.5 billion. If levels of government expenditures and authorizations for public health countermeasure preparedness decrease or shift to programs in areas where we do not offer products or are not developing product candidates, or if the USG otherwise declines to exercise its options under our existing contracts, our revenues would suffer, as well as our business, financial condition, operating results and cash flows.
+
+There can be no assurance that we will be able to secure follow-on procurement contracts with the USG upon the expiration of any of our current product procurement contracts.
+
+A significant portion of our revenue is substantially dependent upon product procurement contracts with the USG and foreign governments for our PHT products. Upon the expiration of a procurement contract, we may not be able to negotiate a follow-on procurement contract for the particular product for a similar product volume, period of performance, pricing or other terms, or at all. The inability to secure a similar or increased procurement contract could materially affect our revenues and our business, financial condition, operating results and cash flows could be harmed. For example, the BARDA procurement contract for raxibacumab that we acquired in our acquisition of raxibacumab from Human Genome Sciences, Inc. and GlaxoSmithKline LLC (collectively referred to as GSK), completed in November 2019. We intend to negotiate follow-on procurement contracts for most of our PHT products upon the expiration of a related procurement
+
+contract, including our procurement contract for raxibacumab, but there can be no assurance that we will be successful obtaining any follow-on contracts. Even if we are successful in negotiating a follow-on procurement contract, it may be for a lower product volume, over a shorter period of performance or be on less favorable pricing or other terms. An inability to secure follow-on procurement contracts for our products could materially and adversely affect our revenues, and our business, financial condition, operating results and cash flows could be harmed.
+
+The government contracting process is typically a competitive bidding process and involves unique risks and requirements.
+
+Our business involves government contracts and grants, which may be awarded through competitive bidding. Competitive bidding for government contracts presents many risks and requirements, including:
+
+•the possibility that we may be ineligible to respond to a request for proposal issued by the government;
+
+•the commitment of substantial time and attention of management and key employees to the preparation of bids and proposals for contracts that may not be awarded to us;
+
+•the need to accurately estimate the resources and cost structure that will be required to perform any contract that we might be awarded;
+
+•the submission by third parties of protests to our responses to requests for proposal that could result in delays or withdrawals of those requests for proposal; and
+
+•in the event our competitors protest or challenge contract or grant awards made to us pursuant to competitive bidding, the potential that we may incur expenses or delays, and that any such protest or challenge could result in the resubmission of bids based on modified specifications, or in the termination, reduction or modification of the awarded contract.
+
+The USG may choose not to award us future contracts for either the development of our new product candidates or for the procurement of our existing products addressing PHTs and may instead award such contracts to our competitors. If we are unable to secure particular contracts, we may not be able to operate in the market for products that are provided under those contracts. Additionally, if we are unable to consistently win new contract awards over an extended period, or if we fail to anticipate all of the costs or resources that we will be required to secure and, if applicable, perform under such contract awards,
+
+40
+
+EMERGENT BIOSOLUTIONS INC.
+
+our growth strategy and our business, financial condition and operating results and cash flows could be materially and adversely affected.
+
+There are a number of laws and regulations that pertain to government contracts and compliance with those laws and regulations require significant time and cost, which could have a material adverse effect on our business, financial condition, operating results and cash flows.
+

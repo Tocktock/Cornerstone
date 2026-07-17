@@ -1,0 +1,2174 @@
+
+57
+
+an emerging growth company for up to five years following 2020, the year in which we completed our IPO, although circumstances could cause us to lose that status earlier. We will remain an emerging growth company until the earlier of (1) the last day of the fiscal year (a) following the fifth anniversary of the closing of our IPO, (b) in which we have total annual gross revenue of at least $1.235 billion or (c) in which we are deemed to be a large accelerated filer, which requires the market value of our common stock that is held by non-affiliates to exceed $700 million as of the prior June 30th, and (2) the date on which we have issued more than $1 billion in non-convertible debt during the prior three-year period.
+
+Under the JOBS Act, emerging growth companies can also delay adopting new or revised accounting standards until such time as those standards apply to private companies. We have elected to avail ourselves of this exemption from complying with new or revised accounting standards and, therefore, will not be subject to the same new or revised accounting standards as other public companies that are not emerging growth companies.
+
+As of December 31, 2022, we no longer qualified as a smaller reporting company; however, we are allowed to continue to rely on exemptions from certain disclosure requirements that are available to smaller reporting companies through our annual report for the year ended December 31, 2022. We cannot predict if investors will find our common stock less attractive because we may rely on these exemptions. If some investors find our common stock less attractive as a result, there may be a less active trading market for our common stock and our stock price may be more volatile.
+
+Anti-takeover provisions under our charter documents and Delaware law could delay or prevent a change of control, which could limit the market price of our common stock and may prevent or frustrate attempts by our stockholders to replace or remove our current management.
+
+Our amended and restated certificate of incorporation and amended and restated bylaws contain provisions that could delay, defer or prevent a change of control of our company or changes in our board of directors that our stockholders might consider favorable. Some of these provisions include:
+
+•
+a board of directors divided into three classes serving staggered three-year terms, such that not all members of the board will be elected at one time;
+
+•
+a prohibition on stockholder action through written consent, which requires that all stockholder actions be taken at a meeting of our stockholders;
+
+•
+a requirement that special meetings of stockholders be called only by a majority of the members of our board of directors then in office;
+
+•
+advance notice requirements for stockholder proposals and nominations for election to our board of directors;
+
+•
+a requirement that no member of our board of directors may be removed from office by our stockholders except for cause and, in addition to any other vote required by law, upon the approval of not less than two-thirds of all outstanding shares of our voting stock then entitled to vote in the election of directors;
+
+•
+a requirement of approval of not less than two-thirds of all outstanding shares of our voting stock and not less than two-thirds of the outstanding shares of each class entitled to vote thereon as a class to amend specific provisions of our certificate of incorporation;
+
+•
+a requirement of approval of not less than two-thirds of all outstanding shares of our voting stock to amend any bylaws by stockholder action; and
+
+•
+the authority of the board of directors to issue preferred stock on terms determined by the board of directors without stockholder approval and which preferred stock may include rights superior to the rights of the holders of common stock.
+
+In addition, we are governed by the provisions of Section 203 of the Delaware General Corporate Law, which may prohibit certain business combinations with stockholders owning 15% or more of our outstanding voting stock. These anti-takeover provisions and other provisions in our amended and restated certificate of incorporation and amended and restated bylaws could make it more difficult for stockholders or potential acquirers to obtain control of our board of directors or initiate actions that are opposed by the then-current board of directors and could also delay or impede a merger, tender offer, or proxy contest involving our company. These provisions could also discourage proxy contests and make it more difficult for stockholders to elect directors of their choosing or cause
+
+58
+
+us to take other corporate actions they desire. Any delay or prevention of a change of control transaction or changes in our board of directors could cause the market price of our common stock to decline.
+
+Our amended and restated bylaws designate certain courts as the sole and exclusive forum for certain types of actions and proceedings that may be initiated by our stockholders, which could limit our stockholders’ ability to obtain a favorable judicial forum for disputes with us or our directors, officers, or employees.
+
+Our amended and restated bylaws provide that, unless we consent in writing to an alternative forum, the Court of Chancery of the State of Delaware will be the sole and exclusive forum for any state law claim for (i) any derivative action or proceeding brought on our behalf, (ii) any action asserting a claim of breach of fiduciary duty owed by any of our directors, officers, and employees to us or our stockholders, (iii) any action asserting a claim arising pursuant to any provision of the Delaware General Corporation Law, our amended and restated certificate of incorporation or our amended and restated bylaws or (iv) any action asserting a claim that is governed by the internal affairs doctrine, in each case subject to the Court of Chancery having personal jurisdiction over the indispensable parties named as defendants therein, or the Delaware Forum Provision. The Delaware Forum Provision will not apply to any causes of action arising under the Securities Act or the Exchange Act. Our bylaws further provide that, unless we consent in writing to the selection of an alternative forum, the United States District Court for the District of Massachusetts shall be the sole and exclusive forum for resolving any complaint asserting a cause of action arising under the Securities Act, or the Federal Forum Provision, as our principle office is located in Cambridge, Massachusetts. In addition, our amended and restated bylaws provide that any person or entity purchasing or otherwise acquiring any interest in shares of our common stock is deemed to have notice of and consented to the foregoing provisions; provided, however, that stockholders cannot and will not be deemed to have waived our compliance with the federal securities laws and the rules and regulations thereunder.
+
+We recognize that the Delaware Forum Provision and the Federal Forum Provision in our bylaws may impose additional litigation costs on stockholders in pursuing any such claims, particularly if the stockholders do not reside in or near the State of Delaware or the Commonwealth of Massachusetts. Additionally, the forum selection clauses in our amended and restated bylaws may limit our stockholders’ ability to bring a claim in a forum that they find favorable for disputes with us or our directors, officers or employees, which may discourage such lawsuits against us and our directors, officers and employees even though an action, if successful, might benefit our stockholders. In addition, while the Delaware Supreme Court ruled in March 2020 that federal forum selection provisions purporting to require claims under the Securities Act be brought in federal court were “facially valid” under Delaware law, there is uncertainty as to whether other courts will enforce our Federal Forum Provision. If the Federal Forum Provision is found to be unenforceable, we may incur additional costs associated with resolving such matters. The Federal Forum Provision may also impose additional litigation costs on stockholders who assert that the provision is not enforceable or invalid. The Court of Chancery of the State of Delaware and the United States District Court for the District of Massachusetts may also reach different judgments or results than would other courts, including courts where a stockholder considering an action may be located or would otherwise choose to bring the action, and such judgments may be more or less favorable to us than our stockholders.
+
+If we fail to establish and maintain proper and effective internal control over financial reporting, our operating results and our ability to operate our business could be harmed.
+
+Ensuring that we have adequate internal control over financial reporting in place so that we can produce accurate financial statements on a timely basis is a costly and time-consuming effort that needs to be re-evaluated frequently. Our internal control over financial reporting is a process designed to provide reasonable assurance regarding the reliability of financial reporting and the preparation of financial statements in accordance with generally accepted accounting principles. In connection with our IPO, we began the process of documenting, reviewing, and improving our internal controls and procedures for compliance with Section 404 of the Sarbanes-Oxley Act, which will require annual management assessment of the effectiveness of our internal control over financial reporting. We have begun recruiting additional finance and accounting personnel with certain skill sets that we will need as a public company. If we are not able to comply with the requirements of Section 404 of the Sarbanes-Oxley Act in a timely manner, or if we are unable to maintain proper and effective internal controls, we may not be able to produce timely and accurate financial statements. If that were to happen, the market price of our stock could decline and we could be subject to sanctions or investigations by the stock exchange on which our common stock is listed, the SEC or other regulatory authorities.
+
+Implementing any appropriate changes to our internal controls may distract our officers and employees, entail substantial costs to modify our existing processes, and take significant time to complete. These changes may not,
+
+59
+
+however, be effective in maintaining the adequacy of our internal controls, and any failure to maintain that adequacy, or consequent inability to produce accurate financial statements on a timely basis, could increase our operating costs and harm our business. In addition, investors’ perceptions that our internal controls are inadequate or that we are unable to produce accurate financial statements on a timely basis may harm our stock price and make it more difficult for us to effectively market and sell our service to new and existing customers.
+
+Item 1B. Unresolved Staff Comments.
+
+None.
+
+Item 2. Properties.
+
+We lease 9,068 square feet of office space located at 321 Arsenal Street, Watertown, Massachusetts 02472 for our principal office. The lease terminates in February 2027.
+
+For our Belgian subsidiary, we lease a facility containing approximately 1,577 square meters for laboratory and office space, which is located at 29 Rue des Frères Wright, 6041 Charleroi, Belgium. In January 2021, the Company entered into an agreement to extend its office lease in Belgium effective February 1, 2021 through January 2030 and include 201 square meters of additional space. In October 2021, the Company entered into an agreement to lease an additional 453 square meters of space.
+
+We believe that our current facilities are adequate for our current needs and that suitable additional or substitute space at commercially reasonable terms will be available as needed to accommodate any future expansion of our operations.
+
+Item 3. Legal Proceedings.
+
+From time to time, we may be a party to litigation or subject to claims incident to the ordinary course of business. We are not currently a party to any material legal proceedings, and our management believes that there are currently no claims or actions pending against us, the ultimate disposition of which could have a material adverse effect on our results of operations or financial condition.
+
+Item 4. Mine Safety Disclosures.
+
+Not applicable.
+
+60
+
+PART II
+
+Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities.
+
+Market information
+
+Our common stock is publicly traded on the Nasdaq Global Select Market under the symbol “ITOS”.
+
+Holders of Record
+
+As of March 7, 2023, there were approximately 234 holders of record of our common stock. This number does not include beneficial owners whose shares are held by nominees in street name.
+
+Dividends
+
+We have not declared or paid any cash dividends on our capital stock since our inception. We intend to retain future earnings, if any, to finance the operation and expansion of our business and do not anticipate paying any cash dividends to holders of common stock in the foreseeable future. Any future determination to declare cash dividends will be made at the discretion of our board of directors, subject to applicable laws, will depend on a number of factors, including our financial condition, results of operations, capital requirements, contractual restrictions, general business conditions, and other factors that our board of directors may deem relevant.
+
+Securities authorized for issuance under equity compensation plans
+
+The information required by Item 5 of Form 10-K regarding equity compensation plans will be included in our Definitive Proxy Statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+Issuer purchases of equity securities
+
+None
+
+Item 6. Reserved
+
+61
+
+Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations.
+
+The following discussion and analysis of our financial condition and results of operations should be read together with our consolidated financial statements and related notes and other financial information appearing elsewhere in this Annual Report on Form 10-K. Some of the information contained in this discussion and analysis or set forth elsewhere in this Annual Report on Form 10-K, including information with respect to our plans and strategy for our business and related financing, includes forward-looking statements that involve risks and uncertainties. As a result of many factors, including those factors set forth in the “Risk factors” section of this Annual Report on Form 10-K, our actual results could differ materially from the results described in or implied by the forward-looking statements contained in the following discussion and analysis.
+
+Overview
+
+We are a clinical-stage biopharmaceutical company pioneering the discovery and development of a new generation of immuno-oncology therapeutics for people living with cancer. We leverage our deep understanding of tumor immunology and immunosuppressive pathways to design novel product candidates with the aim of restoring the immune response against cancer. Our innovative pipeline includes two clinical-stage programs targeting novel, validated immuno-oncology pathways. Each of our therapies in development has optimized pharmacologic properties designed to improve clinical outcomes.
+
+Our lead antibody product candidate, EOS-448, is an antagonist of TIGIT, or T-cell immunoreceptor with lg and ITIM domains, an immune checkpoint with multiple mechanisms of action. EOS-448 was selected for its affinity for TIGIT, its potency and its potential to engage the FcγR to activate dendritic cells, natural killer cells and macrophages and to promote cytokine release, activation of antigen presenting cells and ADCC activity. In 2020, we started an open-label Phase 1/2a clinical trial of EOS-448 in adult cancer patients with advanced solid tumors. In April 2021, we reported preliminary safety, pharmacokinetic, engagement and pharmacodynamic data, indicating target engagement and early evidence of clinical activity as a single agent. In September 2021, we dosed the first patients in a Phase 1/2 clinical trial of EOS-448 in combination with pembrolizumab and in combination with our A2AR antagonist inupadenant in patients with solid tumors.
+
+On June 11, 2021, our wholly owned subsidiary, iTeos Belgium S.A., and GSK executed the GSK Collaboration Agreement, which became effective on July 26, 2021. Pursuant to the GSK Collaboration Agreement, we granted GSK a license under certain of our intellectual property rights to develop, manufacture, and commercialize products comprised of or containing EOS-448, which license is exclusive in all countries outside of the United States and co-exclusive, with iTeos, in the United States. GSK and iTeos intend to develop EOS-448 in combination, including with other oncology assets of GSK, and iTeos and GSK will jointly own the intellectual property created under the GSK Collaboration Agreement that covers such combinations. In partnership with GSK, we are enrolling patients with first line NSCLC in a randomized Phase 2 trial assessing the doublet of GSK's anti-PD-1 (Jemperli (dostarlimab-gxly)) with EOS-448. In addition, we are enrolling patients with first-line advanced or metastatic head and HNSCC for the Phase 2 expansion part of the trial assessing the doublet of GSK’s dostarlimab with EOS-448. We and GSK continue to explore two novel triplets in selected advanced solid tumors both in Phase 1b trials: EOS-448 with dostarlimab and GSK’s investigational anti-CD96 antibody, and EOS-448 with dostarlimab and GSK’s anti-PVRIG.
+
+Based on favorable preclinical data generated in collaboration with Fred Hutchinson Cancer Research Center, we are also enrolling patients in an open-label dose-escalation/expansion Phase 1/2 trial evaluating the safety, tolerability and preliminary activity of EOS-448 as monotherapy and in combination with Bristol Myers Squibb’s iberdomide - a novel, potent oral cereblon E3 ligase modulator (CELMoD®) compound with enhanced tumoricidal and immune-stimulatory effects compared with immunomodulatory (IMiD®) agents - with or without dexamethasone, in adults with relapsed or refractory multiple myeloma.
+
+We are also advancing inupadenant, a next-generation adenosine A2A receptor antagonist tailored to overcome the specific adenosine-mediated immunosuppression found in tumor microenvironment, into proof-of concept trials in several indications following encouraging single-agent activity in Phase 1. We are investigating inupadenant in an open-label multi-arm Phase 1/2a clinical trial in adult cancer patients with advanced solid tumors. The single-agent dose-escalation and expansion portions of our Phase 1/2a clinical trial of inupadenant have demonstrated durable monotherapy antitumor activity in some patients with advanced solid tumors and safety consistent with previously reported results. As part of this monotherapy assessment of inupadenant, we identified a potential predictive biomarker and we have completed enrolling patients in the biomarker cohort of the ongoing Phase 1b/2a trial. We confirmed a partial response using inupadenant in monotherapy in a patient who
+
+62
+
+had the highest level of the biomarker that we have recorded. We are also enrolling patients in the dose ranging part (Part 1) of an ongoing two-part Phase 2 trial in post-IO metastatic non-squamous non-small cell lung cancer (NSCLC) to evaluate the combination of inupadenant with platinum-doublet chemotherapy compared to standard platinum-doublet chemotherapy. We have completed enrollment in the safety evaluation portion of the clinical trial of inupadenant in combination with chemotherapy and with pembrolizumab, as well as the monotherapy expansion cohort in prostate cancer. We have completed enrollment in the Phase 2a trial evaluating inupadenant in combination with pembrolizumab in post-PD-1 melanoma and have decided to prioritize development of inupadenant in our ongoing study in combination with platinum-doublet chemotherapy in patients with chemo-naïve NSCLC as we have determined that the post-PD-1 melanoma setting is not a path to accelerated approval. In addition, we are evaluating a salt form of inupadenant in a Phase 1 study.
+
+In September 2021, we nominated a product candidate, EOS-984, which targets a new mechanism in the adenosine pathway for IND enabling studies. EOS-984 has the potential to fully reverse adenosine immune suppression, as a monotherapy and in combination with inupadenant and other standards of care. We expect to initiate clinical studies for EOS-984 in mid-2023.
+
+Since our inception in August 2011, we have devoted substantially all of our resources to organizing and staffing our company, business planning, raising capital, conducting discovery and research activities, filing patent applications, identifying potential product candidates, undertaking preclinical studies and clinical trials and establishing arrangements with third parties for the manufacture of initial quantities of our product candidates and component materials. To date, we have financed our operations primarily through license and collaboration revenue generated through the GSK Collaboration Agreement and through our Initial Public Offering, or IPO. Through December 31, 2022, we had raised an aggregate of $210.6 million of net proceeds from the IPO and $177.1 million from the sale of preferred stock and received an up-front payment of $625.0 million with respect to the GSK Collaboration Agreement. As of December 31, 2022, our principal sources of liquidity were cash and cash equivalents, which totaled $284.8 million and available-for-sale securities, which totaled $446.6 million.
+
+We expect to continue to incur significant expenses in connection with ongoing development activities, particularly if and as we:
+
+•
+continue preclinical studies and clinical trials and initiate new clinical trials for our product candidates;
+
+•
+pursue regulatory approvals for our product candidates;
+
+•
+advance the development of our product candidate pipeline;
+
+•
+continue research activities as we seek to discover and develop additional product candidates;
+
+•
+obtain, maintain, expand and protect our intellectual property portfolio;
+
+•
+hire additional research and development, clinical and commercial personnel;
+
+•
+scale up our clinical and regulatory capabilities; and
+
+•
+add operational, financial and management information systems and personnel, including personnel to support our research and development programs, any future commercialization efforts and our transition to operating as a public company.
+
+We are also party to other collaboration and license agreements in addition to the GSK Collaboration Agreement pursuant to which we may be required to make future royalty and milestone payments. In January 2017, we entered into a collaboration agreement with Adimab, LLC, or Adimab, pursuant to which we paid $1.0 million in 2018 to exercise an option to acquire certain licenses from Adimab. One of the antibodies licensed under this agreement is what we now refer to as EOS-448. In February 2021, we entered into an amendment to this agreement (the Amended Adimab Agreement). The Amended Adimab Agreement specifies different milestone payments for new products that are derived from research programs beginning after February 22, 2021 (the New Products). For New Products, on a per target basis, we may be required to pay development, regulatory and commercial milestone payments totaling up to an aggregate of $45.8 million for the first three products and additional milestone payments up to $14.5 million for each additional product. In 2022, the Company made a payment of $2.0 million due to reaching an additional milestone (dosing of first patient for Phase 2 clinical trial). As of the date of this Annual Report on Form 10-K, we have not pursued any additional targets under the Amended Adimab Agreement that could potentially result in such milestone payments. We will also pay Adimab low to mid single-digit percentage royalties on a country-by-country and product-by-product basis on worldwide net sales of licensed products. Through December 31, 2022, we have paid a total of $5.4 million to Adimab relating to milestones, option and other fees pursuant the Adimab Agreement.
+
+63
+
+We are also party to a biologics master services agreement with WuXi Biologics Hong Kong Limited, or WuXi, pursuant to which we will pay WuXi, at our election, either a low single-digit percentage royalty on global net sales of manufactured products or a one-time milestone payment in the low tens of millions.
+
+On December 10, 2019, we entered into a Clinical Trial Collaboration and Supply Agreement (the MSD Agreement) with MSD International GmbH (MSD), a subsidiary of Merck & Co., Inc. Under the MSD Agreement, we sponsor a clinical trial in which both our compound and MSD’s compound are dosed in combination. We conduct the research at our own cost and MSD contributes its compound towards the study at no cost to us. We will equally own the clinical data and inventions from the study, with the exception of inventions relating solely to each party’s compound class. The MSD Agreement will expire upon the delivery of a written report on the results of the study, unless earlier terminated or agreed by the parties. We began receiving compounds from MSD on April 1, 2020 and we began the research study in the third quarter of 2020.
+
+Impact of COVID-19
+
+The COVID-19 pandemic has presented a substantial public health and economic challenge around the world. While the COVID-19 pandemic has not significantly impacted our business or results of operations, the future impact of the COVID-19 pandemic on our industry, the healthcare system, our development timelines for EOS-448 and inupadenant, our preclinical research and development, and our current and future operations and financial condition will depend on future developments, which are highly uncertain and cannot be predicted with confidence. Disruptions to the global economy, disruption of global healthcare systems, and other significant impacts of the COVID-19 pandemic could have a material adverse effect on our business, financial condition, results of operations and growth prospects. See “Risk factors” for a discussion of the potential adverse impact of COVID-19 on our business, results of operations and financial condition.
+
+Components of our results of operations
+
+Revenue
+
+To date, our revenues have been derived from the upfront payment associated with the GSK Collaboration Agreement.
+
+For all collaboration agreements, no development or commercial milestones were included in the transaction price at inception, as all milestone amounts were fully constrained. As part of our evaluation of the constraint, we considered numerous factors, including that receipt of the milestones is outside our control and contingent upon success in future clinical trials and the licensee’s efforts. Any consideration related to sales-based milestones will be recognized when the related sales occur as they were determined to relate predominantly to the license granted to GSK and therefore have also been excluded from the transaction price. We are applying the royalty exception for sales-based royalties and will not recognize revenue until the subsequent sale of product occurs.
+
+Research and development expenses
+
+Research and development expenses consist primarily of costs incurred for the development of our product candidates, which include:
+
+•
+costs to obtain licenses to intellectual property and related future payments should certain success, development and regulatory milestones be achieved;
+
+•
+employee-related expenses, including salaries, benefits and stock-based compensation expense;
+
+•
+expenses incurred under agreements with contract research organizations, or CROs, contract manufacturing organizations, or CMOs, and independent contractors that conduct research and development, preclinical and clinical activities on our behalf;
+
+•
+costs of purchasing lab supplies and non-capital equipment used in our preclinical activities and in manufacturing clinical study materials through CMOs;
+
+•
+consulting and professional fees related to research and development activities; and
+
+•
+facility costs, depreciation, and other expenses, which include direct and allocated expenses for rent and maintenance of facilities, insurance, and other supplies.
+
+We expense research and development costs as incurred. We recognize costs for certain development activities, such as preclinical studies and clinical trials, based on an evaluation of the progress to completion of specific tasks using information provided to us by our vendors, such as patient enrollment or clinical site activations for services received and efforts expended.
+
+64
+
+Research and development activities are central to our business model. We expect research and development costs to increase significantly for the foreseeable future as our current development programs progress and new programs are added.
+
+Because of the numerous risks and uncertainties associated with product development, we cannot determine with certainty the duration and completion costs of the current or future preclinical studies and clinical trials or if, when, or to what extent we will generate revenues from the commercialization and sale of any product candidates that receive regulatory approval. We may never succeed in achieving regulatory approval for our product candidates. The duration, costs and timing of preclinical studies and clinical trials and development of our product candidates will depend on a variety of factors, which could all be impacted by the COVID-19 pandemic, including, but not limited to:
+
+•
+successful enrollment in, and completion of, clinical trials;
+
+•
+receipt of marketing approvals from applicable regulatory authorities;
+
+•
+successful completion of preclinical studies and IND-enabling studies;
+
+•
+establishing commercial manufacturing capabilities or making arrangements with third-party manufacturers;
+
+•
+obtaining and maintaining patent and trade secret protection and non-patent exclusivity;
+
+•
+launching commercial sales of the product, if and when approved, whether alone or in collaboration with others;
+
+•
+acceptance of a product, if and when approved, by patients, the medical community and third-party payors;
+
+•
+effectively competing with other therapies and treatment options;
+
+•
+a continued acceptable safety profile following approval;
+
+•
+enforcing and defending intellectual property and proprietary rights and claims; and
+
+•
+achieving desirable medicinal properties for the intended indications.
+
+A change in the outcome of any of these factors could mean a significant change in the costs and timing associated with the development of our current and future preclinical and clinical product candidates. For example, if the FDA or comparable foreign regulatory authority were to require us to conduct clinical trials beyond those that we currently anticipate will be required for the completion of clinical development, or if we experience significant delays in execution of or enrollment in any of our preclinical studies or clinical trials, we could be required to expend significant additional financial resources and time on the completion of preclinical and clinical development.
+
+The following table summarizes our principal product development programs, including direct research and development expenses allocated to each clinical product candidate:
+
+Year ended
+December 31,
+
+(in thousands)
+
+2022
+
+2021
+
+Direct research and development expenses by
+program:
+
+EOS-448
+
+$
+
+36,256
+
+$
+
+14,641
+
+Inupadenant
+
+23,841
+
+18,714
+
+Other non-clinical programs
+
+12,001
+
+8,450
+
+Indirect research and development expenses(1)
+
+25,261
+
+17,564
+
+Total research and development expense
+
+$
+
+97,359
+
+$
+
+59,369
+
+(1)
+The substantial majority of these costs relate to the EOS-448 and inupadenant programs. The majority of these costs are payroll and related costs for our employees performing in-house research and development activities and the remainder represents other research and development costs.
+
+65
+
+General and administrative expenses
+
+General and administrative expenses consist primarily of employee-related expenses, including salaries, benefits and stock-based compensation, for personnel in executive, finance, business development, facility operations and administrative functions. Other significant costs include facility costs not otherwise included in research and development expenses, legal fees relating to patent and corporate matters and fees for accounting, tax and consulting services.
+
+Grant income
+
+We have agreements with granting agencies whereby we receive funding under grants that partially or fully reimburse us for eligible research and development expenditures. Certain grant agreements require us to repay the funding depending on whether we decide to pursue commercial development or out-licensing of any drug candidate that is produced from the research program. The repayment provision includes a portion that is fixed (corresponding to 30% of the grant), payable in annual installments, which is effective unless we decide not to pursue commercial development or out licensing of the drug candidate. The repayment provision also includes a potential obligation to pay a royalty that is contingent upon achieving sales of a product developed through the program. The maximum amount payable to the granting agency under each grant, including the fixed repayments, the royalty on revenue and the interest thereon, is twice the amount of funding received.
+
+Research and development tax credits
+
+Our wholly owned subsidiary iTeos Belgium S.A., as a Belgian biotechnology company, qualifies for a cash-based tax credit on research and development expenses. The credit is calculated based on a percentage of eligible research and development expenses defined by the Belgian government for each fiscal year (13.5% for 2022 and 2021) and then applying the effective tax rate to that result. The research and development tax credits are refundable to us if we are unable to use the credits to offset income taxes for the five subsequent tax years. We record a receivable and other income as the qualified expenses are incurred, as we are reasonably assured that the credit will be received, based upon our history of filing for the tax credits. Research and development tax credits receivable where we expect to receive refunds more than one year after the balance sheet date are classified as noncurrent in the consolidated balance sheet.
+
+Interest income
+
+Interest income consists of interest earned on our available-for-sale securities, money market funds, and bank sweep accounts.
+
+Other income, net
+
+Other income, net includes income and expenses that do not fall within other categories of the statement of operations and comprehensive income. Items included are bank fees and gain or loss on foreign currency transactions.
+
+Income taxes
+
+We are subject to income taxes in the U.S. and Belgium. Belgium has a statutory tax rate different from the U.S. Accordingly, our effective tax rates will vary depending on the relative proportion of foreign to U.S. income, the utilization of foreign tax credits and changes in tax laws. Deferred tax assets are reduced through the establishment of a valuation allowance, if, based upon available evidence, it is determined that it is more likely than not that the deferred tax assets will not be realized. Income tax expense results from foreign minimum income tax and profit on a legal entity basis. For the first time since inception, we recognized income in 2021. Due to the revenue earned, we recognized income tax expense in 2021. As of December 31, 2022, we had foreign net operating loss carryforwards of $44.4 million with no expiration. As of December 31, 2022, we have fully utilized the U.S. net operating loss carryforwards and have $38.4 million of state net operating loss carryforwards. These net operating losses, along with temporary differences related primarily to capitalized research and development, or R&D expenses for tax purposes in Belgium and stock-based compensation in the U.S., resulted in a net deferred tax asset of $45.4 million. We have concluded that it is more likely than not that we will not realize the benefits of the deferred tax asset, and accordingly, established a full valuation allowance as
+
+66
+
+of December 31, 2022. In addition, the Company recorded a $39.2 million liability as of December 31, 2022, related to an uncertain tax position regarding the Company’s allocation of revenue between Belgium and the U.S.
+
+Results of operations
+
+Comparison of the years ended December 31, 2022 and 2021
+
+The following table summarizes our results of operations for the years ended December 31, 2022 and 2021, together with the dollar change in those items:
+
+Year ended
+December 31,
+
+Period to
+period
+
+(in thousands)
+
+2022
+
+2021
+
+change
+
+Revenue:
+
+License and collaboration revenue
+
+$
+
+267,630
+
+$
+
+344,775
+
+$
+
+(77,145
+
+)
+
+Total Revenue
+
+267,630
+
+344,775
+
+(77,145
+
+)
+
+Operating expenses:
+
+Research and development expenses
+
+97,359
+
+59,369
+
+37,990
+
+General and administrative expenses
+
+43,947
+
+40,505
+
+3,442
+
+Total operating expenses
+
+141,306
+
+99,874
+
+41,432
+
+Income from operations
+
+126,324
+
+244,901
+
+(118,577
+
+)
+
+Other income:
+
+Grant income
+
+2,091
+
+10,181
+
+(8,090
+
+)
+
+Research and development tax credits
+
+1,172
+
+—
+
+1,172
+
+Interest income
+
+11,361
+
+78
+
+11,283
+
+Other income, net
+
+7,788
+
+1,304
+
+6,484
+
+Income before income taxes
+
+148,736
+
+256,464
+
+(107,728
+
+)
+
+Income tax expense
+
+52,084
+
+41,943
+
+10,141
+
+Net income
+
+$
+
+96,652
+
+$
+
+214,521
+
+$
+
+(117,869
+
+)
+
+License and collaboration revenue
+
+License and collaboration revenue equaled $267.6 million for the year ended December 31, 2022, resulting from a portion of the GSK upfront payment that was recognized during the year, compared to $344.8 million recognized for the year ended December 31, 2021. The decrease was due to more than half of the revenue relating to the GSK upfront payment having been recognized in 2021.
+
+Research and development expenses
+
+Research and development expenses increased by $38.0 million to $97.4 million for the year ended December 31, 2022, from $59.4 million for the year ended December 31, 2021. This increase was primarily related to an increase of $3.5 million of payroll and related costs, a $29.4 million increase CRO/CMO fees and internal laboratory expenses, a $2.2 million increase in stock-based compensation, an increase of $0.7 million in professional fees and an increase of $1.7 million in collaboration milestones paid. The overall increase was due to an increase in activities related to EOS-448 and inupadenant clinical trials. In addition, there was an increase in spending related to our preclinical programs during the year ended December 31, 2022.
+
+General and administrative expenses
+
+General and administrative expenses increased by $3.4 million to $43.9 million for the year ended December 31, 2022 from $40.5 million for the year ended December 31, 2021. The increase was primarily attributable to an increase of $2.7 million of payroll and related costs resulting from additional executives and finance and administrative employees added to enable us to operate as a public company, a $5.5 million increase in stock-based compensation, an increase of $0.6 million in recruiting fees, and an increase of $0.4 million related to facilities. In addition, there was also a $0.8 million increase related to various other general and administrative expenses. These increases were partially offset by a $6.6 million decrease in professional fees primarily due to $6.3 million in one-time advisor and legal fees incurred by us in connection with the GSK Collaboration Agreement in 2021.
+
+67
+
+Grant income
+
+Grant income decreased by $8.1 million to $2.1 million for the year ended December 31, 2022 from $10.2 million for the year ended December 31, 2021. The overall decrease in grant income, driven by spending on qualified research and development activities, was primarily attributable to certain grant programs reaching their maturity. For the year ending December 31, 2022, grant income relating to the EOS-448 and inupadenant programs decreased by $4.6 million and grant income relating to preclinical activities decreased by $3.5 million.
+
+Research and development tax credits
+
+Research and development tax credits increased by $1.2 million as no research and development tax credits were recognized as income for the year ended December 31, 2021, as the research and development tax credits were utilized in the income tax return to reduce the 2021 taxes due in Belgium. In 2022, a portion of the research and development tax credits are expected to be utilized in the income tax return to reduce the 2022 taxes due in Belgium.
+
+Interest income
+
+Interest income increased by $11.3 million due to rising interest rates in 2022 and due to the significant purchases and holdings of available-for-sale securities in the fourth quarter of 2022.
+
+Other income, net
+
+The $6.4 million increase in other income, net was primarily due to foreign currency exchange gains driven by the decrease in the euro to dollar exchange rate between December 31, 2021 and 2022.
+
+Income tax expense
+
+Year ended December 31,
+
+(in thousands)
+
+2022
+
+2021
+
+Income before income taxes
+
+$
+
+148,736
+
+$
+
+256,464
+
+Income tax expense
+
+52,084
+
+41,943
+
+Effective tax rate
+
+35.0
+
+%
+
+16.4
+
+%
+
+Our effective tax rate increased from 16.4% to 35.0% in the year ended December 31, 2022 as compared to the year ended December 31, 2021, primarily due to the impact of capitalized research and development expenses under Section 174 of the Internal Revenue Code. Section 174 of the Internal Revenue Code was amended on January 1, 2022, in connection with certain provisions of the 2017 Tax Cuts and Jobs Act, Public Law 115-97-Dec. 22, 2017 becoming effective. As a result of the amendment, research and development expenses must now be capitalized and amortized for tax purposes over either five years for work performed in the U.S. and fifteen years for work performed outside of the U.S. Previously, research and development expenses were available to offset taxable income for tax purposes in the year incurred. Although this represents a temporary difference, the related deferred tax asset is fully reserved for under the valuation allowance as of December 31, 2022. In addition, there was a further increase in the liability related to uncertain tax positions in 2022. The Company recorded an additional $22.2 million liability during the year ended December 31, 2022 relating to an uncertain tax position regarding the Company’s allocation of revenue from the GSK Collaboration Agreement between Belgium and the U.S. These factors also caused the 2022 effective tax rate to be higher than the federal and foreign statutory rates of 21% and 25%, respectively. The 2021 effective tax rate was lower than the federal and foreign statutory rates of 21% and 25%, respectively, primarily due to the mix of income between the U.S. and Belgium, the Innovation Income Deduction in Belgium, which excludes 85% of the net revenue generated from qualifying intellectual property from taxation and the taxation in the U.S. from the inclusion of foreign earnings under the Global Intangible Low-Taxed Income (“GILTI”) regime. The liability balance was $39.2 million and $17.0 million as of December 31, 2022 and December 31, 2021, respectively.
+
+See Note 9, Income Taxes, to the consolidated financial statements included elsewhere in this Annual Report on Form 10-K for further details.
+
+Liquidity and capital resources
+
+In June, 2021, the Company's wholly owned subsidiary, iTeos Belgium S.A., and GSK executed the GSK Collaboration Agreement, pursuant to which we agreed to grant GSK a license under certain of our intellectual
+
+68
+
+property rights to develop, manufacture, and commercialize products comprised of or containing our antibody product, EOS-448. Under the GSK Collaboration Agreement, GSK made an upfront payment of $625.0 million on August 5, 2021.
+
+To date, we have funded our operations primarily with proceeds from the IPO, the sales of preferred stock, grants and licenses and the upfront payment from the GSK Collaboration Agreement. As of December 31, 2022, we had $284.8 million in cash and cash equivalents and $446.6 million in available-for-sale securities. To date we have not generated any revenue from product sales and do not expect to generate revenue from the sales of products for the foreseeable future.
+
+In addition, in the event that we receive revenue from products or services related to the intellectual property developed arising from the programs, we must pay to the Walloon Region a 0.33% royalty on revenue related to the inupadenant grant and a 0.15% royalty on revenue on the EOS-448 grant (increased from 0.12% effectively December 2021). The maximum amount payable to the Walloon Region under each grant, including the fixed annual repayments, the royalty on revenue, and the interest thereon, is twice the amount of grant received. The Company recorded a royalty accrual of $0.8 million as of December 31, 2022, due to the upfront payment received pursuant to the GSK Collaboration Agreement.
+
+The following is a summary of our contractual obligations as of December 31, 2022:
+
+Contractual Obligation
+
+Total
+
+Less than
+1 year
+
+More than
+1 year and
+less than 3
+
+More than
+3 years and
+less than 5
+
+More than
+5 years
+
+(In thousands)
+
+Operating lease obligation (1)
+
+$
+
+5,349
+
+$
+
+1,059
+
+$
+
+2,051
+
+$
+
+1,469
+
+$
+
+770
+
+Grants repayable (2)
+
+7,486
+
+449
+
+765
+
+1,190
+
+5,082
+
+Totals
+
+$
+
+12,835
+
+$
+
+1,508
+
+$
+
+2,816
+
+$
+
+2,659
+
+$
+
+5,852
+
+(1)
+During the year ended December 31, 2021, we entered into two amendments to extend the Belgium lease and increase the office and lab space, effective February 2021 and October 2021, both with a termination date of January 2030. The February 2021 amendment increased the office and laboratory space by 201 square meters and the November 2021 amendment increased the office and laboratory space by 453 square meters. In November 2021, we entered into a new lease for 9,068 square feet of office space in Watertown, Massachusetts, which terminates in February 2027.
+
+(2)
+We have entered into two arrangements with the Walloon Region of Belgium, whereby the Walloon Region would provide us with up to $24.7 million for our EOS-448 ($4.6 million) and inupadenant ($20.1 million) research and development programs. As of December 31, 2022, we have received $4.6 million under the EOS-448 grant and $20.1 million under the inupadenant grant. We must repay 30% of the amount received under the grants in annual installments from 2023 to 2042 unless we decide not to pursue development and commercialization of the intellectual property developed arising from the program, apply for a waiver from the Walloon Region justifying our decision based upon the failure of the program, and return the intellectual property to the Walloon Region.
+
+The table above does not include potential milestone and success fees, sublicense fees, royalty fees, licensing maintenance fees and reimbursement of patent maintenance costs that we may be required to pay under agreements we have entered into with certain institutions to license intellectual property. Our agreements to license intellectual property include potential milestone payments that are dependent upon the development of products using the intellectual property licensed under the agreements and contingent upon the achievement of development or regulatory approval milestones, as well as commercial and success payment milestones. We have not included such potential obligations in the table above because they are contingent upon the occurrence of future events and the timing, likelihood and amount of such potential obligations are not known with certainty.
+
+The table above does not include any required expenditures part of the GSK Collaboration Agreement as part of the Global Development Plan, the Company and GSK agree to spend an aggregate amount of at least $900 million. GSK is responsible for 60% of the cost, while the Company is responsible for the remaining 40% of the cost related to the Global Development Plan. We have not included such potential expenditures, as the timing of the obligations are not known with certainty.
+
+69
+
+We enter into contracts in the normal course of business with CROs and clinical sites for the conduct of clinical trials, professional consultants for expert advice and other vendors for clinical supply manufacturing or other services. These contracts are not included in the table above as they provide for termination on notice, and therefore are cancelable contracts and do not include any minimum purchase commitments.
+
+Cash flows
+
+The following table provides information regarding our cash flows for the years ended December 31, 2022 and 2021:
+
+Year ended
+December 31,
+
+(in thousands)
+
+2022
+
+2021
+
+Net cash (used in) provided by:
+
+Operating activities
+
+$
+
+(111,193
+
+)
+
+$
+
+513,140
+
+Investing activities
+
+(446,062
+
+)
+
+(1,242
+
+)
+
+Financing activities
+
+1,984
+
+3,659
+
+Effects of exchange rate changes on cash, cash
+equivalents and restricted cash
+
+(8,526
+
+)
+
+(3,176
+
+)
+
+Net (decrease) increase in cash, cash equivalents
+and restricted cash
+
+$
+
+(563,797
+
+)
+
+$
+
+512,381
+
+Net cash (used in) provided by operating activities
+
+Net cash used in operating activities was $111.2 million during the year ended December 31, 2022. The increase in cash used in comparison to the cash inflow during the prior year was primarily due to the $625.0 million upfront payment from GSK which was received in 2021.
+
+Net cash used in investing activities
+
+Net cash used in investing activities was $446.1 million for the year ended December 31, 2022 compared to $1.2 million for year ended December 31, 2021. The increase in cash used in investing activities was primarily due to the purchase of $445.0 million of available-for-sale securities during the year ended December 31, 2022.
+
+Net cash provided by financing activities
+
+Net cash provided by financing activities was $2.0 million during the year ended December 31, 2022. This was due to the proceeds received from the exercise of stock options, equaling $0.9 million, during the year. We also received proceeds of $1.1 million from grants received from the Walloon region for which a portion is repayable. Net cash provided by financing activities was $3.7 million during the year ended December 31, 2021, primarily driven by $3.0 million in proceeds received from the exercise of stock options. Additionally, the Company received $0.7 million in proceeds from grant programs with a potential obligation for repayment.
+
+Effects of exchange rate changes on cash, cash equivalents and restricted cash
+
+The $8.5 million in the effects of exchange rate changes on cash, cash equivalents and restricted cash for the year ended December 31, 2022 was primarily caused by the decrease in the euro to dollar exchange rate between December 31, 2021 and 2022. The $3.2 million increase for the year ended December 31, 2021 was also primarily related to a decrease in the euro to dollar exchange rate between December 31, 2020 and December 31, 2021.
+
+Funding requirements
+
+We expect our expenses to increase in connection with our ongoing activities, particularly as we continue our Phase 1/2 trials for both EOS-448 and inupadenant and move to larger randomized and registration-directed trials for both programs, advance the development of pipeline programs, initiate new research and preclinical development efforts and seek marketing approval for any product candidates that we successfully develop. In addition, if we obtain marketing approval for any of our product candidates, we expect to incur significant
+
+70
+
+commercialization expenses related to establishing sales, marketing, distribution and other commercial infrastructure to commercialize such products.
+
+In June, 2021, the Company's wholly owned subsidiary, iTeos Belgium S.A., and GSK executed the GSK Collaboration Agreement, pursuant to which we agreed to grant GSK a license under certain of our intellectual property rights to develop, manufacture, and commercialize products comprised of or containing our antibody product, EOS-448. Under the GSK Collaboration Agreement, GSK made an upfront payment of $625.0 million on August 5, 2021. Additionally, we are eligible to receive up to $1.45 billion in milestone payments, contingent upon the EOS-448 program achieving certain development and commercial milestones.
+
+As of December 31, 2022, we had cash and cash equivalents of $284.8 million and available-for-sale securities of $446.6 million. We believe our existing cash and cash equivalents and available-for-sale securities will enable us to fund our operating expenses and capital expenditure requirements into 2026.
+
+We have based our projections of operating capital requirements on assumptions that may prove to be incorrect and we may use all of our available capital resources sooner than we expect. Because of the numerous risks and uncertainties associated with the development and commercialization of EOS-448 and inupadenant, and the research, development and commercialization of other potential product candidates, we are unable to estimate the exact amount of our operating capital requirements. Our future capital requirements will depend on many factors, including:
+
+•
+the scope, progress, timing, costs and results of clinical trials of product candidates;
+
+•
+research and preclinical development efforts for any future product candidates that we may develop;
+
+•
+our ability to enter into and the terms and timing of any collaborations, licensing agreements or other arrangements;
+
+•
+the number of future product candidates that we pursue and their development requirements;
+
+•
+the outcome, timing and costs of seeking regulatory approvals;
+
+•
+the costs of commercialization activities for any of our product candidates that receive marketing approval to the extent such costs are not the responsibility of any future collaborators, including the costs and timing of establishing product sales, marketing, distribution and manufacturing capabilities;
+
+•
+subject to receipt of marketing approval, revenue, if any, received from commercial sales of our current and future product candidates;
+
+•
+our headcount growth and associated costs as we expand our research and development and establish a commercial infrastructure;
+
+•
+the costs of preparing, filing and prosecuting patent applications, maintaining and protecting our intellectual property rights and defending against intellectual property related claims;
+
+•
+the costs of operating as a public company; and
+
+•
+the emergence of competing therapies and other adverse market developments.
+
+Critical accounting policies and significant judgments and estimates
+
+Our management’s discussion and analysis of our financial condition and results of operations is based on our financial statements, which we have prepared in accordance with U.S. generally accepted accounting principles. We believe that several accounting policies are important to understanding our historical and future performance. We refer to these policies as critical because these specific areas generally require us to make judgments and estimates about matters that are uncertain at the time we make the estimate, and different estimates—which also would have been reasonable—could have been used. On an ongoing basis, we evaluate our estimates and judgments, including those described in greater detail below. We base our estimates on historical experience and other market-specific or other relevant assumptions that we believe to be reasonable under the circumstances, the results of which form the basis for making judgments about the carrying value of assets and liabilities that are
+
+71
+
+not readily apparent from other sources. Actual results may differ from these estimates under different assumptions or conditions.
+
+While our significant accounting policies are described in more detail in the notes to our financial statements appearing elsewhere in this Annual Report on Form 10-K, we believe the following accounting policies to be most critical to the judgments and estimates used in the preparation of our financial statements.
+
+Revenue Recognition
+
+We generate revenue from our GSK Collaboration Agreement. We recognize revenue in accordance with ASC 606, which applies to all contracts with customers, except for contracts that are within the scope of other standards. Under ASC 606, we recognize revenue when our customer obtains control of promised goods or services, in an amount that reflects the consideration which the entity expects to receive in exchange for those goods or services. To determine revenue recognition for arrangements that we determine are within the scope of ASC 606, we perform the following five steps:
+
+(i)
+identify the contract(s) with a customer;
+
+(ii)
+identify the performance obligations in the contract;
+
+(iii)
+determine the transaction price;
+
+(iv)
+allocate the transaction price to the performance obligations in the contract; and
+
+(v)
+recognize revenue when (or as) the entity satisfies a performance obligation.
+
+We only apply the five-step model to contracts when it is probable that the entity will collect the consideration we are entitled to in exchange for the goods or services we transfer to the customer. At contract inception, once the contract is determined to be within the scope of ASC 606, we assess the goods or services promised within each contract and determine those that are performance obligations, and assess whether each promised good or service is distinct. We then recognize as revenue the amount of the transaction price that is allocated to the respective performance obligation when (or as) the performance obligation is satisfied. We do not include a financing component in our estimated transaction price at contract inception unless we estimate that certain performance obligations will not be satisfied within one year. Additionally, we recognize the incremental costs of obtaining a contract as an expense when incurred if the amortization period of the asset that we otherwise would have recognized is one year or less.
+
+Research and development expenses
+
+As part of the process of preparing our financial statements, we are required to estimate our accrued research and development expenses. This process involves reviewing open contracts and purchase orders, communicating with our personnel to identify services that have been performed for us and estimating the level of service performed and the associated cost incurred for the service when we have not yet been invoiced or otherwise notified of the actual cost. The majority of our service providers invoice us monthly in arrears for services performed or when contractual milestones are met. We make estimates of our accrued expenses as of each balance sheet date in our financial statements based on facts and circumstances known to us at that time, which we periodically confirm with the service providers and make adjustments if necessary. Examples of accrued research and development expenses include fees paid to:
+
+•
+CROs in connection with clinical trials;
+
+•
+CMOs with respect to clinical materials, intermediates, drug substance and drug product;
+
+•
+vendors in connection with research and preclinical development activities; and
+
+•
+vendors related to manufacturing, development and distribution of clinical supplies.
+
+We must develop assumptions that require judgment to determine whether the individual promises should be accounted for as separate performance obligations or as a combined performance obligation, and to determine the stand-alone selling price for each performance obligation identified in the contract. Since the upfront license was bundled with other promises, we utilized judgment to assess the nature of the combined performance obligation and determined that the combined performance obligation is satisfied over time. Revenue is recognized using a percent complete method based on costs incurred compared with the total expected costs to be incurred (cost to cost measure of progress). There are no outputs from the performance obligation. As a result, an input method was appropriate. A cost to cost measure of progress provides a faithful depiction of the transfer of services to the customer since the predominant inputs to the performance obligation are labor costs, research
+
+72
+
+and development supplies and manufacturing supplies related to the Phase 1 Study, clinical manufacturing and know-how transfer.
+
+The preceding estimates and judgments materially affect our recognition of revenue. Changes in our estimates of forecasted development costs could impact percentage complete and could have a material effect on revenue recorded in the period in which we determine that change occurs.
+
+Stock-based compensation expense
+
+The fair value of stock options and Employee Stock Purchase Plan awards we grant is estimated using the Black Scholes option pricing model. This option pricing model based on certain subjective assumptions, including (i) the expected stock price volatility, (ii) the expected term of the award, (iii) the risk-free rate of interest, and (iv) expected dividends. The fair value of our common stock utilized in the model is determined based on the quoted market price of our common stock.
+
+There were no significant changes to assumptions used to value options using the Black Scholes option pricing model in 2022, with the exception of the stock and exercise prices.
+
+The fair value of restricted stock units we grant is based on the quoted market price of our common stock on the date of grant.
+
+Government grant funding and potential repayment commitments under recoverable cash advance grants (RCAs)
+
+We have agreements with granting agencies whereby we receive funding under grants, which partially or fully reimburse us for eligible research and development expenditures. Certain grant agreements require us to repay the funding wherein the repayment provision of the grants are predicated on whether we decide to pursue commercial development or out licensing of the drug candidate that is produced from the results of the research program. The repayment provision includes a portion that is fixed (corresponding to 30% of the grant) which is effective after we decide to pursue commercial development or out licensing of the drug candidate. The repayment provision also includes a potential obligation to pay a royalty that is contingent upon achieving sales of a product developed through the program. The maximum amount payable to the granting agency under each grant, including the fixed repayments, the royalty on revenue, and the interest thereon, is twice the amount of funding received.
+
+Grant funding for research and development received under grant agreements where there is a repayment provision is recognized as other income to the extent there is no potential obligation to repay this funding. We record the present value of the liability as a grant repayable in the accompanying consolidated balance sheets. The grant repayable is subsequently recorded at amortized cost. There were no significant changes to assumptions in 2022.
+
+Income taxes
+
+We are subject to taxes in the U.S. and Belgium. Significant judgment is required in determining our provision for income taxes, our deferred tax assets and liabilities and any valuation allowance recorded against our net deferred tax assets. We make these estimates and judgments about our future taxable income that are based on assumptions that are consistent with our future plans. Tax laws, regulations and administrative practices may be subject to change due to economic or political conditions including fundamental changes to the tax laws applicable to corporate multinationals. The U.S. and many countries in the European Union are actively considering changes in this regard. As of December 31, 2022 and 2021, we had recorded a full valuation allowance on our net deferred tax assets because we expect that it is more likely than not that our deferred tax assets will not be realized. Should the actual amounts differ from our estimates, the amount of our valuation allowance could be materially impacted.
+
+Furthermore, significant judgment is required in evaluating our tax positions. In the ordinary course of business, there are many transactions and calculations for which the ultimate tax settlement is uncertain. As a result, we recognize the effect of this uncertainty on our tax attributes or taxes payable based on our estimates of the eventual outcome. These effects are recognized when, despite our belief that our tax return positions are supportable, we believe that it is more likely than not that some of those positions may not be fully sustained upon review by tax authorities. We are required to file income tax returns in the U.S. and Belgium, which requires us to interpret the applicable tax laws and regulations in effect in such jurisdictions. Such returns are subject to audit by the various federal, state and foreign taxing authorities, who may disagree with respect to our tax positions. We believe that our consideration is adequate for all open audit years based on our assessment of many factors, including past experience and interpretations of tax law. We review and update our estimates in light of changing
+
+73
+
+facts and circumstances, such as the closing of a tax audit, the lapse of a statute of limitations or a change in estimate. To the extent that the final tax outcome of these matters differs from our expectations, such differences may impact income tax expense in the period in which such determination is made. The eventual impact on our income tax expense depends in part on if we still have a valuation allowance recorded against our deferred tax assets in the period that such determination is made.
+
+Recent accounting pronouncements
+
+Refer to Note 2, “Summary of Significant Accounting Policies,” in the accompanying notes to the consolidated financial statements for a discussion of recent accounting pronouncements.
+
+Emerging growth company and smaller reporting company status
+
+The Jumpstart Our Business Startups Act of 2012 permits an “emerging growth company” such as us to take advantage of an extended transition period to comply with new or revised accounting standards applicable to public companies until those standards would otherwise apply to private companies. We have elected not to “opt out” of this provision and, as a result, we will adopt new or revised accounting standards at the time private companies adopt the new or revised accounting standard and will do so until such time that we either (i) irrevocably elect to “opt out” of such extended transition period or (ii) no longer qualify as an emerging growth company. We have, however, elected to early-adopt certain new or revised accounting standards as of dates that may or may not coincide with the effective dates of private companies.
+
+As of December 31, 2022, we no longer qualified as a “smaller reporting company”; however, we are allowed to continue to rely on exemptions from certain disclosure requirements that are available to smaller reporting companies through our Annual Report on Form 10-K for the year ended December 31, 2022.
+
+74
+
+Item 7A. Quantitative and Qualitative Disclosures About Market Risk.
+
+We are exposed to market risk related to changes in interest rates. As of December 31, 2022 and December 31, 2021, we had cash and cash equivalents of $284.8 million and $848.5 million, respectively. We had available-for-sale fixed income securities of $446.6 million as of December 31, 2022. Our primary exposure to market risk is interest rate sensitivity, which is affected by changes in the general level of interest rates in the United States and Belgium. As of December 31, 2022, our cash and cash equivalents is held primarily in savings, money market accounts and money market funds. Our fixed income securities were held primarily in U.S. treasury obligations and U.S. government agency obligations. The majority of the fixed income securities will mature within one year from December 31, 2022. There are no securities that will mature in a period greater than two years from December 31, 2022. Because of the short-term nature of the instruments in our portfolio, an immediate 10% change in the interest rate would not have a material impact on the fair market value of our investment portfolio or on our financial position or results of operations.
+
+We are subject to the risk of fluctuations in foreign currency exchange rates, specifically with respect to the euro. Our functional currency is the U.S. dollar and the functional currency of our wholly owned subsidiary, iTeos Belgium SA, is the euro. An immediate 5% change in the Euro exchange rate would not have any material effect on our results of operations.
+
+Assets and liabilities of iTeos Belgium SA are translated into U.S. dollars at the exchange rate in effect on the balance sheet date. Income items and expenses are translated at the average exchange rate in effect during the period. Unrealized translation gains and losses are recorded as a cumulative translation adjustment, which is included in the condensed consolidated statements of stockholders’ equity as a component of accumulated other comprehensive income (loss). Adjustments that arise from exchange rate changes on transactions denominated in a currency other than the local currency are included in other income and expenses, net in the condensed consolidated statements of operations and comprehensive income as incurred.
+
+75
+
+Item 8. Financial Statements and Supplementary Data.
+
+The financial statements required to be filed pursuant to this Item 8 are appended to this Annual Report on Form 10-K. An index of those financial statements is found in Item 15, Exhibits and Financial Statement Schedules, of this Annual/ Report on Form 10-K.
+
+Item 9. Changes in and Disagreements with Accountants on Accounting and Financial Disclosure.
+
+None
+
+Item 9A. Controls and Procedures.
+
+Evaluation of Disclosure Controls and Procedures
+
+Our management, with the participation of our principal executive officer and our principal financial officer, evaluated the effectiveness of our disclosure controls and procedures as of December 31, 2022, the end of the period covered by this Annual Report on Form 10-K. The term “disclosure controls and procedures,” as defined in Rules 13a-15(e) and 15d-15(e) under the Securities Exchange Act of 1934, as amended, or the Exchange Act, means controls and other procedures of a company that are designed to ensure that information required to be disclosed by a company in the reports that it files or submits under the Exchange Act is recorded, processed, summarized and reported, within the time periods specified in the SEC’s rules and forms. Disclosure controls and procedures include, without limitation, controls and procedures designed to ensure that information required to be disclosed by a company in the reports that it files or submits under the Exchange Act is accumulated and communicated to the company’s management, including its principal executive and principal financial officers, or persons performing similar functions, as appropriate to allow timely decisions regarding required disclosure.
+
+Our management recognizes that any controls and procedures, no matter how well designed and operated, can provide only reasonable assurance of achieving our objectives and management necessarily applies its judgment in evaluating the cost-benefit relationship of possible controls and procedures. Based on the evaluation of our disclosure controls and procedures as of December 31, 2022, our principal executive officer and principal financial officer concluded that, as of such date, our disclosure controls and procedures were effective at the reasonable assurance level.
+
+Management’s Report on Internal Control Over Financial Reporting
+
+Our management is responsible for establishing and maintaining adequate internal control over our financial reporting. Internal control over financial reporting is defined in Rules 13a-15(f) and 15d-15(f) under the Exchange Act as the process designed by, or under the supervision of, our principal executive officer and our principal financial officer, and effected by our board of directors, management and other personnel, to provide reasonable assurance regarding the reliability of our financial reporting and the preparation of our financial statements for external purposes in accordance with U.S. generally accepted accounting principles (U.S. GAAP), and includes those policies and procedures that:
+
+•
+pertain to the maintenance of records that, in reasonable detail, accurately and fairly reflect the transactions and dispositions of assets;
+
+•
+provide reasonable assurance that transactions are recorded as necessary to permit preparation of financial statements in accordance with U.S. GAAP, and that receipts and expenditures are being made only in accordance with the authorizations of management and directors; and
+
+•
+provide reasonable assurance regarding the prevention or timely detection of unauthorized acquisition, use or disposition of assets that could have a material effect on our financial statements.
+
+Under the supervision and with the participation of our management, including our principal executive officer and our principal financial officer, we conducted an evaluation of the effectiveness of our internal control over financial reporting based on the framework provided in Internal Control—Integrated Framework issued by the Committee of Sponsoring Organizations of the Treadway Commission (2013 Framework). Based on this evaluation, our management concluded that our internal control over financial reporting was effective as of December 31, 2022. This Annual Report on Form 10-K does not include an attestation report of our independent registered public accounting firm due to an exemption established by the JOBS Act for “emerging growth companies”.
+
+76
+
+Changes in Internal Control over Financial Reporting
+
+The Company has adopted a hybrid work model for all employees. For when employees are working in the office, the Company has implemented safety measures designed to comply with applicable federal, state and local guidelines instituted in response to the COVID-19 pandemic. The Company has also maintained efficient communication with the Company’s partners and clinical sites as the COVID-19 situation has progressed. The Company has taken these precautionary steps while maintaining business continuity so that it can continue to progress with its programs. These changes did not materially impact our internal control over financial reporting.
+
+There have been no changes in our internal control over financial reporting (as defined in Rules 13a-15(f) and 15d-15(f) under the Exchange Act) during the quarter ended December 31, 2022 that have materially affected, or are reasonably likely to materially affect, our internal control over financial reporting except for the items listed below.
+
+Item 9B. Other Information.
+
+None
+
+77
+
+PART III
+
+Item 10. Directors, Executive Officers and Corporate Governance
+
+The information required by this Item 10 will be included in our definitive proxy statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+Code of Business Conduct and Ethics
+
+We have adopted a written code of business conduct and ethics, or Code, that applies to all of our directors, officers and employees, including our principal executive officer, principal financial officer, principal accounting officer or controller, or persons performing similar functions. A current copy of the Code is available on the investor section of our website at investors.iteostherapeutics.com. The information contained in or accessible from our website is not incorporated into this Annual Report, and you should not consider it part of this Annual Report. We have included our website address in this Annual Report solely as an inactive textual reference. We intend to disclose on our website any amendments to, or waivers from, our Code that are required to be disclosed pursuant to SEC rules.
+
+Item 11. Executive Compensation
+
+The information required by this Item 11 will be included in our Definitive Proxy Statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+Item 12. Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters
+
+The information required by this Item 12 will be included in our Definitive Proxy Statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+Item 13. Certain Relationships and Related Transactions, and Director Independence
+
+The information required by this Item 13 will be included in our Definitive Proxy Statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+Item 14. Principal Accounting Fees and Services
+
+The information required by this Item 14 will be included in our Definitive Proxy Statement to be filed with the SEC with respect to our 2023 Annual Meeting of Stockholders and is incorporated herein by reference.
+
+78
+
+PART IV
+
+Item 15. Exhibits, Financial Statement Schedules.
+
+(1)
+For a list of the financial statements included herein, see Index to the Consolidated Financial Statements on page F-1 of this Annual Report on Form 10-K, incorporated into this Item by reference. All financial statements;
+
+(2)
+Financial statement schedules have been omitted because they are either not required or not applicable or the information is included in the consolidated financial statements or the notes thereto.
+
+(3)
+Exhibits
+
+Exhibit
+
+Number
+
+Description
+
+3.1
+
+Second Amended and Restated Certificate of Incorporation of the Registrant (Incorporated by reference to Exhibit 3.2 to the Registrant’s Current Report on Form 8-K (File No. 001-39401) filed with the Securities and Exchange Commission on July 28, 2020).
+
+3.2
+
+Amended and Restated Bylaws of the Registrant (Incorporated by reference to Exhibit 3.3 to the Registrant’s Current Report on Form 8-K (File No. 001-39401) filed with the Securities and Exchange Commission on July 28, 2020).
+
+4.1
+
+Amended and Restated Stockholders’ Agreement, dated as of March 24, 2020 (incorporated by reference to Exhibit 4.1 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+4.2
+
+Form of Specimen Common Stock Certificate (incorporated by reference to Exhibit 4.2 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+4.3
+
+Description of Securities (incorporated by reference to Exhibit 4.3 of the Registrant’s Annual Report on Form 10-K(File No. 001-39401) filed on March 24, 2021).
+
+10.1+
+
+2019 Stock Option and Grant Plan, and forms of award agreements thereunder (incorporated by reference to Exhibit 10.1 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.2+
+
+2020 Stock Option and Incentive Plan, and forms of award agreements thereunder (incorporated by reference to Exhibit 10.2 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.3>
+
+Third Amended and Restated Collaboration Agreement between iTeos Belgium SA and Adimab, LLC, dated February 22,2021 (incorporated by reference to Exhibit 10.1 of the Registrant’s Quarterly Report on Form 10-Q (File No. 001-39401) filed on May 13, 2021).
+
+10.4>
+
+Master Services Agreement between iTeos Belgium and WuXi Biologics (Hong Kong) Limited, dated March 21, 2017 (incorporated by reference to Exhibit 10.4 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.5+
+
+2020 Employee Stock Purchase Plan (incorporated by reference to Exhibit 10.5 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.6+
+
+Senior Executive Cash Incentive Bonus Plan (incorporated by reference to Exhibit 10.6 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.7
+
+Form of Officer Indemnification Agreement (incorporated by reference to Exhibit 10.7 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.8
+
+Form of Director Indemnification Agreement (incorporated by reference to Exhibit 10.8 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+79
+
+10.9+
+
+Employment Agreement between the Registrant and Michel Detheux, Ph.D. (incorporated by reference to Exhibit 10.9 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.10+
+
+Employment Agreement between the Registrant and Matthew Call (incorporated by reference to Exhibit 10.10 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.11+
+
+Employment Agreement between the Registrant and Joanne Jenkins Lager, M.D (incorporated by reference to Exhibit 10.11 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.12+
+
+Employment Agreement between the Registrant and Matthew Gall (incorporated by reference to Exhibit 10.12 of the Registrant’s Registration Statement on Form S-1/A (File No. 333-239415) filed on July 20, 2020).
+
+10.13>
+
+Collaboration and License Agreement between iTeos Belgium S.A and GlaxoSmithKline Intellectual Property (No. 4) Limited dated June 11, 2021 (incorporated by reference to Exhibit 10.1 of the Registrant’s Quarterly Report on Form 10-Q (File No. 001-39401) filed on August 11, 2021).
+
+10.14*>
+
+Amendment No. 1 to Collaboration and License Agreement between iTeos Belgium S.A and GlaxoSmithKline Intellectual Property (No. 4) Limited dated January 24, 2022
+
+10.15*>
+
+Amendment No. 2 to Collaboration and License Agreement between iTeos Belgium S.A and GlaxoSmithKline Intellectual Property (No. 4) Limited dated September 30, 2022
+
+10.16
+
+Lease Agreement between ARE-MA Region No. 75, LLC and iTeos Therapeutics, Inc. dated November 8, 2021 (incorporated by reference to Exhibit 10.14 of the Registrant's Annual Report on Form 10-K (File No. 001-39401) filed on March 23, 2022).
+
+10.17+
+
+Employment Contract between iTeos Belgium S.A. and Yvonne McGrath effective as of May 18, 2020 (incorporated by reference to Exhibit 10.15 of the Registrant's Annual Report on Form 10-K (File No. 001-39401) filed on March 23, 2022).
+
+10.18*+
+
+Addendum to Employment Contract between iTeos Belgium S.A. and Yvonne McGrath dated September 23, 2020
+
+10.19*+
+
+Letter Agreement between iTeos Therapeutics, Inc. and Yvonne McGrath dated November 23, 2022
+
+10.20+
+
+Amended and Restated 2020 Stock Option and Incentive Plan (incorporated by reference to Exhibit 99.1 to the Registrant's Current Report on Form 8-K (File No. 001-39401) filed with the Securities and Exchange Commission on June 13, 2022).
+
+10.21+
+
+First Amendment to the iTeos Therapeutics, Inc. 2020 Employee Stock Purchase Plan (incorporated by reference to Exhibit 10.1 of the Registrant's Quarterly Report on Form 10-Q (File No. 001-39401) filed on November 10, 2022).
+
+10.22*+
+
+Consultancy Letter Agreement between iTeos Therapeutics, Inc. and Matthew Roden effective as of January 31, 2023
+
+21.1*
+
+Subsidiaries of the Registrant
+
+23.1*
+
+Consent of Deloitte Bedrijfsrevisoren / Réviseurs d’Entreprises BV/SRL
+
+31.1*
+
+Certification of Principal Executive Officer Pursuant to Rules 13a-14(a) and 15d-14(a) under the Securities Exchange Act of 1934, as Adopted Pursuant to Section 302 of the Sarbanes-Oxley Act of 2002.
+
+80
+
+31.2*
+
+Certification of Principal Financial Officer Pursuant to Rules 13a-14(a) and 15d-14(a) under the Securities Exchange Act of 1934, as Adopted Pursuant to Section 302 of the Sarbanes-Oxley Act of 2002.
+
+32.1*
+
+Certification of Principal Executive Officer Pursuant to 18 U.S.C. Section 1350, as Adopted Pursuant to Section 906 of the Sarbanes-Oxley Act of 2002.
+
+32.2*
+
+Certification of Principal Financial Officer Pursuant to 18 U.S.C. Section 1350, as Adopted Pursuant to Section 906 of the Sarbanes-Oxley Act of 2002.
+
+101.INS
+
+Inline XBRL Instance Document
+
+101.SCH
+
+Inline XBRL Taxonomy Extension Schema Document
+
+101.CAL
+
+Inline XBRL Taxonomy Extension Calculation Linkbase Document
+
+101.DEF
+
+Inline XBRL Taxonomy Extension Definition Linkbase Document
+
+101.LAB
+
+Inline XBRL Taxonomy Extension Label Linkbase Document
+
+101.PRE
+
+Inline XBRL Taxonomy Extension Presentation Linkbase Document
+
+104
+
+Cover Page Interactive Data File (formatted as inline XBRL and contained in Exhibit 101)
+
+* Filed herewith.
+
+> Identified information has been excluded from this exhibit because it is both (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
++ Management contract or compensatory plan or arrangement.
+
+Item 16. Form 10-K Summary
+
+None.
+
+81
+
+SIGNATURES
+
+Pursuant to the requirements of Section 13 or 15(d) of the Securities Exchange Act of 1934, as amended, the Registrant has duly caused this Report to be signed on its behalf by the undersigned, thereunto duly authorized.
+
+iTeos Therapeutics, Inc.
+
+Date: March 15, 2023
+
+By:
+
+/s/ Michel Detheux
+
+Michel Detheux
+
+Title: President, Chief Executive Officer
+
+POWER OF ATTORNEY
+
+KNOW ALL PERSONS BY THESE PRESENTS, that each person whose individual signature appears below hereby authorizes and appoints Michel Detheux and Matthew Gall, and each of them, with full power of substitution and re-substitution and full power to act without the other, as his or her true and lawful attorney-in-fact and agent to act in his or her name, place and stead and to execute in the name and on behalf of each person, individually and in each capacity stated below, and to file any and all amendments to this annual report on Form 10-K and to file the same, with all exhibits thereto, and other documents in connection therewith, with the Securities and Exchange Commission, granting unto said attorneys-in-fact and agents, and each of them, full power and authority to do and perform each and every act and thing, ratifying and confirming all that said attorneys-in-fact and agents or any of them or their or his substitute or substitutes may lawfully do or cause to be done by virtue thereof.
+
+Pursuant to the requirements of the Securities Exchange Act of 1934, as amended, this Report has been signed below by the following persons on behalf of the Registrant in the capacities and on the dates indicated.
+
+Name
+
+Title
+
+Date
+
+/s/ Michel Detheux
+
+President, Chief Executive Officer and Director (Principal Executive Officer)
+
+March 15, 2023
+
+Michel Detheux
+
+/s/ David L. Hallal
+
+Director and Chairman of the Board of Directors
+
+March 15, 2023
+
+David L. Hallal
+
+/s/ Matthew Gall
+
+Chief Financial Officer (Principal Financial Officer and Principal Accounting Officer)
+
+March 15, 2023
+
+Matthew Gall
+
+/s/ Detlev Biniszkiewicz
+
+Director
+
+March 15, 2023
+
+Detlev Biniszkiewicz
+
+/s/ Aaron Davis
+
+Director
+
+March 15, 2023
+
+Aaron Davis
+
+/s/ Derek DiRocco
+
+Director
+
+March 15, 2023
+
+Derek DiRocco
+
+/s/ Tim Van Hauwermeiren
+
+Director
+
+March 15, 2023
+
+Tim Van Hauwermeiren
+
+/s/ Tony Ho
+
+Director
+
+March 15, 2023
+
+Tony Ho
+
+/s/ Robert Iannone
+
+Director
+
+March 15, 2023
+
+Robert Iannone
+
+/s/ Ann D. Rhoads
+
+Director
+
+March 15, 2023
+
+Ann D. Rhoads
+
+82
+
+Index to Financial Statements
+
+PAGE
+
+Audited financial statements for the years ended December 31, 2022 and 2021:
+
+Report of independent registered public accounting firm (PCAOB ID: 1133)
+
+F-2
+
+Consolidated balance sheets
+
+F-3
+
+Consolidated statements of operations and comprehensive income
+
+F-4
+
+Consolidated statements of stockholders' equity
+
+F-5
+
+Consolidated statements of cash flows
+
+F-6
+
+Notes to consolidated financial statements
+
+F-7
+
+F-1
+
+Report of Independent Registered Public Accounting Firm
+
+To the stockholders and the board of directors of iTeos Therapeutics, Inc.
+
+Opinion on the Financial Statements
+
+We have audited the accompanying consolidated balance sheets of iTeos Therapeutics, Inc. and subsidiaries (the "Company") as of December 31, 2022 and 2021, the related consolidated statements of operations and comprehensive income, stockholders’ equity, and cash flows for the years then ended, and the related notes (collectively referred to as the "financial statements"). In our opinion, the financial statements present fairly, in all material respects, the financial position of the Company as of December 31, 2022 and 2021, and the results of its operations and its cash flows for the years then ended, in conformity with accounting principles generally accepted in the United States of America.
+
+Basis for Opinion
+
+These financial statements are the responsibility of the Company's management. Our responsibility is to express an opinion on the Company's financial statements based on our audits. We are a public accounting firm registered with the Public Company Accounting Oversight Board (United States) (PCAOB) and are required to be independent with respect to the Company in accordance with the U.S. federal securities laws and the applicable rules and regulations of the Securities and Exchange Commission and the PCAOB.
+
+We conducted our audits in accordance with the standards of the PCAOB. Those standards require that we plan and perform the audit to obtain reasonable assurance about whether the financial statements are free of material misstatement, whether due to error or fraud. The Company is not required to have, nor were we engaged to perform, an audit of its internal control over financial reporting. As part of our audits, we are required to obtain an understanding of internal control over financial reporting but not for the purpose of expressing an opinion on the effectiveness of the Company’s internal control over financial reporting. Accordingly, we express no such opinion.
+
+Our audits included performing procedures to assess the risks of material misstatement of the financial statements, whether due to error or fraud, and performing procedures that respond to those risks. Such procedures included examining, on a test basis, evidence regarding the amounts and disclosures in the financial statements. Our audits also included evaluating the accounting principles used and significant estimates made by management, as well as evaluating the overall presentation of the financial statements. We believe that our audits provide a reasonable basis for our opinion.
+
+/s/ Deloitte Bedrijfsrevisoren/Réviseurs d’Entreprises BV/SRL
+
+Zaventem, Belgium
+
+March 15, 2023
+
+We have served as the Company’s auditor since 2017.
+
+F-2
+
+iTeos Therapeutics, Inc. and Subsidiaries
+
+Consolidated Balance Sheets
+
+December 31,
+
+(in thousands, except share amounts)
+
+2022
+
+2021
+
+Assets
+
+Current assets:
+
+Cash and cash equivalents
+
+$
+
+284,803
+
+$
+
+848,537
+
+Short-term investments (amortized cost of $328,405)
+
+328,359
+
+—
+
+Grants receivable
+
+1,001
+
+4,022
+
+Research and development tax credits receivable
+
+—
+
+524
+
+Refundable income taxes
+
+1,434
+
+7,544
+
+Prepaid expenses and other current assets
+
+12,701
+
+14,086
+
+Total current assets
+
+628,298
+
+874,713
+
+Property and equipment, net
+
+2,121
+
+2,072
+
+Long-term investments (amortized cost of $118,330)
+
+118,225
+
+—
+
+Research and development tax credits receivable, net of current portion
+
+1,128
+
+2,004
+
+Restricted cash
+
+235
+
+298
+
+Right of use assets
+
+4,652
+
+5,329
+
+Other assets
+
+332
+
+296
+
+Total assets
+
+754,991
+
+884,712
+
+Liabilities and stockholders’ equity
+
+Current liabilities:
+
+Accounts payable
+
+7,662
+
+5,145
+
+Accrued expenses and other current liabilities
+
+19,727
+
+17,157
+
+Deferred income
+
+1,180
+
+827
+
+Deferred revenue
+
+12,595
+
+280,225
+
+Lease liabilities
+
+836
+
+770
+
+Total current liabilities
+
+42,000
+
+304,124
+
+Grants repayable
+
+6,622
+
+6,164
+
+Lease liabilities, net of current portion
+
+3,837
+
+4,571
+
+Unrecognized tax benefits
+
+39,200
+
+17,000
+
+Other noncurrent liabilities
+
+—
+
+33
+
+Total liabilities
+
+91,659
+
+331,892
+
+Commitments and contingencies (Note 10)
+
+Stockholders’ equity:
+
+Common stock, $0.001 par value, 150,000,000 shares authorized
+at December 31, 2022 and 2021, respectively; 35,611,219
+and 35,466,001 shares issued and outstanding at December 31, 2022
+and 2021, respectively
+
+36
+
+35
+
+Additional paid-in capital
+
+435,665
+
+413,180
+
+Accumulated other comprehensive loss
+
+(9,644
+
+)
+
+(1,018
+
+)
+
+Retained earnings
+
+237,275
+
+140,623
+
+Total stockholders’ equity
+
+663,332
+
+552,820
+
+Total liabilities and stockholders’ equity
+
+$
+
+754,991
+
+$
+
+884,712
+
+The accompanying notes are an integral part of these consolidated financial statements.
+
+F-3
+
+iTeos Therapeutics, Inc. and Subsidiaries
+
+Consolidated Statements of Operations and Comprehensive Income
+
+Year ended December 31,
+
+(in thousands, except share and per share amounts)
+
+2022
+
+2021
+
+Revenue:
+
+License and collaboration revenue
+
+$
+
+267,630
+
+$
+
+344,775
+
+Total revenue
+
+267,630
+
+344,775
+
+Operating expenses:
+
+Research and development expenses
+
+97,359
+
+59,369
+
+General and administrative expenses
+
+43,947
+
+40,505
+
+Total operating expenses
+
+141,306
+
+99,874
+
+Income from operations
+
+126,324
+
+244,901
+
+Other income:
+
+Grant income
+
+2,091
+
+10,181
+
+Research and development tax credits
+
+1,172
+
+—
+
+Interest income
+
+11,361
+
+78
+
+Other income, net
+
+7,788
+
+1,304
+
+Income before income tax expense
+
+148,736
+
+256,464
+
+Income tax expense
+
+52,084
+
+41,943
+
+Net income
+
+96,652
+
+214,521
+
+Net income attributable to common stockholders
+
+$
+
+96,652
+
+$
+
+214,521
+
+Basic net income per common share
+
+2.72
+
+$
+
+6.10
+
+Diluted net income per common share
+
+$
+
+2.56
+
+$
+
+5.68
+
+Weighted-average common shares outstanding—basic
+
+35,552,025
+
+35,181,383
+
+Weighted-average common shares outstanding—diluted
+
+37,766,507
+
+37,774,790
+
+Net income
+
+$
+
+96,652
+
+$
+
+214,521
+
+Foreign currency translation adjustments
+
+(8,478
+
+)
+
+(1,635
+
+)
+
+Unrealized loss related to available-for-sale debt securities
+
+$
+
+(148
+
+)
+
+$
+
+—
+
+Comprehensive income
+
+88,026
+
+212,886
+
+The accompanying notes are an integral part of these consolidated financial statements.
+
+F-4
+
+iTeos Therapeutics, Inc. and Subsidiaries
+
+Consolidated Statements of Stockholders’ Equity
+
+Common Stock
+
+Additional
+Paid- In
+
+Accumulated
+Other
+Comprehensive
+
+Retained Earnings (Accumulated
+
+Total
+Stockholders’
+Equity
+
+(in thousands except share amounts)
+
+Shares
+
+Amount
+
+Capital
+
+Income (Loss)
+
+Deficit)
+
+Balance at December 31, 2020
+
+35,044,758
+
+35.00
+
+$
+
+396,443
+
+$
+
+617
+
+$
+
+(73,898
+
+)
+
+$
+
+323,197
+
+Stock-based compensation
+
+13,794
+
+13,794
+
+Common stock issued upon exercises of options
+
+421,243
+
+—
+
+2,943
+
+—
+
+—
+
+2,943
+
+Currency translation adjustment
+
+—
+
+—
+
+—
+
+(1,635
+
+)
+
+—
+
+(1,635
+
+)
+
+Net income
+
+—
+
+—
+
+—
+
+—
+
+214,521
+
+214,521
+
+Balance at December 31, 2021
+
+35,466,001
+
+35
+
+$
+
+413,180
+
+$
+
+(1,018
+
+)
+
+$
+
+140,623
+
+$
+
+552,820
+
+Stock-based compensation
+
+21,561
+
+21,561
+
+Common stock issued upon exercises of options and ESPP purchases
+
+145,218
+
+1
+
+924
+
+—
+
+—
+
+925
+
+Currency translation adjustment
+
+—
+
+—
+
+—
+
+(8,478
+
+)
+
+—
+
+(8,478
+
+)
+
+Unrealized loss on available-for-sale securities
+
+—
+
+—
+
+—
+
+(148
+
+)
+
+—
+
+(148
+
+)
+
+Net income
+
+—
+
+—
+
+—
+
+—
+
+96,652
+
+96,652
+
+Balance at December 31, 2022
+
+35,611,219
+
+36
+
+$
+
+435,665
+
+$
+
+(9,644
+
+)
+
+$
+
+237,275
+
+$
+
+663,332
+
+The accompanying notes are an integral part of these consolidated financial statements.
+
+F-5
+
+iTeos Therapeutics, Inc. and Subsidiaries
+
+Consolidated Statements of Cash Flows
+
+Year Ended December 31,
+
+(in thousands)
+
+2022
+
+2021
+
+Cash flows from operating activities
+
+Net income
+
+$
+
+96,652
+
+$
+
+214,521
+
+Adjustments to reconcile net income to net cash (used in) provided by operating activities:
+
+Depreciation and amortization
+
+803
+
+603
+
+Stock-based compensation
+
+21,561
+
+13,794
+
+Amortization/accretion of available-for-sale debt securities
+
+(1,728
+
+)
+
+-
+
+Change in operating lease right-of-use assets
+
+10
+
+12
+
+Changes in operating assets and liabilities:
+
+Grants receivable
+
+2,751
+
+(4,071
+
+)
+
+Research and development tax credits receivable
+
+1,237
+
+727
+
+Refundable income taxes
+
+6,107
+
+(7,544
+
+)
+
+Prepaid expenses and other current assets
+
+590
+
+(11,789
+
+)
+
+Accounts payable
+
+2,761
+
+2,280
+
+Accrued expenses and other liabilities
+
+3,096
+
+9,959
+
+Deferred income
+
+397
+
+(3,480
+
+)
+
+Deferred revenue
+
+(267,630
+
+)
+
+281,128
+
+Unrecognized tax benefits
+
+22,200
+
+17,000
+
+Net cash (used in) provided by operating activities
+
+(111,193
+
+)
+
+513,140
+
+Cash flows from investing activities
+
+Purchases of investments
+
+(445,004
+
+)
+
+-
+
+Purchase of property and equipment
+
+(938
+
+)
+
+(1,181
+
+)
+
+Purchase of other assets
+
+(120
+
+)
+
+(61
+
+)
+
+Net cash used in investing activities
+
+(446,062
+
+)
+
+(1,242
+
+)
+
+Cash flows from financing activities
+
+Proceeds from issuance of common stock upon exercise of options and ESPP purchase
+
+925
+
+2,943
+
+Proceeds from grants repayable
+
+1,059
+
+716
+
+Net cash provided by financing activities
+
+1,984
+
+3,659
+
+Effects of exchange rate changes on cash, cash equivalents and restricted cash
+
+(8,526
+
+)
+
+(3,176
+
+)
+
+Net (decrease) increase in cash, cash equivalents and restricted cash
+
+(563,797
+
+)
+
+512,381
+
+Cash, cash equivalents and restricted cash at beginning of year
+
+848,835
+
+336,454
+

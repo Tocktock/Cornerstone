@@ -1,0 +1,417 @@
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ko">
+<head>
+    <meta name="viewport" content="width = device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="imagetoolbar" content="no" />
+    <meta name="robots" content="index,follow" />
+    <meta name="classification" content="internet" />
+    <meta name="language" content="ko" />
+    <title>국회도서관 회의록 뷰어</title>
+	<!--[if lt IE 9]>
+		<script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<![endif]-->
+
+	<link rel="stylesheet" type="text/css" href="/css/minutes/font-awesome.min.css" />
+
+ 	<!-- 경상남도 거제시의회 css -->
+ 	
+	
+	<link rel='stylesheet' type='text/css' href='/css/minutes/viewer/055002/css/assembly.css'></link>
+	
+	
+
+	<!-- 상단 CSS -->
+ 	<style>
+ 		#clik_top{position:fixed;width:100%;background-color:#57535a;z-index:1; left:0; top:0;}
+		#clik_top #clik_head{width:98%; background-color:#f9f9f9; border-bottom:1px solid #999; padding:3px 1%; overflow:hidden;}
+		#clik_top #clik_head #clik_left_head{float:left;}
+		#clik_top #clik_head #clik_left_head #clik_find_search{display:inline-block;}
+		#clik_top #clik_head #clik_left_head #clik_find_search input{width:200px;border:1px solid #333;font-size:100%;background-color:#fff;padding:3px 0 3px 10px; height:30px;}
+		#clik_top #clik_head #clik_left_head #clik_find_search input:focus{background-color:#f2f2f2;}
+		#clik_top #clik_head #clik_left_head #clik_find_search button{background-color:#aba9ac;color:#fff;font-weight:bold;border:1px solid #999; padding:3px 10px; font-size:110%; height:30px;}
+		#clik_top #clik_head #clik_left_head #clik_find_search button:hover,
+		#clik_top #clik_head #clik_left_head #clik_find_search button:focus{background-color:#333;}
+
+		#clik_top #clik_head #clik_right_head{float:right; margin:3px 0 0 0;}
+		#clik_top #clik_head #clik_right_head ul{float:right;text-align:center;margin:0 0 0 0;}
+		#clik_top #clik_head #clik_right_head ul li{display:table-cell;border-left:1px solid #aba9ad;vertical-align:middle; color:#555;}
+		#clik_top #clik_head #clik_right_head ul li:hover{color:#000;}
+		#clik_top #clik_head #clik_right_head ul li a{cursor:pointer; font-size:95%;}
+		#clik_top #clik_head #clik_right_head ul li.pixel80{width:70px;}
+		#clik_top #clik_head #clik_right_head ul li.pixel120{width:90px;}
+		#clik_top #clik_head #clik_right_head ul li.pixel160{width:140px;}
+		#clik_top #clik_head #clik_right_head ul li.pixel160 select{
+		   font-family:NanumMyeongjo;
+		   padding:3px 0;
+		   -webkit-appearance:none;
+		   -ms-appearance: none;
+		   box-sizing: border-box;
+		   align-items:right;
+		   -webkit-rtl-ordering: logical;
+		   background:#f9f9f9;
+		   border:0;
+		;}
+		#clik_top #clik_head #clik_right_head ul li #btn_small{font-size:70%;}
+		#clik_top #clik_head #clik_right_head ul li #btn_big{font-size:110%;}
+
+		#clik_closeAct{position:fixed;right:0px;top:0px;}
+		#clik_closeAct a{display:block; padding:4px 0 0 0; color:#fff; width:41px; font-size:170%;  text-align:center;}
+		#clik_closeAct input{height:41px;}
+		#clik_closeAct a:hover{ color:#eb711c;}
+ 	</style>
+
+ 	<script src="/js/minutes/jquery-1.11.1.min.js"></script>
+	<script src="/js/minutes/jquery-ui.js"></script>
+	<script src="/js/minutes/common.js"></script>
+	<script src="/js/minutes/minutes.js"></script>
+
+ 	<!-- 경상남도 거제시의회 javascript -->
+ 	
+	
+ 	
+
+	<script  type="text/javascript">
+		$(document).ready(function()
+		{
+			$(window).scroll(function(e)
+			{
+				var scroll = $(window).scrollTop();
+				if(scroll < 300)
+				{
+					$(".foot_navi").addClass("disnone");
+					$(".foot_navi").removeClass("darkHeader");
+				}
+				else
+				{
+					$(".foot_navi").addClass( "darkHeader");
+					$(".foot_navi").removeClass( "disnone");
+				}
+			});
+
+			/* 2018.10.29 각 의회별 수정사항 정리 */
+			var rasmblyId = '055002';
+			// 상단 닫기 버튼 수정
+			if(rasmblyId == '044001' || rasmblyId == '062001' || rasmblyId == '041001' || rasmblyId == '061001' || rasmblyId == '052001' || rasmblyId == '031019'
+				|| rasmblyId == '055019' || rasmblyId == '054010' || rasmblyId == '032001' || rasmblyId == '042001' || rasmblyId == '063001' || rasmblyId == '061012'
+				|| rasmblyId == '064001' || rasmblyId == '031012' || rasmblyId == '031004' || rasmblyId == '054024' || rasmblyId == '063014' || rasmblyId == '043012'
+				|| rasmblyId == '002001' || rasmblyId == '055014' || rasmblyId == '033010' || rasmblyId == '043008' || rasmblyId == '054016' || rasmblyId == '043001'
+			    || rasmblyId == '031009' || rasmblyId == '055002' || rasmblyId == '054008' || rasmblyId == '031001' || rasmblyId == '033014' || rasmblyId == '031031'
+			    || rasmblyId == '031006' || rasmblyId == '054003' || rasmblyId == '031003' || rasmblyId == '041013' || rasmblyId == '061005' || rasmblyId == '043013'
+			    || rasmblyId == '041003' || rasmblyId == '031017' || rasmblyId == '054005' || rasmblyId == '031018' || rasmblyId == '033006' || rasmblyId == '031025'
+			    || rasmblyId == '031030' || rasmblyId == '031027' || rasmblyId == '041009' || rasmblyId == '031007' || rasmblyId == '033001' || rasmblyId == '031016'
+			    || rasmblyId == '031014' || rasmblyId == '031026' || rasmblyId == '033002' || rasmblyId == '031029' || rasmblyId == '041006' || rasmblyId == '063013'
+			    || rasmblyId == '054015' || rasmblyId == '055012' || rasmblyId == '054012' || rasmblyId == '054002' || rasmblyId == '041014' || rasmblyId == '041015'
+			    || rasmblyId == '033018' || rasmblyId == '032002' || rasmblyId == '052002' || rasmblyId == '051008' || rasmblyId == '061003' || rasmblyId == '055016'
+			    || rasmblyId == '002019' || rasmblyId == '052003' || rasmblyId == '051016' || rasmblyId == '063005' || rasmblyId == '002022' || rasmblyId == '041007'
+			    || rasmblyId == '002002' || rasmblyId == '002004' || rasmblyId == '002005' || rasmblyId == '002012' || rasmblyId == '002016' || rasmblyId == '002023'
+			    || rasmblyId == '032006' || rasmblyId == '031028' || rasmblyId == '033008' || rasmblyId == '033009' || rasmblyId == '042004' || rasmblyId == '051013'
+			    || rasmblyId == '052004' || rasmblyId == '052006' || rasmblyId == '054023' || rasmblyId == '043009' || rasmblyId == '063003' || rasmblyId == '063004'
+			    || rasmblyId == '063007' || rasmblyId == '063009' || rasmblyId == '063010' || rasmblyId == '061007' || rasmblyId == '061014' || rasmblyId == '061015'
+			    || rasmblyId == '002003' || rasmblyId == '002008' || rasmblyId == '002009' || rasmblyId == '002013' || rasmblyId == '031008' || rasmblyId == '031010'
+			    || rasmblyId == '031015' || rasmblyId == '031021' || rasmblyId == '031032' || rasmblyId == '033004' || rasmblyId == '033017' || rasmblyId == '002026'
+			    || rasmblyId == '002011' || rasmblyId == '002024' || rasmblyId == '002006' || rasmblyId == '042005' || rasmblyId == '033015' || rasmblyId == '033003'
+			    || rasmblyId == '033007' || rasmblyId == '033011' || rasmblyId == '033012' || rasmblyId == '033013' || rasmblyId == '033019' || rasmblyId == '031002'
+			    || rasmblyId == '031020' || rasmblyId == '031022' || rasmblyId == '032008' || rasmblyId == '032005' || rasmblyId == '054013' || rasmblyId == '061004'
+			    || rasmblyId == '061011' || rasmblyId == '061016' || rasmblyId == '061017' || rasmblyId == '061018' || rasmblyId == '061019' || rasmblyId == '061022'
+			    || rasmblyId == '061023' || rasmblyId == '043005' || rasmblyId == '043006' || rasmblyId == '043007' || rasmblyId == '053005' || rasmblyId == '042002'
+			    || rasmblyId == '062003' || rasmblyId == '061018' || rasmblyId == '043003' || rasmblyId == '051017' || rasmblyId == '051002' || rasmblyId == '063002'
+			    || rasmblyId == '063006' || rasmblyId == '061021' || rasmblyId == '063011' || rasmblyId == '063015' || rasmblyId == '052005' || rasmblyId == '063012'
+			    || rasmblyId == '043010' || rasmblyId == '061010' || rasmblyId == '061006' || rasmblyId == '063008' || rasmblyId == '061002' || rasmblyId == '055006'
+		    	|| rasmblyId == '055003' || rasmblyId == '055011' || rasmblyId == '055013' || rasmblyId == '055015' || rasmblyId == '055017' || rasmblyId == '055018'
+		    	|| rasmblyId == '054006' || rasmblyId == '054009' || rasmblyId == '042006' || rasmblyId == '051009' || rasmblyId == '051011' || rasmblyId == '051014'
+				|| rasmblyId == '032009'
+			)
+
+			{
+				$('#clik_top #clik_head').css('width', '96%');
+			}
+
+			// 울산 중구
+			if(rasmblyId == '052006') {
+				$("#skip-functionMenu").css("display", "none");
+				$("#skip-content").css("display", "none");
+				$(".skip").css("display", "none");
+
+			}
+
+			// 인천시 동구
+			if(rasmblyId == '032006') {
+				$(".category").remove();
+				$("#head").css("display", "none");
+			}
+
+			// 서울시 관악구 로딩 제거
+			if(rasmblyId == '002006') {
+				$(".page-loader-wrapper").remove();
+				$("#profile_layer_popup").remove();
+			}
+
+			// 강원도 영월군 top 제거
+			if(rasmblyId == '033009') {
+				$("#topFunction").remove();
+				$("#clik_view_minutes").css("margin-top", "60px");
+			}
+			// 강동구의회 수정
+			if(rasmblyId == '002003') {
+				$('#aside').remove();
+				$('#header').remove();
+			}
+
+			// 태안군
+			if(rasmblyId == '041015') {
+				$('#modal_view').remove();
+			}
+
+
+			// 남원시, 서울시 강북구, 강서구, 동대문구, 은평구, 전북 익산시
+			if(rasmblyId == '063005' || rasmblyId == '002004' || rasmblyId == '002005' || rasmblyId == '002012' || rasmblyId == '002023' || rasmblyId == '063010' || rasmblyId == '002008') {
+				$('#article').remove();
+			}
+
+			// 상세수정
+			// 양주시, 인천광역시, 의왕시, 용산구, 보령시 첫 번째 테이블 상단에 여백 주기
+			if(rasmblyId == '031019' || rasmblyId == '032001' || rasmblyId == '031025' || rasmblyId == '002022' || rasmblyId == '041007') {
+				$('table').eq(0).css('margin-top', '55px');
+			}
+
+			// 부산광역시 페이징, 동영상보기 버튼 삭제
+			if(rasmblyId == '051001') {
+				$("span").remove(".movie");
+			}
+
+			// 공주시, 속초시, 부산 중구, 대구 중구 경우 상단 여백을 추가로 주어야 함
+			if(rasmblyId == '041003' || rasmblyId == '033006' || rasmblyId == '051016' || rasmblyId == '053009') {
+				$('#clik_view_minutes').css('margin-top', '65px');
+				$(".c").css('margin', '20px 0px');
+			}
+
+			// 광주북구의회인 경우 특정 CSS를 비노출되게 해야함.
+			if(rasmblyId == '062005') {
+				$('#clik_view_minutes').css('margin-top', '65px');
+				$("#topHiddenLine").css('display', 'none');
+				$("#bottomHiddenLine").css('display', 'none');
+				$("#prev").css('display', 'none');
+				$("#next").css('display', 'none');
+			}
+
+			// 광주광산구의회인 경우 특정 CSS를 비노출되게 해야함.
+			if(rasmblyId == '062002') {
+				$('#clik_view_minutes').css('margin-top', '65px');
+				$("#topHiddenLine").css('display', 'none');
+				$("#bottomHiddenLine").css('display', 'none');
+				$("#prev").css('display', 'none');
+				$("#next").css('display', 'none');
+				$("#leftTabMenu").css('display', 'none');
+				$("#leftConts").css('display', 'none');
+				$(".ovh").css('display', 'none');
+				$(".top .df").css('display', 'none');
+				$(".bottom > .right").css('display', 'none');
+				$('.sub99').removeClass('sub99');
+			}
+
+			// 인천광역시연수구의회인 경우 특정 CSS를 비노출 및 margin값 조정
+			if(rasmblyId == '032009') {
+				$(".util_wrap").css('display', 'none');
+				$(".header").css('display', 'none');
+				$(".lnb_wrap").css('display', 'none');
+			}
+
+
+
+			// 경기도 수원시, 안산시, 안성시, 연천군, 진주시(경남), 충청남도 청양군,은평구, 종로구, 강원도 고성군, 횡성군, 인천광역시 서구, 전남 영암군, 보성군, 화순군, 장성군, 강진군, 대구광역시 동구, 전북 고창군, 경상남도 의령군, 경상남도 하동군,  경상북도 성주군인 경우 상단 여백을 추가로 주어야 함
+			if(rasmblyId == '031017' || rasmblyId == '031016' || rasmblyId == '031014' || rasmblyId == '055012' || rasmblyId == '041014' || rasmblyId == '002023'  || rasmblyId == '002024'
+				|| rasmblyId == '033003' || rasmblyId == '033007' || rasmblyId == '033019' || rasmblyId == '031022' || rasmblyId == '032008' || rasmblyId == '061016' || rasmblyId == '061019'
+				|| rasmblyId == '061011' || rasmblyId == '061023' || rasmblyId == '053005' || rasmblyId == '061018' || rasmblyId == '063002' || rasmblyId == '063011' || rasmblyId == '061002'
+				|| rasmblyId == '055011' || rasmblyId == '055015' || rasmblyId == '054011') {
+				$('#clik_view_minutes').css('margin-top', '60px');
+			}
+
+			// 경기도 안산시(031016), 강원도 속초시(033006), 서울시 강남구(002002), 강원도 고성군(033003), 강원도 양구군(033007), 전라남도 보성군(061011), 경상남도 하동군(055015) img 태그 경로 바꾸기
+			if(rasmblyId == '031016' || rasmblyId == '033006' || rasmblyId == '002002' || rasmblyId == '002024' || rasmblyId == '033003' || rasmblyId == '033007' || rasmblyId == '033012'
+				|| rasmblyId == '061011' || rasmblyId == '055015') {
+				$('img').each(function(){
+					var src 	= $(this).attr('src');
+					var newSrc 	= '/css/minutes/viewer/'+rasmblyId+'/img';
+					var fileNm 	= src.substring(src.lastIndexOf('/'));
+					$(this).attr('src', newSrc+fileNm);
+				});
+			}
+
+			// 전북특별자치도 Poll 삭제
+			if(rasmblyId == '063001' || rasmblyId == '031016') {
+				$("div").remove("#poll");
+			}
+
+			// 강원도, 서산시 발언자 위치 강제변경
+			if(rasmblyId == '033002' || rasmblyId == '041009') {
+				$('.line_context').css('width', '606px');
+			}
+
+			// 강원도 화천군 상단 설정 제거
+			if(rasmblyId == '033018') {
+				$("#article").remove();
+			}
+
+			// 남원시 우측여백 설정
+			if(rasmblyId == '063005') {
+				$("#content").css('width', '98%');
+				$("#content").css('height', '100%');
+			}
+
+		});
+	</script>
+
+	<script type="text/javascript">
+		var scrollUpDelay = 1;
+		var scrollUpSpeed = 30;
+		function scrollUp()
+		{
+			var uaString = window.navigator.userAgent;
+
+			if (uaString.indexOf("Chrome") != -1)
+			{
+				if(document.body.scrollTop<1)
+				{
+					return;
+			 	}
+				document.body.scrollTop=document.body.scrollTop-scrollUpSpeed;
+				setTimeout('scrollUp()',scrollUpDelay);
+			}
+			else
+			{
+				if(document.documentElement.scrollTop<1)
+				{
+					return;
+			 	}
+				document.documentElement.scrollTop=document.documentElement.scrollTop-scrollUpSpeed;
+				setTimeout('scrollUp()',scrollUpDelay);
+			}
+		}
+
+// 		$(window).resize(function()
+// 		{
+// 			var w = window.innerWidth;
+// 			if(w>991 && $("#m_search").css("left")=="0px")
+// 			{
+// 				$("#m_search").animate({"left":"-70%"});
+// 				$(".rightDiv").animate({"left":"0px"});
+// 				$("#wideDiv").animate({"left":"0px"});
+
+// 				$(".shareBackDiv").animate({"left":"0px"});
+// 				$(".shareBackDiv").css({"display":"none"});
+
+// 			}
+
+// 			$("#m_search").css({"height":$("#middleDiv").height()+"px"});
+// 		});
+
+		/* ********************************************************
+		 * 한자 / 한글 변화
+		 ******************************************************* */
+		function changeHanja()
+		{
+			var hanjaFlag = $('#hanjaFlag').val();
+
+			if(hanjaFlag == 'Y')
+				hanjaFlag = 'N';
+			else
+				hanjaFlag = 'Y';
+
+			$('#hanjaFlag').val(hanjaFlag);
+
+			location.href = "/minutes/viewer.do?collection=minutes&DOCID=CLIKC1637208892437588&hanjaFlag=" + hanjaFlag;
+		}
+
+		$(document).ready(function() {
+			//a 링크 관련 처리
+			$('#clik_view_minutes a').each(function(){
+				$(this).attr('href','#none');
+				$(this).attr('onclick','#none');
+			});
+			$('#clik_view_minutes a').click(function(){
+				return false;
+			});
+		});
+	</script>
+</head>
+<body>
+	<!-- 상단 -->
+	<div id="clik_top">
+		<div id="clik_head" class="w">
+			<input type="hidden" id="hanjaFlag" name="hanjaFlag" value="N" title="한자변환여부 (숨겨진요소)" />
+			<div id="clik_left_head">
+				<div id="clik_find_search" >
+					<label for="keyword"></label>
+					<input type="text" name="keyword" id="keyword" />
+					<button type="submit" id="btn_search">검색 <i class="fa fa-search"></i></button>
+				</div>
+			</div>
+			<div id="clik_right_head" >
+				<ul class="hidden-phone hidden-tablet">
+					
+					<li class="pixel120" onclick="javascript:changeHanja();"><a id="btn_change">漢 <i class="fa fa-refresh"></i> 한</a></li>
+					<li class="pixel120"><a id="btn_top" onclick="location.href='#';return false;"><i class="fa fa-arrow-up"></i>TOP</a></li>
+					<li class="pixel80"><a id="btn_small" onclick="FontSize('-')">가 <i class="fa fa-minus"></i></a></li>
+					<li class="pixel80"><a id="btn_big" onclick="FontSize('+')">가 <i class="fa fa-plus"></i></a></li>
+					<li id="btn_print" class="pixel120" value="/minutes/printpage.do?DOCID=CLIKC1637208892437588"><a><i class="fa fa-print" ></i> 인쇄</a></li>
+				</ul>
+			</div>
+			<div id="clik_closeAct">
+				<a href="javascript:window.close();" name="minutes_close" id="minutes_close"><i class="fa fa-times"></i> </a>
+			</div>
+		</div>
+	</div>
+	<!-- //상단 -->
+<!-- 	<div id="wideDiv"></div> -->
+
+	<div id="middleDiv">
+		<div class="rightDiv">
+			<!-- content -->
+			<div id="clik_content">
+				<!-- middle -->
+				<div id="middle">
+					<!-- clik_view_minutes -->
+					<div id="clik_view_minutes" style="width:100%">
+						
+							
+    <div class="content-wrapper" id="canvas"><div id='minutes'><div id='minutes-header'><p class='align-right' id='temporary-minutes-sub-title-line'>[본 회의록은 최종 교정 전 임시회의록이므로 법적 효력이 없습니다.]</p><p class='session-line'>제258회&nbsp;거제시의회(임시회)</p><h1 class='align-center' id='minutes-title-line'>본회의&nbsp;회의록</h1><p class='align-right' id='order-line'>제1호</p><p class='align-right' id='office-line'>거제시의회사무국</p><hr /><p id='date-line'>일&nbsp;시&nbsp;:&nbsp;2025년&nbsp;10월&nbsp;27일(월)&nbsp;10시&nbsp;00분</p></div><hr /><ol id='agenda-block'><li class='agenda_line font-bold'>&nbsp;의사일정</li><li class='agenda_line'>&nbsp;1.&nbsp;제258회&nbsp;거제시의회&nbsp;임시회&nbsp;회기&nbsp;결정의&nbsp;건</li><li class='agenda_line'>&nbsp;2.&nbsp;회의록&nbsp;서명의원&nbsp;선출의&nbsp;건</li><li class='agenda_line'>&nbsp;3.&nbsp;2025년도&nbsp;제3회&nbsp;추가경정&nbsp;세입&middot세출&nbsp;예산안&nbsp;제안&nbsp;설명의&nbsp;건</li><li class='agenda_line'>&nbsp;4.&nbsp;예산결산특별위원회&nbsp;구성의&nbsp;건</li><li class='agenda_line'>&nbsp;5.&nbsp;거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육&nbsp;민간위탁&nbsp;보고의&nbsp;건</li><li class='agenda_line'>&nbsp;6.&nbsp;거제시&nbsp;관광기념품&nbsp;공모전&nbsp;민간위탁&nbsp;보고의&nbsp;건</li><li class='agenda_line'>&nbsp;7.&nbsp;제5기&nbsp;지역사회보장계획의&nbsp;2026년&nbsp;연차별&nbsp;시행계획&nbsp;수립&nbsp;보고의&nbsp;건</li><li class='agenda_line'>&nbsp;8.&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안</li><li class='agenda_line'>&nbsp;9.&nbsp;휴회의&nbsp;건</li></ol><hr /><ol id='item-block'><li class='item_line font-bold'>&nbsp;부의된&nbsp;안건</li><li class='item_line font-bold'><a href='#item1' title='○5분 자유발언(김선민·양태석·이미숙·조대용 의원)' data-item='1'>○5분&nbsp;자유발언(김선민&middot양태석&middot이미숙&middot조대용&nbsp;의원)</a></li><li class='item_line font-bold'><a href='#item2' title='1. 제258회 거제시의회 임시회 회기 결정의 건' data-item='2'>&nbsp;1.&nbsp;제258회&nbsp;거제시의회&nbsp;임시회&nbsp;회기&nbsp;결정의&nbsp;건</a></li><li class='item_line font-bold'><a href='#item3' title='2. 회의록 서명의원 선출의 건' data-item='3'>&nbsp;2.&nbsp;회의록&nbsp;서명의원&nbsp;선출의&nbsp;건</a></li><li class='item_line font-bold'><a href='#item4' title='3. 2025년도 제3회 추가경정 세입·세출 예산안 제안 설명의 건' data-item='4'>&nbsp;3.&nbsp;2025년도&nbsp;제3회&nbsp;추가경정&nbsp;세입&middot세출&nbsp;예산안&nbsp;제안&nbsp;설명의&nbsp;건</a></li><li class='item_line font-bold'><a href='#item5' title='4. 예산결산특별위원회 구성의 건' data-item='5'>&nbsp;4.&nbsp;예산결산특별위원회&nbsp;구성의&nbsp;건</a></li><li class='item_line font-bold'><a href='#item6' title='5. 거제시 관광사업체 네트워크 구성 및 서비스 개선 교육 민간위탁 보고의 건(시장 제출)(의안번호 593)' data-item='6'>&nbsp;5.&nbsp;거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육&nbsp;민간위탁&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;593)</a></li><li class='item_line font-bold'><a href='#item7' title='6. 거제시 관광기념품 공모전 민간위탁 보고의 건(시장 제출)(의안번호 594)' data-item='7'>&nbsp;6.&nbsp;거제시&nbsp;관광기념품&nbsp;공모전&nbsp;민간위탁&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;594)</a></li><li class='item_line font-bold'><a href='#item8' title='7. 제5기 지역사회보장계획의 2026년 연차별 시행계획 수립 보고의 건(시장 제출)(의안번호 597)' data-item='8'>&nbsp;7.&nbsp;제5기&nbsp;지역사회보장계획의&nbsp;2026년&nbsp;연차별&nbsp;시행계획&nbsp;수립&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;597)</a></li><li class='item_line font-bold'><a href='#item9' title='8. 남부내륙철도 착공식 거제시 개최 촉구 결의안(박명옥 의원 대표발의)(양태석·한은진·최양희·이미숙·이태열·안석봉·조대용·김영규·신금자·노재하·김두호·윤부원·김동수·김선민·정명희 의원)(의안번호 624)' data-item='9'>&nbsp;8.&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안(박명옥&nbsp;의원&nbsp;대표발의)(양태석&middot한은진&middot최양희&middot이미숙&middot이태열&middot안석봉&middot조대용&middot김영규&middot신금자&middot노재하&middot김두호&middot윤부원&middot김동수&middot김선민&middot정명희&nbsp;의원)(의안번호&nbsp;624)</a></li><li class='item_line font-bold'><a href='#item10' title='9. 휴회의 건' data-item='10'>&nbsp;9.&nbsp;휴회의&nbsp;건</a></li></ol><hr /><div id='minutes-body'><div class='contents-block' data-con_idx='0'><p class='taged-line tag-R'>(10시 10분  개의)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='1' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;성원이&nbsp;되었으므로&nbsp;제258회&nbsp;거제시의회&nbsp;임시회&nbsp;1차&nbsp;본회의를&nbsp;개의하겠습니다.<br />&nbsp;의회사무국장으로부터&nbsp;집회보고가&nbsp;있겠습니다.&nbsp;사무국장&nbsp;보고하여&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block' data-con_idx='2' data-member_code=''><strong>○의회사무국장 송근섭</strong>&nbsp;반갑습니다.&nbsp;의회사무국장&nbsp;송근섭입니다.<br />&nbsp;집회에&nbsp;관한&nbsp;사항을&nbsp;보고드리겠습니다.<br />&nbsp;이번&nbsp;제258회&nbsp;거제시의회&nbsp;임시회는&nbsp;2025년&nbsp;10월&nbsp;14일&nbsp;거제시장의&nbsp;집회&nbsp;요구가&nbsp;있어&nbsp;「지방자치법」제54조에&nbsp;따라&nbsp;10월&nbsp;23일&nbsp;공고하여&nbsp;오늘&nbsp;집회하게&nbsp;되었습니다.<br />&nbsp;부의안건으로는&nbsp;의원발의&nbsp;안건으로「거제시&nbsp;통합재정안정화기금&nbsp;설치&nbsp;및&nbsp;운용&nbsp;조례&nbsp;일부개정조례안」&nbsp;등&nbsp;16건과&nbsp;거제시장으로부터&nbsp;제출된&nbsp;「2025년도&nbsp;제3회&nbsp;추가경정&nbsp;세입·세출&nbsp;예산안」등&nbsp;20건이&nbsp;접수되어&nbsp;총&nbsp;36건&nbsp;중,&nbsp;4건은&nbsp;본회의에&nbsp;부의하고&nbsp;30건은&nbsp;해당&nbsp;상임위원회에&nbsp;각각&nbsp;회부하였으며,&nbsp;1건은&nbsp;본회의&nbsp;보고&nbsp;후&nbsp;윤리특위에&nbsp;회부할&nbsp;예정입니다.&nbsp;<br />&nbsp;의원&nbsp;출석&nbsp;상황은&nbsp;재적의원&nbsp;열&nbsp;여섯&nbsp;분&nbsp;전원&nbsp;출석하였습니다.<br />&nbsp;이상으로&nbsp;집회에&nbsp;관한&nbsp;보고를&nbsp;마치겠습니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='3' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;국장님,&nbsp;수고하셨습니다.<br /><hr /></div><div class='contents-block' data-con_idx='4'><strong class='item-in-contents' id='item1' title='○5분 자유발언(김선민·양태석·이미숙·조대용 의원)'>○5분&nbsp;자유발언(김선민&middot양태석&middot이미숙&middot조대용&nbsp;의원)</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 12분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='5' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;「거제시의회&nbsp;회의&nbsp;규칙」&nbsp;제37조의2에&nbsp;따라&nbsp;김선민&nbsp;의원,&nbsp;양태석&nbsp;의원,&nbsp;이미숙&nbsp;의원,&nbsp;조대용&nbsp;의원의&nbsp;5분&nbsp;자유발언&nbsp;신청이&nbsp;있어&nbsp;이를&nbsp;허가하였습니다.<br />&nbsp;김선민&nbsp;의원,&nbsp;발언하여&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='6' data-member_code='09050'><strong>○<a class='member_profile btn_profile' id='btn_profile_146' href='#profile_layer_popup' data-uid='146' title='김선민 의원 프로필 보기'>김선민</a> 의원</strong>&nbsp;주&nbsp;제&nbsp;-&nbsp;거제시&nbsp;더&nbsp;이상&nbsp;장애인&nbsp;의무고용&nbsp;미이행&nbsp;기관으로&nbsp;머물러서는&nbsp;안&nbsp;됩니다.<br />&nbsp;존경하는&nbsp;거제시민&nbsp;여러분,&nbsp;안녕하십니까?&nbsp;거제시의회&nbsp;의원&nbsp;김선민입니다.<br />&nbsp;5분&nbsp;자유발언의&nbsp;기회를&nbsp;주신&nbsp;신금자&nbsp;의장님과&nbsp;선배·동료&nbsp;의원님들께&nbsp;감사드립니다.&nbsp;또한&nbsp;시장님을&nbsp;비롯한&nbsp;모든&nbsp;공무원&nbsp;여러분에게도&nbsp;거제시를&nbsp;향한&nbsp;노고에&nbsp;깊은&nbsp;감사를&nbsp;드립니다.<br />&nbsp;오늘&nbsp;저는&nbsp;「장애인고용촉진&nbsp;및&nbsp;직업재활법」에&nbsp;따른&nbsp;거제시의&nbsp;장애인&nbsp;고용&nbsp;의무&nbsp;이행&nbsp;실태를&nbsp;점검하고,&nbsp;법적&nbsp;의무&nbsp;이행을&nbsp;어떻게&nbsp;실천해&nbsp;나가야&nbsp;할지&nbsp;그&nbsp;방향을&nbsp;함께&nbsp;고민하고자&nbsp;이&nbsp;자리에&nbsp;섰습니다.<br />&nbsp;먼저,&nbsp;장애인&nbsp;의무고용&nbsp;제도란&nbsp;국가와&nbsp;지방자치단체,&nbsp;공공기관,&nbsp;그리고&nbsp;일정&nbsp;규모&nbsp;이상의&nbsp;민간기업은&nbsp;전체의&nbsp;근로자&nbsp;중&nbsp;일정&nbsp;비율&nbsp;이상을&nbsp;장애인으로&nbsp;반드시&nbsp;고용해야&nbsp;하는&nbsp;제도입니다.<br />&nbsp;이를&nbsp;이행하지&nbsp;않을&nbsp;경우,&nbsp;고용부담금이&nbsp;부과되는&nbsp;등&nbsp;재정적&nbsp;부담이&nbsp;발생하게&nbsp;됩니다.&nbsp;현재&nbsp;국가와&nbsp;지방자치단체의&nbsp;법정&nbsp;장애인&nbsp;의무&nbsp;고용률은&nbsp;3.8%,&nbsp;상시근로자&nbsp;100인&nbsp;이상&nbsp;민간기업은&nbsp;3.1%로&nbsp;규정되어&nbsp;있습니다.&nbsp;이러한&nbsp;기준에&nbsp;비춰볼&nbsp;때&nbsp;거제시의&nbsp;현실은&nbsp;어떠한지&nbsp;살펴보겠습니다.<br />&nbsp;거제시의&nbsp;장애인&nbsp;고용률은&nbsp;2023년&nbsp;2.74%,&nbsp;2024년&nbsp;2.75%,&nbsp;그리고&nbsp;올해&nbsp;9월&nbsp;기준으로&nbsp;2.56%에&nbsp;그치고&nbsp;있습니다.&nbsp;즉&nbsp;공공기관인&nbsp;거제시조차&nbsp;장애인&nbsp;의무고용&nbsp;제도를&nbsp;충실히&nbsp;이행하지&nbsp;못하고&nbsp;있는&nbsp;상황입니다.&nbsp;<br />&nbsp;반면,&nbsp;거제해양관광개발공사는&nbsp;매우&nbsp;우수한&nbsp;사례를&nbsp;보여주고&nbsp;있습니다.&nbsp;2020년&nbsp;4.6%,&nbsp;2023년&nbsp;4.1%,&nbsp;2024년&nbsp;5.19%로&nbsp;지속적으로&nbsp;높은&nbsp;고용률을&nbsp;유지하여&nbsp;고용장려금&nbsp;인센티브를&nbsp;지급받는&nbsp;등&nbsp;모범적인&nbsp;실적을&nbsp;보이고&nbsp;있습니다.&nbsp;<br />&nbsp;결국&nbsp;거제시는&nbsp;장애인&nbsp;의무고용&nbsp;제도를&nbsp;제대로&nbsp;이행하지&nbsp;못한&nbsp;결과,&nbsp;2023년&nbsp;약&nbsp;1억&nbsp;4000만&nbsp;원,&nbsp;2024년&nbsp;1억&nbsp;8000만&nbsp;원&nbsp;등&nbsp;최근&nbsp;2년간&nbsp;총&nbsp;3억&nbsp;2000만&nbsp;원의&nbsp;시비를&nbsp;장애인고용부담금을&nbsp;납부한&nbsp;것입니다.&nbsp;이렇게&nbsp;납부한&nbsp;부담금&nbsp;누적액은&nbsp;이미&nbsp;수억&nbsp;원에&nbsp;이르고&nbsp;있으며&nbsp;이는&nbsp;조금만&nbsp;더&nbsp;노력했다면&nbsp;장애인&nbsp;고용&nbsp;확대&nbsp;등&nbsp;생산적인&nbsp;분야로&nbsp;전환할&nbsp;수&nbsp;있었던&nbsp;예산입니다.<br />&nbsp;그러나&nbsp;현실은&nbsp;고용&nbsp;대신&nbsp;부담금을&nbsp;내는&nbsp;구조가&nbsp;수년째&nbsp;반복되고&nbsp;있는&nbsp;실정입니다.&nbsp;“장애인의&nbsp;고용&nbsp;대신&nbsp;부담금을&nbsp;내면&nbsp;된다”는&nbsp;인식은&nbsp;공공기관인&nbsp;우리&nbsp;거제시부터&nbsp;바로&nbsp;잡아야&nbsp;합니다.&nbsp;거제시가&nbsp;이러한&nbsp;의무를&nbsp;다하지&nbsp;않는다면&nbsp;민간기업의&nbsp;장애인&nbsp;고용&nbsp;확산&nbsp;또한&nbsp;기대하기&nbsp;어렵습니다.&nbsp;한국장애인고용공단의&nbsp;자료에&nbsp;따르면&nbsp;2024년&nbsp;기준,&nbsp;경남&nbsp;18개&nbsp;시군&nbsp;중&nbsp;거제시는&nbsp;중하위권에&nbsp;머물러&nbsp;있습니다.&nbsp;<br />&nbsp;반면&nbsp;고성군은&nbsp;4.14%,&nbsp;거창군&nbsp;3.52%,&nbsp;사천시&nbsp;3.97%,&nbsp;창원시는&nbsp;3.47%로&nbsp;대부분이&nbsp;법정&nbsp;의무고용률을&nbsp;충족하거나&nbsp;근접하고&nbsp;있습니다.&nbsp;이제&nbsp;저는&nbsp;거제시가&nbsp;장애인&nbsp;의무고용&nbsp;미이행&nbsp;기관이라는&nbsp;오명을&nbsp;벗기&nbsp;위해&nbsp;다음과&nbsp;같은&nbsp;개선&nbsp;방안을&nbsp;제안드립니다.&nbsp;<br />&nbsp;첫째,&nbsp;장애인&nbsp;공무원&nbsp;채용계획과&nbsp;실태에&nbsp;대한&nbsp;면밀한&nbsp;점검이&nbsp;필요합니다.&nbsp;조속히&nbsp;수립하고&nbsp;실행해&nbsp;주시기&nbsp;바랍니다.&nbsp;<br />&nbsp;둘째,&nbsp;민간기업의&nbsp;장애인&nbsp;고용&nbsp;확산을&nbsp;위한&nbsp;인식&nbsp;개선&nbsp;활동이&nbsp;필요합니다.&nbsp;거제시는&nbsp;간담회&nbsp;및&nbsp;세미나,&nbsp;설명회&nbsp;등&nbsp;저비용&nbsp;인식개선&nbsp;사업을&nbsp;정기적으로&nbsp;추진하여&nbsp;전문기관이&nbsp;참여하는&nbsp;체계적이고&nbsp;실질적인&nbsp;교육의&nbsp;장을&nbsp;마련해야&nbsp;합니다.&nbsp;<br />&nbsp;셋째,&nbsp;장애인&nbsp;근로자를&nbsp;위한&nbsp;다양한&nbsp;직무&nbsp;능력&nbsp;교육과&nbsp;근무환경&nbsp;개선&nbsp;지원&nbsp;프로그램을&nbsp;마련해야&nbsp;합니다.&nbsp;스스로의&nbsp;역량에&nbsp;맞는&nbsp;업무와&nbsp;주기적인&nbsp;교육을&nbsp;통해&nbsp;안정적인&nbsp;근로와&nbsp;성장을&nbsp;이어갈&nbsp;수&nbsp;있어야&nbsp;합니다.&nbsp;이를&nbsp;위해&nbsp;교육과&nbsp;지원&nbsp;환경개선이&nbsp;함께&nbsp;병행되어야&nbsp;합니다.<br />&nbsp;존경하는&nbsp;거제시민&nbsp;여러분,&nbsp;우리&nbsp;거제시는&nbsp;장애인과&nbsp;비장애인이&nbsp;함께&nbsp;일하고&nbsp;성장하는&nbsp;포용&nbsp;도시,&nbsp;그리고&nbsp;진정한&nbsp;공정과&nbsp;배려의&nbsp;도시로&nbsp;나아가야&nbsp;합니다.&nbsp;그&nbsp;길에&nbsp;거제시가&nbsp;먼저&nbsp;모범을&nbsp;보이고&nbsp;지역의&nbsp;기업들이&nbsp;함께&nbsp;발맞춰&nbsp;나갈&nbsp;수&nbsp;있기를&nbsp;기대합니다.<br />&nbsp;이상&nbsp;5분&nbsp;자유발언을&nbsp;마치겠습니다.&nbsp;경청해&nbsp;주셔서&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='7' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;김선민&nbsp;의원&nbsp;수고하셨습니다.<br />&nbsp;양태석&nbsp;의원&nbsp;발언하여&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='8' data-member_code='09010'><strong>○<a class='member_profile btn_profile' id='btn_profile_136' href='#profile_layer_popup' data-uid='136' title='양태석 의원 프로필 보기'>양태석</a> 의원</strong>&nbsp;주&nbsp;제&nbsp;-&nbsp;농어업인&nbsp;공익수당&nbsp;단계적&nbsp;상향&nbsp;촉구&nbsp;제안<br />&nbsp;5분&nbsp;발언하기&nbsp;전에&nbsp;한말씀&nbsp;드리겠습니다.<br />&nbsp;정부에서&nbsp;민생회복지원&nbsp;소비쿠폰이&nbsp;96%&nbsp;지급됐다는&nbsp;어제&nbsp;뉴스를&nbsp;봤습니다.&nbsp;대만에서&nbsp;보니까&nbsp;정부에서&nbsp;1인당&nbsp;46만&nbsp;원씩&nbsp;지급한다고&nbsp;어제&nbsp;뉴스&nbsp;나오는&nbsp;거&nbsp;봤습니다.&nbsp;참고하시기&nbsp;바랍니다.<br />&nbsp;5분&nbsp;발언하겠습니다.<br />&nbsp;존경하는&nbsp;거제시민&nbsp;여러분!&nbsp;신금자&nbsp;의장님을&nbsp;비롯한&nbsp;선배·동료&nbsp;의원&nbsp;여러분,&nbsp;그리고&nbsp;변광용&nbsp;시장님과&nbsp;여러&nbsp;공무원&nbsp;여러분&nbsp;반갑습니다.<br />&nbsp;5분&nbsp;발언&nbsp;주제는&nbsp;농어업인&nbsp;공익수당&nbsp;단계적&nbsp;상향&nbsp;촉구&nbsp;제안입니다.&nbsp;<br />&nbsp;먼저&nbsp;경상남도가&nbsp;올해&nbsp;30만&nbsp;원&nbsp;수준에&nbsp;머물렀던&nbsp;농어업인&nbsp;공익수당을&nbsp;내년부터&nbsp;상향하기로&nbsp;한&nbsp;결정에&nbsp;대해서&nbsp;환영하는&nbsp;바입니다.<br />&nbsp;이는&nbsp;그동안&nbsp;농어업&nbsp;현장에서&nbsp;꾸준히&nbsp;제기되어&nbsp;온&nbsp;요구를&nbsp;경상남도에서&nbsp;수용한&nbsp;결과이자&nbsp;농어업의&nbsp;공익적&nbsp;가치를&nbsp;제도적으로&nbsp;인정한&nbsp;소중한&nbsp;전진이라&nbsp;생각합니다.&nbsp;아직&nbsp;구체적인&nbsp;인상&nbsp;금액은&nbsp;확정되지&nbsp;않았으며,&nbsp;경상남도에서는&nbsp;60만&nbsp;원&nbsp;수준으로&nbsp;검토&nbsp;중인&nbsp;것으로&nbsp;알고&nbsp;있습니다.&nbsp;분명&nbsp;긍정적&nbsp;변화이지만&nbsp;농어업&nbsp;현장의&nbsp;현실을&nbsp;충분히&nbsp;반영하기에는&nbsp;여전히&nbsp;부족합니다.<br />&nbsp;오늘&nbsp;우리&nbsp;농어업은&nbsp;오늘도&nbsp;벼랑&nbsp;끝에&nbsp;서&nbsp;있습니다.&nbsp;농자재와&nbsp;비료,&nbsp;사료&nbsp;가격은&nbsp;해마다&nbsp;치솟고&nbsp;있고&nbsp;생산비는&nbsp;수익을&nbsp;잠식하고&nbsp;있습니다.&nbsp;더&nbsp;큰&nbsp;문제는&nbsp;고령화가&nbsp;심화되면서&nbsp;노동&nbsp;강도는&nbsp;날로&nbsp;무거워지고&nbsp;있으며&nbsp;도시&nbsp;근로자와의&nbsp;소득&nbsp;격차&nbsp;또한&nbsp;여전히&nbsp;크게&nbsp;벌어져&nbsp;생활&nbsp;안정성을&nbsp;보장하기&nbsp;어려운&nbsp;실정입니다.&nbsp;<br />&nbsp;이러한&nbsp;상황에서&nbsp;농어업인&nbsp;공익수당은&nbsp;단순히&nbsp;격차를&nbsp;해소할&nbsp;수&nbsp;있는&nbsp;근본&nbsp;대책은&nbsp;아닐지라도&nbsp;최소한의&nbsp;삶을&nbsp;지켜주는&nbsp;안전망이자&nbsp;농어업인의&nbsp;의지를&nbsp;버티게&nbsp;하는&nbsp;장치가&nbsp;되고&nbsp;있습니다.<br />&nbsp;경남연구원의&nbsp;성과평가&nbsp;결과를&nbsp;보면&nbsp;2022년부터&nbsp;시행된&nbsp;농어업인&nbsp;수당&nbsp;제도는&nbsp;농업·농촌에&nbsp;실질적&nbsp;효과를&nbsp;주고&nbsp;있음이&nbsp;확인되었습니다.&nbsp;제도&nbsp;시행&nbsp;이후&nbsp;경남&nbsp;농림어업분야의&nbsp;실질&nbsp;부가가치는&nbsp;전년&nbsp;대비&nbsp;2.71%&nbsp;증가했고,&nbsp;음식료품&nbsp;제조업까지&nbsp;포함하면&nbsp;3.91%가&nbsp;증가하여&nbsp;전국&nbsp;대비&nbsp;높은&nbsp;상승세를&nbsp;보였습니다.&nbsp;<br />&nbsp;수당&nbsp;도입&nbsp;이후&nbsp;농어업인&nbsp;취약계층&nbsp;비율은&nbsp;약&nbsp;7.57%&nbsp;감소했으며&nbsp;이는&nbsp;678억&nbsp;원의&nbsp;재정&nbsp;집행이&nbsp;소득&nbsp;보전과&nbsp;고용&nbsp;안정에&nbsp;실질적으로&nbsp;기여했음을&nbsp;보여줍니다.&nbsp;또한&nbsp;농가소득은&nbsp;평균&nbsp;23.5만&nbsp;원&nbsp;약&nbsp;1.6%&nbsp;증가하였고&nbsp;생활용품·&nbsp;의료비·&nbsp;교육비&nbsp;지출에&nbsp;활용되면서&nbsp;지역경제&nbsp;순환에도&nbsp;긍정적&nbsp;영향을&nbsp;주었습니다.&nbsp;<br />&nbsp;만족도&nbsp;조사&nbsp;결과에서도&nbsp;수당의&nbsp;필요성은&nbsp;평균&nbsp;4.25점으로&nbsp;매우&nbsp;높게&nbsp;나타났으며&nbsp;특히&nbsp;“생활&nbsp;안정과&nbsp;지역사회&nbsp;유지를&nbsp;위한&nbsp;필수&nbsp;제도”라는&nbsp;응답이&nbsp;가장&nbsp;높은&nbsp;평가를&nbsp;받았습니다.&nbsp;<br />이러한&nbsp;수치는&nbsp;농어업인&nbsp;수당이&nbsp;단순한&nbsp;보조금이&nbsp;아니라&nbsp;농어촌&nbsp;유지와&nbsp;지역경제&nbsp;활성화에&nbsp;실질적으로&nbsp;기여하고&nbsp;있음을&nbsp;보여줍니다.<br />&nbsp;그럼에도&nbsp;불구하고&nbsp;현행&nbsp;인상안은&nbsp;여전히&nbsp;충분치&nbsp;않습니다.&nbsp;이미&nbsp;충청남도를&nbsp;비롯한&nbsp;일부&nbsp;지자체에서는&nbsp;80만&nbsp;원&nbsp;수준의&nbsp;공익수당을&nbsp;지급하고&nbsp;있는&nbsp;만큼&nbsp;경상남도&nbsp;또한&nbsp;중장기적&nbsp;로드맵을&nbsp;마련해서&nbsp;최소한&nbsp;그&nbsp;수준까지는&nbsp;상향하고,&nbsp;장기적으로&nbsp;재정&nbsp;여건과&nbsp;농어업&nbsp;현실을&nbsp;감안하여&nbsp;꾸준히&nbsp;확대해&nbsp;나가야&nbsp;합니다.&nbsp;<br />&nbsp;농어업은&nbsp;단순한&nbsp;생계의&nbsp;수단이&nbsp;아니라&nbsp;국민의&nbsp;식량&nbsp;안보를&nbsp;지키고&nbsp;국토를&nbsp;보전하며&nbsp;환경을&nbsp;관리하는&nbsp;국가적&nbsp;기반사업이자&nbsp;공익적&nbsp;기능을&nbsp;수행하는&nbsp;소중한&nbsp;영역입니다.&nbsp;따라서&nbsp;농어업인&nbsp;수당&nbsp;확대는&nbsp;농어업인의&nbsp;삶을&nbsp;지켜내는&nbsp;정책일&nbsp;뿐만&nbsp;아니라&nbsp;우리&nbsp;사회와&nbsp;미래를&nbsp;지탱하는&nbsp;가장&nbsp;확실한&nbsp;투자입니다.<br />&nbsp;거제시&nbsp;역시&nbsp;도의&nbsp;정책&nbsp;변화에&nbsp;발맞추어&nbsp;능동적으로&nbsp;대처해야&nbsp;합니다.&nbsp;경남도와&nbsp;협력하여&nbsp;추가&nbsp;재원&nbsp;부담&nbsp;방안을&nbsp;논의하는&nbsp;것은&nbsp;물론,&nbsp;시&nbsp;차원에서&nbsp;농어업인&nbsp;교육&nbsp;지원,&nbsp;특산품&nbsp;판로&nbsp;확대,&nbsp;기반&nbsp;확충과&nbsp;같은&nbsp;실질적&nbsp;보완&nbsp;정책을&nbsp;병행해야&nbsp;농어업인이&nbsp;체감할&nbsp;수&nbsp;있는&nbsp;변화를&nbsp;이끌어낼&nbsp;수&nbsp;있을&nbsp;것입니다.<br />&nbsp;이&nbsp;수당으로&nbsp;지역&nbsp;소멸의&nbsp;위기에&nbsp;처한&nbsp;농어촌을&nbsp;온전히&nbsp;살려낼&nbsp;수도&nbsp;없고,&nbsp;농어업인의&nbsp;고충을&nbsp;모두&nbsp;덜어낼&nbsp;수도&nbsp;없습니다.&nbsp;<br />&nbsp;그러나&nbsp;중요한&nbsp;것은&nbsp;금액의&nbsp;많고&nbsp;적음이&nbsp;아니라&nbsp;우리&nbsp;농어업인의&nbsp;삶과&nbsp;의지를&nbsp;존중하는&nbsp;사회적&nbsp;약속이자&nbsp;농어촌의&nbsp;지속가능성을&nbsp;지켜내기&nbsp;위한&nbsp;소중한의&nbsp;정책이라는&nbsp;점입니다.&nbsp;단순한&nbsp;지원금이&nbsp;아니라&nbsp;우리&nbsp;모두의&nbsp;미래를&nbsp;지켜내는&nbsp;공동의&nbsp;책임입니다.<br />&nbsp;거제시의회가&nbsp;지역&nbsp;농어업인의&nbsp;목소리를&nbsp;대변하여&nbsp;경상남도와&nbsp;중앙정부가&nbsp;지속적이고&nbsp;단계적인&nbsp;공익수당&nbsp;확대에&nbsp;나설&nbsp;수&nbsp;있도록&nbsp;앞장서&nbsp;나가야&nbsp;할&nbsp;것입니다.&nbsp;<br />&nbsp;농어업인의&nbsp;공익적&nbsp;가치를&nbsp;존중하는&nbsp;지원이&nbsp;더욱&nbsp;확대될&nbsp;수&nbsp;있도록&nbsp;여러분의&nbsp;지혜와&nbsp;관심을&nbsp;부탁드립니다.<br />&nbsp;경청해&nbsp;주셔서&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='9' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;양태석&nbsp;의원&nbsp;수고하셨습니다.<br />&nbsp;이미숙&nbsp;의원&nbsp;발언하여&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='10' data-member_code='09040'><strong>○<a class='member_profile btn_profile' id='btn_profile_144' href='#profile_layer_popup' data-uid='144' title='이미숙 의원 프로필 보기'>이미숙</a> 의원</strong>&nbsp;주&nbsp;제&nbsp;-&nbsp;일본인&nbsp;관광객&nbsp;유치&nbsp;확대를&nbsp;통한&nbsp;거제시&nbsp;관광&nbsp;활성화&nbsp;전략<br />&nbsp;존경하는&nbsp;거제시민&nbsp;여러분&nbsp;반갑습니다.&nbsp;거제시의회&nbsp;이미숙&nbsp;의원입니다.<br />&nbsp;본&nbsp;의원은&nbsp;오늘,&nbsp;‘일본인&nbsp;관광객&nbsp;유치&nbsp;확대&nbsp;전략’을&nbsp;통해&nbsp;거제&nbsp;경제에&nbsp;활력을&nbsp;불어넣고,&nbsp;거제&nbsp;관광의&nbsp;‘새로운&nbsp;전환점’을&nbsp;마련하여&nbsp;대한민국의&nbsp;‘인기&nbsp;있는&nbsp;관광도시’로&nbsp;힘차게&nbsp;도약할&nbsp;구체적인&nbsp;방향을&nbsp;말씀드리고자&nbsp;합니다.<br />&nbsp;거제시는&nbsp;일본에서&nbsp;멀지&nbsp;않은&nbsp;아주&nbsp;매력적인&nbsp;해양관광도시입니다.&nbsp;일본&nbsp;규슈나&nbsp;시코쿠&nbsp;지역에서&nbsp;2시간&nbsp;남짓이면&nbsp;도달할&nbsp;수&nbsp;있는&nbsp;지리적&nbsp;이점과&nbsp;천혜의&nbsp;자연경관과&nbsp;다양한&nbsp;체험&nbsp;콘텐츠를&nbsp;갖춘&nbsp;도시입니다.&nbsp;<br />&nbsp;관광객의&nbsp;발길은&nbsp;끊임없이&nbsp;이어지고&nbsp;있지만&nbsp;실속은&nbsp;없는&nbsp;게&nbsp;현실입니다.&nbsp;그러나&nbsp;현실은&nbsp;어떻습니까?&nbsp;많은&nbsp;관광객이&nbsp;오지만,&nbsp;대부분&nbsp;당일&nbsp;또는&nbsp;1박&nbsp;체류에&nbsp;그치고&nbsp;있습니다.&nbsp;지역&nbsp;상권과&nbsp;도시경제를&nbsp;살리기에는&nbsp;체류&nbsp;시간이&nbsp;짧습니다.&nbsp;관광객&nbsp;수가&nbsp;아닌,&nbsp;바로&nbsp;‘머무는&nbsp;시간’.&nbsp;이것이&nbsp;거제시가&nbsp;마주한&nbsp;가장&nbsp;큰&nbsp;과제입니다.<br />&nbsp;이에&nbsp;본&nbsp;의원은,&nbsp;일본의&nbsp;소도시&nbsp;마쓰야마의&nbsp;사례를&nbsp;주목했습니다.&nbsp;마쓰야마는&nbsp;거제와&nbsp;인구&nbsp;규모와&nbsp;관광&nbsp;여건이&nbsp;유사한&nbsp;소도시지만,&nbsp;한&nbsp;가지&nbsp;분명한&nbsp;전략으로&nbsp;관광&nbsp;활성화의&nbsp;놀라운&nbsp;성과를&nbsp;이뤘습니다.&nbsp;바로&nbsp;외국인,&nbsp;그중에서도&nbsp;한국인&nbsp;관광객만을&nbsp;정조준한&nbsp;관광정책입니다.&nbsp;공항과&nbsp;시내를&nbsp;연결하는&nbsp;무료&nbsp;셔틀버스&nbsp;운행,&nbsp;대표&nbsp;관광지&nbsp;무료입장&nbsp;또는&nbsp;할인&nbsp;쿠폰&nbsp;제공,&nbsp;한국어&nbsp;안내&nbsp;시스템&nbsp;구축&nbsp;등&nbsp;맞춤형&nbsp;혜택을&nbsp;제공하면서&nbsp;단순&nbsp;방문이&nbsp;아닌&nbsp;2박&nbsp;3일&nbsp;체류&nbsp;관광을&nbsp;설계했습니다.<br />&nbsp;그&nbsp;결과&nbsp;외국인&nbsp;관광객&nbsp;수는&nbsp;전년&nbsp;대비&nbsp;22%&nbsp;증가했고,&nbsp;시내&nbsp;주요&nbsp;상점가&nbsp;매출은&nbsp;28%&nbsp;이상&nbsp;상승하는&nbsp;등&nbsp;소비와&nbsp;체류가&nbsp;도시&nbsp;경제를&nbsp;이끄는&nbsp;구조로&nbsp;전환되었습니다.&nbsp;이러한&nbsp;사례는&nbsp;소도시의&nbsp;관광이&nbsp;단순한&nbsp;‘관광객&nbsp;증가’에&nbsp;머물지&nbsp;않고,&nbsp;지역&nbsp;상권&nbsp;회복과&nbsp;일자리&nbsp;창출&nbsp;등&nbsp;실질적&nbsp;경제&nbsp;파급효과로&nbsp;이어질&nbsp;수&nbsp;있음을&nbsp;보여줍니다.<br />&nbsp;한편,&nbsp;외국인&nbsp;관광객이&nbsp;많다고&nbsp;해서&nbsp;모두&nbsp;성공하는&nbsp;것은&nbsp;아닙니다.&nbsp;제주도는&nbsp;크루즈(유람선)&nbsp;관광으로&nbsp;많은&nbsp;외국인을&nbsp;유치하고&nbsp;있지만,&nbsp;상당수가&nbsp;반나절&nbsp;머무르고&nbsp;떠나면서&nbsp;숙박과&nbsp;지역&nbsp;소비로&nbsp;이어지지&nbsp;않는&nbsp;한계를&nbsp;드러내고&nbsp;있습니다.&nbsp;이&nbsp;사례는&nbsp;거제가&nbsp;단순한&nbsp;방문&nbsp;유도보다는,&nbsp;‘머무르게&nbsp;하는’&nbsp;전략을&nbsp;선택해야&nbsp;한다는&nbsp;중요한&nbsp;교훈을&nbsp;줍니다.<br />&nbsp;거제시도&nbsp;이러한&nbsp;성공&nbsp;모델을&nbsp;충분히&nbsp;벤치마킹할&nbsp;수&nbsp;있습니다.&nbsp;특히&nbsp;거제시는&nbsp;이미&nbsp;2024년부터&nbsp;단체관광객&nbsp;유치&nbsp;여행사&nbsp;인센티브&nbsp;지원사업을&nbsp;운영하고&nbsp;있습니다.<br />&nbsp;외국인&nbsp;3명&nbsp;이상&nbsp;단체를&nbsp;유치하거나&nbsp;거제&nbsp;주요&nbsp;관광지&nbsp;2곳&nbsp;이상을&nbsp;방문하는&nbsp;업체에&nbsp;보조금을&nbsp;지급하는&nbsp;제도를&nbsp;시행&nbsp;중이며,&nbsp;이는&nbsp;해외&nbsp;관광객&nbsp;유치의&nbsp;효과적인&nbsp;제도적&nbsp;기반이&nbsp;되고&nbsp;있습니다.&nbsp;여기에&nbsp;일본인을&nbsp;대상으로&nbsp;한&nbsp;개별&nbsp;관광&nbsp;인센티브&nbsp;제도를&nbsp;병행한다면&nbsp;거제는&nbsp;한층&nbsp;경쟁력&nbsp;있는&nbsp;관광도시로&nbsp;성장할&nbsp;것입니다.<br />&nbsp;본&nbsp;의원은&nbsp;다음과&nbsp;같은&nbsp;구체적&nbsp;실행&nbsp;방안을&nbsp;제안합니다.<br />&nbsp;첫째,&nbsp;접근성&nbsp;개선을&nbsp;통한&nbsp;‘첫&nbsp;방문&nbsp;장벽’&nbsp;해소입니다.<br />&nbsp;김해공항에서&nbsp;거제까지&nbsp;‘일본인&nbsp;전용&nbsp;셔틀버스’를&nbsp;운행하고,&nbsp;일본어&nbsp;안내서&nbsp;등을&nbsp;제공하여&nbsp;접근성을&nbsp;획기적으로&nbsp;개선해야&nbsp;합니다.<br />&nbsp;둘째,&nbsp;‘체류형&nbsp;관광패스’&nbsp;도입&nbsp;및&nbsp;‘소비&nbsp;순환&nbsp;구조’&nbsp;설계입니다.&nbsp;주요&nbsp;관광지&nbsp;입장료&nbsp;할인&nbsp;및&nbsp;전통시장&nbsp;체험&nbsp;쿠폰&nbsp;등&nbsp;‘체류형&nbsp;관광패스’를&nbsp;도입하여&nbsp;일본&nbsp;관광객이&nbsp;체계적으로&nbsp;혜택을&nbsp;누릴&nbsp;수&nbsp;있도록&nbsp;함으로써&nbsp;‘도시&nbsp;내&nbsp;소비&nbsp;순환&nbsp;구조’를&nbsp;설계해야&nbsp;합니다.<br />&nbsp;셋째,&nbsp;일본어&nbsp;병기를&nbsp;통한&nbsp;‘언어적&nbsp;안심&nbsp;도시’&nbsp;구축입니다.&nbsp;음식점,&nbsp;숙박업소,&nbsp;안내&nbsp;표지에&nbsp;최소한의&nbsp;일본어를&nbsp;병기하여&nbsp;‘안심하고&nbsp;머무를&nbsp;수&nbsp;있는&nbsp;도시’임을&nbsp;보여주어야&nbsp;합니다.&nbsp;그리고&nbsp;일본어&nbsp;안내&nbsp;책자와&nbsp;표지판을&nbsp;확대하고,&nbsp;온라인&nbsp;홍보&nbsp;플랫폼을&nbsp;구축하여&nbsp;언어&nbsp;장벽을&nbsp;최소화해야&nbsp;합니다.<br />&nbsp;넷째,&nbsp;정례화된&nbsp;팸투어를&nbsp;통한&nbsp;‘거제&nbsp;브랜드’의&nbsp;현지&nbsp;각인입니다.&nbsp;일본&nbsp;현지&nbsp;여행사&nbsp;및&nbsp;미디어&nbsp;초청&nbsp;팸투어를&nbsp;정례화하여&nbsp;‘한국&nbsp;하면&nbsp;거제’라는&nbsp;이미지를&nbsp;각인시키는&nbsp;마케팅&nbsp;전략이&nbsp;필요합니다.​<br />&nbsp;이&nbsp;모든&nbsp;노력이&nbsp;결실을&nbsp;맺는다면,&nbsp;일본인&nbsp;관광객의&nbsp;체류형&nbsp;소비가&nbsp;증가하고,&nbsp;숙박·음식·체험&nbsp;산업&nbsp;등&nbsp;지역경제&nbsp;전반이&nbsp;활성화될&nbsp;것입니다.&nbsp;<br />&nbsp;거제시가&nbsp;주도적으로&nbsp;나서&nbsp;일본인&nbsp;관광객&nbsp;유치를&nbsp;실현한다면,&nbsp;우리&nbsp;시의&nbsp;경제는&nbsp;물론&nbsp;시민들의&nbsp;삶의&nbsp;질&nbsp;또한&nbsp;한&nbsp;단계&nbsp;더&nbsp;도약할&nbsp;것입니다.<br />&nbsp;이상으로,&nbsp;관광의&nbsp;도시,&nbsp;환상의&nbsp;섬&nbsp;거제를&nbsp;세계&nbsp;속에&nbsp;각인시키는&nbsp;전략적&nbsp;준비를&nbsp;강조하며&nbsp;5분&nbsp;자유발언을&nbsp;마치겠습니다.<br />&nbsp;경청해&nbsp;주셔서&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='11' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;이미숙&nbsp;의원&nbsp;수고하셨습니다.<br />&nbsp;조대용&nbsp;의원&nbsp;발언하여&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='12' data-member_code='09030'><strong>○<a class='member_profile btn_profile' id='btn_profile_141' href='#profile_layer_popup' data-uid='141' title='조대용 의원 프로필 보기'>조대용</a> 의원</strong>&nbsp;주&nbsp;제&nbsp;-&nbsp;거제의&nbsp;청정한&nbsp;해양자원을&nbsp;활용하여&nbsp;해양치유산업을&nbsp;육성해야&nbsp;합니다!<br />&nbsp;존경하는&nbsp;거제시민&nbsp;여러분,&nbsp;반갑습니다.&nbsp;아주동&nbsp;지역구&nbsp;행정복지위원회&nbsp;조대용&nbsp;의원입니다.&nbsp;<br />&nbsp;5분&nbsp;자유발언의&nbsp;기회를&nbsp;주신&nbsp;신금자&nbsp;의장님과&nbsp;선배·동료&nbsp;의원&nbsp;여러분께&nbsp;감사드리며,&nbsp;거제시의&nbsp;발전과&nbsp;시민&nbsp;행복을&nbsp;위해&nbsp;애쓰시는&nbsp;변광용&nbsp;시장님을&nbsp;비롯한&nbsp;모든&nbsp;공직자&nbsp;여러분의&nbsp;노고에도&nbsp;깊이&nbsp;감사드립니다.<br />&nbsp;오늘&nbsp;본&nbsp;의원은&nbsp;거제시의&nbsp;청정한&nbsp;해양자원을&nbsp;활용하여&nbsp;해양치유산업을&nbsp;미래&nbsp;신성장&nbsp;산업으로&nbsp;육성해야&nbsp;할&nbsp;필요성에&nbsp;대해&nbsp;말씀드리고자&nbsp;합니다.&nbsp;<br />&nbsp;최근&nbsp;휴식과&nbsp;건강을&nbsp;중시하는&nbsp;생활양식의&nbsp;변화와&nbsp;함께&nbsp;인구&nbsp;고령화&nbsp;등으로&nbsp;건강&nbsp;관련&nbsp;웰니스&nbsp;산업&nbsp;수요가&nbsp;급증하고&nbsp;있습니다.&nbsp;더불어,&nbsp;기후변화와&nbsp;환경오염&nbsp;심화로&nbsp;환경성&nbsp;만성질환이&nbsp;증가하면서,&nbsp;질병의&nbsp;예방과&nbsp;회복을&nbsp;통합적으로&nbsp;다루는&nbsp;치유산업은&nbsp;미래를&nbsp;대비하는&nbsp;핵심&nbsp;산업으로&nbsp;주목받고&nbsp;있습니다.<br />&nbsp;그중에서도&nbsp;해양치유산업은&nbsp;깨끗하고&nbsp;안전한&nbsp;해양자원을&nbsp;활용하여&nbsp;신체적·정신적&nbsp;건강&nbsp;증진과&nbsp;복지를&nbsp;실현하는&nbsp;고부가가치&nbsp;융ㆍ복합&nbsp;산업입니다.&nbsp;<br />&nbsp;이미&nbsp;독일,&nbsp;프랑스,&nbsp;일본&nbsp;등의&nbsp;경우,&nbsp;해양관광,&nbsp;바이오,&nbsp;헬스케어&nbsp;등을&nbsp;융·복합한&nbsp;해양치유산업을&nbsp;통해&nbsp;일자리&nbsp;창출과&nbsp;부가가치를&nbsp;높이며&nbsp;지역&nbsp;성장의&nbsp;핵심&nbsp;동력으로&nbsp;발전시키고&nbsp;있습니다.<br />&nbsp;우리나라도&nbsp;이러한&nbsp;흐름에&nbsp;발맞춰&nbsp;2020년에&nbsp;「해양치유자원의&nbsp;관리&nbsp;및&nbsp;활용에&nbsp;관한&nbsp;법률」을&nbsp;제정하며&nbsp;제도적&nbsp;기반을&nbsp;마련하였고,&nbsp;공공·민간&nbsp;차원에서&nbsp;다양한&nbsp;치유산업을&nbsp;육성&nbsp;중입니다.<br />&nbsp;해양수산부는&nbsp;2017년부터&nbsp;2024년까지&nbsp;약&nbsp;1350억&nbsp;원을&nbsp;투입하여&nbsp;전남&nbsp;완도,&nbsp;충남&nbsp;태안,&nbsp;경북&nbsp;울진,&nbsp;경남&nbsp;고성&nbsp;등&nbsp;4개&nbsp;지역에&nbsp;해역&nbsp;특성을&nbsp;살린&nbsp;해양치유센터를&nbsp;조성하고&nbsp;연구와&nbsp;실증사업을&nbsp;추진해&nbsp;왔습니다.<br />&nbsp;완도는&nbsp;해조류와&nbsp;해양바이오&nbsp;인프라를&nbsp;기반으로&nbsp;한&nbsp;‘스포츠&nbsp;재활형’,&nbsp;태안은&nbsp;수도권과의&nbsp;접근성을&nbsp;살린&nbsp;‘레저&nbsp;복합형’,&nbsp;울진은&nbsp;온천&nbsp;및&nbsp;산림자원과&nbsp;연계한&nbsp;‘중장기&nbsp;체류형’,&nbsp;고성은&nbsp;인근&nbsp;대규모&nbsp;산업단지&nbsp;근로자를&nbsp;대상으로&nbsp;한&nbsp;‘기업&nbsp;연계형’으로&nbsp;특화하여&nbsp;조성하였습니다.<br />&nbsp;특히,&nbsp;2023년에&nbsp;개관한&nbsp;‘완도해양치유센터’는&nbsp;지난&nbsp;추석&nbsp;연휴에만&nbsp;3,600여&nbsp;명이&nbsp;방문하였고,&nbsp;누적&nbsp;방문객이&nbsp;11만&nbsp;명을&nbsp;돌파하며&nbsp;높은&nbsp;시장성과&nbsp;가능성을&nbsp;입증했습니다.&nbsp;이는&nbsp;해양치유산업이&nbsp;국민적&nbsp;수요와&nbsp;경제성을&nbsp;가진&nbsp;성공&nbsp;가능한&nbsp;전략산업임을&nbsp;보여줍니다.<br />&nbsp;대다수&nbsp;우리나라&nbsp;국민은&nbsp;바다를&nbsp;대표적&nbsp;휴양공간으로&nbsp;인식하고&nbsp;있으며,&nbsp;휴식을&nbsp;위해&nbsp;바다를&nbsp;찾는&nbsp;수요는&nbsp;앞으로도&nbsp;계속&nbsp;증가할&nbsp;것입니다.<br />&nbsp;거제는&nbsp;한려해상국립공원을&nbsp;품은&nbsp;수려한&nbsp;자연환경과&nbsp;국내&nbsp;최고&nbsp;수준의&nbsp;청정&nbsp;해양자원을&nbsp;보유하고&nbsp;있어,&nbsp;심신의&nbsp;안정과&nbsp;회복이라는&nbsp;해양&nbsp;치유의&nbsp;핵심&nbsp;가치를&nbsp;실현하기에&nbsp;최적의&nbsp;조건을&nbsp;갖춘&nbsp;도시입니다.&nbsp;<br />&nbsp;이에&nbsp;본&nbsp;의원은&nbsp;거제시의&nbsp;해양치유산업&nbsp;육성을&nbsp;위한&nbsp;두&nbsp;가지&nbsp;방향을&nbsp;제안드립니다.<br />&nbsp;첫째,&nbsp;제도적&nbsp;기반&nbsp;구축입니다.&nbsp;해양치유산업&nbsp;육성&nbsp;관련&nbsp;조례를&nbsp;제정하여&nbsp;법적&nbsp;근거를&nbsp;마련하고,&nbsp;‘해양치유센터’&nbsp;건립을&nbsp;위한&nbsp;선제적&nbsp;용역과&nbsp;기반&nbsp;조성에&nbsp;행정&nbsp;역량을&nbsp;집중해야&nbsp;합니다.<br />&nbsp;제주도의&nbsp;경우,&nbsp;해양치유산업&nbsp;육성을&nbsp;위해&nbsp;2021년&nbsp;전국&nbsp;세&nbsp;번째로&nbsp;해양치유산업&nbsp;조례를&nbsp;제정한&nbsp;뒤,&nbsp;사업부서에서&nbsp;중앙부처에&nbsp;지속적으로&nbsp;건의하고&nbsp;사전&nbsp;용역을&nbsp;추진한&nbsp;결과,&nbsp;기획재정부&nbsp;협의를&nbsp;통해&nbsp;국비&nbsp;지원사업으로&nbsp;확정되어&nbsp;현재&nbsp;센터&nbsp;건립을&nbsp;진행&nbsp;중에&nbsp;있습니다.<br />&nbsp;이처럼&nbsp;체계적인&nbsp;사전&nbsp;준비와&nbsp;제도적&nbsp;기반을&nbsp;마련해야&nbsp;기회를&nbsp;선점할&nbsp;수&nbsp;있습니다.&nbsp;우리&nbsp;시도&nbsp;경상남도와&nbsp;긴밀한&nbsp;협의를&nbsp;통해&nbsp;중앙부처에&nbsp;지속적으로&nbsp;건의하고,&nbsp;조속히&nbsp;용역&nbsp;수행&nbsp;등의&nbsp;필수&nbsp;절차를&nbsp;추진해야&nbsp;합니다.<br />&nbsp;둘째,&nbsp;거제만의&nbsp;차별화된&nbsp;특화&nbsp;전략을&nbsp;마련해야&nbsp;합니다.&nbsp;조선산업&nbsp;중심&nbsp;도시인&nbsp;거제는&nbsp;산업&nbsp;근로자의&nbsp;재활과&nbsp;가족&nbsp;힐링을&nbsp;아우르는&nbsp;해양치유&nbsp;프로그램&nbsp;운영에&nbsp;최적지입니다.&nbsp;근로자&nbsp;맞춤형&nbsp;치유&nbsp;프로그램과&nbsp;가족&nbsp;체류형&nbsp;관광을&nbsp;연계해&nbsp;산업과&nbsp;관광이&nbsp;상생하는&nbsp;새로운&nbsp;성장&nbsp;모델을&nbsp;구축할&nbsp;수&nbsp;있을&nbsp;것입니다.&nbsp;<br />&nbsp;거제는&nbsp;사면이&nbsp;바다로&nbsp;둘러싸여&nbsp;있어,&nbsp;해양치유에&nbsp;활용될&nbsp;수&nbsp;있는&nbsp;풍부한&nbsp;해양치유자원을&nbsp;가지고&nbsp;있습니다.&nbsp;이러한&nbsp;기회와&nbsp;강점을&nbsp;살려,&nbsp;전략적이고&nbsp;집중적인&nbsp;해양치유산업&nbsp;활성화&nbsp;정책을&nbsp;통해&nbsp;거제&nbsp;미래&nbsp;100년을&nbsp;견인할&nbsp;핵심&nbsp;산업으로&nbsp;육성해야&nbsp;합니다.<br />&nbsp;변광용&nbsp;시장님과&nbsp;집행부는&nbsp;해양치유산업을&nbsp;면밀히&nbsp;검토하여,&nbsp;과감한&nbsp;정책&nbsp;결단과&nbsp;실행력으로&nbsp;신속하게&nbsp;추진해&nbsp;주시기를&nbsp;당부드립니다.<br />&nbsp;경청해&nbsp;주셔서&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='13' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;조대용&nbsp;의원&nbsp;수고하셨습니다.<br />&nbsp;의안&nbsp;상정에&nbsp;앞서&nbsp;지난&nbsp;9월&nbsp;23일,&nbsp;양태석&nbsp;의원을&nbsp;대상으로&nbsp;하는&nbsp;거제시의회&nbsp;의원&nbsp;징계의&nbsp;건이&nbsp;발의되어&nbsp;의원님들께&nbsp;해당&nbsp;의안을&nbsp;인쇄·배부해&nbsp;드렸으며,&nbsp;이&nbsp;안건은&nbsp;「거제시의회&nbsp;회의&nbsp;규칙」&nbsp;제87조에&nbsp;따라&nbsp;윤리특별위원회에&nbsp;회부하여&nbsp;윤리특위로부터&nbsp;징계에&nbsp;대한&nbsp;심사보고서가&nbsp;접수되면&nbsp;본회의에&nbsp;부의하도록&nbsp;하겠습니다.<br />&nbsp;의사일정에&nbsp;따라&nbsp;의안을&nbsp;상정하도록&nbsp;하겠습니다.&nbsp;의사일정은&nbsp;배부해&nbsp;드린&nbsp;유인물을&nbsp;참고하여&nbsp;주시기&nbsp;바랍니다.<br /><hr /></div><div class='contents-block' data-con_idx='14'><strong class='item-in-contents' id='item2' title='1. 제258회 거제시의회 임시회 회기 결정의 건'>1.&nbsp;제258회&nbsp;거제시의회&nbsp;임시회&nbsp;회기&nbsp;결정의&nbsp;건</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 35분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='15' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제1항&nbsp;제258회&nbsp;거제시의회&nbsp;임시회&nbsp;회기&nbsp;결정의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;이번&nbsp;임시회는&nbsp;2025년도&nbsp;3회&nbsp;추경&nbsp;예산안과&nbsp;조례안&nbsp;등을&nbsp;심의·의결하기&nbsp;위하여&nbsp;오늘부터&nbsp;11월&nbsp;7일까지&nbsp;12일간의&nbsp;회기로&nbsp;결정하고자&nbsp;하는데&nbsp;이의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;이의가&nbsp;없으므로&nbsp;가결&nbsp;되었음을&nbsp;선포합니다.<br /><hr /></div><div class='contents-block' data-con_idx='16'><strong class='item-in-contents' id='item3' title='2. 회의록 서명의원 선출의 건'>2.&nbsp;회의록&nbsp;서명의원&nbsp;선출의&nbsp;건</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 36분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='17' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제2항&nbsp;회의록&nbsp;서명의원&nbsp;선출의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;이번&nbsp;회의록&nbsp;서명의원은&nbsp;순서에&nbsp;따라&nbsp;이태열&nbsp;의원,&nbsp;김두호&nbsp;의원으로&nbsp;선출하고자&nbsp;하는데&nbsp;이의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;이의가&nbsp;없으므로&nbsp;가결&nbsp;되었음을&nbsp;선포합니다.<br /><hr /></div><div class='contents-block' data-con_idx='18'><strong class='item-in-contents' id='item4' title='3. 2025년도 제3회 추가경정 세입·세출 예산안 제안 설명의 건'>3.&nbsp;2025년도&nbsp;제3회&nbsp;추가경정&nbsp;세입&middot세출&nbsp;예산안&nbsp;제안&nbsp;설명의&nbsp;건</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 36분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='19' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제3항&nbsp;2025년도&nbsp;제3회&nbsp;추가경정&nbsp;세입·세출&nbsp;예산안&nbsp;제안&nbsp;설명의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;부시장님&nbsp;나오셔서&nbsp;제안설명&nbsp;해&nbsp;주시기&nbsp;바랍니다.&nbsp;<br /></div><div class='contents-block speaker-block' data-con_idx='20' data-member_code=''><strong>○부시장 민기식</strong>&nbsp;안녕하십니까.&nbsp;부시장&nbsp;민기식입니다.<br />&nbsp;평소&nbsp;시정발전과&nbsp;시민의&nbsp;복리&nbsp;증진을&nbsp;위해&nbsp;아낌없는&nbsp;성원과&nbsp;고견을&nbsp;보내주시는&nbsp;거제시의회&nbsp;신금자&nbsp;의장님을&nbsp;비롯한&nbsp;의원님들께&nbsp;감사를&nbsp;올립니다.&nbsp;<br />&nbsp;오늘&nbsp;제안드리는&nbsp;제3회&nbsp;추가경정&nbsp;예산안은&nbsp;정부의&nbsp;민생회복&nbsp;소비쿠폰&nbsp;지급&nbsp;정책에&nbsp;발맞추어&nbsp;우리&nbsp;시&nbsp;차원의&nbsp;민생회복지원금&nbsp;추가&nbsp;지원을&nbsp;통해&nbsp;지역경제의&nbsp;활력을&nbsp;높이고&nbsp;시민의&nbsp;생활&nbsp;안정을&nbsp;도모하기&nbsp;위한&nbsp;것입니다.&nbsp;정부의&nbsp;민생회복&nbsp;소비쿠폰&nbsp;사업이&nbsp;시민들의&nbsp;소비촉진과&nbsp;소상공인의&nbsp;매출&nbsp;증대&nbsp;등&nbsp;지역&nbsp;경제&nbsp;회복의&nbsp;마중물&nbsp;역할을&nbsp;하고&nbsp;있지만,&nbsp;고물가·고금리&nbsp;등&nbsp;복합적인&nbsp;경제&nbsp;여건&nbsp;속에서&nbsp;시민들의&nbsp;체감&nbsp;경제는&nbsp;여전히&nbsp;어려운&nbsp;상황입니다.<br />&nbsp;우리&nbsp;시는&nbsp;정부의&nbsp;지원만으로는&nbsp;충분치&nbsp;않은&nbsp;부분을&nbsp;보완하고,&nbsp;지역&nbsp;내&nbsp;소비&nbsp;촉진과&nbsp;소상공인&nbsp;매출&nbsp;회복을&nbsp;위해&nbsp;이번&nbsp;추경예산을&nbsp;편성하였습니다.<br />&nbsp;그럼&nbsp;지금부터&nbsp;제3회&nbsp;추가경정예산안에&nbsp;대하여&nbsp;세부적으로&nbsp;설명&nbsp;올리겠습니다.&nbsp;배부해&nbsp;드린&nbsp;제안설명서를&nbsp;참고하여&nbsp;주시기&nbsp;바랍니다.<br />&nbsp;먼저&nbsp;3페이지&nbsp;예산안&nbsp;총규모입니다.&nbsp;제3회&nbsp;추경예산&nbsp;규모는&nbsp;1조&nbsp;4441억&nbsp;400만&nbsp;원으로,&nbsp;제2회&nbsp;추경예산&nbsp;대비&nbsp;425억&nbsp;4500만&nbsp;원이&nbsp;증가하였습니다.<br />&nbsp;회계별로&nbsp;보면&nbsp;일반회계는&nbsp;거제시&nbsp;민생회복지원금&nbsp;지원사업&nbsp;250억&nbsp;원,&nbsp;정부&nbsp;민생회복&nbsp;소비쿠폰&nbsp;2차&nbsp;지원사업&nbsp;175억&nbsp;4500만&nbsp;원이&nbsp;증액된&nbsp;1조&nbsp;3125억&nbsp;8000만&nbsp;원입니다.&nbsp;특별회계는&nbsp;제2회&nbsp;추경예산과&nbsp;동일한&nbsp;1315억&nbsp;2400만&nbsp;원입니다.<br />&nbsp;다음은&nbsp;4페이지&nbsp;일반회계&nbsp;세입·세출안입니다.&nbsp;총세입은&nbsp;1조&nbsp;3125억&nbsp;8000만&nbsp;원이며&nbsp;보조금&nbsp;175억&nbsp;4500만&nbsp;원,&nbsp;보전수입등및내부거래&nbsp;250억&nbsp;원&nbsp;증가하였습니다.<br />&nbsp;다음은&nbsp;일반회계&nbsp;세출&nbsp;내역입니다.<br />&nbsp;정책사업에&nbsp;425억&nbsp;4500만&nbsp;원&nbsp;증가하였습니다.&nbsp;기타&nbsp;특별회계와&nbsp;공기업특별회계&nbsp;세입·세출은&nbsp;변동사항이&nbsp;없습니다.<br />&nbsp;지난&nbsp;제257회&nbsp;거제시의회&nbsp;임시회에서&nbsp;거제시&nbsp;민생회복지원금&nbsp;지원&nbsp;조례안이&nbsp;원안가결&nbsp;되었습니다.&nbsp;이번&nbsp;추경예산안&nbsp;또한&nbsp;원안대로&nbsp;의결된다면&nbsp;민생경제&nbsp;회복과&nbsp;지역상권&nbsp;활성화에&nbsp;실질적인&nbsp;도움이&nbsp;될&nbsp;것으로&nbsp;기대됩니다.&nbsp;의원님들께서도&nbsp;그&nbsp;취지와&nbsp;필요성을&nbsp;깊이&nbsp;헤아려&nbsp;주시어&nbsp;원안대로&nbsp;의결하여&nbsp;주실&nbsp;것을&nbsp;부탁드립니다.&nbsp;<br />&nbsp;이상으로&nbsp;2025년&nbsp;제3회&nbsp;추가경정예산안에&nbsp;대한&nbsp;제안설명을&nbsp;모두&nbsp;마치겠습니다.<br />&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='21' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;부시장님&nbsp;수고하셨습니다.<br /><hr /></div><div class='contents-block' data-con_idx='22'><strong class='item-in-contents' id='item5' title='4. 예산결산특별위원회 구성의 건'>4.&nbsp;예산결산특별위원회&nbsp;구성의&nbsp;건</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 40분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='23' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제4항&nbsp;예산결산특별위원회&nbsp;구성의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;본&nbsp;안건은&nbsp;2025년도&nbsp;제3회&nbsp;추경&nbsp;예산안을&nbsp;심사하기&nbsp;위하여&nbsp;「거제시의회&nbsp;위원회&nbsp;조례」&nbsp;제7조의2에&nbsp;따라&nbsp;예산결산특별위원회를&nbsp;구성하고자&nbsp;하는&nbsp;것입니다.&nbsp;특별위원회&nbsp;구성은&nbsp;각&nbsp;상임위원회에서&nbsp;추천된&nbsp;위원&nbsp;현황을&nbsp;참고하여&nbsp;주시기&nbsp;바랍니다.&nbsp;위원&nbsp;수는&nbsp;7명으로&nbsp;하며,&nbsp;위원장에는&nbsp;정명희&nbsp;의원,&nbsp;부위원장에는&nbsp;이미숙&nbsp;의원,&nbsp;위원으로는&nbsp;이태열&nbsp;의원,&nbsp;박명옥&nbsp;의원,&nbsp;윤부원&nbsp;의원,&nbsp;노재하&nbsp;의원,&nbsp;김영규&nbsp;의원으로&nbsp;하고,&nbsp;활동기간은&nbsp;오늘부터&nbsp;11월&nbsp;7일까지&nbsp;12일간으로&nbsp;하는데&nbsp;이의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;이의가&nbsp;없으므로&nbsp;가결&nbsp;되었음을&nbsp;선포합니다.<br /><hr /></div><div class='contents-block' data-con_idx='24'><strong class='item-in-contents' id='item6' title='5. 거제시 관광사업체 네트워크 구성 및 서비스 개선 교육 민간위탁 보고의 건(시장 제출)(의안번호 593)'>5.&nbsp;거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육&nbsp;민간위탁&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;593)</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /></div><div class='contents-block' data-con_idx='25'><strong class='item-in-contents' id='item7' title='6. 거제시 관광기념품 공모전 민간위탁 보고의 건(시장 제출)(의안번호 594)'>6.&nbsp;거제시&nbsp;관광기념품&nbsp;공모전&nbsp;민간위탁&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;594)</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 41분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='26' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제5항&nbsp;거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육&nbsp;민간위탁&nbsp;보고의&nbsp;건,&nbsp;제6항&nbsp;거제시&nbsp;관광기념품&nbsp;공모전&nbsp;민간위탁&nbsp;보고의&nbsp;건&nbsp;이상&nbsp;두&nbsp;건을&nbsp;일괄&nbsp;상정합니다.<br />&nbsp;문화관광국장님,&nbsp;보고해&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block' data-con_idx='27' data-member_code=''><strong>○문화관광국장 옥주원</strong>&nbsp;안녕하십니까?&nbsp;문화관광국장&nbsp;옥주원입니다.<br />&nbsp;의안번호&nbsp;제593호&nbsp;「거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육」민간위탁&nbsp;보고의&nbsp;건과&nbsp;의안번호&nbsp;제594호&nbsp;「거제시&nbsp;관광기념품&nbsp;공모전」&nbsp;민간위탁&nbsp;보고&nbsp;등&nbsp;2건에&nbsp;대하여&nbsp;일괄&nbsp;보고드리겠습니다.<br />&nbsp;먼저,&nbsp;첫&nbsp;번째&nbsp;안건인&nbsp;「거제시&nbsp;관광사업체&nbsp;네트워크&nbsp;구성&nbsp;및&nbsp;서비스&nbsp;개선&nbsp;교육」&nbsp;민간위탁입니다.<br />&nbsp;이&nbsp;사업은&nbsp;관내&nbsp;관광&nbsp;관련&nbsp;사업자&nbsp;간의&nbsp;협업체계를&nbsp;구축하고&nbsp;서비스&nbsp;품질&nbsp;향상을&nbsp;위한&nbsp;교육을&nbsp;추진함으로써&nbsp;지역&nbsp;관광산업의&nbsp;질적&nbsp;성장을&nbsp;도모하고자&nbsp;하는&nbsp;사업입니다.<br />&nbsp;위탁기간은&nbsp;2026년&nbsp;4월부터&nbsp;12월까지&nbsp;9개월,&nbsp;사업비는&nbsp;2000만&nbsp;원이며&nbsp;「관광진흥법」&nbsp;및&nbsp;「거제시&nbsp;관광진흥에&nbsp;관한&nbsp;조례」에&nbsp;근거하여&nbsp;비영리&nbsp;법인&nbsp;또는&nbsp;단체에&nbsp;위탁할&nbsp;계획입니다.<br />&nbsp;사업&nbsp;내용으로는&nbsp;거제시&nbsp;관광&nbsp;네트워크&nbsp;워크숍&nbsp;및&nbsp;포럼&nbsp;개최,&nbsp;관광종사자&nbsp;서비스&nbsp;개선&nbsp;교육을&nbsp;포함하고&nbsp;있으며,&nbsp;선정은&nbsp;공개모집을&nbsp;통해&nbsp;수탁기관선정위원회&nbsp;심의를&nbsp;거쳐&nbsp;추진할&nbsp;예정입니다.<br />&nbsp;다음은&nbsp;두&nbsp;번째&nbsp;안건인&nbsp;「거제시&nbsp;관광기념품&nbsp;공모전」&nbsp;민간위탁입니다.<br />&nbsp;이&nbsp;사업은&nbsp;거제를&nbsp;대표할&nbsp;수&nbsp;있는&nbsp;관광기념품을&nbsp;공모를&nbsp;통해&nbsp;신규&nbsp;발굴·개발하고,&nbsp;수상작을&nbsp;상품화하여&nbsp;관광산업&nbsp;경쟁력을&nbsp;높이기&nbsp;위하여&nbsp;추진됩니다.<br />&nbsp;위탁기간은&nbsp;2026년&nbsp;3월부터&nbsp;12월까지&nbsp;10개월,&nbsp;사업비는&nbsp;2500만&nbsp;원입니다.<br />&nbsp;주요&nbsp;사업내용은&nbsp;공모전&nbsp;기획&nbsp;및&nbsp;접수·심사,&nbsp;수상작&nbsp;시상&nbsp;및&nbsp;전시,&nbsp;수상작&nbsp;홍보&nbsp;등으로&nbsp;구성되어&nbsp;있으며,&nbsp;「관광진흥법」&nbsp;및&nbsp;「거제시&nbsp;관광진흥에&nbsp;관한&nbsp;조례」에&nbsp;근거하여&nbsp;전문성을&nbsp;갖춘&nbsp;비영리&nbsp;법인&nbsp;또는&nbsp;단체에&nbsp;공개모집을&nbsp;통해&nbsp;위탁할&nbsp;예정입니다.<br />&nbsp;두&nbsp;건&nbsp;모두&nbsp;수탁기간이&nbsp;1년&nbsp;이하의&nbsp;일회성&nbsp;사업으로,&nbsp;「거제시&nbsp;사무의&nbsp;민간위탁&nbsp;촉진&nbsp;및&nbsp;관리&nbsp;조례」&nbsp;제6조제1항에&nbsp;따라&nbsp;시의회&nbsp;사전&nbsp;보고를&nbsp;드립니다.<br />&nbsp;의원님들께서도&nbsp;2026년&nbsp;관광과&nbsp;소관&nbsp;민간위탁추진사업이&nbsp;거제&nbsp;관광산업의&nbsp;기반을&nbsp;다지고,&nbsp;민간의&nbsp;참여를&nbsp;확대하는&nbsp;계기가&nbsp;될&nbsp;수&nbsp;있도록&nbsp;많은&nbsp;관심과&nbsp;협조를&nbsp;부탁드립니다.<br />&nbsp;이상으로&nbsp;보고를&nbsp;마치겠습니다.&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='28' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;수고하셨습니다.<br /><hr /></div><div class='contents-block' data-con_idx='29'><strong class='item-in-contents' id='item8' title='7. 제5기 지역사회보장계획의 2026년 연차별 시행계획 수립 보고의 건(시장 제출)(의안번호 597)'>7.&nbsp;제5기&nbsp;지역사회보장계획의&nbsp;2026년&nbsp;연차별&nbsp;시행계획&nbsp;수립&nbsp;보고의&nbsp;건(시장&nbsp;제출)(의안번호&nbsp;597)</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 44분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='30' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제7항&nbsp;제5기&nbsp;지역사회보장계획의&nbsp;2026년&nbsp;연차별&nbsp;시행계획&nbsp;수립&nbsp;보고의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;복지국장&nbsp;보고해&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block' data-con_idx='31' data-member_code=''><strong>○복지국장 서미경</strong>&nbsp;반갑습니다.&nbsp;복지국장&nbsp;서미경입니다.<br />&nbsp;의안번호&nbsp;597,&nbsp;우리&nbsp;시의&nbsp;제5기&nbsp;지역사회&nbsp;보장계획&nbsp;2026년&nbsp;연차별&nbsp;시행계획&nbsp;수립에&nbsp;대해&nbsp;보고드리겠습니다.<br />&nbsp;지역사회&nbsp;보장계획은&nbsp;지역주민의&nbsp;욕구,&nbsp;자원&nbsp;등&nbsp;복지환경을&nbsp;고려하여&nbsp;다양한&nbsp;주체들의&nbsp;참여를&nbsp;통해&nbsp;사회&nbsp;보장사업&nbsp;우선순위를&nbsp;결정하는&nbsp;지역단위&nbsp;사회보장계획입니다.<br />&nbsp;「사회보장&nbsp;급여의&nbsp;이용․제공&nbsp;및&nbsp;수급권자&nbsp;발굴에&nbsp;관한&nbsp;법률」&nbsp;제35조&nbsp;및&nbsp;동법&nbsp;시행령&nbsp;제20조에&nbsp;따라&nbsp;지방자치단체의&nbsp;장은&nbsp;4년마다&nbsp;지역사회보장계획을&nbsp;수립하고,&nbsp;매년&nbsp;연차별&nbsp;시행계획을&nbsp;수립하여&nbsp;지역사회보장협의체&nbsp;심의,&nbsp;시의회&nbsp;보고를&nbsp;거친&nbsp;후&nbsp;경남도에&nbsp;제출하도록&nbsp;되어&nbsp;있습니다.<br />&nbsp;제5기&nbsp;지역사회보장계획은&nbsp;2023년부터&nbsp;2026년까지이며,&nbsp;2026년&nbsp;연차별&nbsp;시행계획은&nbsp;4년차에&nbsp;해당되는&nbsp;계획입니다.<br />&nbsp;지역사회보장계획&nbsp;책자&nbsp;1페이지&nbsp;2026년도&nbsp;연차별&nbsp;시행계획&nbsp;목표와&nbsp;추진전략별&nbsp;사업에&nbsp;대해&nbsp;설명드리겠습니다.<br />&nbsp;2026년&nbsp;연차별&nbsp;시행계획은&nbsp;시민과&nbsp;함께&nbsp;만드는&nbsp;행복한&nbsp;거제를&nbsp;목표로&nbsp;지자체&nbsp;사회보장사업&nbsp;전략체계와&nbsp;지역사회보장&nbsp;발전&nbsp;전략&nbsp;체계로&nbsp;구성되어&nbsp;있습니다.<br />&nbsp;지자체&nbsp;사회보장사업&nbsp;전략체계는&nbsp;6대&nbsp;추진전략,&nbsp;38개&nbsp;세부사업이며,&nbsp;지역사회보장&nbsp;발전&nbsp;전략체계는&nbsp;4대&nbsp;추진전략,&nbsp;9개&nbsp;대표과업,&nbsp;13개&nbsp;세부과업으로&nbsp;이루어져&nbsp;있습니다.<br />&nbsp;51개&nbsp;사업&nbsp;시행을&nbsp;위한&nbsp;2026년&nbsp;필요예산은&nbsp;<br />250억&nbsp;5100만&nbsp;원이며,&nbsp;이중&nbsp;우리&nbsp;시&nbsp;부담액은&nbsp;239억&nbsp;2300만&nbsp;원입니다.<br />&nbsp;본&nbsp;계획은&nbsp;보건복지부&nbsp;매뉴얼에&nbsp;따라&nbsp;우리시의&nbsp;자체사업&nbsp;중심으로&nbsp;수립하였으며,&nbsp;2025년&nbsp;연차별&nbsp;시행계획에서&nbsp;복지여건&nbsp;변화에&nbsp;따른&nbsp;세부사업을&nbsp;일부&nbsp;수정&nbsp;반영하였습니다.<br />&nbsp;7페이지부터&nbsp;9페이지까지는&nbsp;2025년&nbsp;대비&nbsp;폐지,&nbsp;변경,&nbsp;신설되는&nbsp;사업내용으로&nbsp;변경사업&nbsp;14건,&nbsp;제외&nbsp;및&nbsp;폐지사업&nbsp;4건,&nbsp;신규사업&nbsp;3건이며&nbsp;거제형&nbsp;원스톱&nbsp;통합돌봄&nbsp;지원&nbsp;사업,&nbsp;지역사회보장계획&nbsp;모니터링&nbsp;활동&nbsp;강화,&nbsp;마을복지계획&nbsp;지원&nbsp;강화&nbsp;사업을&nbsp;신설하였습니다.<br />&nbsp;51개&nbsp;세부사업에&nbsp;대한&nbsp;상세&nbsp;사업내역은&nbsp;82페이지부터&nbsp;192페이지의&nbsp;자료를&nbsp;참고하시기&nbsp;바랍니다.<br />&nbsp;이상으로&nbsp;제5기&nbsp;지역사회보장&nbsp;계획의&nbsp;2026년도&nbsp;연차별&nbsp;시행계획에&nbsp;대한&nbsp;보고를&nbsp;마치겠습니다.&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='32' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;수고하셨습니다.<br /><hr /></div><div class='contents-block' data-con_idx='33'><strong class='item-in-contents' id='item9' title='8. 남부내륙철도 착공식 거제시 개최 촉구 결의안(박명옥 의원 대표발의)(양태석·한은진·최양희·이미숙·이태열·안석봉·조대용·김영규·신금자·노재하·김두호·윤부원·김동수·김선민·정명희 의원)(의안번호 624)'>8.&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안(박명옥&nbsp;의원&nbsp;대표발의)(양태석&middot한은진&middot최양희&middot이미숙&middot이태열&middot안석봉&middot조대용&middot김영규&middot신금자&middot노재하&middot김두호&middot윤부원&middot김동수&middot김선민&middot정명희&nbsp;의원)(의안번호&nbsp;624)</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 48분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='34' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제8항&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안을&nbsp;상정합니다.<br />&nbsp;대표발의하신&nbsp;박명옥&nbsp;의원&nbsp;나오셔서&nbsp;제안설명해&nbsp;주시기&nbsp;바랍니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='35' data-member_code='05050'><strong>○대표발의의원 <a class='member_profile btn_profile' id='btn_profile_138' href='#profile_layer_popup' data-uid='138' title='박명옥 의원 프로필 보기'>박명옥</a></strong>&nbsp;존경하는&nbsp;신금자&nbsp;의장님과&nbsp;선배동료&nbsp;의원&nbsp;여러분,&nbsp;반갑습니다.&nbsp;박명옥&nbsp;의원입니다.<br />&nbsp;이번&nbsp;결의안&nbsp;발의에&nbsp;적극적으로&nbsp;동참해&nbsp;주신&nbsp;의원&nbsp;여러분께&nbsp;진심으로&nbsp;감사의&nbsp;말씀을&nbsp;드립니다.&nbsp;<br />&nbsp;지금부터&nbsp;의안번호&nbsp;제624호&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안에&nbsp;대하여&nbsp;제안설명&nbsp;드리겠습니다.&nbsp;<br />&nbsp;의석에&nbsp;배부해드린&nbsp;회의자료를&nbsp;참고하여&nbsp;주시기&nbsp;바랍니다.&nbsp;<br />&nbsp;주문입니다.&nbsp;<br />&nbsp;정부는&nbsp;국가균형발전의&nbsp;실현과&nbsp;남해안권&nbsp;상생발전을&nbsp;위한&nbsp;중요한&nbsp;시발점으로,&nbsp;남부내륙철도&nbsp;착공식을&nbsp;철도의&nbsp;시·종착역인&nbsp;거제시에서&nbsp;개최할&nbsp;것을&nbsp;강력히&nbsp;촉구한다.<br />&nbsp;제안이유는&nbsp;전문&nbsp;낭독할&nbsp;결의안&nbsp;내용과&nbsp;중복되므로&nbsp;생략하고&nbsp;서명부를&nbsp;포함한&nbsp;자세한&nbsp;내용은&nbsp;회의자료를&nbsp;참고하여&nbsp;주시기&nbsp;바랍니다.&nbsp;<br />&nbsp;본&nbsp;결의안의&nbsp;수신처는&nbsp;대통령,&nbsp;국회의장,&nbsp;국무총리,&nbsp;국토교통부장관,&nbsp;지방시대위원회&nbsp;위원장,&nbsp;경상남도지사,&nbsp;국가철도공단&nbsp;이사장이&nbsp;되겠습니다.<br />&nbsp;그럼&nbsp;지금부터&nbsp;결의안을&nbsp;낭독하겠습니다.&nbsp;<br />&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안.<br />&nbsp;“남부내륙철도&nbsp;착공식은&nbsp;남부내륙철도의&nbsp;시·종착역이자&nbsp;핵심&nbsp;기반시설이&nbsp;건설되는&nbsp;거제에서&nbsp;반드시&nbsp;개최되어야&nbsp;한다!”<br />&nbsp;남부내륙철도&nbsp;건설사업은&nbsp;수도권&nbsp;중심의&nbsp;불균형&nbsp;발전을&nbsp;해소하고&nbsp;경북과&nbsp;경남&nbsp;내륙을&nbsp;연결하는&nbsp;국가&nbsp;교통망을&nbsp;완성함으로써&nbsp;지역균형발전을&nbsp;실현할&nbsp;중대한&nbsp;국책사업이자&nbsp;경남&nbsp;서부권의&nbsp;수도권&nbsp;접근성을&nbsp;개선할&nbsp;숙원사업이다.<br />&nbsp;총연장&nbsp;174.6㎞,&nbsp;총사업비&nbsp;약&nbsp;6조&nbsp;7000억&nbsp;원이&nbsp;투입되는&nbsp;이&nbsp;사업은&nbsp;설계&nbsp;및&nbsp;인·허가&nbsp;절차를&nbsp;거쳐&nbsp;2025년&nbsp;하반기&nbsp;착공을&nbsp;앞두고&nbsp;있다.&nbsp;<br />&nbsp;철도가&nbsp;개통되면&nbsp;거제와&nbsp;서울이&nbsp;2시간대&nbsp;생활권으로&nbsp;연결되어&nbsp;인구&nbsp;유입은&nbsp;물론&nbsp;관광&nbsp;활성화와&nbsp;지역경제&nbsp;발전을&nbsp;견인할&nbsp;것이다.&nbsp;나아가&nbsp;물류&nbsp;수송&nbsp;개선을&nbsp;통해&nbsp;기업&nbsp;경쟁력이&nbsp;강화되고&nbsp;산업&nbsp;인프라&nbsp;확충&nbsp;및&nbsp;지역&nbsp;일자리&nbsp;확대&nbsp;등&nbsp;광범위한&nbsp;파급&nbsp;효과를&nbsp;가져올&nbsp;것으로&nbsp;기대된다.&nbsp;<br />&nbsp;그동안&nbsp;거제시는&nbsp;인구&nbsp;23만&nbsp;명의&nbsp;대한민국&nbsp;조선산업을&nbsp;대표하는&nbsp;도시이자&nbsp;천혜의&nbsp;해양&nbsp;관광&nbsp;자원을&nbsp;보유하고&nbsp;있음에도&nbsp;불구하고&nbsp;고속도로,&nbsp;철도와&nbsp;공항&nbsp;등&nbsp;주요&nbsp;교통&nbsp;인프라가&nbsp;조성되지&nbsp;않은&nbsp;전국&nbsp;유일의&nbsp;교통&nbsp;소외&nbsp;지역으로&nbsp;지금까지도&nbsp;지역&nbsp;발전에&nbsp;상당한&nbsp;제약을&nbsp;받아왔다.&nbsp;<br />&nbsp;이러한&nbsp;점에서&nbsp;남부내륙철도의&nbsp;착공은&nbsp;지역&nbsp;불균형을&nbsp;해소하고&nbsp;거제시의&nbsp;경제적·산업적&nbsp;활력을&nbsp;회복하여&nbsp;지속&nbsp;가능한&nbsp;성장을&nbsp;이루게&nbsp;할&nbsp;핵심&nbsp;교통망으로서&nbsp;국가균형발전&nbsp;실현에&nbsp;중요한&nbsp;전환점이&nbsp;될&nbsp;것이다.<br />&nbsp;무엇보다&nbsp;거제시는&nbsp;남부내륙철도의&nbsp;시·종착역이자&nbsp;핵심&nbsp;거점으로&nbsp;새롭게&nbsp;놓이는&nbsp;철도&nbsp;인프라와&nbsp;연계하여&nbsp;상업·주거·문화관광이&nbsp;어우러진&nbsp;역세권&nbsp;개발을&nbsp;통해&nbsp;지역경제&nbsp;활성화를&nbsp;견인하고&nbsp;남해안권&nbsp;경제&nbsp;중심도시로&nbsp;도약할&nbsp;잠재력을&nbsp;가지고&nbsp;있다.<br />&nbsp;이와&nbsp;더불어&nbsp;향후&nbsp;건설될&nbsp;가덕도&nbsp;신공항과&nbsp;연계되는&nbsp;핵심&nbsp;교통&nbsp;허브로서의&nbsp;전략적&nbsp;중요성은&nbsp;더욱&nbsp;명확하다.<br />&nbsp;따라서&nbsp;남부내륙철도&nbsp;착공식은&nbsp;이러한&nbsp;지역균형발전의&nbsp;취지를&nbsp;가장&nbsp;잘&nbsp;구현하고&nbsp;새로운&nbsp;지방시대의&nbsp;기점이&nbsp;될&nbsp;거제시에서&nbsp;개최되는&nbsp;것이&nbsp;타당하다.&nbsp;<br />&nbsp;이를&nbsp;통해&nbsp;정부는&nbsp;대통령&nbsp;공약인&nbsp;국가균형발전&nbsp;실현&nbsp;의지를&nbsp;대내외적으로&nbsp;공표하고&nbsp;남해안권&nbsp;발전&nbsp;전략의&nbsp;비전을&nbsp;확고히&nbsp;할&nbsp;수&nbsp;있을&nbsp;것이다.<br />&nbsp;이에&nbsp;우리&nbsp;거제시의회&nbsp;의원&nbsp;일동은&nbsp;23만&nbsp;거제시민의&nbsp;간절한&nbsp;염원을&nbsp;담아&nbsp;남부내륙철도&nbsp;착공식의&nbsp;거제시&nbsp;개최를&nbsp;강력히&nbsp;촉구하며&nbsp;다음과&nbsp;같이&nbsp;결의한다.<br />&nbsp;하나,&nbsp;정부는&nbsp;남부내륙철도의&nbsp;상징성과&nbsp;지역균형발전&nbsp;취지를&nbsp;반영하여&nbsp;철도의&nbsp;시·종착역이자&nbsp;핵심&nbsp;거점인&nbsp;거제에서&nbsp;착공식을&nbsp;개최할&nbsp;것을&nbsp;즉각&nbsp;결정하여&nbsp;추진하라.<br />&nbsp;하나,&nbsp;정부는&nbsp;남부내륙철도의&nbsp;조기&nbsp;개통을&nbsp;위한&nbsp;사업&nbsp;추진&nbsp;의지를&nbsp;명확히&nbsp;하고&nbsp;거제시를&nbsp;포함한&nbsp;남해안권&nbsp;경제&nbsp;활성화를&nbsp;위한&nbsp;정책적&nbsp;지원을&nbsp;확대하라.<br />&nbsp;하나,&nbsp;국토교통부와&nbsp;관계기관은&nbsp;남부내륙철도와&nbsp;연계된&nbsp;거제역세권&nbsp;개발사업이&nbsp;국가&nbsp;차원의&nbsp;지역개발&nbsp;정책으로&nbsp;신속하고&nbsp;체계적으로&nbsp;추진될&nbsp;수&nbsp;있도록&nbsp;필요한&nbsp;행정적&nbsp;지원을&nbsp;적극&nbsp;이행하라.<br />&nbsp;남부내륙철도&nbsp;사업은&nbsp;수십&nbsp;년간&nbsp;교통&nbsp;소외를&nbsp;겪어&nbsp;온&nbsp;거제시의&nbsp;지역&nbsp;경쟁력을&nbsp;회복하고&nbsp;지방소멸&nbsp;위기에&nbsp;대응하는&nbsp;상징적&nbsp;과제이다.<br />&nbsp;정부가&nbsp;국가&nbsp;발전의&nbsp;새로운&nbsp;핵심&nbsp;동력이자&nbsp;지역균형발전&nbsp;청사진이&nbsp;될&nbsp;거제에서&nbsp;착공식을&nbsp;개최함으로써&nbsp;지역&nbsp;간&nbsp;상생과&nbsp;미래&nbsp;발전을&nbsp;향한&nbsp;책임&nbsp;있는&nbsp;의지를&nbsp;보여줄&nbsp;것을&nbsp;강력히&nbsp;촉구한다.<br />&nbsp;2025년&nbsp;10월&nbsp;27일&nbsp;&nbsp;<br />&nbsp;경상남도&nbsp;거제시의회&nbsp;의원&nbsp;일동<br />&nbsp;이상으로&nbsp;결의안에&nbsp;대한&nbsp;제안설명을&nbsp;마치겠습니다.&nbsp;<br />&nbsp;본&nbsp;결의안의&nbsp;제안&nbsp;취지를&nbsp;널리&nbsp;살피시어&nbsp;원안대로&nbsp;의결하여&nbsp;주실&nbsp;것을&nbsp;부탁드립니다.&nbsp;<br />&nbsp;감사합니다.<br /></div><div class='contents-block speaker-block member-speech' data-con_idx='36' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;수고하셨습니다.&nbsp;<br />&nbsp;제안설명에&nbsp;대하여&nbsp;질의하실&nbsp;의원께서는&nbsp;질의해&nbsp;주시기&nbsp;바랍니다.&nbsp;<br />&nbsp;질의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;질의가&nbsp;없으므로&nbsp;질의&nbsp;종결을&nbsp;선포합니다.&nbsp;<br />&nbsp;다음은&nbsp;결의안에&nbsp;대하여&nbsp;토론하실&nbsp;의원님&nbsp;계십니까?<br /><p class='taged-line tag-R'>(“없습니다” 하는 의원 있음)</p>&nbsp;토론하실&nbsp;의원님이&nbsp;없으므로&nbsp;토론&nbsp;종결을&nbsp;선포합니다.&nbsp;<br />&nbsp;그럼&nbsp;결의안에&nbsp;대하여&nbsp;가·부를&nbsp;결정토록&nbsp;하겠습니다.<br />&nbsp;의사일정&nbsp;제8항&nbsp;남부내륙철도&nbsp;착공식&nbsp;거제시&nbsp;개최&nbsp;촉구&nbsp;결의안을&nbsp;가결&nbsp;하고자&nbsp;하는데&nbsp;이의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;이의가&nbsp;없으므로&nbsp;가결&nbsp;되었음을&nbsp;선포합니다.<br /><hr /></div><div class='contents-block' data-con_idx='37'><strong class='item-in-contents' id='item10' title='9. 휴회의 건'>9.&nbsp;휴회의&nbsp;건</strong>&nbsp;<a href='#' class='go-to-top' title='처음으로'><i class='fa fas fa-arrow-circle-up'></i></a><br /><p class='taged-line tag-R'>(10시 56분)</p></div><div class='contents-block speaker-block member-speech' data-con_idx='38' data-member_code='06080'><strong>○의장 <a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></strong>&nbsp;제9항&nbsp;휴회의&nbsp;건을&nbsp;상정합니다.<br />&nbsp;상임위원회&nbsp;활동&nbsp;등을&nbsp;위하여&nbsp;11월&nbsp;6일까지&nbsp;본회의를&nbsp;휴회하고자&nbsp;하는데&nbsp;이의&nbsp;없습니까?<br /><p class='taged-line tag-R'>(“예” 하는 의원 있음)</p>&nbsp;이의가&nbsp;없으므로&nbsp;가결되었음을&nbsp;선포합니다.<br />&nbsp;이상으로&nbsp;오늘&nbsp;회의를&nbsp;모두&nbsp;마치겠습니다.<br />&nbsp;제2차&nbsp;본회의는&nbsp;11월&nbsp;7일&nbsp;오전&nbsp;10시에&nbsp;개의하겠습니다.<br />&nbsp;산회를&nbsp;선포합니다.&nbsp;<br /><p class='taged-line tag-R'>(10시 57분  산회)</p></div></div><hr /><div id='minutes-footer'><p class='font-bold attend-head-line' id='attend-member-head-line'>○출석의원(16인)-선거구순</p><p class='attend-line attend-member-line'><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_145' href='#profile_layer_popup' data-uid='145' title='노재하 의원 프로필 보기'>노재하</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_136' href='#profile_layer_popup' data-uid='136' title='양태석 의원 프로필 보기'>양태석</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_142' href='#profile_layer_popup' data-uid='142' title='김동수 의원 프로필 보기'>김동수</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_143' href='#profile_layer_popup' data-uid='143' title='김두호 의원 프로필 보기'>김두호</a></span></p><p class='attend-line attend-member-line'><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_138' href='#profile_layer_popup' data-uid='138' title='박명옥 의원 프로필 보기'>박명옥</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_140' href='#profile_layer_popup' data-uid='140' title='김영규 의원 프로필 보기'>김영규</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_147' href='#profile_layer_popup' data-uid='147' title='안석봉 의원 프로필 보기'>안석봉</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_137' href='#profile_layer_popup' data-uid='137' title='윤부원 의원 프로필 보기'>윤부원</a></span></p><p class='attend-line attend-member-line'><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_141' href='#profile_layer_popup' data-uid='141' title='조대용 의원 프로필 보기'>조대용</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_139' href='#profile_layer_popup' data-uid='139' title='최양희 의원 프로필 보기'>최양희</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_146' href='#profile_layer_popup' data-uid='146' title='김선민 의원 프로필 보기'>김선민</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_135' href='#profile_layer_popup' data-uid='135' title='신금자 의원 프로필 보기'>신금자</a></span></p><p class='attend-line attend-member-line'><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_144' href='#profile_layer_popup' data-uid='144' title='이미숙 의원 프로필 보기'>이미숙</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_150' href='#profile_layer_popup' data-uid='150' title='이태열 의원 프로필 보기'>이태열</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_149' href='#profile_layer_popup' data-uid='149' title='정명희 의원 프로필 보기'>정명희</a></span><span class='attend-member'><a class='member_profile btn_profile' id='btn_profile_148' href='#profile_layer_popup' data-uid='148' title='한은진 의원 프로필 보기'>한은진</a></span></p></div></div></div>
+    </div>
+</div>
+	</div>
+	
+
+
+<!-- 레이어 프로필 팝업-->
+<br />&nbsp;
+						
+						
+					</div>
+					<!-- //clik_view_minutes -->
+				</div>
+				<!-- //middle -->
+			</div>
+			<!-- //clik_content -->
+
+			<!-- 하단 pc -->
+			<div id="clik_bottom">
+				<div id="license">Copyright(c) 대한민국 국회도서관. All rights reserved.</div>
+			</div>
+			<!-- //하단 pc -->
+		</div><!-- //rightDiv -->
+	</div><!-- //middleDiv -->
+
+<!-- 	<div class="shareBackDiv m"></div> -->
+<!-- <iframe id="ifrm" name="ifrm" src="" width="0" height="0" frameborder="0" scrolling="no" style="display:none;"></iframe> -->
+
+</body>
+</html>

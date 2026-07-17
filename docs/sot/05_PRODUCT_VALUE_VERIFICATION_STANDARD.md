@@ -98,8 +98,9 @@ Automated guards establish only the machine-owned portion of these rows. Their h
 
 - **Intent / risk addressed:** Hardcoded uncertainty text ("Add more sources before using it as broad organizational truth") trains users to ignore uncertainty — the opposite of evidence-first.
 - **Given** inputs with distinct, known gaps (missing date, conflicting figures, single-source claim), **when** briefs are generated, **then** each brief's uncertainty section names the specific gap in that input, and inputs with sufficient evidence do not carry false-doubt boilerplate.
-- **Deterministic guard:** uncertainty text must vary across corpus inputs (no single string on >20% of briefs; threshold Proposed) and must reference input-specific entities.
-- **PASS evidence:** Corpus scan + human spot-check record confirming gap statements match planted gaps in the eval fixtures.
+- **Deterministic guard:** every uncertainty row is nonempty, non-generic, explicitly typed `presented_as_fact: false`, and bound either to a mechanically detected source-declared absence / whole-bundle coverage check or to the question-specific `HUMAN_REQUIRED` evidence-need path; no single normalized string may appear on more than 20% of corpus briefs. Exact lexical matches to planted gap labels are diagnostic only because they cannot prove semantic completeness.
+- **Human rubric (owns semantic PASS):** the dated review sample confirms that generated uncertainty addresses the planted decision-evidence gaps and does not falsely claim evidence is absent when the packet contains it. A model-suggested evidence need is never upgraded to a source fact by the automated guard.
+- **PASS evidence:** Corpus structure/variation scan plus the bound human gap-and-conflict review record.
 
 ### CS-VAL-006 — Trust labels are earned, never decorative
 
@@ -138,10 +139,12 @@ Automated guards establish only the machine-owned portion of these rows. Their h
 
 ## 3. Eval Corpus Requirements
 
-- Location: `fixtures/vs5/eval/` (created in VS5).
-- ≥25 messy real-domain inputs (email threads, meeting notes, mixed-language fragments, contradictory drafts), each with a manifest: planted facts, planted gaps, planted contradictions, answerable and unanswerable questions.
-- Frozen by hash before scoring; extended only by dated additions (never silent replacement).
-- Grows with consented real external-user inputs from CS-VAL-008 sessions onward.
+- Formal VS5 acceptance location: `fixtures/vs5/edgar-eval/`.
+- ≥25 messy real-domain decision cases, each using one to five inspectable sources and a manifest with planted facts, planted gaps, and answerable and unanswerable questions. The corpus as a whole must include at least three provenance-supported contradiction, supersession, or scope-difference cases; contradictions are never invented merely to fill a fixture field.
+- Every source must preserve and hash-bind authoritative retrieval metadata, raw bytes, normalized text, and the exact bounded upload span used by CornerStone. A manifest containing only generated inline prose is not sufficient for faithfulness review.
+- Frozen by hash before scoring; extended or replaced only by an explicit dated contract amendment. The earlier inline synthetic corpus at `fixtures/vs5/eval/manifest.json` is superseded by the 2026-07-17 SEC EDGAR corpus and cannot support a current verdict or human record.
+- Synthetic safety probes, including prompt injection, remain isolated negative controls and are excluded from quality-case counts, latency samples, and human quality samples.
+- Grows with consented real external-user inputs from CS-VAL-008 sessions onward; private participant inputs are not redistributed without explicit consent.
 
 ## 4. Boundary Rules
 

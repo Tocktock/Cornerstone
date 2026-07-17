@@ -1,0 +1,74 @@
+{
+  "schema_version": "cs.manual_review_packet.v1",
+  "packet_id": "geoje-livelihood-support-packet-a-2025-06-30",
+  "language": "ko",
+  "as_of": "2025-06-30T12:32:59+09:00",
+  "decision_stage": "immediately_before_bill_519_vote",
+  "decision_question": "의안번호 519를 지금 가결, 부결, 또는 보류해야 하는가? 조례 본문이 허용하는 범위와 당시 집행 계획을 구분하고, 찬반 발언자의 주장과 문서로 직접 확인되는 사실을 구분하여 권고안을 작성하라. 아직 확인되지 않은 법률·재정·효과성 쟁점도 명시하라.",
+  "upload": [
+    {
+      "path": "upload/01_bill-519-metadata-through-2025-05-23.txt",
+      "bytes": 430,
+      "sha256": "abdbc8c2ad24e3149ae7aed040730d5de6c80c51cc078608c9826b18a2ad07ec",
+      "source_url": "https://clik.nanet.go.kr/potal/search/searchView.do?DOCID=CLIKC1454214075702422&collection=bill",
+      "source_role": "official bill metadata through the committee decision"
+    },
+    {
+      "path": "upload/02_geoje-city-position-2025-05-23.txt",
+      "bytes": 2658,
+      "sha256": "e90ca10481ab92091a081a609775cc015850c2c99c95d98b9514feec8fc2b45c",
+      "source_url": "https://www.geoje.go.kr/board/view.geoje?boardId=BBS_0000028&dataSid=306225669&menuCd=DOM_000008902003004000&paging=ok&startPage=106",
+      "source_role": "official city position after the first rejection"
+    },
+    {
+      "path": "upload/03_bill-519-text-and-plenary-debate-pre-vote.txt",
+      "bytes": 56324,
+      "sha256": "e29eea4affe510a4c6103ac448608a2a83c85813be715604ac576c229e952d02",
+      "source_url": "https://clik.nanet.go.kr/minutes/viewer.do?DOCID=CLIKC1453347707408006&collection=minutes",
+      "source_role": "official transcript containing bill text, cost estimate, and competing speaker claims before the vote"
+    }
+  ],
+  "held_out": [
+    {
+      "path": "held-out/01_vote-result-2025-06-30.txt",
+      "bytes": 1647,
+      "sha256": "a50c6c4af2adf593623f3c1fbc27b9bb203328fe464fd2feffdce554f19c8a80",
+      "use": "post-brief chronology check only"
+    }
+  ],
+  "raw_sources": [
+    {
+      "path": "raw/01_bill-519-metadata.html",
+      "sha256": "819f4e0290386279466aa39cafa26e046ccc4aa25a441f58448f741dd633cebc"
+    },
+    {
+      "path": "raw/02_geoje-city-2025-05-23-press-release.html",
+      "sha256": "6cb5de3d364b29d2c07052919ac9a3f4e55f9c161f25f0f12d865a6a5636fa63"
+    },
+    {
+      "path": "raw/03_council-255-plenary-2025-06-30.html",
+      "sha256": "bd1dbcf24312a34a2554148d93141d0159846abf2bb03fc540b7b26e1b6e97a6"
+    }
+  ],
+  "derived_sources": [
+    {
+      "path": "derived/01_bill-519-metadata.full.txt",
+      "sha256": "9129084b84aa65fc02016e5feb78c12063bbe0f850e73826c56adcb54e8bac15"
+    },
+    {
+      "path": "derived/02_geoje-city-2025-05-23-press-release.full.txt",
+      "sha256": "cd004e750f63df125b612d6609a0a175755a419948dc4ec4359c26966ca65c57"
+    },
+    {
+      "path": "derived/03_council-255-plenary-2025-06-30.full.txt",
+      "sha256": "4ebf240b2bba783df8aa8e891132c168575f0fb3ca9961f92e381b1d6becd997"
+    }
+  ],
+  "limits": {
+    "source_count": 3,
+    "total_upload_bytes": 59412,
+    "max_source_bytes": 56324,
+    "within_vs5_intake_boundary": true
+  },
+  "judgment_policy": "The packet contains political and administrative assertions. A statement in the transcript is evidence that a speaker made the statement, not independent proof that the statement is true."
+}

@@ -1,0 +1,3720 @@
+6
+ntt_amendmentxno5-ex106.htm
+EXHIBIT 10.6
+
+Exhibit
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+AMENDMENT NO. 5
+
+TO THE
+
+MASTER SERVICES AGREEMENT
+
+And
+
+SUPPLEMENT A
+
+BETWEEN
+
+CORELOGIC SOLUTIONS, LLC
+
+AND
+
+NTT DATA SERVICES, LLC
+
+Amendment 5 Effective Date May 15, 2018
+
+This document contains proprietary and confidential information of CoreLogic and NTT DATA Services. The information contained in this document may not be disclosed outside either Party without the prior written permission of the other Party.
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+AMENDMENT NO. 5
+
+TO THE
+
+MASTER SERVICES AGREEMENT
+
+THIS AMENDMENT NO. 5 (this “Amendment”) is entered into as of May 15, 2018 (the “Amendment Date”) by and between CoreLogic Solutions LLC (“CoreLogic”) and NTT DATA Services, LLC (“Supplier”) to be effective as of May 15, 2018, (the “Amendment Effective Date”).
+
+WHEREAS, CoreLogic and Supplier are parties to a MSA and Supplement A, each dated as of July 19, 2012; Amendment No. 1 to the MSA dated October 23, 2012; Amendment No. 2 to the MSA dated December 6, 2012; Amendment No. 3 to the MSA dated March 17, 2017; and Amendment No. 4 to the MSA dated October 1, 2017.
+
+WHEREAS, CoreLogic and Supplier intend to further amend and restate the Agreement documents set forth below.
+
+NOW THEREFORE, in consideration of the mutual promises and covenants contained in this Amendment, and of other good and valid consideration, the receipt and sufficiency of which is hereby acknowledged, CoreLogic and Supplier hereby agree as follows:
+
+1.
+
+APPLICABILITY OF PROVISIONS OF THE AGREEMENT
+
+This Amendment is subject to, and shall be governed by, all of the provisions of the Agreement, except to the extent such provisions are expressly modified by this Amendment. Capitalized terms used herein shall have the respective meaning ascribed to each by the Agreement except as otherwise expressly set forth in this Amendment.
+
+2.
+
+NEW AND AMENDED CONTRACT DOCUMENTS
+
+Effective as of 12:00:01 a.m., U.S. Pacific Time on the Amendment Effective Date:
+
+3.2 Amended and Restated Contract Documents. The following contract documents are hereby stricken in their entirety and replaced, respectively with those attached to this Amendment:
+
+Schedule A-3.1 Service Level Matrix
+
+◦
+
+Updated Service Level Matrix to add Key Measure for PC refresh
+
+Schedule A-3.2 Service Level Definitions and Measurement Methodology
+
+◦
+
+Added Key Measure for PC Refresh and CSI Flags as appropriate
+
+3.
+
+GOVERNING LAW.
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 5 Page 1
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+This Amendment shall be governed by and construed in accordance with the terms set forth in Section 19.4 of the Agreement.
+
+4.
+
+HEADINGS.
+
+The article and section headings and the table of contents used herein are for reference and convenience only and will not be considered in the interpretation of this Amendment.
+
+5.
+
+OTHER PROVISIONS OF THE AGREEMENT UNCHANGED.
+
+Except as specifically amended by this Amendment, all other provisions of the Agreement shall remain in full force and effect and shall not be altered by this Amendment.
+
+6.
+
+SIGNATURES.
+
+This Amendment may be signed in multiple counterparts, each of which shall be an original but all of which shall constitute one and the same Amendment. Signatures to this Amendment sent by facsimile or by PDF shall be deemed for all purposes to be the same as original signatures.
+
+IN WITNESS WHEREOF, the Parties have caused this Amendment to be executed by their respective duly authorized representatives as of the Amendment Effective Date.
+
+CORELOGIC SOLUTIONS, LLC NTT DATA SERVICES, LLC
+
+By: /s/ Kevin Tang By: /s/ John Evans
+
+Printed Name: Kevin Tang Printed Name: John Evans
+
+Title: SCVM Sr. Leader Title: Client Executive
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 5
+
+2
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+MASTER SERVICES AGREEMENT
+
+between
+
+CORELOGIC SOLUTIONS, LLC
+
+and
+
+NTT Data Services, LLC
+
+Supplement A
+
+Schedule A-3.2:
+
+Service Level Definitions and Measurement Methodology
+
+This document contains proprietary and confidential information of CoreLogic and NTT Data. The information contained in this document may not be disclosed outside your company without the prior written permission of CoreLogic and NTT Data.
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+1.
+
+Introduction
+
+1.
+
+Agreement. This Schedule A-3.2 (this “Schedule”) is attached to and incorporated by reference in Supplement A to that certain Master Services Agreement by and between CoreLogic and Supplier dated July 19, 2012 (the “MSA”).
+
+2.
+
+References. All references in this Schedule to articles, sections and attachments shall be to this Schedule, unless another reference is provided.
+
+3.
+
+Definitions. Terms used in this Schedule with initial capitalized letters but not defined in this Schedule shall have the respective meanings set forth in Schedule 1 to the MSA, Schedule A-1 to Supplement A or elsewhere in the Agreement.
+
+4.
+
+General Service Level Exceptions. In addition to Section 10.2 and Section 4.4 (last sentence) of the MSA, any Service Levels affected by Software or Equipment listed in the known error database because the Software or Equipment is end of life or no longer vendor supported, or the version is out of currency, or for other known error or issue not caused by Supplier for which the recommended remedial action has not been approved or implemented by CoreLogic shall be an exception and excluded from the Service Level measurement.
+
+5.
+
+Valid Use of Pending. The following reasons are the only valid uses of pending, and must have an associated work note attached to the ticket describing the reason for the pending status.
+
+1.
+
+The following valid pending reasons apply to all ticket types:
+
+a.
+
+Waiting on CoreLogic
+
+b.
+
+Waiting on CoreLogic vendor
+
+2.
+
+The following valid pending reasons apply to incidents only:
+
+a.
+
+Waiting on an agreed upon scheduled change
+
+b.
+
+Pending approved by CoreLogic on MIM call for some other reason
+
+c.
+
+Time during application recovery or business validation after service or infrastructure is restored
+
+d.
+
+Previously unknown third party software defects
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+2.
+
+Service Level Definitions
+
+1.
+
+2.2.a CSL-SM-Incident Handling - Critical
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the time interval between an Incident creation dates for tickets with Critical Priority to the time normal service operation is restored via implementing a solution to the known error or by employing a workaround
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS
+
+Exceptions:
+
+Restoration Time does not include the following:
+
+- Pending time allowed as indicated in section 1.6.
+
+- If there are instances or circumstances at a non-Dell facility where equipment failures (outside of equipment that we support) fail and that inhibits/prohibits us from rendering services, then it’s suspended. Some of this could include Power failures, local equipment not in our support, etc.
+
+- Time incurred restoring Application data and/or functionality from tape media after Supplier has returned Equipment to service.
+
+- Third Party Hardware Exception
+
+- Adjustments to the Service Levels approved by CoreLogic in its sole discretion pursuant to the last sentence of Section 4.4 of the MSA in order to permit the performance of new or additional work activities as contemplated by Section 4.4 of the MSA.
+
+Incidents and outages due to the following incident management exclusion reasons:
+
+2.2.a.1 Scrub, Incident deemed misclassified by CoreLogic exclusion committee.
+
+2.2.a.2 Scrub, Non-Supplier supported site.
+
+2.2.a.3 Scrub, Server/System not in production (not in-service).
+
+2.2.a.4 Scrub, CoreLogic Application related outage that is not Supplier infrastructure caused.
+
+2.2.a.5 Scrub, duplicate Incident record.
+
+2.2.a.6 Scrub, Scheduled Downtime per system.
+
+2.2.a.7 Scrub, Monitoring Alerts, no outage or CoreLogic impact noted.
+
+2.2.a.8 Scrub, Eligible Recipient requested escalation for Emergency Change, No CoreLogic outage.
+
+2.2.a.9 Scrub, CoreLogic requested the Incident Severity be raised to bypass process/lead times.
+
+2.2.a.10 Scrub, Non-Supplier Third Party outage.
+
+2.2.a.11 Scrub, Final CoreLogic Resolver Group.
+
+2.2.a.12 Scrub, Incident related to Supplier reported known errors where solution/remediation not approved by CoreLogic.
+
+2.2.a 13 Scrub NDPM Non-Dell Project Management escalation and/or outage
+
+2.2.a.13 Scrub, Aged CoreLogic records re-assigned to Dell Support.
+
+2.2.a.14 Scrub, Internal Dell support created
+
+2.2.a.15 Scrub, Project related
+
+Critical & High priority incidents that are assigned & related as child records to the Dell Network Operations (NETOPS-GLOBAL-LEVERAGED) are excluded.
+
+Supplemental definition of terms:
+
+Priority (Severity) Level definitions are found in Schedule A-1 Section 2
+
+Low Volume Eligible:
+
+Yes, provided that if any *** Incident is not resolved within ***, then this Low Volume exception shall not apply.
+
+Threshold parameters:
+
+***% of Incidents are restored within ***
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company+*
+
+All Incident Recording during the Reporting Period
+
+Priority*
+
+Status. Resolved. Date/TIME
+
+Exclude from Reporting based on RCA
+
+Opened Date/Time
+
+Total Pending Time
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+(a) Company+*="CORELOGIC ", “STARS”, “RELS”,”FINITI”
+
+(b) Status. Resolved Date/TIME is within the data range selected for running the report
+
+(c) Priority = “Critical”
+
+(d) Submitted Date/Time
+
+(e) Exclude from SLA Reporting <> “Yes”
+
+(f) Support Organization= Dell* or Support Group = CLGX-AOC
+
+2. Incident Handling calculation
+
+Time to restore service = Status Resolved Date/TIME - Submitted Date/Time – Pending Time
+
+On-time Resolution = Resolved - Opened - On Hold
+
+Supplementary criteria
+
+MIM (Major Incident Management) event Critical priority records that align with a Server and or Service Availability SLA’s utilize the AIR (After Incident Review) & Whiteboard documents to calculate business impact duration via the OPAS CI Unavailability record. Process & procedure related missed MIM records (Examples: Failing to place in pending or resolved status at appropriate times, Incident records created with a Dell OPAS people record that load non-CoreLogic SLM targets & milestones) utilize the AIR (After Incident Review) & Whiteboard documents to calculate true business impact duration.
+
+Calculations
+
+Service Level Achievement = (Count of Critical Tickets Resolved within Threshold/Critical Incidents Resolved during reporting period) * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+2.
+
+2.2.b CSL-SM-Incident Handling - High
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+Measures the time interval between an Incident Creation Date being registered in the service management tool for High Priority Incidents to the time normal service operation is restored via implementing a solution to the known error or by employing a workaround.
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS
+
+Exceptions:
+
+Continual Service Improvement
+
+Restoration Time does not include the following:
+
+- Pending time allowed as indicated in section 1.6 above.
+
+- If there are instances or circumstances at a non-Dell facility where equipment failures (outside of equipment that we support) fail and that inhibits/prohibits us from rendering services, then it’s suspended. Some of this could include Power failures, local equipment not in our support, etc.
+
+- Time incurred restoring Application data and/or functionality from tape media after Supplier has returned Equipment to service.
+
+- Third Party Hardware Exception
+
+- Adjustments to the Service Levels approved by CoreLogic in its sole discretion pursuant to the last sentence of Section 4.4 of the MSA to permit the performance of new or additional work activities as contemplated by Section 4.4 of the MSA.
+
+Incidents and outages due to the following incident management exclusion reasons:
+
+2.2.a.1 Scrub, Incident deemed misclassified by CoreLogic exclusion committee.
+
+2.2.a.2 Scrub, Non-Supplier supported site.
+
+2.2.a.3 Scrub, Server/System not in production (not in-service).
+
+2.2.a.4 Scrub, CoreLogic Application related outage that is not Supplier infrastructure caused.
+
+2.2.a.5 Scrub, duplicate Incident record.
+
+2.2.a.6 Scrub, Scheduled Downtime per system.
+
+2.2.a.7 Scrub, Monitoring Alerts, no outage or CoreLogic impact noted.
+
+2.2.a.8 Scrub, Eligible Recipient requested escalation for Emergency Change, No CoreLogic outage.
+
+2.2.a.9 Scrub, CoreLogic requested the Incident Severity be raised to bypass process/lead times.
+
+2.2.a.10 Scrub, Non-Supplier Third Party outage.
+
+2.2.a.11 Scrub, Final CoreLogic Resolver Group.
+
+2.2.a.12 Scrub, Incident related to Supplier reported known errors where solution/remediation not approved by CoreLogic.
+
+2.2.a 13 Scrub NDPM Non-Dell Project Management escalation and/or outage
+
+2.2.a.13 Scrub, Aged CoreLogic records re-assigned to Dell Support.
+
+2.2.a.14 Scrub, Internal Dell support created
+
+2.2.a.15 Scrub, Project related
+
+Critical & High priority incidents that are assigned & related as child records to the Dell Network Operations (NETOPS-GLOBAL-LEVERAGED) are excluded.
+
+Yes
+
+Supplemental definition of terms:
+
+Priority (Severity) Level definitions are found in Schedule A-1 Section 2
+
+Low Volume Eligible:
+
+Yes, provided that if any single Incident is not resolved within ***, then this Low Volume exception shall not apply.
+
+Threshold parameters:
+
+***% of Incidents are restored within ***
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company+*
+
+All Incident Recording during the Reporting Period
+
+Priority*
+
+Status. Resolved. Date/TIME
+
+Exclude from Reporting based on RCA
+
+Opened Date/Time
+
+Total Pending Time
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+(a) Company+*="CORELOGIC ", “STARS”, “RELS”, ”FINITI”
+
+(b) Status. Resolved Date/TIME is within the data range selected for running the report
+
+(c) Priority = “Critical”
+
+(d) Submitted Date/Time
+
+(e) Exclude from SLA Reporting <> “Yes”
+
+(f) Support Organization= Dell* or Support Group = CLGX-AOC
+
+2. Incident Handling calculation
+
+Time to restore service = Status Resolved Date/TIME - Submitted Date/Time – Pending Time
+
+On-time Resolution = Resolved - Opened - On Hold
+
+Supplementary criteria
+
+MIM (Major Incident Management) event High priority records that align with a Server and or Service Availability SLA’s utilize the AIR (After Incident Review) & Whiteboard documents to calculate business impact duration via the OPAS CI Unavailability record. Process & procedure related missed MIM records (Examples: Failing to place in pending or resolved status at appropriate times, Incident records created with a Dell OPAS people record that load non-CoreLogic SLM targets & milestones) utilize the AIR (After Incident Review) & Whiteboard documents to calculate true business impact duration.
+
+Calculations
+
+Service Level Achievement = (Count of Critical Tickets Resolved within Threshold/Critical Incidents Resolved during reporting period) * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+3.
+
+2.2.c KM-SM-INCIDENT COMMUNICATION
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+Percentage of Critical and High Priority Incidents that are communicated within the target timeframe. Measures the time interval between an Incident record being registered in the service management tool for Critical and High Priority Incidents and the time a page/phone and email is sent to CoreLogic via OPAS's FYI paging functionality. Elapsed number of minutes between the creation of a Critical or High Priority Incident and the time that Dell activates the Major Incident Management (MIM) Process including notifying CoreLogic via using the standard critical Priority Incident Notification Email template, to resolve such Critical, as reflected in the corresponding Incident Ticket
+
+Associated hours of Operation:
+
+25x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS
+
+Exceptions:
+
+N/A
+
+Supplemental definition of terms:
+
+None
+
+Low Volume Eligible:
+
+Yes, provided that if any single Incident is not resolved within ten (30) minutes, then this Low Volume exception shall not apply
+
+Threshold parameters:
+
+***% of Incidents are communicated within ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Company
+
+Priority
+
+OPAS FYI Notification Time Stamp
+
+Email Work Log Time Stamp
+
+Work Info Log Time Stamp for MIM Bridge Opening
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Support Company = “CORELOGIC”, STARS”,”RELS”,”FINITI”
+
+Priority = “Critical” or “High”
+
+Assigned Submitted Date/Time = reporting period
+
+Resolved Date/Time within the SLA reporting period
+
+Work log date/time Stamp
+
+This is based on contractual SLA, which essentially covers Severity 1 and 2 (Critical and High) via OPAS FYI, and activation of MIM for Severity 1 (Critical) and notification to CoreLogic via email template within ***.
+
+Calculations (Manual)
+
+The numbers are based on the following criteria:
+
+1. Included Critical and High incidents that were deemed to be Business Impacting or MIM generated incidents.
+
+2. Does not include every incident that triggered Critical or High (e.g., automated alert) that was not identified as business impacting (MIM generated).
+
+3. FYI paging and/or email via OPAS FYI is based on self-subscription and does not qualify who from CoreLogic may have subscribed for FYI alerts. For clarity, the number of CoreLogic employees with FYI subscription (or none) does not influence met/missed for this aspect of the metric. Only the inability to deliver FYI notifications, regardless of the number of subscriptions influences the metric.
+
+4. Only Critical incidents were included in the MIM email notification (per contract). This means Critical is subject to a two prong metric: FYI + MIM email within ***. A miss of *** was counted as a miss for that incident.
+
+5. Total population subject to the SLA calculation (Total Critical + High Incidents that were MIM incidents).
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+4.
+
+2.2.d KM-SM-PERCENTAGE OF INCIDENTS THAT ARE ACCURATELY TRIAGED
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+Percentage of notifications (including automated alerts) that are accurately triaged, categorized and input into the appropriate Service Management system
+
+Associated hours of Operation:
+
+25x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS
+
+Exceptions:
+
+Continual Service Improvement
+
+Any trusted or custom event source incidents (those submitted from outside the current Supplier tools or teams) will be agreed upon before being included in this calculation.
+
+Yes
+
+Supplemental definition of terms:
+
+Measures the percentage of incidents that are submitted to the ticketing system and have initial accurate categorization and assignment. For greatest accuracy, an Incident record should be created to track each inaccuracy. This would be measured using OPAS Incidents and reporting exceptions.
+
+Low Volume Eligible:
+
+Yes
+
+Threshold parameters:
+
+***% of Critical and High Priority Incidents are accurately triaged, categorized and input to system
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Incident Management Triage Field Flagging
+
+Root Cause Analysis Report to include if Triage was done Accurately per guidelines defined in Problem Management process
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Steady State Service Management will review all Critical and High Priority during Root Cause Analysis, with CoreLogic, to agree on whether the Incident has had an Accurate Triage. Incident Ticket will be flagged using an identified field if it is accurately triaged or Not
+
+Calculations (Manual)
+
+% Accurately Triaged = (Total Tickets for High and Critical Priority –( Total Incident Tickets where Incident accuracy=”No” or Transfer Group >3))/ /Total Critical and High Priority Tickets during the reporting period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+5.
+
+2.2.3 KM-SM-Incident Communication - Continual
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure Continual: Percentage of Incidents where updates are sent within the target
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS Incident
+
+Exceptions:
+
+This does not include any communication outside the Supplier Service Management process. Any Communication suspension as agreed by Dell and CoreLogic.
+
+Supplemental definition of terms:
+
+Measures the percentage of Critical Incidents where communication to established stakeholders is distributed within 5 minutes of the 30-minute target during the duration of the Critical Incident
+
+NOTE:
+
+Measurement of KM will be through an agreed-upon process and timestamp within the OPAS system or email transmission mechanism
+
+Low Volume Eligible:
+
+None
+
+Threshold parameters:
+
+***% of all Critical Incident Communications sent no later than *** of the *** target.
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Incident Assigned Date/Time
+
+Incident Priority
+
+Incident ID
+
+Incident Resolved Date/Time
+
+Product Category Tier 1
+
+Product Category Tier 2
+
+CMDB Urgency
+
+CI Unavailability Scheduled Actual Start Date/Time
+
+CI Unavailability Scheduled Actual End Date/Time
+
+CI Unavailability Unscheduled Actual Start Date/Time
+
+CI Unavailability Unscheduled Actual End Date/Time
+
+Related Change to Incident Record
+
+Excluded from SLA Reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”
+
+Incident Records where Resolved Date/Time falls within reporting period
+
+Priority = Critical
+
+Calculations (will be done Manually by Service Management)
+
+Service Level Achievement = (A/B) * 100%
+
+A = Number of Critical Incident Communications which MET Target
+
+B = Total count of Critical Incident Communications
+
+Verification Steps:
+
+1. Distribution Time Stamp of each Communication is reviewed to determine if update is sent at least every ***.
+
+2. Critical Incident Communication = MET if step 1 is true and time stamp within *** of the *** target have elapsed since previous update
+
+Example scenario: Initial MIM is sent at ***, the first update would be due at or between ***
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+6.
+
+2.2.f1/2.2.f2 KM-SM-Problem Management-Service Impact Document Delivery (AIR and RCA)
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the percentage of times an After Incident Report (AIR) document and final RCA that covers the items listed below is completed for Critical and High Priority Incidents and a Problem Review Meeting is completed within the target timeframe.
+
+- Incident details through restoration
+
+- Business impact
+
+- RCA - if known
+
+- Long term - fix if known
+
+Associated hours of Operation:
+
+Business hours – *** = 1 business day
+
+Reporting Tools:
+
+OPAS Problem Management
+
+Exceptions:
+
+Excludes Problem records where CoreLogic critical/key stakeholder participation was not included within the target timeframe.
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+• Critical priority - Within ***, an initial Problem record is created (After Incident Report (AIR)), and within ***, a final Root Cause Analysis (RCA) is completed.
+
+• High priority - Within ***, an initial Problem record is created (After Incident Report (AIR)), and within ***, a final Root Cause Analysis (RCA) is completed
+
+• Measures the percentage of times an AIR document and final RCA that covers the items listed below is completed for Critical & High Incidents and a Problem Review Meeting is completed within the target timeframe.
+
+* Incident details through restoration
+
+* Business impact
+
+* RCA - if known
+
+* Long term - fix if known
+
+Actual closure of the RCA and Problem record is dependent on remediation activities needed.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of AIRs are delivered within *** and Final RCA is delivered and reviewed with CoreLogic within *** for Critical and *** for High Priority Incidents
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Company+*
+
+Work Log Entry in Incident
+
+Manual Report Tracking System
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”, “STARS”, “RELS”, “FINITI”
+
+Problem Records where Completed Date/Time within the reporting period
+
+Steady State must enter work log Information on Initial RCA and Final RCA into each Record. A report will be provided to support when RCAs are submitted based on Incident Critical/High work log Info.
+
+Calculations (will be done Manually by Service Management)
+
+Service Level Achievement = Total Records where Threshold is met during reporting period /Total Problem Records during the reporting Period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+7.
+
+2.2.g KM-SM-ASSET INVENTORY- ACCURACY
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to Measures the accuracy of ***% of CIs and associated attributes (as defined in the Policy and Procedures Manual) stored in the Supplier Asset Management Database.
+
+Associated hours of Operation:
+
+Business Hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+AMDB and KACE
+
+Exceptions:
+
+Any assets within the sample set that are unavailable or inaccessible to Supplier tools and/or Supplier Personnel will be excluded from this calculation
+
+Supplemental definition of terms:
+
+In order to measure this SLA each month a random sampling of ***% of the actively reporting KACE servers and workstations will be obtained. The criteria determine if the CIs are compliant will be the following:
+
+1) Does the device exist in the AMDB?
+
+2) If no, then this counts as a failure
+
+3) If yes, then is the device in ‘deployed’ status in the AMDB?
+
+If not in a ‘deployed’ status, then this counts as a failure
+
+4) If yes and in a Deployed status then compare the data pulled from KACE and compare it to the comparable field of data in the AMDB
+
+5) If any of the fields for a device does not match, then the device counts as a failure
+
+6) All others are accurate [this count to feed into the count of accurately reported CIs within the sample set
+
+Each device included in a random sample audit will be tagged with a Last Audit Date. Devices with Last Audit Dates within the preceding *** will be excluded from inclusion in the random sampling.
+
+The results of the audit and supporting data will be provided to Service Management as per their processes to include the data in the SLA calculations and reporting requirements.
+
+Each device failing the audit will be remediated each month and will have an on-line edit function to record notes as to the remediation.
+
+Each *** prior to the new sampling, the previous *** sampling and remediation will be snapped to an archive.
+
+Each *** Asset Management will review the previous *** audit results with CLGX.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***%
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supported Company
+
+Random ***% of the CI Sampling
+
+Attributes to be compared for audit consist of the following:
+
+KACE ID – to identify matches in the AMDB
+
+Host Name
+
+Status
+
+Domain
+
+IP Address
+
+MAC Address
+
+OS Type
+
+Service Pack
+
+Hard Drive Size
+
+Total RAM
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Manual Audit will be conducted. Any failure on data based on attribute to sampling of ***% of the CIs will be considered an SLA miss, a CI must meet the following requirements in order to pass the audit:
+
+Device in AMDB = Yes
+
+AMDB Status = Deployed
+
+AMDB Data = KACE Data
+
+Calculations (will be done Manually by Service Management)
+
+Audit Accuracy = The count of accurately reported CIs within the sample set/ the total count of sample set CIs
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+8.
+
+2.2.h KM-SM-CSAT Operations Managers
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+*** (every *** in ***)
+
+Reporting Frequency:
+
+*** (every ***), on or before the *** following the reporting period where the survey is closed
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure CoreLogic Operation Managers customer satisfaction
+
+Associated hours of Operation:
+
+Business Hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+Manual Report
+
+Exceptions:
+
+Minimum acceptable returned surveys: ***% of surveys returned
+
+Supplemental definition of terms:
+
+Measures Supplier's performance through a jointly created *** (every *** and ***) survey to 'CoreLogic Operational Managers' (Measured on a –*** scale). Expected survey set of *** individuals. Average of all the scores related to the single overall satisfaction question selected by an Operational Managers in such survey (on a scale of ***, with *** representing the highest level of satisfaction.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+>=***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Survey Sampling and Survey Results
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Total Survey Feedback received ***% of Surveys Sent
+
+Calculations
+
+Service Level Achievement = (Sum of score responses from Operational Managers/ Number of responses received) * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+9.
+
+2.2.h.1 KM-SM-CSAT Operations Managers Service Improvement (SI)
+
+DATES
+
+SLA Start Date:
+
+11/1/2016
+
+First Reporting Period:
+
+11/30/2016
+
+First Report Date:
+
+12/5/2016
+
+Reporting Period:
+
+*** (every in *** and ***)
+
+Reporting Frequency:
+
+*** (every ***), on or before *** following the reporting period where the survey is closed
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+Measures supplier's performance in delivering items collected during the Operation Managers Survey;
+
+1) Publish initial results of survey within *** (Overall score).
+
+2) Publish detailed results of survey within *** of survey closure (Detailed results for every question within survey).
+
+3) Publish action items logged as a result of survey and interview feedback within *** of survey closure.
+
+4) Status of action items *** post survey closure (prep for next survey)
+
+Associated hours of Operation:
+
+Business Hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+Manual Report
+
+Exceptions:
+
+N/A
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+= ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Survey Sampling and Survey Results
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Service Level Achievement = (A/B)
+
+Calculations
+
+A = In the reporting period is there a deliverable due? Y or N.
+
+B = Pass / Fail
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+10.
+
+2.2.i KM-SM-CSAT-END USERS
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+*** on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure End User customer satisfaction
+
+Associated hours of Operation:
+
+N/A
+
+Reporting Tools:
+
+OPAS CSAT
+
+Exceptions:
+
+Minimum acceptable sample: 15% of surveys distributed
+
+Supplemental definition of terms:
+
+Measures Supplier's performance through a survey sent to***% of 'End Users' (Measured on a –*** scale). Average of all of the numeric scores selected by an Authorized User in such survey (on a scale of ***, with *** representing the highest level of satisfaction
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+>=***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Customer Survey Rating per Customer Sat Record
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”,”STARS”, “RELS”, “FINITI”
+
+Customer Satisfaction Survey Feedback during the Reporting Period
+
+Calculations
+
+Service Level Achievement = (Sum of score responses from Authorized Users/ Number of responses received)
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+11.
+
+2.2.j KM-SM-CSAT DROP-END USERS
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure End User customer satisfaction drop
+
+Associated hours of Operation:
+
+N/A
+
+Reporting Tools:
+
+OPAS Datamart
+
+Exceptions:
+
+= Measured at the anniversary of Service Commencement Date
+- Drops in Authorized User satisfaction due to an agreed upon exceptional business events or due to CoreLogic directed
+
+Supplemental definition of terms:
+
+Number of months in a year (measured annually) when end user CSAT dropped below the prior month. Auto surveys based on services requested across all towers/functions. Compiled and summarized ***.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+*** where the CSAT is lower than ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Individual *** CSAT performances during ***
+
+Supporting Company = CORELOGIC, STARS, RELS, FINITI
+
+SLA Missed = *** CSAT where CSAT is lower than ***
+
+Calculations
+
+Total no. of months were SLA Missed<=***
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+12.
+
+2.3.a CSL-SD-AVERAGE SPEED TO ANSWER
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+Average Speed to Answer (ASA) is the average across all calls to the Service Desk for the time taken from when a call is deemed to have entered the “wait queue” (once the caller has made their final selection from the IVR (interactive voice response) menu) to the time a Service Desk agent answers the call for the purposes of providing Services.
+
+Associated hours of Operation:
+
+24x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+Dell-provided system logs and any other designated tracking systems (e.g., ACD system, IVR), tracking will be made using https://client.ps.net system. All calls that were abandoned by the Caller prior to Service Desk taking the call will be excluded from the SLA Calculation.
+
+Exceptions:
+
+Continual Service Improvement
+
+Telephone calls to the Service Desk where the End User hangs up or disconnects prior to speaking with a Service Desk representative.
+
+Yes
+
+Supplemental definition of terms:
+
+None
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of calls answered <=***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Speed to Answer (SA) for each call
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = CORELOGIC, RELS, FINITI
+
+Calculations
+
+Total number of calls answered within ***/ total number of telephone calls answered by Service Desk during the Reporting Period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+13.
+
+2.3.b KM-SD-AVERAGE HANDLE TIME
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the Average Handle Time (AHT) - Percentage of help desk calls that are handled within the target timeframe to support Speed to Answer (ASA) SLA attainment
+
+Associated hours of Operation:
+
+24x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+Automatic Call Distribution (ACD)
+
+Exceptions:
+
+Continual Service Improvement
+
+None
+
+Yes
+
+Supplemental definition of terms:
+
+Average Handle Time (AHT) is the average across all calls to the Service Desk for a Measurement Period of the time taken on the phone by the Service Desk agent for each call.
+
+Actual Performance will be reported every month until Dell and CoreLogic come to an agreement on the KPI measurement value.
+
+The KPI, once defined, will be subject to the Continuous Service Improvement Process in Schedule A-03 Section 6 and will have a cap of ***.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+<= ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Support Company
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Calls within the ACD for the reporting period
+
+Supporting Company = “CORELOGIC”, “STARS”, “RELS”, “FINITI”
+
+Calculations
+
+Actual performance will be reported = Total time in *** of all calls answered by a Service Desk agent during the Measurement Period/ number of answered calls
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+14.
+
+2.3.c KM-SD-ABANDON RATE
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the Abandon Rate - Maximum percentage of help desk calls that are abandoned
+
+Associated hours of Operation:
+
+24x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+Automatic Call Distribution (ACD)
+
+Exceptions:
+
+Continual Service Improvement
+
+Excludes calls abandoned < ***
+
+Yes
+
+Supplemental definition of terms:
+
+Call Abandon Rate measured as a percentage by adding the total number of calls to the Service Desk that hang up after selecting an option on the Voice Response Unit and before the call is answered by a live person and dividing this by the total number of calls to the Service Desk during the Measurement Period
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+<= ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Support Company
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Calls for Supporting Company = “CORELOGIC”, “RELS”, “FINITI”, “STARS” during the reporting period
+
+Calculations
+
+Service Level Achievement =Total number of calls abandoned/Total calls – exempted calls x 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+15.
+
+2.3.d CSL-SD-FIRST CALL RESOLUTION
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+This Service Level measures the percentage of Incidents that are resolved during the first telephone Call to the Service Desk.
+
+Associated hours of Operation:
+
+24x7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS
+
+Exceptions:
+
+- Incidents received by the Service Desk by means other than telephone (for example, e-mail, fax, self-service portal) will be excluded when calculating attainment for this Service Level.
+- Calls for which a ticket has already been opened for the same Incident. Example given: large scale outage, multiple users calling in regards the same issue; the initial reported incident is calculated as part of the SLA.
+- Incidents that cannot be resolved by the Service Desk, as defined in a list to be developed by Dell during Transition Period and updated from time to time, in each case approved by CoreLogic.
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+Reference Material for transactions included as part of FAR is found on :
+
+***
+
+Low Volume Eligible:
+
+Yes
+
+Threshold parameters:
+
+Percentage of help desk calls that are resolved on the first call in less than *** >= ***% of the Time
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Incidents resolved by Service Desk through First Call resolution
+
+Incident flagged as FAR(First Assignment Resolution)
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+• Supporting Company = “CORELOGIC”, “RELS”,”FINITI”, “STARS””
+
+• Status = Resolved
+
+• Assigned Date/Time
+
+• Resolved Date/Time
+
+• Support Group = CLGX-Service Desk
+
+• FAR Candidate Eligible for FAR = “Yes”
+
+• Group Transfer = 0
+
+• Source = Phone
+
+Calculations
+
+First Call Resolution = (total # of Incidents during a Reporting Period that are resolved by a Service Desk representative during the first telephone call to the Service Desk within ***/ Total FAR Eligible incidents) * 100
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+16.
+
+2.6.a KM-DT-END-USER DEVICE NEW USER SETUP
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the End User Device Setup (new user) - Percentage of new user setups that are successfully completed within the target timeframe
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Service Requests
+
+Exceptions:
+
+- Batch new user setups will be excluded from the On-Time Completion percentage calculation.
+- Remote Location: The eleventh or more new user setup per day per remote location will be excluded from SLA calculation.
+- Campus Location: The sixteenth or more new user setup per day per campus location will be excluded from SLA calculation.
+- Time before arrival of assets will be excluded from this measurement (i.e., ticket is submitted after arrival of all necessary assets.)
+- Request for Non-Standard Hardware that requires unique configuration requirements not previously defined.
+_ A Batch will be defined as *** new user set-ups per day for Remote locations and *** new user set-ups per day for Campus Locations.
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+Measures the percentage of New Authorized User setup requests that are completed within the required timeframes during the Measurement Period Request Name : User Provisioning and Work Order = Computer Hardware Implementation
+
+Low Volume Eligible:
+
+Yes, provided that if any single request is not resolved within ***) then this Low Volume exception shall not apply
+
+Threshold parameters:
+
+***% of requests completed within ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Requested by Company
+
+Request Summary
+
+Closed Date/Time
+
+Submitted Date/Time
+
+Approval Date/Time
+
+Pending Time
+
+Status
+
+Excluded from SLA Reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Request Records with Request Type = “New User Provisioning”
+
+If Request Summary = “New User Provisioning”
+
+Get Work Order Name = “*EUD*” or Work Order name = “Desk Phone*” or Work Order Name = “Mobile Device*” or ( Request Type = “
+
+“TEMP NUP CLGX-Add or Install End User Device” or “
+
+“TEMP NUP CLGX-Computer Hardware” or
+
+“TEMP NUP CLGX-Desk Phone” or
+
+“TEMP NUP CLGX-TEM-Mobile Device”)
+
+Closed Date/Time is within the reporting date of the SLA
+
+Excluded from SLA reporting <>”Yes”
+
+Status = “Closed”
+
+CoreLogic authorized users, currently:
+
+Requested by Company = “CORELOGIC”, “RELS”,”FINITI”
+
+Calculations
+
+SLA Elapsed Time = Completed Date/Time – Approval Date/Time – Pending Time
+
+Service Level Achievement = Number of End User Device Setup with SLA Elapsed time <= *** / Total number of End User Device Setup Service Requests for the Measurement Period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+17.
+
+2.6.b1/2.6.b2 KM-DT-END-USER DEVICE SERVICES SUPPORT
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the End User Device Services Support - Percentage of end user device service support Incidents that are successfully completed within the target timeframe
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Incident Management , OPAS Location Table
+
+Exceptions:
+
+Restoration Time does not include the following:
+
+- Time that Incident Tickets are in "suspend mode" due to previously unknown third-party Software defects
+
+- If there are instances or circumstances at a non-Dell facility where equipment failures (outside of equipment that Dell supports) fail and that inhibits/prohibits us from rendering services, then it’s suspended. Some of this could include facilities power failures, local equipment not in our support, etc. - Time incurred restoring Application data and/or functionality from tape media after Dell has returned Equipment to service.
+
+- Third Party Hardware Exception
+
+- Adjustments to the Service Levels approved by CoreLogic in its sole discretion pursuant to the last sentence of Section 4.4 of the MSA in order to permit the performance of new or additional work activities as contemplated by Section 4.4 of the MSA
+
+- Incident Priority = “Critical” or “High” (already part of Critical or High Incidents SLA)
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+Measures the time interval between an Incident record being registered in the service management tool for Desktop Services related Incidents to the time that operation is restored
+
+Low Volume Eligible:
+
+Yes, provided that if any single Incident is not resolved within *** at staffed sites and more than *** for non-staffed sites, then this Low Volume exception shall not apply
+
+Threshold parameters:
+
+***% of Incidents completed within *** at staffed sites and within *** for non-staffed sites
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Customer Company
+
+Reported Date/Time
+
+Closed Date/Time
+
+Pending Time
+
+OPAS Location Site Group
+
+Assignee Group
+
+Site Alias
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Customer Company = “CORELOGIC”, “RELS”, “FINITI”
+
+Closed Date/Time within the reporting period
+
+Priority = Medium or Low
+
+Company = “CORELOGIC”, “RELS”,”FINITI”,
+
+.Location Support Type = “Staffed*” or Non-Staffed*”
+
+(Look up from location table)
+
+Assignee Group = CLGX-FS* or Product Name = “*Phone*”
+
+Calculations
+
+Staffed SLA = (Resolved Date- Submit Date – Pending Time)/*meets SLA if Staffed SLA = ***
+
+Non-Staffed SLA = (Resolved Date- Submit Date – Pending Time)/*meets SLA if Staffed SLA = ***
+
+Service Level Achievement = (Total Met SLA for Staffed + Total Met SLA for Non-Staffed)/Total Incident Tickets during the reporting period based on Report Criteria x 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+18.
+
+2.6.c KM-DT-END-USER DEVICE TERMINATION
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the End User Device Termination - Percentage of employee end user device termination requests that are successfully completed within the target timeframe
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Service Requests
+
+Exceptions:
+
+This excludes any recovery of employee physical assets (for assets not in CoreLogic offices)
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+Measures the degree of compliance of request for End User Device termination within the time period specified. The time period used is the elapsed time from activation of a task to closure of the Service Management Workflow System record.
+
+Low Volume Eligible:
+
+Yes, if single Incident resulting in default is restored in less than ***
+
+Threshold parameters:
+
+*** % of requests completed within ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Requested by Company
+
+Request Summary
+
+Closed Date/Time
+
+Submitted Date/Time
+
+Approval Date/Time
+
+Pending Time
+
+Status
+
+Excluded from SLA Reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Request Records with Request Type = “Terminate a Resource (Employee/Contractor/Vendor)”
+
+Work Order = “Terminate Computer Hardware” or Work Order = “Terminate Desk phone”, or Work Order = “Terminate Mobile Device”
+
+Closed Date/Time is within the reporting date of the SLA
+
+Excluded from SLA reporting <>”Yes”
+
+Status = “Closed”
+
+Requested by Company = “CORELOGIC”, “RELS”,”FINITI”, “STARS”
+
+Calculations
+
+SLA Elapsed Time = Completed Date/Time – Approval Date/Time – Pending Time
+
+Service Level Achievement = Number of End User Device Termination with SLA Elapsed time <= ***/ Total number of End User Device Setup Service Requests for the Measurement Period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+19.
+
+2.6.d KM-DT-REQUEST-PACKAGING (DEVELOP AND PUSH)
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure Packaging - Percentage of packaging requests that are successfully completed within the target timeframe
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Service Requests
+
+Exceptions:
+
+- Any time greater than *** for CoreLogic to perform applicable testing of the software package.
+
+Supplemental definition of terms:
+
+Measures the time taken to package software from the receipt of a request for new software to the time that the software is available for the Authorized User to install via the software distribution system. Software Package is a single software title whose installer has been modified in a manner to install with predetermined settings.
+
+Low Volume Eligible:
+
+Yes, provided that if any single request is not resolved within ***, then this Low Volume exception shall not apply
+
+Threshold parameters:
+
+***% of work requests are completed within ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Requested for Company
+
+Request Summary
+
+Closed Date/Time
+
+Submitted Date/Time
+
+Approval Date/Time
+
+Status
+
+Excluded from SLA Reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Request Records with Request Type = “Software Package Creation/Deployment - DTE”
+
+Closed Date/Time is within the reporting date of the SLA
+
+Excluded from SLA reporting <>”Yes”
+
+Status = “Closed”
+
+Requested by Company = “CORELOGIC”, “RELS”,”FINITI”,”STARS”
+
+Calculations
+
+SLA Elapsed Time = Completed Date/Time – Approval Date/Time - Pending Time
+
+Service Level Achievement = Number of End User Packaging Request with SLA Elapsed time <=*** / Total number of End User Device Setup Service Requests for the Measurement Period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+20.
+
+2.6.e1/2.6.e2 KM-DT-END-USER DEVICE MOVES/ADDS/CHANGES
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure End User Device Moves/Adds/Changes - Percentage of move requests that are successfully completed within the target timeframe
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Service Requests, Location
+
+Exceptions:
+
+- Batch MACDs will be excluded from the On-Time Completion percentage calculation.
+- Remote Location: The eleventh or more MACDs per day per remote location will be excluded from SLA calculation.
+- Campus Location: The sixteenth or more MACDs per day per campus location will be excluded from SLA calculation.
+
+Batch (*** IMACDs in a day per CoreLogic Facility) Moves/Adds/Changes will be excluded from the on-Time Completion percentage calculation.
+
+Continual Service Improvement
+
+Supplemental definition of terms:
+
+Yes
+
+Measures the percentage of Moves/Adds/Changes (MACs) Service Requests completed within the required timeframes during the Measurement Period
+
+Low Volume Eligible:
+
+Yes, provided that if any single Incident is not resolved within *** at staffed sites and more than *** for non-staffed sites, then this Low Volume exception shall not apply
+
+Threshold parameters:
+
+***% of requests completed within *** at staffed sites and *** at non-staffed sites
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Requested for
+
+Company
+
+Request Summary
+
+Closed Date/Time
+
+Submitted Date/Time
+
+Approval Date/Time
+
+Status
+
+Excluded from SLA Reporting
+
+Site Alias
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+All Request Records with Request Summary = “Move Request” , “Computer Hardware”;”De-Install Printer”, “Desk Phone”, “Install Printer – EUD”, “Mobile Device”
+
+Closed Date/Time is within the reporting date of the SLA
+
+Excluded from SLA reporting <>”Yes”
+
+Status = “Closed”
+
+Requested for Company = “CORELOGIC”, “RELS”,”FINITI”, “STARS”
+
+Requester for. Location.Support Type = “staffed*” or Non-Staffed*”
+
+(Look up people record of requested for to get location)
+
+Calculations
+
+Staffed SITE SLA = Completed Date/Time – Approval Date/Time /* SLA met = ***/
+
+Non-Staffed SITE SLA = Completed Date/Time – Approval Date/Time /* SLA met = ***/
+
+Service Level Calculation = (Total Staffed Site SLA Met + Total Non-Staffed Site SLA)/ Total no. of MAC request for the reporting period
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+21.
+
+2.6.f KM-DT-CoreLogic PC Refresh
+
+DATES
+
+SLA Start Date:
+
+6/1/2018
+
+First Reporting Period:
+
+6/30/2018
+
+First Report Date:
+
+7/6/2018
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Interpreted Intent of SLA:
+
+The intent of this SLA is to measure the duration between completion time & end of lease date for the CoreLogic PC Refresh requests.
+
+Associated hours of Operation:
+
+Business hours see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Request Management
+
+Exceptions:
+
+Yes, 1) Records for sites not supported by NTT field services are out of scope for this SLA. (Non-supported sites: Austin TX, Bloomington MN, Milwaukee WI, Rochester NY & Oxford MS). 2) Approved work order driven projects (PMO) for bulk PC Refresh are excluded from this SLA.
+
+Continual Service Improvement
+
+Yes
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***%
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company = “CORELOGIC”, “FINITI”,”RELS”,”STARS”
+
+Request Summary = CoreLogic PC Refresh
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”, “FINITI”,”RELS”,”STARS”
+
+Request Summary = CoreLogic PC Refresh
+
+Request Closed Date/Time is within the reporting period
+
+Request Competition Date/Time is < than End of Lease Date
+
+Excluded in SLA Reporting <> Yes
+
+Calculations
+
+Service Level Achievement = (A/B)*100%
+
+A=Number of PC Refresh SRM’s closed
+
+B= Number of PC Refresh SRM’s completed prior to end of lease date
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+22.
+
+2.4.a KM-ENT-PATCH MANAGEMENT SERVERS
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure Patch management: Servers - Percentage of servers that are successfully patched within the target timeframe (from release of patch)
+
+Associated hours of Operation:
+
+24X7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Change Management
+
+Exceptions:
+
+- Post implementation of service pack, if Microsoft through their website releases a bug notification related to that specific Service Pack & that has caused unsuccessful implementation of patch.
+- Time between Dell's request for CoreLogic's approval and when CoreLogic provides its approval
+
+Supplemental definition of terms:
+
+Apply Patches to all instances of enterprise infrastructure applications including acquiring, testing, and installing multiple patches (Service Pack).
+
+Patch management tasks include: maintaining current knowledge of available patches, deciding what patches are appropriate, ensuring that patches are installed properly, testing systems after installation, and documenting all associated procedures, such as specific configurations required.
+
+Definition of Normal and Critical patches are part of the PPM documentation for Intel and Unix support.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of normal patches applied in ***and critical patches applied in ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Requested for Company
+
+Actual Start Date/Time
+
+Actual End Date/Time
+
+Completed Date/Time
+
+Exclude from SLA Reporting
+
+Product Categorization Tier 1
+
+Product Categorization Tier 2
+
+Product Categorization Tier 3
+
+Operational Categorization Tier 1
+
+Operational Categorization Tier 2
+
+Operational Categorization Tier 3
+
+Excluded from SLA reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Requested Company = “CORELOGIC”,”RELS”,”FINITI”,”STARS”
+
+Completed Date and Time = within the SLA reporting period
+
+Product Categorization 1 = “HARDWARE”;Product Categorization 2 = “SERVER”
+
+Operational Category Tier 1 = “INSTALL”
+
+Operational Category Tier 2 = “CODE”
+
+Operational Category Tier 3 = “PATCH- MAINTENANCE”
+
+Excluded from SLA Reporting <>”Yes”
+
+Performance Rating = 5
+
+Priority = Medium (target is Normal)
+
+Priority = High (target is Critical)
+
+Calculations
+
+Critical Patches SLA = Complete Date/time - Submit Date/Time Date/Time (Should be equal to ***)
+
+Normal Patches SLA = Complete Date/time - Submit Date/Time (Should be equal to ***)
+
+Service Level Achievement = (Total number of Enterprise Patches that are successfully installed in accordance with SLA/ Total number of Enterprise Patches that are scheduled to be completed during the Measurement Period) * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+1.
+
+2.4.b KM-ENT-PERCENTAGE AVAILABILITY OF RIGHTFAX SERVICE
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the Percentage Availability of Right Fax Service
+
+Associated hours of Operation:
+
+24X7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Incident Management , Change Management, Atrium
+
+Exceptions:
+
+- Single point of failure of hardware, software, or carrier services
+Root Cause
+- All records that will indicate not part of this SLA as part of RCA from clause "Will be measured using an Incident RCA based measurement approach" flagged as Excluded from SLA reporting
+
+Supplemental definition of terms:
+
+Service availability for Right Fax (including SQL server database) server to send and receive faxes.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***%
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Priority
+
+Product Name
+
+Incident ID
+
+Incident Related Change
+
+Incident Assigned Date/Time
+
+Incident Resolved Date/Time
+
+Change ID
+
+Change CI Unavailability
+
+Change CI Unavailability Start Date/Time
+
+Change CI Unavailability End Date/Time
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”,”STARS”,”RELS”,”FINITI”
+
+Priority = Critical or High
+
+Service Tier = “RightFax”
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Calculations
+
+Service Level Achievement = (Total number of hours of RightFax UPTIME/ Expected Uptime * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+2.
+
+2.4.c CSL-ENT-PERCENTAGE AVAILABILITY OF EXCHANGE EMAIL SERVICE
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+Service Availability is defined as the ability of an Authorized User on an Exchange account to (a) access and retrieve information from an individual mailbox, and (b) send and receive messages via his or her mailbox using the Services (Outlook MAPI, OWA, IMAP or POP3).
+
+Associated hours of Operation:
+
+24X7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Incident Management /Change Management, Atrium CMDB
+
+Exceptions:
+
+- Individual mailbox or mobile device Availability, individual incoming and outgoing mail delivery time.
+
+- Single point of failure (excluding RAID0 mail stores) of hardware, Software, or carrier services
+
+Supplemental definition of terms:
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+Expected Service Level – ***%
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Priority
+
+Product Catalogue Tier 3
+
+Incident ID
+
+Incident Related Change
+
+Incident Assigned Date/Time
+
+Incident Resolved Date/Time
+
+Change ID
+
+Change CI Unavailability
+
+Change CI Unavailability Start Date/Time
+
+Change CI Unavailability End Date/Time
+
+CMDB Service Tier
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”,”STARS”,”RELS”,”FINITI”,
+
+Priority = Critical or High
+
+CMDB Service Tier = “Exchange”
+
+CI Name as provided above
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Calculations
+
+Service Level Achievement = (Total number of hours of Exchange Email Service UPTIME/ Expected Uptime * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+3.
+
+2.4.d CSL-ENT-PERCENTAGE AVAILABILITY OF CITRIX METAFRAME
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+Service Availability is defined by availability of core Citrix services like IMA service, Print spooler, XML service and published applications.
+
+Associated hours of Operation:
+
+24X7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Datamart Incident Management /Change Management, CMDB
+
+Exceptions:
+
+- Individual Citrix clients, individual Citrix Desktop Availability
+
+- For published applications, where the application is the root cause of the unavailability.
+
+Supplemental definition of terms:
+
+CMDB Service Tier=Citrix
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***%
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Priority
+
+Product Name
+
+Incident ID
+
+Incident Related Change
+
+Incident Assigned Date/Time
+
+Incident Resolved Date/Time
+
+Change ID
+
+Change CI Unavailability
+
+Change CI Unavailability Start Date/Time
+
+Change CI Unavailability End Date/Time
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”,” RELS”,” FINITI”,” STARS”
+
+Priority = High or Critical
+
+CMDB Service Tier = Citrix
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Calculations
+
+Service Level Achievement = (Total number of hours of Exchange Email Service UPTIME/ Expected Uptime * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+4.
+
+2.9.a CSL-NW-Data Center LAN Availability
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+The intent of this SLA is to measure the Availability of Network Connectivity required for business operations - LAN (Data Center locations). Availability within data center, common communication between computing and associated devices. Redundant equipment is required. The service is determined to be available if either side of the redundancy is up and operational.
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS Incident Management and Change Management, Atrium CMDB. Will be measured using an Incident RCA based measurement approach.
+
+Exceptions:
+
+- No single LAN availability device could cause an SLA miss, unless that single device is unavailable for more than 4 hours.
+
+Supplemental definition of terms:
+
+To determine the impact and duration to service availability, the following process is adhered. True impact and duration are determined by analyzing the MIM communications, AIR & RCA. With that extracted start & end times (Excluding any scheduled maintenance downtime) a CI unavailability record is created on the parent incident management record to reflect & report the service impact duration.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of the time, ***% of Data Center LAN Systems will be available.
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Incident Assigned Date/Time
+
+Incident Priority
+
+Incident ID
+
+Incident Resolved Date/Time
+
+Product Category Tier 1
+
+Product Category Tier 2
+
+Product Category Tier 3
+
+CI Unavailability Scheduled Actual Start Date/Time
+
+CI Unavailability Scheduled Actual End Date/Time
+
+CI Unavailability Unscheduled Actual Start Date/Time
+
+CI Unavailability Unscheduled Actual End Date/Time
+
+Related Change to Incident Record
+
+Excluded from SLA Reporting
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CoreLogic”,”Rels”,”Finiti”,”Stars”
+
+Priority = High or Critical
+
+Product Category Tier 1 = Hardware, Service
+
+Product Category Tier 2 = Network
+
+Product Category Tier 3 = Switch, Appliance, Firewall, Load Balancer
+
+Service Tier = Network
+
+Site group = Data Center
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Excluded from SLA Reporting <> Yes
+
+Note: Any incident or unavailability record may be eligible, if the ticket categorization was not entered properly and outage was discovered to be Service related based on RCA.
+
+Calculations
+
+Step 1. Calculate (A) = Unavailability minutes per server allowed = ****(***-.***). Round up to nearest whole number = ***. This is not recalculated ***.
+
+Step 2. Determine the count of devices in the LAN availability pool (B)
+
+*Unit count (B) total is audited ***
+
+Step 3. Calculate (C) = The count of LAN devices allowed to be unavailable more than (A) = (B)*(***-.***) ceiling up to nearest whole number.
+
+Example: if the unit count is *** units, then the result of *** would be rounded up to ***.
+
+Step 4. Calculate (D) = Based on CI unavailability & RCA, determine the count of LAN devices that were unavailable for more than step 1 (A). If (D) is more than step 3 (C) then the SLA would be a miss.
+
+Example: If the unit count is *** units with a unit target of ***% and an availability target of ***%, this would mean there will be no more than *** of downtime.
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+5.
+
+2.9.b CSL-NW-Data Center WAN Availability
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+The intent of this SLA is to measure the Availability of Network Connectivity required for business operations - WAN (Data Center locations). Availability for inter-data center connection, internet, intranet, extranet, devices and circuits. Reachability; measurement of the total number of hours of Availability through VLANS and firewalls to internet service provider circuits, intranet and extranet circuit service providers, communication between data centers. Redundant equipment is required. The service is determined to be available if either side of the redundancy is up and operational.
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS Incident Management and Change Management, Atrium CMDB. Will be measured using an Incident RCA based measurement approach.
+
+Exceptions:
+
+- No single WAN availability device could cause an SLA miss, unless that single device is unavailable for more than ***.
+
+Supplemental definition of terms:
+
+To determine the impact and duration to service availability, the following process is adhered. True impact and duration are determined by analyzing the MIM communications, AIR & RCA. With that extracted start & end times (Excluding any scheduled maintenance downtime) a CI unavailability record is created on the parent incident management record to reflect & report the service impact duration.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of the time, ***% of Data Center WAN Systems will be available.
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Incident Assigned Date/Time
+
+Incident Priority
+
+Incident ID
+
+Incident Resolved Date/Time
+
+Product Category Tier 1
+
+Product Category Tier 2
+
+Product Category Tier 3
+
+CI Unavailability Scheduled Actual Start Date/Time
+
+CI Unavailability Scheduled Actual End Date/Time
+
+CI Unavailability Unscheduled Actual Start Date/Time
+
+CI Unavailability Unscheduled Actual End Date/Time
+
+Related Change to Incident Record
+
+Excluded from SLA Reporting
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CoreLogic”,”Rels”,”Finiti”,”Stars”
+
+Priority = High or Critical
+
+Product Category Tier 1 = Hardware, Service
+
+Product Category Tier 2 = Network
+
+Product Category Tier 3 = Router, Gateway, Circuit
+
+Service Tier = Network
+
+Site group = Data Center
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Excluded from SLA Reporting <> Yes
+
+Note: Any incident or unavailability record may be eligible, if the ticket categorization was not entered properly and outage was discovered to be Service related based on RCA.
+
+Calculations
+
+Step 1. Calculate (A) = Unavailability minutes per server allowed = ****(***-.***). Round up to nearest whole number = ***. This is not recalculated ***.
+
+Step 2. Determine the count of devices in the WAN availability pool (B)
+
+*Unit count (B) total is audited ***
+
+Step 3. Calculate (C) = The count of WAN devices allowed to be unavailable more than (A) = (B)*(***-.***) ceiling up to nearest whole number.
+
+Example: if the unit count is *** units, then the result of *** would be rounded up to ***.
+
+Step 4. Calculate (D) = Based on CI unavailability & RCA, determine the count of WAN devices that were unavailable for more than step 1 (A). If (D) is more than step 3 (C) then the SLA would be a miss.
+
+Example: If the unit count is *** units with a unit target of ***% and an availability target of ***%, this would mean there will be no more than *** of downtime.
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+6.
+
+2.9.c KM-NW-Campus LAN Availability
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this SLA is to measure the Availability of Network Connectivity required for business operations - LAN (Campus locations, Dallas/Irving, Irvine & San Diego). Availability within campus buildings, common communication between computing and associated devices. Assume redundant equipment exists at some level. The service is determined to be available if either side of the redundancy is up and operational.
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS Incident Management and Change Management, Atrium CMDB. Will be measured using an Incident RCA based measurement approach.
+
+Exceptions:
+
+Continual Service Improvement
+
+- No Single Campus LAN availability device could cause an SLA miss, unless that single device is unavailable for more than ***.
+
+Yes
+
+Supplemental definition of terms:
+
+To determine the impact and duration to service availability, the following process is adhered. True impact and duration are determined by analyzing the MIM communications, AIR & RCA. With that extracted start & end times (Excluding any scheduled maintenance downtime) a CI unavailability record is created on the parent incident management record to reflect & report the service impact duration.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of the time, ***% of Campus LAN Systems will be available.
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Incident Assigned Date/Time
+
+Incident Priority
+
+Incident ID
+
+Incident Resolved Date/Time
+
+Product Category Tier 1
+
+Product Category Tier 2
+
+Product Category Tier 3
+
+CI Unavailability Scheduled Actual Start Date/Time
+
+CI Unavailability Scheduled Actual End Date/Time
+
+CI Unavailability Unscheduled Actual Start Date/Time
+
+CI Unavailability Unscheduled Actual End Date/Time
+
+Related Change to Incident Record
+
+Excluded from SLA Reporting
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CoreLogic”,”Rels”,”Finiti”,”Stars”
+
+Priority = High or Critical
+
+Product Category Tier 1 = Hardware, Service
+
+Product Category Tier 2 = Network
+
+Product Category Tier 3 = Switch, Appliance, Firewall, Load Balancer
+
+Service Tier = Network
+
+Site group <> Data Center
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Excluded from SLA Reporting <> Yes
+
+Note: Any incident or unavailability record may be eligible, if the ticket categorization was not entered properly and outage was discovered to be Service related based on RCA.
+
+Calculations
+
+Step 1. Calculate (A) = Unavailability minutes per server allowed = ****(***-.***). Round up to nearest whole number = ***. This is not recalculated ***.
+
+Step 2. Determine the count of devices in the Campus LAN availability pool (B)
+
+*Unit count (B) total is audited ***
+
+Step 3. Calculate (C) = The count of Campus LAN devices allowed to be unavailable more than (A) = (B)*(***-.***) ceiling up to nearest whole number.
+
+Example: if the unit count is *** units, then the result of *** would be rounded up to ***.
+
+Step 4. Calculate (D) = Based on CI unavailability & RCA, determine the count of Campus LAN devices that were unavailable for more than step 1 (A). If (D) is more than step 3 (C) then the SLA would be a miss.
+
+Example: If the unit count is *** units with a unit target of ***% and an availability target of ***%, this would mean there will be no more than *** of downtime.
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+7.
+
+2.9.d1/2.9.d2 KM-NETWORK-REQUEST-FIREWALL, IP ADDRESS, HTTP PORT REQUESTS
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Key Measurement
+
+Interpreted Intent of SLA:
+
+The intent of this Service Level is to measure the IT Security - Percent of Firewall requests, I.P. Address Add, Change or Open HTTP, Port requests that are successfully completed within Target timeframe
+
+Associated hours of Operation:
+
+24X7 see 1.4.8 Time Definitions
+
+Reporting Tools:
+
+OPAS Service Requests
+
+Exceptions:
+
+- Any hold in approval processes or change request initiated by CoreLogic
+
+- Supplier's failure to meet this Service Level in respect of any hardware-related Incidents shall be excused to the extent that such failure is caused by any Supplier third party provider's failure to perform, or delay in performing, any repair or replacement actions required to be performed by such third party provider in connection with the resolution of any such Incident; provided, that (i) Supplier uses commercially reasonable efforts to cause such third party providers to perform within the required time frame and (ii) to the extent documented in Supplier's Root Cause Analysis
+
+- Pending Time based on allowed Pending Event
+
+Supplemental definition of terms:
+
+Measures the time taken between processing of approved request(s)
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of requests completed within ***; ***% completed within ***
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Request Summary Name
+
+Request Approval Date/Time
+
+Request Assigned Date/Time
+
+Request Completed Date/Time
+
+Pending Time
+
+Excluded in SLA Reporting
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CORELOGIC”, “FINITI”,”RELS”,”STARS”
+
+Request Summary Name = Firewall Request or IP Assignment
+
+Request Closed Date/Time is within the reporting period
+
+Excluded in SLA Reporting <> Yes
+
+Calculations
+
+Request SLA = Request Completed Date/Time – Request Approval Date/Time- Total Pending Time
+
+***% - Service Level Achievement (within ***)= (Number of successfully completed requests within *** /Total number of requests in the measurement period) * 100%
+
+***% - Service Level Achievement (within ***)= (Number of successfully completed requests within *** /Total number of requests in the measurement period) * 100%
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+8.
+
+2.9.e CSL-NW-VOIP Availability
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+
+Reporting Frequency:
+
+***, on or before the *** following the reporting period
+
+UNDERSTANDING
+
+Contract Reference:
+
+Category:
+
+CORELOGIC-Dell Schedule A-3.1(Service Level Matrix)
+
+CORELOGIC-Dell Supplement A
+
+Critical Service Level
+
+Interpreted Intent of SLA:
+
+The intent of this SLA is to measure the Availability of the VOIP Service. VOIP Availability consists of time voice communication between users was available. Includes contact center and end user. Redundant equipment and circuits are required.
+
+Associated hours of Operation:
+
+24x7
+
+Reporting Tools:
+
+OPAS Incident Management and Change Management, Atrium CMDB. Cisco operations manager or equivalent. Will be measured using an Incident RCA based measurement approach.
+
+Exceptions:
+
+- Excludes Avaya, Nortel and other non-enterprise VOIP systems.
+- No single VOIP availability device could cause an SLA miss, unless that single device is unavailable for more than ***.
+
+Supplemental definition of terms:
+
+To determine the impact and duration to service availability, the following process is adhered. True impact and duration are determined by analyzing the MIM communications, AIR & RCA. With that extracted start & end times (Excluding any scheduled maintenance downtime) a CI unavailability record is created on the parent incident management record to reflect & report the service impact duration.
+
+Low Volume Eligible:
+
+No
+
+Threshold parameters:
+
+***% of the time, ***% of VOIP Systems will be available.
+
+SLA Metrics and parameters:
+(field names in OPAS)
+
+Supporting Company
+
+Incident Assigned Date/Time
+
+Incident Priority
+
+Incident ID
+
+Incident Resolved Date/Time
+
+CI Unavailability Scheduled Actual Start Date/Time
+
+CI Unavailability Scheduled Actual End Date/Time
+
+CI Unavailability Unscheduled Actual Start Date/Time
+
+CI Unavailability Unscheduled Actual End Date/Time
+
+Related Change to Incident Record
+
+Excluded from SLA Reporting
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+DATES
+
+Logical description of the SLA calculation:
+
+Report Criteria
+
+Supporting Company = “CoreLogic”,”Rels”,”Finiti”,”Stars”
+
+Priority = High or Critical
+
+Service Tier = Network Voice
+
+Site group = Data Center
+
+Incident Resolved Date/Time = Period of Reporting
+
+Incident Related Changes for All incidents during the Period of Reporting
+
+Excluded from SLA Reporting <> Yes
+
+Note: Any incident or unavailability record may be eligible, if the ticket categorization was not entered properly and outage was discovered to be Service related based on RCA.
+
+Calculations
+
+Step 1. Calculate (A) = Unavailability minutes per server allowed = ****(***-.***). Round up to nearest whole number = ***. This is not recalculated ***.
+
+Step 2. Determine the count of devices in the VOIP availability pool (B)
+
+*Unit count (B) total is audited ***
+
+Step 3. Calculate (C) = The count of VOIP devices allowed to be unavailable more than (A) = (B)*(***-.***) ceiling up to nearest whole number.
+
+Example: if the unit count is *** units, then the result of *** would be rounded up to *.
+
+Step 4. Calculate (D) = Based on CI unavailability & RCA, determine the count of VOIP devices that were unavailable for more than step 1 (A). If (D) is more than step 3 (C) then the SLA would be a miss.
+
+Example: If the unit count is *** units with a unit target of ***% and an availability target of ***%, this would mean there will be no more than *** of downtime.
+
+CONFIDENTIAL MATERIAL APPEARING IN THIS DOCUMENT HAS BEEN OMITTED AND FILED SEPARATELY WITH THE SECURITIES AND EXCHANGE COMMISSION IN ACCORDANCE WITH THE SECURITIES EXCHANGE ACT OF 1934, AS AMENDED, AND RULE 24b-2 PROMULGATED THEREUNDER. OMITTED INFORMATION HAS BEEN REPLACED WITH “***”.
+
+9.
+
+2.9.f KM-NW-Call Center/Call Monitoring Requests
+
+DATES
+
+SLA Start Date:
+
+8/1/2013
+
+First Reporting Period:
+
+8/31/2013
+
+First Report Date:
+
+9/6/2013
+
+Reporting Period:
+
+***
+

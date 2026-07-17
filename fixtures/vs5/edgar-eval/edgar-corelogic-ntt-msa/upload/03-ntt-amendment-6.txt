@@ -1,0 +1,317 @@
+2
+clgx-63019xex10110q.htm
+EXHIBIT 10.1
+
+Exhibit
+
+[***]: INDICATES THAT CERTAIN INFORMATION HAS BEEN OMITTED FROM THIS AGREEMENT BECAUSE IT IS BOTH (i) NOT MATERIAL AND (ii) WOULD BE COMPETITIVELY HARMFUL IF PUBLICLY DISCLOSED.
+
+AMENDMENT NO. 6
+
+TO THE
+
+MASTER SERVICES AGREEMENT
+
+And
+
+SUPPLEMENT A
+
+BETWEEN
+
+CORELOGIC SOLUTIONS, LLC
+
+AND
+
+NTT DATA SERVICES, LLC
+
+Amendment 6 Effective Date October 17, 2018
+
+This document contains proprietary and confidential information of CoreLogic and NTT DATA Services. The information contained in this document may not be disclosed outside either Party without the prior written permission of the other Party.
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+[***]: INDICATES THAT CERTAIN INFORMATION HAS BEEN OMITTED FROM THIS AGREEMENT BECAUSE IT IS BOTH (i) NOT MATERIAL AND (ii) WOULD BE COMPETITIVELY HARMFUL IF PUBLICLY DISCLOSED.
+
+AMENDMENT NO. 6
+
+TO THE
+
+MASTER SERVICES AGREEMENT
+
+THIS AMENDMENT NO. 6 (this “Amendment”) is effective as of October 17, 2018 (the “Amendment 6 Effective Date”) by and between CoreLogic Solutions LLC (“CoreLogic”) and NTT DATA Services, LLC (“Supplier”).
+
+WHEREAS, CoreLogic and Supplier are parties to a MSA and Supplement A, each dated as of July 19, 2012; Amendment No. 1 to the MSA dated October 23, 2012; Amendment No. 2 to the MSA dated December 6, 2012; Amendment No. 3 to the MSA dated March 17, 2017; Amendment No. 4 to the MSA dated October 1, 2017, and Amendment No. 5 dated May 15, 2018;
+
+WHEREAS, CoreLogic and Supplier intend to further amend and restate the Agreement documents set forth below to make changes to the Agreement based on the disputes between the parties that were settled in the ARC/RRC Settlement Agreement dated October 17, 2018.
+
+NOW THEREFORE, in consideration of the mutual promises and covenants contained in this Amendment, and of other good and valid consideration, the receipt and sufficiency of which is hereby acknowledged, CoreLogic and Supplier hereby agree as follows:
+
+1.
+
+APPLICABILITY OF PROVISIONS OF THE AGREEMENT
+
+This Amendment is subject to, and shall be governed by, all of the provisions of the Agreement, except to the extent such provisions are expressly modified by this Amendment. Capitalized terms used herein shall have the respective meaning ascribed to each by the Agreement except as otherwise expressly set forth in this Amendment.
+
+2.
+
+NEW AND AMENDED CONTRACT DOCUMENTS
+
+Effective as of 12:00:01 a.m., U.S. Pacific Time on the Amendment 6 Effective Date:
+
+3.2 Amended and Restated Contract Documents. The following contract documents are hereby stricken in their entirety and replaced, respectively with those attached to this Amendment:
+
+Schedule A-4 Pricing and Financial Provisions
+
+◦
+
+In Section 4.4, in the table, added to the Charging Method of Cross Functional Services the following: “(except for User Security Administration, which will be charged as Ongoing Fixed Fees).”
+
+Schedule A-4.02 Resource Unit Definitions
+
+◦
+
+Added the following to Section 1.3.1 EUC (Desktop/Laptop):
+
+“As of the Amendment 6 Effective Date each EUC (Desktop/Laptop) Resource Unit includes the services for (A) Section 1.3.5 (Desktop Application Packages),
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 6 Page 1
+
+[***]: INDICATES THAT CERTAIN INFORMATION HAS BEEN OMITTED FROM THIS AGREEMENT BECAUSE IT IS BOTH (i) NOT MATERIAL AND (ii) WOULD BE COMPETITIVELY HARMFUL IF PUBLICLY DISCLOSED.
+
+(B) Section 1.3.6 (Desktop Image Management,) (C) Section 1.3.7 End User IMACDS – Campus and (D) Section 1.3.8 End User IMACDS – Remote.”
+
+◦
+
+Added the following to Section 1.3.5 EUC (Desktop Application Packages):
+
+“As of the Amendment 6 Effective Date, this Resource Unit will no longer be included as a separate charge outside of the EUC (Desktop/Laptop) Resource Unit.
+
+◦
+
+Added the following to Section 1.3.6 EUC (Desktop Image Management):
+
+“As of the Amendment 6 Effective Date, this Resource Unit will no longer be included as a separate charge outside of the EUC (Desktop/Laptop) Resource Unit.”
+
+◦
+
+Added the following to Section 1.3.7 End User IMACDs (Campus):
+
+“As of the Amendment 6 Effective Date, this Resource Unit will be limited to (I) EUC (Desktop/Laptop) PC refreshes and (II) activities considered a chargeable project under Schedule A-04.10 (Chargeable Projects).
+
+For the avoidance of doubt, each PC refresh request shall be equal to two (2) Resource Units.
+
+◦
+
+Added the following to Section 1.3.8 End User IMACDs (Remote):
+
+“As of the Amendment 6 Effective Date, this Resource Unit will be limited to one (1) EUC (Desktop/Laptop) PC refreshes and (II) activities considered a chargeable project under Schedule A-04.10 (Chargeable Projects).
+
+For the avoidance of doubt, each PC refresh request shall be equal to two (2) Resource Units.
+
+◦
+
+Added the following to Section 1.10.1 User Security Administration:
+
+“As of the Amendment 6 Effective Date, this Resource Unit has been converted to a monthly fixed fee. In addition, as it pertains to User Security Administration Requests where CoreLogic requests Supplier to perform what meets the criteria a chargeable project under Schedule A-04.10 (Deemed Chargeable Projects), such activities will be performed and invoiced as a project.
+
+Schedule A-4.9.1 Form of Invoice
+
+◦
+
+On Summary Tab, Added User Security Administration as an On-going Fixed Fee in Row 25
+
+Schedule A-4.9.2 Form of Chargeback
+
+◦
+
+On Chargeback Volumes Tab, added User Security Administration to the on-going fixed fee section on Row 8.
+
+Schedule A-4.12 On-Going Fixed Fees
+
+◦
+
+Added Section 2.5 User Security Administration with the following content: “The Ongoing-Fixed Fee identified as “User Security Administration” shall be Supplier’s compensation for Supplier’s performance of the Services described in Sections 1.2.7 through Section 1.2.9 of Schedule A-2.3.”
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 6
+
+2
+
+[***]: INDICATES THAT CERTAIN INFORMATION HAS BEEN OMITTED FROM THIS AGREEMENT BECAUSE IT IS BOTH (i) NOT MATERIAL AND (ii) WOULD BE COMPETITIVELY HARMFUL IF PUBLICLY DISCLOSED.
+
+Schedule A-4.7 Rate Card
+
+◦
+
+Tab A-4.1 Baseline Charges
+
+◦
+
+Added Row 9 User Security Administration. Dollar amount in 2018 represents 3 months of the new fixed fee ($[***] per month). Dollar amount in 2019 represents 12 months of the new fixed fee. Dollar amount in 2020 represents 1 month of the new fixed fee.
+
+◦
+
+Amended Row 12 End User Device Support and Messaging. Dollar amount in 2018 represents 12 months of baseline as per the amounts prior to the settlement agreement reduced by 3 months of reductions per the settlement agreement [***]. Dollar amount in 2019 represents the amounts prior to the settlement agreement reduced by 12 months of reductions per the settlement agreement [***]. Dollar amount in 2020 represents the amount prior to the settlement agreement reduced by 1 month of reductions per the settlement agreement [***].
+
+◦
+
+Amended Row 19 Security. Dollar amount in 2018 represents the baseline charges as per the amounts prior to the settlement agreement reduced by 3 months of reductions per the settlement agreement [***]. Dollar amount in 2019 represents the baseline charges as per the amounts prior to the settlement agreement reduced by 12 months of reductions per the settlement agreement [***]. Dollar amount in 2020 represents the amount prior to the settlement agreement reduced by 1 month of reductions per the settlement agreement [***]
+
+◦
+
+Comments added to lines 25-27 for each of the above.
+
+◦
+
+A-4.3 Baseline Volumes
+
+◦
+
+Amended Row 19 Desktop IMACS - Campus *
+
+§
+
+BY19 – CQ19 set to 0
+
+◦
+
+Amended Row 20 Desktop IMACS - Remote *
+
+§
+
+BY20 – CQ20 set to 0
+
+◦
+
+Amended Row 24 Desktop Application Package *
+
+§
+
+BY24 – CQ24 set to 0
+
+◦
+
+Amended Row 25 Desktop Image Management *
+
+§
+
+BY25 – CQ25 set to 0
+
+◦
+
+Amended Row 70 User Security Administration *
+
+§
+
+BY70 – CQ70 set to 0
+
+◦
+
+Added comment row 74
+
+◦
+
+A-4.4 ARC RRC Rates
+
+◦
+
+Added new columns A – N to represent rates from September 2018 Period of Performance Forward
+
+◦
+
+Amended Row 18 EUC (Desktop/Laptop) ****A
+
+§
+
+Updated cells H18 – J18 to indicate the new rate of $[***]
+
+◦
+
+Amended Row 24 Desktop Application Package ****B
+
+§
+
+Updated cells H24 – J24 to $[***]
+
+◦
+
+Amended Row 25 Desktop Image Management ****C
+
+§
+
+Updated cells H25 – J25 to $[***]
+
+◦
+
+Amended Row 73 User Security Administration ****D
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 6
+
+3
+
+[***]: INDICATES THAT CERTAIN INFORMATION HAS BEEN OMITTED FROM THIS AGREEMENT BECAUSE IT IS BOTH (i) NOT MATERIAL AND (ii) WOULD BE COMPETITIVELY HARMFUL IF PUBLICLY DISCLOSED.
+
+§
+
+Updated cells H73 – J73 to $[***]
+
+◦
+
+Added comments in rows 79-82
+
+3.
+
+GOVERNING LAW.
+
+This Amendment shall be governed by and construed in accordance with the terms set forth in Section 19.4 of the Agreement.
+
+4.
+
+HEADINGS.
+
+The article and section headings and the table of contents used herein are for reference and convenience only and will not be considered in the interpretation of this Amendment.
+
+5.
+
+OTHER PROVISIONS OF THE AGREEMENT UNCHANGED.
+
+Except as specifically amended by this Amendment, all other provisions of the Agreement shall remain in full force and effect and shall not be altered by this Amendment.
+
+6.
+
+SIGNATURES.
+
+This Amendment may be signed in multiple counterparts, each of which shall be an original but all of which shall constitute one and the same Amendment. Signatures to this Amendment sent by facsimile or by PDF shall be deemed for all purposes to be the same as original signatures.
+
+IN WITNESS WHEREOF, the Parties have caused this Amendment to be executed by their respective duly authorized representatives as of the Amendment 6 Effective Date.
+
+CORELOGIC SOLUTIONS, LLC
+
+NTT DATA SERVICES, LLC
+
+By: /s/ Kevin Tang
+
+Printed Name:
+
+Kevin Tang
+
+Title: Sr. Leader, SCVM
+
+By: /s/ John Evans
+
+Printed Name:
+
+John Evans
+
+Title: Client Executive
+
+CORELOGIC/NTT DATA SERVICES CONFIDENTIAL
+
+Amendment No. 6
+
+4

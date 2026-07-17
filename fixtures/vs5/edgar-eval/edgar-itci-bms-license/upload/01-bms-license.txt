@@ -1,0 +1,1066 @@
+10
+d590040dex1011.htm
+EX-10.1.1
+
+EX-10.1.1
+
+Exhibit 10.1.1
+
+LICENSE AGREEMENT
+
+between
+
+INTRA-CELLULAR THERAPIES, INC.
+
+and
+
+BRISTOL-MYERS SQUIBB COMPANY
+
+Portions of this Exhibit, indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application
+requesting confidential treatment pursuant to Rule 24b-2 of the Securities Exchange Act of 1934, as amended.
+
+LICENSE AGREEMENT
+
+THIS LICENSE AGREEMENT (this “Agreement”) is made and entered into as of May 31, 2005 (the “Effective
+Date”), by and between Bristol-Myers Squibb Company, a Delaware corporation headquartered at 345 Park Avenue, New York, New York 10154 (“BMS”), and Intra-Cellular Therapies, Inc., a Delaware corporation having
+its principal place of business at Audubon Biomedical Science and Technology Park, 3960 Broadway, New York, NY 10032 (“ITI”). BMS and ITI are sometimes referred to herein individually as a “Party” and collectively
+as the “Parties.”
+
+RECITALS
+
+WHEREAS, BMS Controls (as defined below) certain patent rights and know-how rights with respect to the Licensed Compounds (as defined below); and
+
+WHEREAS, ITI desires to obtain from BMS the licenses set forth herein, and BMS desires to grant such licenses to ITI, all on the terms
+and conditions set forth in this Agreement;
+
+NOW, THEREFORE in consideration of the foregoing and the mutual agreements set
+forth below, the Parties agree as follows:
+
+ARTICLE 1
+
+DEFINITIONS
+
+The terms in this Agreement with initial letters capitalized, whether used in the singular or the plural, shall have the meaning set forth below or, if not listed below, the meaning designated in places
+throughout this Agreement.
+
+1.1 “Act” means the United States Food, Drug and Cosmetic Act, as amended.
+
+1.2 “Affiliate” of a Person means any other Person which (directly or indirectly) is controlled by,
+controls or is under common control with such Person. For the purposes of this definition, the term “control” (including, with correlative meanings, the terms “controlled by” and “under common control with”) as used
+with respect to a Person, shall mean the possession, directly or indirectly, of the power to direct, or cause the direction of, the management or policies of such Person, whether through the ownership of voting securities, by contract or otherwise.
+“Control” shall be presumed to exist if either of the following conditions is met: (i) in the case of a corporate entity, direct or indirect ownership of voting securities entitled to cast at least fifty percent (50%) of the
+votes in the election of directors or (ii) in the case of a non-corporate entity, direct or indirect ownership of at least fifty percent (50%) of the equity interests with the power to direct the management and policies of such entity.
+
+1.3 “Agreement” means this Agreement, together with all Appendices attached hereto, as the same may
+be amended or supplemented from time to time.
+
+1.4 “Approval” means, with respect to any Licensed
+Product in any regulatory jurisdiction, approval from the applicable Regulatory Authority sufficient for the manufacture,
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+distribution, use and sale of the Licensed Product in such jurisdiction in accordance with applicable Laws. For purposes of the U.S., Approval means NDA Approval. For purposes of Japan, Approval
+means JNDA Approval. For purposes of the EU, Approval means MAA Approval.
+
+1.5 “[***]” means (a) [***]
+(b) [***].
+
+1.6 “BMS Core Patent Rights” means those patents and patent applications listed in
+Appendix 1 hereto, and (a) any foreign counterparts thereof, (b) all divisionals, continuations, continuations-in-part thereof or any other patent application claiming priority directly or indirectly to (i) any of the patents
+or patent applications identified on Appendix 1 or (ii) any patent or patent application from which the patents or patent applications identified on Appendix 1 claim direct or indirect priority, and (c) all patents issuing on
+any of the foregoing, and any foreign counterparts thereof, together with all registrations, reissues, re-examinations, supplemental protection certificates, or extensions thereof, and any foreign counterparts thereof.
+
+1.7 “BMS Know-How” means (a) Know-How that, as of the Effective Date, is Controlled by BMS and directly
+relates to and is reasonably necessary for, ITI’s Development and Commercialization of the Licensed Compounds and Licensed Products in the Field, and (b) any Know-How that after the Effective Date is acquired or developed by BMS during the
+term of the Agreement, that is Controlled by BMS, and that directly relates to and is reasonably necessary for, ITI’s Development and Commercialization of the Licensed Compounds and Licensed Products in the Field.
+
+1.8 “BMS Other Patent Rights” means all Patent Rights other than those included in the BMS Core Patent Rights
+which are Controlled by BMS during the term of this Agreement and which (a) claim any Licensed Compound and/or Licensed Product and (b) are necessary for the research, discovery, Development, manufacture, marketing, use, export, import or
+sale of Licensed Compounds and/or Licensed Products in the Field. For the avoidance of doubt, the BMS Other Patent Rights do not include any claims in any Patent Rights Controlled by BMS covering the composition of matter of any compound that are
+not also covering the composition of matter of any Licensed Compound or an intermediate or starting material reasonably necessary in the manufacture of any Licensed Compound. Until a patent or patent application is identified in Appendix 9, it shall
+not be considered a BMS Other Patent Right for the purposes of this Agreement.
+
+1.9 “BMS Patent
+Rights” means the BMS Core Patent Rights and the BMS Other Patent Rights.
+
+1.10 “BMS Retained
+Field” means the prevention, treatment or control of obesity, diabetes, metabolic syndrome, or any related diseases, disorders or conditions or any cardiovascular disease, disorder and condition.
+
+1.11 “Business Day” or “business day” means a day other than Saturday, Sunday or any day on
+which commercial banks located in New York, New York are authorized or obligated by Law to close.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-2-
+
+1.12 “Calendar Quarter” means the respective periods of three
+consecutive calendar months ending on March 31, June 30, September 30 and December 31.
+
+1.13
+“Calendar Year” means each successive period of 12 months commencing on January 1 and ending on December 31.
+
+1.14 “Combination Product” means a Licensed Product that includes at least one additional active ingredient other than the Licensed Compound. Drug delivery vehicles, adjuvants, and
+excipients shall not be deemed to be “active ingredients”, except in the case where such delivery vehicle, adjuvant, or excipient is recognized by the FDA as an active ingredient in accordance with 21 CFR 210.3(b)(7).
+
+1.15 “Commercialization” or “Commercialize” means activities directed to commercially
+manufacturing, obtaining pricing and reimbursement approvals, carrying out Phase IV Studies, marketing, promoting, distributing, importing or selling a Licensed Product.
+
+1.16 “Commercially Reasonable Efforts” means those efforts that a company within the bio-pharmaceutical industry would reasonably use, and specifically means, with respect to the
+Development and Commercialization of Licensed Compounds and Licensed Products, the carrying out of Development and Commercialization activities using efforts that a company within the bio-pharmaceutical industry would reasonably devote to a product
+[***]. Without limiting the foregoing, Commercially Reasonable Efforts require that ITI: (i) promptly assign responsibility for such Development and Commercialization activities to specific employees who are held accountable for progress and
+monitor such progress on an on-going basis, (ii) set and consistently seek to achieve specific and meaningful objectives and timelines for carrying out such Development and Commercialization activities, and (iii) consistently make and
+implement decisions and allocate resources designed to advance progress with respect to such objectives and timelines.
+
+1.17 “Competitive Compound” means [***].
+
+1.18 “Confidential Information” means all trade secrets, processes, formulae, data, Know-How, improvements,
+inventions, chemical or biological materials, techniques, marketing plans, strategies, customer lists, or other information that has been created, discovered, or developed by a Party, or has otherwise become known to a Party, or to which rights have
+been assigned to a Party, as well as any other information and materials that are deemed confidential or proprietary to or by a Party (including, without limitation, all information and materials of a Party’s customers and any other Third Party
+and their consultants), regardless of whether any of the foregoing are marked “confidential” or “proprietary” or communicated to the other by the disclosing Party in oral, written, graphic, or electronic form.
+“Confidential Information” of BMS shall include, without limitation, the BMS Know-How.
+
+1.19
+“Controlled” or “Controls”, when used in reference to intellectual property, shall mean the legal authority or right of a Party hereto (or any of its Affiliates) to grant a license or sublicense of intellectual
+property rights to the other Party or any Third Party, or to otherwise disclose proprietary or trade secret information to such other Party or to any Third Party, without breaching the terms of any agreement with any Third Party.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-3-
+
+1.20 “Development” means non-clinical and clinical drug development
+activities reasonably related to the development and submission of information to a Regulatory Authority, including, without limitation, toxicology, pharmacology and other discovery and pre-clinical efforts, test method development and stability
+testing, process development, formulation development, delivery system development, quality assurance and quality control development, statistical analysis, clinical studies (including, without limitation, pre- and post-approval studies and
+specifically excluding regulatory activities directed to obtaining pricing and reimbursement approvals). When used as a verb, “Develop” means to engage in Development.
+
+1.21 “Development Plan” means, with respect to a Licensed Product, a comprehensive, multi-year plan specifying
+Development details for such Licensed Product (including, without limitation, the indications targeted, line of therapy, timelines for completing key activities, phasing of Development, primary endpoints, criteria for continuing activities, study
+size, comparator drugs, combination drugs, timelines for data preparation and filing of regulatory submissions, toxicology and pharmacology studies and manufacturing process development and scale up) for all applicable countries in the Territory,
+together with a detailed budget specifying the costs for all Development activities proposed to be undertaken by ITI. A summary of the initial Development Plan as of the Effective Date is attached hereto as Appendix 2.
+
+1.22 “Documented BMS Know-How” means any BMS Know-How transferred to ITI under this Agreement in the form of
+written documentation or electronic files and any BMS Know-How that is initially disclosed verbally or visually to ITI and that is summarized in a written document provided to ITI within 30 days after such verbal or visual disclosure.
+
+1.23 “Dollar” or “$” means the lawful currency of the United States.
+
+1.24 “Effective Date” means the date specified in the initial paragraph of this Agreement.
+
+1.25 “EMEA” means the European Agency for the Evaluation of Medicinal Products, or any successor agency thereto.
+
+1.26 “EU” means the European Union, as its membership may be altered from time to time, and any
+successor thereto, and which, as of the Effective Date, consists of Austria, Belgium, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Ireland, Italy, Latvia, Lithuania, Luxembourg, Malta, The Netherlands, Poland,
+Portugal, Slovakia, Slovenia, Spain, Sweden and the United Kingdom, and that certain portion of Cyprus included in such organization.
+
+1.27 “Excluded Compounds” means [***] identified in Appendix 3, and [***].
+
+1.28 “FDA” means the U.S. Food and Drug Administration, or any successor agency thereto.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-4-
+
+1.29 “Field” means the prevention, treatment or control of any human
+or animal disease, disorder or condition in any field except the BMS Retained Field.
+
+1.30 “First Commercial
+Sale” means, with respect to any Licensed Product, the first sale for use or consumption by the general public of such Licensed Product in any country in the Territory after Approval of such Licensed Product has been granted, or such
+marketing and sale is otherwise permitted, by the Regulatory Authority of such country.
+
+1.31 “GAAP”
+means generally accepted accounting principles in the United States.
+
+1.32 “Generic Product” means any
+pharmaceutical product containing as an active ingredient a Licensed Compound (or any salt, solvate, crystalline or noncrystalline form of such Licensed Compound) that is also contained in a Licensed Product, and which pharmaceutical product is sold
+in the same country as such Licensed Product by any Third Party that is not a Sublicensee of ITI or its Affiliates for the same use as the Licensed Product is sold in that country.
+
+1.33 “IND” means an Investigational New Drug Application, as defined in the Act, filed with the FDA or its
+foreign counterparts.
+
+1.34 “Indemnification Claim” has the meaning set forth in
+Section 12.2.
+
+1.35 “Indemnitee” has the meaning set forth in Section 12.2.
+
+1.36 “Independent Evaluator” means an individual with relevant expertise in the commercialization of
+pharmaceutical products employed by an independent certified public accounting firm or investment bank of nationally recognized standing that, at the time of the evaluation set forth in Section 3.2, is not providing auditing or consulting
+services to either Party, and that is selected by ITI and reasonably acceptable to BMS, or such other qualified Person as the Parties may mutually agree to.
+
+1.37 “ITI Improvement Patent Rights” means those Patent Rights owned or Controlled by ITI which claim inventions that arise out of activities under this Agreement and which would
+be infringed (absent a license from ITI) by the practice of the BMS Core Patent Rights or the BMS Other Patent Rights for the research, discovery, Development, manufacture, use or sale of compounds or pharmaceutical products in the BMS Retained
+Field or by the making, using or importing of the Licensed Compounds identified in Appendix 4 (except for the Excluded Compounds) for internal research purposes in the Field.
+
+1.38 “JNDA” means a new drug application filed with the Koseisho required for marketing approval for the
+applicable Licensed Product in Japan.
+
+1.39 “JNDA Approval” means the final approval of a JNDA
+by the Koseisho for the applicable Licensed Product in Japan.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-5-
+
+1.40 “Know-How” means technical information (including, without
+limitation, all biological, chemical, pharmacological, toxicological, clinical, manufacturing assay and related data, know-how and trade secrets).
+
+1.41 “Koseisho” means the Japanese Ministry of Health and Welfare, or any successor agency thereto.
+
+1.42 “Laws” means all laws, statutes, rules, regulations, ordinances and other pronouncements having the effect of law of any federal, national, multinational, state, provincial,
+county, city or other political subdivision, domestic or foreign.
+
+1.43 “Less Favorable to ITI”
+has the meaning set forth in Section 3.6.1.
+
+1.44 “License” means a grant or transfer of rights
+with respect to the Development or Commercialization of any Licensed Compound or any Licensed Product. “License” also refers to the corresponding grant or transfer by ITI of rights back to BMS with respect to one or more Licensed
+Compound(s) or Licensed Product(s) pursuant to Article 3. For the avoidance of doubt, a License can, but does not necessarily have to, include a sublicense of the rights granted under Section 2.1.
+
+1.45 “License Agreement” means a written, definitive agreement for a License.
+
+1.46 “Licensed Compound” means (i) those compounds identified in Appendix 4, (ii) any compound
+that is an analog or derivative thereof and that satisfies the criteria described in Appendix 5, and (iii) any other compound that satisfies the criteria described in Appendix 5 and that was conceived or reduced to practice, in
+whole or in part, using any Documented BMS Know-How, BMS Core Patent Rights, BMS Other Patent Rights or any information generated in the research, discovery or Development of Licensed Compounds and Licensed Products that relates to the structure of
+a compound.
+
+1.47 “Licensed Product” means any pharmaceutical product containing a Licensed Compound
+or a prodrug of a Licensed Compound (alone or with other active ingredients), in all forms, presentations, formulations and dosage forms.
+
+1.48 “Losses and Claims” has the meaning set forth in Section 12.1.
+
+1.49 “MAA Approval” means Approval by the EMEA of a marketing authorization application (“MAA”) filed with the EMEA for the applicable Licensed Product under the
+centralized European procedure. If the centralized EMEA filing procedure is not used, MAA Approval shall be achieved upon the first Approval for the applicable Licensed Product in three of the following countries: France, Germany, Italy, Spain and
+the United Kingdom.
+
+1.50 “Major Market Countries” means the following countries: [***].
+“Major Market Country” means one of these countries.
+
+1.51 “NDA” means a new drug
+application filed with the FDA required for marketing approval for the applicable Licensed Product in the U.S.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-6-
+
+1.52 “NDA Approval” means the final approval of an NDA by the FDA
+for the applicable Licensed Product in the U.S.
+
+1.53 “NDA Filing” means the acceptance by the FDA of
+the filing of an NDA for the applicable Licensed Product.
+
+1.54 “Negotiation Period” has the meaning
+set forth in Section 3.1.2.
+
+1.55 “Net Sales” means, with respect to any Licensed Product, the
+amount billed by a Party, an Affiliate of such Party, or any distributor or permitted Sublicensee for sales of such Licensed Product to a Third Party less:
+
+(a) discounts (including, without limitation, cash discounts and quantity discounts), retroactive price reductions, charge-back payments and rebates granted to managed health care organizations or
+to federal, state and local governments, their agencies, and purchasers and reimbursers or to trade customers (a “Discount”); provided however, that where any such Discount is based on sales of a bundled set of
+products in which such Licensed Product is included, the Discount shall be allocated to such Licensed Product on a pro rata basis based on the sales value (i.e., the unit average selling price multiplied by the unit volume) of the Licensed Product
+relative to the sales value contributed by the other constituent products in the bundled set, with respect to such sale;
+
+(b) credits or allowances actually granted upon claims, damaged goods, rejections or returns of such Licensed Product, including
+such Licensed Product returned in connection with recalls or withdrawals;
+
+(c) freight out, postage, shipping and
+insurance charges for delivery of such Licensed Product; and
+
+(d) taxes or duties levied on, absorbed or otherwise
+imposed on the sale of such Licensed Product, including, without limitation, value-added taxes, or other governmental charges otherwise imposed upon the billed amount, as adjusted for rebates and refunds, to the extent not paid by the Third Party.
+
+Net Sales shall be determined in accordance with GAAP. In the case of any Combination Product sold in the Territory, Net
+Sales for such Combination Product shall be calculated by [***]. If, [***] Net Sales for [***] shall be calculated by [***]. If [***], the Parties shall [***], or, [***] shall be [***] and [***], and shall [***].
+
+Net Sales shall [***].
+
+1.56 “Patent Rights” means (a) patents and patent applications, (b) any foreign counterparts thereof, (c) all divisionals, continuations, continuations-in-part
+thereof or any other patent application claiming priority directly or indirectly to (i) any of the patents or patent applications in (a) or (ii) any patent or patent application from which the patents or patent applications in
+(a) claim direct or indirect priority, and (d) all patents issuing on any of the foregoing, and any foreign counterparts thereof, together with all registrations, reissues, re-examinations, supplemental protection certificates, or
+extensions thereof, and any foreign counterparts thereof.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-7-
+
+1.57 “Person” means any individual, firm, corporation, partnership,
+limited liability company, trust, business trust, joint venture, governmental authority, association or other entity.
+
+1.58
+“Phase I Trial” means a human clinical trial of a Licensed Product in any country that is intended to initially evaluate the safety, pharmacokinetic and/or pharmacological effect of a Licensed Product in subjects, as more fully
+defined in 21 C.F.R. 312.21(a), or a similar clinical study prescribed by a Regulatory Authority outside the U.S.
+
+1.59
+“Phase I/II Trial” means a human clinical trial of a Licensed Product on a limited number of subjects that is intended to establish that a pharmaceutical product is safe and to demonstrate initial indications of efficacy for its
+intended use.
+
+1.60 “Phase II Trial” means a human clinical trial of a Licensed Product, the principal
+purpose of which is a determination of safety and efficacy in the target patient population, as described in 21 C.F.R. 312.21(b), or a similar clinical study prescribed by a Regulatory Authority outside the U.S. For clarity, a Phase II Trial shall
+not include a Phase I/II Trial. A Phase IIa Trial is a Phase II Trial that is a human clinical trial in not less than 70 patients with the disease or indication under study and that is designed to provide an indication of the efficacy of the
+Licensed Product for its intended use, and a Phase IIb Trial is a Phase II Trial in patients with the disease or indication under study that is a well-controlled trial designed to be statistically significant.
+
+1.61 “Phase III Trial” means a human clinical trial of a Licensed Product on a sufficient number of subjects that
+is designed to establish that a pharmaceutical product is safe and efficacious for its intended use, and to determine warnings, precautions, and adverse reactions that are associated with such pharmaceutical product in the dosage range to be
+prescribed, which trial is intended to support Approval of a Licensed Product, as described in 21 C.F.R. 312.21(c), or a similar clinical study prescribed by a Regulatory Authority outside the U.S. A Phase III Trial shall be deemed to have commenced
+when the first patient in such study has been dosed.
+
+1.62 “Phase IIIb Trial” means (a) a product
+support human clinical trial of a Licensed Product (i.e., a clinical trial that is not required for receipt of the first Approval of a Licensed Product for a particular indication in a country but which may be useful in providing additional
+drug profile data in support of such Approval of the Licensed Product for such indication) that is commenced before receipt of the first Approval of the Licensed Product for a particular indication in the country for which such trial is conducted or
+(b) a human clinical trial that is required or advised by a Regulatory Authority as a condition of or in connection with obtaining or maintaining the first Approval of a Licensed Product for a particular indication (whether commenced prior to
+or after receipt of such Approval).
+
+1.63 “Phase IV Study” means a human clinical trial, or other test
+or study, of a Licensed Product commenced after receipt of the first Approval of the Licensed Product for a
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-8-
+
+particular indication in the country for which such trial is being conducted and that is (a) conducted within the parameters of the labeling approved for the Licensed Product, other than
+Phase IIIb Trials or (b) conducted outside the scope of the labeling approved for the Licensed Product. Phase IV Studies may include clinical trials, or other tests and studies, conducted in support of pricing/reimbursement for the first
+Approval of the Licensed Product, epidemiological studies, modeling and pharmacoeconomic studies, post-marketing surveillance studies, investigator sponsored clinical trials of a Licensed Product, and health economics studies.
+
+1.64 “Qualified Study” means the first Phase IIa Trial for a Licensed Product anywhere in the world that is
+completed following the filing of a US IND for the Licensed Product wherein the doses in such Phase IIa Trial are based on the results of one or more Phase I Trials for the Licensed Product.
+
+1.65 “Regulatory Authority” means any national or supranational governmental authority, including, without
+limitation, the FDA, EMEA or Koseisho, that has responsibility in countries in the Territory over the Development and/or Commercialization of the Licensed Compounds and Licensed Products.
+
+1.66 “Restricted Mechanism of Action” means: [***].
+
+1.67 “Sublicense Revenues” means all consideration in the form of cash ITI receives from a Sublicensee pursuant
+to any License, including without limitation [***]: (a) [***]; (b) [***]; (c) [***]; (d) [***]; and (e) [***].
+
+1.68 “Sublicensee” means any Third Party to whom rights are transferred with respect to any Licensed Compound or Licensed Product, including through any license, sublicense,
+co-development, co-discovery, co-promotion, distribution, joint venture, Development and Commercialization collaboration or similar transaction between ITI (or an Affiliate of ITI) and a Third Party. “Sublicensee” shall also include any
+Third Party that is a party to a License Agreement.
+
+1.69 “Term Sheet” has the meaning set forth in
+Section 3.6.2.
+
+1.70 “Territory” means any country in the world.
+
+1.71 “Third Party” means any Person other than ITI, BMS and their respective Affiliates.
+
+1.72 “Third Party Term Sheet” means a Term Sheet summarizing the key terms and conditions on which ITI would be
+willing to enter into negotiations with a Third Party with a view to finalizing a mutually acceptable License Agreement that includes the terms contained in the Term Sheet.
+
+1.73 “Title 11” has the meaning set forth in Section 13.10.
+
+1.74 “Transferred Materials” has the meaning set forth in Section 4.3.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-9-
+
+1.75 “United States” or “U.S.” means the United
+States of America.
+
+1.76 “Valid Claim” means a claim of (i) an issued and unexpired
+patent or a supplementary protection certificate, which claim has not been held invalid or unenforceable by a court or other government agency of competent jurisdiction from which no appeal can be or has been taken and has not been held or admitted
+to be invalid or unenforceable through re-examination or disclaimer, opposition procedure, nullity suit or otherwise, or (ii) a pending patent application; provided, however, [***].
+
+ARTICLE 2
+
+LICENSE GRANT
+
+2.1 BMS Patent Rights and BMS Know-How. Subject to all the terms and conditions set forth in this Agreement (including, without limitation, the restrictions in Section 2.2 and the
+reservation of rights in Section 2.6), BMS hereby grants to ITI a non-transferable (except in accordance with Section 15.4), exclusive license, with the right to sublicense in accordance with Section 2.3, under the BMS Patent Rights
+and BMS Know-How solely to the extent necessary to research, discover, Develop, make, have made, use, sell, offer to sell, export and import Licensed Compounds and Licensed Products in the Field in the Territory. For clarification, nothing in this
+Section 2.1 or this Agreement shall be interpreted as a grant of rights to co-formulate or use in combination a Licensed Compound with: (a) any compound that is not a Licensed Compound and that is, or the manufacture or use of which is,
+covered by a Patent Right owned by or licensed to BMS or any of its Affiliates; (b) a compound or product that is not a Licensed Compound or Licensed Product and that is or could be subject to a governmental grant providing marketing
+exclusivity with respect to such compound or such product (such as data exclusivity under the FDA’s Orange Book or under national implementations of Article 10.1(a)(iii) of Directive 2001/EC/83), including but not limited to any such compound
+or such product that is being developed or sold (as of the Effective Date or in the future) by BMS or its Affiliates or by contractors or collaborators with or on behalf of BMS or its Affiliates, or (c) any Licensed Compound that is subject to
+Section 2.8 so that ITI cannot Develop or Commercialize a product containing such Licensed Compound.
+
+2.2
+Limitations. ITI may exercise the rights granted under Section 2.1 to (i) modify the Licensed Compounds identified in Appendix 4 (e.g., to prepare analogs or derivatives of those Licensed Compounds) and
+(ii) synthesize any compound using any BMS Know-How and any BMS Patent Rights or any information generated in the research, discovery or Development of Licensed Compounds and Licensed Products that relates to the structure of a compound;
+provided, however, that ITI may Develop and Commercialize only those resulting compounds that satisfy the criteria described in Appendix 5. Any compound resulting from activities permitted by this Section 2.2 and satisfying the
+definition of a Licensed Compound shall be a Licensed Compound, and any compound resulting from the activities permitted by this Section 2.2 that does not satisfy the criteria in Appendix 5 may not be Developed or Commercialized by ITI
+or licensed, sold or otherwise transferred to any Third Party by ITI for Development or Commercialization.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-10-
+
+2.3 Sublicenses. ITI shall have the limited right to grant sublicenses to
+Third Parties with respect to the rights licensed to ITI under Section 2.1, solely in accordance with this Section 2.3.
+
+2.3.1 Prior to the Completion of the Qualified Study, ITI may enter into a License Agreement only with the prior written consent of BMS. Regardless of the results of the Qualified Study, following
+the Completion of the Qualified Study, ITI shall have the right to enter into a License Agreement, subject to BMS’ rights as set forth in Article 3. As used herein, “Completion of the Qualified Study” shall mean the submission to BMS
+of the preliminary clinical study report plus the clinical data and tables generated in connection with the Qualified Study after all patient dosing for the Qualified Study has been completed. ITI shall not have the right to enter into any License
+with a Third Party except in accordance with the procedure set forth in Article 3.
+
+2.3.2 Subject to the foregoing and
+Article 3, ITI shall have the right to enter into a License Agreement with a Third Party, provided that:
+
+(a)
+such License Agreement shall refer to this Agreement and shall be subordinate to and consistent with the terms and conditions of this Agreement, and, shall not limit ITI’s ability to fully perform all of its obligations under this Agreement or
+BMS’ rights under this Agreement;
+
+(b) in such License agreement, the Sublicensee shall agree in writing to be
+bound to ITI by terms and conditions that are substantially similar to, or less favorable to the Sublicensee than, or otherwise allow ITI to fully perform, the corresponding terms and conditions of this Agreement;
+
+(c) ITI shall take such actions as BMS reasonably requests, including but not limited to filing a lawsuit, in order to enforce
+against such Sublicensee provisions in the Sublicense relating to the protection of any intellectual property right of BMS licensed hereunder or any Confidential Information of BMS. ITI shall also take such actions as BMS reasonably requests,
+including but not limited to filing a lawsuit, in the event such Sublicensee is in breach of the rights granted to such Sublicensee under the intellectual property of BMS or in breach of any obligation under this Agreement that is binding upon the
+Sublicensee, including but not limited to, failing to maintain insurance coverage at the same levels and on the same terms and conditions as set forth in Section 12.4, failing to keep books and records in accordance with Section 8.7,
+failing to permit an independent auditor of ITI as to which BMS and such Sublicensee have no reasonable objection to review such books and records pursuant to the terms and conditions of Section 8.7, or failing to comply with the provisions
+corresponding to Sections 5.1, 5.2, and 5.3, such as failing to provide ITI with a copy of each Development Plan for a Licensed Product, failing to provide ITI with a copy of each development report due under Section 5.2, failing to maintain
+records in accordance with Section 5.3 or failing to allow an independent Third Party as to which such Sublicensee has no reasonable objection to review such records on behalf of ITI to verify that such Sublicensee is complying with Section
+5.3;
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-11-
+
+(d) promptly after the execution of such License agreement, ITI shall provide a copy
+of such License agreement to BMS, with financial terms redacted;
+
+(e) ITI shall remain responsible for the performance
+of this Agreement (including, without limitation, its obligations under Sections 5.1 and 6.1, the payment of all payments due, and making reports and keeping books and records), and shall use Commercially Reasonable Efforts to monitor such
+Sublicensee’s compliance with the terms of such License;
+
+(f) the Sublicensee shall agree in writing (i) to
+maintain insurance coverage at the same levels and on the same terms and conditions as set forth in Section 12.4, (ii) to keep books and records in accordance with Section 8.7, to permit an independent certified accountant of ITI as
+to which such Sublicensee has no reasonable objection to review such books and records pursuant to the terms and conditions of Section 8.7 and to permit ITI to inform BMS of the results of such review and to provide BMS with a copy of any
+report prepared by such accountant, and (iii) to comply with the provisions of the License Agreement between the Sublicensee and ITI corresponding to Sections 5.1, 5.2, and 5.3, including agreeing to provide ITI with a copy of each Development
+Plan for a Licensed Product, to provide ITI with a copy of each development report due under Section 5.2, to maintain records in accordance with Section 5.3, to allow an independent Third Party as to which such Sublicensee has no
+reasonable objection to review such records on behalf of ITI to verify that such Sublicensee is complying with Section 5.3, and to permit ITI to inform BMS of the results of such review and to provide BMS with a copy of any report prepared by
+such Third Party;
+
+(g) any sublicense rights granted by ITI in a License (to the extent such sublicensed rights are
+granted to ITI in this Agreement) shall terminate effective upon the termination under Article 13 of the license from BMS to ITI with respect to such sublicensed rights, provided that such sublicensed rights shall not terminate if, as of the
+effective date of such termination under Article 13 the Sublicensee is not in material breach of its obligations to ITI under its License Agreement, and within sixty (60) days of such termination the Sublicensee agrees in writing to be bound
+directly to BMS under a license agreement substantially similar to this Agreement with respect to the rights sublicensed hereunder, substituting such Sublicensee (a “Surviving Sublicensee”) for ITI, and provided further that
+(A) such license agreement shall not prejudice any remedy either Party may have against the other in connection with such termination of this Agreement (in whole or in part); (B) the scope of the rights granted to the Surviving Sublicensee
+under such license agreement (with respect to licensed activities, Licensed Products and territory) shall be less than or equal to the scope of the rights that had been sublicensed by ITI to the Surviving Sublicensee pursuant to the License
+Agreement; (C) such license agreement shall not include the provisions of Article 3 or Section 8.1 hereof; (D) ITI shall no longer be obligated under this Agreement to pay amounts set forth in this Agreement, to the extent such
+amounts are payable based on the activities of such Surviving Sublicensee, its Affiliates and its sublicensees from and after the effective date of such termination; (E) such license agreement shall obligate the Surviving Sublicensee to pay
+directly to BMS amounts corresponding to those set forth in Sections 8.2, 8.3 and 8.4 hereof which are payable based on the activities of such Surviving Sublicensee, its Affiliates and its sublicensees from and after the effective date of such
+termination; and (F) such license agreement shall not modify the rights and obligations of the Parties following any termination of this Agreement in whole or in part.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-12-
+
+(h) such Sublicensees shall have the right to grant further sublicenses with respect
+to the Development or Commercialization of Licensed Products, provided that such further sublicenses shall be made in accordance with and subject to all of the terms and conditions of this Section 2.3 other than any reference to Article
+3 contained therein (i.e., the Sublicensee shall be subject to this Section 2.3 in the same manner and to the same extent as ITI, but shall not be subject to Article 3).
+
+2.3.3 For clarity, where provisions of this Agreement provide that ITI shall be “solely” responsible or the like with respect to a matter (for example, Sections 5.4, 5.5, or 7.1), it is
+understood that such responsibilities may be carried out or borne on ITI’s behalf by a permitted Sublicensee or contractor of ITI.
+
+2.3.4 It shall be a breach of this Agreement for ITI to enter into any License hereunder not in compliance with this Section 2.3.
+
+2.3.5 Any purported License not entered into in compliance with the foregoing Sections 2.3.1 and 2.3.2 shall be null and void and
+without effect.
+
+2.4 No Trademark License. No right or license, express or implied, is granted to ITI to use any
+trademark, trade name, trade dress or service mark owned or Controlled by BMS or any of its Affiliates. ITI, at its sole cost and expense, shall be responsible for the selection, registration and maintenance of all trademarks which it employs in
+connection with its activities conducted pursuant to this Agreement, if any, and shall own and Control such trademarks.
+
+2.5 No Implied Licenses. No license or other right is or shall be created or granted hereunder by implication, estoppel or
+otherwise. All such licenses and rights are or shall be granted only as expressly provided in this Agreement.
+
+2.6
+Retained Rights. All rights not expressly granted hereunder are reserved by BMS and may be used by BMS for any purpose. Without limiting the foregoing, BMS retains [***]. BMS also expressly reserves and retains the right to make, have
+made and use any Licensed Compound for use as an intermediate or starting material in the manufacture of any compound that is not a Licensed Compound.
+
+2.7 Grant to BMS. ITI grants to BMS a fully paid-up, worldwide, nonexclusive license to practice under and to utilize any ITI Improvement Patent Rights, solely to research, discover,
+Develop, make, have made, use, import, export, offer to sell, and sell compounds and pharmaceutical products in the BMS Retained Field and to make, have made, use, import and export any Licensed Compounds identified in Appendix 4 except for
+the Excluded Compounds for internal research purposes in the Field. Such nonexclusive license shall be sublicensable only together with any license with respect to the BMS Core Patent Rights or the BMS Other Patent Rights.
+
+2.8 Compound Preemption. The first Party to file an IND for a product containing a Licensed Compound in that Party’s
+field (i.e., in the case of ITI, in the Field, and in the case of BMS, in the BMS Retained Field, and subject to the provisions of Section 2.6), shall have the right to Develop and Commercialize that product and other products containing that
+Licensed
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-13-
+
+Compound in that Party’s field. Upon notification by the filing Party, the other Party shall no longer have the right to Develop or Commercialize a product containing that Licensed Compound
+in that Party’s field until such time as the Party that first filed such an IND discontinues all Development and Commercialization efforts for products containing that Licensed Compound in that Party’s field.
+
+ARTICLE 3
+
+BMS RIGHT OF FIRST NEGOTIATION
+
+3.1 BMS Right of First Negotiation. BMS shall have a right of first negotiation with respect to Licensed Compounds and Licensed Products as follows:
+
+3.1.1 ITI shall not enter into a License Agreement, or enter into discussions with any Third Party with respect to any License,
+until Completion of the Qualified Study except as otherwise provided for in Section 2.3.1. After Completion of the Qualified Study, ITI shall be free to license any or all Licensed Compounds and any or all Licensed Products to Third Parties
+subject to the following rights of BMS.
+
+(a) After Completion of the Qualified Study, in the event that ITI desires to
+enter into a License Agreement for one or more Licensed Compounds and/or Licensed Products, before entering into discussions with any Third Party with respect to a License for such Licensed Compounds or Licensed Products, ITI shall provide BMS with
+written notice that a data room is open and available at ITI for BMS to review the data and information generated in connection with any clinical trials and any other Development performed with the Licensed Compounds or Licensed Products that ITI
+intends to out-license (such written notice, a “Data Room Notice”). ITI shall use its best efforts to inform BMS prior to the Data Room Notice being sent that ITI is preparing a data room in anticipation of a Data Room Notice. The
+Data Room Notice shall identify the Licensed Compound(s) and the Licensed Product(s) that would be the subject of such License and shall comply with Section 3.7.
+
+(b) As of the date the Data Room Notice is provided to BMS, the data room shall include all relevant data then in existence and available to ITI regarding the applicable Licensed Compounds and
+Licensed Products, including, where applicable, copies of clinical protocols, case report forms, investigator brochures, regulatory submissions and correspondence from regulatory agencies with respect to the Licensed Compounds and Licensed Products
+that would be the subject of the License, and details of any Patent Rights owned or Controlled by ITI relating to the Licensed Compounds and Licensed Products that would be the subject of the License, any licenses obtained from Third Parties
+relating to the Licensed Compounds and Licensed Products that would be the subject of the License, and the cost of goods and source of goods for the Licensed Compounds and Licensed Products that would be the subject of the License. ITI shall also
+promptly provide BMS with any additional information available to ITI that is related to the Licensed Compound(s) and Licensed Product(s) that would be the subject of the License, and access to personnel and facilities, as reasonably requested by
+BMS as part of BMS’ due diligence with respect to such License during the Negotiation Period (as defined below in Section 3.1.2).
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-14-
+
+(c) If BMS wishes to exercise its right of first negotiation and pursue license
+discussions, BMS shall so notify ITI thereof in writing (such notice, the “Exercise Notice”) no later than [***] ([***]) [***] following the date the Data Room Notice is provided to BMS (the “Exercise Period”). The
+Parties shall thereafter during the Negotiation Period (defined below in Section 3.1.2) each use diligent efforts to conduct good faith negotiations with respect to such License. During the Negotiation Period, ITI shall provide BMS with an
+opportunity to make a proposal of terms and conditions in a Term Sheet with respect to such License and ITI shall either agree to the proposal (and such Term Sheet shall be deemed as “The Term Sheet ITI Delivered to BMS” for purposes of
+Section 3.2.1 below) and the Parties each shall use diligent efforts to negotiate a License Agreement in good faith based on the proposal, or ITI shall promptly provide a Term Sheet to BMS with a counter offer. During the Negotiation Period,
+ITI may revise the terms and conditions of the Term Sheet with respect to such License, and the last such Term Sheet that ITI delivers to BMS shall be deemed “The Term Sheet ITI Delivered to BMS” for the purposes of Section 3.2.1
+below.
+
+3.1.2 If ITI and BMS do not conclude a License Agreement with respect to such License during a period of [***]
+following the date the Data Room Notice is provided to BMS (the “Negotiation Period”), ITI shall then be free to enter into negotiations with any Third Party regarding a License for such Licensed Compound(s) and Licensed Product(s),
+and, subject to the provisions set forth in Sections 3.2, 3.3 and 3.4, to enter into such License with a Third Party. Such [***] Negotiation Period shall be extended by an additional [***] ([***]) [***] if during such [***] Negotiation Period
+(i) ITI and BMS reach agreement in principle with respect to a Term Sheet with respect to such License and (ii) BMS obtains internal approval of its executive committee to proceed with completing a License Agreement based on such Term
+Sheet.
+
+3.1.3 Following delivery of the Data Room Notice, if BMS does not provide ITI with the Exercise Notice during
+the Exercise Period, ITI shall be free to enter into negotiations with any Third Party with respect to a License for the Licensed Compound(s) and Licensed Product(s) identified in the Data Room Notice, and ITI shall have the right to enter into a
+License Agreement with respect to the Licensed Compound(s) and Licensed Product(s) identified in the Data Room Notice without such Licensed Compound(s) and Licensed Product(s) being subject to Section 3.2 and Section 3.3, provided the
+geographic scope, the scope of licensed indications and the field of use in such License Agreement are the same as or narrower than those offered to BMS with respect to the Licensed Compounds and Licensed Products identified in the Data Room Notice.
+
+3.1.4 ITI shall not enter into any License Agreement with any Third Party with respect to a License under terms and
+conditions which are Less Favorable to ITI (as defined in Section 3.6) than the terms and conditions set forth in The Term Sheet ITI Delivered to BMS, except in accordance with the procedure set forth in Section 3.2.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-15-
+
+3.2 Process for Execution of License Agreement with Third Party following
+Expiration of Negotiation Period. If ITI and BMS have not concluded a License Agreement within the Negotiation Period, and if ITI thereafter intends to enter into a License Agreement with a Third Party, ITI shall follow the procedures set forth
+below:
+
+3.2.1 Independent Evaluation; Re-Offer of Less Favorable Terms. If ITI desires to enter into a License
+Agreement with the Third Party, ITI shall notify BMS thereof and shall notify an Independent Evaluator for the purpose of this Section 3.2.1. ITI shall bear the costs of engaging the Independent Evaluator.
+
+(a) ITI shall provide the Independent Evaluator with the Third Party Term Sheet, without revealing the identity of the Third
+Party, and shall also provide the Independent Evaluator with a copy of The Term Sheet ITI Delivered to BMS that is applicable.
+
+(b) The Independent Evaluator shall promptly make a determination of whether the terms and conditions of the Third Party Term
+Sheet are Less Favorable to ITI (as defined below in Section 3.6) than the terms and conditions of the Term Sheet ITI Delivered To BMS, in accordance with Section 3.6.1 below. Unless the Parties agree otherwise, such determination shall be
+made by the Independent Evaluator within [***] ([***]) [***] of receipt of the relevant Term Sheets from ITI and the Independent Evaluator shall promptly notify the Parties of such determination. The Independent Evaluator shall be required to make a
+definite determination based on information provided to it as to whether or not the Third Party Term Sheet is Less Favorable to ITI than the last Term Sheet offered by ITI to BMS. The Independent Evaluator shall not have the authority to render any
+other determination or to respond without a decision, and the Parties agree to be bound by and not to challenge such determination, except in the case where a Party alleges that the Independent Evaluator did not act in good faith, breached a
+fiduciary duty or engaged in willful misconduct.
+
+(c) If [***],[***] shall [***] and such [***]. For the avoidance of
+doubt, [***].
+
+(d) If the Independent Evaluator determines that the terms and conditions set forth in the Third Party
+Term Sheet are Less Favorable to ITI than the Term Sheet ITI Delivered To BMS, ITI may at its discretion continue its negotiation with the Third Party, with the objective of obtaining financial terms and conditions which are more favorable to ITI
+than the financial terms and conditions last offered by ITI to BMS, provided that ITI shall not enter into a License Agreement with such Third Party without first following the above procedure set forth in this Section 3.2 with respect
+to submitting a revised Third Party Term Sheet to BMS or the Independent Evaluator. Alternatively, ITI may offer such financial terms and conditions set out in the Third Party Term Sheet to BMS (or ITI may offer BMS terms and conditions financially
+Less Favorable to ITI than those set out in the Third Party Term Sheet). In the event that ITI makes such offer to BMS, ITI shall also offer to BMS the same terms with respect to governance and decision-making as set out in the Third Party Term
+Sheet (or otherwise proposed by ITI to the Third Party). If ITI offers such terms and conditions for a License to BMS in accordance with this Section 3.2.1(d), BMS shall have an additional fifteen (15) business days to provide ITI with
+notice that BMS desires to enter into a License Agreement with ITI on substantially the same financial terms and conditions as set out in such Term Sheet (an “Acceptance Notice”). If an Acceptance Notice is provided by BMS, the
+Parties shall work diligently to expeditiously complete such a License Agreement within [***] ([***]) [***]. Such [***] ([***]) [***] negotiation period shall be extended by an additional [***] ([***]) [***] if during such [***] ([***]) [***]
+negotiation period (i) ITI and BMS reach agreement in principle with
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-16-
+
+respect to a Term Sheet with respect to such License and (ii) BMS obtains internal approval of its executive committee to proceed with completing a License Agreement based on such Term
+Sheet.
+
+(e) If an Acceptance Notice is not provided by BMS within such [***] ([***])[***] period, or if ITI and BMS do
+not execute a binding License Agreement within sixty (60) days after receipt of the Acceptance Notice, ITI shall be free to enter into a License Agreement with such Third Party having the terms and conditions set forth in the Third Party Term
+Sheet (or terms and conditions more favorable to ITI than the terms and conditions set forth in the Third Party Term Sheet) and such other terms and conditions as ITI and the Third Party agree. For the avoidance of doubt, [***].
+
+3.3 License Agreement for Retained Rights. If, after Completion of the Qualified Study, BMS does not enter into a License
+Agreement for a License, and if ITI enters into a License Agreement for a License with a Third Party in accordance with Sections 3.1 or 3.2 above where the License is for less than all of the Licensed Compounds and all of the Licensed Products for
+all indications in the Field in all of the Territory (a “Limited Third Party License Agreement”), and BMS did not previously have an opportunity to negotiate for a License to such Licensed Compounds or Licensed Products for such
+indications in the Field in such country(ies) of the Territory in accordance with Section 3.1 and 3.2 that were not licensed to the Third Party in the Limited Third Party License Agreement (such unlicensed Licensed Compounds, Licensed Products,
+indications, and countries, the “Retained Rights”), then prior to offering a License to any Retained Rights to any Third Party, ITI shall offer a License to such Retained Rights to BMS first, and the procedure described above in
+Sections 3.1 and 3.2 shall apply to such Retained Rights (except that ITI shall not be required to complete any clinical trial for any compound that is part of such Retained Rights).
+
+3.4 Resurrection of Right of First Negotiation. If ITI provides BMS the opportunity to obtain a License in accordance with
+Sections 3.1 through 3.3 for particular Licensed Compounds or Licensed Products and BMS does not enter into a License Agreement for such Licensed Compounds or Licensed Products, and if ITI has not entered into a License Agreement with a Third Party
+with respect to a License for such Licensed Compounds or Licensed Products prior to the earlier of: (i) [***]; or (ii) [***], [***] shall [***], provided that ITI shall be free to continue negotiations regarding such License with
+any Third Party (but not initiate any new negotiations with any other Third Party with whom ITI has not previously negotiated with respect to such License) during any such Negotiation Period pursuant to this Section 3.4, but may not enter into
+a License Agreement with a Third Party until after the end of such Negotiation Period, and then only in accordance with and following the procedure set forth in Section 3.2.
+
+3.5 Except as provided in Section 3.4, BMS’ right of first negotiation under this Article 3 shall be a one-time right
+per Licensed Product or Licensed Compound.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-17-
+
+3.6 Certain Definitions. For the purposes of this Article 3, the following
+capitalized terms shall have the following meanings:
+
+3.6.1 “[***]” means, with respect to [***], that [***].
+
+3.6.2 “Term Sheet” means a non-binding term sheet summarizing the key terms and conditions on which a
+Party would be willing to enter into negotiations with a view to finalizing a mutually acceptable License Agreement that includes the terms contained in the Term Sheet. Such a Term Sheet shall contain a level of detail comparable to the term sheets
+exchanged between the Parties in connection with this Agreement, and shall include, without limitation, the financial terms and conditions and provisions for governance and decision-making authority with respect to the Development and
+Commercialization of the Licensed Product. It is understood that a Term Sheet need not specify all material terms, and as is customary, may provide a summary of only certain of the most significant terms.
+
+3.7 In the Data Room Notice, ITI shall offer to BMS the right to negotiate for an exclusive license under any applicable Know-How
+and Patent Rights Controlled by ITI and the grant back of any applicable rights under BMS Patent Rights and BMS Know-How granted to ITI under this Agreement, for the further manufacture, Development and Commercialization in all of the Territory for
+all fields and all indications for all Licensed Compounds and Licensed Products identified in such notice and any likely backup Licensed Compounds and backup Licensed Products, except that ITI shall have the right to retain the right to co-develop
+and co-commercialize such Licensed Compounds and Licensed Products [***], and to limit the licenses and rights offered to BMS in the Data Room Notice for the U.S. to the right to co-develop and co-commercialize all such Licensed Compounds and
+Licensed Products [***] with BMS having at least equal participation in co-commercialization of such Licensed Products in the U.S. Any notice provided by ITI that does not comply with this Section 3.7 shall not be deemed a “Data Room
+Notice.” Upon request of ITI, BMS shall confirm in writing whether a notice complies with this Section 3.7, and may waive in writing (in BMS’s sole discretion) compliance of any Data Room Notice with this Section 3.7. Absent such
+written waiver from BMS, ITI may license any Licensed Compound or Licensed Product identified in a notice that does not comply with this Section 3.7 only after complying with Sections 3.1 and 3.2.
+
+ARTICLE 4
+
+TRANSFER OF KNOW-HOW AND MATERIALS
+
+4.1 Documentation. During the sixty (60) day period following the Effective Date BMS shall provide ITI with one (1) electronic or paper copy of all documents, data or other
+information Controlled by BMS as of the Effective Date to the extent that such documents, data and information are the subject of the BMS Know-How license under Section 2.1 and are, in BMS’ good faith judgment, reasonably necessary for the
+Development or manufacture of the Licensed Compounds or a Licensed Product and are reasonably available to BMS without undue searching; provided, however, that the foregoing shall in no event require BMS to provide originals of laboratory
+notebooks or pages thereof or manufacturing run records required to be maintained by BMS under applicable Law; and provided further, that with respect to BMS Know-How contained in laboratory notebooks, BMS shall only be required to provide
+ITI with copies of those laboratory notebook pages that can be located without undue searching and that contain BMS Know-How for the compounds identified in Appendix 3. Such documentation
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-18-
+
+shall not be used by ITI for any purpose other than for the research, discovery, Development, manufacture or Commercialization of Licensed Compounds and Licensed Products in accordance with this
+Agreement and is Confidential Information of BMS. ITI shall assume full responsibility and liability to BMS for any unauthorized use or disclosure of such Confidential Information. BMS shall be responsible for the cost of providing one (1) set
+of copies only. BMS shall have no obligation to reformat or otherwise alter or modify any materials, or to create materials in electronic form, in order to provide them to ITI. Any and all materials delivered to ITI pursuant to this Section 4.1
+are and shall remain the sole property of BMS.
+
+4.2 Technical Assistance. During the three (3) month period
+following the Effective Date, BMS shall reasonably cooperate with ITI to assist ITI with understanding and using the BMS Know-How provided to ITI under Section 4.1. Such cooperation shall include, without limitation, providing ITI with
+reasonable access by teleconference or in-person at BMS’ facilities (subject to BMS’ customary rules and restrictions with respect to site visits by non-BMS personnel) to BMS personnel directly involved in the research and Development of
+Licensed Compounds and Licensed Products to provide ITI with [***] ([***]) [***] of technical assistance and consultation in connection with the BMS Know-How transferred under Section 4.1, provided, however, that (i) such access
+shall be requested and coordinated through a single contact person to be designated by BMS, (ii) BMS makes no warranty, express or implied, that ITI shall be able to successfully implement and use the BMS Know-How, and (iii) BMS shall not
+be in default hereunder for any inadvertent failure to disclose all pertinent information related to the BMS Know-How, provided that such information shall be supplied to ITI promptly upon discovery of such failure to disclose or upon request of ITI
+specifically identifying the information to be disclosed. ITI shall be responsible for ensuring that its personnel who receive such assistance are appropriately qualified and experienced for such purpose.
+
+4.3 Materials. Within thirty (30) days after the Effective Date, BMS shall transfer to ITI the Licensed Compounds and
+the intermediate compounds identified in Appendix 7 in the quantities set forth in Appendix 7 (the “Transferred Materials”). Other than the Transferred Materials, BMS shall have no obligation to provide ITI with any compounds
+or other materials, such as assays or biomaterials, under this Agreement. The samples of intermediate compounds identified in Appendix 7 provided to ITI by BMS as part of the Transferred Materials shall only be used by ITI and its Affiliates,
+Sublicensees and contractors to make Licensed Compounds. The Transferred Materials are provided “AS IS”. ITI shall be fully responsible for its and its Affiliates’, Sublicensees’ and contractors’ use, storage, handling and
+disposition of the Transferred Materials. Under no circumstances shall BMS be liable or responsible for ITI’s or its Affiliates’, Sublicensees’ and contractors’ use, storage, handling or disposition of the Transferred Materials,
+and ITI assumes sole responsibility for any claims, liabilities, damages and losses that might arise as a result of ITI’s and its Affiliates’, Sublicensees’ and contractors’ use, storage, handling or disposition of any
+Transferred Material. ITI shall indemnify, defend and hold harmless BMS and its Affiliates, and their respective officers, directors, employees, agents, licensors, and their respective successors, heirs and assigns and representatives, from and
+against any and all damages, liabilities, losses, costs and expenses (including, without limitation, reasonable legal expenses, costs of litigation and reasonable attorney’s fees) arising in connection with any claims, suits, proceedings,
+whether for money damages or equitable relief, of any kind, arising out of or relating, directly or indirectly, to ITI’s, or any of its Affiliates’, Sublicensees’ or contractors’ use, storage, handling or disposition of any
+Transferred Material. Transferred Materials may only be provided to Affiliates, Sublicensees and contractors of ITI.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-19-
+
+ARTICLE 5
+
+DEVELOPMENT
+
+5.1 Development. ITI shall itself or through
+its Affiliates or Sublicensees use Commercially Reasonable Efforts to [***]. A summary of the initial Development Plan as of the Effective Date is attached hereto as Appendix 2. [***]. Within sixty (60) days of the Effective Date, ITI
+shall provide BMS with a copy of the complete initial Development Plan. ITI shall promptly provide BMS with a copy of each Development Plan for a Licensed Product not covered by the initial Development Plan.
+
+5.2 Development Reports. ITI shall provide BMS with written development reports within thirty (30) days following the
+end of the second and fourth Calendar Quarter each Calendar Year (i.e., every six (6) months) summarizing (but without disclosing specific data or results) the research and Development activities accomplished by ITI through the end of such six
+(6) month period with respect to Licensed Products, updates on ITI’s progress against the existing Development Plans, any revisions to any Development Plan, and any significant challenges faced or anticipated with respect to Licensed
+Products. The obligations of ITI to provide information pursuant to this Section 5.2 shall be subject to its obligations under any License Agreement with a Sublicensee; provided that ITI shall provide to BMS a summary of the progress of the
+development of Licensed Products in sufficient detail for BMS to determine ITI’s compliance its diligence obligation set forth in Section 5.1.
+
+5.3 Records. ITI shall maintain complete and accurate records of all work conducted in furtherance of the research, Development and Commercialization of the Licensed Compounds and Licensed
+Products and all results, data and developments made in furtherance thereof. Such records shall be complete and accurate and shall fully and properly reflect all work done and results achieved in sufficient detail and in good scientific manner
+appropriate for patent and regulatory purposes. If BMS believes in good faith that ITI may not be complying with its obligations under this Section 5.3, BMS shall provide written notice thereof to ITI identifying the basis for BMS’ good
+faith belief, and ITI shall allow an independent Third Party as to which ITI has no reasonable objection to review such records on behalf of BMS to verify that ITI is complying with this Section 5.3. Such review shall be at BMS’ cost and
+upon reasonable advance notice at mutually agreed upon times and during normal business hours. Such Third Party shall be under an obligation of confidentiality at least equivalent to the terms contained in Article 11 of this Agreement. If BMS
+believes in good faith that a Sublicensee of ITI may not be complying with its obligations under the provision of the License Agreement between ITI and such Sublicensee corresponding to this Section 5.3, BMS shall provide written notice thereof
+to ITI identifying the basis for BMS’ good faith belief, and ITI shall upon request of BMS have an independent Third Party selected by ITI as to which BMS and such Sublicensee have no reasonable objection to review such records to verify that
+such Sublicensee is complying with such provision, to be informed of the results of such review by ITI and to be provided with a copy by ITI of any report prepared by such Third Party.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-20-
+
+5.4 Development Responsibilities and Costs. [***]. ITI shall research and
+Develop the Licensed Compounds and Licensed Products in compliance with all applicable legal and regulatory requirements, including, without limitation, all legal and regulatory requirements pertaining to the design and conduct of clinical studies.
+
+5.5 Regulatory Responsibilities and Costs. As between the Parties, ITI shall have sole responsibility for, and
+shall bear the cost of preparing, all regulatory filings and related submissions with respect to the Licensed Compounds and Licensed Products. Except as set forth in Article 13, ITI shall own all INDs, Approvals and submissions in connection
+therewith and all Approvals shall be obtained by and in the name of ITI.
+
+5.6 Subcontracting. ITI may perform
+certain activities in support of the Development of Licensed Compounds and Licensed Products through subcontracting to a Third Party contractor or contract service organization, provided that: (a) none of the rights of BMS hereunder are
+diminished or otherwise adversely affected as a result of such subcontracting; (b) any such Third Party subcontractor shall enter into an appropriate written agreement obligating such Third Party to be bound by obligations of confidentiality
+and restrictions on use of confidential information that are no less restrictive than the obligations in this Agreement; (c) ITI shall use good faith and diligent efforts to secure an agreement from such Third Party to assign or license (with
+the right to sublicense) to ITI inventions (and patent rights covering such inventions) made by such Third Party in performing such services for ITI; and (d) ITI shall at all times be responsible for the performance of such subcontractor.
+
+5.7 Competitive Compound. [***].
+
+ARTICLE 6
+
+COMMERCIALIZATION
+
+6.1 ITI Obligations. ITI shall use Commercially Reasonable Efforts to Commercialize each Licensed Product in the Territory.
+Without limiting the foregoing, ITI shall use Commercially Reasonable Efforts to obtain all Approvals with respect to at least one Licensed Product and to effect the First Commercial Sale of each Licensed Product for which such Approvals are
+obtained into each Major Market Country as soon as reasonably practicable after receipt of such Approvals.
+
+6.2
+Continued Availability. Following the First Commercial Sale of a Licensed Product in a country in the Territory and until the expiration or termination of this Agreement, ITI shall use Commercially Reasonable Efforts to maintain supplies
+of such Licensed Product sufficient to satisfy ITI’s expected Commercialization efforts in such country.
+
+6.3
+Marking. Each Licensed Product Commercialized by ITI under this Agreement shall be marked with all patent and other intellectual property notices relating to the BMS Patent Rights in such a manner as may be required by applicable Law.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-21-
+
+6.4 Reports. ITI shall provide BMS with a written report within thirty
+(30) days following the end of each Calendar Year summarizing significant commercial activities and events with respect to Licensed Products during the just ended Calendar Year.
+
+ARTICLE 7
+
+MANUFACTURE AND SUPPLY
+
+7.1 Manufacture and Supply. As between the Parties, ITI shall be solely responsible at its expense for all of its requirements for making or having made all of its requirements of the
+Licensed Compounds and Licensed Products.
+
+ARTICLE 8
+
+FINANCIAL TERMS
+
+In partial consideration of the rights granted by BMS to ITI pursuant to this Agreement, ITI shall make the payments provided for in this Article 8.
+
+8.1 Initial Payment. [***], ITI shall pay to BMS a nonrefundable, noncreditable payment of [***] ($[***]) in cash by wire
+transfer into an account designated in writing by BMS.
+
+8.2 Development Milestone Payments. The following
+milestone payments are payable by ITI to BMS for each Licensed Product [***]:
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+The milestone payments set forth above shall be payable by ITI to BMS [***] of the achievement of the specified milestone
+event with respect to a Licensed Product. [***].
+
+8.3 In addition to the milestone and royalty payments in this Article
+8, ITI shall pay to BMS either (a) [***], or (b) [***].
+
+8.4 Royalty Payments.
+
+8.4.1 ITI shall pay to BMS in cash the following royalty payments on the total aggregate annual Net Sales in the Territory of all
+Licensed Products (including all indications and formulations for such Licensed Products) in a particular Calendar Year by ITI, its Affiliates, distributors and Sublicensees in the Territory:
+
+Aggregate Annual Worldwide Net Sales of All Licensed Products in Calendar Year
+
+Royalty Rate
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-22-
+
+By way of example, [***].
+
+8.4.2 Royalty Term. Royalties shall be payable on a product-by-product and country-by-country basis on Net Sales of
+Licensed Products [***] (i) [***], (ii) [***], or (iii) [***].
+
+8.4.3 Royalty Reduction for Generic
+Competition. The royalty amounts otherwise payable under Section 8.4.1 shall be reduced [***] ([***]) on a country-by-country basis at any such time that there is no patent included in the BMS Patent Rights in effect for any reason that are
+infringed by the sale of a Generic Product or any other governmental grants (e.g., under the Hatch-Waxman Act) providing marketing exclusivity with respect to the applicable Licensed Product in such country that are violated by the sale of a Generic
+Product and [***]. For such purposes, the reduction shall [***]. Such reduction shall be first applied with respect to such country starting with [***] sales of the Generic Product(s) in such country [***] of the [***] of the [***].
+
+8.4.4 Third Party Royalty Payments.
+
+(a) If ITI, in its reasonable judgment, is required to obtain a license from any Third Party under any patent [***] or [***] for the prevention, treatment or control of any human or animal central
+nervous system disease, disorder or condition (i.e., [***], for example, [***] or [***]) in order to import, manufacture, use or sell any Licensed Product, and if ITI is required to pay to such Third Party a royalty under such license calculated on
+sales of a Licensed Product, and the infringement of such patent cannot reasonably be avoided by ITI, or if ITI is required by a court of competent jurisdiction to pay such a royalty to such a Third Party (and the infringement of such patent cannot
+reasonably be avoided by ITI), then the amount of ITI’s royalty obligations under Section 8.4.1 hereof [***], provided however, that the royalties payable under Section 8.4.1 hereof [***].
+
+(b) If (i) ITI, in its reasonable judgment, is required to obtain a license from any Third Party [***] or [***], and if ITI
+is required to pay to such Third Party a royalty under such license calculated on sales of a Licensed Product, and the infringement of such patent cannot reasonably be avoided by ITI, or if ITI is required by a court of competent jurisdiction to pay
+such a royalty to such a Third Party (and the infringement of such patent cannot reasonably be avoided by ITI), and (ii) [***], then the amount of ITI’s royalty obligations under Section 8.4.1 hereof in each Calendar Year [***].
+
+(c) [***] shall [***] to [***]. Prior to [***], [***] shall [***]. [***] shall [***] to [***], provided that
+[***] shall not [***] or [***]. [***] shall [***].
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-23-
+
+8.4.5 Royalty Conditions. The royalties under Section 8.4.1 shall be
+subject to the following conditions:
+
+(a) Only one royalty shall be due with respect to the same unit of Licensed
+Product;
+
+(b) no royalties shall be due upon the sale or other transfer among ITI, its Affiliates, distributors or
+Sublicensees, but in such cases the royalty shall be due and calculated upon ITI’s or its Affiliate’s or distributor’s or Sublicensee’s Net Sales of Licensed Product to the first independent Third Party; and
+
+(c) no royalties shall accrue on the disposition of Licensed Product in reasonable quantities by ITI, its Affiliates,
+distributors or Sublicensees as part of an expanded access program or as bona fide samples or as donations to non-profit institutions or government agencies for non-commercial purposes or for the performance of clinical trials, provided, in
+each case, that neither ITI, its Affiliate, distributor or Sublicensee receives any payment for such Licensed Product exceeding the cost of goods.
+
+8.4.6 Limit on Royalty Reductions. [***].
+
+8.5 Manner of
+Payment. All payments to be made by ITI hereunder shall be made in Dollars by wire transfer of immediately available funds to such United States bank account as shall be designated by BMS. Late payments shall bear interest at the rate provided
+in Section 8.10.
+
+8.6 Sales Reports and Royalty Payments. After the First Commercial Sale of a Licensed
+Product and during the term of this Agreement, ITI shall furnish to BMS a written report, within thirty (30) days after the end of each Calendar Quarter (or portion thereof, if this Agreement terminates during a Calendar Quarter), showing the
+amount of royalty due for such Calendar Quarter (or portion thereof). Royalty payments for each Calendar Quarter shall be due at the same time as such written report for the Calendar Quarter. With each quarterly payment, ITI shall deliver to BMS a
+full and accurate accounting to include at least the following information:
+
+8.6.1 the quantity of each Licensed
+Product sold (by country) by ITI, its Affiliates, distributors and Sublicensees;
+
+8.6.2 the total gross sales and total
+Net Sales for each Licensed Product (by country) by ITI, its Affiliates, distributors and Sublicensees, and the calculation of Net Sales from such gross sales;
+
+8.6.3 the quantities of each Licensed Product used by ITI and its Affiliates, distributors or Sublicensees or sold to the U.S. Government;
+
+8.6.4 the names and addresses of all distributors and Sublicensees of ITI;
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-24-
+
+8.6.5 the royalties payable in Dollars which shall have accrued hereunder in respect
+of such Net Sales;
+
+8.6.6 withholding taxes, if any, required by applicable Law to be deducted in respect of such
+royalties; and
+
+8.6.7 the dates of the First Commercial Sales of Licensed Products in any country during the reporting
+period; and the exchange rates used in determining the amount of Dollars payable hereunder.
+
+If no royalty or payment is due
+for any royalty period hereunder, ITI shall so report.
+
+8.7 Sales Record Audit.
+
+8.7.1 ITI shall keep, and shall cause each of its Affiliates, distributors and Sublicensees, if any, to keep, full and accurate
+books of accounting in accordance with GAAP containing all particulars that may be necessary for the purpose of calculating all royalties payable to BMS.
+
+8.7.2 Such books of accounting of ITI and its Affiliates shall be kept at their principal place of business and, with all necessary supporting data and records, shall during all reasonable times
+for [***] ([***]) [***] next following the end of the Calendar Year to which each shall pertain, be open for inspection not more than once during any 12 month period at reasonable times by an independent certified accountant selected by BMS and as
+to which ITI has no reasonable objection, at BMS’ expense, for the purpose of verifying royalty statements and payments for compliance with this Agreement.
+
+8.7.3 Such books of accounting of ITI’s distributors and Sublicensees (if any) shall be kept at their principal place of business and, with all necessary supporting data and records, shall
+during all reasonable times for [***] ([***]) [***] next following the end of the Calendar Year to which each shall pertain, be open for inspection at reasonable times by an independent certified accountant selected by ITI and as to which BMS and
+such distributor or Sublicensee have no reasonable objection, at BMS’ expense, for the purpose of verifying royalty statements and payments for compliance with this Agreement. ITI shall, upon request of BMS but not more than once during any 12
+month period, have such an accountant inspect such books of accounting and such supporting data and records for such purpose. BMS shall be informed of the results of such audit by ITI, and to be provided by ITI with a copy of any report prepared by
+such accountant.
+
+8.7.4 Such accountant must have agreed in writing to maintain all information learned in confidence,
+except as necessary to disclose to BMS such compliance or noncompliance by ITI, its Affiliates, distributors or Sublicensees (who must agree in the License Agreement that such audit report may be disclosed to BMS). The results of each inspection, if
+any, shall be binding on both Parties. BMS shall pay for such inspections, except that in the event there is any upward adjustment in aggregate royalties payable for any year shown by such inspection of more than [***] ([***]) of the amount paid,
+ITI shall pay for such inspection. Any underpayments shall be paid by ITI within ten (10) Business Days of notification of the results of such inspection. Any overpayments shall be fully creditable against amounts payable in subsequent payment
+periods.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-25-
+
+8.8 Currency Exchange. With respect to Net Sales invoiced in Dollars, the Net
+Sales and the amounts due to BMS hereunder shall be expressed in Dollars. With respect to Net Sales invoiced in a currency other than Dollars, the Net Sales shall be expressed in the domestic currency of the entity making the sale, together with the
+Dollar equivalent, [***]. The “closing mid-point rates” found in the “dollar spot forward against the dollar” table published by The Financial Times or any other publication as agreed to by the Parties shall be used as the source
+of spot rates to calculate the average as defined in the preceding sentence. All payments shall be made in Dollars.
+
+8.9
+Tax Withholding. The withholding tax, duties, and other levies (if any) applied by a government of any country of the Territory on payments made by ITI to BMS hereunder shall be borne by BMS. ITI, its Affiliates and Sublicensees shall
+cooperate with BMS to enable BMS to claim exemption therefrom under any double taxation or similar agreement in force and shall provide to BMS proper evidence of payments of withholding tax and assist BMS by obtaining or providing in as far as
+possible the required documentation for the purpose of BMS’ tax returns.
+
+8.10 Interest Due. Without
+limiting any other rights or remedies available to BMS, ITI shall pay BMS interest on any payments that are not paid on or before the date such payments are due under this Agreement at a rate of [***] ([***]) [***] or the maximum applicable legal
+rate, if less, calculated on the total number of days payment is delinquent.
+
+8.11 Statement by ITI. Within 120
+days of the close of each fiscal year of ITI, ITI shall provide BMS with a written summary of ITI’s business activities for the just ended fiscal year along with a written statement signed by the chief executive officer of ITI certifying that
+substantially all of ITI’s business activities in the just ended fiscal year were not on behalf of Licensed Compounds and/or Licensed Products, if that is the case. If that is not the case, then ITI shall promptly provide BMS will all
+information required by BMS to comply with FIN 46, which was issued by the Financial Accounting Standards Board.
+
+ARTICLE 9
+
+REPRESENTATIONS AND WARRANTIES; DISCLAIMER;
+
+LIMITATION OF LIABILITY
+
+9.1 Mutual Representations and
+Warranties. Each Party represents and warrants to the other Party that (i) it has all requisite corporate power and authority to enter into this Agreement and to perform its obligations under this Agreement, (ii) execution of this
+Agreement and the performance by such Party of its obligations hereunder have been duly authorized, (iii) this Agreement is legally binding and enforceable on each Party in accordance with its terms, and (iv) the performance of this
+Agreement by it does not create a breach or default under any other agreement to which it is a Party.
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-26-
+
+9.2 Representations and Warranties of BMS. BMS represents, warrants and
+covenants to ITI that:
+
+9.2.1 to the actual knowledge of its in-house patent department and legal department, as of the
+Effective Date, there is no pending litigation which alleges, or any written communication alleging, that BMS’ activities with respect to the BMS Patent Rights or the Licensed Compounds have infringed or misappropriated any of the intellectual
+property rights of any Third Party;
+
+9.2.2 all fees required to be paid by BMS in order to maintain the BMS Patent
+Rights have been paid as of the Effective Date;
+
+9.2.3 as of the Effective Date, BMS has good and valid title to the
+BMS Patent Rights or the BMS Know-How existing as of the Effective Date, free and clear of any encumbrance, lien, mortgage, charge, restriction or liability of any kind whatsoever, whether equitable or legal, that would conflict with or impair the
+rights granted to ITI under this Agreement or that would require the payment by ITI of any royalty to any Third Party, including, without limitation, any person or entity listed on Appendix 8;
+
+9.2.4 it has not granted, and shall not grant during the term of this Agreement, any right to any Third Party relating to the BMS
+Patent Rights or the BMS Know-How that would conflict with the rights granted to ITI under this Agreement;
+
+9.2.5 BMS
+has the right to grant to ITI the rights and licenses in and to the BMS Patent Rights or the BMS Know-How as set forth in this Agreement;
+
+9.2.6 to the actual knowledge of its in-house patent department and legal department, as of the Effective Date, the manufacture of the Licensed Compounds identified in Appendix 4 does not
+infringe or misappropriate the intellectual property rights of any Third Party;
+
+9.2.7 to the actual knowledge of its
+in-house patent department and legal department, as of the Effective Date, BMS has not received any written request or demand from any Third Party (or, to the actual knowledge of its in-house patent department and legal department, any other request
+or demand from any Third Party) for the licensing of any intellectual property rights of such party in connection with the development, manufacture or commercialization of the Licensed Compounds identified in Appendix 4;
+
+9.2.8 to the actual knowledge of its in-house patent department and legal department, as of the Effective Date, none of the BMS
+Patent Rights is involved in any interference or opposition proceeding, and BMS has not received any written request, demand or notice from any Third Party (including the United States Patent and Trademark Office) threatening or disclosing such a
+proceeding with respect to any of the BMS Patent Rights; and
+
+9.2.9 to the actual knowledge of its in-house patent
+department and legal department, except as set forth in Appendix 8, as of the Effective Date, BMS has not received any statement or assertion that (i) any claim in any of the BMS Patent Rights is, or may be or
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-27-
+
+become rendered, invalid or unenforceable, (ii) any Third Party is aware of any basis as to the future potential invalidity or unenforceability of any claim of any of the BMS Patent Rights,
+or (iii) the BMS Patent Rights do not list all required inventors.
+
+9.3 Representations and Warranties of
+ITI. ITI represents, warrants and covenants that (i) it shall not engage in any activities that use the BMS Patent Rights and/or Documented BMS Know-How in a manner that is outside the scope of the license rights granted to it hereunder,
+(ii) all of its activities related to its use of the BMS Patent Rights and Documented BMS Know-How, and the research, Development and Commercialization of the Licensed Compounds and Licensed Products, pursuant to this Agreement shall comply
+with all applicable material legal and regulatory requirements, and (iii) prior to filing the first drug application (i.e., an NDA or its foreign equivalent) for a Licensed Product, ITI shall have all licenses that are necessary in order for
+the manufacture, use or sale of such Licensed Product not to infringe the intellectual property of any Third Party known to ITI as of such date, but excluding licenses applicable to any Third Party issued patents for which ITI has obtained a
+well-reasoned, written opinion of an outside patent attorney that ITI’s activities under the scope of this Agreement are not reasonably likely to infringe any Valid Claim of such Third Party issued patent.
+
+9.4 The Parties agree that ITI shall not be in breach of the warranty in Section 9.3(ii) in the event that ITI cures a breach
+of such warranty within sixty (60) days of the date ITI becomes aware of such breach, or if such breach is not capable of being cured during such sixty (60) day period, if ITI commences to cure such breach during such sixty (60) day
+period and diligently cures such breach as soon as possible after such sixty (60) day period.
+
+9.5
+DISCLAIMER. EXCEPT AS EXPRESSLY SET FORTH IN THIS AGREEMENT, NEITHER PARTY MAKES ANY REPRESENTATIONS OR WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING IN THE CASE OF BMS ANY EXPRESS OR IMPLIED WARRANTIES OF MERCHANTABILITY
+OR FITNESS FOR A PARTICULAR PURPOSE WITH RESPECT TO THE BMS PATENT RIGHTS OR BMS KNOW-HOW OR ANY LICENSE GRANTED BY BMS HEREUNDER, OR WITH RESPECT TO ANY COMPOUNDS, INCLUDING BUT NOT LIMITED TO THE TRANSFERRED MATERIALS, OR PRODUCTS. FURTHERMORE,
+NOTHING IN THIS AGREEMENT SHALL BE CONSTRUED AS A REPRESENTATION OR WARRANTY BY BMS THAT ANY PATENT OR OTHER PROPRIETARY RIGHTS INCLUDED IN THE BMS PATENT RIGHTS ARE VALID OR ENFORCEABLE OR THAT USE OF THE BMS PATENT RIGHTS, BMS KNOW-HOW AND
+TRANSFERRED MATERIALS CONTEMPLATED HEREUNDER DOES NOT INFRINGE ANY PATENT RIGHTS OR OTHER INTELLECTUAL PROPERTY RIGHTS OF ANY THIRD PARTY.
+
+9.6 Limitation of Liability. NOTWITHSTANDING ANYTHING IN THIS AGREEMENT OR OTHERWISE, NEITHER PARTY SHALL BE LIABLE TO THE OTHER WITH RESPECT TO ANY SUBJECT MATTER OF THIS AGREEMENT, WHETHER
+UNDER ANY CONTRACT, NEGLIGENCE, STRICT LIABILITY OR OTHER LEGAL OR EQUITABLE THEORY, [***]. The Parties agree that in the event that there is a final judicial determination (or a determination by an arbitrator in the event the Parties submit a
+matter to binding arbitration) that absent the limitation under this Section 9.6 of BMS’ liability to the
+
+Portions of this Exhibit,
+indicated by the mark “[***],” were omitted and have been filed separately with the Securities and Exchange Commission pursuant to the Registrant’s application requesting confidential treatment pursuant to Rule 24b-2 of the
+Securities Exchange Act of 1934, as amended.
+
+-28-
+
+amounts paid by ITI to BMS under Sections 8.1, 8.2, 8.3 and 8.4, BMS would be liable to ITI in an amount greater than the amounts paid by ITI to BMS under Sections 8.1, 8.2, 8.3 and 8.4 of this
+Agreement [***] then [***].
+
+ARTICLE 10
+
+PATENT MAINTENANCE; INFRINGEMENT; PATENT EXTENSIONS
+
+10.1
+Inventions. Inventorship of inventions conceived or reduced to practice in the course of Development activities under this Agreement shall be determined by application of United States patent Laws pertaining to inventorship. If such
+inventions are jointly invented in the course of Development activities by one or more employees or consultants or contractors of both Parties, such inventions shall be jointly owned (“Joint Invention”), and if one or more claims
+included in an issued patent or pending patent application which is filed in a patent office in the Territory claim such Joint Invention, such patent or patent application shall be jointly owned (“Joint Patent Rights”). If such an
+invention is solely invented in the course of Development activities by an employee or consultant of a Party, such invention shall be solely owned by such Party, and any patent filed claiming such solely owned invention shall also be solely owned by
+such Party. This Agreement shall be understood to be a joint research agreement in accordance with 35 U.S.C. § 103(c)(3) to develop the Licensed Compounds and Licensed Products. Each Party shall enter into binding agreements obligating all

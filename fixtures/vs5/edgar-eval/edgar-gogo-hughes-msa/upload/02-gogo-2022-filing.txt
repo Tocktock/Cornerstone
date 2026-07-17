@@ -1,0 +1,134 @@
+
+0001537054false0001537054us-gaap:CommonStockMember2022-05-262022-05-260001537054gogo:PreferredStockPurchaseRightsMember2022-05-262022-05-2600015370542022-05-262022-05-26
+
+UNITED STATES
+SECURITIES AND EXCHANGE COMMISSION
+WASHINGTON, D.C. 20549
+
+FORM 8-K
+
+CURRENT REPORT
+
+Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934
+
+Date of Report (Date of earliest event reported): May 26, 2022 (May 21, 2022)
+
+GOGO INC.
+
+(Exact name of Registrant as Specified in Its Charter)
+
+Delaware
+
+001-35975
+
+27-1650905
+
+(State or Other Jurisdiction
+of Incorporation)
+
+(Commission File Number)
+
+(IRS Employer
+Identification No.)
+
+105 Edgeview Dr., Suite 300
+
+Broomfield, Colorado
+
+80021
+
+(Address of Principal Executive Offices)
+
+(Zip Code)
+
+Registrant’s Telephone Number, Including Area Code: 303 301-3271
+
+(Former Name or Former Address, if Changed Since Last Report)
+
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions:
+
+☐Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+
+☐Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+
+☐Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+
+☐Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))
+
+Securities registered pursuant to Section 12(b) of the Act:
+
+Title of each class
+
+Trading
+Symbol(s)
+
+Name of each exchange on which registered
+
+Common Stock, par value $0.001 per share
+
+GOGO
+
+NASDAQ Global Select Market
+
+Preferred Stock Purchase Rights
+
+GOGO
+
+NASDAQ Global Select Market
+
+Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (§ 230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (§ 240.12b-2 of this chapter).
+
+Emerging growth company ☐
+
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ☐
+
+Item 1.01 Entry into a Material Definitive Agreement.
+
+On May 21, 2022, Gogo Business Aviation LLC (“Gogo BA”), a wholly owned subsidiary of Gogo Inc. (the “Company”), and Hughes Network Systems, LLC (“Hughes”) entered into a master services agreement (the “MSA”) providing for the design, development, testing and production readiness by Hughes, and delivery to Gogo BA, of certain airborne equipment for use on a low earth orbit satellite network. The specific services to be rendered by Hughes, and service fees to be paid by Gogo BA, are subject to the terms and provisions of one or more statements of work under the MSA. The MSA may be terminated by either party upon thirty days’ written notice to the other party if there are no statements of work thereunder, and any statement of work can be terminated by either party upon thirty days’ written notice to the other party (unless otherwise specified in such statement of work).
+
+The description of the MSA contained herein does not purport to be complete and is qualified in its entirety by reference to the full text of the MSA, a copy of which is filed as Exhibit 10.1 to this Current Report on Form 8-K and is incorporated in this Item 1.01 by reference.
+
+Forward-Looking Statements
+
+Certain disclosures in this report include forward-looking statements within the meaning of the Private Securities Litigation Reform Act of 1995. These forward-looking statements include, without limitation, statements regarding the Company’s business outlook, industry, business strategy, plans, goals and expectations concerning the Company’s market position, international expansion, future technologies, future operations, margins, profitability, future efficiencies, capital expenditures, liquidity and capital resources and other financial and operating information. When used in this discussion, the words “anticipate,” “assume,” “believe,” “budget,” “continue,” “could,” “estimate,” “expect,” “intend,” “may,” “plan,” “potential,” “predict,” “project,” “should,” “will,” “future and the negative of these or similar terms and phrases are intended to identify forward-looking statements in this report.
+
+Forward-looking statements reflect the Company’s current expectations regarding future events, results or outcomes. These expectations may or may not be realized. Although the Company believes the expectations reflected in the forward-looking statements are reasonable, the Company can give you no assurance these expectations will prove to have been correct. Some of these expectations may be based upon assumptions, data or judgments that prove to be incorrect. Actual events, results and outcomes may differ materially from the Company’s expectations due to a variety of known and unknown risks, uncertainties and other factors. Although it is not possible to identify all of these risks and factors, they include, among others, our ability to effectively evaluate and pursue strategic opportunities.
+
+Additional information concerning these and other factors can be found under the caption “Risk Factors” in the Company’s Annual Report on Form 10-K as filed with the Securities and Exchange Commission (the “SEC”) on March 3, 2022, and in the Company’s Quarterly Report on Form 10-Q as filed with the SEC on May 5, 2022.
+
+Any one of these factors or a combination of these factors could materially affect the Company’s financial condition or future results of operations and could influence whether any forward-looking statements contained in this report ultimately prove to be accurate. The Company’s forward-looking statements are not guarantees of future performance, and you should not place undue reliance on them. All forward-looking statements speak only as of the date made and the Company undertakes no obligation to update or revise publicly any forward-looking statements, whether as a result of new information, future events or otherwise.
+
+Item 9.01 Financial Statements and Exhibits.
+
+Exhibit No.
+
+Description
+
+10.1*
+
+Master Services Agreement, dated as of May 21, 2022, by and between Gogo Business Aviation LLC and Hughes Network Systems, LLC.
+
+104
+
+Cover Page Interactive Data File (embedded within the Inline XBRL document).
+
+*
+
+Certain portions of the exhibit have been omitted pursuant to Item 601(b)(2) of Regulation S-K. The Company agrees to furnish supplementally an unredacted copy of such exhibit to the SEC upon request; provided, however, that the Company may request confidential treatment pursuant to Rule 24b-2 of the Securities Exchange Act of 1934, as amended, for any exhibits or schedules so furnished.
+
+SIGNATURES
+
+Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned thereunto duly authorized.
+
+GOGO INC.
+
+Date:
+
+May 26, 2022
+
+By:
+
+/s/ Marguerite M. Elias
+
+Marguerite M. Elias
+Executive Vice President, General Counsel and Secretary

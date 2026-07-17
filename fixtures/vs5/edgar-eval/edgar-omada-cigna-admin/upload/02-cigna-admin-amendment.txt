@@ -1,0 +1,82 @@
+26
+d785770dex105b.htm
+EX-10.5(B)
+
+EX-10.5(b)
+
+[***] Certain information in this document has been excluded pursuant to Regulation S-K, Item 601(b)(10). Such excluded information is not material and would likely cause competitive harm to the registrant if publicly disclosed.
+
+Exhibit 10.5(b)
+
+AMENDMENT NO. 1 TO ADMINISTRATIVE SERVICES AGREEMENT
+
+This Amendment No. 1 to Administrative Services Agreement (this “Amendment”) is effective as of April 6, 2021 (the “Amendment
+Effective Date”) and is entered into between Omada Health, Inc. (“Omada”) and Cigna Health and Life Insurance Company (“CHLIC”).
+
+WHEREAS, Omada and CHLIC are parties to an Administrative Services Agreement, effective January 1, 2020 (the “Admin Agreement”); and
+
+WHEREAS, Omada and CHLIC wish to amend the Admin Agreement, pursuant to Section 7.08 of the Admin Agreement, to reflect changes that have arisen
+subsequent to the effective date of the Admin Agreement;
+
+NOW THEREFORE, Omada and CHLIC hereby agree to amend the Admin Agreement as follows:
+
+1.
+
+Interpretation. Capitalized terms used in this Amendment but not defined herein shall have the
+respective meanings set forth in the Admin Agreement.
+
+2.
+
+Amendments.
+
+2.1 All references in the Admin Agreement (including any annexes or exhibits attached thereto) to “Type 2 Program” shall be deleted and replaced by
+references to “Diabetes Program” and all references to “type 2 diabetes” shall be deleted and replaced by references to “type 1 or type 2 diabetes.” Capitalized terms used in the Administrative Services Agreement that
+refer to the meaning given those terms in Statement of Work No. 1 (CW2318269) to the Master Services Agreement ([***]), including any Exhibit thereto (the “SOW”) shall have the meaning set forth in the SOW as amended to date.
+
+2.2 The bulleted paragraph entitled “Hypertension Program” in Section 5.01 (CHLIC’s Compensation) of the Admin Agreement is hereby amended
+and restated in its entirety as follows:
+
+“Hypertension Program. For each Covered Member who enrolls in the Hypertension
+Program, beginning on the Enrolled Participant’s Program Start Date [***] thereafter, Omada shall pay CHLIC a fee of [***] (provided that the [***] under the Agreement) until the [***]. For the avoidance of doubt, the Fees set forth herein do
+not apply to Enrolled Participants in the DPP+Hypertension Program (as defined in Statement of Work No. 1 to the Agreement). (Omada shall pay CHLIC for Enrolled Participants in the DPP+Hypertension Program pursuant to the terms set forth in the
+Ancillary Services Agreement by and between Omada and Cigna Health Corporation dated May 31, 2018.)”
+
+2.3 The bulleted paragraph entitled
+“Type 2 Program” in Section 5.01 (CHLIC’s Compensation) of the Admin Agreement is hereby amended and restated in its entirety as follows:
+
+“Diabetes Program. For each Covered Member who enrolls in the Diabetes Program, beginning on the Enrolled Participant’s
+Program Start Date [***] thereafter, Omada shall pay CHLIC a fee of [***] (provided that the [***] under the Agreement) until the [***].”
+
+2.4 The
+bulleted paragraph entitled “Bundled Program” in Section 5.01 (CHLIC’s Compensation) of the Admin Agreement is hereby amended and restated in its entirety as follows:
+
+“Bundled Program. For each Covered Member who enrolls in the Bundled Program, beginning on the Enrolled Participant’s Program
+Start Date [***] thereafter, Omada shall pay CHLIC a fee of [***] (provided that the [***] under the Agreement) until the [***].”
+
+3.
+
+Incorporation and Ratification of Agreement. Except as set forth herein, the Admin Agreement shall
+remain unchanged.
+
+IN WITNESS WHEREOF, the parties hereto have caused this Amendment to be executed as of the Amendment Effective Date
+by their respective duly authorized representatives.
+
+CIGNA HEALTH AND LIFE INSURANCE COMPANY
+
+OMADA HEALTH, INC.
+
+Signature: /s/ Dawn Salan
+
+Signature: /s/ Sean Duffy
+
+Print Name: Dawn Salan
+
+Print Name: Sean Duffy
+
+Title: Managing Director, GP & TPM
+
+Title: Chief Executive Officer
+
+Date: 4/7/2021 | 16:26 PM PDT
+
+Date: 4/6/2021 | 11:28 AM PDT

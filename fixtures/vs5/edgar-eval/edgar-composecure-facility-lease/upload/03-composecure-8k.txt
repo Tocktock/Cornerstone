@@ -1,0 +1,1418 @@
+false
+
+0001823144
+
+2021-12-27
+2021-12-27
+
+0001823144
+
+dei:FormerAddressMember
+
+2021-12-27
+2021-12-27
+
+0001823144
+
+us-gaap:CommonStockMember
+
+2021-12-27
+2021-12-27
+
+0001823144
+
+CMPO:RedeemableWarrantSeachWholeWarrantExercisableForOneShareOfClassACommonStockMember
+
+2021-12-27
+2021-12-27
+
+iso4217:USD
+
+xbrli:shares
+
+iso4217:USD
+
+xbrli:shares
+
+UNITED STATES
+
+SECURITIES AND EXCHANGE COMMISSION
+
+Washington, D.C. 20549
+
+FORM 8-K
+
+CURRENT REPORT
+
+PURSUANT TO SECTION 13 OR 15(d) OF
+THE
+
+SECURITIES EXCHANGE ACT OF 1934
+
+Date of Report (Date of earliest event reported):
+December 27, 2021
+
+CompoSecure, Inc.
+
+(Exact name of registrant as specified in its
+charter)
+
+Delaware
+
+001-39687
+
+85-2749902
+
+(State or other jurisdiction
+
+of incorporation)
+
+(Commission
+
+File Number)
+
+(IRS Employer
+
+Identification No.)
+
+309 Pierce Street
+
+Somerset, New Jersey 08873
+
+(Address of principal executive offices, including
+zip code)
+
+Registrant’s telephone number, including
+area code: (908) 518-0500
+
+Roman DBDR Tech Acquisition Corp.
+
+2877 Paradise Rd. #702
+
+Las Vegas, NV 89109
+
+(Former name or former address, if changed since
+last report)
+
+Check the appropriate box below if the Form 8-K filing is intended
+to simultaneously satisfy the filing obligation of the registrant under any of the following provisions:
+
+¨
+
+Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+
+¨
+
+Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+
+¨
+
+Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+
+¨
+
+Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))
+
+Securities registered pursuant to Section 12(b) of the Act:
+
+Title of each class
+
+Trading Symbol(s)
+
+Name of each exchange on which
+
+registered
+
+Class
+A Common Stock, $0.0001 par value per share
+
+CMPO
+
+The Nasdaq Global Market
+
+Redeemable warrants, each whole warrant exercisable for one share of Class A Common Stock
+
+CMPOW
+
+The Nasdaq Global Market
+
+Indicate by check mark whether the registrant is an emerging
+growth company as defined in Rule 405 of the Securities Act of 1933 (§230.405 of this chapter) or Rule 12b-2 of the Securities
+Exchange Act of 1934 (§240.12b-2 of this chapter).
+
+Emerging growth company
+x
+
+If an emerging growth company, indicate
+by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial
+accounting standards provided pursuant to Section 13(a) of the Exchange Act. ¨
+
+INTRODUCTORY NOTE
+
+Merger Transaction
+
+On December 27, 2021 (the “Closing Date”),
+Roman DBDR Tech Acquisition Corp., a Delaware corporation (“Roman DBDR” and after the
+Business Combination described below, CompoSecure, Inc., being referred to herein as “New CompoSecure”), consummated
+the previously announced merger (the “Closing”) pursuant to that certain Agreement and Plan of Merger (the “Merger Agreement”),
+dated as of April 19, 2021, by and among Roman DBDR, CompoSecure
+Holdings, L.L.C., a Delaware limited liability company (“CompoSecure”), Roman Parent Merger Sub, LLC, a Delaware limited liability
+company and wholly-owned subsidiary of Roman DBDR (“Merger Sub”) and LLR Equity Partners IV, L.P., a Delaware limited partnership
+(“Member Representative”), as subsequently amended by that certain First Amendment to the Merger Agreement, dated as
+of May 25, 2021 (the “First Amendment”). As previously disclosed, Roman DBDR’s
+stockholders approved the Business Combination (as defined below) at a special meeting of stockholders held on December 23, 2021.
+
+On the Closing Date, the parties to the Merger
+Agreement caused a certificate of merger to be executed and filed with the Secretary of State of the State of Delaware, pursuant to which
+Merger Sub merged with and into CompoSecure, with CompoSecure as the surviving entity in the merger and, after giving effect to such merger,
+becoming a wholly-owned subsidiary of Roman DBDR (the “Merger” and, collectively with the other transactions described in
+the Merger Agreement, the “Business Combination”) as described in the section titled “Proposal No. 1: Business
+Combination Proposal” beginning on page 69 of the revised definitive proxy statement, dated November 30, 2021 (the
+“Proxy Statement”) and filed with the Securities and Exchange Commission (the “SEC”).
+
+At the effective time of the Merger
+(the “Merger Effective Time”), Roman DBDR changed its name to “CompoSecure, Inc.” Following the Closing,
+New CompoSecure is organized in an “Up-C” structure and CompoSecure will be managed by a board of managers in accordance with
+the terms of the CompoSecure Second Amended and Restated LLC Agreement (as defined below).
+
+Prior
+to the Closing of the Business Combination contemplated by the Merger Agreement, the following transactions took place: (i) CompoSecure
+amended and restated its limited liability company agreement (the “CompoSecure Second Amended and Restated LLC Agreement”)
+to, among other things, permit the issuance and ownership of interests in CompoSecure as contemplated by the Merger Agreement; (ii) the
+equityholders of CompoSecure (“CompoSecure Holders”) received a combination of cash consideration,
+certain newly-issued membership units of CompoSecure (the “Class B Common Units”) and shares of newly-issued Class B
+Common Stock of Roman DBDR (“Class B Common Stock”), which will have no economic
+value, but will entitle the CompoSecure Holder to one vote per issued share and will be issued on a one-for-one basis for each Class B
+Common Unit retained by the CompoSecure Holder following the Merger; (iii) the holders of outstanding options to purchase CompoSecure
+equity received a combination of cash consideration and options to purchase shares of Class A Common Stock of Roman DBDR (“Class A
+Common Stock”), and (iv) Roman DBDR acquired certain newly-issued membership units of CompoSecure.
+The CompoSecure Second Amended and Restated LLC Agreement, together with an Exchange Agreement entered into at the Closing of the Business
+Combination, provide the CompoSecure Holders the right to exchange the Class B Common Units, together with the cancellation of an
+equal number of shares of Class B Common Stock, for shares of Class A Common Stock, subject to certain restrictions set forth
+therein.
+
+At the Merger Effective Time, by virtue of the
+Merger and without any action on the part of Roman DBDR, Merger Sub, CompoSecure or the CompoSecure Holders:
+
+·
+
+each unit of limited liability company membership interests in CompoSecure (the “CompoSecure Units”) issued and outstanding
+immediately prior to the Merger Effective Time, were, by virtue of the Merger and upon the terms and subject to the conditions set forth
+in the Merger Agreement, cancelled or converted, as the case may be, and automatically deemed for all purposes to represent the right
+to receive the applicable portion of the Cash Merger Consideration, the Equity Merger Consideration and the Earnout Consideration (each
+as defined below), if any, attributable to the CompoSecure Units as required by CompoSecure’s Amended and Restated Limited Liability
+Company Agreement, dated as of June 11, 2020, and as provided on the Merger Consideration Schedule of the Merger Agreement;
+
+·
+
+the membership interests of Merger Sub issued and outstanding immediately prior to the Merger Effective Time, by virtue of the Merger
+and without any action on the part of Roman DBDR, Merger Sub or CompoSecure, converted into and became an amount of newly issued, fully
+paid and non-assessable Class A Common Units of CompoSecure equal to the number of shares of Class A Common Stock issued and
+outstanding immediately following the Merger Effective Time;
+
+·
+
+the number of Class A Common Units of CompoSecure issued and outstanding
+equalled the number of shares of Class A Common Stock then issued and outstanding; and
+
+·
+
+the number of Class B Common Units of CompoSecure issued and outstanding
+equalled the Class B Common Unit Merger Consideration (as defined below).
+
+The aggregate consideration paid to the CompoSecure
+Holders pursuant to the Merger Agreement was based on an equity value of CompoSecure of $852,991,200, as adjusted for certain transaction
+expenses of New CompoSecure (the “Equity Value”), consisting of:
+
+(i)            an
+amount of cash equal to (A) the amount of cash in New CompoSecure’s Trust Account established for the purpose of holding the
+net proceeds from its initial public offering and concurrent private placement of warrants, net of any amounts paid to New CompoSecure’s
+stockholders that exercise their redemption rights in connection with the Business Combination, plus (B) the proceeds of the Common
+PIPE Investment and Note PIPE Investment (each as defined below) minus (C) certain transaction expenses (the “Cash Merger Consideration”);
+plus
+
+(ii)           equity
+consideration consisting of the Class B Common Units (the “Class B Common Unit Merger Consideration”) and Class B
+Common Stock valued at $10.00 per share (the “Class B Common Stock Merger Consideration”) in respect of the remaining
+portion of CompoSecure’s Equity Value after deducting the Cash Merger Consideration (the “Equity Merger Consideration”);
+plus
+
+(iii)          the
+Earnout Consideration, if payable. The CompoSecure Holders and the holders of outstanding options to purchase CompoSecure that are not
+Cashout Options will have the right to receive (A) 3,750,000 additional (x) shares of Class A Common Stock with respect
+to holders of outstanding options to purchase CompoSecure Options that are not Cashout Options or (y) Class B Common Units (and
+a corresponding number of shares of Class B Common Stock) with respect to CompoSecure Holders, as applicable, in earn-out consideration
+in the event the stock price of the Class A Common Stock equals or exceeds $15.00 per share for any 20 trading days within any 30
+consecutive trading day period ending on or prior to the three-year anniversary of the Closing, and (B) 3,750,000 additional (x) shares
+of Class A Common Stock with respect to holders of outstanding options to purchase CompoSecure that are not Cashout Options or (y) Class B
+Common Units (and a corresponding number of shares of Class B Common Stock) with respect to CompoSecure Holders, as applicable, in
+earn-out consideration in the event the stock price of the Class A Common Stock equals or exceeds $20.00 per share for any 20 trading
+days within any 30 consecutive trading day period ending on or prior to the four-year anniversary of the Closing (collectively, the “Earnout
+Consideration”). “CompoSecure Option” means each option to purchase CompoSecure Units that
+is outstanding under CompoSecure’s Amended and Restated Equity Compensation Plan and “Cashout Options” mean CompoSecure
+Options outstanding immediately prior to the Merger Effective Time that are, as of the Merger Effective Time, to be cancelled pursuant
+to the Merger Agreement and entitle the holders thereof to receive the cash consideration pursuant to the Merger Agreement.
+
+A description of the Business Combination and the
+terms of the Merger Agreement are included in the section entitled “Proposal No. 1: Business Combination Proposal”
+beginning on page 69 of the Proxy Statement.
+
+As a result of Redemptions of 18,515,018 shares of Class A Common Stock, there was
+approximately $47.4 million of Cash available in the Trust Account, which is approximately $37.6 million less than the Minimum Cash
+amount required in the maximum redemption scenario. Roman DBDR and CompoSecure agreed to waive the failure to satisfy this
+Minimum Cash Amount condition in order to close the Business Combination.
+
+2
+
+The foregoing description of the Business Combination
+does not purport to be complete and is qualified in its entirety by the full texts of the Merger Agreement and the First Amendment, which
+are attached hereto as Exhibits 2.1 and 2.2, respectively, and are incorporated herein by reference.
+
+PIPE Investment
+
+As previously disclosed, on April 19,
+2021, concurrently with the execution of the Merger Agreement, Roman DBDR entered into subscription
+agreements for a private placement of Class A Common Stock (the “Common Subscription Agreements”) with certain investors
+(the “Common PIPE Investors”). Pursuant to the terms of the Common Subscription Agreements, Roman DBDR issued and sold to
+the Common PIPE Investors and the Common PIPE Investors purchased on the Closing Date of the Business Combination an aggregate amount
+of up to 4,500,000 shares of Class A Common Stock at a purchase price of $10.00 per share for aggregate gross proceeds of $45,000,000
+(the “Common PIPE Investment”). The Common PIPE Investment was consummated substantially concurrently with the Closing.
+
+As previously disclosed, on April 19,
+2021, concurrently with the execution of the Merger Agreement, Roman DBDR, CompoSecure and CompoSecure, L.L.C. entered into subscription
+agreements (the “Note Subscription Agreements”) with certain investors (the “Note PIPE Investors”) pursuant to
+which such investors, severally and not jointly, purchased on the Closing Date of the Business Combination, senior notes (the “Exchangeable
+Notes”) issued by CompoSecure and guaranteed by CompoSecure, L.L.C. in an aggregate principal amount of up to $130,000,000 that
+are exchangeable into shares of Class A Common Stock at a conversion price of $11.50 per share (the “Note PIPE Investment”).
+Pursuant to the Note Subscription Agreements, CompoSecure has issued and sold to the Note PIPE Investors, and the Note PIPE Investors
+purchased, severally and not jointly, subject to the terms and conditions of an Indenture to be executed by Roman DBDR, CompoSecure, CompoSecure,
+L.L.C. and the trustee under the Indenture to be entered into at Closing, the Exchangeable Notes in an aggregate principal amount of $130,000,000,
+which will bear interest at a rate of 7% per annum, payable semi-annually in arrears. The Exchangeable Notes will mature in five years,
+and be convertible into shares of Class A Common Stock at a conversion price of $11.50 per share, in accordance with the terms thereof
+and subject to customary anti-dilution adjustments. In connection with the Note PIPE Investment, New CompoSecure entered into a Registration
+Rights Agreement, pursuant to which the Note PIPE Investors received certain registration rights with respect to the Class A Common
+Stock. A copy of the full text of such Registration Rights Agreement is filed as Exhibit 10.8 to this Current Report on Form 8-K
+and is incorporated herein by reference. The Note PIPE Investment was consummated substantially concurrently with the Closing.
+
+Immediately
+after giving effect to the Business Combination and the Common PIPE Investment and Note PIPE Investment, there were 15,024,882
+shares of Class A Common Stock, 61,136,800 shares of Class B Common Stock, and 22,415,400 Warrants outstanding. The Class A
+Common Stock and the warrants of New CompoSecure trade on The Nasdaq Global Market (“Nasdaq”) under the symbols “CMPO”
+and “CMPOW,” respectively.
+
+Defined Terms
+
+Terms used but not defined herein, or for which
+definitions are not otherwise incorporated by reference herein, shall have the meaning given to such terms in the Proxy Statement and
+such definitions are incorporated herein by reference.
+
+As used hereafter in this Current Report on Form 8-K,
+unless otherwise stated or the context indicates otherwise, the terms the “Company,” “Registrant,” “we,”
+“us” and “our” refer to CompoSecure, Inc. (formerly known as Roman DBDR Tech
+Acquisition Corp.), after giving effect to the Business Combination.
+
+Item 1.01.
+
+Entry into a Material Definitive Agreement.
+
+Indemnification Agreements
+
+New CompoSecure entered, and expects to continue
+to enter into, indemnification agreements with its directors, executive officers, and other employees as determined by the New CompoSecure
+Board of Directors (the “Board”). Each indemnification agreement provides for indemnification and advancements by New CompoSecure
+of certain expenses and costs, if the basis of the indemnitee’s involvement was by reason of the fact that the indemnitee is or
+was a director, officer, employee, or agent of New CompoSecure or any of its subsidiaries or was serving at New CompoSecure’s request
+in an official capacity for another entity, to the fullest extent permitted by the laws of the state of Delaware.
+
+3
+
+The foregoing description of the indemnification
+agreements does not purport to be complete and is qualified in its entirety by the full text of the indemnification agreements, the form
+of which is attached hereto as Exhibit 10.13 and is incorporated herein by reference.
+
+Amended and Restated Registration Rights Agreement
+
+On the Closing Date, in connection with the consummation
+of the Business Combination and as contemplated by the Merger Agreement, New CompoSecure entered into the Amended and Restated Registration
+Rights Agreement (the “Registration Rights Agreement”) with the LLR Investors (as defined therein), the CompoSecure Investors
+(as defined therein), the Founder Investors (as defined therein), and the Additional Investors (as defined therein) (the LLR Investors,
+the CompoSecure Investors, the Founder Investors and the Additional Investors, the “Holders”), pursuant to which the LLR Investors
+and Founder Investors are each entitled to require one or more demand registrations, and all Holders will have certain “piggyback”
+registration rights with respect to registration statements filed with the SEC subsequent to the Business Combination. The material terms
+of the Registration Rights Agreement are described in the section of the Proxy Statement beginning on page 80 titled “Proposal
+No. 1: Business Combination Proposal—Related Agreements—Registration Rights Agreement.” Such description is
+qualified in its entirety by the text of the Registration Rights Agreement, which is included as Exhibit 10.2 to this Current Report
+on Form 8-K and is incorporated herein by reference.
+
+Tax Receivable Agreement
+
+On the Closing Date, New CompoSecure entered into
+the Tax Receivable Agreement with CompoSecure and the TRA Parties (as defined therein). The Tax Receivable Agreement generally provides
+for the payment by New CompoSecure to certain holders of CompoSecure Units (“CompoSecure Holders”) of 90% of the benefits,
+if any, that New CompoSecure is deemed to realize (calculated using certain assumptions) as a result of (i) New CompoSecure’s
+allocable share of existing tax basis in the assets of CompoSecure and its subsidiaries acquired (A) in the Business Combination
+and (B) upon sales or exchanges of CompoSecure Units pursuant to the Exchange Agreement after the Business Combination, (ii) certain
+increases in tax basis that occur as a result of (A) the Business Combination and (B) sales or exchanges of CompoSecure Units
+pursuant to the Exchange Agreement after the Business Combination, and (iii) certain other tax benefits, including tax benefits attributable
+to payments under the Tax Receivable Agreement. These tax attributes may increase (for tax purposes) New CompoSecure’s depreciation
+and amortization deductions and, therefore, may reduce the amount of tax that New CompoSecure would otherwise be required to pay in the
+future. New CompoSecure will retain the benefit of the remaining 10% of these cash savings. The material terms of the Tax Receivable Agreement
+are described in the section of the Proxy Statement beginning on page 80 titled “Proposal No. 1: Business Combination
+Proposal—Related Agreements—Tax Receivable Agreement.” Such description is qualified in its entirety by the text
+of the Tax Receivable Agreement, which is included as Exhibit 10.3 to this Current Report on Form 8-K and is incorporated herein
+by reference.
+
+Stockholders Agreement
+
+On the Closing Date, New CompoSecure, Roman DBDR
+Tech Sponsor LLC, a Delaware limited liability company (“Sponsor”) and certain CompoSecure Holders (Sponsor and the CompoSecure
+Holders, collectively, the “Voting Parties”) entered into a stockholders agreement (the “Stockholders Agreement”),
+which provides for certain voting agreements of the Voting Parties, and, among other things, sets forth certain requirements regarding
+the composition of the Board following the Closing. Under the Stockholders Agreement, the Voting Parties (1) agree to vote or cause
+to be voted all shares of Common Stock, whether at a regular or special meeting of CompoSecure, Inc. stockholders, in such a manner
+as may be necessary to elect and/or maintain the board of directors in accordance with the Stockholders Agreement; and (2) agree
+to the Lock-up Period (as defined below). The Stockholders Agreement also provides that for 180 days following the execution of the Stockholders
+Agreement (the “Lock-Up Period”), the Voting Parties agree not to effect any sale or distribution of any shares of Common
+Stock held by any of them during the Lock-Up Period as described therein. The material terms of the Stockholders Agreement are described
+in the section of the Proxy Statement beginning on page 81 titled “Proposal No. 1: Business Combination Proposal—Related
+Agreements—Stockholders Agreement.” Such description is qualified in its entirety by the text of the Stockholders Agreement,
+which is included as Exhibit 10.4 to this Current Report on Form 8-K and is incorporated herein by reference.
+
+4
+
+Exchange Agreement
+
+On the Closing Date, New CompoSecure, CompoSecure
+and CompoSecure Holders entered into the Exchange Agreement. Pursuant to the Exchange Agreement, the CompoSecure Holders and such other
+holders of Class B Units of CompoSecure from time to time party thereto will be entitled to exchange Class B Units of CompoSecure,
+and surrender shares of Class B Common Stock for cancellation, in exchange for, at the option of New CompoSecure, a number of shares
+of Class A Common Stock or the cash equivalent of such shares. The material terms of the Exchange Agreement are described in the
+section of the Proxy Statement beginning on page 82 titled “Proposal No. 1: Business Combination Proposal—Related
+Agreements—Exchange Agreement.” Such description is qualified in its entirety by the text of the Exchange Agreement, which
+is included as Exhibit 10.5 to this Current Report on Form 8-K and is incorporated herein by reference.
+
+CompoSecure Second Amended and Restated LLC Agreement
+
+On the Closing Date, New CompoSecure and the CompoSecure
+Holders entered into the CompoSecure Second Amended and Restated LLC Agreement. The operations of CompoSecure, and the rights and obligations
+of the CompoSecure Holders, will be set forth in the CompoSecure Second Amended and Restated LLC Agreement. The material terms of the
+CompoSecure Second Amended and Restated LLC Agreement are described in the section of the Proxy Statement beginning on page 84 titled
+“Proposal No. 1: Business Combination Proposal—Related Agreements—CompoSecure Second Amended and Restated LLC
+Agreement.” Such description is qualified in its entirety by the text of the CompoSecure Second Amended and Restated LLC Agreement,
+which is included as Exhibit 10.6 to this Current Report on Form 8-K and is incorporated herein by reference.
+
+Item 2.01.
+
+Completion of Acquisition or Disposition of Assets.
+
+The disclosure set forth in the “Introductory
+Note” above is incorporated into this Item 2.01 by reference. As previously disclosed, on December 23, 2021, the Business
+Combination was approved by the shareholders of Roman DBDR at the extraordinary general meeting of shareholders (the “Shareholder
+Meeting”). The Business Combination was completed on December 27, 2021.
+
+FORM 10 INFORMATION
+
+Item 2.01(f) of Current Report on Form 8-K
+states that if the registrant was formerly a “shell company” (as such term is defined in Rule 12b-2 under the Securities Exchange
+Act of 1934, as amended (the “Exchange Act”)), as Roman DBDR was immediately before the Business Combination, then following
+the closing of the transaction in which the registrant ceases to be a shell company, the registrant must disclose the information that
+would be required if the registrant were filing a general form for registration of securities on Form 10. Accordingly, New CompoSecure
+is providing the information below that would be included in a Registration Statement on Form 10 if it were to file such a Form 10.
+Please note that the information provided below relates to the combined company after the consummation of the Business Combination unless
+otherwise specifically indicated or the context otherwise requires.
+
+Forward-Looking Statements
+
+Certain statements in this Current Report on Form 8-K,
+or some of the information incorporated herein by reference, may be considered forward-looking statements. Forward-looking statements
+generally relate to future events or New CompoSecure’s future financial or operating performance, business strategy, and objectives
+of management for future operations. For example, statements about the benefits of the Business Combination, the competitive environment,
+and the expected future performance (including future revenue) and market opportunities of New CompoSecure are forward-looking statements.
+In some cases, you can identify forward-looking statements by terminology such as “may,” “should,” “expect,”
+“intend,” “will,” “estimate,” “anticipate,” “believe,” “predict,”
+“potential,” or “continue,” or the negatives of these terms or variations of them or similar terminology. Such
+forward-looking statements are subject to risks, uncertainties, and other factors which could cause actual results to differ materially
+from those expressed or implied by such forward looking statements. These forward-looking statements are based upon estimates and assumptions
+that, while considered reasonable by New CompoSecure and its management, as the case may be, are inherently uncertain. Factors that may
+cause actual results to differ materially from current expectations include, but are not limited to: (1) the outcome of any legal
+proceedings that may be instituted against New CompoSecure; (2) the ability to recognize the anticipated benefits of the Business
+Combination; (3) costs related to the Business Combination; (4) changes in applicable laws or regulations; (5) the possibility
+that New CompoSecure may be adversely affected by other economic, business, and/or competitive factors; (6) the limited operating
+history of New CompoSecure; (7) New CompoSecure’s business may not successfully expand into other markets, including the growth
+of the Arculus Platform; (8) the possibility that COVID-19 may adversely affect the results of operations, financial position, and
+cash flows of New CompoSecure; (9) New CompoSecure’s financial and business performance following the Business Combination,
+including financial projections; (10) future exchange and interest rates; and (11) other risks and uncertainties set forth in the
+section entitled “Risk Factors” beginning on page 15 of the Proxy Statement and incorporated herein by reference.
+
+5
+
+Nothing in this Current Report on Form 8-K
+should be regarded as a representation by any person that the forward-looking statements set forth herein will be achieved or that any
+of the contemplated results of such forward-looking statements will be achieved. You should not place undue reliance on forward-looking
+statements, which speak only as of the date they are made. New CompoSecure does not undertake any obligation to update or revise any forward-looking
+statements, whether as a result of new information, future events, or otherwise, except as may be required under applicable securities
+laws.
+
+Business
+
+The business of New CompoSecure is described in
+the Proxy Statement in the section entitled “Summary of CompoSecure’s Business” beginning on page 150 of
+the Proxy Statement, which is incorporated herein by reference.
+
+Risk Factors
+
+The risk factors related to the business and operations
+of New CompoSecure and the Business Combination are set forth in the Proxy Statement in the section entitled “Risk Factors”
+beginning on page 15 of the Proxy Statement, which is incorporated herein by reference.
+
+Selected Historical Financial Information
+
+The selected historical financial information and
+other data for the nine months ended September 30, 2021 and 2020 and the years ended December 31, 2020 and 2019 for CompoSecure
+is included in the Proxy Statement in the section entitled “Selected Consolidated Financial and Other Data of CompoSecure”
+beginning on page 187 of the Proxy Statement, which is incorporated herein by reference.
+
+Unaudited Consolidated Financial Statements
+
+The unaudited consolidated financial statements
+as of and for the nine months ended September 30, 2021 and 2020 of CompoSecure have been prepared in accordance with U.S. generally
+accepted accounting principles and pursuant to the regulations of the SEC and are included in the Proxy Statement beginning on page F-75 of
+the Proxy Statement, and such financial statements are incorporated herein by reference.
+
+These unaudited consolidated financial statements
+as of and for the nine months ended September 30, 2021 should be read in conjunction with the historical audited financial statements
+of CompoSecure as of December 31, 2020 and December 31, 2019 and for the years ended December 31, 2020, 2019 and 2018
+and the related notes included in the Proxy Statement beginning on page F-52 of the Proxy Statement, which are incorporated
+herein by reference.
+
+Unaudited Pro Forma Condensed Combined Financial Information
+
+The unaudited pro forma condensed combined financial
+information as of and for the nine months ended September 30, 2021 is filed as Exhibit 99.1 to this Current Report on Form 8-K
+and is incorporated herein by reference.
+
+Management’s Discussion and Analysis of Financial Condition
+and Results of Operations
+
+Management’s Discussion and Analysis of Financial
+Condition and Results of Operation related to the business and operations of CompoSecure are set forth in the Proxy Statement in the section
+entitled “Management’s Discussion and Analysis of Financial Condition and Results of Operations of CompoSecure”
+beginning on page 189, which is incorporated herein by reference.
+
+6
+
+Third Amended and Restated Credit Agreement
+
+On December 21, 2021 CompoSecure, L.L.C. (“CompoSecure
+OpCo”), CompoSecure and Arculus Holdings, L.L.C. (“Arculus” and collectively, with CompoSecure OpCo and CompoSecure,
+the “Companies”) entered into a Third Amended and Restated Credit Agreement with JPMorgan Chase Bank, National Association,
+as Administrative Agent and certain other lenders (the “Credit Agreement”). The Credit Agreement provides for a $60 million
+loan through a secured revolving credit facility and a $250 million loan through a secured term facility available to be used by CompoSecure
+OpCo and Arculus for, among other things, effecting a dividend to equityholders of Holdings through a distribution from CompoSecure OpCo
+and providing funds for general corporate purposes. The facilities mature on December 21, 2025.
+
+The Credit Agreement requires the Companies to
+comply with certain leverage ratios. In addition, the Credit Agreement contains other customary affirmative and negative covenants such
+as those which (subject to certain thresholds) restrict the Companies from, among other things, incurring certain debt, incurring liens,
+engaging in certain business transactions (including certain mergers, consolidations, liquidations, combinations and acquisitions), making
+certain investments, making distributions on or repurchasing its equity or engaging in transactions with affiliates. Events of default
+under the Credit Agreement include, among other things, payment defaults, breaches of representations, warranties or covenants, certain
+events of bankruptcy or insolvency, certain defaults or a change in control of the Companies. The events of default would permit the lenders
+to terminate commitments and accelerate the maturity of borrowings under the credit facilities.
+
+The foregoing description of the Credit Agreement
+is qualified in its entirety by reference to the full and complete terms of the Credit Agreement, which is filed as Exhibit 10.10
+to this Form 8-K and is incorporated herein by reference.
+
+Security Ownership of Certain Beneficial Owners and Management
+
+The following table sets forth information regarding
+the beneficial ownership of the Class A Common Stock and the Class B Common Stock as of the Closing Date, after giving effect
+to the Business Combination, by:
+
+·
+
+each person known by New CompoSecure to be the beneficial owner of more than 5% of outstanding the Class A Common Stock;
+
+·
+
+each of New CompoSecure’s current named executive officers and directors; and
+
+·
+
+all current named executive officers and directors of New CompoSecure as a group.
+
+Beneficial ownership is determined according to
+the rules of the SEC, which generally provide that a person has beneficial ownership of a security if he, she, or it possesses sole
+or shared voting or investment power over that security, including options and warrants that are currently exercisable or exercisable
+within 60 days of December 27, 2021.
+
+Unless otherwise indicated, New CompoSecure believes
+that each person named in the table below has sole voting and investment power with respect to all shares of common stock beneficially
+owned by such person.
+
+7
+
+Name and Address of
+
+Beneficial Owners (1)
+
+Number of
+
+Shares of
+
+New CompoSecure
+
+Class A
+
+Common
+
+Stock (2)
+
+%
+
+Number of
+
+Shares of
+
+New CompoSecure
+
+Class B
+
+Common
+
+Stock
+
+%
+
+% of Total
+
+Voting
+
+Power(3)
+
+Directors and current named executive officers:
+
+Mitchell Hollin (4)
+
+Director
+
+-
+
+34,526,408
+
+45.33
+
+%
+
+Michele Logan (5)
+
+Director
+
+-
+
+21,564,279
+
+28.31
+
+%
+
+Donald G. Basile (6)
+
+Director
+
+16,626,400
+
+-
+
+19.11
+
+%
+
+Niloofar Razi Howe
+
+Director
+
+-
+
+-
+
+-
+
+Brian Hughes
+
+Director
+
+-
+
+-
+
+-
+
+Jane J. Thompson
+
+Director
+
+-
+
+-
+
+-
+
+Jonathan Wilk (7)
+
+Chief Executive Officer. President and Director
+
+-
+
+1,236,027
+
+1.62
+
+%
+
+Timothy Fitzsimmons (9)
+
+Chief Financial Officer
+
+665,566
+
+-
+
+*
+
+%
+
+Adam Lowe (9)
+
+Chief Innovation Officer
+
+566,768
+
+-
+
+*
+
+%
+
+Gregoire Maes (9)
+
+Chief Operating Officer
+
+280,139
+
+-
+
+*
+
+%
+
+Amanda Gourbault
+
+Chief Revenue Officer
+
+-
+
+-
+
+-
+
+All directors and named executive officers as a group (11 persons)
+
+18,138,873
+
+57,326,714
+
+85.26
+
+%
+
+Five Percent Holders:
+
+-
+
+Entities affiliated with LLR Partners (8)
+
+-
+
+34,526,408
+
+45.33
+
+%
+
+Entities affiliated with Michele Logan (5)
+
+-
+
+21,564,279
+
+28.31
+
+%
+
+Roman DBDR Tech Sponsor LLC (10)
+
+16,626,400
+
+-
+
+19.11
+
+%
+
+*Less than 1%
+
+1.
+
+The business address of each of Mitchell Hollin, Michele Logan, Donald G. Basile, Niloofar Razi Howe, Brian Hughes, Jane J. Thompson, Jonathan Wilk, Timothy Fitzsimmons, Adam Lowe, Gregoire Maes and Amanda Gourbault is 309 Pierce Street, Somerset, New Jersey 08873
+
+2.
+
+The beneficial ownership of New CompoSecure as of December 27,
+2021 is based on (A) 15,024,882 shares of New CompoSecure Class A Common Stock outstanding as of such date and (B) 61,136,800
+shares of New CompoSecure Class B Common Stock outstanding as of such date.
+
+3.
+
+Percentage of total voting power represents voting power with respect to all shares of New CompoSecure Class A Common Stock and New CompoSecure Class B Common Stock, held beneficially as a single class. The holders of New CompoSecure Class B Common Stock are entitled to one vote per share, and holders of New CompoSecure Class A Common Stock are entitled to one vote per share.
+
+8
+
+4.
+
+Includes 33,071,603 shares of Class B Common Stock (which is unregistered),
+and a corresponding number of Class B Common Units issued by CompoSecure (the subsidiary of New CompoSecure, which is also unregistered)
+that are exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment, and a corresponding cancellation of
+the Class B Common Stock, held by LLR Equity Partners IV, L.P. and 1,454,805 shares of Class B Common Stock, and a corresponding number
+of Class B Common Units issued by CompoSecure that are exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment,
+and a corresponding cancellation of the Class B Common Stock, held by LLR Equity Partners IV, L.P. and 1,454,805 shares of New CompoSecure
+Class B Common Stockheld by LLR Equity Partners Parallel IV, L.P. that are exchangeable for New CompoSecure Class A Common Stock
+on a share-for-share basis, subject to adjustment. Mr. Hollin may be deemed the beneficial owner of the 34,526,408 shares of
+New CompoSecure Class B Common Stock because he is a member of LLR Capital IV, LLC, the General Partner of LLR Capital IV, L.P.,
+the General Partner of LLR Equity Partners IV, L.P. and LLR Equity Partners Parallel IV, L.P.. and Mr. Hollin is LLR Equity Partners IV,
+L.P.’s and LLR Equity Partners Parallel IV, L.P.’s designee to New CompoSecure’s board of directors. Mr. Hollin
+disclaims beneficial ownership of the shares held by LLR Equity Partners IV, L.P. and LLR Equity Partners Parallel IV, L.P.
+
+5.
+
+Consists of
+(i) 14,180,147 shares of Class B Common Stock, and a corresponding number of Class B Common Units issued by CompoSecure that
+are exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment, and a corresponding cancellation of the Class
+B Common Stock, held by Ms. Logan; (ii) 849,502 shares of Class B Common Stock, and a corresponding number of Class B Common
+Units issued by CompoSecure that are exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment, and a corresponding
+cancellation of the Class B Common Stock, held by the Carol D. Herslow Credit Shelter Trust B (“Credit Shelter Trust”); and
+(iii) 6,534,630 shares of Class B Common Stock, and a corresponding number of Class B Common Units issued by CompoSecure that are
+exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment, and a corresponding cancellation of the Class
+B Common Stock, held by Ephesians 3:16 Holdings LLC (“Ephesians Holdings”). Of the 6,534,630 shares of New CompoSecure Class B
+Common Stock held by Ephesians Holdings, 3,267,315 shares may be deemed to be beneficially owned by The MDL Family Trust (“MDL Trust”)
+and 3,267,315 shares of may be deemed to be beneficially owned by The DML Family Trust (“DML Trust”). The business address
+of the above entities is 309 Pierce Street, Somerset, New Jersey 08873.
+
+Ephesians Holdings is a manager-managed LLC, and Ms. Logan serves
+as the manager, with the ability to exercise voting and dispositive power with respect to the New CompoSecure Class B Common Stock
+held by Ephesians Holdings. The MLD Trust and the DML Trust are the sole members of Ephesians Holdings, each owning half of the total
+membership interests therein, and Ms. Logan serves as the Investment Adviser of each of the MDL Trust and the DML Trust. Tiedemann
+Trust Company acts as Administrative Trustee of each of the MDL Trust and the DML Trust. As a result, Ms. Logan, Ephesians Holdings
+and the MDL Trust and the DML Trust (to the extent of their respective membership interests therein) possess shared voting and dipositive
+power over the shares of New CompoSecure Class B Common Stock held by Ephesians Holdings. Ms. Logan is a Co-Trustee of the Credit
+Shelter Trust, and, as a result, may be deemed to share voting and dispositive power with respect to the New CompoSecure Class B
+Common Stock held by the Credit Shelter Trust. Ms. Logan expressly disclaims beneficial ownership of the shares held by the entities
+in this footnote 5.
+
+6.
+
+Includes 5,789,000 shares of New CompoSecure Class A Common Stock
+held by Roman DBDR Tech Sponsor LLC (the “Sponsor”) and 10,837,400 shares of NewCompoSecure Class A Common Stock that the
+Sponsor has the right to acquire within 60 days of December 27, 2021 through the exercise of warrants. Dr. Basile may be deemed the
+beneficial owner of the 16,626,400 shares of New CompoSecure Class A Common Stock because he serves as the Managing Member of the
+Sponsor. Dr. Basile disclaims beneficial ownership of the shares held by the Sponsor.
+
+7.
+
+Includes 1,236,027 shares of Class B Common Stock, and a corresponding
+number of Class B Common Units issued by CompoSecure that are exchangeable for Class A Common Stock on a share-for-share basis, subject
+to adjustment, and a corresponding cancellation of the Class B Common Stock, held by CompoSecure Employee LLC. Mr. Wilk may be deemed
+the beneficial owner of the 1,236,027 shares of New CompoSecure Class B Common Stock because he serves as the sole member of
+the CompoSecure Employee LLC. Mr. Wilk disclaims beneficial ownership of the shares held by the CompoSecure Employee LLC.
+
+8.
+
+Consists of (i) 33,071,603 shares of Class B Common Stock,
+and a corresponding number of Class B Common Units issued by CompoSecure that are exchangeable for Class A Common Stock on a share-for-share
+basis, subject to adjustment, and a corresponding cancellation of the Class B Common Stock, held by LLR Equity Partners IV, L.P.; and
+(ii) 1,454,805 shares of Class B Common Stock, and a corresponding number of Class B Common Units issued by CompoSecure that
+are exchangeable for Class A Common Stock on a share-for-share basis, subject to adjustment, and a corresponding cancellation of the Class
+B Common Stock, held by LLR Equity Partners Parallel IV, L.P. The business address of the above entities is 2929 Arch St, Philadelphia,
+PA 19104.
+
+9.
+
+Includes
+the number of shares of New CompoSecure Class A Common Stock that the named executive officer has the right to acquire
+within 60 days of December 27, 2021 through the exercise of stock options issued under the CompoSecure, L.L.C. Amended and Restated Equity Incentive Plan.
+
+10.
+
+Includes 5,789,000 shares of New CompoSecure Class
+A Common Stock held by the Sponsor and 10,837,400 shares of NewCompoSecure Class A Common Stock that the Sponsor has the right to
+acquire within 60 days of December 27, 2021 through the exercise of warrants.
+
+Directors and Executive Officers
+
+Information, including biographical information,
+with respect to the Board and executive officers after the Closing is included in the Proxy Statement in the section titled “Management
+of the Combined Entity Following the Business Combination” beginning on page 180 of the Proxy Statement, which is incorporated
+herein by reference. The information set forth in the section entitled “Election of Director” in Item 5.02 of this Current
+Report on Form 8-K is incorporated herein by reference.
+
+In connection with the consummation of the Business
+Combination, each of Roman DBDR’s executive officers and directors ceased serving Roman DBDR. Each of Mitchell Hollin, Michele Logan,
+Donald G. Basile, Niloofar Razi Howe, Brian Hughes, Jane J. Thompson and Jonathan Wilk were elected to the Board in connection with the
+Business Combination. After the Closing, effective December 27, 2021, the Board appointed Mr. Hollin as the Chairman of the
+Board.
+
+Also, effective December 7, 2021, Amanda Gourbault
+was appointed to serve as Chief Revenue Officer of New CompoSecure.
+
+9
+
+Ms. Gourbault has more than 25 years of experience
+in the payments and security industry, leading global sales, products and services teams for the financial sector. Prior to joining New
+CompoSecure, Ms. Gourbault was Executive Vice President of the Financial Institutions Business Unit at IDEMIA, a global leader in
+payment cards and identity/security credentials. At IDEMIA, where Ms. Gourbault worked for 13 years, Ms. Gourbault was responsible
+for a global division with more than 2,600 employees, comprised of sales, marketing and product development teams, as well as for more
+than 30 card personalization centers worldwide that delivered more than $900 million in revenue per year. Ms. Gourbault is also Chair
+of the Compass for Life foundation, helping disadvantaged children achieve their dreams. Ms. Gourbault holds a BA in modern languages
+from Durham University, England.
+
+Ms. Gourbault has entered into an Employment
+Agreement covering the terms and conditions of her employment as Chief Revenue Officer; a description of that Employment Agreement is
+included in Section 5.02, titled “Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain
+Officers; Compensatory Arrangements of Certain Officers,” beginning on page 13.
+
+Director Independence
+
+The listing standards of Nasdaq require that a
+majority of the Board be independent. The Board determined that each of Mr. Mitchell Hollin, Ms. Niloofar Razi Howe, Mr. Brian
+F. Hughes and Ms. Jane J. Thompson qualify as independent directors, as defined under Nasdaq listing rules.
+
+Committees of the Board of Directors
+
+Following the Closing, the standing committees
+of the Board consist of an Audit Committee, a Compensation Committee and a Nominating and Governance Committee (collectively, the “Board
+Committees”). Each of the Board Committees reports to the Board. Additionally, information with respect to the Board Committees
+is included in the Proxy Statement in the section titled “Management of the Combined Entity Following the Business Combination”
+beginning on page 180 of the Proxy Statement, which is incorporated herein by reference.
+
+Executive and Director Compensation
+
+The Executive and Director Compensation of CompoSecure
+is described in the Proxy Statement in the section entitled “Executive and Director Compensation of CompoSecure” beginning
+on page 172 of the Proxy Statement, which is incorporated herein by reference.
+
+Following the completion of the Business Combination,
+our Compensation Committee will determine the annual compensation to be paid to the members of our Board. We anticipate that any director
+compensation plan adopted will include both equity and cash components, be competitive with relevant comparison companies, and support
+best practices in director compensation plan design.
+
+Equity Incentive Plan
+
+At the Shareholder Meeting, the shareholders of
+Roman DBDR approved the CompoSecure, Inc. 2021 Incentive Equity Plan (the “Incentive Equity Plan”). Initially, the aggregate
+number of shares of Class A Common Stock that may be issued pursuant to stock awards under the Equity Incentive Plan after the Equity
+Incentive Plan becomes effective will be 8,987,609 shares. Additionally, the number of shares of Class A Common Stock reserved for
+issuance under the Incentive Equity Plan will automatically increase on January 1 of each year, beginning on January 1, 2022
+by 4% of the total number of shares of Common Stock outstanding as of the last day of the immediately preceding calendar year, or a lesser
+number of shares determined by the administrator of the Equity Incentive Plan.
+
+The description of the Incentive Equity Plan set
+forth in the Proxy Statement section entitled “Proposal No. 6: The Equity Incentive Plan Proposal” beginning on
+page 123 of the Proxy Statement is incorporated herein by reference. A copy of the full text of the Incentive Equity Plan is filed
+as Exhibit 10.11 to this Current Report on Form 8-K and is incorporated herein by reference. Following the consummation of the
+Business Combination, New CompoSecure expects that the Board will make grants of awards under the Incentive Equity Plan to eligible participants.
+
+10
+
+Employee Stock Purchase Plan
+
+At the Shareholder Meeting, the shareholders of
+Roman DBDR approved the CompoSecure, Inc. Employee Stock Purchase Plan (the “ESPP”). Initially, the aggregate number
+of shares of Class A Common Stock reserved for sale pursuant to the ESPP after the ESPP becomes effective will be 1,650,785 shares.
+The number of shares of Class A Common Stock reserved for sale under the ESPP will automatically increase on the first trading day
+in January each calendar year during the term of the ESPP, beginning with the 2022 calendar year, by 1% of the total number of shares
+of Class A Common Stock and Class B Common Stock outstanding on the last trading day in the immediately preceding calendar month,
+but in no event shall any such annual increase exceed 1,686,531 shares or a lesser number of shares determined by the administrator of
+the ESPP.
+
+The
+description of the ESPP set forth in the Proxy Statement section entitled “Proposal No. 7: The Employee Stock Purchase Plan
+Proposal” beginning on page 132 of the Proxy Statement is incorporated herein by reference. A copy of the full text
+of the ESPP is filed as Exhibit 10.12 to this Current Report on Form 8-K and is incorporated herein by reference. Following
+the consummation of the Business Combination, New CompoSecure expects that the Board will make grants of awards under the ESPP to eligible
+participants.
+
+Director Compensation Following the Business Combination
+
+Following the completion of the Business Combination,
+our Compensation Committee will determine the annual compensation to be paid to the members of our Board. We anticipate that any director
+compensation plan adopted will include both equity and cash components, be competitive with relevant comparison companies, and support
+best practices in director compensation plan design.
+
+Certain Relationships and Related Transactions
+
+The description of certain relationships and related
+transactions is included in the Proxy Statement in the section entitled “Certain Relationships and Related Person Transactions”
+beginning on page 210, which is incorporated herein by reference.
+
+The information set forth in the section entitled
+“Indemnification Agreements” in Item 1.01 of this Current Report on Form 8-K is incorporated herein by reference.
+
+Legal Proceedings
+
+The description of legal proceedings is included
+in the Proxy Statement in the section entitled “Summary of CompoSecure’s Business—Legal Proceedings” on
+page 171, which is incorporated herein by reference.
+
+Market Price and Dividends on the Registrant’s Common Equity
+and Related Stockholder Matters
+
+The Class A Common Stock and warrants of New
+CompoSecure trade on Nasdaq under the symbols “CMPO” and “CMPOW,” respectively, in lieu of the ordinary shares,
+warrants, and units of Roman DBDR. New CompoSecure has not paid any cash dividends on Class A Common Stock or the Warrants to date.
+The Board may from time to time consider whether or not to institute a dividend policy. New CompoSecure presently intends to retain any
+earnings for use in our business operations and accordingly, New CompoSecure does not anticipate the Board declaring any dividends in
+the foreseeable future. The payment of cash dividends in the future will be dependent upon New CompoSecure’s revenues and earnings,
+if any, capital requirements and general financial condition. The payment of any cash dividends will be within the discretion of the Board.
+Further, New CompoSecure’s ability to declare dividends will also be limited by restrictive covenants contained in its debt agreements.
+Under the Second Amended and Restated Certificate of Incorporation of New CompoSecure, holders of Class B Common Stock are not entitled
+to share in any declared dividends.
+
+Recent Sales of Unregistered Securities
+
+Information about unregistered sales of New CompoSecure’s
+equity securities is set forth under Item 3.02 of this Current Report on Form 8-K, which is incorporated herein by reference.
+
+11
+
+Description of Securities
+
+A description of the Class A Common Stock,
+the Class B Common Stock, preferred stock, and warrants of New CompoSecure is included in the Proxy Statement in the section entitled
+“Description of Securities After the Business Combination” beginning on page 200, which is incorporated herein
+by reference.
+
+Indemnification of Directors and Officers
+
+The information set forth in the section entitled
+“Indemnification Agreements” in Item 1.01 of this Current Report on Form 8-K is incorporated herein by reference.
+Further information about the indemnification of New CompoSecure’s directors and officers is set forth in the Proxy Statement in
+the section titled “Certain Relationships and Related Person Transactions—Certain Transactions of the Combined Entity—Indemnification
+Agreements” beginning on page 212 and is incorporated herein by reference.
+
+Financial Statements, Supplementary Data, and Exhibits
+
+The information set forth under Item 9.01 of this
+Current Report on Form 8-K is incorporated herein by reference.
+
+Item 2.03.
+
+Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant.
+
+The disclosure set forth in the “Introductory
+Note” above is incorporated herein by reference.
+
+Item 3.02.
+
+Unregistered Sales of Equity Securities.
+
+The disclosure set forth in the “Introductory
+Note” above is incorporated herein by reference. The securities issued in connection with the Business Combination, the Common
+PIPE Investment and Note PIPE Investment were not be registered under the Securities Act, in reliance on the exemption from registration
+provided by Section 4(a)(2) of the Securities Act.
+
+Item 5.01
+
+Changes in Control of Registrant.
+
+The information set forth above in the “Introductory
+Note” and Item 2.01 is incorporated herein by reference.
+
+Item 5.02
+
+Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers.
+
+The information set forth above in the sections
+titled “Directors and Executive Officers,” “Director Independence,” “Committees of the
+Board of Directors,” and “Executive and Director Compensation” in Item 2.01 is incorporated herein by reference.
+In addition, the Incentive Equity Plan and the ESPP became effective upon the Closing. The material terms of the Incentive Plan and the
+ESPP are described in the Proxy Statement in the sections entitled “Proposal No. 6: The Equity Incentive Plan Proposal”
+and “Proposal No. 7: The Employee Stock Purchase Plan Proposal,” respectively, which are incorporated herein by
+reference.
+
+Employment Agreements.
+
+In connection with the Merger, and as described
+below, New CompoSecure entered into new employment agreements (each, an “Employment Agreement”; collectively, the “Employment
+Agreements”) through its wholly owned subsidiary CompoSecure, L.L.C. with certain of its named executive officers (each, an “Executive”),
+effective as of, and contingent upon, the Closing of the Business Combination (or, in the case of Amanda Gourbault, effective as of December 7,
+2021). Each Employment Agreement generally contains the same terms and conditions for each Executive, with exceptions noted below. Until
+the Merger Effective Time, each of Mr. Wilk’s, Mr. Fitzsimmons’s, Dr. Lowe, and Mr. Maes’s current
+employment agreement will remain in full force and effect.
+
+Under the terms of the new Employment Agreement
+with Jonathan Wilk, New CompoSecure’s President and Chief Executive Officer (“Wilk Agreement”), Mr. Wilk’s
+base salary would increase prospectively to $600,000; Mr. Wilk’s annual target bonus opportunity will remain
+at 100% of his base salary (with a maximum payout of 200% of base salary), based on individual and/or company performance and determined
+by the Compensation Committee of the Board (“Compensation Committee”).
+
+12
+
+Under the terms of the new Employment Agreement
+with Tim Fitzsimmons, New CompoSecure’s Chief Financial Officer, Mr. Fitzsimmons’s base salary would increase prospectively to $375,000 and his annual target bonus opportunity will increase from 50% of his base salary to 60% of his base salary
+(with a maximum payout of 120% of base salary), based on individual and/or company performance and determined by the Compensation Committee.
+
+Under the terms of the new Employment Agreement
+with Adam Lowe, New CompoSecure’s chief innovation officer, Dr. Lowe’s base salary would increase prospectively to $425,000 and his annual target bonus opportunity will increase from 50% of his base salary to 60% of his base salary (with
+a maximum payout of 120% of base salary), based on individual and/or company performance and determined by the Compensation Committee.
+
+Under the terms of the Employment Agreement with
+Amanda Gourbault, New CompoSecure’s Chief Revenue Officer, she will receive a base salary of $500,000, with an annual target bonus
+opportunity of 100% of her base salary (with a maximum payout of 200% of base salary), based on individual and/or company performance
+and determined by the Compensation Committee. She will also receive a $750,000 cash bonus paid to Ms. Gourbault in recognition of her loss of economic rewards due to her early departure from her previous position to join CompoSecure, which she will be obligated to repay if
+she leaves employment (other than as a result of a termination without “Cause” or a resignation for “Good Reason,”
+as defined in the Employment Agreement) during her first year of employment.
+
+Under the terms of the new Employment Agreement
+with Gregoire (Greg) Maes, New CompoSecure’s Chief Operating Officer, Mr. Maes’s base salary would increase prospectively to $375,000 and his annual target bonus opportunity will increase from 50% of his base salary to 60% of his base salary
+(with a maximum payout of 120% of base salary), based on individual and/or company performance and determined by the Compensation Committee.
+
+As more specifically described and set forth in
+the respective Employment Agreements, each of Mr. Wilk, Mr. Fitzsimmons, Ms. Gourbault, Dr. Lowe, and Mr. Maes
+will receive an initial restricted stock unit grant under the Equity Incentive Plan (each, a “Staking Grant”). Ms. Gourbault
+will also receive a separate sign-on grant. Starting in the 2023 fiscal year, each Executive will be eligible to receive annual long-term
+incentive equity awards in the form of time-vested restricted stock units and performance stock units under the Company’s equity
+incentive plan.
+
+The Employment Agreements contain certain rights
+of each of the Executives and New CompoSecure to terminate the Executives’ employment, including a termination by New CompoSecure
+for “Cause” and a resignation by the Executive for “Good Reason” (each, as defined in the Employment Agreements),
+and specifies certain compensation following termination of employment.
+
+Upon a termination of Mr. Fitzsimmons, Ms. Gourbault’s,
+Dr. Lowe’s, or Mr. Maes’s employment by New CompoSecure without Cause or by the Executive with Good Reason, other
+than within two years of a Change in Control (as defined in the Employment Agreements), each such Executive will be eligible to receive
+an amount equal to one times the sum of (i) the Executive’s then-current annual base salary, plus (ii) target bonus for
+the year of termination, payable in installments over the one year period following the date of termination. Further, certain equity grants
+will vest pro-rata based on the date of termination (performance-vested equity, if any, will vest based on target performance), and Ms. Gourbault’s
+sign-on grant will fully vest. Additionally, New CompoSecure will make a lump-sum payment to the Executive equal to Executive’s
+applicable costs of COBRA coverage for 12 months (“COBRA Payment”).
+
+If employment is terminated by New CompoSecure
+without Cause or Mr. Fitzsimmons, Ms. Gourbault, Dr. Lowe, or Mr. Maes resigns with Good Reason within two years of
+a Change in Control, in addition to the COBRA Payment, New CompoSecure will pay the Executive an amount equal to: (i) one times the
+sum of (A) the Executive’s then-current annual base salary, plus (B) the Executive’s target annual bonus for the
+year of termination; plus (ii) a pro-rata portion of the Executive’s annual bonus for the year of termination based on actual
+performance for the applicable performance period. Further, all time-vested equity will become immediately vested and all performance-vested
+equity will vest based on actual performance as of the date of the applicable Change in Control.
+
+13
+
+With respect to Mr. Wilk, if he is terminated
+without Cause or he resigns with Good Reason, New CompoSecure will pay him an amount equal to: (i) two times the sum of (A) his
+then-current annual base salary, plus (B) his target annual bonus for the year of termination; plus (ii) a pro-rata portion
+of his annual bonus for the year of termination, based on actual performance for the applicable performance period (collectively, “Severance
+Payment”). If such termination occurs other than within two years of a Change in Control, the Severance Payment will be paid in
+installments over the one-year period following the date of termination; if termination occurs within two years of a Change in Control,
+the Severance Payment will be paid in lump sum. Whether or not a termination without Cause or a resignation with Good Reason occurs in
+connection with a Change in Control, New CompoSecure will make a lump-sum payment to Mr. Wilk equal to applicable cost of COBRA coverage
+for 24 months. Additionally, all unvested equity will vest pro-rata based on the date of termination; performance-vested equity (other
+than the Staking Grant) will vest pro-rata based on target performance unless termination occurs within two years of a Change in Control,
+in which case performance-vested equity vest pro-rata based on actual performance as of the date of the Change in Control. Any portion
+of Mr. Wilk’s Staking Grant that vests based on performance will vest pro-rata based on the achievement of certain milestones
+as set forth in the Wilk Agreement.
+
+With respect to Mr. Fitzsimmons, Ms. Gourbault,
+Dr. Lowe, and Mr. Maes, if termination is due to Disability, each Executive’s Staking Grant will vest pro-rata based on
+the date of termination. If any of Mr. Fitzsimmons, Ms. Gourbault, Dr. Lowe, or Mr. Maes dies during their term of
+employment with New CompoSecure, all time-vested equity that was granted more than one year prior to the date of termination will vest
+pro-rata.
+
+If Mr. Wilk terminates due to Disability,
+all time-vested equity (including time-vested Staking Grants) shall vest pro-rata and performance-vested equity, other than the Staking
+Grants, will vest based on target performance. Any portion of Mr. Wilk’s Staking Grant that vests based on performance will
+vest pro-rata based on the achievement of certain milestones as set forth in the Wilk Agreement. If Mr. Wilk dies during his term
+of employment, all time-vested equity that was granted more than one year prior to the date of termination will vest pro-rata and performance-vested
+equity, other than the Staking Grants, will vest based on target performance. Any portion of Mr. Wilk’s Staking Grant that
+vests based on performance will vest pro-rata based on the achievement of certain milestones as set forth in the Wilk Agreement.
+
+Each of the Executives will be subject to covenants
+not to compete with New CompoSecure or solicit its employees or customers during their employment and for a period of 24 months following
+their termination of employment for any reason.
+
+The foregoing description is not a complete description
+of the Employment Agreements and is qualified in its entirety by reference to the full text of the Employment Agreements, which are filed
+as Exhibits 10.14 through 10.18 to this Current Report on Form 8-K and are incorporated by reference into this Item 5.02.
+
+Item 5.06.
+
+Change in Shell Company Status.
+
+As a result of the Business Combination, New CompoSecure
+ceased being a shell company. The material terms of the Business Combination are described in the section entitled “Proposal
+No. 1: Business Combination Proposal” beginning on page 69 of the Proxy Statement, and are incorporated herein by
+reference. Further, the information set forth in the “Introductory Note” and under Item 2.01 is incorporated herein
+by reference.
+
+Item 9.01
+
+Financial Statements and Exhibits.
+
+(a)
+
+Financial Statements of Business Acquired.
+
+The unaudited consolidated financial statements
+as of and for the nine months ended September 30, 2021 and 2020 of CompoSecure and the related notes are included in the Proxy Statement
+beginning on page F-75 of the Proxy Statement, and such financial statements are incorporated herein by reference.
+
+The historical audited financial statements of
+CompoSecure as of December 31, 2020 and December 31, 2019 and for the years ended December 31, 2020, 2019 and 2018,
+and the related notes are included in the Proxy Statement beginning on page F-52 of the Proxy Statement, which are
+incorporated herein by reference.
+
+14
+
+(b)
+
+Pro Forma Financial Information.
+
+The unaudited pro forma condensed combined financial
+information as of and for the nine months ended September 30, 2021 is filed as Exhibit 99.1 to this Current Report on Form 8-K
+and is incorporated herein by reference.
+
+(c)
+
+Exhibits
+
+Exhibit
+
+No.
+
+Description
+
+2.1†
+
+Agreement and Plan of Merger, dated April 19, 2021, by and among the Roman DBDR Tech Acquisition Corp., Roman Parent Merger Sub, LLC, CompoSecure Holdings, L.L.C., and LLR Equity Partners IV, L.P. as Member Representative (incorporated by reference to Exhibit 2.1 to the Current Report on Form 8-K (File No. 001-39687), filed with the SEC on April 19, 2021).
+
+2.2
+
+Amendment No. 1 to the Agreement and Plan of Merger, dated as of May 25, 2021, by and among the Roman DBDR Tech Acquisition Corp., Roman Parent Merger Sub, LLC, and CompoSecure Holdings, L.L.C. (incorporated by reference to Exhibit 2.2 to the Current Report on Form 8-K (File No. 001-39687), filed with the SEC on May 25, 2021).
+
+4.1
+
+Specimen Warrant Certificate (incorporated by reference to Exhibit 4.3 to the Registration Statement on Form S-1/A (File No. 333-249330), filed with the SEC on October 19, 2020).
+
+4.2
+
+Warrant Agreement, dated as of November 5, 2021, between Roman DBDR Tech Acquisition Corp. and Continental Stock Transfer & Trust Company (incorporated by reference to Exhibit 4.1 to the Current Report on Form 8-K (File No. 001-39687), filed with the SEC on November 10, 2020).
+
+10.1
+
+Letter Agreement, dated as of November 5, 2021, by and among Roman DBDR Tech Acquisition Corp. and the Holders (as defined therein) (incorporated by reference to Exhibit 10.1 to the Current Report on Form 8-K (File No. 001-39687), filed with the SEC on November 10, 2020).
+
+10.2
+
+Amended and Restated Registration Rights Agreement, dated as of December 27, 2021, by and among CompoSecure, Inc., the LLR Investors (as defined therein), the CompoSecure Investors (as defined therein), the Founder Investors (as defined therein), and the Additional Investors (as defined therein).
+
+10.3
+
+Tax Receivable Agreement, dated as of December 27, 2021, by and among CompoSecure, Inc., CompoSecure Holdings, L.L.C. and the TRA Parties (as defined therein) party thereto.
+
+10.4
+
+Stockholders Agreement, dated as of December 27, 2021, by and among CompoSecure, Inc., Roman DBDR Tech Sponsor LLC and the other Stockholders (as defined therein) party thereto.
+
+10.5
+
+Exchange Agreement, dated as of December 27, 2021, by and among CompoSecure, Inc., CompoSecure Holdings, L.L.C. and the holders of Class B Units of CompoSecure Holdings, L.L.C. party thereto.
+
+10.6
+
+Second Amended and Restated Limited Liability Company Agreement, dated as of December 27, 2021, by and among CompoSecure Holdings, L.L.C., CompoSecure, Inc. and other Members (as defined therein) party thereto.
+
+10.7
+
+Indenture, dated as of December 27, 2021, by and among CompoSecure Holdings, L.L.C., CompoSecure, Inc., the Guarantors (as defined therein) party thereto and U.S. Bank National Association.
+
+10.8
+
+Form of 7.00% Exchangeable Senior Note, due 2026 Note, of CompoSecure Holdings, L.L.C.
+
+10.9
+
+Registration Rights Agreement, dated December 27, by and among CompoSecure, Inc., CompoSecure Holdings, L.L.C. and the Investors (as defined therein) party thereto.
+
+15
+
+Exhibit
+
+No.
+
+Description
+
+10.10
+
+Third Amended and Restated Credit Agreement, dated as of December 21, 2021, by and among CompoSecure, L.L.C., Arculus Holdings, L.L.C., CompoSecure Holdings, L.L.C., the Lenders (as defined therein) party thereto and JPMorgan Chase Bank, N.A.
+
+10.11+
+
+CompoSecure, Inc. 2021 Incentive Equity Plan and forms of agreement thereunder.
+
+10.12+
+
+CompoSecure, Inc. 2021 Employee Stock Purchase Plan.
+
+10.13
+
+Form of Indemnification Agreement.
+
+10.14+
+
+Employment Agreement, dated as of December 27, 2021, by and between CompoSecure, L.L.C. and Jonathan Wilk.
+
+10.15+
+
+Employment Agreement, dated as of December 27, 2021, by and between CompoSecure, L.L.C. and Timothy Fitzsimmons.
+
+10.16+
+
+Employment Agreement, dated as of December 27, 2021, by and between CompoSecure, L.L.C. and Adam Lowe.
+
+10.17+
+
+Employment Agreement, dated as of December 27, 2021, by and between CompoSecure, L.L.C. and Gregoire Maes.
+
+10.18+
+
+Employment Agreement, dated as of December 13, 2021, by and between CompoSecure, L.L.C. and Amanda Gourbault.
+
+10.19
+
+Industrial Building Lease, dated May 2, 2016, by and between FR JH 10, LLC and CompoSecure, L.L.C.
+
+10.20
+
+Lease of Improved Property, dated December 1, 2011, by and between Baker-Properties Limited Partnership and CompoSecure, L.L.C.
+
+10.21
+
+First Amendment to Lease of Improved Property, dated December 15, 2020, by and between Baker-Properties Limited Partnership and CompoSecure, L.L.C.
+
+10.22††
+
+Master Services Agreement, dated August 1, 2004, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.23
+
+Amendment Number 1 to Master Services Agreement, dated July 31, 2016, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.24
+
+Amendment Number 2 to Master Services Agreement, dated August 2, 2018, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.25
+
+Amendment Number 3 to Master Services Agreement, dated January 1, 2019, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.26††
+
+Amendment Number 4 to Master Services Agreement, dated July 1, 2019, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.27
+
+Amendment Number 5 to Master Services Agreement, dated March 19, 2020, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.28††
+
+Amendment Number 6 to Master Services Agreement, dated September 1, 2020, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.29††
+
+Amendment Number 7 to Master Services Agreement, dated July 15, 2021, by and between American Express Travel Related Services Company, Inc. and CompoSecure, L.L.C.
+
+10.30††
+
+Master Services Agreement, dated January 4, 2008, by and between JPMorgan Chase Bank, National Association and CompoSecure, L.L.C.
+
+16
+
+Exhibit
+
+No.
+
+Description
+
+10.31
+
+Amendment to Master Services Agreement, dated May 1, 2014, by and between JPMorgan Chase Bank, National Association and CompoSecure, L.L.C.
+
+10.32
+
+Amendment 2 to Master Services Agreement, dated June 6, 2019, by and between JPMorgan Chase Bank, National Association and CompoSecure, L.L.C.
+
+10.33††
+
+Amendment 3 to Master Services Agreement, dated October 7, 2019, by and between JPMorgan Chase Bank, National Association and CompoSecure, L.L.C.
+
+10.34
+
+Promissory Note, dated August 28, 2020, issued by Roman DBDR Tech Acquisition Corp.to Roman DBDR Tech Sponsor LLC (incorporated by reference to Exhibit 10.2 to the Registration Statement on Form S-1/A (File No. 333-249330), filed with the SEC on October 5, 2021).
+
+21.1
+
+List of Subsidiaries.
+
+99.1
+
+Unaudited Pro Forma Condensed Combined Financial Information of CompoSecure, Inc. at September 30, 2021.
+
+99.2
+
+CompoSecure Holdings, Inc. Press Release, dated December 27, 2021.
+
+104
+
+Cover Page Interactive Data File (embedded within the inline XBRL document)
+
++
+
+Indicates management contract or compensatory plan or arrangement.
+
+†
+
+Schedules and exhibits to this agreement have been omitted pursuant to Item 601(b)(2) of Regulation S-K. A copy of any omitted schedule and/or exhibit will be furnished to the SEC upon request.
+
+††
+
+New CompoSecure has redacted provisions or terms of this Exhibit pursuant to Regulation S-K Item 601(b)(10)(iv). New CompoSecure agrees
+to furnish an unredacted copy of the Exhibit to the SEC upon its request.
+
+17
+
+SIGNATURE
+
+Pursuant to the requirements of the Securities Exchange Act of 1934,
+the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized.
+
+COMPOSECURE, INC.
+
+By:
+
+/s/ Timothy Fitzsimmons
+
+Name: Timothy Fitzsimmons
+
+Title: Chief Financial Officer
+
+Dated: December 29, 2021

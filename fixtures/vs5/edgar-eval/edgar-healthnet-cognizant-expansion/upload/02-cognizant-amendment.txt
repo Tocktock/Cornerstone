@@ -1,0 +1,735 @@
+2
+exhibit101amendment3-hnfsr.htm
+AMENDMENT 3 TO MASTER SERVICE AGREEMENT
+
+Exhibit 10.1 Amendment3-HNFSReqsFinal_Cognizant MSA
+
+Exhibit 10.1
+
+Final Execution Version
+
+AMENDMENT NO. 3 TO
+
+MASTER SERVICES AGREEMENT
+
+This Amendment No. 3 to Master Services Agreement (“Amendment”) is made as of this August 9, 2012, (“Amendment 3 Effective Date”) by and between Cognizant Technology Solutions U.S. Corporation (“Supplier”) and Health Net, Inc., a Delaware corporation (“Health Net”) with reference to the following facts:
+
+A. Supplier and Health Net entered into a Master Services Agreement dated September 30, 2008, as previously amended (collectively the “Agreement”) which, among other things, requires Supplier to perform Services for Health Net;
+
+B. Supplier and Health Net wish to amend the Agreement to incorporate Exhibit A-1 (HNFS Requirements) in support of certain Health Net Federal Services, LLC applications; and
+
+D. Supplier and Health Net desire to modify certain terms and conditions contained in the Agreement as provided in this Amendment.
+
+NOW, THEREFORE, in consideration of the mutual promises, covenants, agreements and other undertakings set forth herein and for other good and valuable consideration, the receipt and sufficiency of which is hereby acknowledged, the parties hereby agree as follows:
+
+1. Definitions: Defined terms used in this Amendment shall have the same meaning as in the Agreement unless otherwise specifically defined herein.
+
+2. The Exhibit A-1 (HNFS Requirements) attached hereto is incorporated into to Schedule A of the Master Services Agreement and each party hereby agrees to comply with and adhere to all of its respective obligations and requirements in the HNFS Requirements document, as may be amended from time to time.
+
+3. With respect to the HNFS Requirements only and notwithstanding Section 25.11 (Order of Precedence) of the Agreement, in the event of a conflict between the HNFS Requirements and any other term or condition of the Agreement, the HNFS Requirements shall prevail.
+
+4. Except as amended and modified by this Amendment, all of the terms and conditions of the Agreement shall remain in full force and effect. This Amendment may not be modified except in writing signed by both parties hereto. This Amendment, the Agreement and exhibits and schedules thereto constitute the entire agreement of the parties with respect to the subject matter contained therein and supersedes any and all prior or contemporaneous agreements between the parties, whether oral or written, concerning the subject matter contained herein.
+
+IN WITNESS WHEREOF, the parties hereto by their duly authorized representatives executed this Amendment to be effective as of the Amendment Effective Date.
+
+COGNIZANT TECHNOLOGY SOLUTIONS HEALTH NET, INC.
+
+U.S. CORPORATION
+
+By /s/ David Brown By /s/ Robert Bushey
+
+Name David Brown Name Robert Bushey
+
+VP, Strategic Sourcing &
+
+Title Senior Director Title Procurement
+
+Exhibit A-1 A-1 - 1 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+EXHIBIT A-1
+
+HNFS REQUIREMENTS
+
+Exhibit A-1 A-1 - 2 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+EXHIBIT A-1
+
+HNFS REQUIREMENTS
+
+1.
+
+INTRODUCTION
+
+1.1
+
+Background.
+
+(a)
+
+Health Net Federal Services, LLC (HNFS) is a business unit within Health Net.
+
+(i)
+
+HNFS’ primary line of business is the TRICARE Program. The TRICARE program is a Department of Defense health care entitlement program, which is administered by private contractors who are selected for participation through a competitive procurement process.
+
+(ii)
+
+In addition to the TRICARE line of business, HNFS has other revenue generating sources, including:
+
+(A)
+
+Veterans Administration (VA) Preferred Pricing Contract-Health Net is a subcontractor to our Service Disabled Veteran-Owned Small Business Partners, Enterprise Technology Solutions and Primeaux Health Strategies. Their contracts cover five regions. The five regions are made up of all 21 Veterans Integrated Service Networks (“VISNs”). VA’s Preferred Pricing Program services allow participating VA Medical Centers to share in savings available through discount agreements with Health Net’s nationwide provider network for a variety of health care services, including hospitalization, outpatient care, ambulatory surgery, behavioral health, ancillary and other services. (Note that this contract was terminated effective Friday, August 3, 2012, but the parties are working toward restoration of the contract.)
+
+(B)
+
+DRG Audit and Recovery Services - HNFS also provides the VA with a review of inpatient medical claims that the VA may have overpaid. HNFS currently holds a single contract to perform this service for all Veterans Administration Medical Centers (VAMCs) nationwide.
+
+(C)
+
+DoD Victims Advocate Program – HNFS currently provides Domestic Abuse Victim Advocates (DAVAs) at military installations around the US through a contract with the Department of Defense. The Advocates provide a range of support and advocacy services for victims of domestic violence, including initial response and safety planning and ongoing assistance. The Advocates are HNFS Associates and
+
+Exhibit A-1 A-1 - 3 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+are managed by the DAVA Management Team located in Johnstown, PA.
+
+(D)
+
+HNFS also bids on additional government health care programs that may include comprehensive medical and behavioral health benefits and/or unbundled administrative services applicable to such programs, including, but not limited to provider network, utilization management, claims administration and direct services.
+
+(E)
+
+VA Rural Mental Health Program-The VA Rural Mental Health Program is a pilot program authorized by Congress in Sec. 105 of P.L. 110-387 to provide mental health services to OIF/OEF Veterans who do not live in close proximity to VA Hospital or Community Based Outpatient Clinics. Health Net is the current contractor for VISNs 19 and 20 and the former contractor for the VISN 6’s Rural Mental Health initiative, which was largely based on the pilot.
+
+(F)
+
+California Department of Corrections and Rehabilitation contract whereby HNFS provides administrative support services, including preferred provider organization network services to the California State Prison system.
+
+1.2
+
+General Obligations.
+
+(a)
+
+This Exhibit A-1 (HNFS Requirements) defines security requirements and related compliance requirements applicable to HNFS. Security requirements applicable to Health Net under the Agreement that are not in conflict with this Exhibit, shall also apply to HNFS.
+
+(b)
+
+As of the Effective Date, Supplier shall comply with all HNFS security-related requirements, policies and standards that apply to the processes, systems, networks, personnel, and facilities that Supplier supports, each as explicitly set forth in this Exhibit A-1, and Supplier shall also comply with all other Health Net security policies and standards as set forth in the Agreement.
+
+(c)
+
+For the avoidance of doubt, and except in the event of a Change Notice, the Production Support Charge shall be Supplier's sole compensation for Supplier's efforts in complying with and adhering to the obligations and requirements in this Exhibit A-1. Notwithstanding the foregoing, in accordance with Section 27.6(c) of the terms and conditions of the Agreement, a Regulatory Change may result in a Change pursuant to the Change Control Process.
+
+2.
+
+SERVICE REQUIREMENTS
+
+2.1
+
+General.
+
+Exhibit A-1 A-1 - 4 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(d)
+
+Supplier must comply with all security requirements applicable to HNFS, as explicitly set forth in this Exhibit A-1.
+
+(e)
+
+Supplier must also comply with the following documents and guidelines in their support and operation of HNFS systems:
+
+(i)
+
+“OMB M-06-16, Protection of Sensitive Agency Information” June 23, 2006: http://www.whitehouse.gov/omb/memoranda/fy2006/m06-16.pdf
+
+(ii)
+
+DoD Directive 5400.11, “DoD Privacy Program,” September 1, 2011: http://www.dtic.mil/whs/directives/corres/pdf/540011p.pdf
+
+(iii)
+
+DoD Publication 5200.2-R, “DoD Personnel Security Program,” January 1987: http://www.dtic.mil/whs/directives/corres/pdf/520002r.pdf
+
+(iv)
+
+FIPS-140 Validated Cryptography: http://csrc.nist.gov/groups/STM/cmvp/validation.html
+
+(f)
+
+Configuration and operation of systems supported by Supplier will be conducted in compliance with the Defense Information Systems Agency (DISA) Security Technical Implementation Guides (STIGs) and STIG checklists. Compliance with these guides is mandatory for all systems and applications that process, store, access, or transmit Department of Defense data, and associated critical security and support systems as defined by INFOSEC.
+
+(i)
+
+DISA Security Technical Implementation Guides (STIGs) and checklists: http://iase.disa.mil/stigs/a-z.html
+
+(g)
+
+Supplier must also comply with HIPAA Privacy and Security rules and corresponding DoD issuances, as described in the TRICARE Operations Manual (TOM) Chapter 19 Section 3 to assure that Military Health System (MHS) data is protected. The Military Health System is the enterprise within the United States Department of Defense responsible for providing health care to active duty and retired military personnel and their dependants.
+
+(h)
+
+Supplier must also comply with Health Net Incident Response requirements, policies and processes as required by DoD 5400.11-R C4.5, DoD 6025.18-R and DoD 8580.02-R, HIPAA Breach rules
+
+(i)
+
+Supplier must also comply with the Health Information Technology for Economic and Clinical Health (HITECH) Act, which is subject to regulatory enforcement by the HHS Office for Civil Rights (OCR).
+
+(j)
+
+The provisions of the Military Family Life Consultant (“MFLC”) contract held by HNFS’ Affiliate, MHN Government Services, Inc. and any follow on contract under the MFLC program. To the extent any requirements or obligations change with respect to a follow-on contract, such changes would be subject to the Change Notice procedures set forth in the Agreement.
+
+Exhibit A-1 A-1 - 5 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+The remainder of this Exhibit A-1 summarizes and consolidates certain of the critical requirements referenced in the documents provided above, and provides additional requirements that Supplier must meet in support of the HNFS security programs.
+
+(k)
+
+Background Investigations
+
+(i)
+
+DoD Sensitive Information (DoD SI) includes Protected Health Information (PHI) and other Personally Identifiable Information (PII) associated with DoD personnel, as well as any other information that could adversely affect the DoD if it were disclosed (e.g. security vulnerabilities, troop data, etc.).
+
+PII is defined as any information about an individual that identifies, links, relates, or is unique to, or describes him or her. This also includes information which can be used to distinguish or trace an individual's identity and any other personal information which is linked or linkable to a specified individual.
+
+PHI is defined in Section A of Schedule K to the Terms and Conditions.
+
+(ii)
+
+Supplier Personnel with permissions to access DoD SI on information systems must be US citizens and must be able to successfully pass a DoD background investigation (National Agency Check with Law Enforcement and Credit (NACLC)) providing an ADP/IT-II Position of Trust. This includes all Supplier Personnel with indirect or potential access to DoD SI as a result of their administrative privileges. The majority of HNFS production systems are involved in the storage or processing of DoD SI, and therefore these requirements apply to most personnel with access to those systems.
+
+(iii)
+
+The Supplier will coordinate efforts to obtain ADP/IT-II Positions of Trust for its employees and subcontractors with Health Net Industrial Security. The Supplier is responsible for performing pre-employment background checks prior to submission for a Position of Trust to include:
+
+(A)
+
+Verification of U.S Citizenship
+
+(B)
+
+Criminal Background Check
+
+(C)
+
+Credit Check
+
+(D)
+
+Drug Screen
+
+The background checks are valid for 90 days only. If a resource is not complete with the NACLC process within the 90 days of the completion of the background check, then the background check will need to be repeated. Supplier must
+
+Exhibit A-1 A-1 - 6 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+receive notification from Health Net’s Industrial Security Department before access to systems will be provided.
+
+(iv)
+
+System access that requires ADP/IT-II Positions of Trust includes, but is not limited to, the following applications:
+
+AHLTA
+
+ART
+
+B2B- Other (DISA)
+
+CCDD
+
+CCS
+
+CHCS
+
+Civilian PCM Panel Reassignment
+
+CLR
+
+CPPR
+
+CRM
+
+DCS
+
+DEERS Security App
+
+DEERS Web
+
+DFAS (DISA)
+
+Direct Care PCM Panel
+
+DMDC/DWR
+
+DOES
+
+DS Logon
+
+Duplicate Claims
+
+Fastrieve (SourceCorp)
+
+Fee interface
+
+FS PEGA (UAT, Staging and Production)
+
+GIQD
+
+Information Warehouse
+
+Mercury Products
+
+MMS (UAT, Staging and Production)
+
+Notifications (PNT)
+
+OHI/SIT
+
+Patient ID Service
+
+PCDIS/TePRV (DHSS)
+
+PCM Load
+
+PCM Research
+
+PEPR
+
+PERR (Other Applications) DHSS
+
+PGBA CCM
+
+PGBA Claims
+
+PGBA DocFinity
+
+RRS
+
+TED
+
+TePRV Inquiry
+
+TIP
+
+TITAN
+
+TRICARE Online (TOL)
+
+VISTA
+
+Exhibit A-1 A-1 - 7 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+WFA
+
+(l)
+
+Security & Privacy Training.
+
+(i)
+
+Initially (within 30 days of assignment) and annually, all Supplier Personnel are required to take the Security Awareness training with the appropriate content provided by Health Net in advance. For Supplier Personnel who hold a Position of Trust (National Agency Check), they are required to take and pass the Security Baseline training course within five days of hire or prior to receiving any government system access. All Supplier Personnel who will have access to HNFS-related systems or data shall be trained in an expeditious manner during the Transition Period, or for Supplier Personnel who start work on the Health Net account after Transition, within five days of starting work (provided that in either case, such training shall occur prior to the applicable Supplier Personnel being granted access to any DoD SI or associated applications). Subsequent refresher training shall be conducted annually and must be completed within 30 days of assignment of the refresher requirement. This refresher training applies to all Supplier personnel regardless of holding an ADP/IT-II position of trust or not. Retraining may also be required as necessary if any material changes are made to HIPAA Rules affecting DoD or Health Net policies and procedures, and must occur within 30 days of assignment of the training.
+
+(ii)
+
+In order to assist with Aerojet’s International Traffic in Arms Regulations (ITAR) and required Department of State (DoS) license and DoS approvals, Health Net has entered into an agreement with Aerojet, whereby employees and contractors who are Foreign Nationals (a Foreign National is an individual who is a citizen of any country other than the United States) and require unescorted access be granted at the Aerojet-Sacramento Facility, will comply with the requirements of Aerojet’s Foreign National Visitor Access Control Plan. Health Net associates and contractors who are Foreign Nationals shall be required to attend a briefing by Aerojet Security regarding identified areas where they are allowed and will wear an identification badge to delineate them as Foreign Nationals on a secured site. Aerojet Security will provide all training and badging services.
+
+(iii)
+
+In addition to formal training, HNFS will email security newsletters and bulletins to all personnel (including Supplier Personnel) using or supporting HNFS systems throughout the year as a part of HNFS' security awareness
+
+Exhibit A-1 A-1 - 8 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+program. HNFS may also require certain security and privacy-related postings at various locations throughout the facilities supporting HNFS to serve as reminders of HNFS security polices and standards. Supplier Personnel shall at all times comply with all policies and standards referenced in such newsletters, bulletins or postings.
+
+(iv)
+
+In addition to the training required in Schedule A and Section 2.8(c) of the General Terms and Conditions, Supplier Personnel supporting the HNFS applications are required to take the following Health Net provided training:
+
+G&SS HIPPAA Privacy Training
+
+GSS Security Awareness
+
+GSS Records Management Training
+
+Security Baseline Training
+
+ISO 101-2009
+
+HNFS URAC CORE V3.0 (TRICARE ONLY)
+
+URAC Applied Training (TRICARE ONLY)
+
+HNFS Reporting Quality of Care and Serious
+
+Reportable Events
+
+(m)
+
+Security Audits and Assessments
+
+(i)
+
+The HNFS NIST Authorization boundary includes all information systems that access, process, display, store or transmit DoD or Veterans Affairs (VA) SI, PII or PHI. It can also include any systems interconnected with these systems, including systems with which information is exchanged via messaging. It typically extends to all intended users of these systems, both directly and indirectly connected, who receive output from the system.
+
+(ii)
+
+The supplier will support security audit and assessments as required to comply with the NIST SP 800-53 controls listed in the Checklist and Certification for Minimum Level of Enhanced Safeguarding for Unclassified DoD Information as referenced by TMA Policy no. 11-63 below:
+
+http://www.tricare.mil/tma/ams/downloads/policyalerts/PA11-63att2.doc
+
+The associated details for the NIST SP 800-53 control requirements listed in that checklist are provided in the following document: http://csrc.nist.gov/publications/
+
+Exhibit A-1 A-1 - 9 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+nistpubs/800-53-Rev3/sp800-53-Rev3/sp800-53-rev3-final_updated-errata_05-01-2010.pdf.
+
+The Supplier will also support security audits and assessments for HNFS systems supporting any HNFS contract. The NIST authorization boundary for VA systems is categorized as NIST “System High.” Supplier will support those systems and associated audits to meet the system high requirements as specified by NIST SP 800-53.
+
+(iii)
+
+Supplier shall provide documentation and support for NIST compliance assessments and any other audits or third-party assessments of applications and information systems that Supplier administers. Typically, this support will consist of requests for information relating to applicable security controls, user access, and system architecture or configuration for the systems and applications supported by the Supplier. However, in depth assessments may be conducted from 1-3 times per year that require extensive access to applications/systems and audit support from Supplier personnel. Supplier will provide adequate personnel to support such efforts. Such assessments may include, but are not limited to: (a) attending and supporting audit/assessment meetings; (b) supporting the INFOSEC team during system security testing and evaluation, including provisioning of access to systems and participating in the assessment process (c) participating in any other audit (i.e completing assessment checklists) as required; and (d) providing remediation and/or approved mitigating controls to address any deficiencies identified.
+
+(n)
+
+Physical Security
+
+(i)
+
+In the event that Supplier provides service from a non Health Net facility Supplier shall support physical security assessments performed by both Industrial Security and the MHS Information Assurance (external government auditors) assessment team using the criteria from the Physical Security Assessment Matrix in Schedule M (Policies and Procedures). Supplier shall correct any deficiencies of its physical security posture indentified.
+
+(ii)
+
+Supplier facilities and data center(s) supporting HNFS functions will submit to a pre-audit physical security inspection performed by a member of the Industrial Security team and comply with all directives to ensure mitigation of findings.
+
+(iii)
+
+In addition, a binder containing site security policies standards and procedures will be provided by Industrial
+
+Exhibit A-1 A-1 - 10 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+Security and maintained at each facility supporting HNFS functions.
+
+(o)
+
+Security Administration.
+
+(i)
+
+Supplier shall provide security administration support for all applications and systems supported by Supplier. Supplier shall provide an assigned point of contact (POC) for Information Security support of each application/system.
+
+(ii)
+
+Each assigned POC will coordinate Supplier support for the security requirements detailed in this document with INFOSEC. They will act as the primary POCs for the notification and response for security vulnerabilities, will coordinate collection of information for each system/application, and will act as the primary POC for any audit/assessment-related activities for each supported system/application.
+
+(p)
+
+Applications & Systems Inventory
+
+(i)
+
+Supplier will provide an updated software inventory list for all supported systems and applications to INFOSEC on a monthly basis. The list provided will include the software name, manufacturer, version, patch level, installed modules or components, and a list of all host names where that software is installed.
+
+(q)
+
+Data & Systems Network Security and Separation Requirements
+
+(i)
+
+Non-DoD data may reside on systems within the NIST authorization boundary and access may be provided to that data as necessary as long as appropriate access control mechanisms are in place.
+
+(ii)
+
+Physical hardware separation between NIST authorization boundary systems and non-NIST systems is required. Virtual server separation such as that provided by VMware or Citrix is not sufficient.
+
+(iii)
+
+Systems that support VA contracts must be physically separated from all other systems. All VA sensitive information, PHI and PII must be encrypted (refer to Section 2.1(b)(iv) of this document for encryption standards) in transit and at rest.
+
+(iv)
+
+Software supported by Supplier that is required to be included within the NIST Authorization boundary must be configured and installed in accordance with the network controls that define that boundary. Such software will be installed on the VLANs and subnets identified for NIST boundary systems and will comply with Health Net
+
+Exhibit A-1 A-1 - 11 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+network communications guidance for permitted ports and protocols.
+
+(r)
+
+Change/Configuration Management.
+
+(i)
+
+Any proposed changes to an information system within the NIST authorization boundary that could affect the security configuration of that system must be reviewed and approved by the INFOSEC team prior to implementation. Any such changes could result in additional testing and evaluation by the INFOSEC team.
+
+(s)
+
+Disaster Recovery and Continuity of Operations.
+
+(i)
+
+Without limiting Supplier’s obligations under Section 2.7 of Schedule A, Supplier shall provide input to HNFS’ Continuity of Operations Plan (COOP), revised on an annual basis, which provides for the continued operation of the systems and data that Supplier supports under Health Net’s TRICARE contract. It will include all actions that will be taken to continue operations should a disaster be declared and in the event of hardware, software and/or communications failures. It shall also include plans for relocation/recovery of operations, timeline for recovery, and relocation site information. It shall include connection to the DoD Business to Business (B2B) Gateway to and from the relocation/recovery site in compliance with all security requirements and associated B2B Gateway connectivity processes. Restoration of critical functions such as claims and enrollment is required within five days of the disaster. HNFS reserves the right to re-prioritize the functions and system interactions proposed in the COOP during the review and approval process for the COOP.
+
+(ii)
+
+Annual disaster recovery testing of all aspects of the COOP for major HNFS functions is required in coordination with HNFS on a timeline agreed to with HNFS in coordination with the DoD and other contractors responsible for the transmission of DoD and/or HNFS data. In the event that any portion of the annual disaster recovery test fails, the Supplier will conduct problem resolutions and retesting of all Services test components in a timely manner.
+
+(t)
+
+Security Documentation. Supplier will assist INFOSEC in developing and maintaining security and compliance related documentation by providing any information associated with the applications and systems that the Supplier supports as required. Examples include but are not limited to:
+
+(i)
+
+Technical specifications
+
+(ii)
+
+Security specifications
+
+(iii)
+
+System/application architecture diagrams
+
+Exhibit A-1 A-1 - 12 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(iv)
+
+Processes, procedures, and workflows
+
+(v)
+
+Roles and responsibilities
+
+(vi)
+
+Other information to support security review of applications and systems
+
+(u)
+
+Information Assurance Vulnerability Management (IAVM).
+
+(i)
+
+Supplier will comply with HNFS IAVM processes as detailed below. The IAVM process is a DoD-mandated patch management process that applies to all HNFS systems. The compliance window for IAVM Alerts (Information Assurance Vulnerability Alerts or IAVA’s) is determined by the DoD and is specific to each individual alert - it is typically 3 weeks, although they have varied from as few as 10 days to as long as a month. IAVA notifications are typically released a few weeks following vendor notifications for security patches, so it is possible that the appropriate patches may have been applied before the IAVA for those patches were received.
+
+(ii)
+
+Supplier will provide:
+
+(A)
+
+Acknowledgement of receipt within two days of delivery of IAVA’s, IAV Bulletins, or IAV Technical Advisories from INFOSEC.
+
+(B)
+
+A list of applicable applications/systems that are supported by the Supplier and a detailed remediation plan for each within five days of delivery of the IAVA’s, IAV Bulletins, or IAV Technical Advisories.
+
+(C)
+
+Remediation of applicable IAVA-identified vulnerabilities within the compliance date specified within the IAVA document.
+
+(D)
+
+A detailed remediation report to INFOSEC upon the successful remediation of each vulnerability. The report must include a detailed description of the remediation steps taken and verification that the remediation was successful (e.g. screenshots, log files, monitoring reports, test results, etc.).
+
+(iii)
+
+If remediation of an IAVA vulnerability is not reasonably achievable within the timeframe specified by the IAVA (as approved by INFOSEC), Supplier will
+
+(A)
+
+Develop a detailed Plan of Action & Milestones (POA&M), (form to be provided by INFOSEC) within five days of delivery of the IAVA from INFOSEC.
+
+(B)
+
+Document and implement mitigating control measures to reduce the associated security risk to a low risk (as determined by INFOSEC).
+
+Exhibit A-1 A-1 - 13 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(C)
+
+Initiate projects or appropriate vendor software modifications as necessary to address the risk.
+
+(v)
+
+Security Vulnerability Remediation.
+
+Supplier will provide:
+
+(i)
+
+Acknowledgement of receipt within two days of delivery of vulnerability information from INFOSEC.
+
+(ii)
+
+A detailed remediation plan for all applicable vulnerabilities to INFOSEC within five days of the delivery of the vulnerability information from INFOSEC.
+
+(iii)
+
+Remediation of all vulnerabilities (other than IAVA’s) within the timeframes described below:
+
+Vulnerability Type
+
+Required Remediation Timeframe
+
+(Upon Supplier receipt of vulnerability data)
+
+Critical:
+
+DoD Category I findings and any High Risk findings as specified by INFOSEC
+
+25 Days*
+
+Non-Critical:
+
+All other findings
+
+85 Days*
+
+*For remediation efforts that would require a change by the vendor of Commercial Off the Shelf (products that are commercially available, or COTS) or Government Off the Shelf (products that are supplied and owned by the government, or GOTS product or if INFOSEC agrees that the finding should not be remediated due to other circumstances, Supplier will:
+
+•
+
+Develop a detailed POA&M within five days of delivery of the vulnerability information or approval of the extended timeline by HNFS IA.
+
+•
+
+Document and implement mitigating control measures to reduce the associated security risk to a low risk (as determined by INFOSEC).
+
+•
+
+Initiate projects or appropriate vendor software modifications as necessary to address the risk.
+
+(iv)
+
+A detailed remediation report to INFOSEC upon the successful remediation of each vulnerability. The report must include a detailed description of the remediation steps taken and verification that the remediation was successful (e.g. screenshots, log files, monitoring reports, test results, etc.).
+
+All efforts associated with security remediation efforts will be considered Adaptive Maintenance as defined in the Agreement.
+
+Exhibit A-1 A-1 - 14 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(w)
+
+Privacy & Security Incident Response
+
+(i)
+
+The Health Net Incident Response team must be notified immediately regarding any potential or confirmed loss of Health Net Data, loss of assets, unauthorized access, exploit of a security vulnerability, or bypass of security controls identified by Supplier personnel.
+
+(ii)
+
+The Supplier will immediately complete an Incident Report available from the following Lotus Notes Database entitled “Lotus Notes Privacy and Security Incident Report Database” as well as Health Net Connectˆ Business Unitsˆ HNFSˆ Quick Linksˆ Incident Reporting. If the database is not immediately available, Supplier will immediately report the incident to HNGSS_Incidents@healthnet.com or by phone at 866-321-5876. Supplier will maintain and use the most recent reporting contact information as provided by Health Net.
+
+(iii)
+
+Supplier will assist the Health Net Incident Response coordinators in addressing any security or privacy incidents in an expedient manner, providing investigative support (e.g. through event correlation, log analysis, and associated reporting) and remediation of any associated vulnerabilities within the timelines specified elsewhere within this document.
+
+(iv)
+
+Detection and reporting of security events is a responsibility of the Supplier. When an event is reported as required, INFOSEC will track actions taken and build an accurate timeline of events while also providing analysis and direction to incident response actions. Accurate documentation is required from Supplier to provide accountability and tracking of incident response activities.
+
+2.2
+
+Additional Security Policies & Standards
+
+In addition, there are a number of additional HNFS-specific security policies, procedures, processes and standards with which Supplier and its subcontractors must comply. They are available on the Health Net Intranet through HNConnect at the following links, and have been extracted and provided to Supplier separately from this SOW:
+
+(a)
+
+Health Net Corporate Security Policy
+
+http://hnconnect.healthnet.com/business_units/security/policies_and_procedures/list.jsp
+
+(b)
+
+HNFS Information Security Policies, Procedures, & Processes
+
+http://kb.hnfs.healthnet.com/hnfskb_itsec.htm
+
+Exhibit A-1 A-1 - 15 Health Net / Cognizant Confidential
+
+Final Execution Version
+
+(c)
+
+HNFS Industrial Security Policies, Procedures, & Processes
+
+http://kb.hnfs.healthnet.com/hnfskb_ssis.htm
+
+(d)
+
+HNFS Privacy Compliance Policies, Procedures, & Processes
+
+http://kb.hnfs.healthnet.com/hnfskb_ssprivacy.htm
+
+(e)
+
+HNFS Records Schedule
+
+http://kb.hnfs.healthnet.com/hnfskb_00003053.htm
+
+3.
+
+SERVICE MANAGEMENT
+
+3.1
+
+Service availability:
+
+Supplier will provide security administration support 24 x 7 x 365.
+
+3.2
+
+Escalation:
+
+Supplier will notify INFOSEC and HNFS Industrial Security immediately if at any time current efforts will not meet the required timeframes. Escalation of issues encountered in the performance of this Exhibit A-1or of any non-compliance with this Exhibit A-1 will be addressed according to the issues resolution and escalation procedures defined elsewhere in the Agreement.
+
+3.3
+
+Points of Contact:
+
+As of August 9, 2012, the following are points of contact for HNFS Security:
+
+Billy Martin
+
+Director of Information Security
+
+billy.martin@healthnet.com
+
+916-935-8151
+
+Matt McCracken
+
+Director of Industrial Security
+
+matthew.t.mccracken@healthnet.com
+
+916-985-1689
+
+Exhibit A-1 A-1 - 16 Health Net / Cognizant Confidential

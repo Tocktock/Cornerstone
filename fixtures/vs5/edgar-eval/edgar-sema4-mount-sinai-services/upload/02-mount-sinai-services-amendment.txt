@@ -1,0 +1,306 @@
+24
+exhibit1023-super8xk.htm
+EX-10.23
+
+Document
+
+Exhibit 10.23
+
+MASTER SERVICES AGREEMENT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+This master services and collaboration agreement (this “Agreement”), effective as of the date of the last signature below (the “Effective Date”), is between Mount Sinai Genomics, Inc., d/b/a Sema4, a Delaware corporation having a principal business address at 1425 Madison Avenue, New York, NY 10029 (“Sema4”), and Icahn School of Medicine at Mount Sinai, a not-for-profit New York education corporation with a principal business address of One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”). The parties hereto are also referenced herein individually as “Party” or jointly as the “Parties.”
+
+WHEREAS, Sema4 is a health information company that operates two CLIA-certified laboratories, and ISMMS wishes to retain Sema4 to perform certain Services (as set forth below); and
+
+WHEREAS, this Agreement is made for the benefit of both Parties and in anticipation of a robust collaborative relationship between ISMMS and Sema4.
+
+NOW THEREFORE, in consideration of the mutual promises and covenants contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, Sema4 and ISMMS hereby agree as follows:
+
+AGREEMENT
+
+1. Services.
+
+a. Upon mutual agreement of the Parties, the Parties shall execute statements of work (each a “SOW”) setting forth the specific obligations of each Party and the specific research services to be performed by Sema4 under each SOW (the “Services”). Each SOW shall be deemed a supplement to this Agreement, and, in the event of a conflict between this Agreement and SOW, unless otherwise indicated in the applicable SOW that is executed by both Parties, the terms of this Agreement shall control. Each SOW shall set forth all matters deemed appropriate by ISMMS and Sema4 and, in any event, set forth at minimum:
+
+i. a description of the Services to be covered by the SOW;
+
+ii. the timeline for Sema4’s performance of the Services;
+
+iii. the fees and expenses associated with Sema4’s performance of the Services, and the terms of payment thereof;
+
+iv. the format of deliverables and/or results associated with the Services that Sema4 will provide to ISMMS;
+
+v. Sema4’s obligations and standard of care with regard to performing the Services and the handling and storing of samples provided by ISMMS in connection with the Services, if any;
+
+1
+
+vi. ISMMS’s right to require retesting and correction of errors by Sema4, if applicable;
+
+vii. Sema4’s duty to maintain records and to account to ISMMS; and
+
+viii. Any other relevant and/or necessary terms, as agreed by the Parties.
+
+b. Upon the execution of a SOW, Sema4 shall use its best efforts to provide the Services in accordance with the terms of this Agreement and the applicable SOW, to keep ISMMS reasonably advised of the progress of the Services, and to maintain complete and accurate laboratory records and store all documents, data, and samples used or produced in connection with the Services in a reasonably safe and secure manner and in accordance with its established practices and all applicable laws and regulations.
+
+c. In connection with the Services, ISMMS shall be responsible for the following, unless otherwise agreed in writing by the Parties: (i) ensuring that the collection and sharing of any samples to be used in the Services for research purposes was approved or exempted by the relevant Institutional Review Board and authorized by donors under informed consent in accordance with federal, state and local laws and regulations which address protection of human subjects in research, including 45 CFR part 46 and (ii) transferring to Sema4 the samples to be used in the Services.
+
+d. Fair Market Value; No Payment for Referrals. Sema4 and ISMMS acknowledge and agree that the compensation set forth in each SOW shall represent the fair market value for the Services and will not be determined in a manner that takes into account the volume or value of any business otherwise generated between Sema4 and ISMMS and shall not obligate Sema4 to purchase, use, recommend, or arrange for the use of any product(s) of ISMMS or its affiliates.
+
+2. Confidentiality.
+
+a. “Confidential Information” means information disclosed by either Party (as applicable, the “Disclosing Party”) that such Disclosing Party owns or controls and maintains as confidential and discloses to the other Party (as applicable, the “Receiving Party”) under this Agreement, including without limitation, any such information regarding finances, commercial strategies, products or services, research, and intellectual property that: (i) if disclosed in tangible form, is marked as “confidential” upon disclosure or (ii) if disclosed in intangible form, is summarized in a writing marked “confidential” and provided to Receiving Party within thirty (30) days of the intangible disclosure; provided, however, that failure to so mark or summarize Confidential Information shall not compromise or alter its confidential status if a reasonable person would recognize, based upon its content and/or the context of its disclosure, that such disclosure was intended as confidential. For clarity, Confidential Information includes the foregoing
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+information of a third party in possession of a Disclosing Party, that such Disclosing Party has a legal right to disclose to the Receiving Party under terms of confidentiality as set forth herein.
+
+b. Notwithstanding the foregoing, Confidential Information shall not include information that the Receiving Party demonstrates by written or electronic records: (i) was already in the Receiving Party’s possession prior to disclosure by the Disclosing Party; (ii) is or later becomes a matter of public knowledge through no act or omission of the Receiving Party; (iii) is disclosed to the Receiving Party by a third party who had an apparent bona fide legal right to so disclose and who does so without imposing a confidential obligation with respect thereto; or (iv) is developed independently by the Receiving Party without use of, reference to, or reliance on the Disclosing Party’s Confidential Information.
+
+c. Restrictions; Maintenance of Confidentiality. Each Receiving Party shall use each Disclosing Party’s Confidential Information solely for the purposes of performing its obligations under this Agreement. Each Receiving Party shall protect the confidentiality of such Confidential Information and guard it from disclosure to third parties with at least the same degree of care it uses to protect the confidentiality of its own Confidential Information, but in no event less than a reasonable degree of care, and shall only disclose such Confidential Information to its directors, trustees, officers, employees, faculty, researchers, consultants, and advisors who are obligated to maintain the confidential nature of such Confidential Information and who need to know such Confidential Information for the performance of A Party’s obligations under this Agreement. Where permitted, third parties (i.e., those who are not employees of such Party) to whom Receiving Party is permitted to disclose the Disclosing Party’s Confidential Information, who are not employees of Receiving Party (such as consultants and advisors of Receiving Party), shall only be permitted access to such Confidential Information if Receiving Party has entered into a legally binding confidentiality agreement with such third parties that is at least as protective of such Confidential Information as this Agreement. For clarity, Receiving Party shall be fully responsible to Disclosing Party for compliance by such third parties with such obligations. Notwithstanding the foregoing, the Receiving Party shall also be permitted to disclose Confidential Information to the extent required by applicable law, court order, or other governmental authority with jurisdiction provided that the Receiving Party promptly provides the Disclosing Party, to the extent legally permissible, with written notice of such requirement and cooperates, at the Disclosing Party’s written request and expense, with the Disclosing Party’s legal efforts to prevent or limit the scope of such required disclosure.
+
+d. Survival of Confidentiality. For a period of five (5) years from receipt, the Receiving Party shall treat Confidential Information received in connection with this Agreement.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+3. Intellectual Property.
+
+a. Except as specifically set forth herein or in a SOW, in no event will this Agreement or its performance be interpreted as granting either Party any express or implied right, title or license to the other Party’s Intellectual Property. As used herein, “Intellectual Property” means all technical information, inventions, developments, discoveries, software, know-how, methods, techniques, formulae, processes, and other proprietary property, whether or not patentable or copyrightable, and “Conceived” means: (i) with respect to any patentable Intellectual Property, “conceived” as such term is defined by U.S. patent law; (ii) with respect to any copyrightable Intellectual Property, “authored” as such term is defined by U.S. copyright law; and (iii) with respect to all other Intellectual Property, developed, created or discovered, as applicable. Unless specifically agreed upon by the Parties in a SOW or separate written agreement, any Intellectual Property that is owned, controlled by, or licensed to either Party to this Agreement prior to the effective date of a given SOW, or outside the scope of a given SOW, as demonstrated by a Party’s competent records (“Background Intellectual Property”), shall remain the sole property of the Party who owns or controls such Background Intellectual Property.
+
+b. Ownership of Intellectual Property. Unless as otherwise agreed by the Parties in the applicable SOW, inventorship of any Intellectual Property Conceived—and, with respect to any patentable Intellectual Property, reduced to practice—in the performance of a Party’s obligations under this Agreement, including improvements or modifications to Background Intellectual Property shall be determined in accordance with U.S. patent or copyright principles, as applicable, whether or not patentable or copyrightable, and ownership of any such Intellectual Property shall vest solely in ISMMS.
+
+c. Ownership of Results. Unless as otherwise agreed by the Parties in the applicable SOW, Mount Sinai will own and solely control all results, data, and information that result from Sema4’s performance of the Services (“Results”). Sema4 will not have any ownership or use rights in Results and will not use Results for any purpose other than performance of the Services.
+
+4. Use of Name. Unless otherwise agreed by the Parties in writing, Mount Sinai will not use Sema4’s name without Sema4’s prior written consent, except that, without such consent, Mount Sinai may acknowledge Sponsor in scientific publications as appropriate per scientific custom and in listings of research projects. Unless otherwise agreed by the Parties in writing, Sponsor shall not use Mount Sinai’s logo, name or the name of any Mount Sinai trustee, officer, faculty member, student, or employee, or any adaptation thereof, without Mount Sinai’s prior written consent. In cases where Mount Sinai has given such consent, Sponsor agrees to cooperate with Mount Sinai with respect to any conditions or limitations imposed upon such name usage.
+
+5. NEITHER PARTY MAKES ANY WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+PARTICULAR PURPOSE, AND HEREBY DISCLAIMS ALL SUCH WARRANTIES AS TO ANY MATTER WHATSOEVER INCLUDING, WITHOUT LIMITATION, WARRANTIES WITH RESPECT TO ITS OBLIGATIONS UNDER THIS AGREEMENT, THE SERVICES, AND ANY INTELLECTUAL PROPERTY RESULTING THEREFROM. NEITHER PARTY SHALL BE LIABLE TO THE OTHER PARTY OR ANY THIRD PARTY FOR ANY SPECIAL, CONSEQUENTIAL, EXEMPLARY OR INCIDENTAL DAMAGES (INCLUDING LOST OR ANTICIPATED REVENUES OR PROFITS RELATING TO THE SAME) ARISING FROM ANY CLAIM RELATING TO THIS AGREEMENT, WHETHER SUCH CLAIM IS BASED ON CONTRACT, TORT (INCLUDING GROSS NEGLIGENCE) OR OTHERWISE.
+
+6. Indemnification.
+
+a. ISMMS agrees to indemnify Sema4, its affiliates, and its and their respective officers, directors, trustees, employees, subcontractors and agents (collectively, the “Indemnified Parties”) against any and all claims, liabilities, and/or suits, including losses, damages, expenses, and reasonable attorneys’ fees for defending those claims, liabilities, and/or suits (collectively, “Claims”), in connection with: (i) ISMMS’s [***] or (ii) [***] of ISMMS; provided that ISMMS shall have no indemnification obligation hereunder to the extent any Claim results from a ISMMS Indemnified Party’s [***].
+
+b. Sema4 agrees to indemnify the ISMMS Indemnified Parties against any and all Claims caused by: (i) Sema4’s [***], or (ii) [***] of ISMMS; provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim results from a ISMMS Indemnified Party’s [***].
+
+c. Indemnification Procedure. Each Party agrees to provide the other Party with prompt notice of any demand, claim, cause of action or suit to which these indemnification provisions apply. The indemnifying Party shall have the exclusive right to control the defense of any such demand, claim or suit, including choice of counsel and any settlement thereof, provided that, as a condition of such control, the indemnifying Party shall first provide written confirmation that it will fully defend and indemnify the indemnitee in this and all related matters.
+
+d. Settlement; Cumulative Remedies.
+
+i. No settlement by an indemnifying Party on behalf of the other Party, or such Party’s faculty, students, employees, trustees, officers, affiliates, and agents, shall acknowledge or implicate any liability, fault, or wrongdoing on the part of such Party without such Party’s prior written consent. The indemnifying Party shall not settle or compromise any claim or action giving rise to liabilities in a manner that imposes any restrictions or obligations on the other Party, or such Party’s faculty, students, employees, trustees, officers, affiliates, and agents, or grants any rights to any Intellectual Property, including
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+5
+
+Background Intellectual Property, without the indemnified Party’s prior written consent.
+
+ii. If an indemnifying Party declines to assume the defense of any claim or action within thirty (30) days after receiving notice of the claim or action (which failure shall constitute a material breach by such indemnifying Party), then the indemnified Party may assume the defense of such claim or action for the account of and at the risk of the indemnifying Party, and any liabilities related to such claim or action and the defense thereof shall be conclusively deemed a liability of such indemnifying Party. The indemnification rights of the Indemnified Parties under this Article 6 are in addition to all other rights that any indemnified Party may have at law, in equity, or otherwise.
+
+7. Term and Termination.
+
+a. The term of this Agreement shall be three (3) years from the Effective Date (the “Initial Term”) and be automatically renewed for successive one-year terms upon the same terms and conditions as set forth herein (the Initial Term, together with all renewal terms shall be referred to herein as the “Term”), unless either Party gives the other Party at least thirty (30) days’ written notice of its intent not to renew the term hereof.
+
+b. Either Party may terminate this Agreement: (i) as set forth in an SOW with regard to that SOW, (ii) in the event of [***], which [***], or (iii) effective immediately if the other Party becomes insolvent or seeks protection under any bankruptcy, receivership, trust deed, assignment for the benefit of creditors, creditors arrangement, composition or comparable proceeding, or if any such proceeding is instituted against the other Party, and such proceeding is not dismissed within ninety (90) days.
+
+c. ISMMS may terminate effective immediately if Sema4 experiences a change of control event where the power to direct the management and policies of Sema4, directly or indirectly, whether through the ownership of voting securities, by contract, or otherwise, and among other circumstances, if Mount Sinai’s ownership interest in Sema4 decreases to less than 51% of the total outstanding shares of Sema4’s voting securities.
+
+d. Effect of Termination. Termination of this Agreement will not affect the rights and obligations of the Parties accrued prior to termination hereof. The provisions of Sections 2, 3, 5, 6, 8, 9, and 11-16 shall survive the termination or expiration of this Agreement.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+6
+
+8. Representations; HIPAA Compliance; Insurance.
+
+a. Each Party represents that:
+
+i. the execution, delivery and performance of this Agreement by it, and the grant by it of the rights granted by it herein, are within its corporate powers and have been duly authorized by all necessary corporate and other action;
+
+ii. no consent, approval, authorization of, license from, or declaration or filing with, any public or governmental authority, and no consent of any other person, firm or entity, is required in connection with the execution, delivery and performance of this Agreement and the grant by it of the rights granted by it herein, except for those already duly obtained;
+
+iii. this Agreement has been duly executed by it;
+
+iv. there is no pending or, to its knowledge, threatened litigation involving it that would affect this Agreement or its ability to perform its obligations hereunder or the grant by it of the rights granted by it herein; and
+
+v. the execution, delivery and performance by it of this Agreement, and the grant by it of the rights granted by it herein, do not and will not conflict with, or constitute a violation or breach of, or constitute a default under, or result in the creation or imposition of any lien upon any of its properties, by reason of the terms of: (A) any judgment, mortgage, encumbrance, lease, indenture, agreement or other instrument to which it is a party or which is binding upon it, (B) any requirement of law applicable to it, or (C) its Certificate or Articles of Incorporation, By-Laws or other organizational documents.
+
+b. For clarity, the representations set forth in Sections 8(a) above and 8(e) below shall survive the execution and delivery of this Agreement.
+
+c. Each Party covenants that it shall perform its obligations under this Agreement in compliance in all material respects with all relevant laws and regulations, including laws controlling the export of technical data, computer software, laboratory prototypes, and all other export controlled commodities.
+
+d. Unless specifically agreed by the Parties in the applicable SOW, neither Party will disclosed any protected health information as defined by the Health Insurance Portability and Accountability Act of 1996 (as amended) in the performance of this Agreement; all information disclosed, to the extent applicable, shall be de-identified prior to disclosure, consistent with HIPAA and any applicable state legal definitions of de-identification, and neither Party will make any attempt at re-identification. If either Party discovers that any protected health information
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+7
+
+has been inadvertently disclosed by the other Party, the receiving Party shall immediately notify the disclosing Party and shall hold such information strictly confidential, use it for no purpose whatsoever, and follow the disclosing Party’s directions, at the disclosing Party’s expense, with respect to the return or destruction (and certification of such destruction) of such information.
+
+e. Each Party agrees to maintain commercial general liability and professional liability insurance or self-insurance in amounts adequate to cover their respective acts and omissions. The Parties agree that such coverage for professional liability shall be, at a minimum, $[***] per claim and $[***] in the annual aggregate. The Parties agree that such coverage for commercial general liability shall be, at a minimum, $[***] per claim and $[***] in the annual aggregate. In the event that any coverage is “claims made,” the Party with such coverage agrees that if the coverage is discontinued or terminated at any time during or after the term of this Agreement, it shall purchase extended reporting insurance (“tail coverage”) to cover all claims made regarding its services under this Agreement. For clarity, this section shall survive termination of this Agreement.
+
+f. Upon the request of the other, each Party agrees to furnish each other with a current and valid Certificate of Insurance, or proof of adequate self-insurance, evidencing their insurance coverage described above. Any material modification or alteration in such coverage shall be promptly communicated to the other Party.
+
+9. Governing Law. This Agreement and any action related thereto will be governed and interpreted by and under the laws of the State of New York, without giving effect to any conflicts of laws principles. The Parties hereby irrevocably submit to the exclusive jurisdiction of and venue in any state or federal courts located within the New York County in the State of New York with respect to any and all disputes concerning or otherwise arising under this Agreement.
+
+10. Assignment. Neither this Agreement nor any right or obligation hereunder may be assigned or otherwise transferred (whether voluntarily, by operation of law or otherwise), without the prior express written consent of the other party, except that either Party may assign this Agreement (and the rights and duties hereunder) to another entity that is controlled by such Party or in connection with a reorganization, merger or sale of substantially all of such Party’s assets relating to the subject matter hereof.
+
+11. No permitted assignment will relieve the assigning Party of responsibility for the performance of any obligations that accrued prior to such assignment, and any permitted assignee shall assume all obligations of its assignor under this Agreement. Any prohibited assignment of this Agreement or any rights, and any prohibited delegation of any obligations hereunder, will be null and void.
+
+12. Severability. If any provision of this Agreement is, for any reason, held to be invalid or unenforceable, the other provisions of this Agreement will remain enforceable and the invalid or unenforceable provision will be deemed modified so that it is valid and enforceable to the maximum extent permitted by law.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+8
+
+13. Notices. Each Party must deliver all notices or other communications required or permitted under this Agreement in writing to the other party at the address listed below by courier, by certified or registered mail (postage prepaid and return receipt requested), or by a nationally-recognized express mail service. Each Party may change its address for receipt of notice by giving notice of such change to the other Party.
+
+14. Waiver. Any waiver or failure to enforce any provision of this Agreement on one occasion will not be deemed a waiver of any other provision or of such provision on any other occasion.
+
+15. Counterparts. This Agreement may be executed in one or more counterparts and by facsimile or pdf, each of which shall be deemed an original and all of which shall be taken together and deemed to be one instrument.
+
+16. Entire Agreement. This Agreement is the final, complete and exclusive agreement of the parties and supersedes and merges all prior or contemporaneous discussions between the Parties with respect to the subject matter hereof. No modification of or amendment to this Agreement, nor any waiver of any rights under this Agreement, will be effective unless in writing and signed by a duly authorized officer of each Party.
+
+17. Independent Contractors. The Parties agree that this Agreement creates an independent contractor relationship. Neither Party has the authority to bind the other Party without the express written authorization of the other Party. Neither this Agreement, nor any terms and conditions contained herein, may be construed as creating or constituting an employer-employee, franchisor-franchisee, partnership, joint venture or agency relationship between the Parties.
+
+SIGNATURE PAGE FOLLOWS
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+9
+
+IN WITNESS WHEREOF, the parties have caused this Agreement to be executed by their duly authorized representative as of the Effective Date.
+
+AGREED:
+
+AGREED:
+
+MOUNT SINAI GENOMICS, INC.
+
+ICAHN SCHOOL OF MEDICINE
+
+AT MOUNT SINAI
+
+By:
+
+/s/ Matthew Rosamond
+
+By:
+
+/s/ Sybil Lombillo
+
+Name:
+
+Matthew Rosamond
+
+Name Printed:
+
+Sybil Lombillo
+
+Title:
+
+CFO
+
+Title:
+
+Managing Director, IP, Contracts &
+
+Licensing
+
+Date:
+
+5/10/2018 | 9:09 AM EDT
+
+Date:
+
+5/9/2018 | 11:31 AM EDT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+10
+
+AMENDMENT NO. 1 TO MASTER SERVICES AGREEMENT
+
+This Amendment No.1 to Master Services Agreement (the “First Amendment”), effective as of July 31, 2019 (the “First Amendment Effective Date”), is entered into by and between Icahn School of Medicine at Mount Sinai, a New York not-for-profit education corporation, having a principal place of business at One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”) and Mount Sinai Genomics, Inc., d/b/a Sema4 and having a business address of 333 Ludlow Street, Stamford, CT 06902 (“Sema4”).
+
+WHEREAS, Mount Sinai and Sema4 entered into a Master Services Agreement with an effective date of May 10, 2018 (the “Agreement”);
+
+WHEREAS, the parties intend to amend the Agreement for the purpose of updating the termination and assignment provisions in accordance with the terms herein;
+
+NOW THEREFORE, in consideration of the mutual obligations in this Amendment and for other good consideration, the receipt and sufficiency of which are hereby acknowledged, ISMMS and Sema4 hereby agree as follows:
+
+1. All capitalized terms used but not defined herein shall have the respective meanings ascribed to such terms in the Agreement.
+
+2. Section 7.c. shall be deleted in its entirety and hereby replaced with the following:
+
+In the event this Agreement is assigned by Sema4 during the Term as permitted by Section 10 to a Non-Approved Person, Mount Sinai shall have the right to terminate this Agreement upon written notice to Sema4 effective as of the date of the assignment. “Non-Approved Person” means: (i) a [***], (ii) a [***], (iii) a [***] or (v) a Third Party that controls, is controlled by, or is under common control with any Third Party described in the clause (i), (ii), or (iii). “Third Party” means any person or entity other than a Party or a subsidiary of a Party that has assumed the relevant obligations of such Party under this Agreement and the obligations of which subsidiary are guaranteed in writing by such Party.
+
+3. Section 10 shall be deleted in its entirety and hereby replaced with the following:
+
+Assignment. Neither this Agreement nor any right or obligation hereunder may be assigned or otherwise transferred (whether voluntarily, by operation of law, or otherwise), without the prior express written consent of the other Party; provided that: (i) ISMMS may assign this Agreement to another entity that is controlled by ISMMS or in connection with a reorganization, merger, or sale of substantially all of ISMMS’s assets relating to the subject matter hereto on a reasonable advance notice to Sema4; and further provided that (ii) Sema4 may assign this Agreement to another entity that is controlled by Sema4 or in connection with a reorganization, merger, or sale of substantially all of Sema4’s assets on a reasonable advance notice to ISMMS, provided, however, that Sema4 may not assign this Agreement to any Prohibited Person. “Prohibited Person” means any Third Party that: (A) has been convicted of a criminal offense related to health care; (B) is currently listed by a federal or state agency as debarred, excluded, or otherwise ineligible for participation in federally or state funded health care programs; (C) is on the Office of Foreign Asset Control’s (OFAC)
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+11
+
+Specially Designate Nationals and Blocked Persons List, or from a nation actively sanction by OFAC, as indicated by the U.S. Department of the Treasury, or (D) controls, is controlled by or is under common control with any Third Party that meets the criteria in subsections (A), (B), or (C). No permitted assignment will relieve the assigning Party of responsibility for the performance of any obligations that accrued prior to such assignment, and except as set forth otherwise in Section 7.c., any permitted assignee shall assume all obligations of its assignor under this Agreement. Any prohibited delegation of any obligations hereunder, will be null and void.
+
+4. All other terms and conditions to the Agreement remain unchanged and in full force and effect except to the extent modified by the terms and conditions of this Amendment. The Agreement, as modified by this First Amendment, contains the entire understanding of the parties with respect to the subject matter contemplated herein.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+12
+
+IN WITNESS WHEREOF, the parties have caused their duly authorized representatives to execute this Amendment.
+
+AGREED AND ACCEPTED:
+
+ICAHN SCHOOL OF MEDICINE AT
+MOUNT SINAI
+
+MOUNT SINAI GENOMICS, INC.
+
+By:
+
+/s/ Erik Lium
+
+By:
+
+/s/ Matthew Rosamond
+
+Name:
+
+Erik Lium
+
+Name:
+
+Matthew Rosamond
+
+Title:
+
+Executive Vice President
+
+Title:
+
+CFO
+
+Date:
+
+7/31/2019 | 2:20 PM EDT
+
+Date:
+
+8/1/2019
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+13

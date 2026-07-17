@@ -1,0 +1,445 @@
+23
+exhibit1022-super8xk.htm
+EX-10.22
+
+Document
+
+Exhibit 10.22
+
+CONFIDENTIAL
+
+MASTER SERVICES AGREEMENT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+This master services and collaboration agreement (this “Agreement”), effective as of April 2, 2018 (the “Effective Date”), is between Mount Sinai Genomics, Inc., d/b/a Sema4, a Delaware corporation having a principal business address at 1425 Madison Avenue, New York, NY 10029 (“Sema4”), Icahn School of Medicine at Mount Sinai, a not-for-profit New York education corporation with a principal business address of One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”), The Mount Sinai Hospital (“MSH”), Beth Israel Medical Center (“BIMC”), St. Luke’s-Roosevelt Hospital Center (SLR”), and The New York Eye and Ear Infirmary (“NYEE”) (each a “Hospital” and collectively (the “Mount Sinai Hospitals”). ISMMS and the Mount Sinai Hospitals shall collectively be referred to as the “Mount Sinai Parties.” The parties hereto are also referenced herein individually as “Party” or jointly as the “Parties.” The Parties acknowledge and agree that ISMMS and each Hospital is separately incorporated, responsible solely for its own obligations and liabilities, and shall not be responsible for the obligations of any of the other Mount Sinai Parties.
+
+WHEREAS, Sema4 is a health information company that operates two CLIA-certified laboratories, and the Mount Sinai Parties wish to retain Sema4 to perform certain Services (as set forth below); and
+
+WHEREAS, this Agreement is made for the benefit of the Parties and in anticipation of a robust collaborative relationship between the Mount Sinai Parties and Sema4.
+
+NOW THEREFORE, in consideration of the mutual promises and covenants contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, Sema4 and the Mount Sinai Parties hereby agree as follows:
+
+AGREEMENT
+
+1. Services.
+
+a. Sema4 shall furnish to the Mount Sinai Parties certain services (the “Services”) as specified in statements of work (each a “SOW”) entered into by the applicable Parties. The Parties acknowledge that different SOWs may involve different Mount Sinai Parties. Each SOW shall be subject to and made part of this Agreement, and, in the event of a conflict between this Agreement and a SOW, the terms of the SOW shall control. Each SOW shall set forth all matters deemed appropriate by the Mount Sinai Parties which are receiving Services under the SOW and Sema4, including but not limited to:
+
+i. a description of the Services to be covered by the SOW;
+
+ii. the timeline for Sema4’s performance of the Services;
+
+iii. the fees and expenses associated with Sema4’s performance of the Services, and the terms of payment thereof;
+
+1
+
+CONFIDENTIAL
+
+iv. the work product, deliverables, results, reports, or other output associated with the Services (the “Deliverables”), including a description of required format and content.
+
+b. Personnel. Sema4 shall perform the Services through its employed or contracted personnel (“Sema4 Personnel”). Sema4 shall assign Sema4 Personnel at appropriate levels of experience and responsibility to perform the Services and use best efforts to ensure continuity of staffing during an SOW. The Mount Sinai Parties shall have the right to review the qualifications of all Sema4 Personnel assigned to perform the Services, and shall have the right to request a replacement of any such Sema4 Personnel, which Sema4 shall not unreasonably withhold. Sema4 shall not subcontract any of its obligations under this Agreement without notifying the Mount Sinai Parties in writing. Sema4 shall remain wholly responsible for all actions of any permitted subcontractors.
+
+c. With respect to all Sema4 Personnel, Sema4 shall:
+
+i. be responsible for the payment of all compensation in compliance with all applicable state and federal laws and regulations, as well as income tax and all withholdings, social security, FICA taxes, and insurance coverage, including workers’ compensation coverage obligations, and any other employment requirements;
+
+ii. ensure that all Sema4 Personnel performing Services have the requisite skill, training and qualifications to perform those Services; and ensure that all Sema4 Personnel comply with this Agreement, all applicable policies and procedures of the Mount Sinai Parties, and all applicable laws and regulations.
+
+d. Deliverables. Sema4 shall submit each Deliverable to the Mount Sinai Parties for review and approval. If the Deliverable does not meet the applicable specifications, the Mount Sinai Parties will notify Sema4 in what respects the Deliverable is non-conforming and identify a reasonable date by which the corrected Deliverable is to be resubmitted. The Mount Sinai Parties shall have [***] days to evaluate a Deliverable. Within this evaluation period, the Mount Sinai Parties shall provide written notice of its: (i) acceptance of such Deliverable or (ii) rejection of such Deliverable, specifying the basis therefore. Sema4 shall have [***] days to cure any defect and resubmit the work product for acceptance and payment; provided, however, that the Mount Sinai Parties are under no obligation to accept such resubmitted Deliverable and shall provide written notice of its acceptance or rejection of the resubmitted Deliverable, as required above. The Mount Sinai Parties’ failure to provide written notice of its rejection of a Deliverable will constitute acceptance of such Deliverable.
+
+e. Performance. Sema4 shall comply with all laws and regulations applicable to this Agreement and the Services. Sema4 shall, and shall cause the Sema4 personnel to, perform the Services in a timely, competent, professional, and workmanlike manner and consistent with the highest industry standards.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+CONFIDENTIAL
+
+f. Fair Market Value; No Payment for Referrals. Sema4 and the Mount Sinai Parties acknowledge and agree that the compensation set forth in each SOW was negotiated in good faith based on the fair market value for the Services, was not be determined in a manner that took into account the volume or value of any business generated between Sema4 and the Mount Sinai Parties, and does not obligate any Party to purchase, use, recommend, or arrange for the use of any product(s) of another Party or its affiliates. No consideration or amount paid hereunder is intended to be, nor shall it be construed to be, an inducement or payment for referral of patients between any of the Parties.
+
+2. Confidentiality.
+
+a. “Confidential Information” means information disclosed by either Party (as applicable, the “Disclosing Party”) that such Disclosing Party owns or controls and maintains as confidential and discloses to the other Party (as applicable, the “Receiving Party”) under this Agreement, including without limitation, any such information regarding finances, commercial strategies, products or services, research, and intellectual property that: (i) if disclosed in tangible form, is marked as “confidential” upon disclosure or (ii) if disclosed in intangible form, is summarized in a writing marked “confidential” and provided to Receiving Party within thirty (30) days of the intangible disclosure; provided, however, that failure to so mark or summarize Confidential Information shall not compromise or alter its confidential status if a reasonable person would recognize, based upon its content and/or the context of its disclosure, that such disclosure was intended as confidential. For clarity, Confidential Information includes the foregoing information of a third party in possession of a Disclosing Party, that such Disclosing Party has a legal right to disclose to the Receiving Party under terms of confidentiality as set forth herein.
+
+b. Notwithstanding the foregoing, Confidential Information shall not include information that the Receiving Party demonstrates by written or electronic records: (i) was already in the Receiving Party’s possession prior to disclosure by the Disclosing Party; (ii) is or later becomes a matter of public knowledge through no act or omission of the Receiving Party; (iii) is disclosed to the Receiving Party by a third party who had an apparent bona fide legal right to so disclose and who does so without imposing a confidential obligation with respect thereto; or (iv) is developed independently by the Receiving Party without use of, reference to or reliance on the Disclosing Party’s Confidential Information.
+
+c. Restrictions; Maintenance of Confidentiality. Each Receiving Party shall use each Disclosing Party’s Confidential Information solely for the purposes of performing its obligations under this Agreement. Each Receiving Party shall protect the confidentiality of such Confidential Information and guard it from disclosure to third parties with at least the same degree of care it uses to protect the confidentiality of its own Confidential Information, but in no event less than a reasonable degree of care, and shall only disclose such Confidential Information to its directors, trustees, officers, employees, faculty, researchers, consultants, and advisors who are obligated
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+CONFIDENTIAL
+
+to maintain the confidential nature of such Confidential Information and who need to know such Confidential Information for the performance of the Party’s obligations under this Agreement. Where permitted, third parties (i.e., those who are not employees of such Party) to whom Receiving Party discloses the Disclosing Party’s Confidential Information, shall only be permitted access to such Confidential Information if Receiving Party has entered into a legally binding confidentiality agreement with such third parties that is at least as protective of such Confidential Information as this Agreement. For clarity, Receiving Party shall be fully responsible to Disclosing Party for compliance by such third parties with such obligations. Notwithstanding the foregoing, the Receiving Party shall also be permitted to disclose Confidential Information to the extent required by applicable law, court order, or other governmental authority with jurisdiction provided that the Receiving Party promptly provides the Disclosing Party, to the extent legally permissible, with written notice of such requirement and cooperates, at the Disclosing Party’s written request and expense, with the Disclosing Party’s legal efforts to prevent or limit the scope of such required disclosure.
+
+d. Return; Remedies. Upon termination of this Agreement or otherwise upon the Disclosing Party’s request, the Receiving Party shall, at the Disclosing Party’s option, destroy or return to the Disclosing Party the Confidential Information and all copies of all or any portion thereof in any tangible or intangible form whatsoever, unless the Receiving Party is expressly authorized by the Disclosing Party to continue to use such Confidential Information. For a period of five (5) years from receipt, the Receiving Party shall treat Confidential Information received in connection with this Agreement, provided that the Receiving Party will continue to comply with the terms of this Section for any retained Confidential Information. Each Party acknowledges that its disclosure of any of the Confidential Information without the Disclosing Party’s prior written consent except as permitted hereunder would cause continuing, substantial and irreparable injury to the Disclosing Party and that the Disclosing Party’s remedies at law for such disclosure shall not be adequate. Accordingly, the Parties agree that the Disclosing Party shall be entitled to seek immediate injunctive relief against the breach or threatened breach of the foregoing, and that such rights shall be in addition to, and not in limitation of, any other rights or remedies to which the Disclosing Party may be entitled at law or equity.
+
+e. PHI. The Parties shall enter into a business associate agreement covering the use or disclosure of protected health information under this Agreement, which shall become part of this Agreement.
+
+3. Intellectual Property.
+
+a. Except as specifically set forth herein or in a SOW, in no event will this Agreement or its performance be interpreted as granting either Party any express or implied right, title or license to the other Party’s Intellectual Property. As used herein, “Intellectual Property” means all technical information, inventions, developments, discoveries, software, know-how, methods, techniques, formulae, processes, and other proprietary
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+CONFIDENTIAL
+
+property, whether or not patentable or copyrightable, and “Conceived” means: (i) with respect to any patentable Intellectual Property, “conceived” as such term is defined by U.S. patent law; (ii) with respect to any copyrightable Intellectual Property, “authored” as such term is defined by U.S. copyright law; and (iii) with respect to all other Intellectual Property, developed, created or discovered, as applicable. Unless specifically agreed upon by the Parties in a SOW or separate written agreement, any Intellectual Property that is owned, controlled by, or licensed to any Party prior to the effective date of a given SOW, or outside the scope of a given SOW, as demonstrated by a Party’s competent records (“Background Intellectual Property”), shall remain the sole property of the Party who owns or controls such Intellectual Property.
+
+b. Ownership of Intellectual Property. Unless as otherwise agreed by the Parties in the applicable SOW, inventorship of any Intellectual Property Conceived—and, with respect to any patentable Intellectual Property, reduced to practice—in the performance of a Party’s obligations under this Agreement, including improvements or modifications to Background Intellectual Property shall be determined in accordance with U.S. patent or copyright principles, as applicable, whether or not patentable or copyrightable. Except as specifically set forth herein or in a SOW, ownership of any such Intellectual Property shall vest solely in the Mount Sinai Parties.
+
+c. Sema4 represents that the Deliverables shall not contain any Background or third party Intellectual Property, except with the express prior written consent of the Mount Sinai Parties, and that neither the Services nor the Deliverables infringe on the rights of any third party with regard to Intellectual Property. Except as specifically set forth herein or in a SOW, ownership of any Deliverables shall vest solely in the Mount Sinai Parties.
+
+4. Records. Sema4 agrees to maintain and make available during this Agreement and for a period of four (4) years thereafter, upon the written request of the Mount Sinai Parties, the Secretary of the Department of Health and Human Services, the Comptroller General, or other applicable government authority, this Agreement, and any other books, records, data and documents that are necessary to certify the nature, performance, and extent of the Services furnished under this Agreement.
+
+5. Use of Name. The Parties acknowledge and agree that this Agreement does not grant any Party the right to use any trademark of another Party without such Party’s prior written consent,
+
+6. EXCEPT FOR THIRD PARTY INDEMNIFICATION, NEITHER PARTY SHALL BE LIABLE TO THE OTHER PARTY FOR ANY SPECIAL, CONSEQUENTIAL, EXEMPLARY OR INCIDENTAL DAMAGES (INCLUDING LOST OR ANTICIPATED REVENUES OR PROFITS RELATING TO THE SAME) ARISING FROM ANY CLAIM RELATING TO THIS AGREEMENT, WHETHER SUCH CLAIM IS BASED ON CONTRACT, TORT (INCLUDING GROSS NEGLIGENCE) OR OTHERWISE.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+5
+
+CONFIDENTIAL
+
+7. Indemnification.
+
+a. The Mount Sinai Parties agree to indemnify Sema4, its affiliates, and its and their respective officers, directors, trustees, employees, subcontractors and agents (collectively, the “Indemnified Parties”) against any and all claims, liabilities, and/or suits, including losses, damages, expenses, and reasonable attorneys’ fees for defending those claims, liabilities, and/or suits (collectively, “Claims”), caused by: (i) their [***] or (ii) the [***] of the Mount Sinai Parties under this Agreement; provided that the Mount Sinai Parties shall have no indemnification obligation hereunder to the extent any Claim results from a Sema4 Indemnified Party’s [***].
+
+b. Sema4 agrees to indemnify the Mount Sinai Parties’ Indemnified Parties against any and all Claims caused by: (i) Sema4’s [***] under this Agreement, provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim results from the Mount Sinai Parties’ Indemnified Party’s [***], (ii) Sema4’s [***], or (iii) any claim that the [***], including but not limited to [***]; provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim results from a Mount Sinai Party Indemnified Party’s [***].
+
+c. Indemnification Procedure. Each Party agrees to provide the other Party with prompt notice of any demand, claim, cause of action or suit to which these indemnification provisions apply. The indemnifying Party shall have the exclusive right to control the defense of any such demand, claim or suit, including choice of counsel and any settlement thereof, provided that, as a condition of such control, the indemnifying Party shall first provide written confirmation that it will fully defend and indemnify the indemnitee in this and all related matters.
+
+d. Settlement; Cumulative Remedies. No settlement by an indemnifying Party on behalf of any Indemnified Parties, shall acknowledge or implicate any liability, fault, or wrongdoing on the part of such Indemnified Party without such Indemnified Party’s prior written consent. The indemnifying Party shall not settle or compromise any claim or action giving rise to liabilities in a manner that imposes any restrictions or obligations on the Indemnified Party, or grants any rights to affecting the Indemnified Party, without the Indemnified Party’s prior written consent.
+
+8. Term and Termination.
+
+a. The term of this Agreement shall be one (1) year from the Effective Date (the “Initial Term”) and be automatically renewed for successive one-year terms upon the same terms and conditions as set forth herein (the Initial Term, together with all renewal terms shall be referred to herein as the “Term”), unless either Party gives the other Parties at least thirty (30) days’ prior written notice of its intent not to renew the term hereof.
+
+b. Either Party may terminate this Agreement or an SOW (except as set forth in such SOW) without cause upon sixty (60) days’ prior written notice to the other Parties.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+6
+
+CONFIDENTIAL
+
+c. Either Party may terminate this Agreement or an SOW: (i) as set forth in an SOW with regard to that SOW, (ii) in the event of a [***], which [***], (iii) effective immediately if the other Party becomes insolvent or seeks protection under any bankruptcy, receivership, trust deed, assignment for the benefit of creditors, creditors arrangement, composition or comparable proceeding, or if any such proceeding is instituted against the other Party, and such proceeding is not dismissed within ninety (90) days.
+
+d. The Mount Sinai Parties may terminate effective immediately if Sema4 experiences a change of control event where there is a change in the individuals or entities with the power to direct the management and policies of Sema4, directly or indirectly, whether through the ownership of voting securities, by contract, or otherwise, and among other circumstances, if ISMMS’s ownership interest in Sema4 decreases to less than 51% of the total outstanding shares of Sema4’s voting securities.
+
+e. Effect of Termination. Termination of this Agreement will not affect the rights and obligations of the Parties accrued prior to termination hereof. In the event of any termination or expiration of this Agreement, the Parties shall cooperate to effect a transition of the Services. The provisions of Sections 2, 3, 4, 5, 6, 7, 8(e), and 9-16 shall survive the termination or expiration of this Agreement.
+
+9. Representations.
+
+a. Sema4 represents, warrants, and covenants that:
+
+i. it has obtained and will continue to maintain any consent, approval, credential, certification, authorization, or license required in connection with the execution, delivery and performance of this Agreement;
+
+ii. neither it nor the Sema4 Personnel: (a) has been convicted of or charged with a criminal offense related to health care (unless it has been reinstated to participation in Medicare after being excluded because of the conviction), or (b) is excluded, debarred, or otherwise ineligible for participation in any government health care program or government payment program, and it will notify the Mount Sinai Parties in writing immediately if any of the foregoing should occur, and the Mount Sinai Parties may immediately terminate the whole or any part of this Agreement, receive a refund of all compensation paid and pursue any other remedies available at law or in equity.
+
+10. Insurance.
+
+a. Sema4 shall procure and maintain at its sole expense such insurance covering Sema4’s performance under this Agreement, including but not limited to the following:
+
+i. Occurrence based commercial general liability insurance, including, without limitation, coverage for bodily and/or personal injury and death,
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+7
+
+CONFIDENTIAL
+
+property damage (including loss of property and use of property), and contractual liability, with separation of insureds, the Mount Sinai Parties named as additional insureds on a primary and non-contributory basis and limits of not less than $[***] each occurrence and $[***] in the aggregate.
+
+ii. Errors and omissions insurance with limits of not less than $[***] each occurrence and $[***] in the aggregate.
+
+iii. Workers compensation insurance as required by applicable law and employer’s liability insurance with limits of not less than $[***] per accident.
+
+iv. Occurrence based cyber insurance (including security and privacy) with limits of not less than $[***] each occurrence and $[***] in the aggregate.
+
+b. Sema4 shall purchase tail coverage if any claims made coverage is discontinued or terminated at any time during or after the term of this Agreement.
+
+c. Upon the request of the Mount Sinai Parties, Sema4 agrees to provide a current and valid Certificate of Insurance evidencing their insurance coverage described above. Any material modification or alteration in such coverage shall be promptly communicated to Mount Sinai Parties in writing at least thirty (30) days in advance.
+
+11. Governing Law. This Agreement and any action related thereto will be governed and interpreted by and under the laws of the State of New York, without giving effect to any conflicts of laws principles. The Parties hereby irrevocably submit to the exclusive jurisdiction of and venue in any state or federal courts located within New York County in the State of New York with respect to any and all disputes concerning or otherwise arising under this Agreement.
+
+12. Assignment. Neither this Agreement nor any right or obligation hereunder may be assigned or otherwise transferred (whether voluntarily, by operation of law or otherwise), without the prior express written consent of the other party. No permitted assignment will relieve the assigning Party of responsibility for the performance of any obligations that accrued prior to such assignment, and any permitted assignee shall assume all obligations of its assignor under this Agreement. Any prohibited assignment of this Agreement or any rights, and any prohibited delegation of any obligations hereunder, will be null and void.
+
+13. Severability. If any provision of this Agreement is, for any reason, held to be invalid or unenforceable, the other provisions of this Agreement will remain enforceable and the invalid or unenforceable provision will be deemed modified so that it is valid and enforceable to the maximum extent permitted by law.
+
+14. Notices. Each Party must deliver all notices or other communications required or permitted under this Agreement in writing to the other party at the address listed below by courier, by certified or registered mail (postage prepaid and return receipt requested), or by a nationally-recognized express mail service. Each Party may change its address for receipt of notice by giving notice of such change to the other Party.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+8
+
+CONFIDENTIAL
+
+15. Waiver. Any waiver or failure to enforce any provision of this Agreement on one occasion will not be deemed a waiver of any other provision or of such provision on any other occasion.
+
+16. Counterparts. This Agreement may be executed in one or more counterparts and by facsimile or pdf, each of which shall be deemed an original and all of which shall be taken together and deemed to be one instrument.
+
+17. Entire Agreement. This Agreement is the final, complete and exclusive agreement of the parties and supersedes and merges all prior or contemporaneous discussions between the Parties with respect to the subject matter hereof. No modification of or amendment to this Agreement, nor any waiver of any rights under this Agreement, will be effective unless in writing and signed by a duly authorized officer of each Party.
+
+18. Independent Contractors. The Parties agree that this Agreement creates an independent contractor relationship. Neither Party has the authority to bind the other Party without the express written authorization of the other Party. Neither this Agreement, nor any terms and conditions contained herein, may be construed as creating or constituting an employer-employee, franchisor-franchisee, partnership, joint venture or agency relationship between the Parties.
+
+SIGNATURE PAGE FOLLOWS
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+9
+
+IN WITNESS WHEREOF, the Parties have caused this Agreement to be executed by their duly authorized representative,
+
+AGREED:
+
+AGREED:
+
+MOUNT SINAI GENOMICS, INC.
+
+ICAHN SCHOOL OF MEDICINE
+AT MOUNT SINAI
+
+By:
+
+/s/ Matthew Rosamond
+
+By:
+
+/s/ Stephen Harvey
+
+Name:
+
+Matthew Rosamond
+
+Name:
+
+Stephen Harvey
+
+Title:
+
+CFO
+
+Title:
+
+Sr. VP Finance
+
+Date:
+
+4/2/2018
+
+Date:
+
+4/6/18
+
+AGREED:
+
+AGREED:
+
+THE MOUNT SINAI HOSPITAL
+
+BETH ISRAEL MEDICAL CENTER
+
+By:
+
+/s/ Michael Pastier
+
+By:
+
+/s/ Michael Pastier
+
+Name:
+
+Michael Pastier
+
+Name:
+
+Michael Pastier
+
+Title:
+
+Sr. V.P. – Finance
+
+Title:
+
+Sr. V.P. – Finance
+
+Date:
+
+4/6/18
+
+Date:
+
+4/6/18
+
+AGREED:
+
+AGREED:
+
+ST. LUKE’S–ROOSEVELT
+HOSPITAL CENTER
+
+THE NEW YORK EYE AND EAR INFIRMARY
+
+By:
+
+/s/ Michael Pastier
+
+By:
+
+/s/ Michael Pastier
+
+Name:
+
+Michael Pastier
+
+Name:
+
+Michael Pastier
+
+Title:
+
+Sr. V.P. – Finance
+
+Title:
+
+Sr. V.P. – Finance
+
+Date:
+
+4/6/18
+
+Date:
+
+4/6/18
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+10
+
+FIRST AMENDMENT TO MASTER SERVICES AGREEMENT (CLINICAL)
+
+THIS FIRST AMENDMENT (this “First Amendment”), effective as of July 31, 2019 (the “First Amendment Effective Date”), is made by and between Mount Sinai Genomics, d/b/a Sema4 and having a business address of 333 Ludlow Street, Stamford, CT 06902 (“Sema4”), and Icahn School of Medicine at Mount Sinai, a not-for-profit New York education corporation with a principal business address of One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”), The Mount Sinai Hospital (“MSH”), Beth Israel Medical Center (“BIMC”), St. Luke’s-Roosevelt Hospital Center (“SLR”), and The New York Eye and Ear Infirmary (“NYEE”) (collectively, the “Mount Sinai Parties”). Sema4 and the Mount Sinai Parties are also at times herein referenced individually as “Party” or jointly as the “Parties.”
+
+WHEREAS, the Parties entered into the Master Services Agreement, effective as of April 2, 2018 (the “Agreement”) under which Sema4 would provide services to the Mount Sinai Parties in connection with their clinical operations; and
+
+WHEREAS, the Parties wish to amend certain provisions of the Agreement in accordance with the terms hereof.
+
+NOW, THEREFORE, for good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties hereby agree as follows:
+
+19. DEFINITIONS.
+
+For the purposes of this First Amendment, capitalized words and phrases not otherwise defined herein shall have the meanings set forth in the Agreement.
+
+20. AMENDMENTS TO THE AGREEMENT.
+
+Section 8 “Term and Termination”. Section 8(d) is hereby deleted in its entirety and replaced with the following:
+
+Termination by Mount Sinai Parties in Event of Assignment. In the event this Agreement is assigned by Sema4 during the Term as permitted by Section 12 to a Non-Approved Person, the Mount Sinai Parties shall have the right to terminate this Agreement upon written notice to Sema4 effective as of the date of the assignment. “Non-Approved Person” means: (i) a [***], (ii) a [***], (iii) a [***] or (iv) a third party that controls, is controlled by or is under common control with any third party described in clause (i), (ii), or (iii).
+
+Section 12 “Assignment”. Section 12 is hereby deleted in its entirety and replaced with the following:
+
+Neither this Agreement nor any right or obligation hereunder may be assigned or otherwise transferred (whether voluntarily, by operation of law or otherwise), without the prior express written consent of the other party; provided that: (i) the Mount Sinai Parties may assign this Agreement to another entity that is controlled by the Mount Sinai Parties or in connection with a reorganization, merger or sale of substantially all of such Party’s assets relating to the subject matter hereto on
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+1
+
+reasonable advance notice to Sema4; and provided further that (ii) Sema4 may assign this Agreement to another entity that is controlled by Sema4 or in connection with a reorganization, merger or sale of substantially all of Sema4’s assets on reasonable advance notice to the Mount Sinai Parties, provided, however, that Sema4 may not assign this Agreement to any Prohibited Person. “Prohibited Person” means any third party that: (A) has been convicted of a criminal offense related to health care; (B) is currently listed by a federal or state agency as debarred, excluded, or otherwise ineligible for participation in federally or state funded health care programs; (C) is on the Office of Foreign Asset Control’s (OFAC) Specially Designated Nationals and Blocked Persons List, or from a nation actively sanctioned by OFAC, as indicated by the U.S. Department of the Treasury, or (D) controls, is controlled by or is under common control with any third party that meets the criteria in subsections (A), (B), or (C). No permitted assignment will relieve the assigning Party of responsibility for the performance of any obligations that accrued prior to such assignment, and except as set forth otherwise in Section 8(d), any permitted assignee shall assume all obligations of its assignor under this Agreement. Any prohibited assignment of this Agreement or any rights, and any prohibited delegation of any obligation s hereunder, will be null and void.
+
+21. AMENDMENT EFFECTIVENESS.
+
+This First Amendment shall be effective, and the Agreement shall be deemed to be amended as set forth herein, on the date hereof.
+
+22. MISCELLANEOUS.
+
+Counterparts. This First Amendment may be executed in any number of counterparts and by the Parties on separate counterparts. Each counterpart shall constitute an original of this First Amendment, but together the counterparts shall constitute one document.
+
+Full Force and Effect. All of the provisions of the Agreement shall remain in full force and effect as so amended. If any term or provision of this First Amendment shall be deemed prohibited by or invalid under any applicable law, such provision shall be invalidated without affecting the remaining provisions of this First Amendment.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+IN WITNESS WHEREOF, the Parties have executed this First Amendment by their duly authorized officers as of Amendment Effective Date.
+
+Mount Sinai Genomics, Inc.
+
+St. Luke’s – Roosevelt Hospital Center.
+
+By:
+
+/s/ Matthew Rosamond
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name: Matthew Rosamond
+
+Name: Kenneth L. Davis, MD
+
+Title: CFO
+
+Title: President and CEO
+
+Date: 7/30/2019
+
+Date: 7/31/2019
+
+Icahn School of Medicine at Mount Sinai
+
+The New York Eye and Ear Infirmary
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name: Kenneth L. Davis, MD
+
+Name: Kenneth L. Davis, MD
+
+Title: President and CEO
+
+Title: President and CEO
+
+Date: 7/31/2019
+
+Date: 7/31/2019
+
+The Mount Sinai Hospital
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name: Kenneth L. Davis, MD
+
+Title: President and CEO
+
+Date: 7/31/2019
+
+Beth Israel Medical Center
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name: Kenneth L. Davis, MD
+
+Title: President and CEO
+
+Date: 7/31/2019
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3

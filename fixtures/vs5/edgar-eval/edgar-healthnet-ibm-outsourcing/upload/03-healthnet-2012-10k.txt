@@ -1,0 +1,1217 @@
+
+We are in the process of reducing the number of systems that we operate. Any difficulty or unexpected delay associated with the transition to or from information systems, including in connection with the decommissioning of a system or the implementation of a new system; any inability or failure to properly maintain information management systems; any failure to efficiently and effectively consolidate our information systems, including to renew technology, maintain technology currency, keep pace with evolving industry standards or eliminate redundant or obsolete applications; or any inability or failure to successfully update or expand processing capability or develop new capabilities to meet our business needs, could result in operational disruptions, loss of existing customers, difficulty in attracting new customers, disputes with customers and providers, regulatory or other legal or compliance problems, significant increases in administrative expenses and/or other adverse consequences. If for any reason there is a business continuity interruption resulting in loss of access to or availability of data, we may, among other things, not be able to meet the full demands of our customers and, in turn, our business, results of operations, financial condition and cash flow could be adversely impacted. In addition, we obtain significant portions of our systems-related and other services and facilities, including our data center, from independent third parties and are considering expanding our outsourced information technology arrangements. This makes our operations vulnerable to adverse effects if such third parties fail to perform adequately. See “—We are subject to risks associated with outsourcing services and functions to third parties.”
+
+The Department of Health and Human Services mandated new standards in the electronic transmission of health care transactions, including claims, remittance, eligibility, claims status requests and related responses, and privacy and security standards, known as HIPAA 5010 that became effective in 2012. While we have implemented the HIPAA 5010 requirements to be able to exchange 5010 formats with our trading partners, the failure of our trading partners to implement the HIPAA 5010 requirements in a compliant manner could result in additional costs and administrative burden to us and have other adverse effects. Furthermore, CMS adopted a new coding set for diagnoses, commonly referred to as ICD-10, which significantly expands the number of codes utilized. The new ICD-10 coding set is currently required to be implemented by October 2014. We will be required to incur significant additional expenses to implement and support the new ICD-10 coding set. If we have not adequately implemented HIPAA 5010 and/or do not adequately implement the requirements of the ACA and ICD-10 within the time period required, our results of operations, financial condition and cash flows would be adversely affected.
+
+42
+
+We also face challenges with respect to our implementation and support of the requirements of the ACA. Because federal and state regulators are still in the process of determining the final rules and regulations relating to the implementation of the ACA, there is substantial uncertainty with respect to these requirements, including, but not limited to requirements related to the state-based and federally facilitated exchanges, the assessment and collection of the health insurer fee and the reinsurance, risk adjustment and risk corridors programs. Among other things, we will need to define and implement new billing and payment capabilities and support new requests from third parties and government agencies for data collection and reporting. These additional demands will require us to make significant systems changes, including developing, investing in, configuring and installing new products and technology. Implementation of these requirements will require the expenditure of material resources and will require significant changes in many aspects of our business. See “—Federal health care reform legislation has had and will continue to have an adverse impact on our revenues and the costs of operating our business and could materially adversely affect our business, cash flows, financial condition and results of operations” and “—Various health insurance reform proposals are also emerging at the state level, which could have an adverse impact on us” for further information regarding the ACA and the challenges we face in implementing its provisions. There can be no assurances that we will be able to implement the systems changes or other modifications necessary to successfully meet the requirements of the ACA. If we do not successfully execute our strategic and operational objectives with respect to the ACA within the time period expected, our results of operations, financial condition and cash flows could be materially adversely affected.
+
+We must comply with requirements relating to patient privacy and information security, including taking steps to ensure compliance by our business associates with HIPAA.
+
+The Department of Health and Human Services has regulations in place under HIPAA relating to the privacy and security of protected health information (“PHI”). These regulations, as amended, require health plans, clearinghouses and providers to, among other obligations: comply with various requirements and restrictions related to the use, disclosure, storage, and transmission of PHI; adopt rigorous internal policies and procedures to safeguard PHI; and enter into specific written agreements with business associates that receive, use and/or create PHI on our behalf. HIPAA also established significant civil and criminal sanctions for violations. These regulations expose us to liability for, among other things, violations of the regulations by our business associates, including the third party vendors involved in our outsourcing projects. The Health Information Technology for Economic and Clinical Health Act (the “HITECH Act”) of 2009 expanded HIPAA's requirements for security and privacy safeguards, including improved enforcement, additional limitations on use and disclosure of PHI and additional potential penalties for violations, and imposed notice obligations in the event of a breach of unsecured PHI. The HITECH Act has been implemented on a rolling basis through subsequent rulemaking. On January 17, 2013, the Office of Civil Rights (“OCR”) of HHS issued the omnibus final rule on HIPAA privacy, security, breach notification requirements and enforcement requirements under the HITECH Act, and a final regulation for required changes to the HIPAA Privacy Rule for the Genetic Information Nondiscrimination Act. The omnibus final rule becomes effective on March 26, 2013, with an applicable compliance date of September 23, 2013. Although our contracts with our business associates provide for protections of PHI by our business associates, we may have limited control over the actions and practices of our business associates. Compliance with HIPAA and state and federal privacy and security laws and regulations has resulted in and may in the future result in significant costs to us due to necessary systems changes, the development of new administrative processes and the effects of potential noncompliance by us or our business associates. See also “—If we fail to comply with requirements relating to patient privacy and information security, including taking steps to ensure that our business associates who obtain access to sensitive patient information maintain the privacy and security of such information, our reputation and business operations could be materially adversely affected.”
+
+If we fail to comply with requirements relating to patient privacy and information security, including taking steps to ensure that our business associates who obtain access to sensitive patient information maintain the privacy and security of such information, our reputation and business operations could be materially adversely affected.
+
+The collection, maintenance, use, disclosure and disposal of individually identifiable health information or data, including PHI, by our businesses are regulated at the federal and state levels, and in some cases are subject to contractual requirements. Despite the privacy and security measures we have in place to ensure compliance with applicable laws, regulations and contractual requirements, our facilities and systems, and those of our third party vendors and service providers, are vulnerable to privacy and security incidents including, but not limited to, computer hacking, breaches, acts of vandalism or theft, computer viruses or other forms of cyber attack, misplaced or lost data, programming and/or human errors or other similar events. For example, in January 2011, we were notified by a third party vendor that certain of our server drives could not be accounted for in connection with the migration of our data center to a facility owned and operated by our third party vendor. We subsequently commenced an investigation of the contents of the unaccounted for server drives, including a detailed forensic review by computer experts, and determined that certain of these unaccounted for drives contain PHI and other
+
+43
+
+personally identifiable information relating to certain individuals. We reported the loss to authorities and notified affected individuals. This matter is under review by various regulatory authorities. We are currently party to various putative class action lawsuits brought in federal and state courts on behalf of individuals who claim to be affected by this incident. See “Item 3. Legal Proceedings” and “—We face risks related to litigation, which, if resolved unfavorably, could result in substantial penalties and/or monetary damages, including punitive damages. In addition, we incur material expenses in the defense of litigation and our financial condition, results of operations, cash flow and/or liquidity could be adversely affected if litigation expenses are greater than we project” for additional information about these actions and the associated risks.
+
+A party, whether internal or external, that is able to circumvent our security systems could, among other things, misappropriate or misuse sensitive or confidential information (including but not limited to PHI and other member information), user information or other proprietary information, cause significant interruptions in our operations and cause all or portions of our website to be unavailable. Internal or external parties may attempt to circumvent our security systems, and we have experienced external attacks on our network, such as, for example, reconnaissance probes and denial of service attempts. We have expended significant resources to protect against such attacks in the past, and will continue to do so in the future. Any reductions in the availability of our website could impair our ability to conduct our business and adversely impact our members during the occurrence of any such incident. Because the techniques used to circumvent security systems can be highly sophisticated and change frequently, often are not recognized until launched against a target and may originate from less regulated and remote areas around the world, we may be unable to proactively address all possible techniques or to implement adequate preventive measures for all situations.
+
+Noncompliance with any privacy laws or data security laws or any security incident or breach involving the misappropriation, loss or other unauthorized use or disclosure of sensitive or confidential member information, whether by us, one of our business associates or another third party, could have a material adverse effect on our business, reputation, financial condition and results of operations, including but not limited to: material fines and penalties; compensatory, special, punitive, and statutory damages; litigation; consent orders regarding our privacy and security practices; requirements that we provide notices, credit monitoring services and/or credit restoration services or other relevant services to impacted individuals; adverse actions against our licenses to do business; and injunctive relief. Additionally, the costs incurred to remediate any data security or privacy incident could be substantial.
+
+We have a material amount of indebtedness and may incur additional indebtedness, or need to refinance existing indebtedness, in the future, which may adversely affect our operations.
+
+Our indebtedness includes $400 million in aggregate principal amount of 6.375% Senior Notes due 2017. Our Senior Notes payable balance was $399.1 million as of December 31, 2012. In addition, we have a $600 million five-year revolving credit facility that expires in October 2016. As of December 31, 2012, we had $100.0 million outstanding under our revolving credit facility. For a description of our Senior Notes and our revolving credit facility, see “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources—Capital Structure.” We may incur additional debt in the future. Our existing indebtedness, and any additional debt we incur in the future through drawings on our revolving credit facility or otherwise could have an adverse effect on our business and future operations. For example, it could:
+
+•
+
+require us to dedicate a substantial portion of cash flow from operations to pay principal and interest on our debt, which would reduce funds available to fund stock repurchases, working capital, capital expenditures and other general operating requirements;
+
+•
+
+increase our vulnerability to general adverse economic and industry conditions or a downturn in our business; and
+
+•
+
+place us at a competitive disadvantage compared to our competitors that have less debt.
+
+We continually evaluate options to refinance our outstanding indebtedness. Our ability to obtain any financing, whether through the issuance of new debt securities or otherwise, and the terms of any such financing are dependent on, among other things, our financial condition, financial market conditions within our industry and generally, credit ratings and numerous other factors. In the event we need to access the credit markets, including to refinance our debt, there can be no assurance that we will be able to obtain financing on acceptable terms or within an acceptable time, if at all. If we are unable to obtain financing on terms and within a time acceptable to us it could, in addition to other negative effects, have a material adverse effect on our operations, financial condition, ability to compete or ability to comply with regulatory requirements.
+
+Downgrades in our debt ratings may adversely affect our business, financial condition and results of operations.
+
+44
+
+Claims paying ability, financial strength, and debt ratings by nationally recognized statistical rating organizations are increasingly important factors in establishing the competitive position of insurance companies and managed care companies. We believe our claims paying ability and financial strength ratings also are important factors in marketing our products to certain of our customers. In addition, our debt ratings impact both the cost and availability of future borrowings and, accordingly, our cost of capital. Rating agencies review our ratings periodically and there can be no assurance that our current ratings will be maintained in the future. Our ratings reflect each rating agency's independent opinion of our financial strength, operating performance, ability to meet our debt obligations or obligations to policyholders and other factors, and are subject to change. Potential downgrades from ratings agencies, should they occur, may adversely affect our business, financial condition and results of operations.
+
+We are a holding company and substantially all of our cash flow is generated by our subsidiaries. Our regulated subsidiaries are subject to restrictions on the payment of dividends and maintenance of minimum levels of capital.
+
+As a holding company, our subsidiaries conduct substantially all of our consolidated operations and own substantially all of our consolidated assets. Consequently, our cash flow and our ability to pay our debt depends, in part, on the amount of cash that we receive from our subsidiaries. Our subsidiaries' ability to make any payments to us will depend on their earnings, business and tax considerations, legal and regulatory restrictions and economic conditions. Under the California Knox-Keene Health Care Service Plan Act of 1975, as amended, certain of our subsidiaries must comply with certain minimum capital or tangible net equity (“TNE”) requirements. In addition, certain of our subsidiaries have agreed to certain undertakings to the Department of Managed Health Care, restricting dividends and loans to affiliates, to the extent that the payment of such would reduce its TNE below the minimum requirement or 130% of the minimum requirement, or reduce its cash-to-claims ratio below 1:1. In addition, in certain states our regulated subsidiaries are subject to risk-based capital requirements, known as RBC. These laws require our regulated subsidiaries to report their results of risk-based capital calculations to the departments of insurance in their state of domicile and the National Association of Insurance Commissioners. Failure to maintain the minimum RBC standards could subject certain of our regulated subsidiaries to corrective action, including increased reporting and/or state supervision. In addition, in most states, we are required to seek prior approval before we transfer money or pay dividends from our regulated subsidiaries that exceed specified amounts. If our regulated subsidiaries are restricted from paying us dividends or otherwise making cash transfers to us, it could have material adverse effect on our results of operations and free cash flow. For additional information regarding our regulated subsidiaries' statutory capital requirements, see “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources—Statutory Capital Requirements.”
+
+Acquisitions, divestitures and other significant transactions may adversely affect our business.
+
+We continue to evaluate the profitability realized or that we expect to be realized by our existing businesses and operations. From time to time we review, from a strategic standpoint, potential acquisitions and divestitures in light of our core businesses and growth strategies. The success of any such acquisition or divestiture depends, in part, upon our ability to identify suitable buyers or sellers, negotiate favorable contractual terms and, in many cases, obtain governmental approval. For acquisitions, success is also dependent upon efficiently integrating the acquired business into our existing operations. For divestitures, success may also be dependent upon efficiently reducing general and administrative or other functions for our remaining operations. In the event the structure of the transaction results in continuing obligations by the buyer to us or our customers, a buyer's inability to fulfill these obligations could lead to future financial loss on our part. As a seller, we may have significant continuing indemnification, administrative services or other obligations to the buyer. Potential acquisitions or divestitures present financial, managerial and operational challenges, including diversion of management attention from existing businesses, difficulty with integrating or separating personnel and financial and other systems, significant post-closing obligations, increased expenses, assumption of unknown liabilities, indemnities and potential disputes with the buyers or sellers.
+
+On April 1, 2012, our subsidiary Health Net Life Insurance Company (“HNL”) sold substantially all of the assets, properties and rights of HNL used primarily or exclusively in our Medicare stand-alone prescription drug plan ("Medicare PDP") business to CVS Caremark and CVS Caremark assumed certain related liabilities and obligations of HNL as set forth in the related Asset Purchase Agreement. We recognized a $132.8 million pretax gain on the sale, or $114.8 million net of tax. We are subject to certain post-closing obligations in connection with the sale, including a prohibition against offering stand-alone Medicare PDP plans for one year following the closing, subject to certain exceptions. In addition, we provide Medicare PDP transition-related services to CVS Caremark in connection with the transaction. We have completed the majority of these services, but certain transition-related services are being provided in 2013. Among the other risks discussed above, if we are unable to reduce our general and administrative or other functions for our remaining operations, it could have an adverse impact on our business and financial condition.
+
+45
+
+The value of our intangible assets may become impaired.
+
+Goodwill and other intangible assets represent a significant portion of our assets. Goodwill and other intangible assets were approximately $583 million as of December 31, 2012, representing approximately 15 percent of our total assets and 37 percent of our consolidated stockholders' equity at December 31, 2012.
+
+In accordance with applicable accounting standards, we periodically evaluate our goodwill and other intangible assets to determine whether all or a portion of their carrying values may be impaired, in which case a charge to income may be necessary. This impairment testing requires us to make assumptions and judgments regarding estimated fair value including assumptions and estimates related to future earnings and membership levels based on current and future plans and initiatives, long-term strategies and our annual planning and forecasting processes, as well as the expected weighted average cost of capital used in the discount process. If estimated fair values are less than the carrying values of goodwill and other intangible assets, we may be required to record impairment losses against income. Any future evaluations resulting in an impairment of our goodwill and other intangible assets could materially impact our results of operations and stockholders' equity in the period in which the impairment occurs. A material decrease in stockholders' equity could, in turn, negatively impact our debt ratings or potentially impact our compliance with existing debt covenants.
+
+From time to time, we divest businesses that we believe are less of a strategic fit for the company or do not produce an adequate return. Any such divestiture could result in significant asset impairment charges, including those related to goodwill and other intangible assets, which could have a material adverse effect on our financial condition and results of operations. See “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Critical Accounting Estimates—Goodwill and Other Intangible Assets” for further discussion of our procedures related to goodwill and other intangible assets.
+
+The value of our investment portfolio and our goodwill could be adversely impacted by varying economic and market conditions which could, in turn, have a negative effect on our results of operations and stockholders' equity.
+
+Our investment portfolio is comprised primarily of available-for-sale investment securities such as interest-yielding debt securities of varying maturities. As of December 31, 2012, our available-for-sale investment securities were approximately $1.8 billion. The value of fixed-income securities is highly sensitive to fluctuations in short- and long-term interest rates, with the value decreasing as such rates increase and increasing as such rates decrease. These securities may also be negatively impacted by illiquidity in the market. We closely monitor the fair values of our investment securities and regularly evaluate them for any other-than-temporary impairments. We have the intent and ability to hold our investments for a sufficient period of time to allow for recovery of the principal amount invested.
+
+The current economic environment and uncertainty in the U.S. and global capital markets have negatively impacted the liquidity of investments, such as the debt securities we hold, and a worsening in these markets could have additional negative effects on the liquidity and value of our investment assets. In addition, such uncertainty has increased the difficulty of assessing investment impairment and the same influences tend to increase the risk of potential impairment of these assets.
+
+Over time, the economic and capital market environment may further decline or provide additional insight regarding the fair value of certain securities, which could change our judgment regarding the impairment of certain investments. This could result in realized losses relating to other-than-temporary declines being charged against future income. There is continuing risk that declines in fair value may occur and material other-than-temporary impairments may result in realized losses in future periods, which could have an adverse effect on our results of operations, liquidity and financial condition. See “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources” for additional information regarding our investment portfolio.
+
+In addition, our regulated subsidiaries are also subject to state laws and regulations that govern the types of investments that are allowable and admissible in those subsidiaries' portfolios. There can be no assurance that our investment assets will produce total positive returns or that we will not sell investments at prices that are less than the carrying value of these investments. Changes in the value of our investment assets, as a result of interest rate fluctuations, illiquidity or otherwise, could have a negative effect on our stockholders' equity. In addition, if it became necessary for us to liquidate our investment portfolio on an accelerated basis, it could have an adverse effect on our results of operations.
+
+If our stock price experiences significant fluctuations or if our market capitalization materially declines, we could be required to take an impairment charge to reduce the carrying amount of our goodwill. If we were required to take such a charge, it would be non-cash and would not affect our liquidity or financial condition, but could have a significant adverse effect on our results of operations in the period in which the charge was taken.
+
+46
+
+Our revolving credit facility contains restrictive covenants that could limit our ability to pursue our business strategies.
+
+Our $600 million revolving credit facility due in October 2016 requires us to comply with various covenants that impose restrictions on our operations, including our ability to incur additional indebtedness, create liens, pay dividends, make investments or other restricted payments, sell or otherwise dispose of assets and engage in other activities. Our revolving credit facility also requires us to comply with certain financial covenants, including a maximum leverage ratio and a minimum fixed charge coverage ratio. See “Item 7. Management's Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources—Capital Structure-Revolving Credit Facility” for further details regarding our revolving credit facility.
+
+The restrictive covenants under our revolving credit facility could limit our ability to pursue our business strategies. In addition, any failure by us to comply with these restrictive covenants could result in an event of default under the revolving credit facility and, in some circumstances, under the indenture governing our Senior Notes, which, in any case, could have a material adverse effect on our financial condition.
+
+The market price of our common stock is volatile.
+
+The market price of our common stock is subject to volatility. In 2012, the Morgan Stanley Healthcare Payor Index (the “HMO Index”), an index comprised of 10 managed care organizations, including Health Net, recorded an approximate 10.2% increase in its value, while the per share value of our common stock decreased by 20.1%. There can be no assurance that the trading price of our common stock will vary in a manner consistent with the variation in the HMO Index or the Standard & Poor's 400 Mid-Cap Index of which our common stock is also a component. The market prices of our common stock and the securities of certain other publicly-traded companies in our industry have shown significant volatility and sensitivity in response to many factors, including the ACA and health care reform generally, public communications regarding managed care, legislative or regulatory actions, litigation or threatened litigation, health care cost trends, proposed premium increases, pricing trends, competition, earnings, proposed changes in government programs, receivable collections or membership reports of particular industry participants, and market speculation about or actual merger and acquisition activity. Additionally, adverse developments affecting any one of the companies in our sector could cause the price of our common stock to weaken, even if those adverse developments do not otherwise affect us. There can be no assurances regarding the level or stability of our share price at any time or the impact of these or any other factors on our stock price.
+
+Securities class action lawsuits are often brought against companies after periods of volatility in the market price of their securities. If we were to become involved in securities litigation, it could subject us to substantial costs, divert resources and the attention of management from our business, and otherwise adversely affect our business.
+
+Negative publicity regarding the managed health care industry could adversely affect our ability to market and sell our products and services.
+
+Managed health care companies have received and continue to receive negative publicity reflecting the public perception of the industry. For example, the Company and the managed health care industry have been subject to negative publicity surrounding premium rate increases government investigations into the industry and our own business practices. In addition, health care and related health care reform and proposals have been and are expected to continue to be the subject of intense media attention and political debate. Such political discourse can often generate publicity that portrays managed care in a negative light. These risks will be exacerbated in the event we and other companies in our industry raise premium rates by more than has been done in recent years to price for the expanded benefits required by, and the fees, taxes and assessments imposed by, the ACA or to respond to any increase in medical cost trends. Our marketing efforts may be affected by the amount of negative publicity to which the industry has been subject, as well as by speculation and uncertainty relating to merger and acquisition activity among companies in our industry. Speculation, uncertainty or negative publicity about us, our industry or our lines of business could adversely affect our ability to market and sell our products or services, require changes to our products or services, or stimulate additional legislation, regulation, review of industry practices or litigation that could adversely affect us.
+
+Managing executive succession and retention is critical to our success. If we are unable to manage the succession of our key executives, it could adversely affect our business.
+
+We are dependent on retaining existing key executives and attracting additional qualified executives to meet current and future needs. We face intense competition for qualified executives, and there can be no assurance that we will be able to attract and retain such executives. Although we have succession plans in place and have employment arrangements with our key executives, these do not guarantee that the services of these key executives will continue to be available to us or that we will be
+
+47
+
+able to attract and retain suitable successors. We would be adversely affected if we fail to adequately plan for future turnover of our senior management team.
+
+We depend, in part, on independent brokers and sales agents to market our products and services, and recent regulatory investigations have focused on certain brokerage practices, including broker compensation arrangements and bid quoting practices.
+
+We market our products and services both through sales people employed by us and through independent sales agents. Independent sales agents typically do not work with us on an exclusive basis and may market health care products and services of our competitors. We face intense competition for the services and allegiance of independent sales agents and we cannot assure you that these agents will continue to market our products at a reasonable cost. Although we have a number of sales employees and agents, if key sales employees or agents or a large subset of these individuals were to leave us, our ability to retain existing customers and members could be impaired.
+
+The ACA includes broker and agent commissions as administrative expenses for purposes of calculating the minimum medical loss ratio. As a result, these expenses will be under the same cost reduction pressures as other administrative costs of health insurers, and there is pressure to make changes to existing commission structures for brokers and agents. For example, some of our competitors have reduced the commissions payable to brokers and agents for sales in the individual market, and we have implemented similar reductions in the individual market in California. In addition, the implementation of certain provisions of the ACA, including the exchanges, will open new distribution channels to customers or reduce or otherwise modify the roles that brokers play in our marketing and sales practices. Our relationships with brokers and agents could be adversely impacted by changes in our business practices to address these pressures and changing roles, including potential reductions in commissions and changes in the treatment of consulting fees.
+
+There have been a number of investigations and enforcement actions against insurance brokers and insurers over the last several years regarding allegedly inappropriate or undisclosed payments made by insurers to brokers for the placement of insurance business. We could be sanctioned as a result of unlawful acts by our agents or brokers. In addition, investigations by state attorneys general, CMS and other regulators, as well as regulatory changes initiated in several states in response to allegedly inappropriate broker conduct and broker payment practices, could result in changes in industry practices or negative publicity that could have an adverse effect on our ability to market our products.
+
+We are dependent on our ability to recruit, manage, enable and retain a large workforce.
+
+Our products and services and our operations require a large number of employees. As of December 31, 2012, we employed 7,286 individuals on a full-time basis and 92 individuals on a part-time or temporary basis. It is critical that we recruit, manage, enable and retain talent to successfully execute our strategic objectives, which requires aligned policies, a positive work environment and a robust succession and talent development process. Further, particularly in light of the changing health care environment, we must focus on building employee capabilities to help ensure that we can meet upcoming challenges and opportunities. Our business could be adversely affected if we are unable to recruit, manage, enable and retain talent and meet upcoming challenges and opportunities. In addition, the impact of the external or internal environment or other factors on employee morale, enablement and engagement could also significantly impact the success of the Company.
+
+Our forecasts and other forward-looking statements are based on a variety of assumptions that are subject to significant uncertainties. Our performance may not be consistent with these forecasts and forward-looking statements.
+
+From time to time in press releases and otherwise, we publish forecasts or other forward-looking statements regarding our future results, including estimated revenues, net earnings and other operating and financial metrics. Any forecast of our future performance reflects various assumptions. These assumptions are subject to significant uncertainties, and, as a matter of course, any number of them may prove to be incorrect.
+
+The achievement of any forecast depends on numerous risks and other factors, including those described in this report, many of which are beyond our control. In addition, the uncertainties associated with federal and state health care reform, challenging economic conditions and our potential participation in new government programs or the provision of new services and/or benefits to new populations, among other things, may make it particularly difficult to forecast our future performance. As a result, we cannot assure that our performance will meet any management forecasts or that the variation from such forecasts will not be material and adverse. You are cautioned not to base your entire analysis of our business and prospects upon isolated predictions, but instead are encouraged to utilize the entire mix of publicly available historical and forward-looking information, as well as other available information affecting us, our services, and our industry when evaluating our forecasts and other forward-looking statements relating to our operations and financial performance.
+
+48
+
+It may be difficult for a third party to acquire us, which could decrease the value of your shares of our common stock.
+
+We are subject to the Delaware anti-takeover laws regulating corporate takeovers. These provisions may prohibit stockholders owning 15% or more of our outstanding voting stock from merging or combining with us. In addition, federal antitrust laws apply to us, and any change in control of our state health plans or health insurance companies also would require the approvals of the applicable regulatory agencies in each state in which we operate.
+
+In addition to the Rights Agreement, our certificate of incorporation and bylaws also contain provisions that could have the effect of delaying, deferring, or preventing a change in control of the Company that our stockholders may consider favorable or beneficial. These provisions could discourage proxy contests and make it more difficult for our stockholders to elect directors and take other corporate actions. These provisions could also limit the price that investors might be willing to pay for shares of our common stock.
+
+Large-scale public health epidemics and/or terrorist activity could cause us to incur unexpected health care and other costs and could materially and adversely affect our business, financial condition and results of operations.
+
+An outbreak of a pandemic disease and/or future terrorist activities, including bio-terrorism, could materially and adversely affect the U.S. economy in general and the health care industry specifically. Depending on the government's actions and the responsiveness of public health agencies and insurance companies, a large-scale public health epidemic or future acts of bio-terrorism could lead to, among other things, increased utilization of health care services and the associated increased health care costs due to increased in-patient and out-patient hospital costs, disruption of information and payment systems and the cost of any anti-viral medication used to treat affected people.
+
+Disasters, including earthquakes, fires and floods, could severely damage or interrupt our systems and operations and result in an adverse effect on our business, financial condition or results of operations.
+
+Disasters such as fires, floods, earthquakes, tornados, power losses, virus outbreaks, telecommunications failures, break-ins or similar events could severely damage or interrupt our systems and operations, result in loss of data, and/or delay or impair our ability to service our members and providers. We have in place a disaster recovery plan that is intended to provide us with the ability to recover our critical information technology systems in the event of a natural disaster utilizing various alternate sites provided by a national disaster recovery vendor. However, there can be no assurance that such adverse effects will not occur in the event of a disaster. Any such disaster or similar event could have a material adverse effect on our business, financial condition and results of operations.
+
+Under the agreements that govern the Northeast Sale, we have retained responsibility for certain liabilities of the acquired business, which could have an adverse effect on our business, financial condition and results of operations.
+
+Under the Stock Purchase Agreement for the Northeast Sale, we are required to indemnify the Buyer and its affiliates for all pre-closing liabilities of the acquired business and for a broad range of excluded liabilities, including liabilities arising out of the acquired business incurred through the winding-up and running-out period of the acquired business. The Stock Purchase Agreement does not limit the amount or duration of our obligations to the Buyer and its affiliates with respect to these indemnities. As a result, in the event that the amount of these liabilities was to exceed our expectations, we could be responsible to the Buyer and its affiliates for substantial indemnification obligations, which could have an adverse effect on our business, financial condition and results of operations.
+
+At the closing of the Northeast Sale, we entered into a Non-Competition Agreement with the Buyer that contains prohibitions which could negatively impact our prospects, business, financial condition or results of operations.
+
+Under the Stock Purchase Agreement, at the closing of the transactions contemplated by the agreement, we entered into a Non-Competition Agreement with the Buyer, pursuant to which we generally are prohibited from competing with the acquired business in the States of New York, New Jersey, Connecticut and Rhode Island for a period of five years from the closing, and from engaging in certain other restricted activities. Although we currently do not have any intention to engage in such prohibited activities during the term of the Non-Competition Agreement, circumstances could change and it may become in our best interests to engage in a business that is prohibited by the agreement. If this were to occur, in order to engage in the business we would be required to obtain the Buyer's consent under the Non-Competition Agreement, which the Buyer could withhold in its discretion. In the event that we are unable to engage in a business due to the terms of the Non-Competition Agreement, this could have an adverse effect on our prospects, business, financial condition or results of operations.
+
+We also face other risks that could adversely affect our business, financial condition or results of operations, which include:
+
+49
+
+•
+
+any requirement to restate financial results in the event of inappropriate application of accounting principles;
+
+•
+
+a significant failure of our internal control over financial reporting;
+
+•
+
+our inability to convert to international financial reporting standards, if required;
+
+•
+
+failure of our prevention and control systems related to employee compliance with internal policies, including data security;
+
+•
+
+provider fraud that is not prevented or detected and impacts our medical costs or those of self-insured customers;
+
+•
+
+failure to protect our proprietary information; and
+
+•
+
+failure of our corporate governance policies or procedures.
+
+Item 1B. Unresolved Staff Comments.
+
+None.
+
+Item 2. Properties.
+
+We lease office space for our principal executive offices in Woodland Hills, California, which is used by each of our reportable segments. The operating lease for our executive offices expires on December 31, 2014 and relates to approximately 125,315 square feet. We also lease a separate 333,954 square foot facility in Woodland Hills primarily to house the operations for a significant portion of our Western Regions Operations reportable segment. The lease for this two-building facility expires December 31, 2021.
+
+In Rancho Cordova and San Rafael, California, we lease an aggregate of approximately 593,216 square feet of office space that is used for operations in our Western Region Operations and Government Contracts reportable segments. The related leases expire at various dates ranging from December 2013 to June 2022.
+
+In addition to the office space referenced above, we lease approximately 53 sites in 12 states, totaling approximately 648,258 square feet of space, which are used by our reportable segments for their respective operations. We also lease approximately 442,928 square feet of office space in Shelton, Connecticut under leases expiring at various dates ranging from 2013 to 2017. We no longer conduct operations in Shelton, and have subleased a portion of this space under subleases expiring at various dates ranging from 2013 to 2016.
+
+We also own a facility in Rancho Cordova, California comprising approximately 82,000 square feet of space, which is used to support operations for all of our reportable segments.
+
+We believe that our properties are adequate and suitable to meet our business needs.
+
+Item 3. Legal Proceedings.
+
+Overview
+
+We record reserves and accrue costs for certain legal proceedings and regulatory matters to the extent that we determine an unfavorable outcome is probable and the amount of the loss can be reasonably estimated. While such reserves and accrued costs reflect our best estimate of the probable loss for such matters, our recorded amounts may differ materially from the actual amount of any such losses. In some cases, no estimate of the possible loss or range of loss in excess of amounts accrued, if any, can be made because of the inherently unpredictable nature of legal and regulatory proceedings, which may be exacerbated by various factors, including but not limited to that they may involve indeterminate claims for monetary damages or may involve fines, penalties or punitive damages; present novel legal theories or legal uncertainties; involve disputed facts; represent a shift in regulatory policy; involve a large number of parties, claimants or regulatory bodies; are in the early stages of the proceedings; involve a number of separate proceedings, each with a wide range of potential outcomes; or result in a change of business practices. Further, there may be various levels of judicial review available to the Company in connection with any such proceeding in the event damages are awarded or a fine or penalty is assessed. As of the date of this report, amounts accrued for legal proceedings and regulatory matters were not material. However, it is possible that in a particular quarter or annual period our financial condition, results of operations, cash flow and/or liquidity could be materially adversely affected by an ultimate unfavorable resolution of or development in legal and/or regulatory proceedings, including those described below in this Item 3 under the heading “Litigation and Investigations Related to Unaccounted-for Server Drives,” depending, in part, upon our financial condition, results of operations, cash flow or liquidity in such period, and our reputation may be adversely affected. Except for the regulatory and legal proceedings discussed in this Item 3 under the heading “Litigation and Investigations Related to Unaccounted-for Server Drives,” management believes that the
+
+50
+
+ultimate outcome of any of the regulatory and legal proceedings that are currently pending against us should not have a material adverse effect on our financial condition, results of operations, cash flow and liquidity.
+
+Litigation and Investigations Related to Unaccounted-for Server Drives
+
+We are a defendant in three related litigation matters pending in California state and federal courts relating to information security issues. On January 21, 2011, International Business Machines Corp. ("IBM"), which handles our data center operations, notified us that it could not locate several hard disk drives that had been used in our data center located in Rancho Cordova, California. We have since determined that personal information of approximately two million former and current Health Net members, employees and health care providers is on the drives. Commencing on March 14, 2011, we provided written notification to the individuals whose information is on the drives. To help protect the personal information of affected individuals, we offered them two years of free credit monitoring services, in addition to identity theft insurance and fraud resolution and restoration of credit files services, if needed.
+
+On March 18, 2011, a putative class action relating to this incident was filed against us in the U.S. District Court for the Central District of California (the "Central District of California"), and similar actions were later filed against us in other federal and state courts in California. A number of those actions were transferred to and consolidated in the U.S. District Court for the Eastern District of California (the "Eastern District of California"), and the two remaining actions are currently pending in the Superior Court of California, County of San Francisco ("San Francisco County Superior Court") and the Superior Court of California, County of Sacramento ("Sacramento County Superior Court"). The consolidated amended complaint in the federal action pending in the Eastern District of California was filed on behalf of a putative class of over 800,000 of our current or former members who received the written notification, and also named IBM as a defendant. It sought to state claims for violation of the California Confidentiality of Medical Information Act and the California Customer Records Act, and sought statutory damages of up to $1,000 for each class member, as well as injunctive and declaratory relief, attorneys' fees and other relief. On January 20, 2012, the district court issued an order dismissing the consolidated complaint on the grounds that the plaintiffs lacked standing to bring their action in federal court. On April 20, 2012, an amended complaint with a new plaintiff was filed against us, but no longer asserted claims against IBM. The amended complaint asserted the same causes of action and sought the same relief as the earlier complaint. On June 18, 2012, we filed a motion to dismiss the amended complaint, which is currently pending.
+
+The San Francisco County Superior Court proceeding was instituted on March 28, 2011 and is brought on behalf of a putative class of California residents who received the written notification, and seeks to state similar claims against us, as well as claims for violation of California's Unfair Competition Law, and seeks similar relief. We moved to compel arbitration of the two named plaintiffs' claims. The court granted our motion as to one of the named plaintiffs and denied it as to the other. We are appealing the latter ruling. Thereafter, the plaintiff as to whom our motion to compel arbitration was granted filed a petition for a writ of mandate with the California Court of Appeal seeking review of that ruling. On July 9, 2012, the Court of Appeal issued a peremptory writ of mandate directing the Superior Court to vacate its order granting the motion to compel arbitration and to enter an order denying the motion to compel.
+
+The Sacramento County Superior Court proceeding was instituted on April 3, 2012 and is brought on behalf of a putative class of California members whose information was contained on the unaccounted for drives. The action contains the same claims and seeks the same relief as the case pending in the Eastern District of California. On June 18, 2012, we filed a demurrer seeking dismissal of this complaint, which is currently pending.
+
+We have also been informed that a number of regulatory agencies are investigating the incident, including the California Department of Managed Health Care ("DMHC"), the California Department of Insurance, the California Attorney General, the Massachusetts Office of Consumer Affairs and Business Regulation and the Office of Civil Rights of the U.S. Department of Health and Human Services.
+
+We intend to vigorously defend ourselves against these claims; however, these proceedings are subject to many uncertainties.
+
+Miscellaneous Proceedings
+
+In the ordinary course of our business operations, we are subject to periodic reviews, investigations and audits by various federal and state regulatory agencies, including, without limitation, CMS, DMHC, the Office of Civil Rights of the U.S. Department of Health and Human Services and state departments of insurance, with respect to our compliance with a wide variety of rules and regulations applicable to our business, including, without limitation, HIPAA, rules relating to pre-authorization penalties, payment of out-of-network claims, timely review of grievances and appeals, and timely and accurate payment of claims, any one of which may result in remediation of certain claims, contract
+
+51
+
+termination, the loss of licensure or the right to participate in certain programs, and the assessment of regulatory fines or penalties, which could be substantial. From time to time, we receive subpoenas and other requests for information from, and are subject to investigations by, such regulatory agencies, as well as from state attorneys general. There also continues to be heightened review by regulatory authorities of, and increased litigation regarding, the health care industry's business practices, including, without limitation, information privacy, premium rate increases, utilization management, appeal and grievance processing, rescission of insurance coverage and claims payment practices.
+
+In addition, in the ordinary course of our business operations, we are party to various other legal proceedings, including, without limitation, litigation arising out of our general business activities, such as contract disputes, employment litigation, wage and hour claims, including, without limitation, cases involving allegations of misclassification of employees and/or failure to pay for off-the-clock work, real estate and intellectual property claims, claims brought by members or providers seeking coverage or additional reimbursement for services allegedly rendered to our members, but which allegedly were denied, underpaid, not timely paid or not paid, and claims arising out of the acquisition or divestiture of various business units or other assets. We are also subject to claims relating to the performance of contractual obligations to providers, members, employer groups and others, including the alleged failure to properly pay claims and challenges to the manner in which we process claims, and claims alleging that we have engaged in unfair business practices. In addition, we are subject to claims relating to information security incidents and breaches, reinsurance agreements, rescission of coverage and other types of insurance coverage obligations and claims relating to the insurance industry in general. We are, and may be in the future, subject to class action lawsuits brought against various managed care organizations and other class action lawsuits.
+
+We intend to vigorously defend ourselves against the miscellaneous legal and regulatory proceedings to which we are currently a party; however, these proceedings are subject to many uncertainties. In some of the cases pending against us, substantial non-economic or punitive damages are being sought.
+
+Potential Settlements
+
+We regularly evaluate legal proceedings and regulatory matters pending against us, including those described above in this Item 3, to determine if settlement of such matters would be in the best interests of the Company and its stockholders. The costs associated with any settlement of the various legal proceedings and regulatory matters to which we are or may be subject from time to time, including those described above in this Item 3, could be substantial and, in certain cases, could result in a significant earnings charge or impact on our cash flow in any particular quarter in which we enter into a settlement agreement and could have a material adverse effect on our financial condition, results of operations, cash flow and/or liquidity and may affect our reputation.
+
+Item 4. Mine Safety Disclosures.
+
+Not applicable.
+
+52
+
+PART II
+
+Item 5. Market For Registrant’s Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities.
+
+The following table sets forth the high and low sales prices of the Company’s common stock, par value $.001 per share, on The New York Stock Exchange (“NYSE”) since January 2011.
+
+High
+
+Low
+
+Calendar Quarter—2011
+
+First Quarter
+
+$32.85
+
+$26.82
+
+Second Quarter
+
+$34.03
+
+$29.36
+
+Third Quarter
+
+$32.62
+
+$20.51
+
+Fourth Quarter
+
+$31.26
+
+$21.46
+
+Calendar Quarter—2012
+
+First Quarter
+
+$40.22
+
+$30.43
+
+Second Quarter
+
+$41.22
+
+$23.80
+
+Third Quarter
+
+$27.42
+
+$16.65
+
+Fourth Quarter
+
+$26.58
+
+$21.09
+
+On February 25, 2013, the last reported sales price per share of our common stock was $25.74 per share.
+
+Securities Authorized for Issuance Under Equity Compensation Plans
+
+Information regarding the Company’s equity compensation plans is contained in Part III of this Annual Report on Form 10-K under “Item 12. Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters.”
+
+Holders of Common Stock
+
+As of February 25, 2013, there were 1,678 registered holders of record of our common stock.
+
+Dividends
+
+We have not paid any dividends on our common stock during the preceding two fiscal years. We have no present intention of paying any dividends on our common stock, although the matter will be periodically reviewed by our Board of Directors.
+
+We are a holding company and, therefore, our ability to pay dividends depends on distributions received from our subsidiaries, which are subject to regulatory net worth requirements and additional state regulations which may restrict the declaration of dividends by HMOs, insurance companies and licensed managed health care plans. The payment of any dividend is at the discretion of our Board of Directors and depends upon our earnings, financial position (including cash position), capital requirements and such other factors as our Board of Directors deems relevant.
+
+Under our revolving credit facility, we cannot declare or pay cash dividends to our stockholders or purchase, redeem or otherwise acquire shares of our capital stock or warrants, rights or options to acquire such shares for cash except to the extent permitted under the revolving credit facility, which is described in “Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations—Liquidity and Capital Resources—Capital Structure.”
+
+Stock Repurchase Program
+
+On March 18, 2010, our Board of Directors authorized our 2010 stock repurchase program pursuant to which a total of $300 million of our common stock could be repurchased. We completed our 2010 stock repurchase program in April 2011, at which time we had repurchased an aggregate of 10.8 million shares of our common stock since the inception of the program at an average price of $27.80 per share for aggregate consideration of $300 million.
+
+On May 2, 2011, our Board of Directors authorized our 2011 stock repurchase program pursuant to which a total of $300 million of our outstanding common stock could be repurchased. On March 8, 2012, our Board of Directors
+
+53
+
+approved a $323.7 million increase to our 2011 stock repurchase program, taking the total available authorization under our 2011 stock repurcahse program to $400 million as of that date. During the year ended December 31, 2012, we repurchased 2.1 million shares of our common stock for aggregate consideration of approximately $50.0 million under our 2011 stock repurchase program. The remaining authorization under our 2011 stock repurchase program as of December 31, 2012 was $350.0 million. For additional information on our stock repurchase programs, see Note 9 to our consolidated financial statements.
+
+Under our various stock option and long-term incentive plans, employees and non-employee directors may elect for the Company to withhold shares to satisfy minimum statutory federal, state and local tax withholding and/or exercise price obligations, as applicable, arising from the exercise of stock options. For certain other equity awards, we have the right to withhold shares to satisfy any tax obligations that may be required to be withheld or paid in connection with such equity award, including any tax obligation arising on the vesting date. These repurchases were not part of either of our stock repurchase programs.
+
+The following table presents monthly information related to repurchases of our common stock, including shares withheld by the Company to satisfy tax withholdings and exercise price obligations in 2012, as of December 31, 2012:
+
+Period
+
+Total Number
+
+of Shares
+
+Purchased (a)
+
+Average
+
+Price Paid
+
+per Share
+
+Total
+
+Price Paid
+
+Total Number
+
+of Shares
+
+Purchased as
+
+Part of Publicly
+
+Announced
+
+Programs (b)
+
+Maximum Dollar Value of
+
+Shares (or Units)
+
+that May Yet Be
+
+Purchased Under
+
+the Programs (b)
+
+January 1—January 31
+
+—
+
+$
+
+—
+
+$
+
+—
+
+—
+
+$
+
+76,341,683
+
+February 1—February 28
+
+488,964
+
+(c)
+
+39.28
+
+19,205,186
+
+—
+
+$
+
+76,341,683
+
+March 1—March 31
+
+857
+
+(c)
+
+38.59
+
+33,072
+
+—
+
+$
+
+400,000,000
+
+April 1—April 30
+
+—
+
+—
+
+—
+
+—
+
+$
+
+400,000,000
+
+May 1—May 31
+
+—
+
+—
+
+—
+
+—
+
+$
+
+400,000,000
+
+June 1—June 30
+
+561,600
+
+24.75
+
+13,899,362
+
+561,600
+
+$
+
+386,100,638
+
+July 1—July 31
+
+1,182,859
+
+(c)
+
+24.88
+
+29,428,383
+
+1,182,400
+
+$
+
+356,682,688
+
+August 1—August 31
+
+336,279
+
+(c)
+
+19.95
+
+6,709,955
+
+334,761
+
+$
+
+350,000,012
+
+September 1—September 30
+
+1,401
+
+(c)
+
+23.25
+
+32,573
+
+—
+
+$
+
+350,000,012
+
+October 1—October 31
+
+1,503
+
+(c)
+
+23.06
+
+34,659
+
+—
+
+$
+
+350,000,012
+
+November 1—November 30
+
+1,712
+
+(c)
+
+23.85
+
+40,831
+
+—
+
+$
+
+350,000,012
+
+December 1—December 31
+
+3,668
+
+(c)
+
+24.91
+
+91,366
+
+—
+
+$
+
+350,000,012
+
+2,578,843
+
+$
+
+26.94
+
+$
+
+69,475,387
+
+2,078,761
+
+________
+
+(a)
+
+During the twelve months ended December 31, 2012, we did not repurchase any shares of our common stock outside our publicly announced stock repurchase programs, except shares withheld in connection with our various stock option and long-term incentive plans.
+
+(b)
+
+On May 2, 2011, our Board of Directors authorized our 2011 stock repurchase program, and the remaining authorization under the program as of December 31, 2012 was $350.0 million. Our 2011 stock repurchase program does not have an expiration date. During the twelve months ended December 31, 2012, we did not have any repurchase program expire, and we did not terminate any repurchase program prior to its expiration date.
+
+(c)
+
+Includes shares withheld by the Company to satisfy tax withholding and/or exercise price obligations arising from the vesting and/or exercise of restricted stock units, stock options and other equity awards.
+
+Performance Graph
+
+The following graph compares the performance of the Company's Common Stock with the performance of the Standard & Poor's 500 Composite Stock Price Index (the “S&P 500 Index”) and our Industry Peer Group Index. We calculate year-end values based on the closing prices from the final trading days in December 2007, 2008, 2009, 2010, 2011 and 2012. The graph assumes that $100 was invested on December 31, 2007 in each of the Common Stock, the S&P 500 Index, and the Industry Peer Group Index, and that all dividends were reinvested. The Industry Peer Group
+
+54
+
+Index weights the constituent companies' stock performance on the basis of market capitalization at the beginning of each annual period.
+
+The Company’s Industry Peer Group Index includes the following companies: Aetna, Inc., Cigna Corporation, Coventry Health Care, Humana, Inc., UnitedHealth Group, Inc. and WellPoint, Inc.
+
+Indexed Total Return (Stock Price Plus Reinvested Dividends)
+
+Name
+
+12/31/2007
+
+12/31/2008
+
+12/31/2009
+
+12/31/2010
+
+12/31/2011
+
+12/31/2012
+
+Health Net
+
+$100.00
+
+$22.55
+
+$48.22
+
+$56.50
+
+$62.98
+
+$50.31
+
+Standard & Poor’s 500 Index
+
+$100.00
+
+$63.01
+
+$79.69
+
+$91.71
+
+$93.62
+
+$108.59
+
+Industry Peer Group Index
+
+$100.00
+
+$45.04
+
+$57.48
+
+$62.47
+
+$83.88
+
+$88.83
+
+All historical performance data reflects the performance of each company’s stock only and does not include the historical performance data of acquired companies.
+
+The preceding graph and related information are being furnished solely to accompany this Annual Report on Form 10-K pursuant to Item 201(e) of Regulation S-K and shall not be deemed “soliciting materials” or to be “filed” with the Securities and Exchange Commission (other than as provided in Item 201). Such information shall not be incorporated by reference into any filing under the Securities Act of 1933, as amended, or the Securities Exchange Act of 1934, as amended, whether made before or after the date hereof and irrespective of any general incorporation language contained therein, except to the extent that we specifically incorporate it by reference into such filing.
+
+55
+
+Item 6. Selected Financial Data.
+
+The following selected financial and operating data as of and for the years ended December 31, 2012, 2011, and 2010 are derived from our audited consolidated financial statements and notes thereto contained in this Annual Report on Form 10-K. The selected financial and operating data as of and for the years ended December 31, 2009 and 2008 are derived from our audited consolidated financial statements which are not included herein. The selected financial and operating data should be read in conjunction with “Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations” and the consolidated financial statements and notes thereto contained elsewhere in this Annual Report on Form 10-K.
+
+Year Ended December 31,
+
+2012
+
+2011
+
+2010
+
+2009
+
+2008
+
+(Dollars in thousands, except per share and PMPM data)
+
+REVENUES:
+
+Health plan services premiums (1)
+
+$
+
+10,459,098
+
+$
+
+9,878,687
+
+$
+
+9,492,460
+
+$
+
+11,975,356
+
+$
+
+11,926,881
+
+Government contracts
+
+689,121
+
+1,416,619
+
+3,344,483
+
+3,104,700
+
+2,835,261
+
+Net investment income
+
+82,434
+
+74,161
+
+71,181
+
+105,930
+
+91,042
+
+Administrative services fees and other income (1)
+
+17,968
+
+11,523
+
+21,126
+
+61,976
+
+48,259
+
+Divested operations and services revenue (1)
+
+40,471
+
+34,446
+
+186,167
+
+—
+
+—
+
+Total revenues (1)
+
+$
+
+11,289,092
+
+$
+
+11,415,436
+
+$
+
+13,115,417
+
+$
+
+15,247,962
+
+$
+
+14,901,443
+
+INCOME SUMMARY (2):
+
+Income (loss) from continuing operations
+
+$
+
+25,681
+
+$
+
+61,056
+
+$
+
+171,885
+
+$
+
+(81,948
+
+)
+
+$
+
+91,149
+
+Income on discontinued operation, net of tax
+
+96,382
+
+11,064
+
+32,358
+
+32,944
+
+3,854
+
+Net income (loss)
+
+$
+
+122,063
+
+$
+
+72,120
+
+$
+
+204,243
+
+$
+
+(49,004
+
+)
+
+$
+
+95,003
+
+NET INCOME (LOSS) PER SHARE—DILUTED (2):
+
+Income (loss) from continuing operations
+
+$0.31
+
+$
+
+0.68
+
+$
+
+1.73
+
+$(0.79)
+
+$0.85
+
+Income of discontinued operation, net of tax
+
+$1.16
+
+$
+
+0.12
+
+$
+
+0.33
+
+$0.32
+
+$0.03
+
+Net income (loss)
+
+$1.47
+
+$
+
+0.80
+
+$
+
+2.06
+
+$(0.47)
+
+$0.88
+
+Weighted average shares outstanding:
+
+Diluted
+
+83,112
+
+89,970
+
+99,232
+
+103,849
+
+107,610
+
+BALANCE SHEET DATA:
+
+Cash and cash equivalents and investments available for sale
+
+$2,152,622
+
+$1,790,397
+
+$
+
+2,022,112
+
+$2,079,815
+
+$2,172,859
+
+Total assets
+
+3,934,390
+
+3,607,669
+
+4,131,693
+
+4,282,651
+
+4,816,350
+
+Loans payable—Current
+
+—
+
+—
+
+—
+
+104,007
+
+27,335
+
+Loans payable—Long term
+
+100,000
+
+112,500
+
+—
+
+100,000
+
+253,992
+
+Senior notes payable
+
+399,095
+
+398,890
+
+398,685
+
+398,480
+
+398,276
+
+Total stockholders’ equity (3)
+
+1,557,030
+
+1,443,146
+
+1,694,416
+
+1,695,783
+
+1,752,126
+
+OPERATING DATA:
+
+Pretax margin from continuing operations (4)
+
+0.3
+
+%
+
+1.4
+
+%
+
+2.1
+
+%
+
+(0.5)%
+
+0.9
+
+%
+
+Western Region Operations health plans services medical care ratio (MCR) (4)
+
+89.1
+
+%
+
+86.5
+
+%
+
+87.1
+
+%
+
+87.1
+
+%
+
+87.4
+
+%
+
+Western Region Operations G&A expense ratio (4)
+
+8.6
+
+%
+
+8.6
+
+%
+
+8.5
+
+%
+
+8.2
+
+%
+
+8.1
+
+%
+
+Western Region Operations selling costs ratio (4)
+
+2.4
+
+%
+
+2.4
+
+%
+
+2.5
+
+%
+
+2.5
+
+%
+
+2.9
+
+%
+
+Western Region Operations health plan services premiums per member per month (PMPM) (4)
+
+$341.28
+
+$322.28
+
+$315.55
+
+$305.12
+
+$287.96
+
+Western Region Operations health plan services costs PMPM (4)
+
+$304.01
+
+$278.85
+
+$274.70
+
+$265.86
+
+$251.64
+
+Net cash provided by operating activities
+
+$32,540
+
+$103,380
+
+$308,038
+
+$82,659
+
+$58,741
+
+Net cash (used in) provided by investing activities
+
+$(12,558)
+
+$222,227
+
+$(200,593)
+
+$(135,174)
+
+$(67,871)
+
+Net cash provided by (used in) financing activities
+
+$89,875
+
+$(445,492)
+
+$(440,110)
+
+$67,117
+
+$(329,686)
+
+56
+
+__________
+
+(1) Revenues for the years ended December 31, 2011, 2010, 2009 and 2008 were restated to reflect discontinued operations.
+
+(2)
+
+For 2012, includes a gain on sale of discontinued operation in the amount of $114.8 million after-tax. Our operating results for the year ended December 31, 2012 were impacted by approximately $35 million of adverse development related to prior years recorded as part of our health care cost. In addition, our operating results for the year ended December 31, 2012 were impacted by pretax costs of $35.6 million related to our G&A cost reduction efforts, a $5.0 million expense related to the early termination of a medical management contract and $1.3 million in litigation-related expenses net of an insurance reimbursement. For 2011, includes a $181 million pretax expense related to a litigation judgment in the first quarter. In addition, our operating results for the year ended December 31, 2011 were impacted by a $40.8 million favorable adjustment to loss on sale of Northeast health plan subsidiaries and a $6.8 million benefit from litigation reserve adjustments, partially offset by pretax costs of $25.2 million related to our G&A cost reduction efforts. For 2010, includes pretax charges of $61.2 million related to our operations strategy and other cost management initiatives, and $9.0 million in early debt extinguishment and related interest rate swap termination costs, partially reduced by a $46.5 million benefit from litigation reserve adjustments and a $42.0 million adjustment to loss on sale of Northeast health plan subsidiaries. For 2009, includes pretax charges of $105.9 million for loss on Northeast Sale, $174.9 million of asset impairment on Northeast operations and $123.6 million related to our operations strategy, reductions for litigation reserve adjustments and Northeast Sale-related expenses. For 2008, includes pretax charges of $175.1 million for costs related to our operations strategy, legal and regulatory fees primarily associated with our rescission practices, estimated costs related to the settlement agreement for a large class action lawsuit, and other-than-temporary impairments of investments.
+
+(3) No cash dividends were declared in any of the years presented.
+
+(4) Restated for the years ended December 31, 2011, 2010, 2009 and 2008 to reflect the impact of discontinued operation.
+
+57
+
+Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations.
+
+OVERVIEW
+
+General
+
+We are a publicly traded managed care organization that delivers managed health care services through health plans and government-sponsored managed care plans. Our mission is to help people be healthy, secure and comfortable. We provide and administer health benefits to approximately 5.4 million individuals across the country through group, individual, Medicare (including the Medicare prescription drug benefit commonly referred to as "Part D"), Medicaid, U.S. Department of Defense (“Department of Defense” or “DoD”), including TRICARE, and Veterans Affairs programs. Through our subsidiaries, we also offer behavioral health, substance abuse and employee assistance programs, managed health care products related to prescription drugs, managed health care product coordination for multi-region employers, and administrative services for medical groups and self-funded benefits programs.
+
+How We Report Our Results
+
+We operate within three reportable segments, Western Region Operations, Government Contracts and Divested Operations and Services, each of which is described below.
+
+Our health plan services are provided under our Western Region Operations reportable segment, which includes the operations primarily conducted in California, Arizona, Oregon and Washington for our commercial, Medicare and Medicaid health plans, our health and life insurance companies, our pharmaceutical services subsidiaries and certain operations of our behavioral health subsidiaries in several states including Arizona, California and Oregon. We have approximately 2.6 million medical members in our Western Region Operations reportable segment. On April 1, 2012, we completed the sale of our Medicare stand-alone prescription drug plan business ("Medicare PDP business") to Pennsylvania Life Insurance Company, a subsidiary of CVS Caremark Corporation ("CVS Caremark"). As a result, the operating results related to our Medicare PDP business have been excluded from continuing operations results and are classified in this Annual Report on Form 10-K as discontinued operations for the years ended December 31, 2012, 2011 and 2010. Accordingly, the information included in this Annual Report on Form 10-K regarding our Western Region Operations reportable segment excludes the operating results of our Medicare PDP business for the years ended December 31, 2012, 2011 and 2010. For additional information regarding the sale of our Medicare PDP business, see Note 3 to our consolidated financial statements.
+
+Our Government Contracts segment includes our government-sponsored managed care contract with the DoD under the TRICARE program in the North Region and other health care-related government contracts. On April 1, 2011, we began delivery of administrative services under a new Managed Care Support Contract (“T-3 contract”) for the TRICARE North Region. Under the T-3 contract for the TRICARE North Region, we provide administrative services to approximately 2.9 million Military Health System (“MHS”) eligible beneficiaries. See Note 2 to our consolidated financial statements under the heading “Government Contracts” for additional information on the T-3 contract. In addition, we also provide behavioral health services to military families under the DoD's Military and Family Life Counseling, formerly Military and Family Life Consultant (“MFLC”) contract, which is also included in our Government Contracts segment. For additional information on our MFLC contract, see "— Results of Operations—Government Contracts Reportable Segment."
+
+Prior to its conclusion on March 31, 2011, our previous TRICARE contract for the North Region was included in our Government Contracts segment. Under our previous TRICARE contract for the North Region, we provided health care services to approximately 3.1 million MHS eligible beneficiaries, including 1.8 million TRICARE eligible beneficiaries for whom we provided health care and administrative services and 1.3 million other MHS eligible beneficiaries for whom we provided administrative services only ("ASO").
+
+As a result of entering into a definitive agreement in January 2012 to sell our Medicare PDP business, we reviewed our reportable segments in the first quarter of 2012. Following this review, all services provided in connection with divested businesses, including those relating to the sale of our Medicare PDP business and the Northeast Sale (as defined below), were reported as part of our Divested Operations and Services reportable segment beginning in the first quarter of 2012. Prior period segment information has been conformed to this current presentation in this Annual Report on Form 10-K.
+
+Prior to the sale of our Medicare PDP business, our Divested Operations and Services reportable segment, formerly called the "Northeast Operations" reportable segment, included the operations of our businesses that provided administrative and run-out support services to an affiliate of UnitedHealth Group Incorporated ("United") and its affiliates under administrative services and claims servicing agreements in connection with the sale of all of the
+
+58
+
+outstanding shares of capital stock of our health plan subsidiaries that were domiciled and had conducted businesses in Connecticut, New Jersey, New York and Bermuda to United (the "Northeast Sale"). Beginning in the first quarter of 2012, this segment also includes the transition-related expenses of our divested Medicare PDP business. See Note 2 to our consolidated financial statements under the heading “Divested Operations and Services” and Notes 3 and 14 to our consolidated financial statements for additional information regarding our reportable segments, the Northeast Sale and the sale of our Medicare PDP business.
+
+How We Measure Our Profitability
+
+Our profitability depends in large part on our ability to, among other things, effectively price our health care products; manage health care and pharmacy costs; contract with health care providers; attract and retain members; and manage our general and administrative (“G&A”) and selling expenses. In addition, factors such as state and federal health care reform legislation and regulation, competition and general economic conditions affect our operations and profitability. The effect of escalating health care costs, as well as any changes in our ability to negotiate competitive rates with our providers, may impose further risks to our ability to profitably underwrite our business. Each of these factors may have a material impact on our business, financial condition or results of operations.
+
+We measure our Western Region Operations reportable segment profitability based on medical care ratio (“MCR”) and pretax income. The MCR is calculated as health plan services expense divided by health plan services premiums. The pretax income is calculated as health plan services premiums and administrative services fees and other income less health plan services expense and G&A and other net expenses. See “—Results of Operations—Western Region Operations Reportable Segment—Western Region Operations Segment Results” for a calculation of MCR and pretax income.
+
+Health plan services premiums generally include health maintenance organization (“HMO”), point of service (“POS”) and preferred provider organization (“PPO”) premiums from employer groups and individuals and from Medicare recipients who have purchased supplemental benefit coverage (which premiums are based on a predetermined prepaid fee), Medicaid revenues based on multi-year contracts to provide care to Medicaid recipients, and revenue under Medicare risk contracts to provide care to enrolled Medicare recipients. Medicare revenue can also include amounts for risk factor adjustments and additional premiums that we charge in some places to members who purchase our Medicare risk plans. The amount of premiums we earn in a given period is driven by the rates we charge and enrollment levels. Administrative services fees and other income primarily includes revenue for administrative services such as claims processing, customer service, medical management, provider network access and other administrative services. Health plan services expense generally includes medical and related costs for health services provided to our members, including physician services, hospital and related professional services, outpatient care, and pharmacy benefit costs. These expenses are impacted by unit costs and utilization rates. Unit costs represent the health care cost per visit, and the utilization rates represent the volume of health care consumption by our members.
+
+G&A expenses include those costs related to employees and benefits, consulting and professional fees, marketing, business expansion initiatives, premium taxes and assessments, occupancy costs and litigation and regulatory-related costs. Such costs are driven by membership levels, introduction of new products or provision of new services, system consolidations, outsourcing activities and compliance requirements for changing regulations, among other things. These expenses also include expenses associated with corporate shared services and other costs to reflect the fact that such expenses are incurred primarily to support health plan services. Selling expenses consist of external broker commission expenses and generally vary with premium volume.
+
+We measure our Government Contracts segment profitability based on pretax income, which is calculated as Government Contracts revenue less Government Contracts cost. See “—Results of Operations—Government Contracts Reportable Segment—Government Contracts Segment Results” for a calculation of the government contracts pretax income.
+
+Under the T-3 contract for the TRICARE North Region, we provide various types of administrative services including provider network management, referral management, medical management, disease management, enrollment, customer service, clinical support service, and claims processing. We also provide assistance in the transition activities related to both the T-3 contract and the prior TRICARE North Region contract. These services are structured as cost reimbursement arrangements for health care costs plus administrative fees earned in the form of fixed prices, fixed unit prices, and contingent fees and payments based on various incentives and penalties. We recognize revenue related to administrative services on a straight-line basis over the option period, when the fees become fixed and determinable. The TRICARE North Region members are served by our network and out-of-network providers in accordance with the T-3 contract. We pay health care costs related to these services to the providers and are later reimbursed by the DoD for such payments. Under the terms of the T-3 contract, we are not the primary obligor for health care services and
+
+59
+
+accordingly, we do not include health care costs and related reimbursements in our consolidated statements of operations. The T-3 contract also includes various performance-based incentives and penalties. For each of the incentives or penalties, we adjust revenue accordingly based on the amount that we have earned or incurred at each interim date and are legally entitled to in the event of a contract termination. See Note 2 to our consolidated financial statements under the heading “Government Contracts” for additional information on our T-3 contract.
+
+Under our previous TRICARE contract for the North Region, Government contracts revenue was made up of two major components: health care and administrative services. The health care component included revenue recorded for health care costs for the provision of services to our members, including paid claims and estimated incurred but not reported claims (“IBNR”) expenses for which we were at risk, and underwriting fees earned for providing health care and assuming underwriting risk in the delivery of care. The administrative services component encompassed fees received for all other services provided to both the government customer and to beneficiaries, including services such as medical management, claims processing, enrollment, customer services and other services unique to the managed care support contract with the government. Government contracts revenue and expenses included the impact from underruns and overruns relative to our target cost under the applicable contracts.
+
+We measure our Divested Operations and Services segment profitability based on pretax income. This pretax income is calculated as Divested Operations and Services segment total revenues less Divested Operations and Services segment total expenses. See “—Results of Operations—Divested Operations and Services Reportable Segment Results” for a calculation of our Divested Operations and Services pretax income.
+
+Health Care Reform Legislation
+
+During the first quarter of 2010, President Obama signed into law both the Patient Protection and Affordable Care Act and the Health Care and Education Reconciliation Act of 2010 (collectively, the “ACA”), which is causing and will continue to cause significant changes to the U.S. health care system and alter the dynamics of the health care insurance industry. The legislation includes provisions, which, among other things will impose a significant non-deductible tax (technically taking the form of a “fee”) on health insurers, effective for calendar years beginning after December 31, 2013. This “health insurer fee” will be assessed at a total of $8 billion in 2014, will increase thereafter and will be allocated pro rata amongst industry participants based on net premiums written, subject to certain exceptions. Payment of the health insurer fee will not be due until 2014; however, it has started to impact us since our premium rates are set a year in advance, and the tax amounts for 2014 depend on net premiums written in 2013. Additionally, regulations relating to the health insurer fee have not yet been issued by the Internal Revenue Service (“IRS”), making related payment procedures, timing and financial reporting requirements unclear. If we are not able to incorporate the costs of our pro rata portion of the health insurer fee when we set our premium rates, or if we are unable to otherwise adjust our business to address this additional new cost, our financial condition and results of operations may be materially adversely affected. In addition, some of our competitors may have greater economies of scale, which, among other things, may lead to lower expense ratios and higher profit margins than we have. Since the health insurer fee is not tax deductible, it will generally represent a higher percentage of our profits, and therefore could impact us to a greater degree than these larger competitors. Moreover, some of our competitors, including, among others, government entities, certain non profits insurers and self funded plans, may not be required to pay the health insurer fee or may be required to pay only one-half the rate we will be required to pay, which may have an adverse effect on our ability to compete effectively. We may not be able to match our competitors' ability to support reduced premiums by virtue of any full or partial exemptions from the fees and taxes imposed by the ACA, or by making changes to their distribution arrangements, decreasing spending on non-medical product features and services, or otherwise adjusting their operating costs and reducing general and administrative expenses.
+
+In addition, the ACA requires the establishment of state-based or federally facilitated “exchanges” where individuals and small groups may purchase health coverage. California, Oregon and Washington, among others, have passed legislation that will make coverage by health plans on their respective exchanges effective in 2014. Participation in these and other exchanges in the states in which we operate may be conditioned on the approval of the applicable state or federal government regulator. In some cases, the factors to be considered for inclusion on the exchanges have not yet been finalized or may be subject to change, which could result in the exclusion of some carriers from the exchanges. In addition, states and the federal government are continuing to finalize other rules and regulations related to the actual operation of the exchanges, including, without limitation, with respect to state and federal rate review for plans offered on the exchanges, federal subsidies for premiums, cost-sharing reductions, mandated state "essential health benefits", the operation of reinsurance, risk corridors and risk adjustment mechanisms and the ability of participating insurers to continue to offer coverage to individuals and small group employers outside the exchanges. We have submitted bids to participate in certain exchanges, and intend to submit future bids in certain eligible counties, but due in part to the uncertainty and complexity of the regulatory environment surrounding the implementation of the
+
+60
+
+exchanges, including, among other things, with respect to the required level of essential health benefits that must be provided by participants in the exchanges, there is no assurance that our bids or any participation in exchanges will be successful. The developing regulatory structure for the exchanges will shape the marketplace for individual and small group health plans both within and outside the exchanges, and these changes will require us to modify our strategies and operations in response. For example, we will need to adjust our product offerings and marketing and sales practices, including through the development of new tools, to adapt to the new direct-to-consumer distribution channels that will be introduced in the exchanges. In response to these changes in the health care market, our competitors could modify their product features or benefits, change their pricing relative to others in the market and adjust their mix of business within or outside the exchanges, or even exit segments of the market. New competitors seeking to gain a foothold in the changing market may also introduce product offerings or pricing that we may not be able to match, which may adversely affect our ability to compete effectively. See “Item 1A. Risk Factors—The markets in which we do business are highly competitive. If we do not design and price our product offerings competitively, our membership and profitability could decline” for additional discussion on the risks related to the changing competitive landscape. If we fail to effectively adapt our business strategy and operations to these evolving markets, including with respect to shifts in consumer interface, product offerings and the competitive landscape, our financial condition and results of operations may be adversely affected.
+
+The ACA also contains risk adjustment provisions applicable to the individual and small group markets that take effect in 2014. These risk adjustment provisions will effectively transfer funds from health plans with relatively lower risk enrollees to plans with relatively higher risk enrollees to help protect against adverse selection. The individual and small group markets represent a significant portion of our commercial business and the relevant amounts transferred may be substantial. Effectively adapting to these risk adjustment provisions may require us to modify our operational and strategic initiatives to focus on and manage different populations of potential members than we have in the past. In addition, the risk adjustment mechanism relies on encounter data to define a health plan's average actuarial risk. The process of collecting this data presents disadvantages to more heavily capitated health plans such as ours because providers receiving fixed fees from health insurers do not have the same incentive to provide accurate and complete encounter data with respect to services rendered when compared to providers under fee for service arrangements. This incentive problem is particularly acute for health plans operating under the delegated HMO model, which is prevalent in our California health plans. Under this model, third party intermediaries assume responsibility for certain utilization management and care coordination responsibilities, including the collection of encounter data. If we are not able to successfully design and implement operational and strategic initiatives to adapt to these changes in certain of our markets, our financial condition and results of operations may be materially adversely affected.
+
+For a further discussion regarding the ACA and related legislation, including a description of certain of its key provisions and the proposed timetable for their implementation, see “Item 1. Business—Government Regulation—Health Care Reform Legislation”
+
+Implementation of the provisions of the ACA generally varies from as early as enactment to as late as 2018. In addition to the health insurer fee, the establishment of the exchanges and the risk adjustment provisions described above, some other potentially significant provisions of the ACA will not become effective until 2014 or later, including, but not limited to, the excise tax on high premium insurance policies, increased taxes on medical device manufacturers, increased fees on pharmaceutical manufacturers, the guaranteed issue requirement and the individual mandate. However, some of these provisions will have an earlier impact on our operations, including in connection with the setting of our premium rates as discussed above.
+
+Various aspects of the ACA will transform the operating and regulatory landscape in the markets in which we operate, and could have an adverse impact on the cost of operating our business, and our revenues, enrollment and premium growth in certain products and market segments. For example, among other things, the ACA will require premium rate review in certain market segments and will require that premium rebates be paid to policyholders in the event certain specified minimum medical loss ratios are not met. We do not believe that we will be required to pay a material amount in rebates with respect to our 2012 business, however, we cannot be certain that we will not be required to pay material amounts in rebates in the future. In addition, as part of the rate review process, certain insurers may be excluded from participating in the exchanges if the review determines that the insurer has demonstrated a pattern or practice of excessive or unjustified premium rate increases. The ACA may also make it more difficult for us to attract and retain members, and will increase the amount of certain taxes and fees we pay, the latter of which is expected to increase our effective tax rate in future periods. As noted above with respect to the health insurer fee, we are unable to estimate the amount of these fees and taxes or the increase in our effective tax rate because material information and guidance regarding the calculations of these fees and taxes has not been issued. The sales tax on medical device manufacturers and increase in the amount of fees pharmaceutical manufacturers pay imposed by the ACA, could, in turn, also increase our medical costs. Further, it is not yet clear how state regulators will respond to rate
+
+61
+
+filings that include requests to increase premiums to cover increased costs resulting from the health insurer fee or any other portion of the ACA, particularly in light of recent heightened regulatory scrutiny of premium rates. In the event regulators take positions preventing or delaying health insurers from increasing premiums to reflect ACA-related costs, or if consumers forego coverage as a result of such premium increases, our financial condition, results of operations and cash flows may be adversely affected. See “Item 1A. Risk Factors—We face competitive and regulatory pressure to contain premium prices. If the premiums we charge are insufficient to cover our costs, it could have a material adverse effect on our business, financial condition or results of operations” for further information on how these increased costs and our related ability to increase premium prices could affect our profitability.
+
+We also face additional competition as new competitors enter the marketplace and existing competitors seize on opportunities to expand their business as a result of the ACA, including as discussed above with respect to the exchanges. For example, among other things, ACA provisions related to accountable care organizations, or “ACOs”, which are intended to create incentives for health care participants to work together to treat an individual across different care settings, may create opportunities for provider organizations to compete with us by assuming care management and other administrative responsibilities as part of a more integrated delivery system. However, there remains considerable uncertainty about the impact of the ACA on the health insurance market as a whole and what actions our competitors or potential competitors could take in response to the legislation. For additional information, see “Item 1A. Risk Factors—The markets in which we do business are highly competitive. If we do not design and price our product offerings competitively, our membership and profitability could decline.”
+
+Because of the magnitude, scope and complexity of the ACA, we also need to dedicate substantial resources and incur material expenses to implement the legislation. Any delay or failure by us to execute our operational and strategic initiatives with respect to health care reform or otherwise appropriately react to the legislation, implementing regulations and actions of our competitors could result in operational disruptions, disputes with our providers or members, increased exposure to litigation, regulatory issues, damage to our existing or potential member relationships or other adverse consequences.
+

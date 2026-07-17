@@ -1,0 +1,2118 @@
+EX-10.34
+7
+tm2214659d7_ex10-34.htm
+EXHIBIT 10.34
+
+Exhibit 10.34
+
+***Certain identified information has been omitted
+from this exhibit because it is both (i) not material and (ii) information that the Registrant treats as private or confidential. Such
+omitted information is indicated by brackets (“[...***...]”) in this exhibit. ***
+
+PRODUCT DEVELOPMENT AGREEMENT
+
+by and between
+
+STASON PHARMACEUTICALS, INC. (on the one hand)
+
+and
+
+OISHI KOSEIDO CO., LTD
+
+together with
+
+ITOCHU CHEMICAL FRONTIER Corporation (on the
+other hand).
+
+DATED AS OF May 11th, 2011
+
+ARTICLE 1.
+
+DEFINITIONS
+
+1
+
+ARTICLE 2.
+
+PRODUCT DEVELOPMENT
+
+7
+
+2.1
+
+General Development Obligations
+
+7
+
+ARTICLE 3.
+
+DEVELOPMENT COMMITTEE
+
+9
+
+3.1
+
+Development Committee
+
+9
+
+3.2
+
+Purpose and Responsibilities of the Development Committee
+
+9
+
+3.3
+
+Development Committee Meetings
+
+10
+
+ARTICLE 4.
+
+REGULATORY
+
+10
+
+4.1
+
+Ownership and Maintenance
+
+10
+
+4.2
+
+Regulatory Approvals and Applications
+
+10
+
+4.3
+
+Regulatory Expenses
+
+11
+
+ARTICLE 5.
+
+API
+
+11
+
+5.1
+
+API Supply
+
+11
+
+5.2
+
+Criteria for API Quality and for API Supplier
+
+11
+
+5.3
+
+Qualification of Secondary API Supplier
+
+12
+
+5.4
+
+Information
+
+12
+
+ARTICLE 6.
+
+SUPPLY
+
+12
+
+6.1
+
+Development Supply
+
+12
+
+6.4
+
+Facility Updates
+
+13
+
+6.5
+
+Documentation
+
+13
+
+ARTICLE 7.
+
+FINANCIAL PROVISIONS
+
+13
+
+7.1
+
+Development Costs and Expenses
+
+13
+
+7.2
+
+Royalty
+
+13
+
+7.3
+
+Sublicense Fees
+
+13
+
+7.4
+
+Records
+
+13
+
+7.5
+
+Accounting
+
+14
+
+ARTICLE 8.
+
+COMPLIANCE STANDARDS
+
+15
+
+8.1
+
+Development Compliance
+
+15
+
+8.2
+
+Warranties by Developers
+
+15
+
+8.3
+
+Warranties by Stason
+
+15
+
+ARTICLE 9.
+
+LICENSE GRANTS; EXCLUSIVITIES
+
+16
+
+9.1
+
+License Grant
+
+16
+
+9.2
+
+Exclusivity
+
+16
+
+ARTICLE 10.
+
+COMMERCIALIZATION
+
+17
+
+10.1
+
+Marketing, Sales and Distribution Obligations
+
+17
+
+10.2
+
+Label
+
+17
+
+-i-
+
+ARTICLE 11.
+
+INTELLECTUAL PROPERTY
+
+17
+
+11.1
+
+General Ownership
+
+17
+
+11.2
+
+Patent Prosecution
+
+17
+
+11.3
+
+Possible Infringement of Either Party’s Intellectual Property by Third Parties
+
+18
+
+11.4
+
+Claims by Third Parties
+
+19
+
+11.5
+
+Cooperation
+
+19
+
+ARTICLE 12.
+
+CONFIDENTIALITY AND PUBLIC DISCLOSURE
+
+20
+
+12.1
+
+Confidential Information
+
+20
+
+ARTICLE 13.
+
+REPRESENTATIONS AND WARRANTIES
+
+20
+
+13.1
+
+Developers Representations
+
+20
+
+13.2
+
+Stason Representations
+
+21
+
+ARTICLE 14.
+
+INDEMNIFICATION
+
+21
+
+14.1
+
+Stason Indemnification
+
+21
+
+14.2
+
+Developers Indemnification
+
+22
+
+14.3
+
+Other Claims
+
+22
+
+14.4
+
+Obligations of the Indemnified Party
+
+22
+
+14.5
+
+Settlement
+
+23
+
+ARTICLE 15.
+
+TERM AND TERMINATION
+
+23
+
+15.1
+
+Term
+
+23
+
+15.2
+
+Termination for Breach
+
+23
+
+15.3
+
+Termination for Study Failure
+
+23
+
+15.4
+
+Termination for Refusal to File
+
+23
+
+15.5
+
+Termination for Efficacy Study Requirement
+
+24
+
+15.6
+
+Termination Regarding Economic Viability
+
+24
+
+15.7
+
+Termination right for Failure to Submit Application
+
+24
+
+15.8
+
+Termination right for Failure to Agree
+
+24
+
+15.9
+
+Termination for Bankruptcy
+
+25
+
+15.10
+
+Reversion of Rights to Developers upon Termination
+
+25
+
+15.11
+
+Survival
+
+25
+
+ARTICLE 16.
+
+INSURANCE
+
+25
+
+16.1
+
+Insurance
+
+25
+
+-ii-
+
+ARTICLE 17.
+
+MISCELLANEOUS
+
+25
+
+17.1
+
+Interpretation and Construction
+
+25
+
+17.2
+
+Independent Contractor Status
+
+26
+
+17.3
+
+Waiver and Modification
+
+26
+
+17.4
+
+Assignment
+
+26
+
+17.5
+
+Severability
+
+26
+
+17.6
+
+Further Assurances
+
+26
+
+17.7
+
+Use of Party’s Name
+
+26
+
+17.8
+
+Notices
+
+27
+
+17.9
+
+Dispute Resolution
+
+27
+
+17.10
+
+Governing Law and Arbitration
+
+27
+
+17.11
+
+Force Majeure
+
+28
+
+17.12
+
+Entire Agreement
+
+28
+
+17.13
+
+Counterparts
+
+28
+
+17.14
+
+Third Party Beneficiaries
+
+28
+
+17.15
+
+Bankruptcy
+
+28
+
+17.16
+
+Responsibility for Related Entities
+
+29
+
+-iii-
+
+PRODUCT DEVELOPMENT AGREEMENT
+
+This
+Product Development Agreement (this “Agreement”) is hereby entered into and effective as of May 11th,
+2011 (the “Effective Date”) by and between Stason Pharmaceuticals, Inc. a company organized under the laws of the state of
+California, with offices located at 11 Morgan, Irvine, California 92618 (“Stason) on the one hand, together with Oishi
+Koseido Co., Ltd., a company formed in accordance with and by virtue of the laws of Japan, having its registered office at 1-933,
+Honmachi, Tosu, Saga, 841-0037 Japan (“Oishi”) together with ITOCHU CHEMICAL FRONTIER Corporation, a company formed in accordance
+with and by virtue of the laws of Japan, having its registered office at 5-1 Kita-Aoyama 2-Chome-Minato-Ku Tokyo, Japan (“Itochu”)(Oishi
+and Itochu are collectively the “Developers”).
+
+WHEREAS,
+Stason desires to have Developers exclusively develop for Stason for the Territory, and Developers desire to so exclusively develop for
+the Territory, a lidocaine tape product (the “Product”, as further defined below) that is intended to be a Bioequivalent pharmaceutical
+alternative to Lidoderm®.
+
+WHEREAS,
+Stason desires to have Developers exclusively provide API for the Product for the Territory, and Developer desire to so exclusively provide
+API for the Product for the Territory;
+
+WHEREAS,
+Stason desires to have Developers exclusively supply, and developers desire to so exclusively supply, the Product to Stason for the Territory;
+
+WHEREAS,
+Developers desire to have Stason market, sell and distribute the products that are the subject of this Agreement in the Territory, and
+Stason desires to so market, sell and distribute such products in the Territory;
+
+NOW,
+THEREFORE, in consideration of the mutual promises, covenants and agreements hereinafter set forth and for good and valuable
+consideration, the receipt and sufficiency of which are hereby acknowledged, Stason, Oishi and Itochu hereby agree as follows:
+
+ARTICLE 1.   DEFINITIONS
+
+1.1          “Affiliate(s)”
+means as to a Party, any entity which controls, is controlled by, or is under common control with such Party. For purposes of the foregoing
+definition, the term “control” (including with correlative meaning, the terms “controlling”, “controlled
+by”, and “under common control with”) shall mean the possession, directly or indirectly, of the power to direct or cause
+the direction of the management and policies of such party, whether through ownership of equity, securities, or partnership interest or
+by contract, or otherwise. Ownership of more than fifty percent (50%) of the securities or other ownership interests representing
+the equity, the voting stock or general partnership interest in an entity, or greater than fifty percent (50%) interest in the income
+of such business entity shall, without limitation, be deemed to be control for purpose of this definition. For the purpose of clarity,
+ITOCHU Chemicals America Inc., a company organized under the laws of the state of New York, with offices located at 360 Hamilton
+Avenue, 6th Floor White Plains, NY 10601 (“ICAI”), shall be regarded
+as the Affiliate of Itochu.
+
+1
+
+1.2          “Agreement”
+has the meaning given to such term in the first paragraph of this Agreement.
+
+1.3          “API”
+means the active pharmaceutical ingredient, lidocaine.
+
+1.4          “Applicable
+Laws” means all laws, rules, regulations and guidelines of any Governmental Authority with jurisdiction over the development,
+manufacturing, exportation, importation, promotion, marketing, sale or distribution of the Products, the API and/or the performance of
+a Party’s obligations under this Agreement, to the extent applicable and relevant, and including specifically, but without limitation,
+all cGMP and current Good Clinical Practices or similar standards or guidelines of the FDA and including trade association guidelines,
+where applicable, as well as U.S. export control laws and the U.S. Foreign Corrupt Practices Act.
+
+1.5          “Bioequivalent”
+shall have the meaning set forth in the applicable edition of “Approved Drug Products with Therapeutic Equivalence Evaluations”
+published by the FDA also known as the “Orange Book”.
+
+1.6          “cGMP”
+means all current good manufacturing practices as may be applicable, including: (a) as required by the provisions of 21 C.F.R.,
+parts 210 and 211 and all applicable rules, regulations, orders and guidances of the FDA; and (b) ICH, Guidance for Industry Q7a
+Good Manufacturing Practice Guidance for Active Pharmaceutical Ingredients. cGMP requirements shall include all such requirements applicable
+to activities during the term of this Agreement, including as such requirements may be amended, modified or otherwise implemented from
+time-to-time during the term of this Agreement.
+
+1.7          “COA”
+means the signed certificate of analysis provided, or caused to be provided, by Developers with each shipment of the Product, demonstrating
+and certifying that the Product included in such shipment conforms to the requirements contained in this Agreement, including, without
+limitation, the Product Specifications and cGMP.
+
+1.8          “Commercial
+Launch” means the first commercial sale in the Territory of the Product by Stason, or a Stason Affiliate or by a permitted sub-licensee
+of Stason, as the case may be, to an unaffiliated Third Party.
+
+1.9          “Commercially
+Reasonable Efforts” means with respect to each Party, efforts and commitment of resources in accordance with such Party’s
+reasonable business, legal, medical, and scientific judgment that are consistent with the efforts and resources such Party uses for other
+products owned by it or to which it has exclusive rights, which are of similar market potential and at a similar stage in their life cycle,
+taking into account the competitiveness of the marketplace, the regulatory structure involved, the profitability of the applicable products
+and other relevant factors, including technical, legal, scientific, medical, sales performance, and/or marketing factors. For the avoidance
+of doubt, “Commercially Reasonable Efforts,” means, as it relates to Developer’s supply obligations hereunder, Developer’s
+reasonable business judgment that is consistent with the efforts that Developers uses to manufacture and supply product to itself or third
+parties. The term “Commercially Reasonable” shall have correlative meaning.
+
+1.10        “Confidential
+Information” means with respect to a Party (as the “Disclosing Party”), all non-public information of any kind
+whatsoever (including without limitation, data, materials, compilations, formulae, models, patent disclosures, procedures,
+processes, projections, protocols, results of experimentation and testing, specifications, strategies, techniques and all non-public
+Intellectual Property and Know-How as defined herein), and all tangible and intangible embodiments thereof of any kind whatsoever
+(including without limitation, materials, samples, apparatus, compositions, documents, drawings, machinery, patent applications,
+records and reports), which are disclosed by the Disclosing Party to the other Party (as the “Receiving Party”)
+including any and all copies, replication or embodiments thereof. For the avoidance of doubt, Confidential Information includes any
+agreement entered into by Developers with the API supplier hereunder. The terms, subject matter and substance of this Agreement
+shall be deemed the Confidential Information of both Parties.
+
+2
+
+1.11        “Control”
+means, with respect to any information, intellectual property right or Regulatory Approval, possession by a Party of the ability (whether
+by ownership, license or otherwise) to grant access, rights, title, possession, a license or a sublicense, as applicable, to such intellectual
+property right without violating the terms of any Third Party agreement, court order, or other arrangement or legal obligation.
+
+1.12        “Cost
+of Goods” shall mean the amount equal to Stason’s documented out-of-pocket cost associated with the acquisition of applicable
+Product, including, as applicable: Transfer Price; Freight Charges; customs charges and fees; intake testing, Product validation and stability
+testing;
+
+1.13        “Developer’s
+Acquisition Cost” means, with respect to a Product supplied by Developers to Stason hereunder, the direct labor and direct materials
+used to manufacture, test, Label, Package the Product, all calculated in accordance with GAAP plus [...***...]
+of such amount to account for all indirect and overhead expenses for the same
+
+1.14        “Developers”
+has the meaning set forth in the first paragraph of this Agreement.
+
+1.15        “Developers
+Patents” means any Patents Controlled by Developers related to Product, API, or that are useful or necessary for the manufacture,
+use, sale, offer for sale or import of Product in the Territory.
+
+1.16        “Dollar”
+means the United States dollar.
+
+1.17        “DMF”
+means a drug master file for active pharmaceutical ingredient in the Territory.
+
+1.18        “Drug
+Product” means a drug product as defined in 21 C.F.R. § 314.3 for administration to human subjects.
+
+1.19        “Effective
+Date” shall have the meaning given to such term in the opening paragraph of this Agreement.
+
+1.20        “Exporting
+Expenses” means the costs and expenses incurred by Developers to export the Product, including but not limited to the transportation
+cost from Oishi’s factory to US main airport, marine insurance charge, and other charges imposed upon the export of the Product.
+
+1.21        “FD&C
+Act” means the Federal Food, Drug and Cosmetic Act, as amended, and the rules and regulations of the FDA promulgated thereunder.
+
+3
+
+1.22        “FDA”
+means the United States Food and Drug Administration or any successor agency thereto.
+
+1.23        “Freight
+Charges” means, with respect to Product supplied by Developers to Stason hereunder, actual out-of-pocket freight, shipping and
+insurance costs, and taxes, incurred by Stason as a result of shipping and transporting such Product from the Developers to Stason that
+is not otherwise included under Exporting Expenses.
+
+1.24        “GAAP”
+means generally accepted accounting principles in effect in the United States from time to time, consistently applied.
+
+1.25        “Governmental
+Authority” means any court, tribunal, arbitrator, agency, legislative body, commission, official or other instrumentality of
+(i) any government of any country, or (ii) a federal, state, province, county, city or other political, administrative or regulatory
+subdivision thereof.
+
+1.26        “ICH”
+means the International Conference on Harmonization.
+
+1.27        “Intellectual
+Property” means without limitation all of the following: (i) patent applications, continuation applications, continuation-in-part
+applications, divisional applications, and any issued or issuing patents, as well as any foreign patent applications or patent corresponding
+to any of the foregoing, and also including without limitation reissues, re- examinations and extensions and any supplemental protection
+certificates, or the like; (ii) all Know-How, work product, trade secrets, inventions (whether patentable or otherwise), data, processes,
+techniques, procedures, compositions, devices, methods, formulas, protocols and information, whether patentable or not; (iii) copyrightable
+works, copyrights and applications, registrations and renewals; (iv) logos, trademarks, service marks, and all applications and registrations
+relating thereto; (v) other proprietary rights; (vi) abbreviated new drug applications or other applications to market (including
+right of reference thereto); (vii) any regulatory exclusivities, patent extensions, supplemental protection certificates or the like;
+and (viii) copies and tangible embodiments of any one or more of the foregoing.
+
+1.28        “Issued
+Product Patents” means any claims of issued patents in the Territory, which would cover the Products or the API contained in
+the Products including, but not limited to the use of Product or the making of Product, but excluding any-claims of inventions that can
+be applied to pharmaceutical products generally and not specifically to lidocaine products.
+
+1.29        “Itochu”
+has the meaning set forth in the first paragraph of this Agreement.
+
+1.30        “Know-How”
+means the following confidential proprietary information to the extent related to a Product: manufacturing protocols and methods, Product
+formulations, product specifications, processes, product designs, plans, trade secrets, ideas, concepts, manufacturing information, engineering
+and other manuals and drawings, standard operating procedures, flow diagrams, chemical, pharmacological, toxicological, pharmaceutical,
+physical and analytical, safety, quality assurance, quality control and clinical data, technical information, data, research records.
+
+1.31        “Label,”
+“Labeled” or “Labeling” shall refer to such labels and other written, printed or graphic matter,
+(i) upon a Product or any container or wrapper utilized with the Product, or (ii) accompanying a Product, including without
+limitation, package inserts.
+
+4
+
+1.32        “Marketing
+Expenses” means the costs and expenses incurred by Stason that are associated with the marketing and selling of the Product
+in the Territory, specifically including, without limitation, the cost of sales personnel, physician samples, promotional materials, and
+the cost of any post approval studies performed. The Marketing Expenses are estimated to be between [...***...]
+and [...***...] percent of Net Sales.
+
+1.33        “Net
+Profits” means Net Sales, less (a) Cost of Goods, and (b) Marketing Expenses.
+
+1.34        “Net
+Sales” means, with respect to any Product commercially sold by Stason under this Agreement, the total gross sales (number of
+units shipped times the invoice price per unit) to Third-Party customers of the Product, less all applicable deductions, to the extent
+accrued, paid or allowed in the ordinary course of business with respect to the sale of the Product, and to the extent they are in accordance
+with generally accepted accounting principles in effect in the United States from time to time, consistently applied, including, but not
+limited to:
+
+(i)
+
+cash discounts, quantity discounts, promotional discounts, stocking or other promotional allowances;
+
+(ii)
+
+sales and excise taxes, customs and any other taxes, all to the extent added to the sale price and paid by Stason and not refundable in accordance with Applicable Law (but not including taxes assessed against the income derived from such sale);
+
+(iii)
+
+freight, insurance and other transportation charges to the extent added to the sale price and set forth separately as such in the total amount invoiced;
+
+(iv)
+
+returns, recalls, and returned goods allowances;
+
+(v)
+
+retroactive corrections including price adjustments (including those on customer inventories following price changes) and corrections for billing errors or shipping errors; and
+
+(vi)
+
+chargebacks, rebates, administrative fees, any other allowances actually granted or allowed to any entity including, but not limited to group purchasing organizations, managed health care organizations and to governments, including their agencies, or to trade customers, in each case that are not Affiliates of Stason, and which are directly attributable to the sale of the applicable product
+
+The
+total deductions are estimated to be less than [...***...] percent of the Gross Sales.
+
+1.35        “Oishi”
+has the meaning set forth in the first paragraph of this Agreement.
+
+1.36        “Packaging”
+means all primary containers, including bottles, cartons, shipping cases or any other like matter used in packaging or accompanying a
+Product.
+
+1.37        “Patents”
+means patent applications, continuation applications, continuation-in-part applications, divisional applications, and any issued or
+issuing patents, as well as any foreign patent applications or patent corresponding to any of the foregoing, and also including
+without limitation reissues, re-examinations and extensions and any supplemental protection certificates, or the like.
+
+5
+
+1.38        “Party”
+means Stason or Developers, as applicable and “Parties” shall mean both Stason and Developers.
+
+1.39        “Person”
+means an individual, corporation, partnership, limited liability company, firm, association, joint venture, estate, trust, governmental
+or administrative body or agency, or any other entity.
+
+1.40        “Proceedings”
+means, without limitation, governmental, judicial, administrative or adversarial proceedings (public or private), litigation, suits, arbitration,
+disputes, claims, causes of action or investigations.
+
+1.41        “Product”
+means a lidocaine tape product intended to be a Bioequivalent pharmaceutical alternative to the brand product Lidoderm®.
+
+1.42        “Product
+Information” has the meaning set forth in Section 2.1.5.
+
+1.43        “Product
+Specifications” means the specifications for the Product established by Stason, as set forth in any applicable application for
+Regulatory Approval, or prior to the application, as embodied in applicable documents leading up to such application (e.g., in connection
+with a clinical study), or as may be superseded in the future by an applicable Regulatory Approval for such a Product, including (as applicable)
+any supplements or amendments thereof and statements of pharmaceutical manufacturing, filling, storage and quality control procedures,
+submission batch specifications, and Labeling and Packaging specifications (as such may be revised from time to time in accordance with
+Applicable Laws) together with any additional specifications that may be agreed to between the Parties.
+
+1.44        “Reference
+Product” means all strengths and packaging configurations, as may now or hereafter be approved for sale, of the Drug Products
+listed in Table 1 of Schedule A identified by New Drug Application number in the “NDA No.” column, as may be amended
+from time to time pursuant to this Agreement.
+
+1.45        “Regulatory
+Approval” shall mean the applicable approvals necessary to make Product, including applications submitted to the FDA, and all
+applicable product and/or establishment licenses, registrations, permits or other authorizations as may be necessary in connection with
+the applicable Product, and which are necessary for the commercial manufacture, commercialization, use, storage, importation, transport,
+promotion, pricing, distribution or sale of such Product in the Territory.
+
+1.46        “Secondary
+API Supplier” means a Party, an Affiliate of a Party, or a Third Party designated by the Parties to supply API for the Product
+in the Territory
+
+1.47        “Stason”
+has the meaning set forth in the first paragraph of this Agreement
+
+1.48        “Territory”
+means the United States and Canada, including without limitation, their respective territories and possessions.
+
+1.49        “Third
+Party” or “Third Parties” shall mean any Person or entity other than a Party or its Affiliates.
+
+6
+
+1.50        “Transfer
+Price” means, with respect to a Product supplied by Developers to Stason hereunder, Developer’s Acquisition Cost (and
+adjustments, if any, made in accordance with Section 6.2, 6.3) plus the Exporting Expenses.
+
+ARTICLE 2.   PRODUCT DEVELOPMENT
+
+2.1          General
+Development Obligations. Developers shall develop the Product in accordance with this Agreement with a regulatory filing target
+of the second half of 2011, Developer’s development responsibilities shall include the following:
+
+2.1.1         Developers shall develop a stable final dosage
+form of the Product suitable for submission of an application for Regulatory Approval to the FDA for approval to market such Product in
+the Territory, such that the Product is Bioequivalent to the Reference Product as listed in the Orange Book, as expeditiously as reasonably
+practicable.
+
+2.1.2         Except as provided in Section 2.5 below,
+Developers shall be solely responsible for all product development activities necessary to support the filing of the applicable application
+for Regulatory Approval for the Product, including development of appropriate analytical methods, development of a GMP compliant and commercially
+competitive manufacturing process; stability studies and other analytical testing; all manufacturing scale up activities; and all necessary
+preclinical and in vitro studies.
+
+2.1.3         In carrying out its development responsibilities,
+Developers shall cooperate and coordinate with Stason, and Stason shall have final authority in establishing the final Product Specifications
+for the Territory. Developers shall cooperate with Stason and its legal counsel in assessing and avoiding infringement of third party
+Intellectual Property.
+
+2.1.4         Developers, upon request by Stason, shall transfer
+to Stason all data, information and materials generated or obtained in connection with the Product for use in the Territory, including
+with respect to the components thereof, and all associated methods and analytical testing, within five (5) business days of completion
+or generation, of such data, information and materials, on an ongoing basis.
+
+2.1.5         Developers will promptly complete timely requests
+for information from Stason relating to the development and manufacture of the Product. To the extent that Stason requests access to information
+or materials reasonably necessary or useful in preparing the applications for Regulatory Approval or necessary or useful in assessing
+any regulatory issues or Intellectual Property issues or concerns (collectively, the “Product Information”), such as formulation
+information, methods and processes, analytical and processing techniques, product and API samples, processing techniques and any other
+information, for these purposes, Developers will promptly disclose such Product Information to Stason.
+
+2.2          Developers
+shall keep Stason informed of the progress of the development of the Product, as practical and reasonable, including, but not limited
+to, by way of responding in a prompt manner to Stason’s inquiries, and participating in the Development Committee as described below.
+Developers shall provide updates to Stason at Stason’s request on the development of the Product, including future development and
+manufacturing plans and will promptly advise Stason of any delays or problems encountered during development of the Product or the manufacturing
+process for each such Product.
+
+7
+
+2.3          Stason
+shall be permitted to inspect and audit Developer’s development facilities one time in each calendar year (and additionally in the
+event of a reasonable need or request by Stason) during normal business hours upon reasonable advance notice of at least thirty (30) business
+days. Developers shall not subcontract any of its responsibilities under this Agreement without the prior approval of Stason Developers
+shall notify Stason promptly, but in no event later than three business days, after learning that any inspection by FDA or other applicable
+governmental authority is being conducted or will be conducted of a Developers facility, or of a facility of a Developers contractor,
+being used in connection with the Product. Developers shall provide Stason with copies of any Form FDA 483 or other correspondence
+from the FDA or other applicable governmental authority regarding the compliance with Applicable Laws, including cGMP and ICH Guidelines,
+within three business days of receipt by Developers (or its contractors) of same.
+
+2.4          Developers
+shall be responsible, at its expense, for carrying out all applicable in vitro and in vivo studies required for Regulatory Approval of
+the Product. It is currently expected that such studies shall include the following:
+
+2.4.1         Non-clinical single and repeat dose (one month)
+toxicity studies in an appropriate test species (i.e. minipig or rat) to support the change (for example the issue of an excipient that
+has not been used topically or the exposure is greater than previously used) in the Product
+
+2.4.2         Chronic safety studies, in an appropriate species,
+depending on the outcome of the non-clinical studies referred to in section 2.4.1 above
+
+2.4.3         Acute dermal irritation studies in rabbits to
+support the change
+
+2.4.4         Accelerated and real time stability studies
+
+2.4.5         Pilot Human Fasting Pharmacokinetic study measuring
+lidocaine in the plasma
+
+2.5          Stason
+shall be responsible for conducting all pivotal human clinical studies for the Product. It is expected that such studies shall include
+the following:
+
+2.5.1         Fasting Pharmacokinetic study measuring lidocaine
+in the plasma (standard 90% confidence interval, reporting of the apparent dose delivered).
+
+2.5.2         Skin Irritation/Sensitization study
+
+2.5.3         Adhesion analysis
+
+2.5.4         Photo-toxicity and photo-allergy studies
+
+2.6          Stason
+shall be responsible for all regulatory filings, correspondence and meetings with the FDA (or any other applicable Governmental Authority)
+associated with preparing and filing the NDA, including
+
+2.6.1         Requesting and managing a pre-IND meeting with
+the FDA
+
+2.6.2         Preparing and filing the IND with the FDA
+
+8
+
+2.7          Developers
+agrees to cooperate fully with Stason in connection with Stason’s carrying out the additional in vivo studies, and will promptly
+provide Stason, as requested and at no additional charge, such technical and other assistance, including all available information and
+data in its control, that is reasonably necessary or useful for Stason to conduct the human clinical studies.
+
+2.8          Stason
+agrees to cooperate fully with Developers in connection with Developers carrying out their development responsibilities and will promptly
+provide Developers, as requested and at no additional charge, such technical and regulatory assistance, that is reasonably necessary or
+useful for Developers to carry out their development responsibilities in accordance with U.S. regulatory requirements.
+
+2.9          The
+Parties acknowledge that the development activities listed under Section 2.3 – 2.6 will be the proposal that is made to the
+FDA. If, as a result of the pre-IND meeting the FDA requires or recommends any additional studies be performed then the parties will negotiate
+and mutually agree on which Party will perform the additional studies and how the cost of such studies shall be borne by the Parties.
+
+2.10        If
+the FDA at any time subsequent to the FDA’s recommendations in connection with the pre-IND meeting imposes a requirement for studies
+to be conducted that are additional to those specified in this Article 2, the parties shall negotiate in good faith to reach mutual
+agreement on which Party shall conduct such additional studies and how the cost of such studies shall be borne by the Parties. Anything
+else in the agreement notwithstanding, no Party shall be obligated to conduct or pay for any such additional studies required by the FDA
+unless and until the parties have mutually agreed upon the allocation of responsibility for conducting and paying for such studies.
+
+ARTICLE 3.   DEVELOPMENT COMMITTEE
+
+3.1          Development
+Committee. Promptly after the Effective Date, the Parties will form a committee (the “Development Committee”) to
+be comprised of an equal number of representatives from each of Developers and Stason. All members appointed by Stason shall have, collectively,
+one vote on the Development Committee, and all members appointed by Developers shall have, collectively, one vote on the Development Committee.
+The chairperson of the Development Committee shall be a Stason representative, and each Party shall have the right from time to time to
+substitute new members, on a permanent or temporary basis, for any of its previously designated members of the Development Committee by
+providing notice to the other Party. Each Party shall bear its own costs associated with participation in the Development Committee.
+
+3.2          Purpose and Responsibilities of the Development Committee. The Development Committee shall oversee the development of the
+Products, including establishing a timetable for the development and the occurrence of milestones, in each case as is consistent
+with the obligations of each party under this Agreement, and such other matters as are provided to the Development Committee by
+mutual agreement of the Parties. The Parties shall keep each other informed of their respective status through the Development
+Committee. The Development Committee shall not have any authority to impose financial, cost or other obligations on either Party in
+excess of those expressly set forth in this Agreement unless expressly consented to in writing by such Party.
+
+9
+
+3.3          Development
+Committee Meetings. During the term of this Agreement, the Development Committee shall meet within thirty (30) days of
+the Effective Date, and at least once each calendar quarter thereafter or at such other frequency as the Development Committee agrees.
+The Parties shall meet on a date and time and at a location agreed to by the Development Committee. Upon written notice by either Party
+to the other that a meeting is required or requested, a meeting will be held within thirty (30) calendar days of such notice on a
+date and time and at a location to be agreed upon by the Parties, or sooner if warranted by the circumstances. Notice requesting such
+a meeting shall include adequate information describing the activity to be reviewed. Any meetings of the Development Committee may be
+held in person at a location to be agreed to by the Parties, or by videoconference or teleconference. A reasonable number of additional
+representatives of either Party including outside consultants and independent contractors (subject to confidentiality agreements and the
+other Party’s reasonable consent) may attend meetings of the Development Committee in a non-voting capacity. At least one (1) week
+prior to any meeting of the Development Committee, each Party shall provide the other with a proposed agenda of the matters to be discussed
+at such meeting. Within thirty (30) days after each meeting, the Development Committee chairperson will provide the Parties with
+a written report describing, in reasonable detail, the status of each Product, a summary of the results and progress to date, the issues
+requiring resolution and the agreed resolution of previously reported issues.
+
+ARTICLE 4.   REGULATORY
+
+4.1          Ownership
+and Maintenance. The Regulatory Approvals, and associated applications, for each Product shall be owned exclusively by Stason
+and Stason shall maintain such Regulatory Approvals during the term of this Agreement at its own expense.
+
+4.2          Regulatory
+Approvals and Applications.
+
+4.2.1         Stason shall have the sole right and responsibility
+to file for Regulatory Approval in the Territory and to communicate with the FDA and all other applicable Regulatory Authorities in the
+Territory relating to the Regulatory Approval of Product or submission for Regulatory Approval, and Developers shall not submit material
+to the FDA or any Regulatory Authority in the Territory related to a Product without Stason’s prior written approval.
+
+4.2.2         Notwithstanding anything else in this Agreement,
+Stason shall have sole control of and responsibility (including expenses) for preparing any patent certifications to the FDA as required
+in connection with seeking Regulatory Approval pursuant to Section 505 (21 USC sec. 355) of the Food, Drug, and Cosmetic Act and
+Stason shall have sole control and responsibility (including expenses) related to preparing and sending the associated notice letters
+in connection with the Regulatory Approval applications for the Product and the prosecution and/or defense of any citizen’s petition
+associated therewith, in each case as may be applicable in the Territory.
+
+4.2.3         Developers shall
+fully support and cooperate with Stason in its efforts to assemble and submit applications for Regulatory Approval for the Product
+and in pursuing Regulatory Approvals for the Product. In connection therewith, Developers shall draft those portions of the
+application for Regulatory Approval associated with Developer’s development responsibilities. Developers will promptly provide
+Stason such technical and other assistance, including all available Product Information and data in its control, reasonably
+necessary or useful for Stason to apply for, obtain, and maintain Regulatory Approvals and to market, sell or otherwise
+commercialize the Product throughout the Territory. As may be requested by Stason, Developers shall provide any necessary documents
+in CTD format.
+
+4.2.4         Developers shall assist as reasonably requested
+by Stason in communications to applicable Regulatory Authorities and all activities relating to Regulatory Approvals for the Product,
+including assisting Stason in responding to any Regulatory Authority request relating to Product, API, or facilities used in, or proposed
+for use in, the development or manufacture of Product or API. Developers will not respond to the FDA or other Regulatory Authority regarding
+Product without Stason’s prior written approval.
+
+10
+
+4.3          Regulatory
+Expenses. Stason shall bear sole responsibility for all expenses associated with preparing, filing and prosecuting applications
+for Regulatory Approval for the Product in the Territory, including the prosecution or defense of any associated citizen petitions. Stason
+shall be responsible for all filing fees required by the FDA or other regulatory authorities, and for all associated duplication and other
+of its document preparation and handling costs associated with making the regulatory filing in the Territory.
+
+ARTICLE 5.   API
+
+5.1          API
+Supply. During the Term, Developers shall have the responsibility for sourcing and providing API for the manufacturing of development
+and commercial quantities of the Product and shall provide all such API required for development and for commercial supply of Product.
+It is expected that Developers shall acquire API from Moehs Iberica, S.L. of Barcelona, Spain. Developers shall enter into a supply agreement
+with the API supplier within six (6) months of the execution of this Agreement Stason shall have the right to review and approve
+any such API agreement prior to Developers entering into such agreement. Any other API supplier must be approved by Stason in writing,
+prior to sourcing, such approval not to be unreasonably withheld.
+
+5.2          Criteria
+for API Quality and for API Supplier. Without limitation, the following criteria shall apply in connection with the supply
+of API:
+
+5.2.1         Subject to Section 5.2.7, Developers shall
+insure that all API used in the manufacture of each Product is manufactured in accordance with cGMP and all Applicable Laws by a vendor
+with a successful history in meeting FDA requirement at the facility supplying the API.
+
+5.2.2         Subject to Section 5.2.7, Developers shall
+insure that all API is consistent with the Product Specifications, and meets the requirements of the applicable Regulatory Approval (or
+associated application prior to approval) and is in compliance with applicable compendial (e.g. United States Pharmacopeia) specifications
+for such API.
+
+5.2.3         Developers shall store and handle such API in
+accordance with all applicable Regulatory Approvals, Applicable Laws and compendial requirements, and the Product Specifications.
+
+5.2.4         Developers shall insure that the DMF for the
+API is timely prepared and submitted; and that the DMF is maintained in good standing with the FDA during the Term, including such annual
+filings with the FDA as are required.
+
+11
+
+5.2.5         Developers shall obtain from the API vendor
+such letters of authorization for Stason in order for the FDA to access the DMF for the API to the extent necessary to support seeking,
+obtaining and maintaining Regulatory Approvals for the Product in the Territory.
+
+5.2.6         At Stason’s request, Developers shall
+provide reasonable assistance to Stason and all materials, methods, records, and information in its possession related to the API to assist
+Stason in seeking, obtaining, and maintaining Regulatory Approvals for the Product, and will require the API vendor to provide reasonable
+assistance to Stason and supply to Stason all materials, methods, records, and information related to the API to Stason as may be necessary
+in seeking, obtaining and maintaining Regulatory Approvals for Product.
+
+5.2.7         Stason’s recourse to Developers in connection
+with the criteria set forth in Sections 5.2.1, 5.2.2, 5.2.4, 5.2.5, shall only apply and shall be limited to the extent that Stason
+does not have direct contractual recourse to the API Supplier.
+
+5.3          Qualification
+of Secondary API Supplier. The Parties agree to cooperate with each other and provide all reasonable assistance to each other,
+at either Party’s request, to qualify a Secondary API Supplier, including, as may be applicable or relevant, executing other documents,
+providing all materials, methods and information in its possession related to such API, and doing all other things reasonably requested
+by the Parties that are required to qualify such Secondary API Supplier to supply API for the Product under all applicable Regulatory
+Approvals and Applicable Laws including applicable FDA requirements, cGMP and the requirements of any other applicable Governmental Authority.
+
+5.4          Information.
+Developers shall provide a copy of such API supply agreements it enters into and under or pursuant to which API will be used to manufacture
+the Product. Developers shall cooperate with Stason and its legal counsel in assessing and avoiding infringement of third party Intellectual
+Properly in connection with the supply of API, and Developers shall provide access to Stason to all relevant technical information related
+to the API and its process of manufacture in order for such assessment to be made. Such access shall be subject to Stason entering into
+a reasonable and appropriate confidentiality agreement with such API manufacturer, which Developers shall facilitate.
+
+ARTICLE 6.   SUPPLY
+
+6.1          Development
+Supply. Developers shall supply Stason with its requirements of Product for the purposes stipulated in Article 2 at no
+cost to Stason, as and when reasonably required by Stason.
+
+6.2          Developers
+shall supply Stason with its commercial requirements of Product for the Territory as and when reasonably required by Stason. Such Product
+shall be supplied at the Transfer Price. Developers Acquisition Cost shall be determined and subject to adjustment on an annual basis.
+It is currently expected that the Developers Acquisition shall be approximately […***…] per sheet in finished and fully
+packaged form ready for commercial sale and that the Exporting Expenses shall be approximately […***…] per sheet, for a
+Transfer Price of […***…] per sheet in finished and fully packaged form ready for commercial sale.. Such Product shall be
+delivered to Stason CIP to main airports in the Territory as designated by Stason.
+
+12
+
+6.3          Without
+limiting Developers obligation to supply under Section 6.2, The Parties shall enter into a commercial supply agreement within six
+(6) of the execution of this Agreement in order to further clarify the elements, including but not limited to purchase orders, supply
+times, delivery terms, payment terms for finished product, acceptance and rejections of finished product, inspections and regulatory matters
+and other supply terms.
+
+6.4          Facility
+Updates. Stason acknowledges that Oishi’s facility has not currently been inspection by the FDA and Oishi acknowledges
+that its facility must pass an FDA inspection in order for the FDA to approve Oishi as a manufacturing site for the Product. As such,
+Stason will audit Oishi’s facilities and provide a list of updates and activities that Stason believes are needed for Oishi’s
+facility to pass an FDA inspection. Oishi will complete these updates and activities within six (6) months of Stason filing the Product
+with the FDA (the “FACILITY UPDATES. If Oishi is unable to complete FACILITY UPDATES then Stason shall have the right to transfer
+the Product to a third party manufacturer and Oishi will assist Stason with this transfer. Each Party will bear all of its own costs and
+expenses required to perform its obligations under this Section 6.4.
+
+6.5          Documentation.
+Developers shall deliver an appropriate COA with all Product delivered to Stason.
+
+ARTICLE 7.   FINANCIAL PROVISIONS
+
+7.1          Development
+Costs and Expenses. Except as explicitly provided in this Agreement, each party shall be solely responsible for all costs and
+expenses associated with carrying out its responsibilities under this Agreement.
+
+7.2          Royalty.
+Stason shall pay a royalty of […***…] of Net Profits to Oishi and […***…] of Net Profits to Itochu. Stason
+shall pay Oishi and Itochu their respective royalties quarterly within forty-five (45) days of the end of each applicable quarter
+in which Product is sold. Each quarterly payment to Oishi and Itochu shall include data and information on the amount of Marketing Expenses,
+Net Profits and Net Sales, with materials supporting such data and information (which materials are not required to be prepared by accountants
+but may be materials prepared for Stason’s internal use), In the event that the Net Profit for any of the first four calendar quarters
+after Commercial Launch equals a negative amount (“Net Loss”), then Stason shall be permitted to carry over such Net
+Loss to apply against future calendar quarters until such Net Losses are recovered, all calculated in accordance with United States GAAP.
+
+7.3          Sublicense
+Fees. Stason shall pay a royalty on any licensing fees received by Stason from a sublicensee of […***…] of such
+licensing fee to Oishi and […***…] of such licensing fee to Itochu. Stason shall pay Oishi and Itochu their respective
+royalties within forty-five (45) days of receipt of such licensing fee by Stason.
+
+7.4          Records.
+
+7.4.1         Each Party, shall
+keep and maintain or cause to be maintained books and records pertaining to its activities in connection with this Agreement,
+including, Such books and records) shall be maintained in accordance with GAAP and with all records and details necessary to enable
+the other party to verify compliance with the financial obligations under this Agreement. With respect to Developers, such books and
+records shall also include any documentation regarding API included in the Product to verify compliance with Section 5.2.
+
+13
+
+7.4.2         Stason shall provide Oishi and Itochu the quarterly
+data and information on the amount of Marketing Expenses, Net Profits and Net Sales, with materials supporting such data and information
+within thirty (30) days of the end of each applicable quarter in which Product is sold.
+
+7.4.3         Each Party shall have the right once per calendar
+year, at its own expense, during the term of this Agreement and for two (2) years thereafter, to have an independent public accountant,
+acceptable to the other Party acting reasonably, audit the relevant financial books and records of account of during normal business hours,
+upon reasonable advance notice, to determine or verify the compliance with the applicable financial provisions of this Agreement, to the
+extent applicable. If errors are found, any deficiency shall be paid within thirty (30) days of the receipt and acceptance of the
+auditors report, and if errors of the greater of five percent (5%) or $10,000 or more in the auditing party’s favor are discovered
+as a result of such audit the Party being audited shall reimburse the other Party the direct expense of such audit. Each auditor must
+sign a confidentiality agreement with the party being audited and may only disclose to the other Party the amount of any discrepancy,
+and the associated source of the error. No auditor may be employed on a contingency basis, and each auditor shall have experience in auditing
+in the pharmaceutical business in the United States.
+
+7.5          Accounting.
+The Parties acknowledge that any expenses or costs deducted from Net Sales under this Agreement may be based upon accruals, which accruals
+will be compliant and in accordance with GAAP consistently applied; provided that such accruals shall be adjusted based upon actual amounts
+on a rolling basis as and when known relative to any accrued amount, and any difference between the actual results and the accrual shall
+be reported and accounted for. Within one (1) year after the termination or expiration of this Agreement, a final reconciliation
+shall be performed (and a written report of such reconciliation shall be provided) of the deductions made, pursuant to the definition
+of Net Sales, and of the amounts payable. The reconciliation shall be based on all actual amounts known through the date that is ten (10) months
+following the applicable termination or expiration date versus prior accruals. No further reconciliations shall be made. Such final reconciliation
+shall be based on the amount accrued for returned product in Stason’s audited financial statements issued most recently before such
+ten (10) month date (or in the work papers underlying such financial statements, as confirmed by a Stason’s auditors); provided
+that such amounts must (a) be based upon reasonable assumptions and (b) be consistent with past accounting practices and in
+accordance with GAAP consistently applied. If any reconciliation between accruals and the actual results under this Section 7.5 show
+either an underpayment or an overpayment, the Party having made the underpayment or received the overpayment shall pay the undisputed
+amount of the difference to the other within thirty (30) days after the date of delivery of the report of such reconciliation. In
+the event that such reconciliation shows an underpayment or overpayment, the Party having made the underpayment or received the overpayment
+shall have the right to review and discuss the written report with the other Party during the 30 days after the delivery of such
+report. In the event that the Party having made the underpayment or received the overpayment disputes the written report after such review
+and discussion, such Party shall have the right to have the report audited consistent with the audit rights and pursuant to the procedures
+set forth in Section 7.5.
+
+14
+
+ARTICLE 8.
+COMPLIANCE STANDARDS
+
+8.1          Development
+Compliance. During the Term, Developers shall comply with, and shall require compliance by its Third Party contractors with
+all Applicable Laws in the conduct of all activities associated with the Product, including in the practice of all associated analytical
+methods. During the Term, Developers shall be fully responsible to Stason for all activities (actions or inactions) of any contractor
+that Developers may employ as if Developers had conducted such activities itself. Each of Itochu and Oishi shall not employ any contractor
+in connection with this Agreement without Stason’s prior written consent.
+
+8.2          Warranties
+by Developers. Developers hereby warrants, covenants and agrees that:
+
+8.2.1         All API supplied shall be manufactured, Packaged,
+tested, stored and handled in accordance with the Product Specifications, all Applicable Law in connection with seeking to Regulatory
+Approval for, and sale for human use of the Product in the Territory. Developers further covenants that the API contained in such Product
+shall conform to the then current version of the applicable drug master file on file with the FDA.
+
+8.2.2         All deliveries of API shall be accompanied by
+all documentation required under Applicable Law and applicable Regulatory Approvals in order for Stason to utilize such API in the Product
+pursuant to the applicable Regulatory Approval.
+
+8.2.3         Developers will not violate the trade secrets,
+Know-How, confidential information or other proprietary rights of any Third Party in developing the Products; and the manufacture of the
+Products by or on behalf of Developers and the supply of the Products to Stason by or through Developers will not violate the trade secrets,
+Know- How, confidential information or other proprietary rights of any Third Party. Issued Product Patents is not covered by such warrants
+as described in 11.4.
+
+8.2.4         As of each date that the Product manufactured
+by Developers is delivered to Stason, (a) such Product shall (i) be of good, merchantable and usable quality, unadulterated,
+(ii) conform to the Product Specifications, (iii) have been manufactured in accordance with cGMP and all Applicable Laws and
+(iv) have shelf life of not less than twenty-one (21) months remaining before the labeled expiration date; and (b) Developers
+shall have obtained all approvals required by the applicable Governmental Authorities for manufacture of the Product at the manufacturing
+facility where the Product is manufactured.
+
+8.3          Warranties
+by Stason. Stason hereby warrants and covenants and agrees that:
+
+8.3.1         Stason will comply with all Applicable Laws
+applicable to its activities under this Agreement; and
+
+8.3.2         No Stason employees or other persons performing
+services on behalf of Stason under this Agreement have been debarred under Section 306 of the United States Food, Drug, and Cosmetic
+Act.
+
+15
+
+ARTICLE 9.   LICENSE GRANTS; EXCLUSIVITIES
+
+9.1          License
+Grant.
+
+9.1.1         Each of Oishi and Itochu hereby appoint Stason
+as their respective exclusive distributor of Product in the Territory. On condition that the Commercial Launch occurs within the term
+of this Agreement, and until the expiration or termination of this Agreement, each of Oishi and Itochu hereby grants to Stason an exclusive
+(even as to each of Oishi and Itochu), royalty-free, sublicensable (subject to Section 9.2), license for the Territory, under its
+current and future Intellectual Property rights related to the Product and any current and future Intellectual Property rights owned by
+either or both of Oishi that pertain to the API for the Product, to develop, handle, import, market, have marketed, promote, distribute,
+make, have made use, sell and have sold Product (including all components and ingredients thereof) in the Territory.
+
+9.1.2         Stason’s right to sublicense under this
+Agreement is subject to Stason notifying Developers of sublicense candidates and the prior written approval by Developers, which shall
+not be unreasonably withheld, conditioned or delayed.
+
+9.1.3         For purposes of clarity, and in order for Stason
+to fully enjoy the commercial value of the exclusive rights associated with the Product granted herein, the exclusive license granted
+to Stason includes grant of rights to use patents and the associated rights to enforcement, as further provided in Article 13, against
+Third Parties that may (or may attempt to) make, have made, use, have used, sell, have sold, import or have imported, or otherwise market
+or commercialize any infringing product in the Territory, including the right to collect damages associated with any lost profits of Stason
+as the exclusive licensee.
+
+9.2          Exclusivity.
+
+9.2.1         Except as pursuant to this Agreement, each of
+Itochu and Oishi and its Affiliates shall not (i) develop, market, sell, manufacture, supply, distribute, make or use the Product
+or any other lidocaine topical product for sale or distribution in the Territory, or (ii) sell or distribute the Product or any-
+lidocaine topical product outside the Territory to any Third Party if it knows or has reason to know that such product will be sold or
+distributed in the Territory, or (iii) assist or license a Third Party to do any of the above mentioned (i), (ii) or (iii) of
+clause 9.2 during the term of this Agreement. Developers shall be allowed to use any and all data and information generated by Developers
+associated with the Product development to license to any Third Party outside of the Territory in order that such Third Party shall be
+able to market, sell or distribute the lidocaine topicall products outside of the Territory at no charge to Developers. Stason shall notify
+Developers and Developers shall consent in writing prior to Stason transferring or selling to any Third Party any data regarding the Product
+developed by Stason.
+
+9.2.2         Stason and its Affiliates shall not sell, market
+are distribute a lidocaine tape or patch product in the Territory except the Product developed under this Agreement.
+
+16
+
+ARTICLE 10.   COMMERCIALIZATION
+
+10.1        Marketing,
+Sales and Distribution Obligations.
+
+10.1.1       Stason will consult
+with Developers in good faith concerning the timing of commercial launch of the Product, including in the case of any delays or
+decisions not to launch. Stason will endeavor in good faith to commercially launch the Product in the Territory as soon as
+reasonably practicable after obtaining final Regulatory Approval from the FDA to market Product in the Territory and after all
+pre-launch activities are completed. The foregoing notwithstanding, the Parties agree that Stason will have the ultimate
+decision-making authority on the timing of the Commercial Launch for the Product, including the decision to not launch the Product,
+based upon Stason’s evaluation of market conditions, legal obligations and concerns, including any regulatory, Intellectual
+Property or product liability disputes or issues, manufacturing preparedness, and Regulatory Approvals.
+
+10.1.2       Following commercial launch Stason shall use
+Commercially Reasonable Efforts to, market, forecast, distribute and profitably sell Product, in the Territory during the Term. Ultimate
+responsibility and decision-making control with regard to marketing and pricing of such Product shall belong solely to Stason. Anything
+else in this Agreement notwithstanding, Stason shall not have any obligation to sell the Product at a loss or to launch, market, distribute
+or sell Product in the face of any regulatory, Intellectual Property or product liability disputes or issues, or in the absence of adequate
+supply of API and/or the Product.
+
+10.1.3       Sublicense Rights – Subject to Section 9.1.2,
+Stason may sublicense the sales, marketing and distribution of the Product to a third party (“Sublicensee”)
+
+10.2        Label.
+The label for the Product shall be a Stason Label or that of a Sublicensee in accordance with Stason’s customary practices and Applicable
+Laws. At Oishi’s request, Oishi will be included on the label as the manufacturer of the Product. Developers will not sell or offer
+for sale any product bearing a Stason Label.
+
+ARTICLE 11.   INTELLECTUAL PROPERTY
+
+11.1        General
+Ownership. Except as explicitly provided for in this Agreement, each Party shall own its own Intellectual Property consistent
+with U.S. law.
+
+11.2        Patent
+Prosecution.
+
+11.2.1       (a) The Parties shall cooperate in good faith
+to determine whether to seek or continue to seek or to maintain patent protection in the Territory with respect to any the Product, the
+API, or any associated method of use, or method of manufacturing, or any other invention that could reasonably be expected to affect the
+Commercialization or value of the Product in the Territory (collectively, “Inventions”). Developers shall have the first right
+to pursue patent protection for any Invention that is invented by Developers.
+
+11.2.2       In connection therewith, Developers shall promptly
+provide Stason with copies of all correspondence to and from the U.S. Patent and Trademark Office, as well as any related demand,
+notice and summons, that relates to such Inventions.
+
+11.2.3       Each Party, and its employees and agents, shall
+provide the other Party and its legal representatives with reasonable assistance and cooperation with respect to such Patent prosecution,
+including entering into any joint defense and/or joint privilege agreement that may be reasonably requested by such Party and Developers
+shall consider in good faith all reasonable suggestions of Stason and its patent counsel related thereto.
+
+11.2.4       Developers’s
+patent prosecution and maintenance expenses associated with Developers Patents including the filing of any patent term extensions,
+shall be borne by Developers; prosecution- and maintenance-related expenses incurred by Stason in connection with its review and
+consultation concerning any Developers Patents, including Developers’s filing of any patent term extensions, shall be borne by
+Stason. Developers will timely apply for any applicable patent term extensions.
+
+17
+
+11.2.5       Stason agrees to cooperate fully in the preparation,
+filing prosecution and maintenance of any Developers’s Patents in the Territory under this Agreement, and in the obtaining and maintenance
+of any patent extensions and the like with respect to any Developers’s Patent.
+
+11.2.6       If Developers elects (i) to abandon the
+prosecution or maintenance of any Developers’s Patent under which Stason has a license hereunder, or (ii) elects not to file
+a patent application in the Territory for any Invention, then Developers shall promptly notify Stason in writing at least sixty (60) days
+before the abandonment or applicable filing deadline therefore, and Stason shall have the right, upon providing written notice to Developers
+of Stason’s election to do so, at Stason’s expense, to file, prosecute, continue prosecution and/or maintenance, as applicable,
+of such Developers’s Patent. In such case, Stason shall keep Developers reasonably informed on matters regarding such filing, prosecution
+and maintenance, including by providing Developers with a copy of any and all correspondence between Stason and the U.S. Patent and
+Trademark Office, providing Developers with sufficient time to review and comment on such communications (excluding any non substantive
+correspondence or communications), and Stason shall consider in good faith the requests and suggestions of Developers with respect to
+such communications with the U.S. Patent and Trademark Office. With respect to the activities set forth in this Section 11.7
+that are continued by Stason, Developers shall provide a power of attorney and relevant files and other information owned or controlled
+by Developers pertaining to such Developers’s Patents or Program Developments, as soon as reasonably practical after receiving such
+written election by Stason.
+
+11.3        Possible
+Infringement of Either Party’s Intellectual Property by Third Parties. The Parties agree to cooperate with one another
+in good faith to prosecute and defend against any and all Third Parties that market or seek to market any product that competes or would
+compete with the Product in the Territory and that infringe applicable Intellectual Property owned or controlled by a Party hereto, including
+to prosecute such Intellectual Property, to collect damages reflecting each of the Parties’ respective losses associated with this
+exclusive relationship regarding the Product under such Intellectual Property and/or to defend against any declaratory judgment actions
+concerning such Intellectual Property owned or controlled by a Party hereto.
+
+All amounts awarded as profits or otherwise in
+connection with any action specified in this Section 11.3 shall be deemed to be Net Profits, subject to split pursuant to Section 7.2
+after the fees, costs and expenses (including all attorney’s fees) of each Party in respect of the Proceeding have first been reimbursed
+from such amounts.
+
+18
+
+11.4        Claims
+by Third Parties. To the extent that (i) any Third Party asserts patent infringement in the Territory regarding the
+Product or (ii) there are any FDA regulatory claims or FDA proceedings against Stason or Developers or any of their Affiliates,
+regarding the Product in the Territory or the NDA for such Product (including, for example, citizen petitions, but explicitly
+excluding Proceedings related to product liability and any other Proceeding subject to indemnification under Article 14),
+Stason shall have sole control in addressing, defending, managing and conducting such claims or assertions, any related litigation
+and any settlement or settlement negotiations thereof (collectively “Litigation”), using counsel of its choice. In
+connection with any such Litigation, Developers shall fully cooperate with Stason and Stason’s counsel. If Developers is named
+in any such Litigation, Developers shall become a client of Stason’s legal counsel and agrees that such legal counsel will act
+solely under the instruction of Stason. Developers shall sign a waiver with such legal counsel to that effect Developer’s full
+support of Stason’s legal counsel shall not obligate Developers in any way to pay Stason’s legal counsel for any
+expenses incurred during such litigation. Developers may additionally employ its own legal counsel, at its own cost, to advise
+Developers, and Stason and its legal counsel shall make themselves reasonably available to consult with such counsel, and will
+consider the input from such counsel in good faith. Stason’s legal counsel shall keep Developers, or Developer’s own
+legal counsel (employed by Developers at its own expense), reasonably informed with respect to material events in the progress of
+such Litigation and in support of the foregoing, and respond to inquiries by Developers regarding such Litigation, to the extent
+permissible under any applicable protective order, and disclose to Developers or Developer’s own legal counsel upon request,
+the Litigation strategy, status, and all material decisions issued by the courts in such matters. Stason and Developers and their
+respective Affiliates shall, and each of Stason and Developers shall cause its Affiliates to, cooperate with each other in relation
+to Litigation matters and when reasonably practical shall discuss, consult and participate with each other on the course of action
+to be followed. Stason shall bear all expenses, costs, fees, including its own attorney’s fees and any award of damages or
+litigation costs associated with Litigation in connection with this Section 11.2.3 (but not the costs and expenses of
+Developer’s own counsel). Stason shall not enter into any settlement of Litigation (“Settlement”) that requires
+Developers to pay, without the prior written consent of Developers. Stason shall not enter into any Settlement that admits to the
+invalidity or unenforceability of any Issued Product Patents, without the prior written consent of Developers. Stason will provide
+to Developers a copy of any Settlement agreement entered into by Stason, subject to Developers entering into an appropriate
+confidentiality agreement. Stason will not enter into any Settlement that provides cash payments to Stason by the plaintiff, without
+Developer’s prior written consent. Developers shall not enter into any settlement, agreement, consent judgment or other
+voluntary final disposition of any proceeding or threatened proceeding relating to the Product without the prior written consent of
+Stason. Prior to entering into any Settlement and promptly, but no later than three business days after receiving a proposal
+regarding a Settlement, Stason shall consult in good faith with Developers regarding such Settlement.
+
+11.5        Cooperation.
+Each Party agrees to promptly notify the other of any potential infringement of Third Party Intellectual Property rights by the making,
+using or selling of Product, as it may become aware of such potential infringement, and to cooperate in addressing such potential infringement
+issues. With respect to all development work conducted following the Effective Date, Developers agrees to cooperate with Stason and Stason’s
+legal counsel, on the basis as set out at Section 2.1 et. seq. and 5.4 so as to avoid infringement of any Intellectual Property Controlled
+by a Third Party.
+
+19
+
+ARTICLE 12.   CONFIDENTIALITY AND PUBLIC DISCLOSURE
+
+12.1        Confidential
+Information. It is recognized by the Parties that, during the Term of this Agreement, the Parties will exchange
+Confidential Information. Stason agrees that it shall not disclose or use for Stason personal benefit (other than pursuant to this
+Agreement) or for the benefit of any third person Confidential Information received from Developers. Each of Itochu and Oishi agree
+that it shall not disclose or use for it’s personal benefit (other than pursuant to this Agreement) or for the benefit of any
+third person Confidential Information received from Stason.
+
+This does not apply to:
+
+(a)
+
+information which was already in the public domain at the time of signature.
+
+(b)
+
+information which becomes a part of the public domain by publication or otherwise, except by breach of this Agreement.
+
+(c)
+
+information which a Party can establish by proof in its possession before the Effective Date and was not acquired directly or indirectly from the other Party.
+
+(d)
+
+information received by the Receiving Party free of an obligation of confidentiality from a source rightfully having possession of and the right to disclose such information free of an obligation of confidentiality.
+
+(e)
+
+Information independently developed by employees or agents of the Receiving Party without the use of Confidential Information of the Disclosing Party.
+
+(f)
+
+Information that is required to be disclosed by law or by a requirement of a regulatory body.
+
+12.2        Notwithstanding
+the above, nothing contained in this Agreement shall preclude Developers from utilizing Confidential Information as may be necessary for
+prosecuting patent rights related to the Product pursuant to Article 11, or Stason obtaining Regulatory Approvals, or in manufacturing
+or otherwise obtaining supply of the Product pursuant to the terms and conditions of this Agreement. The obligations of the Parties relating
+to Confidential Information shall expire ten (10) years after the termination of this Agreement.
+
+ARTICLE 13.   REPRESENTATIONS AND WARRANTIES
+
+13.1        Developers
+Representations. Each of Itochu and Oishi hereby represent, warrant and covenant that:
+
+13.1.1       It is a company duly organized, validly existing
+and in good standing under the laws of the jurisdiction of its formation;
+
+13.1.2       It has the power and authority to enter into
+and be bound by the terms and conditions of this Agreement and to perform its obligations hereunder and to execute this Agreement on behalf
+of itself and its Affiliates and to so bind itself and its Affiliates to the terms and conditions of this Agreement;
+
+13.1.3       It has taken all necessary action on its part
+to authorize the execution and delivery of this Agreement and this Agreement has been duly executed and delivered on behalf of itself
+and its Affiliates and constitutes a legal, valid, binding obligation, enforceable against itself and its Affiliates in accordance with
+its terms;
+
+20
+
+13.1.4       It is subject to no legal, contractual or other
+restrictions, limitations or conditions which conflict with its rights and obligations under this Agreement or which would reasonably
+be expected to affect adversely its ability to perform hereunder;
+
+13.1.5       It will not (i) promise, offer, or give
+(and has not promised, offered or given) anything of value to any government employee or individual acting in an official capacity for
+the purpose of securing any improper or undue advantage, (ii) accept or receive (and has not accepted or received) any unlawful contributions,
+payments, expenditures, or gifts, (iii) do (and has not done) business with any country or person that is the subject of sanctions
+imposed or administered by the U.S. Treasury Department’s Office of Foreign Assets Control or the UN Security Council or any
+governmental agency in a jurisdiction in which SOBI is organized or doing business; or (iv) violate (and has not violated) any applicable
+U.S. or other export restriction, anti-boycott regulation, or other applicable laws.
+
+13.2        Stason
+Representations. Stason represents and warrants that:
+
+13.2.1       Stason is a company duly organized, validly
+existing and in good standing under the laws of the jurisdiction of its formation;
+
+13.2.2       Stason has the power and authority to enter
+into and be bound by the terms and conditions of this Agreement and to perform its obligations hereunder;
+
+13.2.3       Stason has taken all necessary action on its
+part to authorize the execution and delivery of this Agreement and this Agreement has been duly executed and delivered on behalf of Stason
+and constitutes a legal, valid, binding obligation, enforceable against Stason in accordance with its terms; and
+
+13.2.4       Stason is subject to no legal, contractual
+or other restrictions, limitations or conditions which conflict with its rights and obligations under this Agreement or which would reasonably
+be expected to affect adversely its ability to perform hereunder.
+
+13.2.5       Stason will not (i) promise, offer, or
+give (and has not promised, offered or given) anything of value to any government employee or individual acting in an official capacity
+for the purpose of securing any improper or undue advantage, (ii) accept or receive (and has not accepted or received) any unlawful
+contributions, payments, expenditures, or gifts, (iii) do (and has not done) business with any country or person that is the subject
+of sanctions imposed or administered by the U.S. Treasury Department’s Office of Foreign Assets Control or the UN Security
+Council or any governmental agency in a jurisdiction in which SOBI is organized or doing business; or (iv) violate (and has not violated)
+any applicable U.S. or other export restriction, anti-boycott regulation, or other applicable laws.
+
+ARTICLE 14.   INDEMNIFICATION
+
+14.1        Stason
+Indemnification. Stason shall at all times during the term of this Agreement and thereafter indemnify, defend and hold
+Developers, its officers, directors, employees, agents and Affiliates (“Developers Parties”), and the successors and
+assigns of the foregoing, harmless from and against all expenses, damages, costs and liabilities of any kind whatsoever, including
+legal expenses and reasonable attorneys’ fees, payable to third parties as a result of a Third Party claim, suit, or cause of
+action (collectively, the Developers Parties’ “Losses”) arising out of a breach by Stason of any representation,
+warranty or obligation of Stason under this Agreement, or by a failure of Stason, or its Affiliates, to comply with all Applicable
+Laws during the term of this Agreement, or negligence or willful misconduct of Stason, except to the extent that such Losses arise
+solely out of the negligence or willful misconduct or illegal acts of the Developers Parties or are subject to indemnification by
+Developers under Section 14.2.
+
+21
+
+14.2        Developers
+Indemnification.
+
+14.2.1       Itochu shall at all times during the term of
+this Agreement and thereafter indemnify, defend and hold Stason and Oishi, and their respective officers, directors, employees, agents
+and Affiliates (“Stason and Oishi Parties”), and the successors and assigns of the foregoing, harmless from all expenses,
+damages, costs and liabilities of any kind whatsoever, including legal expenses and reasonable attorneys’ fees, payable to third
+parties as a result of a Third Party claim, suit, or cause of action (collectively, the Stason and Oishi Parties’ “Losses”)
+arising out of breach by Itochu of any representation, warranty or obligation of Itochu under this Agreement, or by a failure of Itochu,
+to comply with all Applicable Laws during the term of this Agreement, or negligence or willful misconduct of Itochu. The foregoing indemnification
+shall not apply to the extent that such Losses arise solely out of the negligence or willful misconduct or illegal acts of the Stason
+Parties or are subject to indemnification by Stason or are the sole responsibility of Oishi as provided in section 17.16.
+
+14.2.2       Oishi shall at all times during the term of
+this Agreement and thereafter indemnify, defend and hold Stason and Itochu and their respective officers, directors, employees, agents
+and Affiliates (“Stason and Itochu Parties”), and the successors and assigns of the foregoing, harmless from all expenses,
+damages, costs and liabilities of any kind whatsoever, including legal expenses and reasonable attorneys’ fees, payable to third
+parties as a result of a Third Party claim, suit, or cause of action (collectively, the Stason and Itochu Parties’ “Losses”)
+arising out of a breach by Oishi of any representation, warranty or obligation of Oishi under this Agreement, or by a failure of Oishi,
+to comply with all Applicable Laws during the term of this Agreement, or negligence or willful misconduct of Oishi. The foregoing indemnification
+shall not apply to the extent that such Losses arise solely out of the negligence or willful misconduct or illegal acts of the Stason
+Parties or are subject to indemnification by Stason or are the sole responsibility of Itochu as provided in section 17.16..
+
+14.3        Other
+Claims. To the extent either Party incurs any Losses arising from or in connection with any claim based on bodily injury by
+the Product that is not otherwise subject to indemnification by a Party under Section 14.1 or 14.2 of this Agreement such Losses
+shall be shared according to the profit split in Section 7.2.1 in this Agreement by the Parties. To the extent that any Losses are
+subject to indemnification by two or all of the Parties, they shall be apportioned in accordance with each Party’s respective fault.
+
+14.4        Obligations
+of the Indemnified Party. Each indemnified Party under this Agreement shall give the indemnifying Party prompt written
+notice of any claim it receives, including all particulars of such claim(s) to the extent known to the indemnified Party; provided,
+that the failure to give timely notice to the indemnifying Party as contemplated hereby shall not release the indemnifying Party
+from any liability to the indemnified Party except to the extent the indemnifying Party is materially prejudiced in defending any
+claim by such failure. The indemnified Party shall also give the indemnifying Party the opportunity to assume sole and full control
+of the defense and settlement (subject to Section 14.4) of all claims for which it is seeking indemnification. If the
+indemnifying Party assumes such control and defends against the Losses, it shall not be responsible for the legal fees of any
+attorneys additionally employed by the indemnified Party. If the indemnifying Party refuses to defend, it shall remain liable for
+the legal fees of any attorneys additionally employed by the indemnified Party. If the indemnifying Party is not given opportunity
+to assume sole and full control of the defense and settlement, then it shall have no liability of the purported indemnified Party
+for the associated claim, whether for attorney’s fees, costs, expenses or Losses. The Party not assuming the defense of any
+such claim shall render all reasonable assistance to the Party assuming such defense, and all reasonable out-of-pocket costs of such
+assistance shall be promptly paid or reimbursed by the indemnifying Party, except that the indemnifying Party shall not have any
+obligation to pay additional attorneys fees, should the Indemnified Party choose to retain separate counsel.
+
+22
+
+14.5        Settlement.
+Except in case the indemnifying Party refuses to fully defend and hold harmless the indemnified Party against subject losses, in no event
+shall the indemnified Party be entitled to settle claims subject to indemnification under this Article 14 without the consent of
+the indemnifying Party. The indemnifying Party may settle any claim under this Article 14 on behalf of the indemnified Party with
+the consent of the indemnified Party so long as the indemnified Party is not required to make any payments not covered by the indemnifying
+Party. For the purposes of clarification, no amounts paid in connection with indemnification of Losses pursuant to this Article 14
+shall be deducted from the calculation of Net Profits.
+
+ARTICLE 15.   TERM AND TERMINATION
+
+15.1        Term.
+Unless earlier terminated pursuant to this Article 15, the term of this Agreement shall continue in force from the Effective Date
+until the date that is 10 years following the Effective Date, except that if a Commercial Launch occurs within ten years from the Effective
+Date, the Agreement shall remain in full force and effect until the date that is ten (10) years following the Commercial Launch of
+the Product (the “Term”). This Agreement shall automatically renew upon for subsequent successive one (1) year renewal
+terms thereafter, unless prior written notice of at least six (6) months is given by one Party to the other indicating that it wishes
+this Agreement to terminate and the end of the then current term — in which case this Agreement shall not renew, it shall be deemed
+to have been expired without fault, and the termination provisions relating thereto shall apply.
+
+15.2        Termination
+for Breach. Either Party may terminate this Agreement or suspend performance under this Agreement upon written notice to the
+other Party at any time during the term of this Agreement, if the other Party is in material breach of this Agreement and such other Party
+has not cured such material breach within one hundred and eighty (180) days after notice requesting cure of the breach. If a cure
+is not capable, the non-breaching Party may terminate this Agreement, or suspend performance under this Agreement, immediately.
+
+15.3        Termination
+for Study Failure. In the event that any of the studies listed in Article 2.5 fails, Stason may terminate this Agreement
+upon ten (10) days notice.
+
+15.4        Termination
+for Refusal to File. In the event that FDA issues a “Refusal To File” for the Product Regulatory Approval
+application because of a deficiency arising out of the dossier provided by Developers for the preparation of such application for
+Regulatory Approval, Stason shall work together in good faith with Developers and provide Developers one-hundred and eighty
+(180) days to cure such problem and so that Stason may re-file an application for Regulatory Approval that addresses the
+reasons for the refusal to file If Stason believes in good faith, after reasonable consultation with Developers after the
+aforementioned one hundred eighty (180) days allowed to resolve the problems associated with the “Refusal To File”,
+that it is commercially unreasonable to re-file, Stason may terminate this agreement upon thirty (30) days notice to
+Developers.
+
+23
+
+15.5        Termination
+for Efficacy Study Requirement. In the event that FDA determines that the formulation of the Product would not be eligible
+for final Regulatory Approval in the absence of efficacy studies, either Party may terminate this Agreement upon one hundred eighty (180) days
+notice to the other Parties during which time, Developers shall have the right to work in good faith to address the efficacy study requirements
+with the FDA and if successful, then the Agreement shall continue to be in force.
+
+15.6        Termination
+Regarding Economic Viability. If at any time during the Term market conditions in the Territory are such that
+
+(a)
+
+total Net Profits (excluding the deduction for reimbursement of legal expenses) reach a level that is equal to or less than five percent (5%) of Stason’s (and its Affiliates’) Net Sales of the Products and such conditions persist for a period of four (4) or more consecutive quarters, or
+
+(b)
+
+the Product’s economic viability is affected significantly as evidenced by documentation and substantial information by any external circumstance deemed to be detrimental to both Stason and Developers and agreed to by both Parties,
+
+then the Parties shall immediately, at either Party’s
+request, in good faith meet and discuss the terms of the Agreement in an attempt to resolve the Parties’ concerns in a mutually
+acceptable manner. If after a period of thirty (30) days of such good-faith discussions the Parties are unable to reach an agreement
+resolving such concerns, either Party shall have the right to immediately terminate the Agreement upon giving prior written notice to
+the other Party, and if Stason shall terminate the Agreement, Stason shall discontinue sales of the Product after all inventories are
+sold and such sales shall continue to be subject to the profit split provided in this Agreement.
+
+15.7        Termination
+right for Failure to Submit Application. In the event that Stason fails to file for regulatory approval for the Product within
+three (3) months of the date on which all passing reports of studies required by the FDA are received, all required stability results
+are received by Stason and all required components of the Regulatory Approval application are received by Stason, and Developers has provided
+constant and continual support, and all studies required by the FDA have been successful, Developers may terminate this Agreement upon
+thirty (30) days prior written notice.
+
+15.8        Termination
+right for Failure to Agree. In connection with Section 2.9, in the event the Parties are unable to reach mutual agreement
+as to who shall conduct the study(ies) and how the cost shall be allocated within sixty-days of learning of the request for such studies
+from the FDA then either Party may terminate upon thirty (30) days prior written notice.
+
+24
+
+15.9        Termination
+for Bankruptcy. Either Party may immediately terminate this Agreement upon written notice to the other Parties if the other
+Party becomes insolvent, admits in writing its inability to pay debts as they become due, is liquidated, dissolved or ceases to conduct
+business, makes an assignment for the benefit of creditors, or files or has filed against it a petition in bankruptcy or reorganization
+proceedings.
+
+15.10      Reversion
+of Rights to Developers upon Termination.
+
+15.10.1     In the event that Stason terminates this Agreement
+pursuant to Section 15.3, 15.5, 15.6, 15.7 or 15.8, or this Agreement is terminated by Developers pursuant to Section 15.2 or
+15.9, all rights of the applicable Product for Territory, including ownership of the Product NDA, shall be transferred to Developers or
+its designee, by Stason at Stason’s sole cost and expense immediately, which Developers may then use for its own purposes in its
+sole discretion, including in the development, testing, manufacture, distribution and sale of any Products or any Drug Product in the
+Territory.
+
+15.10.2     In the event that Stason terminates this Agreement
+pursuant to Section 15.2, 15.4 or 15.9, or this Agreement is terminated by Developers pursuant to Section 15.1, Developers shall
+hereby grant to Stason an exclusive, perpetual, irrevocable, royalty free, sublicensable license to use, make, manufacture, market, distribute
+and sell the Product in the Territory.
+
+15.11     Survival.
+Articles 1, 7, 12, 14, 15, 16, 17, Sections 4.1, 11.1 and any other provisions necessary and proper to give effect to the intention
+of the Parties as to the effect of the Agreement after termination shall survive any expiration or termination of this Agreement. In addition,
+unless otherwise expressly set forth herein, no expiration or termination of this Agreement shall have any affect on any payment, obligation
+accruing or arising prior to such expiration or termination.
+
+ARTICLE 16.   INSURANCE
+
+16.1        Insurance.
+Stason shall obtain and maintain, through self insurance or otherwise, at all times during the term of this Agreement, and for three years
+thereafter, prudent comprehensive general liability coverage appropriate to its activities with reputable and financially secure insurance
+carriers to cover its activities related to this Agreement. Additionally such insurance coverage shall include, without limitation, product
+liability coverage of an appropriate amount, not less than five million US Dollars ($5,000,000) per occurrence and five million US Dollars
+($5,000,000) in the aggregate, to be in place prior to the manufacture of any Product that is to be administered to humans. Each of Itochu
+and Oishi shall obtain and maintain, through self insurance or otherwise, starting with the manufacture of Product for Commercial Launch
+and thereafter through the term of this Agreement, and for three years thereafter, prudent comprehensive general liability coverage appropriate
+to its activities with reputable and financially secure insurance carriers to cover its activities related to this Agreement.
+
+ARTICLE 17.   MISCELLANEOUS
+
+17.1        Interpretation
+and Construction. Unless the context of this Agreement otherwise requires, (i) the terms “include,”
+“includes,” or “including” shall be deemed to be followed by the words “without limitation”
+unless otherwise indicated; (ii) words using the singular or plural number also include the other; (iii) the terms
+“hereof,” “herein,” “hereby,” and derivative or similar words refer to this entire Agreement;
+(iv) the terms “Article,” “Section” and “Exhibit” refer to the specified Article, Section
+and Exhibit of this Agreement, and (v) words of any gender include each other gender. Whenever this Agreement refers to a
+number of days, unless otherwise specified, such number shall refer to calendar days. The headings and paragraph captions in this
+Agreement are for reference and convenience purposes only and shall not affect the meaning or interpretation of this Agreement. This
+Agreement shall not be interpreted or constructed in favor of or against either Party because of its effort in preparing it.
+
+25
+
+17.2        Independent
+Contractor Status. It is understood and agreed that nothing in this Agreement nor any agreements related hereto is intended
+to nor shall create a partnership between the Parties. The Parties hereto are independent contractors and are engaged in the operation
+of their own respective businesses, and neither Party hereto is to be considered the agent, partner, joint venturer or employee of the
+other Party for any purpose whatsoever, and neither Party shall have any authority to enter into any contracts (other than settlement
+agreements pursuant to the applicable provisions of this Agreement) or assume any obligations for the other Party nor make any warranties
+or representations on behalf of that other Party.
+
+17.3        Waiver
+and Modification. The waiver by either Party of a breach of any provision contained herein shall only be effective if in writing
+and shall in no way be construed as a waiver of any succeeding breach of such provision or obligation or the waiver of the provision or
+obligation itself. This Agreement may not be changed, modified, amended or supplemented except by an express written instrument signed
+by both Parties.
+
+17.4        Assignment.
+This Agreement shall be binding upon and inure to the benefit of each ‘ of the Parties hereto and their respective successors and
+approved assigns, provided, however, that neither Party may assign or transfer this Agreement whether by operation of law or otherwise
+without the prior written consent of the other Party, except that no consent shall be required if such assignment or transfer by operation
+of law is in connection with a merger or acquisition or sale of all or substantially all of the assets of the assigning Party. Any assignment
+or transfer in contravention of this Agreement shall be null and void.
+
+17.5        Severability.
+If any provision of this Agreement shall be held illegal or unenforceable, that provision shall be limited or eliminated to the minimum
+extent necessary so that this Agreement shall otherwise remain in full force and effect and enforceable.
+
+17.6        Further
+Assurances. Each Party hereto agrees to undertake and carry out their respective obligations in connection with this Agreement
+in good faith, and shall cooperate with each other in good faith throughout the performance of this Agreement. Each Party hereto agrees
+to execute, acknowledge and deliver such further instruments and documents, and to do all such other acts, as may be reasonably necessary
+or appropriate in order to carry out the purposes and intent of this Agreement
+
+17.7        Use
+of Party’s Name. Except as otherwise required by Applicable Law, no right, express or implied, is granted by this
+Agreement to either Party to use in any manner the name of the other or any other trade name or trademark of the other in connection
+with the performance of this Agreement. For clarity, it is understood that nothing herein shall prohibit either Party from using the
+name of the other Party (i) in certain of such Party’s disclosure documents including those filed or disclosed in order
+to comply with its obligations under Applicable Law or the listing standards or agreements of any national or international
+securities exchange or The NASDAQ Stock Market or other similar laws of a governmental authority, (ii) to respond to an inquiry
+of a governmental authority, or (iii) in a judicial, administrative or arbitration proceeding, or from disclosing the fact that
+it has granted or obtained a license to any Intellectual Property of the other Party so long as such use of the other’s name
+is limited to statements of fact and is not done in a manner to suggest or imply endorsement by the other Party.
+
+26
+
+17.8        Notices.
+Any notice or other communication to be given under this Agreement by any Party to any other Party shall be in writing and shall be either
+(a) personally delivered, (b) mailed by registered or certified mail, postage prepaid with return receipt requested, (c) delivered
+by reputable overnight express delivery service or same-day local courier service, (d) delivered by confirmed (or answered back)
+telex or facsimile transmission, to the address of the applicable Party as set forth below, or to such other address as may be designated
+by the Parties from time to time in accordance with this Section 17.8. Notices delivered personally, by overnight express delivery
+service or by local courier service shall be deemed given as of actual receipt. Mailed notices shall be deemed given ten (10) business
+days after mailing and five (5) business days after expedited mailing services. Notices delivered by telex or facsimile transmission
+shall be deemed given upon receipt by the sender of the answerback (in the case of a telex) or transmission confirmation (in the case
+of a facsimile transmission); provided, however, that telex or facsimile that is sent after 5:00 pm (recipient’s local time) shall
+be deemed given at 9:00 am (recipient’s local time) on the next business day.
+
+If to Stason at:
+
+Stason Pharmaceutical, Inc.
+
+​
+
+11 Morgan
+
+​
+
+Irvine, CA 92618
+
+​
+
+President
+
+​
+
+Facsimile Number: [...***...]
+
+​
+
+​
+
+If to Developers at:
+
+ITOCHU CHEMICAL FRONTIER Corporation
+
+​
+
+5-1 Kita-Aoyama 2-Chome-Minato-Ku Tokyo,
+
+​
+
+Japan
+
+​
+
+ATTENTION: Mr. Akira Kikuchi
+
+​
+
+Facsimile Number: [...***...]
+
+or to such other address as each Party may designate
+for itself by like notice.
+
+17.9        Dispute
+Resolution. Except in case an injunction is sought, the Parties shall refer all disputes to the respective Chief Executive
+Officers (or their senior management designee), and the Parties shall negotiate in good faith to resolve such disputes for at least sixty
+(60) days before initiating any court action.
+
+17.10      Governing
+Law and Arbitration. This Agreement shall be governed by and construed in accordance with the laws of the State of New
+York, without reference to the choice of law principles thereof, other than those which may permit designation of New York law
+unless any dispute shall be resolved under the provision of Section 17.9, any claim, dispute or controversy arising out of or
+relating to this Agreement, or the breach, termination or invalidity thereof, shall be submitted by the Parties in dispute to
+binding arbitration in accordance with the arbitration rules then in effect of the International Chamber of Commerce. Any such
+arbitration shall be conducted in the State of New York, U.S.A. Any judgment or award rendered by the arbitrator shall be final and
+binding on the Parties. The Parties agree that such a judgment and/or award may be enforced in any court of competent
+jurisdiction.
+
+27
+
+17.11      Force
+Majeure. A Party shall not be liable for nonperformance or delay in performance, except for defaulted obligations of payment,
+to the extent that such nonperformance or delay in performance is not due to its negligence and is caused by any event reasonably beyond
+the control of such Party, including wars, hostilities, revolutions, riots, civil commotion, national emergency, strikes, lockouts, unavailability
+of supplies, epidemics, fire, flood, earthquake, force of nature, explosion, terrorist act, embargo, or any other Act of God, or any law,
+proclamation, regulation, ordinance, or other act or order of any court, government or governmental agency (each a “Force Majeure
+Event”). In the event of any such delay, the delayed Party may defer its performance for a period equal to the time of such delay,
+provided that the delayed Party gives the other Party written notice thereof promptly and, in any event, within thirty (30) calendar
+days of discovery thereof; and uses its good faith efforts to cure the excused breach.
+
+17.12      Entire
+Agreement. This Agreement and any Exhibits and Schedules attached hereto, constitute the entire agreement between Developers
+and Stason with respect to the Product and supersede all prior representations, understandings and agreements with respect to the Product.
+
+17.13      Counterparts.
+This Agreement may be executed in one or more counterparts, including by transmission of facsimile or PDF copies of signature pages, each
+of which shall for all purposes are deemed to be an original and all of which together shall constitute one instrument.
+
+17.14      Third
+Party Beneficiaries. No term or provision of this Agreement is intended to be, or shall be, for the benefit of a sub-contractor,
+supplier, any individual member of the control group utilized for the bioequivalence studies, firm, organization, or corporation not a
+party hereto, and no such other person, firm, organization or corporation shall have any right or cause of action hereunder.
+
+17.15      Bankruptcy.
+All rights and licenses granted under or pursuant to any article or section of this Agreement are, and shall otherwise be deemed to
+be, for purposes of Section 365(n) of Title 11 of the United States Code (the “Bankruptcy Code”) and other
+similar foreign laws, licenses of rights to be “intellectual property” as defined under the Bankruptcy Code or such
+foreign laws. If a case is commenced during the term of this Agreement by or against Developers or its Affiliates under
+Title 11, then, unless and until this Agreement is rejected as provided in Title 11, Developers (in any capacity,
+including debtor-in-possession) and its successors and assigns (including a Title 11 trustee) shall perform all of the
+obligations provided in this Agreement to be performed by such Party. If a Title 11 case is commenced during the term of this
+Agreement by or against Developers, this Agreement is rejected as provided in Title 11 and Stason elects to retain its rights
+hereunder as provided in Title 11, then the Developer Party which rejected the Agreement, subject to the Title 11 case (in
+any capacity, including debtor-in-possession) and its successors and assigns (including a Title 11 trustee), shall provide to
+Stason copies of all documents and information necessary for Stason to prosecute, maintain and enjoy its license under the Issued
+Product Patents, the NDA, and the Regulatory Approvals associated with all Products held by Developers and such successors and
+assigns promptly upon Stason’s written request therefor. All rights, powers and remedies of Stason, as a licensee hereunder,
+provided herein are in addition to and not in substitution for any and all other rights, powers and remedies now or hereafter
+existing at law or in equity (including Title 11) in the event of the commencement of a Title 11 case by or against
+Developers. If a case is commenced during the term of this Agreement by or against Stason or its Affiliates under Title 11,
+then, unless and until this Agreement is rejected as provided in Title 11, Stason (in any capacity, including
+debtor-in-possession) and its successors and assigns (including a Title 11 trustee) shall perform all of the obligations
+provided in this Agreement to be performed by Stason. If a Title 11 case is commenced during the term of this Agreement by or
+against Stason and this Agreement is rejected as provided in Title 11, Developers shall have the right to terminate this
+Agreement. Itochu and its Affiliates, as licensees of rights under this Agreement, shall retain and may fully exercise any or all of
+its rights and elections under the Bankruptcy Code and other similar foreign laws, in its discretion, in the event of the bankruptcy
+of Developers or its Affiliates. Developers and its Affiliates, having certain rights under this Agreement, shall retain and may
+fully exercise any or all of its rights and elections under the Bankruptcy Code and other similar foreign laws, in its discretion,
+in the event of the bankruptcy of Stason or Oishi or its Affiliates. Oishi and its Affiliates, having certain rights under this
+Agreement, shall retain and may fully exercise any or all of its rights and elections under the Bankruptcy Code and other similar
+foreign laws, in its discretion, in the event of the bankruptcy of Stason or Itochu or its Affiliates.
+
+28
+
+17.16      Responsibility
+for Related Entities. Stason shall be liable for any action or inaction caused by an Affiliate or subcontractor of Stason in
+connection with this Agreement. Oishi shall be solely liable for (1) responsibilities attributed solely to Oishi under this Agreement,
+(2) all illegal acts of Oishi, and (3) all actions or inactions of its Affiliates and subcontractors. Itochu shall be solely
+liable for (1) responsibilities attributed solely to Itochu under this agreement and (2) any illegal acts of Itochu, and (3) all
+actions or inactions of its Affiliates and subcontractors. Anything else in this agreement notwithstanding, each of Oishi and Itochu shall
+be jointly and severally liable for all responsibilities ascribed to “Developers” in this Agreement including all subcontractors
+associated with such responsibilities; provided, however, that if Itochu and Oishi enter into a written agreement that allocates Developer
+responsibilities between Oishi and Itochu then from and after the date that Oishi and Itochu provide a true and complete copy of such
+agreement to Stason and for so long as such agreement applies in such form (not amended or modified) then (a) Oishi shall be
+solely responsible for such Developer responsibilities clearly allocated solely to Oishi and arising solely after such agreement has been
+provided to Stason, and (b) Itochu shall be solely responsible for such Developer responsibilities clearly allocated solely to Itochu
+and arising solely after such agreements has been provided to Stason, To the extent that there is any dispute and/or confusion about whether
+Itochu or Oishi is responsible for a liability the burden of proof shall be on Oishi and Itochu to prove which is responsible and Itochu
+and Oishi shall remain jointly and severally liable until such allocation has been determined. Notwithstanding the foregoing, each of
+Itochu and Oishi shall not be liable for any inability to perform its Developer obligations hereunder if the other Developer Party becomes
+insolvent, admits in writing its inability to pay debts as they become due, is liquidated, dissolved or ceases to conduct business, makes
+an assignment for the benefit of creditors, or files or has filed against it a petition in bankruptcy or reorganization proceedings.
+
+[Signature Page of Product Development Agreement]
+
+29
+
+IN
+WITNESS WHEREOF, the Parties hereto have executed this Amended and Restated Product Development and Supply Agreement to be
+effective as of the Effective Date.
+
+STASON PHARMACEUTICAL, INC.
+
+​
+
+​
+
+​
+
+By:
+
+/s/ Harry Fan
+
+​
+
+​
+
+​
+
+​
+
+Name:
+
+Harry Fan
+
+​
+
+​
+
+​
+
+​
+
+Title:
+
+Chief Executive Officer
+
+​
+
+​
+
+​
+
+​
+
+Date:
+
+June 3, 2011
+
+​
+
+​
+
+​
+
+​
+
+OISHI KOSEIDO CO., LTD
+
+​
+
+​
+
+​
+
+By:
+
+/s/ Koji Oishi
+
+​
+
+​
+
+​
+
+​
+
+Name:
+
+Koji Oishi
+
+​
+
+​
+
+​
+
+​
+
+Title:
+
+President & CEO
+
+​
+
+​
+
+​
+
+​
+
+Date:
+
+May 11, 2011
+
+​
+
+​
+
+​
+
+​
+
+ITOCHU CHEMICAL FRONTIER Corporation
+
+​
+
+​
+
+​
+
+By:
+
+/s/ Toshinari Hidekuma
+
+​
+
+​
+
+​
+
+​
+
+Name:
+
+Toshinari Hidekuma
+
+​
+
+​
+
+​
+
+​
+
+Title:
+
+Director Managing Executive Officer, General Manager Pharmaceutical Division
+
+​
+
+​
+
+​
+
+​
+
+Date:
+
+May 11, 2011
+
+​
+
+30
+
+SCHEDULE A
+
+PRODUCTS
+
+Table 1. Identification of Reference Products
+
+NDA No.
+
+Active
+
+Ingredient
+
+Dosage Form;
+
+Route
+
+Strengths
+
+Proprietary
+
+Name
+
+20612
+
+lidocaine
+
+patch; topical
+
+5%
+
+Lidoderm®
+
+31

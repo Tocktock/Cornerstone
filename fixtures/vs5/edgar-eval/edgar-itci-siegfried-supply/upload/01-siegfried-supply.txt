@@ -1,0 +1,1692 @@
+2
+d436875dex102.htm
+EX-10.2
+
+EX-10.2
+
+Exhibit 10.2
+
+CERTAIN INFORMATION IDENTIFIED BY “[***]” HAS BEEN EXCLUDED FROM THE EXHIBIT BECAUSE IT IS BOTH NOT MATERIAL AND IS THE TYPE OF
+INFORMATION THAT THE REGISTRANT TREATS AS PRIVATE OR CONFIDENTIAL.
+
+January 5, 2023
+
+SUPPLY AGREEMENT
+
+This Agreement is made as of January 5, 2023 (the Effective Date) between
+
+Siegfried AG
+
+Untere Bruehlstrasse 4, 4800 Zofingen,
+Switzerland
+
+(Siegfried)
+
+and
+
+Intra-Cellular Therapies, Inc.
+
+430 E. 29th St, New York, NY 10016, United States of America
+
+(ITI)
+
+Recitals
+
+A.
+
+ITI engages in the business of research, development and commercialization of pharmaceutical compounds and
+products;
+
+B.
+
+Siegfried has substantial expertise in process development, scale-up
+and manufacturing of active pharmaceutical ingredients and drug products; and
+
+C.
+
+ITI and Siegfried desire to enter into this Agreement to provide the terms and conditions upon which Siegfried
+shall manufacture Product in commercial quantities after the completion of a validation campaign.
+
+Now, therefore, in
+consideration of the foregoing recitals and mutual covenants, agreements, representations, warranties and obligations expressed herein, and intending to be legally bound hereby, the Parties agree as follows:
+
+1.
+
+Definitions
+
+Unless elsewhere defined in this Agreement, each of the capitalized terms used in this Agreement (other than the names of the Parties and the
+headings of the Sections) shall have the meanings indicated below. Such meanings shall apply equally to all forms of such terms, including singular and plural forms, unless otherwise clearly indicated.
+
+Siegfried
+
+ITI
+
+2
+/ 32
+
+1.1
+
+Act shall mean the United States Food, Drug and Cosmetic Act of 1938, including any amendments thereto
+and all rules and regulations promulgated thereunder.
+
+1.2
+
+Affiliate shall mean with respect to any Party any person or entity controlling, controlled by, or under
+common control with a Party at any time during the term of this Agreement. For purposes of this definition, the term control shall mean the power to direct or cause the direction of the management and policies of an entity, whether through
+the ownership of voting stock, by contract or otherwise. In the case of a corporation, the term Control shall mean the direct or indirect ownership of at least fifty per cent (50%) of the outstanding voting stock.
+
+1.3
+
+Agreement shall mean this Supply Agreement including its Annexes (and appendices, if applicable), as
+amended from time to time according to the terms and conditions of this Agreement.
+
+1.4
+
+API shall mean active pharmaceutical ingredient.
+
+1.5
+
+Applicable Laws means, with respect to ITI, all laws, ordinances, rules and regulations, currently in
+effect or enacted or promulgated, and as amended from time to time, of each jurisdiction (in which the Product is manufactured, marketed, distributed, used or sold); and with respect to Siegfried, all laws, ordinances, rules and regulations,
+currently in effect or enacted or promulgated, and as amended from time to time, of the jurisdiction in which it performs the Services, and cGMP Regulations.
+
+1.6
+
+Business Day shall mean a day (not being a Saturday or Sunday) on which banks are open for business in
+New York, U.S.A. and Zurich, Switzerland.
+
+1.7
+
+cGMP Regulations shall have the meaning as set forth in the Quality Agreement.
+
+1.8
+
+Change shall mean any change to the Specifications, Master Batch Record, Raw Materials, Consigned
+Materials, Mandatory Vendor, or the Facility, or any other change referred to in the change control procedure set forth in the Quality Agreement, such Change being either (i) a Required Change (as defined in Section 11.1), (ii) a Customer
+Change (as defined in Section 11.3), or (iii) a Siegfried Change (as defined in Section 11.3).
+
+1.9
+
+Confidential Information shall mean any information of whatever kind, and all tangible and intangible
+embodiments, and oral disclosures thereof, of any kind whatsoever, which has been or will be disclosed by one Party (Disclosing Party) to the other Party (Receiving Party) in connection with this Agreement, and which is confidential or
+proprietary to the Disclosing Party or an Affiliate thereof, including, without limitation, for ITI, any and all information pertaining to the Product and the Specifications, and for both Parties information which relates to the business of such
+Party, including without limitation business plans, strategies, operations, policies, procedures, pricing, techniques, technical and scientific information, accounts, marketing plans, financial plans and status, and personnel
+
+Siegfried
+
+ITI
+
+3
+/ 32
+
+of either Party, that is designated or marked at the time of the disclosure as confidential or proprietary, or disclosed or made available under circumstances under which a reasonable person
+would understand the information to be confidential or proprietary, including without limitation which are obtained by Receiving Party through inspection or observation of Disclosing Party’s, or its Affiliates’, property or facilities
+(whether in writing, or in oral, graphic, electronic or any other form).
+
+1.10
+
+Consigned Materials shall mean the samples and materials, if any, that are to be provided to Siegfried
+by or on behalf of ITI for the performance of the Manufacturing Services under this Agreement, as listed in Annex B.
+
+1.11
+
+EMA shall mean the European Medicines Agency or any successor entity.
+
+1.12
+
+Entitled Person shall have the meaning set forth in Section 12.2.
+
+1.13
+
+End Market Product shall mean any pharmaceutical product containing the Product (or any derivatives
+thereof) in the finished packed form for marketing, distribution and sale.
+
+1.14
+
+Facility means any Siegfried facility where the Manufacturing Services are performed.
+
+1.15
+
+FDA shall mean the United States Food and Drug Administration or any successor entity.
+
+1.16
+
+Force Majeure Event shall have the meaning set forth in Section 17.2.
+
+1.17
+
+Forecast shall have the meaning as set out in Section 4.1.
+
+1.18
+
+Hidden Defects shall mean any failure of a Product to conform to the Specifications, such failure not
+being discoverable upon reasonable physical inspection or standard testing upon receipt of Product.
+
+1.19
+
+Improvement shall mean any result, data, documentation, invention,
+know-how, improvement, modification, adaptation, enhancement or new application to or for any part of the Product or the techniques or processes involved in its manufacture, which is conceived, derived,
+reduced to practice, made or developed by or for Siegfried in its performance of Services under this Agreement.
+
+1.20
+
+Independent Improvement shall mean an Improvement which is independent from ITI’s Intellectual
+Property Rights and which is not solely applicable to the Product.
+
+1.21
+
+Initial Term shall have the meaning set forth 14.1.
+
+1.22
+
+Intellectual Property Rights shall mean all inventions, patent applications, patents, registered or
+unregistered design rights, copyrights, database rights, trademarks, trade names, know-how, trade secrets and other industrial or intellectual property rights of whatever kind.
+
+Siegfried
+
+ITI
+
+4
+/ 32
+
+1.23
+
+Manufacture/Manufacturing Services shall mean all activities with respect to the manufacturing and
+supply of the Product, including, without limitation, the purchase and incoming inspections, storage and handling of Materials, quality control testing (including in-process, release and stability testing,
+when applicable), and packaging, release and delivery of Products.
+
+1.24
+
+Marketing Authorization shall mean any of the following: (a) a New Drug Application (NDA) filed
+with the FDA, (b) an Abbreviated New Drug Application (ANDA) filed with the FDA or (c) any other similar or equivalent regulatory filing with any Regulatory Authority seeking authorization and approval to manufacture, package, ship, and
+sell the End Market Product that will be given to humans; and (d) all supplements and amendments that may be filed with respect to the foregoing.
+
+1.25
+
+Master Batch Record means the document approved in writing by both Parties, and as may be amended from
+time to time in accordance with this Agreement and the Quality Agreement, specifying or referencing the complete set of formal instructions for the Manufacture of Product(s), including, but not limited to material descriptions, the formula,
+processing procedures, and in-process testing specifications, Specifications and packaging and shipping specifications.
+
+1.26
+
+Materials shall mean Raw Materials and Consigned Materials.
+
+1.27
+
+Order shall mean a purchase order issued by ITI in accordance with this Agreement.
+
+1.28
+
+Order Confirmation shall mean a confirmation issued by Siegfried that an Order posted by ITI shall be
+executed.
+
+1.29
+
+Party/Parties shall mean either ITI or Siegfried, or both, as the context may require.
+
+1.30
+
+Product shall mean any API to be manufactured by Siegfried as set out in any Product Schedule.
+
+1.31
+
+Quality Agreement shall mean the signed agreement between ITI and Siegfried which defines the
+responsibilities of each Party (Delinitation of Pharmaceutical Responsibility) with respect to the practices to be followed to ensure Product quality and compliance under cGMP Regulations, which shall be made part of this Agreement by reference (as
+such Quality Agreement may be amended from time to time).
+
+1.32
+
+Raw Materials shall mean all excipients, packaging materials and and other materials, excluding any
+Consigned Materials, which are used to Manufacture the Product in accordance with the Requirements and Specifications, as applicable.
+
+1.33
+
+Regulatory Approval means any approval or authorizations (including supplements and amendments thereof)
+of any governmental authority in each country.
+
+Siegfried
+
+ITI
+
+5
+/ 32
+
+1.34
+
+Regulatory Authority shall mean the FDA and the EMA.
+
+1.35
+
+Requirements means compliance with Applicable Laws, cGMP Regulations, the Quality Agreement and the
+Master Batch Records.
+
+1.36
+
+Specifications shall mean the detailed description of technical requirements the Product has to conform
+to, as set out in detail in any Product Schedule.
+
+2.
+
+Manufacture and Purchase of Products
+
+2.1
+
+This Agreement covers the purchase, Manufacture, and supply of commercial quantities of Product after
+completion of a validation campaign during the term of the Agreement as set forth in Section 14 below.
+
+2.2
+
+ITI shall purchase the Product(s) from Siegfried and Siegfried agrees to Manufacture and supply to ITI the
+volume of Product(s) as set forth in each Product Schedule.
+
+2.3
+
+In case circumstances, which could not have been foreseen or which were excluded from the assumptions made by
+both Parties render the completion of Manufacturing Services considerably more difficult than expected, or if this completion will cause substantially more labor and external costs to Siegfried than had been foreseen, Siegfried shall notify ITI
+accordingly and shall have the right to request from ITI an extension of deadlines or an adjustment of Siegfried’s compensation.
+
+3.
+
+Product Schedules and Affiliates
+
+3.1
+
+During the term of this Agreement, Siegfried and ITI shall enter into one or, if applicable, more Product
+Schedules under this Agreement, which are specifying and detailing the respective Product(s).
+
+3.2
+
+If an Affiliate of ITI desires to purchase a Product or an Affiliate of Siegfried wishes to Manufacture a
+Product under this Agreement, such an Affiliate may obtain or provide the Product by entering into a Product Schedule that needs to be executed by ITI—or the applicable ITI Affiliate—and Siegfried—or the applicable Siegfried
+Affiliate. ITI shall not unreasonably withhold its consent to Siegfried’s wish to Manufacture the Product at a Siegfried Affiliate.
+
+3.3
+
+Siegfried shall, directly or through its Affiliates, conduct all Manufacturing Services of the Product(s) in
+accordance with the Requirements and solely at the Facility. Siegfried may not deviate from the Requirements without ITI’s prior written consent in each instance. Siegfried shall notify ITI of any proposed changes to the Specifications and/or
+Master Batch Record in accordance with the Quality Agreement, and may not implement such change without
+
+Siegfried
+
+ITI
+
+6
+/ 32
+
+ITI‘s prior written consent. During the term of this Agreement, ITI shall timely provide to Siegfried all information, which may be required or useful for the due performance by Siegfried of
+its Manufacturing Services or other obligations under this Agreement, including but not limited to any existing or new information on Product safety, efficacy or quality and/or regulatory requirements relating thereto.
+
+4.
+
+Forecast and Ordering
+
+4.1
+
+Promptly after the Effective Date and thereafter at least [***] prior to the start of each month, ITI shall
+submit to Siegfried a rolling forecast covering ITI’s anticipated requirements of Product during such period (each, a Forecast). ITI acknowledges that Siegfried will rely on the accuracy of ITI’s Forecasts in planning its
+acquisitions of Raw Materials. If at any time ITI finds that a Forecast is inaccurate, ITI shall inform Siegfried without delay and submit a modified forecast for the period in question.
+
+4.2
+
+ITI shall make all purchases hereunder by submitting Orders to Siegfried regarding ITI’s requirements of
+Product(s) in accordance with each Product Schedule. Each Order shall be in writing and shall specify the (i) Product ordered, (ii) quantity ordered, (iii) price, (iv) delivery location(s) and (v) the required delivery date.
+
+4.3
+
+Within [***] from the date of the receipt of an Order from ITI, Siegfried shall confirm to ITI by way of an
+Order Confirmation that it will meet ITI’s quantity requirements in accordance with the delivery date(s), whereupon the Order shall be confirmed, final, and binding on the Parties.
+
+4.4
+
+Without limiting ITI’s remedies or Siegfried’s obligations hereunder, Siegfried shall promptly notify
+ITI in writing of any anticipated delay or of any circumstance(s) rendering it unable to Manufacture and/or supply Product in accordance with the delivery date(s) and the estimated duration of such delay/circumstance(s) and the Parties shall discuss
+in good faith about the steps to be taken to overcome such delay. Siegfried will keep ITI regularly informed of the progress of such Orders.
+
+4.5
+
+The Product(s) shall be delivered from Siegfried to ITI according to the commercial terms and at the price as
+set out in ANNEX A.
+
+5.
+
+Materials
+
+5.1
+
+Siegfried shall order sufficient quantities of all Raw Materials from its selected and qualified vendors to
+Manufacture and deliver Product(s) in accordance with ANNEX A and this Agreement. [***], where such change is agreed by the Parties in writing.
+
+Siegfried
+
+ITI
+
+7
+/ 32
+
+5.2
+
+If ITI designates Mandatory Vendors in accordance with the Quality Agreement, then Siegfried shall obtain
+respective Raw Material(s) only from such Mandatory Vendors. [***] In no event shall Siegfried be liable or responsible for any acts or omissions of such Mandatory Vendor, including without limitation, any delayed delivery, delivery of non-conforming Raw Material or other supply failure.
+
+5.3
+
+ITI shall supply Consigned Material in sufficient quantities and of good quality as necessary to enable
+Siegfried to perform all Manufacturing Services of Product(s) in accordance with the Requirements, the Product Schedule and Orders, at ITI’s cost and expense. At ITI’s option, the Consigned Materials may be delivered directly from
+ITI’s vendor to Siegfried at the vendor’s or ITI’s cost and expense.
+
+5.4
+
+Consigned Materials shall be delivered to Siegfried no later than the requested delivery date as set forth in
+the Order Confirmation issued by Siegfried requesting the delivery of Consigned Materials. Customer shall compensate Siegfried for any loss or damage (including idle capacity) incurred in connection with late delivery or delivery of non-conforming Consigned Materials by the delivery date or timeframe specified in the ANNEX B. In no event shall Siegfried be liable or responsible for any acts or omissions caused by third party or ITI activities
+under Sections 5.2, 5.3 and/or 5.4, including without limitation, any delayed delivery, delivery of non-conforming Consigned Materials or other supply failure. Any import duties, taxes or other fees due to
+governmental authorities regarding Consigned Materials shall be paid by ITI (DDP Incoterms 2020).
+
+5.5
+
+Siegfried agrees that Consigned Materials shall: (i) be used solely for the purpose of Manufacturing
+Services under this Agreement; (ii) be used in compliance with all Applicable Laws; and (iii) not be transferred to any third party, except to any permitted subcontractor of Siegfried, or except as provided for under a specific Product
+Schedule.
+
+5.6
+
+Siegfried agrees to use all reasonable and appropriate precautions in handling and storing Consigned Materials
+and to inform ITI promptly in writing of any adverse effects experienced by persons handling Consigned Materials.
+
+5.7
+
+ITI shall retain all right, title and interest in and to all Consigned Materials delivered to Siegfried and
+shall insure the Consigned Materials against loss and damage. Siegfried shall only be liable for any loss of or damage to Consigned Materials after delivery to Siegfried if such loss or damage was caused by Siegfried’s [***]. Following receipt
+of Consigned Materials, Siegfried shall inspect such items, in accordance with the procedures set forth in the Quality Agreement and/or the Master Batch Record, to verify their quantity and quality, and shall give ITI, as soon as reasonably
+possible, notice of any quantity or quality shortcoming. Any Consigned Materials not rejected by Siegfried within such time period shall be deemed accepted, unless they have Hidden Defects. In case the Consigned Materials are rejected by Siegfried,
+Siegfried shall follow ITI’s written instructions in respect of return or disposal of defective Consigned Materials, at ITI’s costs and risks. Upon delivery of any Order, Siegfried shall notify ITI of any excess Product(s) or Consigned
+Materials in its possession, and unless ITI directs otherwise within [***] after receipt of such notice, Siegfried shall store all such material at its facility at an agreed rate.
+
+Siegfried
+
+ITI
+
+8
+/ 32
+
+5.8
+
+Siegfried will provide an inventory report directly from its warehouse system of all material held by Siegfried
+that is owned by ITI (Consigned Materials and Product) by the end of the 2nd (second) Business Day following the end of the prior month. The report shall include, but not be limited to, item
+description, batch/lot identifier, warehouse location, quantity on hand, and expiration date (if applicable). The report data shall include the inventory on hand as of the close of business on the last day of the month.
+
+5.9
+
+Siegfried may subcontract its Manufacturing activities (including to any Affiliate) only upon ITI’s prior
+written consent. If ITI gives its consent (in its sole reasonable discretion) Siegfried will execute a subcontractor agreement with the third party subcontractor or Affiliate that contains terms at least as protective of ITI, its rights under this
+Agreement, and its Intellectual Property Rights as the terms in this Agreement, including, without limitation terms that, at a minimum, provide for compliance by the subcontractor with Applicable Laws, provide for ownership and allocation of
+Intellectual Property Rights in accordance with Section 13, and for obligations of confidentiality of information, record-keeping, access, and rights to data that are consistent with the intent and terms of this Agreement. Siegfried shall
+remain liable at all times for the performance of any of its obligations hereunder that it delegates to a subcontractor, and for each such subcontractor’s actions and omissions.
+
+6.
+
+Mandatory Vendor
+
+6.1
+
+In the event ITI designates a Mandatory Vendor to Siegfried, Siegfried shall purchase the relevant Raw
+Materials only from a Mandatory Vendor. Siegfried shall promptly inform ITI of any acts or omissions of such a Mandatory Vendor impacting the due and timely delivery of the Product(s), including without limitation, any supply shortage, supply
+failure (including, but not limited to, any supply of defective Raw Materials or service) or late supply of Raw Materials or late performance of service by such a Mandatory Vendor (each a Mandatory Vendor Failure), and the Parties shall
+confer and use commercially reasonable efforts to have any such Mandatory Vendor Failure promptly cured.
+
+6.2
+
+Either Party may suggest, upon reasonable prior written notice to the other Party, to change or add a Mandatory
+Vendor and the Parties shall promptly confer and amicably agree if and how to proceed, including, without limitation, to a respective adjustment of the price of the Product(s). Except to the extent due to the fault of Siegfried, Siegfried shall not
+be liable or responsible for any Mandatory Vendor Failure, and, if applicable, ITI shall reimburse Siegfried its costs and expenses, including any idle capacity, incurred in connection with
+
+(i) the appointment or change of such Mandatory Vendor or
+
+(ii) any Mandatory Vendor Failure.
+
+Siegfried
+
+ITI
+
+9
+/ 32
+
+7.
+
+Delivery
+
+7.1
+
+The Product shall be delivered from Siegfried to ITI on the date confirmed in the Order Confirmation (see
+Section 4.3 above) according to the Incoterm as set forth in each Product Schedule. ITI assumes all responsibilities and liability arising out of the transport, storage, handling and use of the Product after delivery by Siegfried to ITI.
+
+7.2
+
+ITI shall accept deliveries of [***] of an Order. ITI shall pay solely for the Products actually delivered by
+Siegfried.
+
+7.3
+
+In the event ITI does not pick-up the Products on the date confirmed in
+the Order Confirmation, the risk and rewards of ownership in the Product shall pass to ITI on such confirmed date. Siegfried shall store the Products that are not picked-up on the date confirmed in the Order
+Confirmation in its warehouse on behalf of ITI against a reasonable storage fee, and shall have the right to invoice such Products to ITI upon delivery. Siegfried shall have the right to procure shipment of the Product on behalf of ITI and have the
+Product shipped to ITI, at ITI’s costs and expenses, provided that Products have been stored on behalf of ITI for a period of no less than [***] after delivery.
+
+7.4
+
+Siegfried shall promptly notify ITI in writing of any anticipated delay or of any circumstance(s) rendering it
+unable to deliver the Product in accordance with the confirmed delivery date(s) and the estimated duration of such delay/circumstance(s). Upon such written notice, the Parties will work together to agree upon a revised delivery schedule.
+
+7.5
+
+If Siegfried, due to a negligent act or omission, is unable to meet the confirmed delivery date, Siegfried
+shall, at ITI’s election, either: (i) use all commercially reasonable efforts to deliver the delayed Product within a reasonable after time, or (ii) if delivery of conforming Product is not possible within a reasonable time, refund to
+ITI within [***] all amounts therefore paid by ITI to Siegfried for such late Product. Except in the case of Siegfried’s gross negligence or willful misconduct, such delivery or refund, shall be the only remedy available to ITI in case of late
+deliveries.
+
+7.6
+
+In the event a Product Schedule relates to a Product to be used to Manufacture another Product (i.e. an
+intermediate), the Parties agree to establish a special consignment warehouse (“Consignment Warehouse”). In such case, Siegfried shall invoice to ITI the relevant Product upon delivery of such Product into the Consignment Warehouse. Such
+Product is to be appropriately stored and taken from stock following the principle “first in – first out”; further details related to the storage of Product are set forth in the Quality Agreement. ITI shall bear all costs and expenses
+related to the Product stored in the Consignment Warehouse. Risk and rewards of ownership of the the Product shall pass on to ITI upon delivery of the Product in the Consignment Warehouse. Siegfried shall be responsible for any loss of Products if
+and to the extent attributable to Siegfried’s wilful misconduct or gross negligence.
+
+Siegfried
+
+ITI
+
+10
+/ 32
+
+8.
+
+Product Inspection
+
+8.1
+
+Siegfried shall take reasonable precautions and institute procedures to ensure that the Manufacture of
+Product(s) is and remains fully compliant with the Requirements.
+
+8.2
+
+Upon receipt of the Product, ITI shall examine the Product within [***] in order to determine compliance with
+the Specifications. If, in ITI’s opinion, the Product delivered does not comply with the Specifications, then ITI shall notify Siegfried in writing thereof. If ITI does not notify Siegfried within [***] after receipt of the Product by ITI, then
+the Product is deemed accepted. ITI retains the right to reject the Product for a period of [***] after delivery in case of Hidden Defects, provided that ITI notifies Siegfried in writing within [***] of discovering the Hidden Defect.
+
+8.3
+
+Any claims by ITI regarding Product delivered shall specify in reasonable detail the nature and basis for the
+claim and cite Siegfried’s relevant batch numbers or other information to enable specific identification of the Product involved. Siegfried shall review any written claim made by ITI regarding the quality of the Product and provide ITI with the
+results of such review. If such review and testing by Siegfried confirms that the identified Product did not meet the Specifications, ITI shall have the right to reject such Product and the Parties shall proceed according to Sections 8.5 and 8.6.
+
+8.4
+
+If the Parties fail to agree as to whether a delivered quantity of Product is a
+non-conforming Product, the Parties shall have the batch in dispute further tested and analyzed by an independent testing laboratory selected by agreement between the Parties. The decision of the independent
+testing laboratory shall be deemed final. Should the laboratory’s testing determine that the delivered Product are non-conforming Product, then (i) Siegfried shall bear all costs for the independent
+laboratory testing, (ii) ITI shall have the right to reject such non-conforming Product, and (iii) the Parties shall proceed according to Section 8.6. However, if said quantity of Product is
+determined by the independent laboratory to conform to the Specifications, then ITI shall bear all costs of the independent laboratory and compensate Siegfried for the rejected Product, the replacement delivery (if any), and the transportation costs
+as set out in this Agreement. Such remedy shall be the sole remedy to ITI, except in the event of Siegfried’s gross negligence or willful misconduct.
+
+8.5
+
+ITI shall, at Siegfried’s expense and written direction, dispose of the Product not conforming to the
+Specifications or deliver it to such destination as Siegfried shall specify in writing, provided that such directions are in compliance with applicable environmental laws and regulations. ITI shall not use or dispose of any Product that does not, or
+of which ITI claims that it does not, conform to the Specifications without Siegfried’s prior written consent.
+
+Siegfried
+
+ITI
+
+11
+/ 32
+
+8.6
+
+If a Product is a non-conforming Product, due to a negligent act or
+omission of Siegfried, Siegfried shall within a reasonable period: (i) use all commercially reasonable efforts to replace the rejected Product with Product that conforms with the Specifications or (ii) if delivery of conforming Product is
+not possible within the reasonable additional time, refund to ITI within [***] all amounts theretofore paid by ITI to Siegfried for such non-conforming Product. Except in the case of Siegfried’s gross
+negligence or willful misconduct, such replacement delivery or refund, shall be the only remedy available to ITI in case of delivery of non-conforming Product. For the avoidance of doubt, Siegfried shall not
+be liable against ITI for a non-conforming Product, if the non-conformity results from the Consigned Material or a Mandatory Vendor Failure.
+
+9.
+
+Product Price and Invoicing
+
+9.1
+
+ITI shall pay Siegfried the purchase price specified in each Product Schedule.
+
+9.2
+
+All pricing, payments, credits, allowances or other monetary adjustments under this Agreement shall be in Swiss
+Francs (CHF), unless otherwise agreed in writing. The Parties shall adjust the price (up or down) upon written agreement with regard to (i) documented Raw Materials price increases, (ii) changes in relevant indices,
+(iii) exchange rate variations, and (iv) as otherwise set forth in ANNEX A, subject to this Section 9. Notwithstanding the above, Siegfried shall have the right to increase the price in the event that:
+
+(i) the total costs of Raw Materials increase by more than [***] percent ([***]%) and/or
+
+(ii) the actual documented manufacturing costs incurred for the Manufacture of the Product(s) significantly exceed the manufacturing costs
+assumptions of Siegfried on which the price is based and/or
+
+(iii) in the event of a Manufacturing Change (see Section 11).
+
+9.3
+
+Furthermore, each calendar year, Siegfried shall have the right to increase the price based on year-over-year
+variation of the Swiss Consumer Price Index (the Index) (https://www.bfs.admin.ch/bfs/en/home/statistics/prices/consumer-price-index.html), provided that the Index variation is equal or higher than [***]% ([***] percent).
+
+The Index reference month shall be September of each calendar year (first reference month shall be September Index
+2022). The September Index of the current year shall be compared to the September Index of the previous year in order to determine the price adjustment of the price applying to all Order(s) to be delivered to ITI in the calendar year following the
+current year.
+
+Siegfried
+
+ITI
+
+12
+/ 32
+
+Example: If the September Index 2023 is [***] and the September Index 2022 is [***], the
+Index has increased by [***]% and Siegfried shall be entitled to adjust the Price for all Purchase Orders to be delivered to ITI in the calendar year 2023 by [***]%.
+
+In the event that the Index variation is lower than [***] percent ([***]%), the price will not be adjusted, but the percentage will be
+accumulated to the following years increase.
+
+Example: If the September Index 2023 increased by [***]% compared to the September Index
+2022 and the September Index 2024 increased by [***]% compared to the September Index 2023, Siegfried will be entitled to increase the price by [***]% for all Orders to be delivered in the calendar year 2024.
+
+9.4
+
+For each Product Schedule, the Product price shall cease at the end of the Initial Term. The Parties shall meet
+prior to the end of the Initial Term in order to set the Product price for each Product Schedule for the following year, unless otherwise mutually agreed in writing. The Product price shall then cease at the end of the year.
+
+9.5
+
+A portion of [***]% ([***] percent) of the Price of the respective Product shall be paid by ITI in advance. A
+down payment advice shall be issued by Siegfried and sent to ITI after issuance of Order Confirmation. A second portion of [***]% ([***] percent) of the Price of the respective Product shall be paid by ITI in advance. A down payment advice shall be
+issued by Siegfried and sent to ITI upon the scheduled production start date. Siegfried shall then issue a final invoice upon delivery of the Product, reflecting the advance payments made and attributable for such Order of the Product. ITI shall pay
+invoices to Siegfried within [***] after the date of such invoice, it being understood that the invoiced amount shall be on Siegfried’s bank account on the due date at the latest.
+
+9.6
+
+In case any undisputed invoices are not paid in accordance with such terms of payment, then ITI shall pay
+interest at an annual rate of [***]% ([***] percent) on the amount of the late sum (from original due date until the late sum is paid).
+
+9.7
+
+ITI shall pay any and all taxes, duties, assessments and other charges and expenses imposed by any Regulatory
+Authority in connection with delivery of the Product(s) and the other services provided to ITI and payments made by ITI under this Agreement.
+
+9.8
+
+All payments made to Siegfried pursuant to this Agreement shall be (i) made by wire transfer and
+(ii) are non-refundable and the expiration or termination of this Agreement shall not relieve ITI of its obligation to pay any outstanding balances due to Siegfried.
+
+9.9
+
+Shortage of Supply: In the event of any shortage in the availability or supply of Raw Materials that Siegfried
+orders under Section 5.1 of this Agreement and utilizes both in connection with the Manufacture of the Product and in connection with the production of other pharmaceutical products for third parties, Siegfried shall use commercially reasonable
+efforts to allocate equitably such Raw Materials among ITI and such third parties.
+
+Siegfried
+
+ITI
+
+13
+/ 32
+
+10.
+
+Regulatory Affairs
+
+10.1
+
+ITI shall be solely responsible for all regulatory filings for the Product and End Market Product. All
+information, documents and updates with regard to the Manufacture of Product which are in the possession of Siegfried and required by any governmental authority shall, as reasonably requested by ITI in connection with such submissions and filings,
+be provided by Siegfried, at ITI’s cost, to ITI or to the governmental authority, if requested by ITI.
+
+10.2
+
+Siegfried shall further provide ITI, at ITI’s requests, costs and expenses, with reasonable assistance in
+preparing or reviewing regulatory submissions or formulating responses to any questions and/or inquiries (i.e., deficiency letters) with respect to the above submissions. Without limiting the foregoing, Siegfried shall provide to ITI directly all
+information as ITI may reasonably require for purposes of applying for and maintaining Regulatory Approval, and Siegfried hereby allows ITI to provide such information to a governmental authority as necessary to support any application for
+authorization to conduct clinical trials or Regulatory Approval of a Product or in response to the requests or requirements of such governmental authority, provided however that ITI shall take appropriate steps to limit the disclosure of
+Siegfried’s Confidential Information to the extent necessary to accomplish the purpose. ITI shall be responsible for preparing all submissions to governmental authorities with respect to the Product. Siegfried will assist ITI with all
+regulatory matters relating to Product, at ITI’s request and expense. The Parties intend and commit to cooperate to allow each Party to satisfy its regulatory obligations under Applicable Laws relating to performance of this Agreement.
+
+10.3
+
+ITI shall provide, and Siegfried shall review those portions of ITI’s proposed regulatory submissions
+relating to Siegfried’s Manufacturing procedures or otherwise related to Siegfried’s key obligations hereunder before the submissions are filed with relevant governmental authorities and ITI shall consider Siegfried’s comments
+relating to the accuracy thereto in good faith.
+
+10.4
+
+The Parties acknowledge that the ultimate decision of whether any End Market Product will be approved for
+marketing and sale rests with the respective Regulatory Authorities. Any decision of the Regulatory Authorities to deny Marketing Authorization approval shall in no event be attributable to Siegfried and Siegfried shall assume no liability for such
+decision.
+
+11.
+
+Manufacturing Changes
+
+11.1
+
+All Changes shall be handled in accordance with the relevant provisions set forth in the Quality Agreement. In
+the event of a Change, regardless whether it is a Required Change, a Customer Change or a Siegfried Change, Siegfried shall provide to ITI (i) a calculation of the Change costs, (ii) if applicable, a new price for the Product,
+(iii) the timing for implementation (iv) as well as the amount and discard cost of any Raw Material obsolete because of the Change (Change Documentation).
+
+Siegfried
+
+ITI
+
+14
+/ 32
+
+11.2
+
+In the event that either Party becomes aware and notifies the other Party that any Change is mandated by
+Applicable Laws and regulations (including, without limitation cGMP Regulations) or by a competent Regulatory Authority (Required Change), Siegfried shall provide ITI the Change Documentation. Siegfried shall, if feasible, implement such
+Required Change and
+
+(i)
+
+if the Required Change relates exclusively to the Product, the ITI shall bear all costs relating to the
+Required Change;
+
+(ii)
+
+if the Required Change relates to, or will be used for, the Products and other products manufactured by
+Siegfried at the Facility, ITI and Siegfried shall discuss and agree on a pro-rated allocation of any costs in relation to the Required Change in good faith; or
+
+(iii)
+
+if the Required Change applies generally to the operation of the Facility, all costs relating to the Required
+Change shall be bore by Siegfried.
+
+(iv)
+
+ITI shall reimburse Siegfried for the Raw Materials rendered obsolete due to the Required Change and ITI shall
+notify Siegfried whether such obsolete Raw Material shall be delivered to ITI or destroyed on behalf of ITI, both at ITI’s cost and expense.
+
+(v)
+
+if applicable, ITI shall pay the new price for the Product as set forth in the Change Documentation.
+
+11.3
+
+In the event ITI wishes to effect a Change, which is not a Required Change (Customer Change), ITI shall
+advise Siegfried in writing of such Customer Change as set forth in the Quality Agreement. If Siegfried deems, in its reasonable discretion, such Customer Change as feasible, then Siegfried shall provide the Change Documentation to ITI. In case, ITI
+approves the Change Documentation, Manufacturer shall implement such Customer Change and
+
+(i)
+
+ITI shall bear all costs with regard to such Customer Change.
+
+(ii)
+
+ITI shall reimburse Siegfried for the Raw Materials rendered obsolete due to the Customer Change and ITI shall
+notify Siegfried whether such obsolete Raw Material shall be delivered to ITI or destroyed on behalf of ITI, both at ITI’s cost and expense.
+
+(iii)
+
+if applicable, ITI shall pay the new price for the Product as set forth in the Change Documentation.
+
+Siegfried
+
+ITI
+
+15
+/ 32
+
+11.4
+
+In the event Siegfried wishes to effect a Change, which is not a Required Change (Siegfried Change),
+Siegfried shall advise ITI in writing of such Siegfried Change as set forth in the Quality Agreement. If ITI does not notify Siegfried in writing to refrain from implementation within forty-five (45) days after the date of Siegfried’s
+request, then Siegfried shall be free to implement such Siegfried Change. Both Parties shall negotiate in good faith the (a) the allocation of the costs relating to the Siegfried Change, (b) the new price applicable after the Siegfried
+Change has been implemented, (c) the timing for implementation (d) as well as an estimated amount of any Raw Material rendered obsolete as a result of the Siegfried Change and respective costs to be allocated. In allocating the costs, the
+Parties should consider whether such Siegfried Change is beneficial to either or both Parties.
+
+12.
+
+Confidential Information
+
+12.1
+
+Each Receiving Party agrees to retain in strict confidence any Confidential Information of the Disclosing Party
+(or its Affiliate), whether disclosed prior to, or after the Effective Date or the date of prior secrecy agreements and not to use any such Confidential Information for any purpose except pursuant to, and in order to carry out, the terms and
+objectives of this Agreement, and not to disclose, divulge or otherwise communicate any such Confidential Information to any third party.
+
+12.2
+
+The Receiving Party may disclose Confidential Information of the Disclosing Party to the Receiving Party’s
+(and its Affiliate’s) officers, directors, employees, agents, consultants, licensees, representatives or (for Siegfried, permitted) subcontractors (each an Entitled Person), who, in each case, (i) need to know such information for
+purposes of the implementation and performance by the Receiving Party of this Agreement, (ii) will use the Information only for such limited purposes and (iii) are subject to confidentiality restrictions covering the Confidential
+Information that are at least as stringent at those contained herein
+
+12.3
+
+The provisions of this Section 12 shall not apply to any Confidential Information disclosed hereunder
+which (a) was independently developed or known by the Receiving Party prior to its disclosure to the Receiving Party by the Disclosing Party, as evidenced by the Receiving Party’s written or electronic records kept in the ordinary course
+of its business; or (b) was before or after the date of such disclosure in the public domain, other than through the Receiving Party’s fault or breach; or (c) is lawfully disclosed to the Receiving Party by an independent,
+unaffiliated third party rightfully in possession of the Confidential Information and not under any confidentiality obligation towards the Disclosing Party with regard to such Confidential Information. The fact that any portion of the Confidential
+Information may be subject to one of the foregoing exceptions (a) through (c) shall not automatically exclude any combination of Confidential Information from protection under this Agreement unless the entirety of such Confidential Information
+also falls under the same exception(s). Specific information disclosed as part of the Confidential Information shall not be deemed to be in the public domain or in prior possession of the Receiving Party merely because it is included in more general
+information in the public domain or in the prior possession of the Receiving Party.
+
+Siegfried
+
+ITI
+
+16
+/ 32
+
+12.4
+
+The Receiving Party may disclose the Disclosing Party’s Confidential Information to the extent such
+Confidential Information is required to be disclosed by the Receiving Party to the officials of a Regulatory Authority or to comply with Applicable Laws, to defend or prosecute litigation, or to comply with judicial orders or valid subpoenas,
+provided that the Receiving Party provides prior written notice of such intended disclosure to the Disclosing Party and takes reasonable and lawful actions to avoid and/or minimize the degree of such disclosure, and reasonably assists the Disclosing
+Party in its efforts (if any) to oppose such disclosure. The burden of proof of the foregoing exceptions shall lie with the Receiving Party.
+
+12.5
+
+Except as otherwise provided for in this Agreement, nothing herein shall be construed as giving either Party
+any right, title or interest in or ownership of the Confidential Information of the other Party.
+
+12.6
+
+The Parties acknowledge that any breach of this Section 12 will cause irreparable harm and that the non-breaching Party shall be entitled to specific performance or injunctive relief to enforce this Section 12 or to prevent a breach of this Section 12, in addition to whatever remedies such Party may
+otherwise be entitled to at law or in equity.
+
+12.7
+
+Upon termination or expiration of this Agreement, or at any other time during the term of the Agreement upon
+the other Party’s written request, provided that it does not prevent the Receiving Party from performing its obligations under this Agreement, each Party shall immediately deliver to the other Party (and cause any of its Entitled Persons to so
+deliver), at such Party’s expense, all Confidential Information of the other Party in such Party’s possession or control, including without limitation any and all copies, duplications, summaries and/or notes thereof or derived thereof,
+regardless of the format, and Siegfried shall return to ITI all remaining samples of Product, provided however, that both Parties may keep original documents, copies and samples as required by law or for archival purposes or stored on their back up
+devices.
+
+13.
+
+Intellectual Property
+
+13.1
+
+Subject to Section 13.5, and unless otherwise required by law or specified in writing, the results of the
+Manufacturing Services performed pursuant to and during the term of this Agreement, including, but not limited to, any Intellectual Property Right(s) arising out of any Improvements (other than an Independent Improvement) shall be the property of
+ITI and all rights, title and interest therein shall be vested in ITI. Siegfried shall have no responsibility for prosecuting, maintaining and enforcing any patents or other Intellectual Property Rights that ITI obtains pursuant to this Agreement.
+
+Siegfried
+
+ITI
+
+17
+/ 32
+
+13.2
+
+Siegfried shall assign and hereby irrevocably assigns to ITI all title and interest that Siegfried and its
+Affiliates and its permitted subcontractors may have in any Intellectual Property Right(s) arising out of any Improvements (other than an Independent Improvement); provided, that ITI shall grant a
+non-exclusive, worldwide, irrevocable, royalty-free, sub-licensable license to Siegfried for the use of such Improvements for Manufacture of Products.
+
+13.3
+
+ITI shall have the sole right to file and seek protection for any Intellectual Property Right(s) arising out of
+any Improvements (other than an Independent Improvement). To the extent that ITI deems it reasonable to seek protection for, ITI shall bear the costs (including, but not limited to attorney’s fees) and the responsibility associated with
+developing, applying for, and maintaining such protection as may be granted. In the event ITI decides to file and prosecute patent applications on any Improvement (other than an Independent Improvement), Siegfried shall provide ITI with reasonable
+assistance to obtain and defend such patents at ITI’s costs and expenses.
+
+13.4
+
+During the term of this Agreement and for a period of [***] thereafter, upon request by ITI, and at ITI’s
+expense, Siegfried shall promptly execute, acknowledge and deliver any papers reasonably deemed necessary by ITI to document, protect, or otherwise perfect such rights of ITI, including, without limitation, all documents necessary to obtain or
+perfect any protection of Intellectual Property Rights and/or to effect an assignment of ownership of the same to ITI, at ITI’s cost and expenses.
+
+13.5
+
+All rights related to any Independent Improvements shall be the sole property of Siegfried. Upon ITI’s
+request, Siegfried shall grant and hereby grants ITI a non-exclusive, worldwide, irrevocable, royalty-free license to use Independent Improvements to the extent that, and limited to, the manufacturing, sale,
+commercialization or any other use of the Product is dependent upon such license.
+
+13.6
+
+In the event of patent infringement or regulatory litigation or other legal proceedings, threatened in writing
+or actual, involving the Product, Siegfried shall have the right to suspend further supply of the Product to the extent this is required or by a court order or arbitral award or order (whether interim or final) or reasonably deemed necessary or
+advisable by Siegfried on advice of its counsel to prevent or limit actual or possible damages, liability or injury. Such suspension shall be deemed a temporary suspension of Siegfried’s Manufacturing Services and supply obligations under this
+Agreement; provided, that if such suspension continues for more than [***], the Parties shall jointly attempt in good faith to modify this Agreement to resolve the situation but if they are unable to do so within the following [***] either Party may
+terminate this Agreement by notice to the other Party.
+
+Siegfried
+
+ITI
+
+18
+/ 32
+
+14.
+
+Term and Termination
+
+14.1
+
+This Agreement shall become effective on the Effective Date and, unless earlier terminated in accordance with
+this Section 14, shall continue in full force and effect for three (3) years (hereinafter the “Initial Term”).
+
+14.2
+
+This Agreement shall automatically renew on an evergreen basis for a consecutive one (1) year period,
+unless one of the Parties notifies the other of its election not to renew this Agreement at least twelve (12) months prior to the end of the Initial Period or any renewal period then in effect, in which case this Agreement shall terminate upon
+the expiration of such term.
+
+14.3
+
+Either Party may terminate the Agreement immediately, [***] after becoming aware of such event, by providing
+written notice to the other Party upon the occurrence of any of the following events:
+
+(a)
+
+the liquidation or dissolution of the other Party, or the commencement of insolvency procedures or any
+proceeding under any bankruptcy, insolvency or moratorium law, or any other law or laws for the relief of debtors which proceeding is not dismissed within ninety (90) days, or the appointment of any receiver, trustee or assignee to take
+possession of the properties of the other Party; or
+
+(b)
+
+the cessation of all or substantially all of the other Party’s business operations.
+
+14.4
+
+If a Party breaches a material term or condition of this Agreement, the
+non-breaching Party shall have the right to terminate this Agreement [***] prior written notice to the other Party unless any such breach is cured within [***]. Termination shall be in addition to all other
+rights and remedies available to the non-breaching Party at law or in equity.
+
+14.5
+
+Termination of this Agreement shall automatically terminate each outstanding Order unless ITI instructs
+Siegfried to fulfill such Order. Neither the expiration nor the termination of this Agreement shall relieve the Parties of their rights or obligations incurred prior to such expiration or termination. All provisions that, by their express or implied
+terms, are meant to survive termination of the Agreement, in particular all rights and obligations set forth in Sections 9 (Product Price and Invoicing), 12 (Confidential Information), 13 (Intellectual Property), 16 (Liability and Indemnity), 17
+(Miscellaneous) and 18 (Applicable Law and Dispute Resolution) shall continue irrespective of such termination.
+
+15.
+
+Representations and Warranties
+
+15.1
+
+Each Party represents and warrants to the other Party:
+
+Siegfried
+
+ITI
+
+19
+/ 32
+
+(i) that such Party has the legal power, authority and right to enter into this Agreement and
+to perform its obligations set forth herein,
+
+(ii) it has and shall have throughout the term of the Agreement the required expertise,
+permits and approvals to perform its obligations under the Agreement,
+
+(iii) that this Agreement has been duly executed and delivered by
+such Party and constitutes the valid and binding obligation of such Party, enforceable against such Party in accordance with its terms,
+
+(iv) that it is not and will not become a party to any agreement, contract, arrangement or the like with any third party, which in any way
+limits or conflicts with its ability to fulfill any of its obligations under this Agreement,
+
+(v) that it is not and will not be under any
+obligation or restriction, including, without limitation, pursuant to its charter document(s) or by-laws, which in any way limits or conflicts with its ability to fulfill any of its obligations under this
+Agreement.
+
+15.2
+
+Siegfried represents and warrants that:
+
+(a)
+
+the Products have been manufactured in compliance with the Requirements at the time of its release.
+
+(b)
+
+Each Product, when delivered to ITI, will not be adulterated, misbranded, or otherwise prohibited from sale
+within the meaning of the Act or Applicable Laws.
+
+(c)
+
+It will procure, maintain and comply with all non-Product-specific
+licenses, permits, certifications and approvals required under Applicable Law at the Facility, and the portion of Facility used to Manufacture Product.
+
+(d)
+
+It and the Facility are registered with all applicable Regulatory Authorities pursuant to and in accordance
+with all Applicable Laws at the Facility.
+
+Siegfried will provide ITI with prompt written notice of any facts or
+circumstances (whether occurring prior to or after the Effective Date) which cause any of the representations and warranties contained in this Section 15.2 not to be true, accurate, and complete in any material respect as of the Effective Date
+or as of any date during the term of this Agreement.
+
+15.3
+
+ITI warrants that (i) all quantities of Consigned Material, if any, delivered to Siegfried shall be free
+from defects and, if applicable, conform to the Specifications of such Consigned Material and (ii) except as set out otherwise in any particular Order, none of the processes, procedures, substances or materials, including any Consigned
+Material, supplied by ITI or its designee and used by Siegfried in the performance of the Services or the Manufacture of Product infringes or misappropriates or will infringe or misappropriate the Intellectual Property Rights of any third party.
+
+Siegfried
+
+ITI
+
+20
+/ 32
+
+ITI will provide Siegfried with prompt written notice of any facts or circumstances (whether
+occurring prior to or after the Effective Date) which cause any of the representations and warranties contained in this Section 15.3 not to be true, accurate, and complete in any material respect as of the Effective Date or as of any date
+during the term of this Agreement.
+
+15.4
+
+EXCEPT AS EXPRESSLY WARRANTED IN THIS AGREEMENT, SIEGFRIED AND ITI EXTEND NO OTHER WARRANTIES OR
+REPRESENTATIONS COVERING THE PRODUCT OR MATERIALS OR RELATING TO THIS AGREEMENT, EXPRESS OR IMPLIED, AND EACH PARTY EXPRESSLY DISCLAIMS ALL IMPLIED WARRANTIES, INCLUDING THE WARRANTY OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. EITHER
+PARTY‘S LIABILITY UNDER THIS AGREEMENT SHALL BE STRICTLY LIMITED TO THE REMEDIES PROVIDED FOR UNDER THIS AGREEMENT.
+
+16.
+
+Liability and Indemnity
+
+16.1
+
+Siegfried shall indemnify, defend and hold ITI, its directors, officers, employees and Affiliates, harmless
+against losses arising out of or in connection with a third party claims, suits, actions, demands or judgements to the extent resulting from the negligent (i) breach of representations under this Agreement, or (ii) breach of any of
+Siegfried’s obligations under this Agreement, except to the extent ITI is obliged to indemnify Siegfried under Section 16.2 below.
+
+16.2
+
+ITI shall indemnify, defend and hold Siegfried, its directors, officers, employees and Affiliates harmless
+against losses, damages arising out of or in connection with third party claims, suits, actions, demands or judgements to the extent resulting from the negligent (i) breach of representations under this Agreement, or (ii) breach of any of
+ITI’s obligations, or (i) the handling, use, distribution fo the Product(s) after delivery to ITI, or (iv) the death of or injury to any person or any damage to property, resulting from side effects, characteristics or defects of the
+Product; except to the extent Siegfried is obligated to indemnify ITI under Section 16.1 above.
+
+16.3
+
+With respect to any indemnification obligation under this Agreement, the following conditions shall be
+applicable:
+
+(a)
+
+The Party seeking to be indemnified shall notify the indemnifying Party promptly in writing of any claim which
+may give rise to an obligation on the part of the indemnifying Party hereunder; and
+
+Siegfried
+
+ITI
+
+21
+/ 32
+
+(b)
+
+the indemnifying Party shall be allowed to timely take the sole control of the defense of any such action and
+claim, including all negotiations for the settlement, or compromise of such claim or action at its sole expense; and
+
+(c)
+
+the Party to be indemnified shall, at the expense of the indemnifying Party, render reasonable assistance,
+information, co-operation and authority to permit the indemnifying Party to defend such action; and
+
+(d)
+
+no settlement or compromise shall be binding on the indemnifying Party hereto without its prior written
+consent, which consent shall not be unreasonnably withheld, conditioned or delayed.
+
+16.4
+
+Before the commencement of any Manufacturing Services under this Agreement, Siegfried and ITI shall each obtain
+and carry in full force and effect adequate commercial, general liability insurance as common in the industry, including product liability insurance. Such insurance shall be written by a reputable insurance company and shall be endorsed to include
+liability coverage for Product used. Both Parties shall provide each other on request with a copy of certificates of insurance evidencing the same.
+
+16.5
+
+NEITHER PARTY SHALL BE LIABLE TO THE OTHER FOR INCIDENTAL, INDIRECT, OR CONSEQUENTIAL DAMAGES OF THE OTHER
+PARTY OR ANY THIRD PARTY, INCLUDING BUT NOT LIMITED TO CLAIMS BASED ON LOST PROFITS, LOSS OF TIME OR LOSS OF BUSINESS OPPORTUNITY SUFFERED OR INCURRED AS A RESULT OF THIS AGREEMENT, WHETHER SUCH LOSS OR DAMAGE MAY BE BASED UPON PRINCIPLES OF
+CONTRACT, WARRANTY, NEGLIGENCE OR OTHER TORT, BREACH OF ANY STATUTORY DUTY, PRINCIPLES OF INDEMNITY OR CONTRIBUTION, THE FAILURE OF ANY LIMITED OR EXCLUSIVE REMEDY TO ACHIEVE ITS ESSENTIAL PURPOSE OR OTHERWISE.
+
+16.6
+
+[***].
+
+16.7
+
+SECTION 12.6 AND SECTION 12.7 SHALL NOT APPLY, FOR DAMAGES CAUSED BY A PARTY’S BREACH OF SECTION 12,
+DAMAGES CAUSED BY A PARTY’S WILLFUL MISCONDUCT OR GROSS NEGLIGENCE.
+
+17.
+
+Miscellaneous
+
+17.1
+
+No set-off. Neither Party shall be entitled to set off
+any of its rights or obligations under this Agreement against the rights or obligations of another Party without having first obtained the prior written consent of that other Party.
+
+Siegfried
+
+ITI
+
+22
+/ 32
+
+17.2
+
+Force Majeure. A Party shall be excused from performing its obligations under this
+Agreement (other than obligations of payment) to the extent that its performance is delayed or prevented by any unforeseeable cause beyond such Party’s reasonable control, which may include, but is not limited to, supplier failure, fire,
+explosion, weather, disease (including epidemic and pandemic), war, terrorist act, insurrection, civil strike, riots, government action power failure or energy or Raw Materials shortages (Force Majeure Event). Performance shall be excused
+only to the extent of and during the reasonable continuance of such Force Majeure Event. Any deadline or time for performance specified in this Agreement that falls due during or subsequent to the occurrence of any of the Force Majeure Event
+referred to herein shall be automatically extended for a period of time equal to the period of such Force Majeure Event. The prevented Party shall immediately notify the other Party if, by reason of any Force Majeure Event, the prevented Party is
+unable to meet any deadline or time affecting its performance of this Agreement. In the event that such Force Majeure Event cannot be removed or overcome within [***] or more (as jointly determined by the Parties) from the date the Party affected
+first became affected, then either Party may at any time after the expiration of such period, by written notice to the other Party, either (i) suspend this Agreement for as long as such Force Majeure Event continues to exist, or
+(ii) terminate this Agreement with immediate effect.
+
+17.3
+
+COVID-19. ITI is aware of the worldwide COVID-19 pandemic (Covid-19 Pandemic). The further development of the Covid-19 Pandemic, in particular with regard to its infection
+incidence and its additional containment by governmental or regulatory measures, cannot be predicted by Siegfried. Since effects of the Covid-19 Pandemic may still cause disruptions to Siegfried’s
+performance the Covid-19 Pandemic shall be considered a Force Majeure Event. For such reason, Siegfried reserves the right to postpone, change or cancel this contract or any order confirmation issued under
+this contract at any time. Any claim for damages arising out of or in connection with such postponement, change or cancellation due to Covid-19 Pandemic is explicitly precluded. In addition, ITI and Siegfried
+define a worldwide pandemic due to a rapidly spreading disease on a comparable scale to the Covid-19 Pandemic as a Force Majeure Event.Precedence of Agreement. Unless expressly agreed otherwise
+in writing, the terms outlined in this Agreement shall prevail over any terms and conditions outlined in any Order or Order Confirmation for Product(s) and any general terms and conditions of a Party, and such terms and conditions are hereby
+expressly excluded. In case of discrepancies between this Agreement and an Annex hereto, the provisions of this Agreement shall prevail; provided however that in case of discrepancies between this Agreement and the Quality Agreement regarding
+(i) the delineation of responsibilities pursuant to cGMP Regulations, (ii) the Specifications or (iii) the Manufacturing procedure, the Quality Agreement shall govern.
+
+17.4
+
+No assignment. This Agreement is binding upon and shall inure to the benefit of the
+Parties hereto and their successors and permitted assigns. This Agreement and any rights or obligations hereunder, other than monetary claims, may be assigned or delegated only (i) with the consent of the other Party, not to be unreasonably
+withheld, conditioned or delayed, or (ii) to the successor to all or substantially all of the business of a Party (whether by merger, consolidation, asset transfer or similar transaction) to which this Agreement relates, or (iii) to an
+Affiliate of Siegfried. Any other assignment or delegation by either Party without the prior written consent of the other Party is void.
+
+Siegfried
+
+ITI
+
+23
+/ 32
+
+17.5
+
+No waiver. The failure by either Party at any time to enforce any of the terms, provisions
+or conditions of this Agreement or to exercise any right hereunder shall not constitute or be construed to constitute a waiver of the same or affect that Party’s rights thereafter to enforce or exercise the same.
+
+17.6
+
+Independent Parties. Nothing in this Agreement shall be deemed or construed to constitute
+or create between the Parties hereto a partnership, joint venture, agency, or other relationship other than as expressly set forth herein. Neither Party shall be responsible for the acts or omissions of the other Party, and neither Party shall have
+authority to speak for, represent or obligate the other Party in any way without prior written consent of the other Party.
+
+17.7
+
+Entire Agreement. This Agreement (together with the Quality Agreement) contains the full
+understanding of the Parties with respect to the subject matter hereof and supersedes all prior understandings and writings relating thereto. No waiver, alteration or modification of any of the provisions hereof shall be binding unless made in
+writing and signed by the Parties.
+
+17.8
+
+Severability. If any portion of this Agreement is held invalid by a court of competent
+jurisdiction, such portion shall be deemed to be of no force and effect and this Agreement shall be construed as if such portion had not been included herein, provided however, if the deletion of such provision materially impairs the commercial
+value of this Agreement to either Party, the Parties shall attempt to renegotiate such provision in good faith. The fact that any provision of this Agreement shall be prohibited or unenforceable in any jurisdiction shall not invalidate or render
+unenforceable such provision in any other jurisdiction. To the extent permitted by applicable law, the Parties to this Agreement waive any provision of law that renders any provision of this Agreement prohibited or unenforceable in any respect.
+
+17.9
+
+Notices. Any notice required under this Agreement shall be effective only if it is in
+writing and (i) delivered in person or (ii) deposited with an internationally recognized overnight courier service, or (iii) dispatched by an acknowledged e-mail (pdf), in which case such notice
+is to be confirmed by one of the alternate means within five (5) Business Days; in either case any notice is to be addressed to the applicable address set forth below.
+
+if to Siegfried
+
+Siegfried AG
+
+Untere Bruehlstrasse 4, 4800 Zofingen, Switzerland
+
+[Attention:
+
+Email:]
+
+Siegfried
+
+ITI
+
+24
+/ 32
+
+with a copy to:
+
+Siegfried AG
+
+Untere Brühlstrasse 4, 4800 Zofingen, Switzerland
+
+Legal Department
+
+Email: [***]
+
+if to ITI :
+
+Intra-Cellular Therapies, Inc.
+
+430 E. 29th St, New York, NY 10016, U.S.A.
+
+Attention: Michael Halstead
+
+Email: [***]
+
+Either Party may change its above addresses, but no such change shall have any effect until the other
+Party has been properly notified with written notice of the change of the address.
+
+17.10
+
+Compliance with Laws. Each Party shall comply with all Applicable Laws governing its
+performance of the terms of this Agreement, including, but not limited to, those relating to health, safety and the environment, fair labor practices, unlawful discrimination, debarment, anti-corruption and anti-bribery laws.
+
+17.11
+
+Hardship. If as a result of a change in technical, legal, economic, unpredictable,
+exceptional and particularly serious circumstances occurring after the conclusion of the Agreement, and external to the will of the Parties, the general balance of the Agreement was to be long-term and substantially disrupted and the performance by
+a Party of its obligations would be seriously detrimental to such Party,, both Parties shall undertake reasonable endeavors to discuss a possible amicable resolution or possible amendment to this Agreement in light of the change in circumstances;
+provided, however, that neither Party shall have any obligation to amend this Agreement or to waive or modify any of its rights under this Agreement.
+
+18.
+
+Applicable Law and Dispute Resolution
+
+18.1
+
+This Agreement shall be governed by the laws of Switzerland without regard to its conflict of laws provisions,
+and the provisions of the UN-Convention regarding Contracts on the International Sale of Goods (Vienna Convention) are expressly excluded.
+
+18.2
+
+All disputes, controversy or claim arising out of or in connection with this Agreement, including the validity,
+invalidity, breach, or termination thereof, shall be exclusively submitted to the ordinary courts of Zürich, Switzerland, whereby the commercial court of the canton of Zürich shall have subject matter jurisdiction.
+
+This Agreement and any future amendments may be signed by electronic signature (e.g. using DocuSign), whereby the Parties acknowledge its validity and binding
+force.
+
+Siegfried
+
+ITI
+
+25
+/ 32
+
+List of Annexes
+
+Annex
+
+Description
+
+Content
+
+A
+
+Product Schedule
+
+Details, sales price and commercial terms
+
+Product Schedule #1
+
+Product Schedule #1 [***]
+
+Product Schedule #2
+
+Product Schedule #2 [***]
+
+B
+
+Materials
+
+Description of Consigned Materials and Mandatory Vendors for Raw Materials
+
+In Witness Whereof, the Parties have executed this Agreement as of the Effective Date.
+
+Siegfried AG
+
+/s/ Marianne Späne
+
+/s/ Marcel Signer
+
+Marianne Späne/Chief Business Officer
+
+Marcel Signer/Managing Director EVZ
+
+Name / function
+
+Name / function
+
+Intra-Cellular Therapies, Inc.
+
+/s/ Jose Garrido
+
+/s/ Lawrence Hineline
+
+Jose Garrido/Sr. Director Manufacturing
+
+Lawrence Hineline/CFO
+
+Name / function
+
+Name / function
+
+Siegfried
+
+ITI
+
+26
+/ 32
+
+ANNEX A
+
+Product Schedule #NUMBER
+
+This Product
+Schedule No. NUMBER (Product Schedule) is entered into as of [DATE] (Product Schedule Effective Date) by and between Siegfried AG (Siegfried) and Intra-Cellular Therapies, Inc. (ITI) under the Supply Agreement dated [DATE] (Agreement).
+
+Pursuant to the Agreement, Siegfried has agreed to Manufacture one or more Products in accordance with written Product Schedules, such as this one, entered
+into from time to time.
+
+Capitalized terms used in this Product Schedule and not otherwise defined have the meanings given to them in the Agreement.
+
+The Parties hereto agree as follows:
+
+1.
+
+Product Schedule
+
+This document constitutes a Product Schedule under the Agreement. Except if expressly modified in this Product Schedule, the terms of the Agreement are hereby
+incorporated by reference.
+
+2.
+
+Product
+
+Product
+
+3.
+
+Minimum quantity per Order
+
+Maximum order quantity per Order:
+
+Minimum order quantity per
+Order:
+
+4.
+
+Price
+
+Product Price:
+
+Product
+
+Volume (kg)
+
+Price/kg (CHF)
+
+Siegfried
+
+ITI
+
+27
+/ 32
+
+5.
+
+Forecast
+
+•
+
+Binding period: The first NUMBER months of each Forecast shall be covered by binding Orders pursuant to
+Section 4 of the Agreement.
+
+•
+
+Non-binding: months NUMBER through NUMBER of the Forecast shall be
+for information purposes only and non-binding.
+
+6.
+
+Delivery
+
+FCA Siegfried Manufacturing facility in PLACE (as per Incoterms 2020, made a part hereof by reference).
+
+7.
+
+Term/Termination
+
+Unless earlier terminated in accordance with the Agreement, this Product Schedule shall commence on the Product Schedule Effective Date and shall continue
+until the expiry or termination of the Agreement (Product Schedule Term).
+
+Siegfried AG
+
+/s/ Marianne Späne
+
+/s/ Marcel Signer
+
+Marianne Späne/Chief Business Officer
+
+Marcel Signer/Managing Director EVZ
+
+Name / function
+
+Name / function
+
+Intra-Cellular Therapies, Inc.
+
+/s/ Jose Garrido
+
+/s/ Lawrence Hineline
+
+Jose Garrido/Sr. Director Manufacturing
+
+Lawrence Hineline/CFO
+
+Name / function
+
+Name / function
+
+Siegfried
+
+ITI
+
+28
+/ 32
+
+Product Schedule #1 [***]
+
+This Product Schedule No. 1 (Product Schedule) is entered into as of [DATE] (Product Schedule Effective Date) by and between Siegfried AG (Siegfried) and
+Intra-Cellular Therapies, Inc. (ITI) under the Supply Agreement dated [DATE] (Agreement).
+
+Pursuant to the Agreement, Siegfried has agreed to Manufacture
+one or more Products in accordance with written Product Schedules, such as this one, entered into from time to time.
+
+Capitalized terms used in this
+Product Schedule and not otherwise defined have the meanings given to them in the Agreement.
+
+The Parties hereto agree as follows:
+
+1.
+
+Product Schedule
+
+This document constitutes a Product Schedule under the Agreement. Except if expressly modified in this Product Schedule, the terms of the Agreement are hereby
+incorporated by reference.
+
+2.
+
+Product
+
+Product
+
+[***]
+
+3.
+
+Minimum quantity per Order
+
+Maximum order quantity per Order: [***]
+
+Minimum order quantity
+per Order: [***]
+
+4.
+
+Price
+
+Product Price:
+
+Product
+
+Volume (kg)
+
+Price/kg (CHF)
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+Siegfried
+
+ITI
+
+29
+/ 32
+
+5.
+
+Forecast
+
+•
+
+Binding period: The first [***] of each Forecast shall be covered by binding Orders pursuant to
+Section 4 of the Agreement.
+
+•
+
+Non-binding: [***] of the Forecast shall be for information
+purposes only and non-binding.
+
+6.
+
+Delivery
+
+FCA Siegfried Manufacturing facility in [***] (as per Incoterms 2020, made a part hereof by reference).
+
+7.
+
+Term/Termination
+
+Unless earlier terminated in accordance with the Agreement, this Product Schedule shall commence on the Product Schedule Effective Date and shall continue
+until the expiry or termination of the Agreement (Product Schedule Term).
+
+Siegfried AG
+
+/s/ Marianne Späne
+
+/s/ Marcel Signer
+
+Marianne Späne/Chief Business Officer
+
+Marcel Signer/Managing Director EVZ
+
+Name / function
+
+Name / function
+
+Intra-Cellular Therapies, Inc.
+
+/s/ Jose Garrido
+
+/s/ Lawrence Hineline
+
+Jose Garrido/Sr. Director Manufacturing
+
+Lawrence Hineline/CFO
+
+Name / function
+
+Name / function
+
+Siegfried
+
+ITI
+
+30
+/ 32
+
+Product Schedule #2 ITI-11 [***]
+
+This Product Schedule No. 2 (Product Schedule) is entered into as of [DATE] (Product Schedule Effective Date) by and between Siegfried AG (Siegfried) and
+Intra-Cellular Therapies, Inc. (ITI) under the Supply Agreement dated [DATE] (Agreement).
+
+Pursuant to the Agreement, Siegfried has agreed to Manufacture
+one or more Products in accordance with written Product Schedules, such as this one, entered into from time to time.
+
+Capitalized terms used in this
+Product Schedule and not otherwise defined have the meanings given to them in the Agreement.
+
+The Parties hereto agree as follows:
+
+1.
+
+Product Schedule
+
+This document constitutes a Product Schedule under the Agreement. Except if expressly modified in this Product Schedule, the terms of the Agreement are hereby
+incorporated by reference.
+
+2.
+
+Product
+
+Product
+
+[***]
+
+3.
+
+Minimum quantity per Order
+
+Maximum order quantity per Order [***]
+
+Minimum order quantity
+per Order: [***]
+
+4.
+
+Price
+
+Product
+
+Volume (kg)
+
+Price/kg (CHF)
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+5.
+
+Forecast
+
+•
+
+Binding period: The first [***] of each Forecast shall be covered by binding Orders pursuant to
+Section 4 of the Agreement.
+
+•
+
+Non-binding: [***] of the Forecast shall be for information
+purposes only and non-binding.
+
+Siegfried
+
+ITI
+
+31
+/ 32
+
+6.
+
+Delivery
+
+FCA Siegfried Manufacturing facility in [***] (as per Incoterms 2020, made a part hereof by reference).
+
+7.
+
+Term/Termination
+
+Unless earlier terminated in accordance with the Agreement, this Product Schedule shall commence on the Product Schedule Effective Date and shall continue
+until the expiry or termination of the Agreement (Product Schedule Term).
+
+Siegfried AG
+
+/s/ Marianne Späne
+
+/s/ Marcel Signer
+
+Marianne Späne/Chief Business Officer
+
+Marcel Signer/Managing Director EVZ
+
+Name / function
+
+Name / function
+
+Intra-Cellular Therapies, Inc.
+
+/s/ Jose Garrido
+
+/s/ Lawrence Hineline
+
+Jose Garrido/Sr. Director Manufacturing
+
+Lawrence Hineline/CFO
+
+Name / function
+
+Name / function
+
+Siegfried
+
+ITI
+
+32
+/ 32
+
+ANNEX B
+
+Materials
+
+Mandatory Vendors:
+
+Raw Materials
+
+Mandatory Vendor
+
+Raw Materials have an overall anticipated lead-time of [***].
+
+Consigned Materials:
+
+Consigned Materials*
+
+Siegfried Code
+
+Volume
+
+Siegfried
+
+ITI

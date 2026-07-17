@@ -1,0 +1,721 @@
+EX-10.26
+27
+exhibit1026-super8xk.htm
+EX-10.26
+
+Document
+
+Exhibit 10.26
+
+CONFIDENTIAL
+
+NON-EXCLUSIVE PATENT LICENSE AGREEMENT
+
+between
+
+Mount Sinai Genomics, Inc.
+
+and
+
+Icahn School of Medicine at Mount Sinai
+
+________________________________________
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+CONFIDENTIAL
+
+TABLE OF CONTENTS
+
+Page
+
+1.
+
+DEFINITIONS
+
+1
+
+2.
+
+LICENSE GRANT
+
+5
+
+3.
+
+FEES, ROYALTIES, AND PAYMENTS
+
+6
+
+4.
+
+REPORTS AND PAYMENTS
+
+7
+
+5.
+
+CONFIDENTIALITY; PUBLICITY; USE OF NAME
+
+10
+
+6.
+
+PATENT MATTERS
+
+11
+
+7.
+
+REPRESENTATIONS; DISCLAIMER OF WARRANTIES; LIMITATION OF LIABILITIES
+
+11
+
+8.
+
+INDEMNIFICATION
+
+13
+
+9.
+
+INSURANCE
+
+14
+
+10.
+
+TERM AND TERMINATION
+
+14
+
+11.
+
+EFFECT OF TERMINATION
+
+15
+
+12.
+
+ADDITIONAL PROVISIONS
+
+15
+
+Exhibit A:
+
+Licensed Patents
+
+Exhibit B:
+
+Form of Quarterly Royalty Report
+
+Exhibit C:
+
+Calculation of Running Royalties
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+i
+
+CONFIDENTIAL
+
+Non-Exclusive Patent License Agreement
+
+This Non-Exclusive Patent License Agreement (this “Agreement”) is by and between Icahn School of Medicine at Mount Sinai, a New York not-for-profit education corporation, with a principal place of business at One Gustave L. Levy Place, New York, NY 10029 (“Mount Sinai”) and Mount Sinai Genomics, Inc., a Delaware corporation with a principal place of business at 1425 Madison Avenue, New York, NY 10029 (“MSGI”). This Agreement will become effective on June 1, 2017, (the “Effective Date”). Mount Sinai and MSGI are individually referred to herein as a “Party” and together as the “Parties”.
+
+WHEREAS, Mount Sinai is a center for patient care, research and education and the owner of certain intellectual property relating to diagnosis, prognosis, or identification of humans with disorders, conditions or diseases, whether quantitative or qualitative, or both;
+
+WHEREAS, MSGI is interested in [***] and wishes to obtain from Mount Sinai certain rights to such intellectual property and [***]; and
+
+WHEREAS, Mount Sinai has determined that the [***] subject to the terms and conditions of this Agreement is in the best interest of Mount Sinai, consistent with Mount Sinai’s educational and research missions and goals.
+
+NOW THEREFORE, in consideration of the mutual rights and obligations contained in this Agreement, and intending to be legally bound, the Parties hereby agree as follows:
+
+1. DEFINITIONS
+
+1.1 “Affiliate” means any Entity that Controls, is Controlled by, or is under common Control with MSGI, directly or indirectly. Without limiting the generality of the foregoing, MSGI will be deemed to Control another Entity if MSGI owns or directly or indirectly Controls more than fifty percent (50%) of the voting stock or other securities of such Entity. For clarity, Mount Sinai shall not be considered an Affiliate of MSGI for purposes of this Agreement.
+
+1.2 “Business Day” means a day other than Saturday, Sunday, or any day on which commercial banks located in New York, New York are authorized or obligated by law to close.
+
+1.3 “Calendar Year” means January 1 through December 31 of a given year.
+
+1.4 “Change of Control” means a change in Mount Sinai’s Control of MSGI. Among other circumstances, a Change of Control event shall be deemed to have occurred if and when Mount Sinai’s ownership interest in MSGI decreases to less than 51% of the total outstanding shares of Sponsor’s voting securities.
+
+1.5 “Commercial Sale” means any bona fide transaction with a Third Party for which consideration is received or expected for the sale, use, lease, transfer or other disposition of a Licensed Product, and a Commercial Sale is deemed completed at the time that MSGI, its Affiliate or Sublicensee invoices, ships or receives payment for a Licensed Product, whichever occurs first.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+1
+
+CONFIDENTIAL
+
+1.6 “Commercialization” means activities directed to obtaining pricing and reimbursement approvals, marketing, promoting, distributing, importing, exporting, using, offering for sale or lease, selling or leasing a product or service anywhere in the world. When used as a verb, “Commercialize” means to engage in Commercialization.
+
+1.7 “Confidential Information” shall have the meaning assigned in Section 5.
+
+1.8 “Control” means an event whereby the power to direct the management and policies of an Entity, directly or indirectly, whether through the ownership of voting securities, by contract, or otherwise, and the terms “Controlling” and “Controlled” have correlative meanings.
+
+1.9 “Development” means [***]. When used as a verb, “Develop” means to engage in Development.
+
+1.10 “EMA” means the European Medicines Agency or any successor agency thereto.
+
+1.11 “Entity” means a corporation, an association, a joint venture, a partnership, a trust, a business, an institution, an individual, a government or political subdivision thereof, including an agency, or any other organization that can exercise independent legal standing.
+
+1.12 “Exploit” means, [***]. “Exploitation” has a correlative meaning.
+
+1.13 “FDA” means the United States Food and Drug Administration or any successor agency thereto.
+
+1.14 “Field of Use” means [***], whether [***] or [***], or both. For avoidance of doubt, Field of Use shall not include [***].
+
+1.15 “First Commercial Sale” means, on a country-by-country basis, the first time a Commercial Sale is made by or on behalf of MSGI, its Affiliates, or Sublicensees.
+
+1.16 “Health Care Law” means all applicable laws with respect to matters primarily relating to patient care and human health and safety, including where appropriate such laws pertaining to: (i) the research, testing, production, manufacturing, marketing, transfer, distribution and sale of drugs, devices, and biologics, including, without limitation, the United States Food, Drug and Cosmetic Act and the regulations promulgated thereunder and equivalent applicable laws of other governmental authorities; (ii) the reimbursement and payment for health care products and services, including any United States federal health care program (as such term is defined in 42 U.S.C. § 1320a-7b(f)), and programs and arrangements pertaining to providers of health care products or services that are paid for by any governmental authority or other Entity, including the federal Anti-Kickback Statute (42 U.S.C. § 1320a-7b(b)), the civil False Claims Act (31 U.S.C. § 3729 et seq.), the administrative False Claims Law (42 U.S.C. § 1320a-7b(a)), 42 U.S.C. § 1320a-7 and 1320a-7a and the regulations promulgated pursuant to such statutes, Medicare (Title XVIII of the Social Security Act) and the regulations promulgated thereunder, Medicaid (Title XIX of the Social Security Act) and the regulations promulgated thereunder, and equivalent applicable laws of other governmental authorities; and (iii) the privacy and security of patient-identifying health care information, including, without limitation, the Health Insurance
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+CONFIDENTIAL
+
+Portability and Accountability Act of 1996 (42 U.S.C. § 1320d et seq.) and the regulations promulgated thereunder and equivalent applicable laws of other governmental authorities; in each of the foregoing (i) through (iii), as such laws may be amended from time to time.
+
+1.17 “Infringement Action” means any threatened or pending action, claim, litigation, or proceeding (other than oppositions, cancellations, interferences, reissue proceedings, or reexaminations), respecting any Licensed Patent.
+
+1.18 “Licensed Patents” means the Patents listed on Exhibit A hereto, which is hereby incorporated into and made part of this Agreement.
+
+1.19 “Licensed Product” means any product or service or component of any of the foregoing, the Development, Manufacturing, Commercialization, use, rental or lease of which would, in the absence of the licenses granted to MSGI hereunder, infringe at least one Valid Claim.
+
+1.20 “Licensed Product Data” means [***] directly relating to [***].
+
+1.21 “Licensed Process” means any method or process (including, for clarity, any software or algorithm) the use of which, in the absence of the license agreement, would infringe at least one Valid Claim, or employs a Licensed Product.
+
+1.22 “Manufacturing” means all activities directed to sourcing of necessary raw materials, producing, processing quality assurance testing and release of a Licensed Product or Licensed Process including but not limited to reagents, buffers, cleaners and other disposables, and hardware and software components. When used as a verb, “Manufacture” means to engage in Manufacturing.
+
+1.23 “Patent” means: (a) the United States and foreign patents and/or patent applications; (b) any and all patents issuing from the foregoing; (c) any and all claims of continuation-in-part applications that claim priority to the United States patent applications, but only where such claims are directed to inventions disclosed in the manner provided in the first paragraph of 35 U.S.C. § 112 in such United States patent applications, and such claims in any patents issuing from such continuation-in-part applications; (d) any and all foreign patent applications, foreign patents, or related foreign patent documents that claim priority to the patents and/or patent applications; and (e) any and all divisionals, continuations, reissues, re-examinations, renewals, substitutions, and extensions of the foregoing.
+
+1.24 “Prosecution” means the filing, preparation, prosecution (including any interferences, reissue proceedings, reexaminations, and oppositions), extension, term adjustment, and maintenance of Licensed Patents. When used as a verb, “Prosecute” means to engage in Prosecution.
+
+1.25 “Quarter” means each three-month period beginning on January 1, April 1, July 1 and October 1 of each Calendar Year; provided, however, that as it relates to the Commercial Sale of Licensed Products, the first Quarter shall be comprised of the time period beginning on the date of First Commercial Sale and ending at the end of the Quarter during which such First Commercial Sale occurs. “Quarterly” means once during each Quarter.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+CONFIDENTIAL
+
+1.26 “Quarterly Reports” shall have the meaning assigned in Section 4.
+
+1.27 “Regulatory Approval” means all approvals from the relevant Regulatory Authorities necessary to market a Licensed Product in a country (not including any applicable pricing and governmental reimbursement approvals unless legally required to market the Licensed Product in a country).
+
+1.28 “Regulatory Authority” means any applicable government regulatory authority involved in granting approvals for the marketing of a Licensed Product in any country, including the FDA, EMA, and any corresponding national or regional regulatory authorities.
+
+1.29 “Royalty Term” means, on a Licensed Product-by-Licensed Product and country-by-country basis, the period from the First Commercial Sale of such Licensed Product in such country until expiration of the last Valid Claim of a Licensed Patent covering such Licensed Product in such country.
+
+1.30 “Sublicensee” means any Entity that enters into an agreement or arrangement with MSGI, or receives from MSGI a license grant or option for license grant under the Licensed Patents, to exercise any of the rights granted to MSGI by Mount Sinai hereunder (such agreement, arrangement, or license herein referred to as a “Sublicense”), including to Manufacture, have Manufactured, Commercialize, have Commercialized, or otherwise Exploit a Licensed Product, subject to the then-current applicable article, item, service, technology, and technical data-specific requirements of the U.S. export laws and regulations.
+
+1.31 “Sublicense Income” means consideration MSGI receives, directly or indirectly, from any Sublicensee or other Third Party in consideration of a Sublicense or otherwise in consideration of any of the rights granted to MSGI under this Agreement (including any option or contingent right to obtain a sublicense or other right), that is not an earned royalty a portion of which will be payable to Mount Sinai as provided in Section 3.4, including but not limited to any fixed fee, option fee, license fee, maintenance fee, milestone payment, unearned portion of any minimum royalty payment, equity, joint marketing fee, intellectual property cross license, settlement agreement, research and development funding in excess of MSGI’s cost of performing such research and development, and any other property, consideration or thing of value given or exchanged for a sublicense or otherwise in consideration of any of the rights granted to Licensee under this Agreement, regardless of how MSGI and Sublicensee characterize such payments or consideration. Any earned royalty received by MSGI from a Sublicensee that is greater than the appropriate royalty listed in Section 3.3 hereunder will be considered Sublicense Income.
+
+1.32 “Term” means the term of this Agreement which will commence on the Effective Date and expire upon the expiration of the last Royalty Term for the last Licensed Product and/or Licensed Process, unless terminated earlier pursuant to Section 10.
+
+1.33 “Territory” See attached Exhibit A.
+
+1.34 “Third Party” means any Entity other than a Party or its Affiliates.
+
+1.35 “Valid Claim” means: (a) an unexpired claim of an issued Patent within the Licensed Patents that has not been ruled unpatentable, invalid or unenforceable by a final and
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+CONFIDENTIAL
+
+unappealable decision of a court or other competent authority in the subject country; or (b) a pending claim of a Patent application within the Licensed Patents which has been prosecuted in good faith and has not been pending for more than [***] years from the first substantive office action.
+
+2. LICENSE GRANT
+
+2.1 Non-Exclusive License. Subject to the terms and conditions set forth herein, Mount Sinai hereby grants to MSGI a royalty-bearing, non-exclusive, non-transferable license under the Licensed Patents to Exploit Licensed Products and/or Licensed Processes in the Field of Use, during the Term and throughout the Territory.
+
+2.2 Sublicensing. Subject to the terms and conditions set forth herein, Mount Sinai hereby grants to MSGI the right to grant Sublicenses, provided that any and all such Sublicenses shall:
+
+a. obligate the Sublicensee to abide by and be subject to all of the terms, conditions, and limitations of this Agreement (including all exhibits and schedules hereto) applicable to MSGI;
+
+b. expressly prohibit the Sublicensee from granting further sublicenses and declare any such purported grant of a further sublicense to be invalid and unenforceable;
+
+c. cause the Sublicensee to comply with the applicable provisions of this Agreement to the same extent as MSGI is required to comply and include a provision providing for the termination of the Sublicense, upon written request by Mount Sinai, in the event that the Sublicensee does not so comply;
+
+d. provide that, in the event of any inconsistency between the Sublicense and this Agreement, this Agreement shall control;
+
+e. obligate the Sublicensee to submit annual, Quarterly, and interim reports to Mount Sinai, consistent with the reporting provisions of Article 4 and all other relevant provisions herein; and
+
+f. be written in the English language (for clarity, this is a reference to the original Sublicense as executed; provision of a translation to Mount Sinai shall not satisfy this requirement).
+
+2.3 If MSGI enters into any agreement, arrangement, or license purporting to grant rights to any Licensed Patents that does not comport with the requirements of Section 2.2, or is otherwise inconsistent with the terms and conditions of this Agreement, such agreement, arrangement, or license shall be null and void. MSGI acknowledges and agrees that entering into such an agreement, arrangement, or license constitutes a material breach of this Agreement.
+
+2.4 MSGI shall notify Mount Sinai of any proposed grant of a Sublicense and provide to Mount Sinai a copy of any proposed Sublicense at least forty (40) Business Days prior to execution thereof for review and comment by Mount Sinai, and MSGI will not enter into such Sublicense without incorporating such comments, to the extent such comments are reasonable.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+5
+
+CONFIDENTIAL
+
+2.5 MSGI hereby agrees to remain fully liable under this Agreement to Mount Sinai for the performance or non-performance under this Agreement and the relevant Sublicense by any party to those agreements. MSGI shall enforce all such Sublicenses against its Sublicensees, ensuring its Sublicensees’ performance in accordance with the terms of this Agreement and the relevant Sublicense. No such Sublicense or attempt to obtain a Sublicense shall relieve MSGI of its obligations hereunder to pay to Mount Sinai any and all license fees, royalties and other payments due under the Agreement.
+
+2.6 Government Rights. All rights and licenses granted by Mount Sinai to MSGI under this Agreement are subject to: (a) any limitations imposed by the terms of any government grant, government contract or government cooperative agreement applicable to the technology that is the subject of this Agreement, and (b) applicable requirements of 35 U.S.C. § 200 et seq., as amended, and implementing regulations and policies. Without limitation of the foregoing, MSGI agrees that, to the extent required under 35 U.S.C. § 204, any Licensed Product used, sold, distributed, rented or leased by MSGI, its Affiliates, or Sublicensees in the United States will be Manufactured substantially in the United States. In addition, MSGI agrees that, to the extent required by law or regulation including under 35 U.S.C. § 202(c)(4), the United States government is granted a nonexclusive, nontransferable, irrevocable, paid-up license to practice or have practiced for or on behalf of the United States any Licensed Patent throughout the world.
+
+2.7 No Implied Licenses. Except as expressly provided under this Article 2, no right or license is granted under this Agreement (expressly or by implication or estoppel) by Mount Sinai to MSGI, its Affiliates, or Sublicensees under any tangible or intellectual property, materials, Patent, Patent application, trademark, copyright, technical information, data, or other proprietary right.
+
+3. FEES, ROYALTIES, AND PAYMENTS
+
+3.1 License Maintenance Fee. As additional consideration for the license and other rights granted under this Agreement, starting on the date of a Change of Control and at each anniversary of such date thereafter, MSGI shall pay to Mount Sinai an annual, non-refundable, non-creditable license maintenance fee, payable through the expiration of the Royalty Term, according to the following schedule, provided that the Parties agree to negotiate in good faith a reduction of such annual fee in the event that this Agreement is terminated or amended as to any specified Licensed Patent:
+
+YEAR
+
+ANNUAL FEE
+
+Each year until the expiration of the Royalty Term
+
+[***] U.S. Dollars ($[***] USD)
+
+3.2 Running Royalties. As additional consideration for the license and other rights granted under this Agreement, during the Royalty Term, MSGI shall pay to Mount Sinai running royalties as specified in Exhibit C; provided that, upon a Change of Control event, MSGI shall pay running royalties solely in accordance with section a of Exhibit C hereto, and section b of Exhibit C hereto shall no longer have any effect.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+6
+
+CONFIDENTIAL
+
+3.3 Sublicense Fees. MSGI shall pay Mount Sinai [***] of all Sublicense Income within [***] days after receipt of such Sublicense Income. All consideration received by MSGI from any Sublicensee shall be fully auditable by Mount Sinai pursuant to the audit right in Section 4.9. MSGI shall not receive from any Sublicensee anything of value in lieu of cash payments inconsideration for any Sublicense without the express prior written consent of Mount Sinai. Any non-cash consideration, including, without limitation, equity in other companies or equity investments in MSGI, received by MSGI from any Sublicensee will be valued at its fair market value as of the date of receipt by MSGI for purposes of calculating Sublicense Income. MSGI shall not sell or transfer, voluntarily or involuntarily, to a Third Party any of MSGI’s interest in any portion of any future sublicensing revenues under any Sublicense without the prior written consent of Mount Sinai.
+
+4. REPORTS AND PAYMENTS
+
+4.1 Reporting of First Commercial Sale. In addition to the Quarterly Reports required under Section 4.2 below, MSGI shall provide a written report to Mount Sinai setting forth the date of First Commercial Sale in each country within sixty (60) days of the occurrence thereof. All reports set forth in this Section 4, including Quarterly Reports and Annual Progress Reports, shall be considered the Confidential Information of MSGI.
+
+4.2 Quarterly Royalty Report. Within sixty (60) days after the Quarter in which any First Commercial Sale occurs, and within sixty (60) days after each Quarter thereafter, MSGI shall provide Mount Sinai with a written report detailing the number and type of test (including a test for one or more conditions) by MSGI that is covered by one or more Valid Claims during such Quarter and the royalty payments due to Mount Sinai for such Quarter pursuant to Article 4 (each such report, a “Quarterly Report”). Each Quarterly Report shall include at least the following:
+
+a. the number and type of test (including a test for one or more conditions) by MSGI that is covered by one or more Valid Claims;
+
+b. total royalty payments due to Mount Sinai by Licensed Product and by country;
+
+c. names and addresses of all Sublicensees, all revenue received by MSGI from such Sublicensees and all amounts payable, as applicable; and
+
+4.3 Each Quarterly Report shall be in substantially similar form as Exhibit B attached hereto (which is hereby incorporated into and made a part of this Agreement), or to such other form as Mount Sinai may provide from time to time. Each Quarterly Report shall be certified as true and correct by an officer of MSGI. With each Quarterly Report submitted, MSGI shall pay to Mount Sinai the royalties and fees due and payable under this Agreement, to the extent not already paid pursuant to Article 4. If no royalties or fees are due and payable, MSGI shall so report. MSGI’s failure to timely submit to Mount Sinai a Quarterly Report substantially in the required form will constitute a material breach of this Agreement, and, if such breach is not remedied within ten (10) days’ written notice from Mount Sinai, Mount Sinai may terminate this Agreement in full pursuant to Section 10 hereof. MSGI will continue to deliver Quarterly
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+7
+
+CONFIDENTIAL
+
+Reports to Mount Sinai after the termination or expiration of this Agreement with respect to any Quarter during which this Agreement remained in effect and until such time as all Licensed Product(s) permitted to be sold after termination have been sold or destroyed.
+
+4.4 Annual Progress Report. On the first Business Day of each Calendar Year following the Effective Date, MSGI shall submit to Mount Sinai a written report covering MSGI’s, its Affiliate’s and/or Sublicensees’, as applicable, progress (if any) in: (i) Developing and Commercializing Licensed Products and/or Licensed Processes; (ii) research and Development activities, including status and plans for obtaining any necessary governmental approvals or CPT codes, performed during the past year, and the plans for research and Development activities for the following year; and (iii) marketing activities for the past year and planned for the next year, and MSGI’s internal sales estimate for the following year (an “Annual Progress Report”). Each Annual Progress Report shall be in substantially similar form and contain at least the information required by Exhibit C attached hereto (which is hereby incorporated into and made a part of this Agreement), or in such other form as may be provided by Mount Sinai from time to time.
+
+4.5 Annual Sublicense Reports. On the first Business Day of each Calendar Year following the Effective Date, MSGI shall submit to Mount Sinai a written report setting forth: (a) the names and addresses of all Sublicensees, (b) all Sublicense revenue received by MSGI from each Sublicensee during the preceding Calendar Year, and (c) all amounts payable or paid to Mount Sinai under Section 3 during the preceding Calendar Year. In addition, within fifteen (15) days of MSGI’s receipt of any Sublicense revenue, MSGI shall submit to Mount Sinai the amount payable to Mount Sinai under Section 3, together with a written report describing the triggering event, the gross amount of Sublicense revenue received, any applicable fees, credits or deductions, and the net amount of Sublicense revenue payable to Mount Sinai. After any First Commercial Sale has occurred, MSGI’s obligation to provide such annual sublicense reports shall be satisfied by providing Quarterly Reports pursuant to Section 4.
+
+4.6 Payment and Currency. All dollar amounts referred to in this Agreement are expressed in United States Dollars and MSGI shall make all payments due to Mount Sinai in U.S. Dollars, without deduction of exchange, collection, wiring fees, bank fees, or any other charges, within thirty (30) days following the Quarter. Each payment will reference Agreement AGR-11352. All payments to Mount Sinai will be made in U.S. Dollars by wire transfer or check payable to the Icahn School of Medicine at Mount Sinai and sent to:
+
+By Electronic Transfer:
+
+Icahn School of Medicine at Mount Sinai
+
+Mount Sinai Bank Account Number: [***]
+
+Routing ABA Number: [***]
+
+Mount Sinai Ref:
+
+[***]
+
+By Check:
+
+Mount Sinai Innovation Partners
+
+Icahn School of Medicine at Mount Sinai
+
+One Gustave L. Levy Place Box 1675
+
+New York, NY 10029
+
+4.7 [INTENTIONALLY LEFT BLANK]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+8
+
+CONFIDENTIAL
+
+4.8 Late Payments. In the event undisputed royalty payments or other fees are not received by Mount Sinai when due hereunder, MSGI shall pay to Mount Sinai interest charges that will accrue interest from the date due until paid at a rate equal to [***] per month (or the maximum allowed by law, if less).
+
+4.9 Records and Audit Rights.
+
+a. MSGI shall keep, and cause its Affiliates and Sublicensees to keep, complete, true and accurate records and books containing all particulars that may be necessary for the purpose of showing the amounts payable to Mount Sinai hereunder. Records and books shall be kept at MSGI’s principal place of business or the principal place of business of the appropriate division of MSGI to which this Agreement relates. The records for each Quarter will be maintained for at least five (5) years after submission of the applicable report. Such books and the supporting data shall be open to inspection by Mount Sinai, its contractors or agents, upon at least thirty (30) days prior notice to MSGI, its Affiliate, or Sublicensee, as applicable, at all reasonable terms for a term of five (5) years following the end of the Calendar Year to which they pertain, for the purpose of verifying MSGI’s royalty statement or compliance in other respects with this Agreement. Such access will be available to Mount Sinai on at least 45 days’ advance notice to MSGI, its Affiliate, or Sublicensee, as applicable, no more than one audit of MSGI and each Affiliate, or Sublicensee shall be conducted in any 2 calendar years, during normal business hours, and once in any 2 calendar years for five (5) years after the expiration or termination of this Agreement. If any amounts due to Mount Sinai have been underpaid, then MSGI shall promptly pay to Mount Sinai the amount of such underpayment plus accrued interest of LIBOR plus 2% but never greater than 8% (or maximum allowed by law, if less). Should such inspection lead to the discovery of at least a [***] percent ([***]%) or [***] Dollar ($[***]) discrepancy in reporting to Mount Sinai’s detriment (whichever is greater), MSGI agrees to reimburse Mount Sinai for the full cost of such inspection. Whenever MSGI, its Affiliate, or Sublicensee has its books and records audited by an independent certified public accountant, MSGI, its Affiliate, or Sublicensee, as applicable, will, within thirty (30) days of the conclusion of such audit, provide Mount Sinai with a written statement, certified by said auditor, setting forth the calculation of royalties, fees, and other payments due to Mount Sinai over the time period audited as determined from the books and records of such party.
+
+b. Such audits may, in Mount Sinai’s sole discretion, consist of a self-audit conducted by MSGI at MSGI’s expense and certified in writing by a certified public accountant. All information examined pursuant to this Agreement shall be deemed to be the Confidential Information of MSGI. Further, whenever MSGI and/or its affiliates has its books and records
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+9
+
+CONFIDENTIAL
+
+audited by an independent certified public accountant, MSGI and/or its affiliates will, within 30 days of the conclusion of such audit, provide Mount Sinai with a written statement of said auditor, setting forth the calculation of amounts due to Mount Sinai over the time period audited, as determined from the books and records of MSGI, but said auditor does not need to give any audit opinion with said statement.
+
+5. CONFIDENTIALITY; PUBLICITY; USE OF NAME
+
+5.1 “Confidential Information” means any and all information of a Party (the “Disclosing Party”), or such information of Affiliates or Third Parties provided on behalf of such Party to the other Party (“Receiving Party”), that is disclosed in tangible form marked as “confidential” upon disclosure or, if disclosed in oral or other intangible form, is identified as confidential at the time of disclosure and summarized in a writing that is marked as “confidential” and provided to the Receiving Party within thirty (30) days of the intangible disclosure, provided however that failure to so mark or summarize shall not alter the confidential nature of such Confidential Information if a reasonable person would, based on the content and/or context of the disclosure, recognize such disclosure was intended as confidential. Notwithstanding the foregoing, Confidential Information shall not include information that: (i) is available to the public at the time of disclosure or, after disclosure, becomes a part of the public domain by publication or otherwise, through no fault of the Receiving Party; (ii) is already properly possessed by the Receiving Party prior to receipt from the Disclosing Party; (iii) was received by the Receiving Party without obligation of confidentiality or limitation on use from a Third Party who had the lawful right to disclose such information; or (iv) was independently developed by or for the Receiving Party by any person or persons who had no knowledge or benefit of the Disclosing Party’s Confidential Information, as demonstrated by the Receiving Party’s written or electronic records created contemporaneously with such independent development.
+
+5.2 Confidentiality. The Receiving Party shall maintain in confidence and not disclose to any Third Party any Disclosing Party’s Confidential Information, using the same degree of care it uses to protect its own confidential information of a similar nature but in no event using less than a reasonable degree of care. The Receiving Party will use Disclosing Party’s Confidential Information solely as required to undertake its rights and obligations under this Agreement. The Receiving Party will ensure that its employees, independent contractors, Affiliates, and Sublicensees (“Recipient Individuals”) have access to Disclosing Party’s Confidential Information only on a need to know basis, are informed of all the obligations attaching to such Confidential Information in advance of being given access to it, and are required to comply with such Receiving Party’s obligations under this Agreement. Receiving Party shall be fully responsible to Disclosing Party for such compliance by its Recipient Individuals. Notwithstanding the foregoing, the Receiving Party may disclose Disclosing Party’s Confidential Information to the limited extent required by law, court order, or other governmental authority with jurisdiction provided that the Receiving Party: (a) promptly provides the Disclosing Party, to the extent legally permissible, with written notice of such requirement, (b) uses reasonable efforts to obtain confidential treatment of such Disclosing Party’s Confidential Information by such court or governmental authority, and (c) cooperates, at
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+10
+
+CONFIDENTIAL
+
+the Disclosing Party’s written request and expense, with the Disclosing Party’s legal efforts to prevent or limit the scope of such required disclosure; the Receiving Party shall in all other respects continue to hold such Confidential Information as confidential and subject to all obligations of this Article 6. The Receiving Party’s obligations of confidentiality and non-use restrictions as set forth in this Article 6 shall be for a period of five (5) years from receipt of the Confidential Information from the Disclosing Party.
+
+5.3 Publicity. The Parties may issue a press release upon mutual written agreement and, if so, will cooperate to determine the timing and content of such press release. All press releases shall be subject to the terms and conditions of this Agreement, including Sections 5.2 and 5.4.
+
+5.4 Use of Mount Sinai’s Name. MSGI and its Affiliates, Sublicensees, employees and agents may not use the name, logo, seal, trademark, or service mark of Mount Sinai or any school, organization, employee, student or representative of Mount Sinai (or any adaptation of any of the foregoing) without the prior written consent of Mount Sinai, which consent will be granted or denied by the Vice President of the Office of Marketing and Communications of the Mount Sinai Health System (in his or her sole discretion).
+
+6. PATENT MATTERS
+
+6.1 Patent Prosecution. Mount Sinai shall control the Prosecution of Licensed Patents and the selection of patent counsel. MSGI and Mount Sinai shall reasonably consult each other regarding such management, and MSGI shall have the right to provide input and guidance to Mount Sinai relating to ongoing prosecution matters relating to the Licensed Patents. It is agreed and understood, however, the Mount Sinai shall have the ultimate decision making authority (in its sole discretion) with respect to Licensed Patent Prosecution matters.
+
+6.2 Infringement. In the event that MSGI becomes aware of any suspected infringement of any Licensed Patent or any Infringement Action, MSGI shall promptly notify Mount Sinai thereof. At its sole expense, Mount Sinai will have sole and full authority with respect to such infringement matters (whether through litigation, settlement negotiation, mediation, or other means) and shall retain all recoveries therefrom. MSGI shall cooperate with Mount Sinai’s requests to the extent reasonably possible, including joining the Infringement Action if requested by Mount Sinai.
+
+7. REPRESENTATIONS; DISCLAIMER OF WARRANTIES;
+
+LIMITATION OF LIABILITIES
+
+7.1 Each Party represents to the other Party that: (a) as of the Effective Date it has the full right, power and authority to enter into this Agreement and to perform its obligations hereunder, and (b) this Agreement has been duly executed by it and is legally binding upon it, enforceable in accordance with its terms, and does not conflict with any agreement, instrument or understanding, oral or written, to which it is a party or by which it may be bound, nor violate any material law or regulation of any court, governmental body or administrative or other agency having jurisdiction over it.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+11
+
+CONFIDENTIAL
+
+7.2 Health Care Law. Each Party agrees that from the Effective Date and throughout the Term of this Agreement that it (and its agents and employees involved in the performance of this Agreement) shall not, and it shall use reasonable efforts to cause its Affiliates and each of its vendors, suppliers and subcontractors involved in the performance of this Agreement, not to be debarred, excluded or disqualified by any Regulatory Authority or other governmental entity pursuant to 21 U.S.C. § 335a or any other Health Care Law. Each Party shall notify the other Party in writing immediately if any such debarment, exclusion or disqualification occurs or comes to its attention, and shall, with respect to any Entity so debarred promptly remove such Entity from performing this Agreement.
+
+7.3 DISCLAIMER OF WARRANTIES; LIMITATION OF LIABILITIES. THE LICENSED PATENTS, MATERIALS, TECHNICAL INFORMATION, LICENSED PRODUCTS, LICENSED PROCESSES, AND ANY OTHER TECHNOLOGY OR INFORMATION PROVIDED OR LICENSED UNDER THIS AGREEMENT ARE PROVIDED ON AN “AS IS” BASIS. MOUNT SINAI MAKES NO REPRESENTATIONS OR WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY OF ACCURACY, COMPLETENESS, PERFORMANCE, MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, COMMERCIAL UTILITY, NON INFRINGEMENT OR TITLE WITH RESPECT THERETO. MOUNT SINAI WILL NOT BE LIABLE TO MSGI, ITS SUCCESSORS OR ASSIGNS, OR ANY THIRD PARTY WITH RESPECT TO ANY CLAIM ARISING FROM OR ATTRIBUTABLE TO MSGI’S USE OF THE LICENSED PATENTS, MATERIALS, TECHNICAL INFORMATION, LICENSED PRODUCTS, AND ANY OTHER TECHNOLOGY OR INFORMATION PROVIDED OR LICENSED UNDER THIS AGREEMENT, OR ARISING FROM THE DEVELOPMENT, TESTING, MANUFACTURE, USE OR SALE OF LICENSED PRODUCTS. NEITHER PARTY WILL BE LIABLE TO THE OTHER PARTY, OR ITS SUCCESSORS OR ASSIGNS, OR TO ANY THIRD PARTY, FOR LOST PROFITS, BUSINESS INTERRUPTION, OR INDIRECT, SPECIAL OR CONSEQUENTIAL OR OTHER DAMAGES OF ANY KIND.
+
+7.4 Disclaimer of Specific Warranties. Without limiting the generality of the foregoing, nothing in this Agreement shall be construed as:
+
+a. a warranty or representation by Mount Sinai as to the validity or scope of any Licensed Patents;
+
+b. a warranty or representation by Mount Sinai that anything made, used, sold, distributed, or as applicable publicly performed, publicly displayed, derived from, or otherwise disposed of pursuant to any license granted under this Agreement is or will be free from infringement of intellectual property rights of third parties;
+
+c. an obligation by Mount Sinai to bring or prosecute actions or suits against third parties for infringement, misappropriation, or other similar causes of action related to the Licensed Patents, except as expressly provided in this Agreement; or
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+12
+
+CONFIDENTIAL
+
+d. conferring by implication, estoppel or otherwise any license or rights under any intellectual property rights of Mount Sinai other than Licensed Patents, as and to the extent expressly set forth herein.
+
+7.5 Limitation of Liability. Notwithstanding any provision in this Agreement to the contrary, Mount Sinai’s aggregate liability under this Agreement shall not exceed an amount equal to the maximum amount of all payments made by MSGI to Mount Sinai pursuant to Article 3 hereof during the full Calendar Year during which MSGI paid to Mount Sinai the highest aggregate amount pursuant to that Article 3.
+
+8. INDEMNIFICATION
+
+8.1 Indemnification. MSGI will defend, indemnify and hold harmless Mount Sinai, and its trustees, officers, faculty, agents, employees and students (each, an “Indemnified Party”) from and against any and all claims, actions, liabilities, losses, damages, judgments, costs or expenses suffered or incurred by the Indemnified Parties, including attorneys’ fees and related costs (collectively, “Liabilities”), caused in whole or in part by:
+
+a. any [***] of MSGI, its Affiliates or Sublicensees, or of any of the officers, directors, employees or agents of any of the foregoing, in connection with [***], and/or
+
+b. the enforcement of this Article by any Indemnified Party;
+
+except in each case to the extent such Liabilities result solely from the [***] of an Indemnified Party. For clarity, Liabilities under this Section include, but are not limited to, Liabilities arising out of, resulting from, or caused by: (i) the [***] by MSGI or its Sublicensees, Affiliates, assignees, vendors or Third Parties; or (ii) a failure to perform under this Agreement or any Sublicense [***], or (iii) a claim (excluding claims based on [***]) by [***], or [***]; or (iv) [***] of MSGI, its Affiliates, Sublicensees, assignees, vendors or associated Third Parties relating to [***], such as claims by or on behalf of a [***].
+
+8.2 Indemnification Procedure. An Indemnified Party will promptly provide MSGI with written notice of any Liability that is indemnifiable under this Article; provided, however, that the failure to so notify shall not relieve MSGI of its indemnification obligations hereunder except to the extent of any material prejudice to MSGI as a direct result of such failure. Provided that MSGI can demonstrate sufficient financial and legal resources, MSGI shall control such defense and all negotiations relative to the settlement of any indemnifiable claim or action, except that MSGI shall not settle or compromise any claim or action in any manner that may impose restrictions or obligations on any Indemnified Party, or that grants any rights to the Licensed Patents or Licensed Products, without Mount Sinai’s prior written consent. If MSGI fails or declines to assume the defense against any claim or action within thirty (30) days after notice thereof, then Mount Sinai may assume and control the defense of such claim or action for the account and at the risk of MSGI, and any Liabilities related to such claim or action will be conclusively deemed a liability of MSGI. The indemnification rights of the Indemnified Parties under this Article 0 are in addition to all other rights that an Indemnified Party may have at law, in equity or otherwise.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+13
+
+CONFIDENTIAL
+
+9. INSURANCE
+
+9.1 Coverages. MSGI will procure and maintain appropriate insurance policies for the following coverages with respect to personal injury, bodily injury, property damage or contractual liability arising out of MSGI’s performance under this Agreement as follows: (a) during the Term, comprehensive general liability, including broad form and contractual liability, in a minimum amount of $[***] per claim and $[***] in the annual aggregate; and (b) prior to the sale of the first Licensed Product, product or professional liability coverage, as applicable, in a minimum amount of $[***] per claim and $[***] in the annual aggregate. Mount Sinai may review periodically the adequacy of the minimum amounts of insurance for each type of coverage required by this Article 9, and Mount Sinai reserves the right to reasonably require MSGI to adjust the limits accordingly. The required minimum amounts of insurance do not constitute a limitation on MSGI’s liability or indemnification obligations to Mount Sinai under this Agreement.
+
+9.2 Other Requirements. Any policies of insurance required by Section 9.1 above will be issued by an insurance carrier with an A.M. Best rating of “A” or better and will name Mount Sinai as an additional insured, on a primary and non-contributory basis, with respect to MSGI’s performance under this Agreement. MSGI will provide Mount Sinai with insurance certificates evidencing the required coverage within thirty (30) days after the commencement of each policy period and any renewal periods. Each certificate will provide that the insurance carrier will notify Mount Sinai in writing at least thirty (30) days prior to the cancellation or material change in coverage.
+
+10. TERM AND TERMINATION
+
+10.1 Expiration of Royalty Term. Upon expiration of the Royalty Term with respect to a Licensed Product in any country and payment in full of all amounts owed hereunder with respect to such Licensed Product in such country, MSGI will have a non-exclusive, fully paid license for such Licensed Product in such country.
+
+10.2 Termination by Mount Sinai. If MSGI should: (i) [***] (including if MSGI should [***]); (ii) seek voluntary bankruptcy protection, or have an involuntary bankruptcy action filed against it that is not dismissed within sixty (60) days; or (iii) enter into a composition with creditors, or have a receiver appointed for it; then Mount Sinai may give written notice of such default to MSGI. If MSGI should fail to cure such default within sixty (60) days of such notice, the rights, privileges, and license granted hereunder shall automatically terminate.
+
+10.3 Termination by MSGI. MSGI may terminate this Agreement, in whole or as to any specified Licensed Patent, at [***], by giving written notice thereof to Mount Sinai. Such termination shall be effective ninety (90) days after such notice and all of MSGI’s rights associated therewith shall cease as of that date.
+
+10.4 Cessation of [***]. If MSGI shall cease to [***], this Agreement shall terminate upon thirty (30) days written notice by Mount Sinai.
+
+10.5 Challenge of Patents. MSGI agrees that nothing herein shall be construed as preventing it from challenging the validity or enforceability of the Licensed Patents, at any time.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+14
+
+CONFIDENTIAL
+
+In the event that MSGI shall, however, challenge the validity or enforceability of any of the Licensed Patents, or otherwise indicate the payment of any royalty due under this Agreement is made under protest, MSGI agrees that Mount Sinai shall have the right, but not the obligation, to terminate this Agreement immediately upon providing written notice of the same to MSGI.
+
+11. EFFECT OF TERMINATION
+
+11.1 Continuing Obligations. Any termination pursuant to Section 10 hereof shall not relieve MSGI of any monetary obligation or any other obligation or liability accrued hereunder, nor shall it rescind or give rise to any right to rescind any payments made or other consideration given to Mount Sinai hereunder prior to the time such termination becomes effective. Such termination shall not affect in any manner any rights of Mount Sinai arising under this Agreement prior to the date of such termination. MSGI shall pay all attorneys’ fees and costs incurred by Mount Sinai in enforcing any obligation of MSGI or accrued right of Mount Sinai
+
+11.2 Survival of Terms. In addition to any provision which by its terms contemplates performance after the Term, the following provisions shall survive the expiration or termination of this Agreement: Articles 1 (Definitions), 3 (Fees, Royalties, Milestones, and Payments), 4.9 (Records and Audit Rights), 5 (Confidentiality; Publicity; Use of Name), 7 (Representations; Disclaimer of Warranties; Limitation of Liabilities), 8 (Indemnification), 9 (Insurance), 11 (Effect of Termination), and 12 (Additional Provisions).
+
+11.3 Licensed Product on Hand. Upon expiration or termination of this Agreement by either Party, MSGI shall provide Mount Sinai with a written inventory of all Licensed Products in process of manufacture, in use, or in stock. MSGI may dispose of any such Licensed Products within the ninety (90) day period following such expiration or termination; provided, however, that MSGI shall pay royalties and render reports to Mount Sinai thereon in the manner specified herein.
+
+12. ADDITIONAL PROVISIONS
+
+12.1 Independent Contractors. The Parties are independent contractors. Nothing contained in this Agreement is intended to create an agency, partnership or joint venture between the Parties. At no time will either Party make commitments or incur any charges or expenses for or on behalf of the other Party.
+
+12.2 Compliance with Laws. MSGI must comply with all prevailing laws, rules and regulations that apply to its activities or obligations under this Agreement. For example, MSGI will comply with applicable United States export laws and regulations. The transfer of certain technical data and commodities may require a license from the applicable agency of the United States government and/or written assurances by MSGI that MSGI will not export data or commodities to certain foreign countries without prior approval of the agency. Mount Sinai does not represent that no license is required, or that, if required, the license will issue.
+
+12.3 Marking. MSGI shall, and agrees to require its Affiliates and Sublicensees to, comply with any marking requirements of the intellectual property laws of the applicable countries in the Territory to the extent any failure to do so would materially and adversely affect the Licensed Patents or any Licensed Product, or either Party’s ability to avail itself of all
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+15
+
+CONFIDENTIAL
+
+potential remedies for any infringement of the Licensed Patents, and particularly agrees to permanently and legibly mark all Licensed Products made, used, reproduced, or sold under the terms of this Agreement, or their respective containers, in accordance with the applicable provisions set forth in the Patent marking and notice provisions under Title 35 of the United States Code. Any Sublicense shall impose on the Sublicensee obligations substantially similar to those imposed in this paragraph.
+
+12.4 Modification, Waiver and Remedies. This Agreement may only be modified by a written amendment that is executed by an authorized representative of each Party. Any waiver must be express and in writing. No waiver by either Party of a breach by the other Party will constitute a waiver of any different or succeeding breach. Unless otherwise specified, all remedies are cumulative.
+
+12.5 Assignment. MSGI may not assign this Agreement or any part of it, either directly or by merger or operation of law, without the prior written consent of Mount Sinai. Any such assignment will be valid only if: (a) at least thirty (30) days before the closing of the proposed transaction, MSGI has given Mount Sinai written notice and such background information as may be reasonably necessary to enable Mount Sinai to give an informed consent; and (b) the assignee agrees in writing to be legally bound by this Agreement. Any permitted assignment will not relieve MSGI of responsibility for performance of any obligation of MSGI that has accrued at the time of the assignment. Any assignment granted contrary to this provision will be null and void.
+
+12.6 Notices. Except as otherwise expressly set forth herein, any notice or other required communication under this Agreement (each, a “Notice”) must be in writing, addressed to the Party’s respective Notice Address, and delivered personally or by globally recognized express delivery service, charges prepaid. A Notice will be deemed delivered and received: (a) in the case of personal delivery, on the date of such delivery; and (b) in the case of a globally recognized express delivery service, on the Business Day that receipt by the addressee is confirmed pursuant to the service’s systems. The “Notice Address” of each Party is as follows:
+
+if to Mount Sinai, to:
+
+Icahn School of Medicine at Mount Sinai
+
+Mount Sinai Innovation Partners
+
+One Gustave L. Levy Place, Box 1675
+
+New York, NY 10029
+
+Attention: Vice President and Executive Director
+
+and a copy of legal notices only to:
+
+One Gustave L. Levy Place, Box 1099, New York, NY 10029
+Attention: Office of General Counsel
+
+if to MSGI, to:
+
+Mount Sinai Genomics, Inc.
+1425 Madison Avenue
+New York, NY 10029
+Attention: General Counsel
+
+12.7 Severability and Reformation. If any provision of this Agreement is held to be invalid or unenforceable by a court of competent jurisdiction, then the remaining provisions of
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+16
+
+CONFIDENTIAL
+
+this Agreement will remain in full force and effect. Such invalid or unenforceable provision will be automatically revised to be a valid or enforceable provision that comes as close as permitted by law to the Parties’ original intent.
+
+12.8 Headings and Counterparts. The headings of the articles and sections included in this Agreement are inserted for convenience only and are not intended to affect the meaning or interpretation of this Agreement. This Agreement may be executed in several counterparts, and execution signatures may be exchanged electronically including by facsimile or as scanned e-mail attachments, and signatures so exchanged shall be considered as original for all purposes and taken together will constitute one and the same instrument.
+
+12.9 Governing Law. This Agreement will be governed in accordance with the laws of the State of New York, without giving effect to the conflict of law provisions of any jurisdiction.
+
+12.10 Dispute Resolution. If a dispute arises between the Parties concerning any right or duty under this Agreement, then the Parties will confer, as soon as practicable, in an attempt to resolve the dispute amicably. If the Parties are unable to resolve the dispute amicably, the Parties each hereby irrevocably submit to the exclusive jurisdiction of the state and federal courts located in the County and State of New York.
+
+12.11 Integration. This Agreement, together with all attached Exhibits, contains the entire agreement between the Parties with respect to the Licensed Patents, and supersedes all other oral or written representations, statements, or agreements with respect to such subject matter, including but not limited to, the term sheet exchanged prior to this Agreement.
+
+12.12 Force Majeure. Neither Party will be responsible for nonperformance caused by forces beyond the reasonable control of such Party, including fire, explosion, natural disaster, war (whether declared or not), act of terrorism, strike, or riot, provided that the nonperforming Party uses reasonable efforts to avoid or remove such causes of nonperformance and continues performance under this Agreement with reasonable dispatch whenever such causes are removed, and notifies the other Party of such cause as promptly as is reasonably practical given the circumstances.
+
+12.13 Certain Conventions. Any reference in this Agreement to an Article, Section, subsection, paragraph, clause or Exhibit shall be deemed to be a reference to an Article, Section, subsection, paragraph, clause or Exhibit, of or to, as the case may be, this Agreement, unless otherwise indicated. Unless the context of this Agreement otherwise requires: (a) all definitions set forth herein shall be deemed applicable whether the words defined are used herein with initial capital letters in the singular or the plural, (b) the word “will” shall be construed to have the same meaning and effect as the word “shall,” (c) any definition of or reference to any agreement, instrument or other document herein shall be construed as referring to such agreement, instrument or other document as from time to time amended, supplemented or otherwise modified (subject to any restrictions on such amendments, supplements or modifications set forth herein), (d) any reference herein to any Party shall be construed to include the Party’s successors and assigns, (e) the word “notice” shall mean notice in writing (whether or not specifically stated) and shall include notices, consents, approvals and other written communications contemplated under this Agreement, (f) provisions that require that a Party or the Parties “agree,”
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+17
+
+CONFIDENTIAL
+
+“consent” or “approve” or the like shall require that such agreement, consent or approval be specific and in writing, whether by written agreement, letter, approved minutes or otherwise (but excluding e-mail and instant messaging), (g) references to any specific law, rule or regulation, or article, section or other division thereof, shall be deemed to include the then-current amendments thereto or any replacement or successor law, rule or regulation thereof, (h) words of any gender include each other gender, (j) words such as “herein,” “hereof” and “hereunder” refer to this Agreement as a whole and not merely to the particular provision in which such words appear, (i) the words “include,” “includes” and “including” shall be deemed to be followed by the phrase “but not limited to,” “without limitation,” “inter alia” or words of similar import, and (j) unless “Business Days” is specified, “days” shall mean “calendar days.” In the event an ambiguity or question of intent or interpretation arises, this Agreement shall be construed as if drafted jointly by the Parties and no presumption or burden of proof shall arise favoring or disfavoring any Party by virtue of the authorship of any of the provisions of this Agreement.
+
+12.14 Business Day Requirements. In the event that any notice or other action or omission is required to be taken by a Party under this Agreement on a day that is not a Business Day, then such notice or other action or omission shall be deemed to be required to be taken on the next occurring Business Day.
+
+[Signature Page Follows]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+18
+
+IN WITNESS WHEREOF, the Parties have executed this Agreement as of the Effective Date.
+
+MOUNT SINAI GENOMICS, INC.
+
+ICAHN SCHOOL OF MEDICINE
+AT MOUNT SINAI
+
+BY:
+
+/s/ Eric Schadt, Ph.D.
+
+BY:
+
+/s/ Dennis S. Charney, M.D.
+
+NAME:
+
+Eric Schadt, Ph.D.
+
+NAME:
+
+Dennis S. Charney, M.D.
+
+TITLE:
+
+President and Chief Executive Officer
+
+TITLE:
+
+Anne and Joel Ehrenkranz Dean of the Icahn School of Medicine at Mount Sinai
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+19
+
+Exhibit A
+
+Licensed Patents
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+20
+
+Exhibit B
+
+Form of Quarterly Royalty Report
+
+Quarterly Royalty and Sublicense Income Report
+
+Mount Sinai Agreement Number
+
+Agreement effective date
+
+Time Period of Report
+
+Licensee royalties
+
+Country
+
+Date of First
+Sale
+
+Product Name
+
+Royalty rate
+utilized
+
+Gross Sales
+
+Deductions
+
+Net Sales
+
+Royalty
+
+Country A
+
+Country B
+
+Country C
+
+Sublicense royalties
+
+Date of First
+Sale
+
+Product Name
+
+Royalty rate
+utilized
+
+Gross Sales
+
+Deductions
+
+Net Sales
+
+Royalty
+
+Sublicensee A Name
+
+Country A
+
+Country B
+
+Country C
+
+Sublicensee B Name
+
+Country X
+
+Country Y
+
+Country Z
+
+Non-royalty sublicense income
+
+Description of sublicense income triggering event
+
+Date of triggering event
+
+Sublicense income gross amount
+
+Fees, credits, deductions (if applicable)
+
+Description of fees, credits, deductions (if applicable)
+
+Sublicense income net amount
+
+Milestones
+
+Description of milestone triggering event
+
+Date of triggering event
+
+Milestone gross amount
+
+Fees, credits, deductions (if applicable)
+
+Description of fees, credits, deductions (if applicable)
+
+Milestone net amount
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+21
+
+Exhibit C
+
+Calculation of Running Royalties
+
+a) Total Royalties. For Licensed Products or Licensed Processes performed or sold by MSGI, “Total Royalties” shall be determined as follows, on a jurisdiction-by-jurisdiction basis within the Territory: (i) [***] U.S. dollar ($[***]) per [***] (including a [***]) by MSGI that is covered by [***] Valid Claims with respect to the [***], per [***] upon [***], prior to the issuance in the applicable jurisdiction of the first Patent with such a Valid Claim; and (ii) [***] U.S. dollars ($[***]) per [***] (including a [***] conditions) that is covered by one or more Valid Claims with respect to the [***] by MSGI, per [***] upon [***], after the issuance in the applicable jurisdiction of the first Patent with such a Valid Claim.
+
+b) Royalties Owed by MSGI. For [***] from the Effective Date, or until the date of a Change of Control event, if earlier, in accordance with Section 3.4 above, MSGI shall owe to Mount Sinai, and shall actually remit to Mount Sinai, [***]. For further clarity, starting on the date that the conditions set forth in this subsection (b) are not satisfied, MSGI shall owe to Mount Sinai, and shall actually remit to Mount Sinai, [***]
+
+i) [***] to [***] in Total Royalties Per Calendar Year. For the first [***] dollars in royalty income in aggregate per calendar year, Mount Sinai’s adjusted royalty distribution rates are as follows: [***]% to inventors, [***]% to the applicable ISMMS department, and [***]% to ISMMS. Accordingly, MSGI shall owe only [***] percent ([***]%) of Total Royalties with respect to the first [***] dollars ($[***]) of Total Royalties in a calendar year. By way of example: if the Total Royalty amount calculated as set forth in subsection (a) above was [***]dollar ($[***]), the actual amount due from MSGI to Mount Sinai hereunder would be calculated as follows: [***].
+
+ii) Over [***] in Total Royalties Per Calendar Year. For all amounts over [***] dollars in royalty income in aggregate per calendar year, Mount Sinai’s adjusted royalty distribution rates are as follows: [***]% to inventors, [***]% to the applicable ISMMS department, and [***]% to ISMMS. Accordingly, MSGI shall owe only [***] percent ([***]%) of Total Royalties with respect to any portion of Total Royalties in a calendar year that exceeds [***] dollars ($[***]). By way of example: if the Total Royalty amount calculated as set forth in subsection (a) above was [***] and [***] dollar ($[***]), the actual amount due from MSGI to Mount Sinai hereunder with respect to the [***] dollar in excess of [***]dollars (and, for clarity, all dollars thereafter) would be calculated as follows: [***].
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+22

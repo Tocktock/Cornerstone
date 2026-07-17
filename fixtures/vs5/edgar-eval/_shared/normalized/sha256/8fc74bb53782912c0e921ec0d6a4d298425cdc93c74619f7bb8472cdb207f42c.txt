@@ -1,0 +1,1019 @@
+EX-10.24
+25
+exhibit1024-super8xk.htm
+EX-10.24
+
+Document
+
+Exhibit 10.24
+
+CONFIDENTIAL
+
+Execution Version
+
+DATA STRUCTURING AND CURATION AGREEMENT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+This Data Structuring and Curation Agreement (this “Agreement”), effective as of August 1, 2019 (the “Effective Date”), is between, on the one hand, Mount Sinai Genomics, Inc., d/b/a Sema4, a Delaware corporation having a business address at 333 Ludlow St., Stamford, CT 06902 (“Sema4”), and on the other hand, Icahn School of Medicine at Mount Sinai, a not-for-profit New York education corporation with a principal business address of One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”), The Mount Sinai Hospital (“MSH”), Beth Israel Medical Center (“BIMC”), St. Luke’s-Roosevelt Hospital Center (SLR”), and The New York Eye and Ear Infirmary (“NYEE”) (each a “Hospital” and collectively (the “Mount Sinai Hospitals”), ISMMS and the Mount Sinai Hospitals shall collectively be referred to as the “Mount Sinai Parties;” each of Sema4 and the Mount Sinai Parties are also sometimes referred to herein individually as “Party” or jointly as the “Parties.”
+
+WHEREAS, each of the Mount Sinai Parties are part of the Mount Sinai Health System (the “Mount Sinai System”), which is in the process of developing and launching a Genetic Health Initiative founded on the belief that with better data, clinicians can provide better care to patients;
+
+WHEREAS, Sema4 has demonstrated in specific clinical applications, such as reproductive health and oncology, that improved data may enhance patients’ health and enable the development of predictive models that may be of clinical value, and Sema4 and the Mount Sinai Parties believe that similar benefits can be brought to the patients and clinicians of the Mount Sinai Parties across a range of health conditions and indications through a progressive program of structuring clinical data that is housed in various clinical datasets developed and maintained by one or more of the Mount Sinai Parties, including the Mount Sinai Data Warehouse (“MSDW”);
+
+WHEREAS, Sema4 wishes to provide, and the Mount Sinai Parties wish to avail themselves of, certain data structuring services including the development of a genomic health enterprise platform for each of the Mount Sinai Parties, which Services are anticipated to entail expenditure of material resources by Sema4;
+
+WHEREAS, [***] Sema4’s performance of the Services, the Mount Sinai Parties are willing to allow Sema4 [***] in accordance with this Agreement;
+
+WHEREAS, Sema4 and the Mount Sinai Parties are parties to that certain Business Associate Addendum (the “BAA”), effective as of April 2, 2018, as amended, and this Agreement is an “Underlying Agreement” as defined in the BAA;
+
+WHEREAS, Sema4 is the subject of a formal report confirming Sema4’s data security capabilities, and ISMMS and Sema4 are concurrently entering into an agreement for Sema4 to provide sequencing services to ISMMS for the BioMe Biobank (as defined herein); and
+
+1
+
+CONFIDENTIAL
+
+WHEREAS, this Agreement is part of a continuum of agreements designed to keep the Mount Sinai Parties and the Mount Sinai System in the forefront of genomic medicine worldwide in a manner that is patient-centered, fully coordinated with clinicians and founded on respect for confidentiality of patient data and informed patient choice, and each of the Parties under such continuum of agreements hereto believe that the services provided by Sema4 to the Mount Sinai Parties will be of value in both the clinical and research activities of the Mount Sinai Parties.
+
+NOW THEREFORE, in consideration of the mutual promises and covenants contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, Sema4 and the Mount Sinai Parties hereby agree as follows:
+
+ARTICLE 1
+
+DEFINITIONS
+
+Capitalized terms not otherwise defined in this Agreement shall have the following meanings:
+
+“Applicable Cure Period” with respect to any breach by Sema4 on the one hand or a Mount Sinai Party on the other hand means a [***] cure period determined by the [***] (i.e., [***]) taking into account the [***] of the breach, with the understanding that the following cure periods shall be deemed [***] for purposes of this Agreement and the cure period [***] shall not be [***] the applicable following periods: (i) for any breach [***], [***] days after the breaching party receives notice of the breach from the non-breaching party, (ii) where a [***] has been breached, a period of [***] days after the due date of the [***]; provided, however, that, with respect to the first breach of a [***] relating to [***], if Sema4 is making [***] efforts to cure the breach, at Sema4’s request, Sema4 shall be entitled to [***] additional [***]-day cure periods (for a total cure period of [***] days); (iii) where a [***] exists but it is not reasonably likely that an actual breach of [***] has occurred, [***] days after the first to occur of Sema4 becoming aware of the [***] or the date on which notice of such [***] is given to Sema4 by the Mount Sinai Parties; (iv) where a [***] breach or any other [***] exists and it is reasonably likely that [***] is being [***] or otherwise [***] in an [***], [***] days after the first to occur of Sema4 becoming aware of the [***] or the date on which notice of such [***] is given to Sema4 by the Mount Sinai Parties; (v) where [***], [***] days after the date of such [***]; and (vi) for any breach that [***] or causes [***], [***] days after the first to occur of Sema4 becoming aware of the breach or receiving notice of the breach from the Mount Sinai Parties unless a [***] period is required by law; provided that the Parties agree and acknowledge there shall be no Applicable Cure Period for any [***].
+
+“BAA” has the term set forth in the Recitals.
+
+“BioMe Biobank” is the biospecimen repository maintained by ISMMS that contains [***].
+
+“Capability Arbiter” means a Third Party expert mutually agreed by the Parties or, if such agreement is not reached within [***] days, then a Third Party expert mutually selected by Third Party experts designated by each Party.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+CONFIDENTIAL
+
+“Clinical Trial” means any investigation in human subjects intended to discover or verify the clinical, pharmacological, and/or other pharmacodynamics effects of an investigational product(s), and/or to identify any adverse reactions to an investigational product(s), and/or to study absorption, distribution, metabolism, and excretion of an investigational product(s) with the object of ascertaining its safety and/or efficacy.
+
+“Commercial Entity” means any entity other than a Non-Commercial Entity.
+
+“Commercial Project” has the meaning set forth in Section 6.1.
+
+“Conceived” means: (i) with respect to any patentable Intellectual Property, “conceived” as such term is defined by U.S. patent law; (ii) with respect to any copyrightable Intellectual Property, “authored” as such term is defined by U.S. copyright law; and (iii) with respect to all other Intellectual Property, developed, created or discovered, as applicable.
+
+“Confidential Information” has the meaning set forth in Section 7.1.
+
+“Covered Data” means [***].
+
+“CRO” means a clinical research organization.
+
+“Data” means the [***].
+
+“Data Dictionary” means those [***].
+
+“De-Identified Covered Data” means [***].
+
+“De-Identified” (including its variants such as “De-Identify” and “De-Identification”) means [***].
+
+“Deliverables” has the meaning set forth in Section 2.2.6.
+
+“Fair Market Value” means in the case of any services proposed to be provided by Sema4 on the one hand or by a Mount Sinai Party or Parties on the other hand, the amount that a willing recipient of such services would pay to a willing provider of such services on an arms-length basis taking into account all relevant circumstances, but not taking into account the volume or value of any patient referrals made between the Parties.
+
+“FMV Arbiter” means a Third Party expert mutually agreed by the Parties or, if such agreement is not reached within [***] days, then a Third Party expert mutually selected by Third Party experts designated by each Party.
+
+“Fundamental In-Term Breach” means, in each case after the Applicable Cure Period, if any: (i) a material breach of or failure by [***] to comply with the [***]; (ii) an unauthorized use by [***] of [***] (including, for clarity, the provision to a Third Party of access to [***] that is not authorized under this Agreement or a failure to adhere to the [***] required by this Agreement); (iii) a material breach by [***] of the [***]; (iv) any failure of [***] to [***] upon the [***]; or
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+CONFIDENTIAL
+
+(v) a material breach by [***] of any other material obligation under this Agreement, including, for clarity, a failure to [***] (but not a [***]).
+
+“Fundamental Post-Termination Breach” means a breach by [***] of any material obligation under this Agreement that survives the termination of this Agreement, which breach occurs after the termination of this Agreement and continues after the Applicable Cure Period, if any.
+
+“HIPAA” means the Health Insurance Portability and Accountability Act of 1996, as amended by the Health Information Technology for Economic and Clinical Health Act (“HITECH”), and the implementing regulations, including, but not limited to, 45 C.F.R. Parts 160 and Part 164, all as may be amended from time to time.
+
+“Identified Covered Data” means [***].
+
+“Independent Director” of Sema4 means a director that has been nominated and elected by the other directors of Sema4 as opposed to by any preferred stockholder of Sema4.
+
+“Institutional Review Board” or “IRB” means the institutional review board of the applicable Mount Sinai Party.
+
+“Intellectual Property” means all technical information, inventions, developments, discoveries, software, know-how, methods, techniques, formulae, processes, and other proprietary property, whether or not patentable or copyrightable.
+
+“Internal Data Structuring Project” means any data structuring project undertaken by one or more Mount Sinai Parties using: (i) solely staff employed by such Mount Sinai Party(ies) or (ii) a combination of such employed staff and one or more Third Party contractor(s) that do not in connection with such services receive any right to use data of the Mount Sinai Parties for any purpose other than the rendering of services by such contractor(s) to the Mount Sinai Parties.
+
+“Milestone” means certain defined events or tasks described in the applicable SOW that must be completed by the date set forth in such SOW.
+
+“MSDW” has the term set forth in the Recitals.
+
+“Mount Sinai Party” or “Mount Sinai Parties” has the meaning set forth in the Recitals.
+
+“Mount Sinai IT” means the Information Security Team of the Mount Sinai Health System and any of its contractors.
+
+“MSIP” means Mount Sinai Innovation Partners, a division of ISMMS.
+
+“Non-Approved Person” means (i) a Prohibited Person, (ii) a Third Party that is an academic medical center or a hospital system operating three or more hospitals, (iii) a Third Party that is or within the thirty-six months prior to the time of the applicable transaction has been in active litigation with or has formally threatened litigation against any Mount Sinai Party or any subsidiary thereof, (iv) a Third Party whose data security system does not in the good faith
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4
+
+CONFIDENTIAL
+
+judgment of the Mount Sinai Parties or (at the option of Sema4) the opinion of an independent nationally recognized data security expert reasonably acceptable to the Mount Sinai Parties meet or exceed the data security standards of a nationally recognized academic medical center or (v) a Third Party that controls, is controlled by or is under common control with any Third Party described in clause (i), (ii), (iii) or (iv).
+
+“Non-Commercial Entity” means an entity that is a nonprofit organization, academic institution, government organization, or similar entity organized for non-commercial purposes.
+
+“Non-Commercial R&D Activities” means R&D Activities conducted under an agreement with a Non-Commercial Entity, whether or not such R&D Activities are funded in whole or in part by, or are subject to the rights of, any Commercial Entity; provided that an R&D Activity shall not be deemed to be a Non-Commercial R&D Activity if the Mount Sinai Parties have actual knowledge that the R&D Activity is (i) funded by a Commercial Entity through a single-purpose Non-Commercial Entity established by such Commercial Entity for the sole purpose of funding such R&D Activity; or (ii) undertaken by a Non-Commercial Entity that is acting on behalf of a Commercial Entity on another basis that is tantamount to the Commercial Entity acting directly. It is understood and agreed that (A) Mount Sinai shall have no obligation to inquire into or ascertain the sources of any funding obtained by or the rights granted by a Non-Commercial Entity in connection with any Non-Commercial R&D Activity and (B) actual knowledge of the Mount Sinai Parties for purposes of this definition shall mean the actual knowledge of the Chief Executive Officer, General Counsel or Executive Vice President, Mount Sinai Innovation Partners of the Mount Sinai System or the Dean of ISMMS.
+
+“Phase” has the meaning set forth in Section 3.3.
+
+“Prohibited Person” means any Third Party that: (A) has been convicted of a criminal offense related to health care; (B) is currently listed by a federal or state agency as debarred, excluded, or otherwise ineligible for participation in federally or state funded health care programs; (C) is on the Office of Foreign Asset Control’s (OFAC) Specially Designated Nationals and Blocked Persons List, or from a nation actively sanctioned by OFAC, as indicated by the U.S. Department of the Treasury, or (D) controls, is controlled by or is under common control with any Third Party that meets the criteria in subsections (A), (B), or (C).
+
+“Protected Health Information” or “PHI” shall have the meaning [***].
+
+“R&D Activities” means research, including for the discovery of clinical and commercial research tools, products (including components of products), therapies or services for the treatment, prevention, palliation, delay and/or diagnosis of diseases or disorders or the improvement of quality of life. R&D Activities shall include, but not be limited to, Clinical Trials.
+
+“Secure Access Portal” means, with respect to a party providing Data or making Data available to any Third Party recipient, a method of providing access to such Data to such recipient in a manner designed to ensure that Data remains on the servers or cloud-based service controlled by such party, for which functionality is enabled that is designed to prevent downloading by a Third Party, and where access is not permitted without appropriate authorization from the providing party or administrators authorized by the providing party. For purposes of this definition,
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+5
+
+CONFIDENTIAL
+
+servers or cloud-based services will be deemed to be controlled by a party if: (a) such servers or service are either owned, leased or otherwise contracted for by such party and (b) such party has the ability to administrate access and security controls for such servers or services.
+
+“Sema4” has the meaning set forth in the Recitals.
+
+“Sema4 Data Environments” has the meaning set forth in Section 7.6.4.
+
+“Sema4 Personnel” has the meaning set forth in Section 2.4.
+
+“Services” has the meaning set forth in Section 2.2.
+
+“SOW” has the meaning set forth in Section 2.2.
+
+“SOW #1” has the meaning set forth in Section 2.3.
+
+“SOW-Specific Dataset” has the meaning set forth in Section 2.2.2.
+
+“Steering Committee” has the meaning set forth in Section 3.1.
+
+“Third Party” means any person or entity other than a Party or a subsidiary of a Party that has assumed the relevant obligations of such Party under this Agreement and the obligations of which subsidiary are guaranteed in writing by such Party.
+
+“3P AMC” means a Third Party academic medical center.
+
+“Twelve Month Work Effort Level” means the level of work effort [***] dedicated by [***] to the performance of [***], as determined by mutual agreement of the Parties or, if such mutual agreement cannot be reached, by the Capability Arbiter.
+
+“Valuation Study” has the meaning set forth in Section 2.1.
+
+ARTICLE 2
+
+SERVICES
+
+2.1 Valuation Study. Prior to the commencement of the provision of Services and prior to the provision of any access to Data of the Mount Sinai Parties by Sema4, the Mount Sinai Parties shall have received a valuation study of the Agreement (the “Valuation Study”) conducted by a Third Party expert chosen by the Mount Sinai Parties. The Valuation Study shall evaluate (i) the fair market value of the rights and obligations of the Mount Sinai Parties and (ii) the fair market value of the rights and obligations of Sema4 (including [***]), as set forth in this Agreement and conclude that (i) the fair market value ranges are equivalent to each other and (ii) the arrangement contemplated by this Agreement is commercially reasonable.
+
+2.2 Services. From and after the completion of the Valuation Study as set forth in Section 2.1, during the term of this Agreement Sema4 shall furnish to the Mount Sinai Parties
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+6
+
+CONFIDENTIAL
+
+certain [***] as specified in statements of work (each a “SOW”) entered into by the applicable Parties (all such services described in all such SOWs, collectively, the “Services”). The Parties acknowledge and agree that each SOW may involve Sema4 on the one hand, and different Mount Sinai Parties on the other hand. Each SOW entered into by the applicable Parties shall be subject to and made part of this Agreement, and, in the event of a conflict between this Agreement and a SOW, the terms of the SOW shall control. Each SOW shall set forth all matters deemed appropriate by the Mount Sinai Parties that are receiving Services under the SOW and Sema4, including but not limited to:
+
+2.2.1 a description of the Services to be provided pursuant to the SOW;
+
+2.2.2 the [***] in the SOW (the “[***]”);
+
+2.2.3 the timeline for Sema4’s performance of the Services;
+
+2.2.4 if the [***] for the Services;
+
+2.2.5 the level and scope of engagement necessary on the part of faculty and/or personnel of the Mount Sinai Parties and the work product that will be expected of such faculty and/or personnel; and
+
+2.2.6 the work product, deliverables, results, reports, or other output associated with the Services (the “Deliverables”), including a description of required format and content.
+
+2.3 SOW #1. The first SOW (“SOW #1”) is attached to this Agreement as Exhibit B, is hereby agreed to by the Parties and is hereby incorporated into this Agreement by reference.
+
+2.4 Personnel. Sema4 shall perform the Services through its employed or contracted personnel (“Sema4 Personnel”). Sema4 shall assign Sema4 Personnel at appropriate levels of experience and responsibility to perform the Services and use best efforts to ensure continuity of staffing during a SOW. The Mount Sinai Parties shall have the right to review the qualifications of all Sema4 Personnel assigned to perform the Services and shall have the right to request a replacement of any such Sema4 Personnel, and Sema4 shall comply with any reasonable such request. Sema4 shall not subcontract any of its obligations under this Agreement without the express prior written consent of the Mount Sinai Parties, which may be granted or withheld in the sole discretion of the Mount Sinai Parties. Sema4 shall remain wholly responsible for all actions of any permitted subcontractor.
+
+2.4.1 With respect to all Sema4 Personnel, Sema4 shall:
+
+(1) be responsible for the payment of all compensation in compliance with all applicable state and federal laws and regulations, as well as income tax and all withholdings, social security, FICA taxes, and insurance coverage, including workers’ compensation coverage obligations, and any other employment requirements;
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+7
+
+CONFIDENTIAL
+
+(2) ensure that all Sema4 Personnel performing Services have the requisite skill, training and qualifications to perform those Services; and
+
+(3) ensure that all Sema4 Personnel comply with this Agreement, all applicable policies and procedures of the Mount Sinai Parties, and all applicable laws and regulations.
+
+2.5 Deliverables. Sema4 shall submit each Deliverable to the Mount Sinai Party(ies) identified in the applicable SOW for review and approval by such Mount Sinai Party(ies). If the Deliverable does not meet the specifications set forth in the SOW, the applicable Mount Sinai Parties shall jointly notify Sema4 with specificity of the manner or respects in which the Deliverable is non-conforming and identify a reasonable date by which the corrected Deliverable is to be resubmitted by Sema4 for further review and approval. The applicable Mount Sinai Party(ies) shall use reasonable commercial efforts to evaluate such deliverable within [***] days from the date of delivery of such Deliverable by Sema4. The applicable Mount Sinai Party(ies) shall provide written notice of its: (i) acceptance of such Deliverable or (ii) rejection of such Deliverable, specifying the basis therefor. Sema4 shall have a period that is determined by the Steering Committee to be reasonable starting from the date of such written notice to cure any defect and resubmit the work product for acceptance; provided, however, that such Mount Sinai Parties are under no obligation to accept such resubmitted Deliverable if it fails to meet the applicable specifications and shall provide written notice of their acceptance or rejection of the resubmitted Deliverable, as contemplated above. The applicable Mount Sinai Party’s(ies’) failure to provide written notice of their rejection of a Deliverable within the applicable timeframes described above shall not constitute acceptance of such Deliverable; provided that Sema4 shall have the right to bring any delay in the provision of a notice of acceptance or rejection that Sema4 considers to be unreasonable to the Steering Committee and if the applicable Mount Sinai Parties fail to provide to Sema4 a notice of acceptance or rejection within a reasonable period specified by the Steering Committee then such Deliverable shall be deemed accepted.
+
+2.6 Performance. Sema4 shall comply with all laws and regulations applicable to this Agreement and the Services. Sema4 shall, and shall cause the Sema4 Personnel to, perform the Services in a timely, competent, professional, and workmanlike manner and consistent with the highest industry standards.
+
+2.7 Fair Market Value; No Payment for Referrals. Sema4 and the Mount Sinai Parties acknowledge and agree that the consideration set forth in this Agreement and each SOW was negotiated in good faith based on the fair market value for the Services, was not determined in a manner that took into account the volume or value of any business generated between Sema4 and any of the Mount Sinai Parties, and does not obligate any Party to purchase, use, recommend, or arrange for the use of any product(s) or services of another Party or its affiliates. No consideration or amount paid hereunder is intended to be, nor shall it be construed to be, an inducement or payment for referral of patients between any of the Parties.
+
+2.8 Consideration for Services and Deliverables.
+
+2.8.1 Each of the Parties hereby agree and acknowledge that, except to the extent the [***] of or connection with the Services rendered and Deliverables submitted by Sema4 shall [***] under and in accordance with this Agreement to [***].
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+8
+
+CONFIDENTIAL
+
+2.8.2 Sema4 shall compensate the Mount Sinai Parties for the cost of an Alliance Manager employed by the Mount Sinai Parties to manage the relationships and contractual obligations between Sema4 and the Mount Sinai Parties by performing the duties and services described on Exhibit D hereto (as such description of services may be amended from time to time by the mutual agreement of the parties). The compensable cost for the Alliance Manager for the remainder of 2019 and for 2020 shall be $[***] (prorated in the case of 2019 based on the number of months remaining in 2019 after the Effective Date). The compensable cost for the Alliance Manager for each subsequent calendar year during the Term of this Agreement shall be the compensable cost for the immediately preceding calendar year increased by [***]% (and prorated in the case of a partial calendar year). Such compensable cost shall be paid by Sema4 to the Mount Sinai Parties in a manner and on a timetable that is mutually acceptable to Sema4 and the Mount Sinai Parties.
+
+ARTICLE 3
+
+STEPWISE METHODOLOGY AND STEERING COMMITTEE
+
+3.1 The obligations and responsibilities of the Parties contemplated by this Agreement shall be overseen by a “Steering Committee” composed of an equal number of appointees from: (i) Sema4 and (ii) collectively, the Mount Sinai Parties.
+
+3.1.1 The Steering Committee shall have responsibility for the following:
+
+(1) the [***] to the Mount Sinai Parties [***];
+
+(2) the [***] that will [***] the Services;
+
+(3) the other matters ascribed to the Steering Committee in this Agreement other than the matters described in Section 3.1.2.
+
+3.1.2 The Parties agree that the Steering Committee shall not have the authority:
+
+(1) to [***] of the Services;
+
+(2) except as set forth in Section 3.9, to commit Sema4 to a Phase or SOW that would require, in any twelve-month period during the Term, a level of work effort on the part of Sema4 that, together with the work effort required during such period under all other then-existing SOWs (except SOW #1), would exceed the Twelve Month Work Effort Level (as determined by mutual agreement of the Parties or, if such agreement is not able to be reached within fifteen days after an SOW is proposed, then by the Capability Arbiter), unless: (i) the Mount Sinai Parties agree to compensate Sema4 in
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+9
+
+CONFIDENTIAL
+
+each twelve month period for the work effort required by such SOW in excess of the Twelve Month Work Effort Level at Fair Market Value (as determined by mutual agreement of the Parties or, if such agreement is not able to be reached within fifteen days after an SOW is proposed, then by the FMV Arbiter) and (ii) such work effort does not materially interfere with Sema4’s business operations or otherwise adversely affect the value of Sema4’s business, as mutually determined by the Parties, or if the Parties are unable to mutually make such a determination, by the Capability Arbiter; or
+
+(3) to cause a Party to consent under Section 6.3.5 to an exception from the applicable covenant in Article 5 or this Section 6.3.
+
+3.2 All decisions of the Steering Committee shall be made by consensus, with each appointee having one vote. For those matters described in Section 3.1.1, if the Steering Committee cannot reach consensus, such matter shall be referred to the Dean of ISMMS for resolution, and, in the event the Dean of ISMMS cannot resolve the issue, the issue shall be determined by Chief Executive Officer of the Mount Sinai Health System, in his or her reasonable discretion, and taking into account the legitimate business issues of the Parties with respect to the issues. Any decision by the Chief Executive Officer of the Mount Sinai Health System on such matters shall be final and binding on the Parties. It is understood and agreed that in discharging their functions as described in this Section 3.2 the Dean of ISMMS and the Chief Executive Officer of the Mount Sinai Health System shall act in their respective capacities as such and not in their capacities (if applicable) as members of the Sema4 board of directors, and in no event shall any action taken or decision made by the Dean of ISMMS or the Chief Executive Officer of the Mount Sinai Health System be deemed to breach or violate any duty owed by the Dean of ISMMS or the Chief Executive Officer of the Mount Sinai Health System to Sema4 in any capacity (and Sema4 hereby irrevocably waives any claim for any such breach or violation arising out of the discharge of the functions as described in this Section 3.2 by the Dean of ISMMS and/or the Chief Executive Officer of the Mount Sinai Health System).
+
+3.3 The Parties intend that the program of work under this Agreement shall proceed in multiple phases (each, a “Phase”). Each such Phase will proceed pursuant to a separate SOW or SOWs, which shall set forth a Data Dictionary and the applicable Milestones associated with such SOW. The Steering Committee shall have the authority to modify any SOW, Data Dictionary or Milestone as work on each Phase continues, provided that in all instances of fundamental changes in the scope of a SOW or Deliverable, the Steering Committee concludes, prior to the commencement of Services or preparation of Deliverables reflecting such fundamental changes, that the proposed Services or modification of Services (individually or collectively with other such modifications) does not materially affect the fundamental valuation precepts and determination set forth in the Valuation Study described in Section 2.1.
+
+3.4 Pursuant to the terms of SOW #1 the initial Phase (“Phase 1”) of the program of work requires Sema4 to deliver [***] mutually agreed to by the Parties and [***]. The objectives of Phase 1 are for Sema4 to:
+
+3.4.1 deliver to the Mount Sinai Parties the Identified Covered Data and De-Identified Covered Data, in accordance with this Agreement, which data sets will enable the
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+10
+
+CONFIDENTIAL
+
+Mount Sinai Parties to increase the efficiency of their research activities (including Clinical Trial recruitment); and
+
+3.4.2 develop and make available an interface for providers that allows up to a maximum number of users (which maximum will be established by the Steering Committee) designated by the Mount Sinai Parties to query the De-Identified Covered Data for simple views, as well as other aspects of the Covered Data as agreed by the Parties. For clarity, the Mount Sinai Parties shall be responsible for managing access controls for such interface for Mount Sinai Party users.
+
+3.5 To develop the workplan and SOWs for subsequent Phases, the Steering Committee shall determine which conditions and indications should be the sequential targets for Sema4’s data structuring activities in each subsequent Phase under this Agreement.
+
+3.6 The Parties acknowledge and agree that the goal of each subsequent Phase is to [***] to [***] of the Mount Sinai Parties or the Mount Sinai Parties’ system administrators. In all instances, as an essential component of each subsequent Phase, Sema4 shall [***]. Without limiting the generality of the foregoing, Sema4 shall use reasonable commercial efforts to deliver to the Mount Sinai Parties Covered Data as contemplated by each applicable SOW that is in a form and that is structured so that the Covered Data can be formatted and be loadable into the standard electronic medical record used by the Mount Sinai Parties, and Sema4 shall cause its personnel to consult with the applicable technical personnel of the Mount Sinai Parties from time to time so as to achieve such objective, including, but not limited to, providing reasonable cooperation to support the Mount Sinai Parties’ clinical validation efforts. The Parties expect that after the completion of Phase 1, subsequent Phases will sequentially provide for structuring and curating data with respect to a series of disease states or health conditions specified by the Steering Committee.
+
+3.7 The Mount Sinai Parties and Sema4 agree that, if required, the Mount Sinai Parties shall seek approval by an Institutional Review Board that is permitted under the policies of the Mount Sinai Parties in connection with the structuring of Identified Covered Data for research purposes by the Mount Sinai Parties, and Sema4 shall reasonably support such submission.
+
+3.8 Sema4 and the Mount Sinai Parties shall [***] in connection with that certain Statement of Work #2, dated October 12, 2018, entered into by the Parties (“JCAP SOW”) pursuant to that certain Master Services Agreement, dated April 2, 2018, by and among the Parties, concerning [***] the JCAP SOW into [***] this Agreement. The Parties shall [***] this Agreement in a manner that [***].
+
+3.9 In the event that Sema4 fails to meet a [***] other than [***], the Mount Sinai Parties shall have the rights set forth in this Section 3.9.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+11
+
+CONFIDENTIAL
+
+3.9.1 The Mount Sinai Parties shall provide Sema4 with a notice setting forth the nature of such failure and requesting that such failure be cured within [***] days of receipt of the notice. If the failure is not cured within such [***]-day period, then such [***] shall be deemed to be an “Affected [***],” such [***] shall be deemed to be an “Affected [***]” and the Steering Committee shall have the right to direct Sema4 to (i) continue to make [***] efforts to remedy the failure with respect to the Affected [***] and the Affected [***], or (ii) stop working on the Affected [***], to return to the Mount Sinai Parties the [***] associated with the Affected [***] and to enter into a [***] involving a comparable level of [***] as the Affected [***]. In either case, upon the giving by the Steering Committee of the direction described in clause (i) or (ii) of this Section 3.9.1, (A) the Mount Sinai Parties shall be deemed to be released from the restrictions set forth in Section 5.1, Section 6.1 and Section 6.2 with respect only to the subject matter of the Affected [***], and (B) Sema4 shall not be deemed to have [***] related to [***] other than the Affected [***] even if there is an overlap between the [***] related to such [***] and [***] related to the Affected [***].
+
+3.9.2 If any any time during the Term the number of Affected [***] is at least [***] and is such as to [***] set forth in the [***], then the Mount Sinai Parties shall be entirely released from the restrictions set forth in Section 5.1, Section 6.1 and Section 6.2.
+
+ARTICLE 4
+
+AVAILABILITY OF SOW-SPECIFIC DATASETS;
+
+RETURN OF COVERED DATA TO MOUNT SINAI PARTIES
+
+4.1 Mount Sinai and Sema4 shall work together to enable Sema4 to have the necessary access to the approved datasets for all Phases under this Agreement. As set forth in Exhibit B hereto, the following datasets constitute the SOW-Specific Datasets for Phase 1:
+
+4.1.1 Identified copy of [***], including [***] which feed to [***], as agreed upon by both parties to enable the [***];
+
+4.1.2 [***]; and
+
+4.1.3 [***].
+
+4.2 As part of the process of providing access to the SOW-Specific datasets for Phase 1 as set forth in Section 4.1 and SOW #1, to the extent permitted by the licensing agreements between the Mount Sinai Parties and Epic, the Mount Sinai Parties shall develop a procedure and mechanism for certain Sema4 Personnel to have read-only access to the Epic Caboodle data warehouse for [***] in connection with the Services rendered by Sema4 pursuant to this Agreement.
+
+4.3 The Parties agree that the [***] to the Mount Sinai Parties, and, as [***], the Steering Committee will [***] to Sema4’s [***]. The Parties acknowledge and agree that [***] the Steering Committee.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+12
+
+CONFIDENTIAL
+
+4.4 Sema4 shall work with Mount Sinai System administrators to enable the return of the Identified Covered Data via secured file transfer or other means mutually agreed to by the Parties.
+
+4.5 Sema4 agrees to [***] in a manner that will permit the Mount Sinai Parties to [***]. Such [***] shall be subject to [***] by this Agreement [***], including in [***]. Sema4 shall work with Mount Sinai System administrators to enable the [***] mutually agreed to by the Parties. The Steering Committee will then [***] to the Mount Sinai Parties.
+
+4.6 For each Phase after Phase 1, the Steering Committee shall determine the scope of the SOW-Specific Datasets that will be accessed by Sema4 in order for Sema4 to render the Services. Prior to the granting of access to Sema4 of the SOW-Specific Datasets for the applicable Phase, the Mount Sinai Parties and Sema4 agree to obtain any requisite contractual, IRB and/or other regulatory approvals required in connection with such access by Sema4.
+
+4.7 Sema4 and the Mount Sinai Parties agree that access to and use of any the SOW Specific Datasets in each Phase shall solely be provided in accordance with all applicable requirements of HIPAA and other applicable laws, rules and regulations, including without limitation, the requirement by HIPAA that only the minimum identified data may be provided by a covered entity to a business associate that is necessary in order for the business associate to provide services to such covered entity. Sema4 shall make commercially reasonable efforts to promptly return to the Mount Sinai Parties any Identifiable Covered Data that it is not reasonably anticipated will be needed for the provision of Services in the future.
+
+4.8 Sema4 and the Mount Sinai Parties agree to work together to determine the extent to which [***]. The Mount Sinai Parties will be responsible for the costs of configuring the Mount Sinai Parties’ standard electronic medical record so that [***].
+
+ARTICLE 5
+
+EXCLUSIVITY AND MILESTONES
+
+5.1 During the Initial Term, the Mount Sinai Parties agree to not engage any Third Party to provide [***]: (i) that are of an [***] that has been agreed to by the Steering Committee and documented in an SOW and (ii) that are [***], except that no such restriction shall apply to (a) any [***] or (b) [***]. For the avoidance of doubt, [***] shall not be deemed [***] if a Third Party is engaging in such activities for the purpose of [***].
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+13
+
+CONFIDENTIAL
+
+5.1.1 Process for Mount Sinai’s Use of Third Parties
+
+(1) Notwithstanding Section 5.1, if, during the Initial Term and other than as part of an Internal Data Structuring Project, the Mount Sinai Parties wish to engage a Third Party to provide [***] and are of an [***] that has been agreed to by the Steering Committee, the relevant Mount Sinai Party shall either give notice to Sema4 that the Mount Sinai Party believes Sema4 is not capable of performing the [***] activities or offer to Sema4 the opportunity to perform such activities. Within five business days following receipt of such notice or offer, either: (1) Sema4 shall give notice to the relevant Mount Sinai Party by electronic mail that it does not wish to perform the services in question, and if Sema4 gives such notice to the relevant Mount Sinai Parties within such five business day period or if Sema4 fails to give any notice under this Section 5.1.1(1) to the relevant Mount Sinai Parties within such five business day period, then the relevant Mount Sinai Party(ies) shall be free to proceed with such Third Party with respect to such services with no further obligation to Sema4, or (2) Sema4 shall give notice to the Mount Sinai Party(ies) that Sema4 believes that it is capable of and wishes to provide the services in question, in which case Sema4 and the relevant Mount Sinai Party(ies) shall discuss in good faith within a period of no less than five further business days whether Sema4 is in fact capable of performing the services in question and the terms on which Sema4 may perform such activities. If Sema4 provides the services in question under this Section 5.1.1(1), the cost of the services will be counted toward the Twelve Month Work Effort Level calculation for the relevant twelve-month period or be paid for in cash by the Mount Sinai Parties to the extent the services exceed the Twelve Month Work Effort Level.
+
+(2) If clause 2 in Section 5.1.1(1) applies and within such five business day period Sema4 and the relevant Mount Sinai Parties reach agreement on Sema4’s capability to perform the services in question and the terms on which Sema4 shall perform such services, then the relevant Mount Sinai Parties and Sema4 shall [***] for the performance by Sema4 of such services and the relevant Mount Sinai Parties shall [***]. If clause (2) in Section 5.1.1(1) applies and within such three business day period Sema4 and the relevant Mount Sinai Parties do not reach agreement as to whether Sema4 is capable of performing the services in question, then such question shall be escalated to [***], and if within a further period of two business days [***] do not reach agreement then such question shall be resolved by [***] within a further period of seven business days and such resolution shall be final and binding on the Parties. If clause (2) in Section 5.1.1(1) applies and it is determined that Sema4 is not capable of performing the services in question, then the relevant Mount Sinai Parties shall [***]. If clause (2) in Section 5.1.1(1) applies and it is determined that Sema4 is capable of performing the services in question, but within three business days after such determination Sema4 and the relevant Mount Sinai Parties do not reach agreement on the terms on which Sema4 shall provide such services, then such question shall be escalated to [***], and if within a further period of two business days [***] do not reach agreement then [***] for such services shall be [***] as determined by [***] within a further period of seven business days, such resolution shall be final and binding on the Parties and Sema4 and the relevant Mount Sinai Parties shall [***].
+
+5.2 The Mount Sinai Parties and Sema4 agree and acknowledge that, in general, dates by which Milestones for a particular SOW are required to be achieved may only be measured from the date on which the related SOW-Specific Datasets are operationally made available to Sema4 by the Mount Sinai Parties.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+14
+
+CONFIDENTIAL
+
+5.3 The Mount Sinai Parties and Sema4 also agree and acknowledge that SOWs may need to be adjusted to take account of factors that only become known as work on a given SOW proceeds. Therefore if, as a result of events outside of Sema4’s control, the actual costs to Sema4 of providing the Services under a SOW or the scope or level of work effort required of Sema4 under a SOW are, or are reasonably expected to materially increase, then Sema4 shall notify the Steering Committee and the Steering Committee shall not unreasonably withhold its consent to appropriate modifications to the SOW; provided that Sema4 shall continue to use reasonable commercial efforts and proceed with reasonable diligence to achieve the applicable SOW’s objectives. The agreed upon modifications to the SOW may not materially affect the fundamental valuation precepts and determinations in the Validation Study set forth in Section 2.1.
+
+ARTICLE 6
+
+RIGHTS TO DATA AND PRODUCTS OF ACTIVITIES
+
+6.1 Except as otherwise provided in this Agreement or as may otherwise be specifically agreed by the Parties in writing, each in its sole discretion, each Mount Sinai Party shall have the unrestricted right to use all of the Covered Data at any time for [***] purposes. Each Mount Sinai Party has the right to use the Covered Data for [***], subject to the terms of this Agreement, including but not limited to the restrictive covenants described in Section 6.2 (but subject to any exceptions set forth therein). The Mount Sinai Parties shall not use the Covered Data to perform R&D Activities that are [***] (collectively, “Commercial Projects”), except as permitted by Section 6.3. For the avoidance of doubt, the use of the Covered Data by the Mount Sinai Parties’ health care providers to [***] shall not constitute the use of the Covered Data for a Commercial Project, regardless of whether the [***], as long as a Commercial Entity does not [***].
+
+6.2 Each Mount Sinai Party acknowledges and agrees that during the term of this Agreement, and (provided that no Fundamental In-Term Breach and no Fundamental Post-Termination Breach occurs) for a period of [***], such Mount Sinai Party will not [***] that is [***]. Notwithstanding the foregoing, to the extent that [***] is incorporated in a [***]in the Mount Sinai Parties’ [***] in a [***], or is contained in the [***] because it was [***] after being so incorporated (the “Incorporated Covered Data”), the Mount Sinai Parties shall not be restricted from using such Incorporated Covered Data for any purposes and the restrictions set forth in Section 6.3 shall not apply. It is also understood that this Section 6.2 shall not restrict the Mount Sinai Parties from [***] in Intellectual Property developed by the Mount Sinai Parties using [***], as long as such Third Party is not [***] itself except for the sole purpose of validating [***].
+
+6.3 During the Initial Term:
+
+6.3.1 If a Mount Sinai Party or a principal investigator employed by one or more of the Mount Sinai Parties (a “PI”) wishes to use Covered Data in connection with a Commercial Project, the PI (if applicable) and each of the applicable Mount Sinai Party(ies) shall engage in the following process:
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+15
+
+CONFIDENTIAL
+
+(1) Each Commercial Project shall go through a screen to evaluate whether Sema4 is capable of providing services required by such project on more favorable terms in the aggregate than could be provided by the Mount Sinai Parties.
+
+(2) The screening process will be conducted in an expedient manner that does not inhibit the progress of the Commercial Project.
+
+(3) If, following the screen, Sema4 elects not to collaborate with the PI or Mount Sinai Parties on the Commercial Project, the PI or Mount Sinai Parties may use Covered Data in connection with the Commercial Project without engaging Sema4.
+
+(4) If, following the screen, Sema4 and the PI or Mount Sinai Parties agree that Sema4 will collaborate with the PI and/or Mount Sinai Parties on the Commercial Project, Sema4 will be engaged by the PI or Mount Sinai Parties.
+
+(5) If, following the screen, Sema4 concludes that it is capable of providing services in accordance with Section 6.3.1(1) and elects to collaborate with the PI or Mount Sinai Parties on the Commercial Project, but the PI or Mount Sinai Parties do not agree that Sema4 is capable of providing the services in accordance with Section 6.3.1(1), a joint MSIP-Sema4 committee shall review the Commercial Project to resolve the dispute. If there is an equal number of votes cast for and against any action by the joint MSIP-Sema4 committee relating to the review of the prospective engagement of Sema4, the dispute shall be resolved by the Capability Arbiter.
+
+6.3.2 Sema4 acknowledges and agrees that any proprietary information related to a Commercial Project that is disclosed to Sema4 in connection with the screening process described in this Section 6.3 is deemed Confidential Information and is subject to Article 7 of this Agreement. Additionally, Sema4 acknowledges and agrees that it may not use or incorporate such proprietary information for any purposes, including R&D Activities.
+
+6.3.3 If Sema4 submits an R&D Activity opportunity of which Sema4 becomes aware to a Mount Sinai Party, and a Mount Sinai Party wishes to collaborate with Sema4 to provide the service of re-identifying Covered Data and liaising with the Mount Sinai Party’s clinicians, then pursuant to an agreement between Sema4 and such Mount Sinai Party, Sema4 shall agree to pay the Mount Sinai Party the Fair Market Value of such service as determined by the mutual agreement of the Parties or, if the Parties are unable to reach agreement, then as determined by the FMV Arbiter.
+
+6.3.4 Sema4 acknowledges and agrees that it shall not unreasonably withhold its consent to exceptions to the covenants in Article 5 or this Section 6.3 if the Dean of ISMMS determines that a covenant in Article 5 or this Section 6.3 with respect to the prospective use of Covered Data creates serious interference with Mount Sinai’s ability to fulfill its teaching, research and/or patient care missions. If the Dean reaches such a determination, the Dean shall consult with the Steering Committee, and the Parties will not unreasonably withhold their consent to an exception from the applicable covenant in Article 5 or this Section 6.3 that is drawn in as narrow a manner as is feasible to both address the interference and to preserve Sema4’s interests to the greatest extent feasible.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+16
+
+CONFIDENTIAL
+
+6.4 Sema4 shall [***] to which Sema4 has access under this Agreement for any purpose except as a business associate of the Mount Sinai Parties to provide the services to the Mount Sinai Parties that are specified in the SOW under which Sema4 is authorized to access data in the applicable SOW-Specific Dataset. Upon completion of the work contemplated by a SOW or any applicable Phase thereof, Sema4 shall return to the Mount Sinai Parties [***] to the Mount Sinai Parties [***] except to the extent that a given [***] with respect to an [***]. During the term of this Agreement, Sema4 shall [***] in accordance with the standards set forth [***], unless [***]. The Mount Sinai Parties shall prescribe and Sema4 shall permit the Mount Sinai Parties to conduct reasonable audit procedures to validate the processes by which [***]. In the future, Sema4 and the Mount Sinai Parties may agree, each in its own discretion, to implement an “honest broker system” or other mechanism to enable [***] in a manner that incorporates and links additional datasets to support the health care operations at the Mount Sinai Parties or for another purpose that is mutually agreed to by the Parties, so long as Sema4 and the Mount Sinai Parties each conclude that such implementation will not involve any material risk of non-compliance with then-current applicable law.
+
+6.5 Sema4 shall have the right to use [***] for [***], including [***] (provided that Sema4 shall not [***], or [***], other than in connection with an [***]), subject to compliance with all applicable laws and regulations in its use of [***], and subject to the following restrictions:
+
+6.5.1 Sema4 shall not identify, or attempt to identify in any manner, directly or indirectly, or enable a Third Party to identify (or re-identify), any of the individuals who are the subject of [***], or their family members or relatives, or to contact such individuals or their family members or relatives of such individuals for any reason, without advance written consent by the Mount Sinai Parties; provided, however, that nothing in this Section 6.5.1 shall restrict Sema4 from using data other than Covered Data to contact individuals in connection with clinical or research activities undertaken by Sema4 outside the scope of this Agreement. Sema4 shall notify the Mount Sinai Parties immediately if it: (i) identifies a subject in the [***], (ii) becomes aware that a Third Party has identified such an individual or (iii) has actual knowledge that any of [***] could be re-identified (other than by the Mount Sinai Parties using the key provided by Sema4);
+
+6.5.2 Sema4 shall not use De-identified Covered Data to [***], or the [***] (the [***], collectively, the “Mount Sinai [***]”), or any [***], in a manner that makes it reasonably possible to [***], or makes it reasonably possible for a [***], the Mount Sinai [***] or their [***].
+
+(1) The prohibition in Section 6.5.2 shall include Sema4’s [***] or any other similar [***] in [***] until Sema4 certifies to the Mount Sinai Parties and the Mount Sinai Parties confirm based on their own analysis (which
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+17
+
+CONFIDENTIAL
+
+confirmation shall not be unreasonably withheld) that such [***] including the Mount Sinai Parties that there is no reasonable risk that a user of such [***] would assume or be reasonably likely to conclude that the [***]. For clarity, this subsection 6.5.2(1) shall not affect the provisions of Section 6.6.
+
+6.5.3 In [***] after such certification and confirmation, Sema4 shall emphasize that the [***], and Sema4 shall obtain the prior approval of the Mount Sinai Parties for the [***]. Nevertheless, Sema4 may use [***] to evaluate any [***] other than Mount Sinai [***], or evaluate [***], so long as such evaluations do not permit the [***] any Mount Sinai [***] (or its affiliates or personnel) specifically.
+
+6.5.4 Sema4 shall not use the [***] in any [***] without the express prior written consent of the Mount Sinai Parties (which may be granted or withheld in the discretion of the Mount Sinai Parties). The foregoing prohibition shall include, but not be limited to, Sema4’s use of De-Identified Covered Data to [***]. It is understood and agreed that Sema4 shall have no obligation to inquire into or ascertain the source of any [***] in connection with any [***]. This Section 6.5.3 shall not limit or restrict Sema4’s use of the [***] in accordance with this Agreement as part of the [***] that Sema4 uses to[***] that are not specifically designed for use by [***] so long as such [***] are not based on [***] that includes the [***].
+
+6.5.5 During the Term or thereafter, Sema4 shall not [***], or [***], to any Third Party without the Mount Sinai Parties’ prior written consent unless one of the following conditions is satisfied: (A) it is not reasonably possible for the Third Party to determine that [***] the Third Party was derived from [***]; (B) [***] constitutes less than [***] to the Third Party, as measured by the number of [***]; or (C) the Third Party is not [***] or any entity controlled by, controlling or under common control with [***]. Any such [***] occurring during the Term shall be permissible only in connection with [***]. Any such [***] occurring after the end of the Term shall be permissible only (i) in connection with a [***], (ii) after Sema4 has provided the Mount Sinai Parties with reasonable advance notice of the [***] in writing, (iii) if the Third Party purchaser is not a Prohibited Person and (iv) if the Third Party purchaser has agreed in writing to assume all of the obligations imposed on Sema4 under this Agreement that survive this Agreement’s termination. For clarity, the provisions of this Section 6.5.5 shall not affect the provisions of Section 6.6.
+
+6.5.6 Prior to the time at which Sema4 utilizes any De-Identified Covered Data for any purpose other than the provision of the Services, Sema4 shall develop and implement an “opt-out” process whereby any patient of one or more of the Mount Sinai Parties can direct Sema4 not to add to Sema4’s data set of De-Identified Covered Data that Sema4 has the right to use in accordance with this Article 6 any De-Identified Covered Data that is derived from such patient’s Identified Covered Data received by Sema4 after the date of delivery of such patient’s opt-out notice, and such process shall have been approved by the Mount Sinai Parties (such approval not to be unreasonably withheld).
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+18
+
+CONFIDENTIAL
+
+6.6 Sema4 Disclosure of [***] to Third Parties.
+
+6.6.1 To the extent permitted under this Agreement, Sema4 may provide access to [***] to Third Parties in connection with Sema4’s [***], which shall include [***] (but which [***]), and Sema4 may [***] to Third Parties [***] to the [***] to enable the Third Parties to [***] with Sema4, and provided further that Sema4 shall [***] the Mount Sinai Parties of [***], give [***] to the Mount Sinai Parties [***], and shall [***] the Mount Sinai Parties [***], as set forth below. Any other [***] by this Section 6.6.1 shall [***] the Mount Sinai Parties. Notwithstanding the foregoing, until such time as it is [***] for a Third Party to [***] to which the Third Party is [***] by Sema4 was [***] of the Mount Sinai Parties, Sema4 shall [***] to which Third Parties [***] that has [***] by the Parties, each [***].
+
+6.6.2 Sema4 shall require any Third Parties that are permitted to have access to the [***] to agree to the following contractual provisions for the benefit of Sema4 and the Mount Sinai Parties prior to the Third Party accessing the [***] (the following provisions may be subject to any exceptions that are approved in advance in writing by the Mount Sinai Parties):
+
+(1) The Third Party will not identify, or attempt to identify in any manner, directly or indirectly, or enable a Third Party to identify (or re-identify), any of the individuals who are the subject of the [***], or their family members or relatives, or to contact such individuals or their family members or relatives of such individuals for any reason, without advance written consent by the Mount Sinai Parties. The Third Party will notify Sema4 and the Mount Sinai Parties immediately if it identifies a subject in the [***], or if it becomes aware that a Third Party has identified such an individual.
+
+(2) The Third Party shall not use the [***]: (a) to evaluate care or services provided by the Mount Sinai [***] or the Mount Sinai [***], or (b) in a manner that [***].
+
+(3) The Third Party shall be prohibited from any further transfer of [***] (including a transfer to a successor-in-interest to such Third Party unless such successor is approved by Sema4 and assumes the obligations to Sema4 of its predecessor and Sema4 gives notice of such succession to the Mount Sinai Parties).
+
+(4) The Third Party shall return or destroy such [***] upon the termination or expiration of this Agreement with Sema4.
+
+6.6.3 Sema4 shall be responsible for the use by Third Parties of [***] which Sema4 transfers to such Third Parties or to which Sema4 provides access to such Third Parties, and shall take reasonable steps to monitor the use of such data by such Third Parties.
+
+6.7 As of and after the expiration of this Agreement for a period of [***], Sema4 agrees that it shall offer the Services, and any other services that are substantially similar to the Services, to the Mount Sinai Parties [***].
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+19
+
+CONFIDENTIAL
+
+6.8 Except as specifically set forth herein or in a SOW, in no event will this Agreement or its performance be interpreted as granting any Party any express or implied right, title or license to any other Party’s Intellectual Property. Unless specifically agreed upon by the Parties in a SOW or separate written agreement, any Intellectual Property that is owned, controlled by, or licensed to any Party prior to the effective date of a given SOW, or outside the scope of a given SOW, as demonstrated by a Party’s competent records (“Background Intellectual Property”), shall remain the sole property of the Party who owns or controls such Intellectual Property. For the avoidance of doubt, any Intellectual Property developed by a Party in connection with its activities under and in accordance with this Agreement (including, without limitation, a Party’s use of De-Identified Data) shall remain the sole property of such Party.
+
+6.9 Ownership of Intellectual Property. Unless as otherwise agreed by the Parties in the applicable SOW, inventorship of any Intellectual Property Conceived and, with respect to any patentable Intellectual Property, reduced to practice in the performance of a Party’s obligations under this Agreement, including improvements or modifications to Background Intellectual Property shall be determined in accordance with U.S. patent or copyright principles, as applicable, whether or not patentable or copyrightable. Except as specifically set forth herein or in a SOW, ownership of any such Intellectual Property shall vest solely in the Party that invented or reduced such Intellectual Property to practice. For the avoidance of doubt, any such Intellectual Property invented or reduced to practice by Sema4 in connection with its activities under this Agreement, including the use of De-Identified Covered Data, shall vest solely in Sema4.
+
+6.10 Sema4 shall retain all rights to software and application programming interfaces developed by Sema4 as part of the activities contemplated by this Agreement (referred to herein as the “Code”), provided that, (i) in the event that this Agreement is terminated as a result of a breach by the Mount Sinai Parties, the Mount Sinai Parties shall be granted a license by Sema4 as described herein to retain and use the Code for consideration equal to the Fair Market Value of the license, taking into account the Mount Sinai Parties intended use of the Code, and (ii) in the event that this Agreement is terminated as a result of a breach by Sema4, Sema4 shall grant to the Mount Sinai Parties a limited, non-exclusive, fully paid up, royalty-free license to retain and use the Code solely for their internal, non-commercial research and clinical operations purposes, such license to become effective without the payment of any consideration upon such expiration or termination of this Agreement (the license referred to in clause (i) or clause (ii), as applicable, the “Code License”). In connection with the Code License, Sema4 shall have no ongoing support or maintenance obligations with regard to Code used or retained by the Mount Sinai Parties following termination of this Agreement, unless agreed by Sema4 in writing, provided that the Code will be escrowed pursuant to a customary escrow agreement prescribed by the Mount Sinai Parties in a manner that enables the Mount Sinai Parties to support and maintain the Code directly or using Third Party vendors, and provided further that, Sema4 shall be obligated to keep the escrowed copy of the Code up to date prior to the termination of this Agreement.
+
+6.11 Sema4 represents that the Deliverables shall not contain any Background Intellectual Property or Third Party Intellectual Property, except with the express prior written consent of the Mount Sinai Parties, and that neither the Services nor the Deliverables infringe on
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+20
+
+CONFIDENTIAL
+
+the rights of any Third Party with regard to Intellectual Property. Except as specifically set forth herein or in a SOW, ownership of any Deliverables shall vest solely in the Mount Sinai Parties.
+
+ARTICLE 7
+
+CONFIDENTIALITY AND DATA SECURITY; COMPLIANCE WITH LAW
+
+7.1 “Confidential Information” means information other than PHI governed by Section 7.5 and the BAA that is disclosed by either (a) Sema4 to a Mount Sinai Party or (b) a Mount Sinai Party or Mount Sinai Parties to Sema4 (as applicable, the “Disclosing Party”) that such Disclosing Party owns or controls and maintains as confidential and discloses to a Mount Sinai Party or Mount Sinai Parties or to Sema4 as applicable (as applicable, the “Receiving Party”) under this Agreement, including without limitation, any such information regarding finances, commercial strategies, products or services, research, and intellectual property that: (i) if disclosed in tangible form, is marked as “confidential” upon disclosure or (ii) if disclosed in intangible form, is summarized in a writing marked “confidential” and provided to a Receiving Party within thirty (30) days of the intangible disclosure; provided, however, that failure to so mark or summarize Confidential Information shall not compromise or alter its confidential status if a reasonable person would recognize, based upon its content and/or the context of its disclosure, that such disclosure was intended as confidential. For clarity, Confidential Information includes the foregoing information of a Third Party in possession of a Disclosing Party, that such Disclosing Party has a legal right to disclose to the Receiving Party under terms of confidentiality as set forth herein.
+
+7.2 Notwithstanding the foregoing, Confidential Information shall not include information that a Receiving Party demonstrates by written or electronic records: (i) was already in the Receiving Party’s possession prior to disclosure by the Disclosing Party; (ii) is or later becomes a matter of public knowledge through no act or omission of the Receiving Party; (iii) is disclosed to the Receiving Party by a Third Party who had an apparent bona fide legal right to so disclose and who does so without imposing a confidential obligation with respect thereto; or (iv) is developed independently by the Receiving Party without use of, reference to or reliance on the Disclosing Party’s Confidential Information.
+
+7.3 Restrictions; Maintenance of Confidentiality. Each Receiving Party shall use each Disclosing Party’s Confidential Information solely for the purposes of performing its obligations under this Agreement. Each Receiving Party shall protect the confidentiality of such Confidential Information and guard it from disclosure to Third Parties with at least the same degree of care it uses to protect the confidentiality of its own Confidential Information, but in no event less than a reasonable degree of care, and shall only disclose such Confidential Information to its directors, trustees, officers, employees, faculty, researchers, consultants, and advisors who are obligated to maintain the confidential nature of such Confidential Information and who need to know such Confidential Information for the performance of the Party’s obligations under this Agreement; provided, for clarity, that any Mount Sinai Party may disclose Sema4’s Confidential Information to any other Mount Sinai Party. Where permitted, Third Parties (i.e., those who are not employees of such Party) to whom Receiving Party discloses the Disclosing Party’s Confidential Information, shall only be permitted access to such Confidential Information if Receiving Party has entered into a legally binding confidentiality agreement with such Third
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+21
+
+CONFIDENTIAL
+
+Parties that is at least as protective of such Confidential Information as this Agreement. For clarity, Receiving Party shall be fully responsible to Disclosing Party for compliance by such Third Parties with such obligations. Notwithstanding the foregoing, the Receiving Party shall also be permitted to disclose Confidential Information to the extent required by applicable law, court order, or other governmental authority with jurisdiction provided that the Receiving Party promptly provides the Disclosing Party, to the extent legally permissible, with written notice of such requirement and cooperates, at the Disclosing Party’s written request and expense, with the Disclosing Party’s legal efforts to prevent or limit the scope of such required disclosure.
+
+7.4 Return; Remedies. Upon termination of this Agreement or otherwise upon the Disclosing Party’s request, the Receiving Party shall, at the Disclosing Party’s option, destroy or return to the Disclosing Party the Confidential Information and all copies of all or any portion thereof in any tangible or intangible form whatsoever, unless the Receiving Party is expressly authorized by the Disclosing Party to continue to use such Confidential Information. For a period of five (5) years following the termination date of this Agreement, Sema4 will continue to comply with the terms of this Section for any retained Confidential Information. Each Party acknowledges that its disclosure of any of the Confidential Information without the Disclosing Party’s prior written consent except as permitted hereunder would cause continuing, substantial and irreparable injury to the Disclosing Party and that the Disclosing Party’s remedies at law for such disclosure shall not be adequate. Accordingly, the Parties agree that the Disclosing Party shall be entitled to seek immediate injunctive relief against the breach or threatened breach of the foregoing, and that such rights shall be in addition to, and not in limitation of, any other rights or remedies to which the Disclosing Party may be entitled at law or equity.
+
+7.5 PHI. The BAA is hereby incorporated by reference into this Agreement.
+
+7.6 Sema4 Data Security.
+
+7.6.1 Sema4 will complete a review of its data transfer and data storage security controls by the Mount Sinai Parties’ Information Security Team ("Mount Sinai IT"). In the event Mount Sinai IT does not approve the Sema4 data transfer and data storage security controls, the Mount Sinai Parties may suspend their performance under this Agreement until Mount Sinai IT provides its approval. If the Parties do not agree as to whether any such suspension is warranted, the disagreements will be referred to a special information technology committee made up of an equal number of appointees of the Mount Sinai Parties and Sema4. If such special committee is not able to resolve the disagreements, the disagreements will be referred to the Steering Committee for final resolution. Pending final resolution of the disagreements, the Mount Sinai Parties may suspend their performance under this Agreement.
+
+7.6.2 Sema4 will limit access to the Data to Sema4 personnel who have been approved by Sema4’s Data Governance Committee and are required to deliver Services to the Mount Sinai Parties.
+
+7.6.3 Sema4 will house the Data in a cloud-based storage environment that has been approved by Mount Sinai IT.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+22
+
+CONFIDENTIAL
+
+7.6.4 Sema4 will implement, maintain and enforce security procedures and practices that comply with applicable laws, and that are designed to protect the security and confidentiality of Data and prevent unauthorized access, acquisition, destruction, use, modification and/or disclosure of such Data. Sema4 shall have a process in place for the continuous validation of the existence and effectiveness of appropriate security controls within all Sema4 environment (including any maintained by third party service providers or subcontractors) where Data is received, transmitted, stored or processed (collectively, “Sema4 Data Environments”). The measures to be implemented by Sema4 will include:
+
+(1) Security Architecture.
+
+(i) Overall Security Framework. Sema4 will have a security program consisting of a comprehensive risk-based security, privacy and compliance framework that covers people, processes and technology domains and provides control objectives that support compliance with applicable law.
+
+(ii) Physical Security. Data will be restricted to secure facilities with limited and traceable access to authorized individuals.
+
+(iii) Data Encryption. Data will be encrypted when in transit (SSLITLS), both over the internet and internally (e.g., while in the cloud or other internal environment) and while stored, with the goal of minimizing the ability of intruders to decipher Data, in the case of unauthorized access to systems, storage or networks.
+
+(iv) Monitoring. Sema4 will implement reasonable technologies and procedures for regular system scanning and monitoring to track potential vulnerabilities and both actual and potential intrusion.
+
+(2) Access Control.
+
+(i) Authorization. Sema4 will have the ability to specify appropriate privilege levels to the Data, including viewer, uploader, contributor, or administrator roles. Project administrators will also have the ability to prevent non-administrators from copying or downloading Data.
+
+(ii) Authentication. Access to Data will require two-factor authentication and Sema4 will implement password complexity requirements, password change requirements, and session timeout features to protect against unauthorized access to Data.
+
+(iii) Firewalls. The security infrastructure should use network firewalls to protect all servers that process Data.
+
+7.6.5 Auditability.
+
+(1) Logging. Access and changes to Data shall be logged to a dedicated server, and logs shall be maintained for at least six (6) years. All user uploads shall be logged and “hashed” to verify integrity. All Data analyses shall be stamped with the date and time processed.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+23
+
+CONFIDENTIAL
+
+(2) Records Retention. Sema4 shall have the ability to delete Data.
+
+(3) Regular Audits. Sema4 shall regularly audit its security program to ensure adequate security controls and compliance with this Agreement and applicable law.
+
+7.6.6 Incident Response Policy. Sema4 will implement an incident response policy that specifies how Sema4 will respond in the event of a Security Incident, as defined in the BAA, as amended by the Amendment.
+
+7.7 Data Security Audit Rights.
+
+7.7.1 Sema4 shall [***] is in any [***]and shall [***] to determine [***] including without limitation for protection of [***]. Sema4 shall engage an independent third party cybersecurity auditor that is [***] and Sema4 shall [***] by Sema4. Sema4 will also [***] such processes. Sema4 will also [***] and that are [***] by Mount Sinai IT to Sema4. Sema4 acknowledges and agrees that Sema4 [***] this Section 7.7.1 are [***]. If the Parties do not agree as to whether [***] of this Section 7.7.1 have been [***], the disagreements will be referred to a [***] made up of [***] of the Mount Sinai Parties and Sema4. If such [***] is not able to resolve the disagreements, the disagreements will be referred to [***] for final resolution.
+
+7.7.2 Subject to Section 7.7.3, [***] which the requirements of Section 7.7.1 are satisfied, Sema4 shall [***] Mount Sinai IT an [***] by Sema4 and [***] in accordance with the [***].
+
+7.7.3 Within [***] after the Effective Date and within [***] during the Term of the date on which the requirements of this Section 7.7.3 are first satisfied, Sema4 shall receive (i) an [***] that Sema4 [***] and any [***] issued by such [***] to Sema4 in connection with such [***] shall be[***] to Mount Sinai IT or (ii) [***] with a rating of [***] . The requirements of Section 7.7.2 shall not apply so long as the requirements of this Section 7.7.3 are satisfied.
+
+7.7.4 Sema4’s compliance with the requirements of this Section 7.7 shall be [***] of Mount Sinai IT.
+
+7.8 Sema4 and the Mount Sinai Parties shall comply with all applicable laws, rules and regulations and the terms of all patient consents that are applicable to Sema4's and the Mount Sinai Parties’ activities under this Agreement. Sema4 and the Mount Sinai Parties acknowledge and agree that regulatory requirements and industry standards will evolve during the Term of the Agreement, and the Parties agree to amend this Agreement to bring it into full compliance and to do so in a manner that the Steering Committee reasonably recommends as a result of any such evolution.
+
+7.9 Notwithstanding the foregoing provisions of this Article 7, Sema4 has the right to disclose the terms of this Agreement to financial advisors and actual or potential financing sources or strategic partners provided that such parties are bound by appropriate confidentiality agreements.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+24
+
+CONFIDENTIAL
+
+7.10 Joint Data Security Report. Sema4 acknowledges and agrees that it is subject to the data security requirements and methodologies set forth in the Joint Data Security Report attached hereto as Exhibit C. If the Joint Data Security Report is not appended to this Agreement as of the Effective Date, Sema4 and the Mount Sinai Parties shall have a period of ninety (90) days from the Effective Date to complete and append such Joint Data Security Report to this Agreement. Sema4 acknowledges and agrees that Sema4 will not have any access to any Covered Data until such Joint Data Security Report is completed and approved by the Steering Committee, except to the extent that any such access is expressly contemplated by another executed written agreement by and among one or more Mount Sinai Party and Sema4.
+
+ARTICLE 8
+
+TERM AND TERMINATION
+
+8.1 Term. The term of this Agreement shall be five (5) years from the Effective Date, subject to earlier termination pursuant to Article 8 (the period from the Effective Date to the earlier of (i) the fifth anniversary of the Effective Date or (ii) the date on which this Agreement is terminated pursuant to Article 8 shall be referred to herein as the Initial Term. If this Agreement has not theretofore been terminated pursuant to Article 8, and if no event of default on the part of Sema4 or event which with the giving of notice or the passage of time or both would constitute an event of default on the part of Sema4 has occurred, Sema4 shall have the option to extend this Agreement for up to two additional one-year periods, such option to be exercised no later than sixty (60) days prior to the then-current expiration of this Agreement (each, an “Extension Term”). Upon the expiration of the Initial Term or any applicable Extension Term, this Agreement may be renewed by mutual agreement of the Mount Sinai Parties and Sema4. The period from the Effective Date to the earlier of the expiration of this Agreement, including the Initial Term and all Extension Terms, or if earlier the termination of this Agreement pursuant to Article 8, shall be referred to herein as the “Term”.
+
+8.2 Termination Due to Fundamental In-Term Breach. Either Sema4 or the Mount Sinai Parties may terminate a SOW as set forth in a SOW with regard to that SOW. Either Sema4 or the Mount Sinai Parties may terminate this Agreement: (i) in the case of the Mount Sinai Parties as the terminating Party, in the event of a Fundamental In-Term Breach by Sema4, (ii) in the case of Sema4 as the terminating Party, upon breach by a Mount Sinai Party of any material obligation of Mount Sinai under this Agreement that is not cured by Mount Sinai within a period of [***] after notice of such breach is given to the Mount Sinai Parties by Sema4, (iii) effective immediately by the Mount Sinai Parties if Sema4, or by Sema4 if the Mount Sinai Parties, become(s) insolvent or seek(s) protection under any bankruptcy, receivership, trust deed, assignment for the benefit of creditors, creditors arrangement, composition or comparable proceeding, or if any such proceeding is instituted against such Party or Parties, and such proceeding is not dismissed within [***]. For the avoidance of doubt, this Agreement shall not be terminable by either Sema4 or the Mount Sinai Parties [***]. Upon the occurrence of a Fundamental In-Term Breach, Sema4 shall [***] to the Mount Sinai Parties or [***]. The Parties acknowledge and agree that the Mount Sinai Parties shall be [***] of Sema4 to [***] the Mount Sinai Parties.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+25
+
+CONFIDENTIAL
+
+8.3 Return of [***]; Termination Due to Fundamental Post-Termination Breach. Upon the expiration or termination of this Agreement pursuant to Section 8.1, Sema4 shall [***] (including for [***]) in accordance with the terms of the Agreement and BAA. Notwithstanding the foregoing, Sema4 may continue to [***] after such termination or expiration, so long as no Fundamental Post-Termination Breach has occurred and is continuing. Upon the occurrence of a Fundamental Post-Termination Breach, Sema4 shall immediately [***] the Mount Sinai Parties or [***].
+
+8.4 Automatic Termination of Sema4 Rights to [***] Due to Adverse Financial Events. The rights of Sema4 to retain and use [***] shall terminate automatically if: (i) Sema4 becomes insolvent; (ii) makes a transfer in fraud of creditors; (iii) makes an assignment for the benefit of creditors; or admits, in writing, its inability to pay its debts as they become due; (iv) commits an act of bankruptcy; (v) files a petition under the United States Bankruptcy Code or under any other similar federal or state law; (vi) is adjudged bankrupt; or is named in a pleading or motion filed in any court proposing to reorganize or adjudicate as a bankrupt, and that pleading or motion is not discharged or denied within [***] days after its filing; (vii) has a receiver or trustee appointed for all or substantially all of its assets, and the receiver or trustee is not discharged within [***] days after its appointment; (viii) has filed against it any tax lien respecting all or substantially all of its property and such tax lien shall not be discharged, removed, or bonded over within sixty (60) days of the date on which it was filed; or (ix) has its assets assigned by law (the events and/or circumstances described in clauses (i)-(ix), collectively, “Adverse Financial Events”). Sema4 shall [***] and [***] the Mount Sinai Parties immediately upon occurrence of an Adverse Financial Event.
+
+8.5 Termination by Mount Sinai Parties in Event of [***]. In the event [***] by Sema4 during the Term [***], the Mount Sinai Parties shall have the right to terminate this Agreement upon written notice to Sema4 effective as of [***]. Upon such termination, certain of the provisions hereof shall survive such termination in accordance with Section 9.15. This Section 8.5 does not apply in the case of any [***].
+
+8.6 Effect of Termination. Termination of this Agreement will not affect the rights and obligations of the Parties accrued prior to termination hereof. Upon termination of this Agreement, certain of the provisions hereof shall survive such termination in accordance with Section 9.15. In the event of any termination or expiration of this Agreement, and without limiting any other provision of this Agreement, the Parties shall cooperate to effect a transition of the Services.
+
+ARTICLE 9
+
+MISCELLANEOUS
+
+9.1 Records. Sema4 agrees to maintain and make available during this Agreement and for a period of four (4) years thereafter, upon the written request of the Mount Sinai Parties, the Secretary of the Department of Health and Human Services, the Comptroller General, or other applicable government authority, this Agreement, and any other books, records, data and documents that are necessary to certify the nature, performance, and extent of the Services furnished under this Agreement.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+26
+
+CONFIDENTIAL
+
+9.2 Use of Name. The Parties acknowledge and agree that this Agreement does not grant any Party the right to use any trademark of another Party without such Party’s prior written consent.
+
+9.3 NO SPECIAL DAMAGES. EXCEPT FOR THIRD PARTY INDEMNIFICATION, NEITHER PARTY SHALL BE LIABLE TO THE OTHER PARTY FOR ANY SPECIAL, CONSEQUENTIAL, EXEMPLARY OR INCIDENTAL DAMAGES (INCLUDING LOST OR ANTICIPATED REVENUES OR PROFITS RELATING TO THE SAME) ARISING FROM ANY CLAIM RELATING TO THIS AGREEMENT, WHETHER SUCH CLAIM IS BASED ON CONTRACT, TORT (INCLUDING GROSS NEGLIGENCE) OR OTHERWISE.
+
+9.4 Indemnification.
+
+9.4.1 Each Mount Sinai Party agrees to indemnify Sema4, its affiliates, and its and their respective officers, directors, trustees, employees, subcontractors and agents (collectively, the “Indemnified Parties”) against any and all claims, liabilities, and/or suits, including losses, damages, expenses, and reasonable attorneys’ fees for defending those claims, liabilities, and/or suits (collectively, “Claims”), caused by: (i) such Mount Sinai Party’s [***], (ii) a Mount Sinai Party’s [***] (provided that in the case of this clause (ii) the Mount Sinai Parties’ indemnification obligations shall be limited to claims by Third Parties), or (iii) the [***] of such Mount Sinai Party under this Agreement; provided that no Mount Sinai Party shall have any indemnification obligation hereunder to the extent any Claim results from any Sema4 Indemnified Party’s [***].
+
+9.4.2 Sema4 agrees to indemnify the Mount Sinai Parties’ Indemnified Parties against any and all Claims caused by: (i) Sema4’s [***] under this Agreement, provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim results from the Mount Sinai Parties’ Indemnified Party’s [***], (ii) any claim that the Services or any Deliverable [***] any [***], including but not limited to [***]; provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim results from a Mount Sinai Party Indemnified Party’s [***]; (iii) any failure of Sema4 or any collaborator of Sema4 or any Third Party to which Sema4 [***] to [***] prior to the [***], (iv) any [***]; and (v) any claims of Third Parties arising out of Sema4’s [***]; provided that Sema4 shall have no indemnification obligation hereunder to the extent any Claim is [***].
+
+9.4.3 Each Party agrees to provide the other Party with prompt notice of any demand, claim, cause of action or suit to which these indemnification provisions apply. The indemnifying Party shall have the exclusive right to control the defense of any such demand, claim or suit, including choice of counsel and any settlement thereof, provided that, as a condition of such control, the indemnifying Party shall first provide written confirmation that it will fully defend and indemnify the indemnitee in this and all related matters.
+
+9.4.4 No settlement by an indemnifying Party on behalf of any Indemnified Parties, shall acknowledge or implicate any liability, fault, or wrongdoing on the part of such Indemnified Party without such Indemnified Party’s prior written consent. The indemnifying Party shall not settle or compromise any claim or action giving rise to liabilities in a manner that
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+27
+
+CONFIDENTIAL
+
+imposes any restrictions or obligations on the Indemnified Party, or grants any rights to affecting the Indemnified Party, without the Indemnified Party’s prior written consent.
+
+9.5 Representations. Sema4 represents, warrants, and covenants that:
+
+9.5.1 it has obtained and will continue to maintain any consent, approval, credential, certification, authorization, or license required in connection with the execution, delivery and performance of this Agreement;
+
+9.5.2 neither it nor the Sema4 Personnel: (a) has been convicted of or charged with a criminal offense related to health care (unless it has been reinstated to participation in Medicare after being excluded because of the conviction), or (b) is excluded, debarred, or otherwise ineligible for participation in any government health care program or government payment program, and it will notify the Mount Sinai Parties in writing immediately if any of the foregoing should occur, and the Mount Sinai Parties may immediately terminate the whole or any part of this Agreement, receive a refund of all compensation paid and pursue any other remedies available at law or in equity.
+
+9.6 Insurance. During the term of this Agreement, for so long as Sema4 has rights under Section 6.5, and (except in the case of occurrence-based policies) for at least three (3) years after any Fundamental Post-Termination Breach has occurred, Sema4 shall procure and maintain at its sole expense the following insurance covering Sema4’s performance under this Agreement, and Sema4 shall not unreasonably fail to procure such additional commercially-available insurance as the Steering Committee shall prescribe from time to time in connection with Sema4’s performance under this Agreement.
+
+9.6.1 Occurrence based commercial general liability insurance, including, without limitation, coverage for bodily and/or personal injury and death, property damage (including loss of property and use of property), and contractual liability, with separation of insureds, the Mount Sinai Parties named as additional insureds on a primary and non-contributory basis and limits of not less than $[***] each occurrence and $[***] in the aggregate.
+
+9.6.2 Errors and omissions insurance with limits of not less than $[***] each occurrence and $[***] in the aggregate.
+
+9.6.3 Workers compensation insurance as required by applicable law and employer’s liability insurance with limits of not less than $[***] per accident.
+
+9.6.4 Occurrence based cyber insurance (including security and privacy) with limits of not less than those applicable under the comparable policies maintained by the Mount Sinai Parties from time to time (or such lesser policy limits as the Mount Sinai Parties shall reasonably approve in light of the volume of Covered Data to which Sema4 has rights hereunder at any applicable time and whether such Covered Data is Identified Covered Data or De-Identified Covered Data).
+
+9.6.5 Sema4 shall purchase tail coverage if any claims made coverage is discontinued or terminated at any time during or after the term of this Agreement unless such tail
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+28
+
+CONFIDENTIAL
+
+coverage is not commercially available (in which case Sema4 shall promptly give notice of such unavailability to the Mount Sinai Parties).
+
+9.6.6 Upon the request of the Mount Sinai Parties, Sema4 agrees to provide a current and valid Certificate of Insurance evidencing the insurance coverage required by this Agreement. Any material modification or alteration in such coverage shall be promptly communicated to Mount Sinai Parties and the Steering Committee in writing at least thirty (30) days in advance.
+
+9.7 Governing Law. This Agreement and any action related thereto will be governed and interpreted by and under the laws of the State of New York, without giving effect to any conflicts of laws principles. The Parties hereby irrevocably submit to the exclusive jurisdiction of and venue in any state or federal courts located within New York County in the State of New York with respect to any and all disputes concerning or otherwise arising under this Agreement.
+
+9.8 Assignment.
+
+9.8.1 Neither this Agreement nor any right or obligation hereunder may be assigned or otherwise transferred (whether voluntarily, by operation of law or otherwise), without the prior express written consent of the other party; provided that: (i) the Mount Sinai Parties may assign this Agreement to another entity that is controlled by the Mount Sinai Parties or in connection with a reorganization, merger or sale of substantially all of such Party’s assets relating to the subject matter hereto on reasonable advance notice to Sema4; and provided further that (ii) Sema4 may assign this Agreement to another entity that is controlled by Sema4 or in connection with a reorganization, merger or sale of substantially all of Sema4’s assets on reasonable advance notice to the Mount Sinai Parties, provided, however, that Sema4 may not assign this Agreement to any Prohibited Person. Sema4’s rights under this Section 9.8.1 shall be subject to the restrictions on the sale of the De-identified Covered Data set forth in Section 6.5.5.
+
+9.8.2 No permitted assignment will relieve the assigning Party of responsibility for the performance of any obligations that accrued prior to such assignment, and except as set forth otherwise in Section 8.5, any permitted assignee shall assume all obligations of its assignor under this Agreement. Any prohibited assignment of this Agreement or any rights, and any prohibited delegation of any obligations hereunder, will be null and void.
+
+9.9 Severability. If any provision of this Agreement is, for any reason, held to be invalid or unenforceable, the other provisions of this Agreement will remain enforceable and the invalid or unenforceable provision will be deemed modified so that it is valid and enforceable to the maximum extent permitted by law.
+
+9.10 Notices. Each Party must deliver all notices or other communications required or permitted under this Agreement in writing to the other party at the address listed below by courier, by certified or registered mail (postage prepaid and return receipt requested), or by a nationally-recognized express mail service. Each Party may change its address for receipt of notice by giving notice of such change to the other Party.
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+29
+
+CONFIDENTIAL
+
+9.11 Waiver. Any waiver or failure to enforce any provision of this Agreement on one occasion will not be deemed a waiver of any other provision or of such provision on any other occasion.
+
+9.12 Counterparts. This Agreement may be executed in one or more counterparts and by facsimile or pdf, each of which shall be deemed an original and all of which shall he taken together and deemed to be one instrument.
+
+9.13 Entire Agreement. This Agreement, the BAA and the SOWs collectively constitute the final, complete and exclusive agreement of the parties and supersedes and merges all prior or contemporaneous discussions between the Parties with respect to the subject matter hereof. No modification of or amendment to this Agreement, nor any waiver of any rights under this Agreement, will be effective unless in writing and signed by a duly authorized officer of each Party.
+
+9.14 Independent Contractors. The Parties agree that this Agreement creates an independent contractor relationship. Neither Party has the authority to bind the other Party without the express written authorization of the other Party. Neither this Agreement, nor any terms and conditions contained herein, may be construed as creating or constituting an employer-employee, franchisor-franchisee, partnership, joint venture or agency relationship between the Parties.
+
+9.15 Survival.
+
+9.15.1 The following provisions of this Agreement shall survive the termination of this Agreement for so long as no Fundamental Post-Termination Breach has occurred: Section 3.1, Section 3.2, Section 6.2, Section 6.5, Section 6.6 and Section 7.6, and each such Section shall terminate if a Fundamental Post-Termination Breach occurs.
+
+9.15.2 The following provisions of this Agreement shall survive the termination of this Agreement and the occurrence of a Fundamental Post-Termination Breach: Article 1, Section 6.4 (first sentence), Section 6.5.1, Section 6.5.2, Section 6.5.5, Section 6.7, Section 6.9, Section 6.10, Article 7, Section 8.2, Section 8.3, Section 8.4, Section 8.5, Section 8.6, Sections 9.1 through 9.4 and Sections 9.6 through 9.18.
+
+9.16 No Joint and Several Liability. The Parties acknowledge and agree that ISMMS and each Hospital is separately incorporated, responsible solely for its own obligations and liabilities, and shall not be responsible for the obligations of any of the other Mount Sinai Parties.
+
+SIGNATURE PAGE FOLLOWS
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+30
+
+CONFIDENTIAL
+
+IN WITNESS WHEREOF, the Parties have caused this Agreement to be executed by their duly authorized representative.
+
+AGREED:
+
+AGREED:
+
+MOUNT SINAI GENOMICS, INC.
+
+ICAHN SCHOOL OF MEDICINE
+AT MOUNT SINAI
+
+By:
+
+/s/ Matthew Rosamond
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name:
+
+Matthew Rosamond
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CFO
+
+Title:
+
+President and CEO
+
+AGREED:
+
+AGREED:
+
+THE MOUNT SINAI HOSPITAL
+
+BETH ISRAEL MEDICAL CENTER
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+Name:
+
+Kenneth L. Davis, MD
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+President and CEO
+
+Title:
+
+President and CEO
+
+AGREED:
+
+AGREED:
+
+ST. LUKE’S-ROOSEVELT
+HOSPITAL CENTER
+
+THE NEW YORK EYE AND EAR
+INFIRMARY
+
+By:
+
+/s/ Kenneth L. Davis, MD
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Name:
+
+Kenneth L. Davis
+
+Title:
+
+President and CEO
+
+Title:
+
+President and CEO
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+31
+
+CONFIDENTIAL
+
+Exhibit A
+
+[Reserved]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+32
+
+CONFIDENTIAL
+
+Exhibit B
+
+Statement of Work for Phase 1
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+33
+
+CONFIDENTIAL
+
+Exhibit C
+
+Joint Data Security Report
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+34
+
+CONFIDENTIAL
+
+Exhibit D
+
+Alliance Manager Duties and Services
+
+[***]
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+35
+
+CONFIDENTIAL
+
+FIRST AMENDMENT TO DATA STRUCTURING AND CURATION AGREEMENT
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+THIS FIRST AMENDMENT TO THE DATA STRUCTURING AND CURATION AGREEMENT (this “Amendment”), effective as of March 11, 2020 (the “Amendment Effective Date”), is made by and among Mount Sinai Genomics, Inc., d/b/a Sema4 having a business address of 333 Ludlow St, Stamford, CT 06902 (“Sema4”), and on the other hand, Icahn School of Medicine at Mount Sinai, a not-for-profit New York education corporation with a principal business address of One Gustave L. Levy Place, New York, NY 10029 (“ISMMS”), The Mount Sinai Hospital (“MSH”), Beth Israel Medical Center (“BIMC”), St. Luke’s-Roosevelt Hospital Center (SLR”), and The New York Eye and Ear Infirmary (“NYEE”) (each a “Hospital’’ and collectively (the “Mount Sinai Hospitals”), ISMMS and the Mount Sinai Hospitals shall collectively be referred to as the “Mount Sinai Parties;” each of Sema4 and the Mount Sinai Parties are also sometimes referred to herein individually as “Party” or jointly as the “Parties.”
+
+WHEREAS, the Parties entered into a Data Structuring and Curation Agreement, effective as of August 1, 2019 (the “Agreement”); and
+
+WHEREAS, the Parties wish to amend certain provisions of the Agreement in accordance with the terms hereof.
+
+NOW, THEREFORE, for good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the Parties hereby agree as follows:
+
+1. DEFINITIONS. For the purposes of this Amendment, capitalized words and phrases not otherwise defined herein shall have the meanings set forth in the Agreement.
+
+2. AMENDMENTS TO THE AGREEMENT.
+
+a. The Agreement is hereby amended by deleting Paragraph 6.6.1 of the Agreement in its entirety and replacing it with the following:
+
+6.6.1 To the extent permitted under this Agreement, Sema4 may provide access to [***] to Third Parties in connection with Sema4’s [***], which shall include [***] (but which [***]). Sema4 shall provide such access only through a [***], provided that Sema4 may [***] De-Identified Covered Data to Third Parties solely to the [***] the Third Parties to [***] with Sema4, and provided further that Sema4 shall [***] the Mount Sinai Parties of any such [***], [***] the Mount Sinai Parties when an agreement with a Third Party collaborator [***], and shall [***] the Mount Sinai Parties when a Third Party has [***] the [***], as set forth below. Any other [***] of the [***] by this Section 6.6.1 shall [***] the Mount Sinai Parties, which [***]. Notwithstanding the foregoing, until such [***] for a Third Party to determine that any specific [***] to which
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+1
+
+CONFIDENTIAL
+
+the Third Party is [***] of the Mount Sinai Parties, Sema4 shall [***] the [***] to which Third Parties are [***] to [***] that has been [***], [***] that are mutually agreed on by the Parties, each acting reasonably.
+
+3. MISCELLANEOUS.
+
+a. Counterparts. This Amendment may be executed in any number of counterparts and by the Parties on separate counterparts. Each counterpart shall constitute an original of this Amendment, but together the counterparts shall constitute one document.
+
+b. Full Force and Effect. All of the provisions of the Agreement shall remain in full force and effect as so amended. If any term or provision of this Amendment shall be deemed prohibited by or invalid under any applicable law, such provision shall be invalidated without affecting the remaining provisions of this Amendment.
+
+c. Complete Agreement. The Agreement, as amended by this Amendment, is the final, complete and exclusive agreement of the Parties and supersedes and merges all prior or contemporaneous discussions between the Parties with respect to the subject matter hereof. No modification of or amendment to the Agreement, nor any waiver of any rights under the Agreement, will be effective unless in writing and signed by a duly authorized officer of each Party.
+
+SIGNATURE PAGE FOLLOWS
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+2
+
+CONFIDENTIAL
+
+IN WITNESS WHEREOF, the Parties have executed this Amendment by their duly authorized officers as of Amendment Effective Date.
+
+Mount Sinai Genomics, Inc.
+
+By:
+
+/s/ Joel Sendek
+
+Name:
+
+Joel Sendek
+
+Title:
+
+CFO
+
+Date:
+
+5/27/2020
+
+Icahn School of Medicine at Mount Sinai
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CEO
+
+Date:
+
+5/20/2020
+
+The Mount Sinai Hospital
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CEO
+
+Date:
+
+5/20/2020
+
+Beth Israel Medical Center
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CEO
+
+Date:
+
+5/20/2020
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+3
+
+CONFIDENTIAL
+
+St. Luke’s-Roosevelt Hospital Center
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CEO
+
+Date:
+
+5/20/2020
+
+The New York Eye and Ear Infirmary
+
+By:
+
+/s/ Kenneth L. Davis
+
+Name:
+
+Kenneth L. Davis, MD
+
+Title:
+
+CEO
+
+Date:
+
+5/20/2020
+
+Pursuant to SEC Release 34-85381, certain identified information has been excluded from this Exhibit because it is (i) not material and (ii) would be competitively harmful if publicly disclosed.
+
+4

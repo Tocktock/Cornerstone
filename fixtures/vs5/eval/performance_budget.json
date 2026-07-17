@@ -3,11 +3,11 @@
   "frozen_at": "2026-07-17",
   "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
   "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
-  "corpus_manifest_sha256": "568bd1cd634ce597ef8a9f3a1106eaf00b9cf349fe16de7dda9d07a6d1edb8c4",
-  "prompt_retrieval_revision": "559a4cfbfb267d0c0eb7514e68ee85a2f14c7fc9123b636f103b25024f21c7b5",
-  "pilot_measurements_seconds": {"three_source_brief": 8.718, "three_source_answer": 3.462},
+  "corpus_manifest_sha256": "9204cad035e4e1ad697c3a710fd39b95a90b24882619b10eeb24a796b7c493c2",
+  "prompt_retrieval_revision": "6afc47d37792cf595eceeed8a34b221087fff154a0bd5b417e044f17351c9a0d",
+  "pilot_measurements_seconds": {"three_source_brief": 21.929, "three_source_answer": 11.005},
   "combined_operation_p95_budget_seconds": 35.0,
   "minimum_full_corpus_sample_count": 50,
-  "refreeze_reason": "The July 17 pipeline refreeze binds the completed citation-grounding repair, including canonical comparison projection, later-version clause observation, Korean attribution and disposition guards, and the two-fact model schema. A current 25-case ornith:9b measurement recorded 50 operations at p50 7.875 seconds and p95 12.904 seconds; its three-source case measured 8.718 seconds for Brief and 3.462 seconds for Ask. The existing 35-second p95 regression budget remains unchanged.",
+  "refreeze_reason": "The July 17 refreeze binds the rebuilt 25-case SEC corpus and the final 9B citation-grounding repair: precise two-source amendment labels, decision-relevant retrieval, exact amendment-to-agreement identifier binding, full-subject effective-date guards, named-agreement party-operand binding, amendment-recital date binding, competing-amendment rejection, exact amendment-opening party binding, full-sentence citation preference, scalar-question eligibility, single-clause actor-to-percentage citation repair, allocation-specific retrieval, and fail-closed legal-party parsing. A fresh three-source BMS ornith:9b pilot measured 21.929 seconds for Brief and 11.005 seconds for answerable Ask. Both operations remain within the previously frozen 35-second p95 budget; the canonical full-corpus run records the final 50-operation distribution.",
   "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
 }

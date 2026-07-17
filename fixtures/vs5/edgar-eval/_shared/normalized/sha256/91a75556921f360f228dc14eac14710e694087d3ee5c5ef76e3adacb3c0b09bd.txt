@@ -1,0 +1,2060 @@
+EX-10.40
+18
+vcka-20220331xex10d40.htm
+EXHIBIT 10.40
+
+​
+
+Exhibit 10.40
+
+​
+
+***Certain identified information has been omitted from this exhibit because it is both (i) not material and (ii) information that the Registrant treats as private or confidential. Such omitted information is indicated by brackets (“[...***...]”) in this exhibit. ***
+
+​
+
+MASTER SERVICES AGREEMENT – SP-102
+
+This Master Services Agreement (the “Agreement”) between Lifecore Biomedical, LLC, a Minnesota (U.S.A.) entity, with offices located at 3515 Lyman Boulevard, Chaska, Minnesota 55318 (“Lifecore”) and Semnur Pharmaceuticals, Inc. with offices located at 4970 El Camino Real, #205, Los Altos, CA 94022 (“Semnur”) is effective as of January 27, 2017 (“Agreement Date”).
+
+BACKGROUND
+
+Semnur is engaged in the business of developing and commercializing pharmaceutical products and owns proprietary technology and know-how related to SP-102, a dexamethasone sodium hyaluronate viscous gel solution (as further defined in this Agreement, the “Product”), and wishes to engage Lifecore to perform contract development services and clinical trial material manufacturing for the Product. Semnur will be the market authorization holder for the Product. Lifecore, as contract development and manufacturing organization, will provide the development services and clinical trial material manufacturing of the Product, in accordance with the terms and conditions of this Agreement and the attached Master Quality Agreement.
+
+AGREEMENT
+
+In consideration of the mutual covenants exchanged in this Agreement, the parties agree as follows:
+
+1.
+
+Definitions
+
+1.1
+
+“Affiliate” means with respect to any specified Person, any other Person that directly or indirectly through one or more intermediaries, controls, or is controlled by, or is under common control with, the Person specified. For purposes of this definition, “control” including, with correlative meanings, the terms “controlled by” and “under common control with” means ownership directly or indirectly of more than fifty percent (50%) of the equity capital having the right to vote for election of directors in the case of a corporation and more than fifty percent (50%) of the beneficial interest in the case of a business entity other than a corporation.
+
+1.2
+
+“Applicable Law” means any domestic or foreign, supranational, regional, national, state or local law or rule, regulation, guideline, or requirement of any Regulatory Authority for Phase 3 clinical studies as defined in FDA 21 CFR part 11, 210 and 211 and EU GMP; provided, however, that to the extent Lifecore’s compliance with Applicable Law in a country other than the United States and the European Union would require Lifecore to bear increased costs, quality assurance or regulatory burdens in connection with the Development Services and Manufacturing of CTM, Lifecore will provide a quotation and
+
+​
+
+1
+
+​
+
+charge Semnur for the labor and materials required to comply with such requirements at its standard rates in Exhibit B under Additional Regulatory Services.
+
+1.3
+
+“Application” means the use of the Product to treat complications of chronic back pain.
+
+1.4
+
+“Batch” means the specific quantity of Product or other material that is intended to have uniform character and quality, within specified limits, and is produced during the same cycle of Manufacturing. Batch is used synonymously with “Lot”.
+
+1.5
+
+“Certificate of Analysis” (“COA”) means the document issued by Lifecore that lists the test methods performed, acceptance limits, and release test results for a specific Lot of Product.
+
+1.6
+
+“Clinical Trial Material” (CTM) means the Product for use in clinical trials.
+
+1.7
+
+“Current Good Manufacturing Practices” (cGMP) means those current good manufacturing practices and standards as promulgated by the FDA under the FFDCA in 21 CFR Part 11, 210 and 211 and 820, and ICH Q7 “Good Manufacturing Practice Guide for Active Pharmaceutical Ingredients,” as promulgated under European Directive 91/356/EEC, as applicable to the control and manufacture of the Product.
+
+1.8
+
+“Development Services” means the services described in Exhibit B.
+
+1.9
+
+“Exhibits” means the Exhibits to this Agreement listed below, which are an integral part of this Agreement and are hereby incorporated herein and may only be modified as agreed in writing by the Parties:
+
+​
+
+​
+
+​
+
+Exhibit
+
+Description
+
+A
+
+Master Quality Agreement
+
+B
+
+Statement of Work
+
+C
+
+Semnur Equipment and Semnur Supplies
+
+​
+
+1.10
+
+“Facility” means the facility of Lifecore located at 3515 Lyman Blvd., Chaska, Minnesota 55318.
+
+1.11
+
+“FDA” means the Food and Drug Administration of the United States Department of Health and Human Services, or any successor agency thereto.
+
+1.12
+
+“FFDCA” means the United States Federal Food, Drug, and Cosmetic Act, 21 U.S.C. §301 et seq., as amended.
+
+1.13
+
+“Lifecore Background Technology” means any and all know-how, trade secrets, processes and other technical information, whether or not patented or patentable, including without limitation, proprietary filtration technology, preclinical, pharmacological, toxicological, chemical, physical and analytical, safety, quality
+
+​
+
+2
+
+​
+
+control or other proprietary data and information which Lifecore has conceived, developed, acquired or has the ability to license or sublicense (under licenses from others or otherwise) prior to, or created by persons employed or owing a duty to assign to Lifecore during the term of this Agreement, or which Lifecore conceives, develops, acquires or has the ability to license or sublicense, provided that Lifecore Background Technology does not include Semnur’s know-how, trade secrets or technical documents, protocols, reports and information provided to Lifecore for purposes of performing its obligations under this Agreement.
+
+1.14
+
+“Lifecore Procedures” means Lifecore’s written standard operating procedures and work instructions for use with the Product, as adapted and revised in accord with the Master Quality Agreement.
+
+1.15
+
+“Manufacturing or Manufacture” means those activities referenced in Section 2.2 of this Agreement relating to the receipt of Raw Materials, formulation, filtration, filling, packaging, testing, storage, and shipping of Product.
+
+1.16
+
+“Person” means any individual, corporation, company, partnership, business trust, business association, governmental entity, governmental authority or other legal entity.
+
+1.17
+
+“Price” means the cost to Semnur of Development Services and CTM Manufacturing hereunder described in Section 3.1. All references to pricing throughout this Agreement will be in U.S. dollars.
+
+1.18
+
+“Product” means SP-102, an injectable viscous gel solution filled into syringes, labeled, and packaged in accordance with the Specifications and the Lifecore Procedures as referenced in Appendix A of the Master Quality Agreement.
+
+1.19
+
+“Product Specifications” means the specifications set forth Appendix A of the Master Quality Agreement, as they may be modified by written agreement of Lifecore and Semnur.
+
+1.20
+
+“Master Quality Agreement” means the document attached as Exhibit A.
+
+1.21
+
+“Raw Material(s)” means ingredients, including […***…], primary and secondary packaging components, or supplies necessary to Manufacture and ship the Product in accordance with the Specifications. […***…].
+
+1.22
+
+“Regulatory Authority” means any applicable supranational, national, regional, state, provincial or local regulatory agencies, departments, bureaus, commissions, councils or other government entities, such as the FDA, regulating or otherwise exercising authority with respect to the Development Services or CTM Manufacturing of Product and the production, interstate or international shipment, marketing or sale of Product or use of Product in clinical trials.
+
+​
+
+3
+
+​
+
+1.23
+
+“Reprocess” means introducing the Product or any intermediate that does not meet standards or Specifications back into the relevant process and repeating a Manufacturing step that is part of the established Manufacturing process for the Product.
+
+1.24
+
+“Rework” means introducing the Product or material that does not meet standards or Specifications to one or more processing steps that are different from the established manufacturing process to obtain acceptable quality.
+
+2.
+
+Development Services and Clinical Trial Material Manufacturing
+
+2.1
+
+Development Services. Semnur hereby retains Lifecore to provide the Development Services and Manufacturing of CTM described in, and will pay Lifecore the fees set forth on, the Statement of Work attached as Exhibit B (the “Statement of Work” or “SOW”). The Statement of Work may be amended by one or more sequentially numbered Statements of Work that reference this Agreement and are executed by both Lifecore and Semnur. The terms and conditions of this Agreement will be deemed to be incorporated by reference in each such Statement of Work. This Agreement will take precedence over any contrary or inconsistent terms or conditions appearing in or referred to in any Statement of Work. A Statement of Work in the form attached hereto as Exhibit B will take precedence over any contrary or inconsistent terms and conditions appearing or referred to in any purchase orders or other similar related documents.
+
+2.1.1.
+
+Change Orders. Semnur and Lifecore shall have the right to request reasonable modifications to the Development Services in the relevant Statement of Work by providing written notice thereof to the other party. Upon receipt of such notice, the other party shall respond promptly to any request for changes. Lifecore shall generate a Change Order, and shall submit such Change Order to Semnur for Semnur’s review and approval. A Change Order that has been signed by both parties shall become part of the relevant Statement of Work. If any changes contemplated by a Change Order will have a financial or other impact on the scope of the Statement of Work, Lifecore shall include a written description of such impacts in the Change Order. If Semnur does not approve such Change Order, and has not terminated the Statement of Work, but requests modification to the Change Order, then the parties will use reasonable efforts to agree on a Change Order that is mutually acceptable. If practicable and requested by Semnur, Lifecore will continue to work on the Development Services agreed to in the existing Statement of Work during such negotiations, but will not commence work in accordance with the Change Order until the Change Order is signed by both parties. No Change Order will be effective unless and until it has been signed by an authorized representative of each party. The signed Change Order will be implemented as soon as it is commercially practical to do so in a good faith effort to meet the development and manufacturing timelines as set
+
+​
+
+4
+
+​
+
+forth and accepted in the Statement of Work (as they may be modified by the Change Order).
+
+2.2
+
+Manufacturing. Appendix B of the Master Quality Agreement, which is attached as Exhibit A and incorporated in this Agreement by reference, delineates the respective responsibilities of Lifecore and Semnur applicable to Manufacturing of CTM. Either party may share the Master Quality Agreement with the FDA. If there is conflict between this Agreement and the Master Quality Agreement relating to Manufacturing responsibilities or quality requirements, the Master Quality Agreement will control. If there are other conflicts or inconsistencies between the documents, this Agreement will control over the Master Quality Agreement.
+
+2.3
+
+Human Use. Semnur acknowledges that, except for the Clinical Batches, no other material supplied by Lifecore in connection with the Development Services under this Agreement, may be used in humans, in foods, drugs, medical devices, cosmetics, or for in vitro diagnostic uses.
+
+2.4
+
+Product Use. Semnur may purchase the Product for use only in the Application. Semnur may not sell, and shall use its reasonable endeavors to prohibit the use of the Product for any use other than the Application. Semnur may not use or sell any Product supplied by Lifecore as a carrier or delivery vehicle for allogeneic bone.
+
+2.5
+
+Reports and Deliverables. Lifecore shall keep appropriate records of the status and progress of the Development Services as required by the relevant Statement of Work, and will deliver to Semnur reports, samples, Product(s) and other supporting documentation and materials as set forth in the relevant Statement of Work within thirty (30) days of the completion of the Development Services as set forth in the relevant Statement of Work. Lifecore will, upon the written request of Semnur, deliver to Semnur copies of all other data, Batch records, samples, analyses, and work product generated in the course of performing the Development Services, except that which contains Lifecore Background Technology. Lifecore acknowledges that with the exception of Lifecore Background Technology, all such records, reports, supporting documentation, analyses, data, samples and Product(s) prepared for the purposes of a relevant Statement of Work are the property of Semnur.
+
+2.6
+
+Dispute Concerning Certificate of Analysis
+
+2.6.1.
+
+In the event of a dispute concerning whether a Certificate of Analysis should have been issued for a Product Batch pursuant to Article 7 of the Master Quality Agreement, the quality assurance managers of Lifecore and Semnur, or their authorized quality assurance consultants, will diligently and in good faith attempt to resolve such dispute. If they fail to reach agreement within thirty (30) days of initiating dispute procedures, such dispute will be submitted to the appointed officers of the parties. If
+
+​
+
+5
+
+​
+
+the appointed officers fail to reach agreement within thirty (30) days, such dispute will be submitted to an independent, qualified third-party expert that is mutually acceptable and selected by Lifecore and Semnur promptly, and in good faith. Such expert will determine whether the requirements for the Certificate of Analysis had been met, and such expert’s determinations will be final and determinative for purposes of this Agreement. The party against whom the expert rules will bear all costs of the expert’s activities. Any dispute relating to such expert’s determination may be resolved as set forth in Section 19 (Disputes). For the avoidance of doubt, both parties will be responsible for their own costs that are not the costs of the expert’s activities.
+
+2.6.2.
+
+If it is determined by agreement of the parties or through a final determination under Section 2.6.1 that the Certificate of Analysis for a Batch should not have been issued, and that the nonconformity of the Batch was not due in any part to Lifecore’s failure to comply with the Batch records, Product Specifications, Lifecore Procedures or Applicable Law, Semnur will be required […***…].
+
+2.6.3.
+
+If it is determined by agreement of the parties or through a final determination under Section 2.6.1 above that the Manufacture of a Batch of Product did not conform to the Batch records, Product Specifications, Lifecore Procedures or Applicable Law, and this nonconformity is due to Lifecore’s failure to comply with the Batch records, Product Specifications, Lifecore Procedures or Applicable Law (“Lifecore Non-Conformity”), Semnur will, in its sole discretion, elect one of the following actions which, if successful, will be deemed to cure any breach that otherwise may have been deemed as a result of a Lifecore Non-Conformity: […***…]. In each case, Lifecore and Semnur will meet to discuss, evaluate and analyze the reasons for and implications of the failure to comply with the Batch records, Product Specifications, Lifecore Procedures or Applicable Law and will discuss in good faith how to proceed. Except for indemnification under Section 6, the foregoing remedies are Semnur’s sole and exclusive remedies and Lifecore’s exclusive liability if a Batch of Product is not Manufactured according to Batch records, Product Specifications, Lifecore Procedures or Applicable Law.
+
+2.7
+
+Semnur Equipment and Semnur Supplies
+
+2.7.1.
+
+Lifecore will purchase the equipment listed in Table 1 of Exhibit C (the “Semnur Equipment”) and will invoice Semnur upon receipt of the Semnur Equipment. Upon receipt of full payment from Semnur, Lifecore will assign title and ownership of the Semnur Equipment to Semnur. Equipment numbers will be assigned upon receipt of the Semnur Equipment. The Semnur Equipment will be located at the Facility and Lifecore will use the Semnur Equipment solely for the purpose of
+
+​
+
+6
+
+​
+
+providing Development Services to Semnur under this Agreement. […***…] Lifecore will not be in breach of any warranty or other provision of this Agreement to the extent any delay or failure to perform is caused by any delay caused by Semnur’s failure to approve or pay Lifecore for the cost of maintaining the Equipment within 45 (forty-five) days after Lifecore’s request for reimbursement together with documented expenses. Upon termination of this Agreement by either party, Semnur will remove the Semnur Equipment from the Facility at Semnur’s expense.
+
+2.7.2.
+
+Lifecore will purchase the supplies listed in Table 2 of Exhibit C (the “Semnur Supplies”) and will invoice Semnur upon receipt of the Semnur Supplies. Upon receipt of full payment from Semnur, Lifecore will assign title and ownership of the Semnur Supplies to Semnur. Lifecore will use the supplies to perform the tasks in the SOW, or subsequent SOWs. Upon termination or expiration of this Agreement, Lifecore will ship the remainder of the Semnur Supplies to Semnur at Semnur’s expense or dispose of as mutually agreed by the parties in writing.
+
+3.
+
+Prices and Payments
+
+3.1
+
+Prices – Development Services and CTM Manufacturing. The Prices and Payments Schedule for Development Services and CTM Manufacturing are set forth in Exhibit B, […***…]. All Prices exclude: (i) federal, state or local sales, use or similar taxes which are properly attributable to the Development Services or Product and which will be separately stated where Lifecore has the legal obligation to collect the taxes or fees; and (ii) all expenses related to shipping, insurance, handling, storage, and customs duties and fees, if separately stated, which shall be borne by Semnur.
+
+3.2
+
+Invoicing. Invoicing will be as described in Exhibit B.
+
+3.3
+
+Payment. For all invoices under this Agreement, Semnur will pay Lifecore within thirty (30) days of the date the invoice issued by Lifecore.
+
+3.4
+
+Additional Payment Security. Invoices that are not paid in full when due will bear interest at the rate of one percent (1%) per month or the maximum allowed by law, whichever is less. In addition, if Semnur fails to pay any amounts due to Lifecore within the time provided herein, then following a notice period of sixty (60) days during which period payment is still not made, Lifecore may cease providing the Development Services or decline to make further deliveries under this Agreement until such time as Semnur’s payments are current and may thereafter condition performance or acceptance and delivery of future orders on receipt of cash, a letter of credit or other security satisfactory to Lifecore, in its sole discretion. This requirement will not release Semnur from any previous obligation.
+
+​
+
+7
+
+​
+
+4.
+
+Shipment
+
+All Product Manufactured by Lifecore for Semnur and any other shipment contemplated by Exhibit B that is to be delivered to Semnur or a third party designated by Semnur in the purchase order will be shipped by Lifecore FCA (Incoterms® 2010) Chaska, MN. Lifecore will arrange for collect shipment, and Semnur will pay all loading, freight, shipping, insurance, duties, forwarding and handling charges, taxes, storage (including any fees for specific cold storage requirements for the Product) and all other charges applicable to the Product.
+
+5.
+
+Warranty and Limitation of Remedies
+
+5.1
+
+Limited Warranty. Lifecore represents and warrants to Semnur that (a) the Development Services will be performed in a competent, diligent, workman like and professional manner, in accordance with this Agreement, and its Exhibits, and (b) the Product will be Manufactured in accordance with the Batch records, Product Specifications, Lifecore Procedures and Applicable Law, including cGMP. THESE LIMITED WARRANTIES ARE EXCLUSIVE AND IN LIEU OF ALL OTHER WARRANTIES, WHETHER EXPRESSED OR IMPLIED (INCLUDING, WITHOUT LIMITATION, ANY WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT, OR ARISING UNDER COURSE OF PERFORMANCE, COURSE OF DEALING OR TRADE USAGE). The liability of Lifecore under these limited warranties does not extend to (i) the design of the Product Specifications, (ii) any abuse or misuse of a Product by anyone other than Lifecore, (iii) any Product which is used after its expiration date, or (iv) when handling, storage, or improper use by anyone other than Lifecore causes a loss of sterilization or other problem affecting proper performance of a Product.
+
+5.2
+
+Title. Notwithstanding the foregoing, Lifecore warrants that Semnur will receive good and marketable title to Product, free and clear of all liens and encumbrances.
+
+5.3
+
+Remedies. If Semnur later discovers that Product did not conform to the warranty set forth in Section 5.1, Semnur will notify Lifecore in writing within 20 days of such discovery and Semnur will be entitled to the remedies set forth in Section 2.6.3. Those remedies constitute Semnur’s sole remedy for any breach of the warranty in Section 5.1.
+
+5.4
+
+Authority. Each party warrants that it has the necessary corporate authorizations to enter into and perform this Agreement.
+
+6.
+
+Indemnity; Limitations
+
+6.1
+
+Lifecore Indemnity. Lifecore will defend, indemnify and hold Semnur, its directors, officers, employees, Affiliates and agents (the “Semnur Indemnitees”) harmless from any and all claims, liabilities, judgments, losses, damages, costs, and expenses (including reasonable attorney’s fees) incurred by or asserted against any Semnur Indemnitee, by any person or entity, as a result of any injury,
+
+​
+
+8
+
+​
+
+illness, death, property damage or other loss or damage arising from Lifecore’s breach of this Agreement, any failure of a particular Product to comply with the warranties contained in Section 5.1 or resulting from the negligence or willful misconduct of Lifecore in performing this Agreement. Semnur shall give Lifecore written notice of any such claim, action, suit or proceeding promptly upon Semnur’s receipt of notice thereof and tender control of the defense to Lifecore. Semnur shall have the right to retain its own counsel, at its own expense. Semnur shall reasonably cooperate with Lifecore, at Lifecore’s expense, in defending or otherwise resolving any such claims, actions, suits and proceedings. All costs associated with such events will be borne by Lifecore. Lifecore will not settle or compromise any such claim, suit, action or proceeding without the prior written consent of Semnur, which consent may not be unreasonably withheld.
+
+6.2
+
+Lifecore Insurance. Lifecore will maintain product liability or umbrella insurance issued by one or more insurance companies, with Best Rating A-VII or higher, of at least […***…] dollars ($[…***…]) to satisfy the indemnification obligations under Section 6.1 and will name Semnur as an additional insured. Subject to Lifecore’s maintenance of such insurance, and subject to section 6.1 above, Lifecore will have full control of any such claims, actions, suits, and proceedings, and Semnur will promptly tender defense thereof to Lifecore.
+
+6.3
+
+Semnur Indemnity. Semnur will defend, indemnify and hold Lifecore, its directors, officers, employees, Affiliates and agents (the “Lifecore Indemnitees”) harmless from any and all claims, liabilities, judgments, losses, damages, costs, and expenses (including reasonable attorney’s fees) incurred by or asserted against any Lifecore Indemnitee, by any person or entity, as a result of any injury, illness, death, property damage or other loss or damage arising from the development, purchase, storage, handling, distribution, testing or use of the Product, except to the extent caused by (i) Lifecore’s breach of this Agreement, (ii) any failure of a particular Product to comply with the warranty contained in Section 5.1, or (iii) resulting from the negligence or willful misconduct of Lifecore in performing this Agreement. Lifecore shall give Semnur written notice of any such claim, action, suit or proceeding promptly upon Lifecore’s receipt of notice thereof and tender control of the defense to Semnur. Lifecore shall have the right to retain its own counsel, at its own expense. Lifecore shall reasonably cooperate with Semnur, at Semnur’s expense, in defending or otherwise resolving any such claims, actions, suits and proceedings. All costs associated with such events will be borne by Semnur. Semnur will not settle or compromise any such claim, suit, action or proceeding without the prior written consent of Lifecore, which consent may not be unreasonably withheld.
+
+6.4
+
+Contribution. To the extent that both Lifecore and Semnur are found or determined to be liable based upon any theory of liability to any person or entity as a result of any injury, illness, death, property damage, or other loss or damage arising out of the sale or use of any Product, all rights of contribution between Lifecore and Semnur are preserved and contribution between them will be
+
+​
+
+9
+
+​
+
+calculated based upon a comparison of the relative fault or percentage of liability of Semnur and Lifecore.
+
+6.5
+
+Semnur Insurance. Semnur will maintain product liability or umbrella insurance issued by one or more insurance companies, with Best Rating A-VII or higher, of at least […***…] dollars ($[…***…]) and will name Lifecore as an additional insured. Subject to Semnur’s maintenance of such insurance, Semnur will have full control of any such claims, actions, suits, and proceedings, and Lifecore will promptly tender defense thereof to Semnur.
+
+6.6
+
+Limitations of Indemnification and Liability. The indemnification obligations of each party to the opposite party will extend only to losses, damages, costs and expenses (including reasonable attorney’s fees) incurred with respect to claims of any third parties and will not include any claims for incidental or consequential damages (including, without limitation, loss of profits or business opportunities) by a party to this Agreement or any of its Affiliates against the other party as a result of the incident or matter involved. EXCEPT FOR EACH PARTY’S INDEMNITY OBLIGATIONS HEREUNDER FOR THIRD PARTY CLAIMS OR A BREACH OF SECTION 11 (CONFIDENTIAL INFORMATION), NEITHER PARTY SHALL BE LIABLE TO THE OTHER, AND THE OTHER PARTY HEREBY WAIVES AND RELINQUISHES ANY AND ALL CLAIMS IT MAY HAVE AGAINST THE FIRST PARTY HEREUNDER, FOR ANY INDIRECT, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING FROM OR RELATING TO THIS AGREEMENT, WHICH MAY INCLUDE LOST PROFITS, LOSS OF BUSINESS REPUTATION, AND LOST BUSINESS OPPORTUNITY, EVEN IF THE FIRST PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+7.
+
+Term and Termination
+
+7.1
+
+Term; Renewal. The term of this Agreement will commence on the Agreement Date and, unless terminated earlier in accordance with this Agreement, will continue until the earlier of (i) completion of the services in Exhibit B, or (ii) December 31, 2020 (the “Term”). This Agreement will expire at the end of the Term unless the Parties negotiate and execute a renewal of this Agreement.
+
+7.2
+
+Termination For Material Breach. Either party may terminate this Agreement by written notice to the other in the event of a material breach by the other party of this Agreement, provided that such breach is not cured within thirty (30) calendar days after written notice, with the provision that this Agreement shall not terminate if the breach cannot be cured within the 30 day period, but the breaching party has taken significant steps within the 30 day period to cure the breach, and thereafter cured the breach as soon as practicable, but in no event more than 180 days from such notice. For clarity, Lifecore may terminate this Agreement upon thirty (30) days’ written notice in the case of Semnur’s non-payment of past due invoices, provided that such breach is not cured within such thirty-day period.
+
+​
+
+10
+
+​
+
+7.3
+
+Other Termination. Lifecore may terminate this Agreement upon sixty (60) days’ written notice to Semnur if Semnur rejects or fails to respond to a Major Change or Minor Change proposed by Lifecore or disputes a Minor Change of which Lifecore has provided notice pursuant to the Master Quality Agreement, in each case only after (a) Lifecore has validated the Major Change and it is ready for implementation by Lifecore and (b) Lifecore has provided written confirmation to Semnur that the subject Major Change or Minor Change will not change Semnur’s written and approved acceptance criteria in its Product Specifications. The termination notice will be withdrawn by Lifecore if Semnur provides to Lifecore written acceptance of the Major Change or Minor Change, as the case may be, prior to the expiration of the 60-day termination notice period.
+
+7.4
+
+Immediate Termination. Either party may terminate this Agreement immediately upon written notice to the other party if the other party (a) becomes insolvent, makes a general assignment for the benefit of its creditors, has a receiver or manager appointed or otherwise commences, or becomes the subject of, any action relating to bankruptcy, insolvency, reorganization, dissolution or winding up; (b) ceases to function as a going concern or conduct its operations in the normal course of business as currently conducted; (c) is convicted of or pleads guilty to a charge of violating any law relating to Lifecore’s or Semnur’s business, or (d) engages in any act which materially impairs the goodwill associated with the Product or which materially impairs the terminating party’s trademark, trade name or logo.
+
+7.5
+
+Consequences of Termination. In the event of the termination or expiration of this Agreement:
+
+7.5.1.
+
+The parties expressly agree that the notice periods under this Agreement with respect to the termination of this Agreement are reasonable under the contemplated circumstances.
+
+7.5.2.
+
+Termination will not relieve and release either party from its obligations to make any other payment which may be then owing to the other party under the terms of this Agreement or from any other liability which either may have to the other as of the date of termination and arising out of this Agreement or breach of this Agreement. The non-breaching party agrees to take all reasonable steps to mitigate out-of-pocket expenses incurred in connection therewith.
+
+7.5.3.
+
+Termination will not relieve Lifecore from its documentation and record retention requirements included in the Master Quality Agreement or Semnur’s access to such documentation or records.
+
+8.
+
+Compliance; Regulatory and Quality Issues
+
+8.1
+
+Regulatory Responsibility. Semnur will be responsible for obtaining and maintaining all required regulatory filings and approvals applicable to the
+
+​
+
+11
+
+​
+
+Product, clinical testing and commercial sale of the Semnur Product. Lifecore is responsible for complying with Applicable Law as it relates to performing the Development Services and Manufacturing the Product in accordance with the Master Quality Agreement.
+
+8.2
+
+Recall. The Master Quality Agreement delineates the respective responsibilities of Lifecore and Semnur with respect to recalls. Semnur will have the sole responsibility to effect any recall of the Product; provided however, that Semnur must notify Lifecore in advance and take into account Lifecore’s obligations under Applicable Laws. Lifecore will cooperate as reasonably required in Semnur’s efforts. Semnur will reimburse Lifecore for its reasonable costs incurred in complying with such efforts, except to the extent that the recall is caused by the Product’s failure to comply with the warranty in Section 5.1, in which case, Lifecore will be consulted in advance of the recall and will reimburse Semnur for any out-of-pocket costs reasonably expended by Semnur to effect the recall that are attributable to the Product supplied by Lifecore.
+
+8.3
+
+Inspection. Lifecore will permit Semnur employees or its agents (including QP auditors) to inspect its facilities and quality systems in accordance with the Master Quality Agreement. Upon Semnur’s request for an inspection, or if additional audit support is requested, Lifecore will provide a quotation and charge Semnur for the labor and materials as per Exhibit B. Payment will be due within 30 days of the date of invoice issued on completion of the inspection or audit. If Semnur’s aggregate purchases of Development Services and Product during the 12 months preceding the request exceed $[…***…], Lifecore will waive the charge for one inspection or audit in each calendar year (January 1 - December 31). All information disclosed or revealed during such audit shall be subject to the confidentiality restrictions in this Agreement, and applicable third parties may be required to execute written confidentiality agreements. Semnur agrees that its employees or agents who inspect Lifecore facilities will comply with Lifecore rules and regulations and cGMP’s as set forth in the Master Quality Agreement. Semnur specifically assumes liability for any injuries, damages or delays in production resulting solely from the action of its employees or agents at Lifecore facilities.
+
+9.
+
+Confidential Information
+
+9.1
+
+For purposes of this Agreement, “Confidential Information” means, subject to Section 9.3, any information which is disclosed by a party (the “Disclosing Party”) to the other party (the “Receiving Party”) in writing or in the form of samples or other tangible material and which is marked “Confidential” or “Proprietary” or which is disclosed visually or orally and thereafter summarized in writing within thirty (30) days and marked “Confidential” or “Proprietary.” Without limiting the foregoing, “Confidential Information” includes information relating to biological materials, chemical compounds, products, research, animal testing, clinical trials, development plans, market research, strategies, financial and sales data, pricing or trading terms, evaluations, opinions, interpretations, the
+
+​
+
+12
+
+​
+
+identity of customers or of their requirements or of key contacts within the customer’s organizations, and marketing and merchandising techniques.
+
+9.2
+
+Each party shall hold the other party’s Confidential Information in confidence and agrees not to publish or disclose such Confidential Information to any third party or use it for any purpose other than fulfilling its obligations or exercising its rights under this Agreement. Each party will limit the dissemination of Confidential Information received under this Agreement to only those of its employees, agents, independent contractors or advisors (collectively, “Representatives”) who are directly involved in the performance of this Agreement and who have a need to know the information for this purpose. The Receiving Party will obtain from each such Representative an agreement limiting the use and disclosure of the Confidential Information on terms at least as restrictive as this Agreement. The Receiving Party will be responsible for any breach of this Agreement by any of its Representatives.
+
+9.3
+
+Confidential Information excludes information that: (a) is generally available to the public at the time of disclosure to the Receiving Party or, without a breach of this Section 9 by the Receiving Party, later becomes part of the public domain; (b) the Receiving Party can verify by written records kept in the ordinary course of business was in its lawful possession prior to its disclosure by the Disclosing Party; (c) is received by the Receiving Party from a third party without a breach of confidentiality owed by the third party to the Disclosing Party; or (d) is independently developed by the Receiving Party without use of or reference to the Confidential Information of the Disclosing Party.
+
+9.4
+
+The obligations of the parties under this Section 9 will survive the termination or expiration of this Agreement for a period of […***…] years. All documents and other tangible objects containing or representing Disclosing Party Confidential Information that have been disclosed to the Receiving Party, and all copies thereof which are in the possession of the Receiving Party, shall be and remain the property of the Disclosing Party and shall be destroyed upon the Disclosing Party’s written request. Notwithstanding the foregoing, a Receiving Party may retain a single archival copy of any tangible or electronic Disclosing Party Confidential Information provided under this Agreement, which copy shall only be used by the Receiving Party and its legal advisors in connection with the review of its obligations under this Agreement. Further, the Receiving Party is not required to destroy computer files stored in the ordinary course of its business as a result of automated back-up, archival, fail-over or disaster recovery procedures (subject, however, to the continuing restrictions on use and disclosure set forth in this Agreement). Notwithstanding the return, deletion, destruction or retention of the Confidential Information, the Receiving Party and its Representatives will continue to be bound by all obligations of confidentiality and other obligations under this Agreement.
+
+9.5
+
+Each of Semnur and Lifecore acknowledges that its failure to maintain the other party’s Confidential Information confidential may result in immediate and
+
+​
+
+13
+
+​
+
+irreparable damage to the other party. Therefore, each of Semnur and Lifecore may be entitled to seek such equitable relief, in addition to any damages, as any court of competent jurisdiction may deem proper to enforce the provisions of this Section 9.
+
+9.6
+
+This Section 9 supersedes any confidentiality or non-disclosure agreement previously executed between Lifecore and Semnur. Any Confidential Information exchanged between the parties under such a prior agreement will be treated as Confidential Information under this Agreement and is subject to the terms and conditions hereunder.
+
+10.
+
+Intellectual Property
+
+10.1
+
+License to Lifecore. Subject to the limitations set forth in this Agreement, Semnur hereby grants to Lifecore a nonexclusive, worldwide, royalty-free license, with no right to sublicense, under all patents, patent applications, Trademarks, non-patented intangible and tangible information and know-how, which are owned or controlled by Semnur and which Semnur has the right to disclose and license to third parties, including manufacturing instructions, copyrights, copyrightable works, know-how and trade secrets, solely in each case which are necessary for, and solely for the purpose of, Lifecore to Manufacture the Product for Semnur as part of the Development Services and CTM Manufacturing during the Term. Lifecore will comply with all Trademark manuals and similar use guidelines provided by Semnur and for clarity, all use permitted above by Lifecore of the Trademark will inure solely to the benefit of Semnur. Except for the license provided hereby, Lifecore will obtain no other right, title, or interest in Semnur’s intellectual property by virtue of this Agreement or its performance of services hereunder.
+
+11.
+
+Infringement
+
+11.1
+
+Semnur warrants that, to its knowledge, the Manufacture and sale of the Product as it exists on the Agreement Date in accordance with this Agreement does not infringe any patent or other intellectual property right of another Person. In the event an intellectual property infringement claim is commenced or threatened by a third party against Lifecore or Semnur involving the Product in the United States or any other country (“Infringement Claim”), the affected party will promptly notify the other party of such Infringement Claim.
+
+11.2
+
+Semnur will indemnify and hold Lifecore harmless from any and all losses, damages, costs and expenses (including reasonable attorney’s fees) awarded against or incurred by Lifecore arising from an Infringement Claim relating to Lifecore’s Manufacture of Product for Semnur hereunder and Semnur’s sale, distribution, import, marketing, or use of the Product, except to the extent that such Infringement Claim arises out of or in connection with or is caused by Lifecore’s material breach of this Agreement, in which event the provisions of Section 6.1 will apply. Lifecore will cooperate fully and promptly with Semnur
+
+​
+
+14
+
+​
+
+in defending or otherwise resolving any such claims, actions, suits and proceedings.
+
+12.
+
+Force Majeure
+
+12.1
+
+Neither party will be deemed to be in breach of this Agreement or otherwise be liable to the other by reason of any delay in performing or failure to perform any obligations hereunder (other than payment obligations for amounts due for services or Product earned before the Force Majeure) to the extent that such delay or failure was due to any event of Force Majeure of which it has notified the other party, and provided that the party resumes performance as soon as reasonably practicable, and the time of performance of that obligation will be extended accordingly. If the event of Force Majeure in question prevails for a continuous period in excess of three months, and such event substantially prevents a party from performing any of its material obligations under this Agreement, the parties will enter into bona fide discussions with a view to alleviating its effects or to agree to such alternative arrangements as may be fair and reasonable, and the other party may terminate this Agreement as provided in Article 7. Each party will notify the other of any delay due to Force Majeure as soon as practicable and will keep the other informed through the duration of the delay.
+
+12.2
+
+As used above, “Force Majeure” means acts of God, explosions, floods, tempest, fires or accidents, acts of terrorism, war or threat of war, acts, restrictions or regulations of any government or governmental agency, import or export regulations or embargoes, strikes or other labor troubles, difficulties in obtaining raw materials, power failure or breakdowns in machinery in respect of which the party responsible has taken all reasonable steps in an attempt to rectify or fix such breakdowns, or any other cause which would frustrate the execution of this Agreement and which is beyond the control of, or occurring without the fault of, the party asserting the event of Force Majeure.
+
+13.
+
+Notices
+
+All notices under this Agreement will be in writing, and may be delivered by hand or sent by facsimile, email, overnight courier or registered mail, return receipt requested. Notices sent by mail or courier will be deemed received on the date of receipt indicated by the return verification provided by the national postal service or courier involved. Notices sent by facsimile transmission will be deemed received on the day on which sent if the sender’s copy of the facsimile transmission contains the automatic confirmation of the transmission, and notices sent by email will be deemed delivered on the day sent, subject to confirmation of delivery. Notices will be given, or sent to the parties at the following addresses;
+
+If to Semnur:
+
+[…***…]
+
+If to Lifecore:
+
+[…***…]
+
+​
+
+15
+
+​
+
+Any party may designate any other address for notices given it hereunder by written notice to the other party given at least ten (10) days prior to the effective date of such change.
+
+14.
+
+Entire Contract
+
+This Agreement, together with the Exhibits attached and incorporated, supersedes all other oral and written arrangements between the parties and is intended as a complete and exclusive statement of the terms of their understanding with respect to Development Services and CTM Manufacturing to be provided.
+
+15.
+
+Amendments
+
+Amendments, if any, will be in writing and valid only when signed by both parties.
+
+16.
+
+Assignment
+
+16.1
+
+Except as otherwise provided in this Section 16, neither party shall assign or otherwise transfer this Agreement or any part thereof to any third party without the written consent of the other party, which shall not be unreasonably withheld, conditioned, or delayed. Each party, in its sole discretion and without the other party’s written consent, may assign this Agreement or transfer all or a portion of its rights under this Agreement to any of its Affiliates, or designate or cause any Affiliate to have the benefit of all or a portion of its rights hereunder; provided, however, that any such party shall remain liable for the performance by its Affiliate of the obligations of the Affiliate under this Agreement. Also, Lifecore may assign this Agreement without the other party’s written consent to a successor in interest to all or substantially all of the assets of the operations of Lifecore relating to the subject matter of this Agreement, whether through merger, acquisition, operation of law, reorganization or otherwise. This Agreement shall inure to the benefit of, be binding upon, and be enforceable against the parties hereto, their permitted successors and assigns.
+
+16.2
+
+Subject to Section 9.2, Lifecore may permit third-party subcontractors to perform a portion of the Development Services hereunder, provided that Lifecore will remain fully responsible to Semnur for the performance of the subcontractor, including any breach of this Agreement by the subcontractor.
+
+17.
+
+Severability
+
+In the event that any provision of this Agreement is held invalid by the final judgment of any arbitrator or court of competent jurisdiction, the remaining provisions will remain in full force and effect as if such invalid provision had not been included herein.
+
+18.
+
+U.N. Convention Excluded
+
+The U.N. Convention on Contracts for the International Sale of Goods shall not apply to this Agreement.
+
+​
+
+16
+
+​
+
+19.
+
+Language; Interpretation. This Agreement may be translated into any language but it shall be construed and interpreted in English. Except where the context otherwise requires, wherever used, the use of any gender will be applicable to all genders, and the word “or” is used in the inclusive sense. When used in this Agreement, “including” or its correlative uses means “including without limitation”. References to either party include the successors and permitted assigns of that party. The Background and the Exhibits are incorporated by reference into this Agreement. The headings of this Agreement are for convenience of reference only and in no way define, describe, extend or limit the scope or intent of this Agreement or the intent of any provision contained in this Agreement.
+
+20.
+
+Applicable Law
+
+Except as altered or expanded by this Agreement, the substantive law (and not the law of conflicts) of the State of New York, U.S.A., will govern this Agreement in all respects as to the validity, interpretation, construction and enforcement of this Agreement and all aspects of the relationship between the parties to this Agreement.
+
+21.
+
+Alternative Dispute Resolution
+
+21.1
+
+Negotiation. The Parties will attempt in good faith to resolve any dispute arising out of or relating to this Agreement promptly between officials who have authority to settle the controversy. These representatives will consult and negotiate with each other in good faith, and recognizing their mutual interests, attempt to reach a solution satisfactory to both Parties before resorting to arbitration as provided below. If the negotiation is not concluded within thirty (30) days of a Party seeking a negotiation, that Party may commence arbitration, as set forth below.
+
+21.2
+
+Arbitration. Except as otherwise set forth in this Agreement, any dispute arising out of or in connection with this Agreement or the existence, validity, breach or termination thereof, whether during or after its term, which is not resolved in accordance with Section 21.1, will be finally settled by compulsory arbitration under the Arbitration Rules of the American Arbitration Association (“AAA”), as hereinafter modified or supplemented.
+
+21.3
+
+Location, power, hearing. Claims shall be heard by a single arbitrator. The place of arbitration shall be New York City, New York. The parties expressly agree that the arbitrator will be empowered to grant injunctive relief. The arbitrator will have no authority to award punitive or other damages not measured by the prevailing party’s actual damages, except as may be required by statute. The arbitrator shall not award consequential damages in any arbitration initiated under this section.
+
+21.4
+
+Award. Except as provided in Section 9.5, the arbitral award will be the exclusive remedy of the parties for all claims, counterclaims, issues or accountings presented or pled to the arbitrators. Any such award will be granted and paid in U.S. dollars exclusive of any tax, deduction, or offset. Judgment upon
+
+​
+
+17
+
+​
+
+the arbitral award may be entered in any court of competent jurisdiction. Any additional costs, fees or expenses incurred in enforcing the arbitral award will be charged by the court against the party that resists its enforcement.
+
+21.5
+
+Appeal. Notwithstanding any language to the contrary in this Agreement, the parties hereby agree: that the award described in Section 21.4 (the “Underlying Award”) may be appealed pursuant to the AAA’s Optional Appellate Arbitration Rules (“Appellate Rules”) if the amount of the Underlying Award exceeds $500,000; that the Underlying Award rendered by the arbitrator shall, at a minimum, be a reasoned award; and that the Underlying Award shall not be considered final until after the time for filing the notice of appeal pursuant to the Appellate Rules has expired. Appeals must be initiated within thirty (30) days of receipt of an Underlying Award, as defined by Rule A-3 of the Appellate Rules, by filing a Notice of Appeal with any AAA office. Following the appeal process, the decision rendered by the appeal tribunal may be entered in any court having jurisdiction thereof.
+
+22.
+
+Waiver of Breach
+
+The waiver or failure of either party to enforce the terms of this Agreement in one instance will not constitute a waiver of said party’s rights under this Agreement with respect to other violations. Waivers must be in writing signed by the waiving party to be enforceable.
+
+23.
+
+Survival
+
+All representations or warranties made in this Agreement and all terms and provisions of this Agreement intended to be observed and performed after the termination hereof, including without limitation, Sections 1 (Definitions), 2.7 (Semnur Equipment and Semnur Supplies), 5 (Warranty and Limitation of Remedies), 6 (Indemnity; Limitations), 7.5 (Consequences of Termination), 9 (Confidential Information), 11 (Infringement) and Sections 13-24 and 26 will survive such termination and continue, thereafter, in full force and effect.
+
+24.
+
+Public Announcements
+
+Neither party will make any formal press release or other public announcement or disclosure in connection with any of the transactions covered by this Agreement, except to the extent (i) required by Applicable Law, rule, regulation or the rules and regulations of the SEC or any national securities exchange, (ii) mutually agreed by the parties, or (iii) required in order for a party to exercise its rights under this Agreement. If such disclosure is made under clause (i) above, the party intending to make such disclosure will provide the other advance written notice, to the extent practicable, and the reasonable opportunity to seek a protective order.
+
+​
+
+18
+
+​
+
+25.
+
+Management Meetings
+
+Lifecore and Semnur will use commercially reasonable efforts every 3 (three) months to schedule and participate in conference calls or in-person visits among management representatives of both companies, as needed. The specific date, time, and agenda will be mutually agreeable by both parties at least ten (10) days prior to the call. The agenda will include a review of each company’s performance under this Agreement, and any other items mutually agreed upon as relevant to this Agreement.
+
+26.
+
+Relationship of the Parties
+
+Lifecore will perform services for Semnur under this Agreement as an independent contractor and not as agent or representative of Semnur. All persons employed by Lifecore (or its subcontractors) in connection with services under this Agreement shall be Lifecore’s (or its subcontractors’) employees, and shall not be deemed employees of Semnur. Lifecore shall not make any commitment or incur any charge or expense in the name of Semnur.
+
+27.
+
+Headings
+
+The headings contained in this Agreement are intended for convenience or reference only and shall not in any way control or affect the meaning or construction of any provision of this Agreement.
+
+28.
+
+Counterparts
+
+Each of this Agreement, and the Master Quality Agreement attached as Exhibit A, may be executed in counterparts, any of which may be executed and delivered via facsimile or other electronic delivery (including Portable Document Format (.pdf)), each of which shall be deemed an original, and all of which, taken together, shall constitute one and the same instrument.
+
+IN WITNESS WHEREOF, the parties have hereunto set their hands and seal as of the day and year first above written.
+
+​
+
+LIFECORE BIOMEDICAL, LLC
+
+SEMNUR PHARMACEUTICALS, INC.
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+By:
+
+/s/ Kipling Thacker, Ph.D.
+
+​
+
+By:
+
+/s/ Suketu Desai, Ph.D.
+
+​
+
+​
+
+​
+
+​
+
+​
+
+Name:
+
+Kipling Thacker, Ph.D.
+
+​
+
+Name:
+
+Suketu Desai, Ph.D.
+
+​
+
+​
+
+​
+
+​
+
+​
+
+Title:
+
+CSO and Vice President
+
+​
+
+Title:
+
+CTO and SVP
+
+​
+
+​
+
+​
+
+​
+
+​
+
+Date:
+
+1/26/17
+
+​
+
+Date:
+
+01/27/2017
+
+​
+
+​
+
+19
+
+​
+
+EXHIBIT A
+
+MASTER QUALITY AGREEMENT
+
+​
+
+SEMNUR PHARMACEUTICAL, INC. AND
+
+​
+
+LIFECORE BIOMEDICAL, LLC
+
+​
+
+MASTER QUALITY AGREEMENT
+
+THIS AGREEMENT made as of the 9th day of January, 2017, (“Effective Date”)
+
+BETWEEN:
+
+Lifecore Biomedical, LLC
+3515 Lyman Boulevard
+Chaska, Minnesota, 55318
+(hereinafter referred to as “Lifecore”)
+
+and
+
+SEMNUR PHARMACEUTICALS, INC.
+4970 El Camino Real, #205
+Los Altos, CA 94022
+(hereinafter referred to as “Semnur”)
+
+Approvals:
+
+This Quality Agreement is approved by:
+
+​
+
+​
+
+​
+
+SEMNUR PHARMACEUTICALS, INC.
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+/s/ Suketu Desai, Ph.D.
+
+​
+
+01/12/2017
+
+Suketu Desai, Ph.D.
+
+​
+
+Date
+
+CTO and SVP
+
+​
+
+​
+
+​
+
+​
+
+​
+
+LIFECORE BIOMEDICAL, LLC
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+​
+
+/s/ Jackie Klecker
+
+​
+
+1/17/2017
+
+By: Jackie Klecker, Vice President, Quality Assurance and Regulatory
+
+​
+
+Date
+
+​
+
+​
+
+20
+
+​
+
+​
+
+TABLE OF CONTENTS
+
+​
+
+ARTICLE 1 SCOPE
+
+1
+
+ARTICLE 2 COMMUNICATION BETWEEN LIFECORE AND SEMNUR
+
+3
+
+ARTICLE 3 INSPECTION/IDENTIFICATION OF INCOMING RAW MATERIALS
+
+3
+
+ARTICLE 4 MANUFACTURING AND QUALITY CONTROL
+
+4
+
+ARTICLE 5 DISCREPANCIES/DEVIATIONS AND INVESTIGATIONS
+
+5
+
+ARTICLE 6 CHANGE CONTROL
+
+5
+
+ARTICLE 7 BATCH TESTING, REVIEW, AND RELEASE PROCEDURES
+
+8
+
+ARTICLE 8 STORAGE AND SHIPMENT
+
+9
+
+ARTICLE 9 QUALIFICATION, VERIFICATION, AND VALIDATION
+
+9
+
+ARTICLE 10 QUALITY COMPLAINTS; FIELD REPORTING
+
+9
+
+ARTICLE 11 RIGHT TO INSPECT
+
+10
+
+ARTICLE 12 STABILITY
+
+10
+
+ARTICLE 13 REGULATORY
+
+11
+
+ARTICLE 14 PRODUCT NOTICES AND RECALLS
+
+12
+
+ARTICLE 15 ANNUAL PRODUCT REVIEWS
+
+12
+
+ARTICLE 16 RECORDS
+
+12
+
+ARTICLE 17 RETAINS
+
+13
+
+​
+
+​
+
+​
+
+​
+
+LIST OF APPENDICES
+
+​
+
+Appendix A Product Description
+
+14
+
+Appendix B Outline of Responsibilities – General
+
+15
+
+Appendix C Quality Contacts
+
+16
+
+Appendix D Lifecore Documentation Requiring Semnur Approval
+
+17
+
+Appendix E Definition of Lifecore Lot Number, Formulation Date, and Expiry Date
+
+18
+
+Appendix F Product Shipping Requirements
+
+19
+
+​
+
+​
+
+​
+
+​
+
+MASTER QUALITY AGREEMENT
+
+This Master Quality Agreement (“MQA” or “Agreement”), is between LIFECORE BIOMEDICAL, LLC, a Minnesota (U.S.A.) entity with offices located at 3515 Lyman Boulevard, Chaska, Minnesota 55318 (“Lifecore”) and SEMNUR PHARMACEUTICALS, INC., having registered offices at 4970 El Camino Real, #205, Los Altos, CA 94022.
+
+In consideration of the mutual covenants exchanged herein, the parties agree as follows:
+
+ARTICLE 1
+
+SCOPE
+
+1.1This Master Quality Agreement sets forth the obligations and responsibilities of Semnur and Lifecore relating to the manufacturing and quality assurance of the Phase 3 Clinical Trial Material (CTM) Product described in Appendix A that is provided under the Master Services Agreement between Lifecore and Semnur dated as of January 9, 2017, as amended, (the “Master Services Agreement” or “MSA”), and any subsequent agreements executed between Lifecore and Semnur. Semnur purchases and sends […***…] and […***…] to Lifecore for development and clinical trial material manufacturing.
+
+1.2Appendix B sets forth the respective responsibilities of Lifecore and Semnur. Each party is authorized to provide this document, including Appendix B without limitation, to Regulatory Authorities as required by Applicable Law.
+
+1.3Capitalized terms used but not otherwise defined herein have the meanings ascribed thereto in the Master Services Agreement. The following terms are specifically defined for purposes of this Quality Agreement:
+
+(a)Applicable Law. “Applicable Law” means any domestic or foreign, supranational, regional, national, state or local law or rule, regulation, guideline, or requirement of any Regulatory Authority for Phase 3 clinical studies as defined in FDA 21 CFR part 11, 210, 211, and EU GMP; provided, however, that to the extent Lifecore’s compliance with Applicable Law in a country other than the United States and the European Union would require Lifecore to bear increased costs, quality assurance or regulatory burdens in connection with the Development Services and Manufacturing of CTM, Lifecore will provide a quotation and charge Semnur per the terms of the MSA.
+
+(b)Batch: Specific quantity of Product or other material that is intended to have uniform character and quality, within specified limits, and is produced during the same cycle of Manufacturing. Batch is used synonymously with “Lot”.
+
+(c)Certificate of Analysis (“COA”): Document issued by Lifecore that lists the test methods used, acceptance limits, and release test results for a specific Lot of Product.
+
+(d)Critical Compound: Means any material which may reasonably present a potential hazard to the Product(s), including ß-lactam-antibiotics.
+
+​
+
+1
+
+​
+
+(e)Current Good Manufacturing Practices (“cGMP”): “cGMP” means those current good manufacturing practices and standards as promulgated by the FDA under the FFDCA in CFR 21 Part 11, 210, 211, for the control and manufacture of the Product.
+
+(f)Final Product, or “Product”: Means the Product as identified in Appendix A, including associated packaging and components (collectively, the “Product”).
+
+(g)Facility: The facilities of Lifecore located at 3515 Lyman Boulevard, Chaska, Minnesota 55318 or 1245 Lakeview Drive, Chaska, Minnesota, 55318.
+
+(h)FDA: “FDA” means the Food and Drug Administration of the United States Department of Health and Human Services or any successor agency thereto.
+
+(i)Lifecore SOPs: Lifecore’s written standard operating procedures and work instructions, as adapted from time to time for use in Manufacturing the Product and as revised in accordance with this Quality Agreement.
+
+(j)Lot Number: The unique number used to identify a specific Lot or Batch of manufactured material.
+
+(k)Manufacturing: Those activities described in the Master Services Agreement (or other written agreement between Lifecore and Semnur) relating to the receipt of Raw Materials, formulation, filtration, filling, packaging, testing, storage, and shipping of the Product.
+
+(l)Out-of-Specification (“OOS”): Out of Specification, an individual or composite test result, obtained using a current and approved test method, which fails to meet a specified acceptance criterion. An OOS is considered a Significant Quality Event.
+
+(m)Process Validation: Establishment of documented evidence that provides a high degree of assurance that a specific process will consistently produce a product, meeting its predetermined specifications and quality attributes.
+
+(n)Product Specification: “Product Specifications” means the specifications set forth in Appendix A, as they may be modified by written agreement of Lifecore and Semnur.
+
+(o)Quality Contacts: “Quality Contacts” means the representatives of Semnur and Lifecore identified on Appendix C, as it may be updated from time to time.
+
+(p)Raw Materials: “Raw Materials” means formulation ingredients, including active pharmaceutical ingredient(s) ([…***…]), excipients ([…***…] and others), components (primary or secondary packaging components), or supplies necessary to Manufacture and ship the Product in accordance with the Specifications.
+
+(q)Regulatory Authority: “Regulatory Authority” means any applicable supranational, national, regional, state, provincial or local regulatory agencies, departments, bureaus, commissions, councils or other government entities, such as the FDA, regulating or otherwise exercising authority with respect to the Development Services or CTM Manufacturing
+
+​
+
+2
+
+​
+
+of the Product and the production, interstate or international shipment, marketing, or sale of the Product or use of the Product in clinical trials.
+
+(r)Reprocess: “Reprocess” means introducing the Product or any intermediate that does not meet standards or Specifications back into the relevant process and repeating a Manufacturing step that is part of the established Manufacturing process for the Product.
+
+(s)Rework: Introducing a Product or material that does not meet standards or Specifications to one or more processing steps that are different from the established manufacturing process to obtain acceptable quality.
+
+(t)Significant Quality Event: A nonconformity that could have an impact on the safety, purity, integrity, efficacy, or quality of the Product. A confirmed Out of Specification result is a Significant Quality Event.
+
+ARTICLE 2
+
+COMMUNICATION BETWEEN LIFECORE AND SEMNUR
+
+2.1The Quality Contacts of Semnur and Lifecore will provide timely communications to one another as necessary or appropriate related to the quality of the Product. Routine verbal and written communications shall be delivered to the Quality Contacts at the addresses and via any communication mode designated on Appendix C Primary contact list.
+
+2.2The Product scope of this agreement is for Clinical Trial Material (CTM) in clinical phase 3. Any change to the regulatory status of this product must be communicated in writing to Lifecore within 5 business days.
+
+2.3Quality Contacts of Semnur and Lifecore shall communicate to review quality issues related to the obligations and responsibilities as described in this Master Quality Agreement. During this discussion, Semnur and Lifecore will discuss items such as Product quality-related data, proposed changes, future planning, regulatory updates, major organizational changes, and such other matters as may be requested by a party. Semnur is responsible for scheduling these meetings.
+
+2.4Dispute resolution: In the event that a dispute arises regarding any quality-related issue covered in this MQA, the Quality Contacts from both parties shall in good faith promptly attempt to resolve the dispute. In the event of a dispute that cannot be resolved between the Quality Contacts from both parties, the matter shall be resolved in accordance with dispute resolution provisions of the Master Services Agreement.
+
+ARTICLE 3
+
+INSPECTION/IDENTIFICATION OF INCOMING RAW MATERIALS
+
+3.1Semnur is responsible for defining the Raw Material requirements.
+
+3.2Lifecore will identify, inspect, test, release, and document all incoming Raw Materials and components used in Manufacturing of the Product in accordance with Appendix A, Lifecore SOPs, the Master Production Record, and Applicable Law.
+
+​
+
+3
+
+​
+
+3.3Lifecore will segregate all Raw Materials that have not been inspected from approved materials. According to Applicable Law and Lifecore SOPs, Lifecore shall ensure that the Raw Materials, Components, and the Product are not cross contaminated by or mixed with other products or materials.
+
+3.4Lifecore shall perform periodic assessments of its suppliers of Raw Materials or other goods or services used in the Manufacturing of the Product as required under Applicable Law and according to Lifecore SOPs.
+
+ARTICLE 4
+
+MANUFACTURING AND QUALITY CONTROL
+
+4.1Lifecore shall Manufacture the Product in accordance with the Master Services Agreement or any other subsequent written agreement executed between Lifecore and Semnur. Without limiting the scope of the foregoing in any way, Lifecore shall, among other things:
+
+·
+
+Manufacture the Product in accordance with written Batch records, the Product Specifications, Lifecore SOPs, and Applicable Law.
+
+·
+
+Validate in accordance with Applicable Law all analytical methods, equipment, Facilities, processes, computerized systems, software, and cleaning used in connection with the Manufacture of the Product.
+
+·
+
+Retain Batch documentation and maintain such other original manufacturing records as required by the Master Production Record, Lifecore SOPs, Semnur requirements and Applicable Law.
+
+·
+
+Provide adequate personnel with appropriate education, training, and experience, or any combination thereof, to Manufacture, test, and release Product and to fulfill Lifecore’s obligations under this Agreement.
+
+·
+
+Obtain and maintain during the term hereof, as relating to the Facility, all government and regulatory authority licenses, permits, registrations, and approvals required by Applicable Law in order to Manufacture the Product pursuant to the terms hereof.
+
+4.2In the event that prior to entering into this Quality Agreement, or at any time during the term of this Quality Agreement, LIFECORE has Manufactured, handled or stored (or intends to do so, as the case may be) any Critical Compounds in the same area where the Products are to be Manufactured, handled or stored, LIFECORE will maintain on file a risk assessment demonstrating appropriate separation and segregation of the operations. Where new Product risks become evident or there is adverse impact to existing Product risks, the change must be communicated and approved by SEMNUR, as described in section Change Control.
+
+4.3Lifecore is responsible for quality assurance of (a) Raw Materials, (b) Components (c) Primary and secondary packaging (d) Formulation and in process steps, (f) filtration, filling and packaging and (g) the Product, including testing and documentation thereof, and retention of Product archive samples and documentation in accordance with Lifecore SOPs, the Master
+
+​
+
+4
+
+​
+
+Production Record, and Applicable Law. Changes to any of the above will be addressed per Article 6, Changes.
+
+4.4Lifecore is responsible for any outside contracted services associated with the Manufacture or testing of the Product and Raw Materials. Changes to outside contracted services will be communicated per Article 6, Changes.
+
+4.5Lifecore will use a unique Lot Number as defined by Lifecore SOPs for identifying each Batch of manufactured Product (see Appendix E). This Lot Number shall appear on drug master record documentation relating to the particular Batch of Product.
+
+4.6Lifecore shall maintain a self-inspection program that satisfies cGMP requirements. Lifecore will have a documented program and procedure for conducting internal quality audits.
+
+ARTICLE 5
+
+DISCREPANCIES/DEVIATIONS AND INVESTIGATIONS
+
+5.1Discrepancies and Investigations – General Information
+
+(a)In the event of a discrepancy (Manufacturing nonconformity such as unplanned deviation, planned deviation, Out-of-Specification result, or nonconforming material), Lifecore will determine the category of the nonconformity: either a Significant Quality Event, or an insignificant event. Lifecore will conduct an investigation and will notify Semnur as described in the following sections.
+
+(b)A Lifecore Contact will notify Semnur Quality Contact(s) in the event Lifecore identifies and confirms Significant Quality Events prior to the release of any such affected Product. A Semnur Quality Contact will be notified within one (1) business day of becoming aware of a potential OOS involving product outside of Lifecore control, for example a stability OOS. If the potential OOS is appropriately invalidated by Lifecore within one (1) business day of becoming aware, notification to Semnur is not required.
+
+(c)Semnur will review all insignificant event resolutions related to the Product as part of batch record review and reserves the right to request additional information from Lifecore concerning any nonconformity by Lifecore related to the Product.
+
+(d)When the nonconformance involves a Significant Quality Event, Lifecore shall investigate the Significant Quality Event and shall work with Semnur to resolve the issue. Semnur will review and approve the documentation supporting the Significant Quality Event.
+
+5.2Lifecore will not Rework a Batch without the prior written consent of Semnur.
+
+ARTICLE 6
+
+CHANGE CONTROL
+
+6.1This Article sets forth Lifecore’s Change Control System related to the implementation of all changes that could affect the identity, quality, safety, stability, regulatory status, use, and efficacy of the Product.
+
+​
+
+5
+
+​
+
+6.2Changes requested and/or made by Lifecore shall be addressed per the categories below, (Major Change, Minor Change, insubstantial Change or No Risk Change) pursuant to the procedures set forth in this Article 6. Changes to the documentation referenced in Appendix D will continue to require Semnur approval regardless of the change category. Additionally Lifecore will maintain a list, referred to as a Client Correspondence and Documentation (CCD) list, of documents associated with the Semnur Product that includes documents where, regardless of the change type, Semnur will receive a copy of the final, effective revised document. This document will also note which specific documents require Semnur approval regardless of the change type per Appendix D.
+
+Major Change:
+
+A change that is reasonably likely to have an impact on the safety, purity, integrity, efficacy, or quality of the Product, such as a design change. Major Changes shall be submitted in writing to the Semnur Quality Contacts for review and written approval reasonably in advance of anticipated implementation. Without limiting the foregoing, Major Changes, for example, will:
+
+·
+
+Alter Product Specification requirements
+
+·
+
+Add or remove any major manufacturing process step (as defined in the Quality Plan Flowchart)
+
+·
+
+Affect the primary container/closure system
+
+·
+
+Modify the composition and control of the formulation
+
+·
+
+Modify […***…] and/or […***…] manufacturers/suppliers
+
+·
+
+Modify analytical methods or add new methods
+
+·
+
+Modify processing steps
+
+·
+
+Add or remove product design related item(s) from the BOM (ex. container/closure, formulation chemicals, product labeling etc.)
+
+·
+
+Impact any regulated or customer-owned labeling artwork on the Product
+
+·
+
+Add a new risk or adversely impact an existing risk
+
+·
+
+Impact an existing sterilization system or critical parameters
+
+·
+
+Change an outsourced manufacturing process or outsourced testing facility
+
+·
+
+Impact Raw Materials (acceptance criteria, manufacturing method, or test methods)
+
+·
+
+Change the sample treatment/composilion, critical analysis parameters, methodology, or function of the analytical methods used to test Product
+
+A Major Change requires prior written approval through the Change Control Systems of both parties. In the event that either party desires to make any Major Change, written notice shall he delivered to the other party specifying such proposed change, and the other party shall respond to any such notice within thirty (30) calendar days after receipt. These changes may have validation and regulatory impact and are subject to both party’s quality and regulatory approval.
+
+​
+
+6
+
+​
+
+Minor Change:
+
+A change that could have an impact on the safety, purity, integrity, efficacy, or quality of the Product. Minor changes shall be submitted in writing to the Semnur Quality Contacts for notification, reasonably in advance of anticipated implementation. Without limiting the foregoing, Minor Changes, for example, will:
+
+·
+
+Require Facility changes that may impact Product data or validations
+
+·
+
+Tighten a control limit at a process step
+
+A Minor Change may be implemented by a single party with subsequent notification of the change to the other party.
+
+Insubstantial Change:
+
+A change that is reasonably likely to have NO impact on the safety, purity, integrity, efficacy, or quality of the Product. Lifecore, at its discretion, shall have the right to make insubstantial changes pertaining to the Product, its Manufacturing, documentation, or testing. Without limiting the foregoing, Insubstantial Changes, for example, will:
+
+·
+
+Affect a single component within equipment with no impact to process parameters
+
+·
+
+Add a minor inspection step with thoroughly understood impact to quality
+
+·
+
+Effect equipment maintenance or calibration procedures with no impact to process / Product
+
+·
+
+Fix a software bug or make a modular addition with no change to original functionality
+
+·
+
+Improve safety or reduce variation on minor equipment with no impact to process / Product
+
+·
+
+Change a document name/number or format
+
+·
+
+Update the structure/format, add more detail to instruction or improve flow of a document/test method
+
+An Insubstantial Change may be made by Lifecore without notice to the other party.
+
+No Risk Change:
+
+An administrative change to the Manufacturing, Product, or testing documentation, such as correcting grammatical errors or formatting, should be classed as No Risk. Lifecore shall have the right to make No Risk changes pertaining to the Product, its Manufacturing, documentation, or testing at Lifecore’s discretion.
+
+A No Risk Change may be made by Lifecore without notice to the other party.
+
+6.3Change Control Systems at both parties will be used to document and approve changes, following approved procedures. Change documentation may be used for formal notification of approved changes to the other party.
+
+6.4If a change is initiated by Semnur, Semnur must provide the change request in writing to the Lifecore. Both parties will work together and mutually agree to a change implementation
+
+​
+
+7
+
+​
+
+plan, including timing of implementation. Changes above and beyond those normally associated with the contract manufacture of the Product will be invoiced by the Lifecore per the conditions set forth in the Master Services Agreement.
+
+6.5The implementation of changes at any level that affect the Product regulatory status will be subject to regulatory review and approval by each/either party.
+
+6.6Semnur shall obtain Regulatory Authority approval, where necessary, prior to implementation of any approved change by Lifecore. Semnur will notify Lifecore if prior approval by a Regulatory Authority is required, will provide the anticipated Regulatory Authority approval date, and will notify Lifecore of the date approved by the Regulatory Authority. Lifecore shall cooperate with all reasonable requests of Semnur to obtain such Regulatory Authority approval.
+
+ARTICLE 7
+
+BATCH TESTING, REVIEW, AND RELEASE PROCEDURES
+
+7.1Master Production Record (MPR)
+
+(a)Semnur will review and approve MPR.
+
+(b)Changes to the MPR shall be handled according to Article 6.
+
+(c)Copies of the approved MPR will be provided to Semnur by Lifecore.
+
+7.2Lifecore Release of Product to Semnur
+
+(a)Lifecore Quality Assurance will release each Lot of Product to Senmur.
+
+(b)Lifecore Quality Assurance shall not release a Lot of Product to Semnur unless it conforms to the Product Specifications and cGMP requirements.
+
+(c)Lifecore shall provide a Certificate of Analysis with each Lot of Product
+
+(d)Copies of the executed batch records will be provided to Semnur by Lifecore using a mutually agreed upon method of document transfer. Semnur will review the final executed batch production records after Lifecore QA review as part of quality oversight.
+
+(e)Semnur will review and release the final product based on lot release information in the form of a release memo for each lot.
+
+7.3Qualified Person Release
+
+(a)Where the Territory includes countries or areas (e.g., the European Union) that require clinical and/or commercial release by a Qualified Person (QP), Semnur shall be responsible for the selection and appointment of such QP and the completion of QP activities according to regulatory requirements for the Territory. Semnur shall be responsible for interaction with the QP to obtain product release.
+
+​
+
+8
+
+​
+
+(b)Where the Territory includes countries or areas that require clinical and/or commercial in-country testing, Semnur shall be responsible for the in-country testing and coordination of such testing.
+
+ARTICLE 8
+
+STORAGE AND SHIPMENT
+
+8.1Semnur will provide or approve Lifecore’s proposed storage and shipping conditions for the Product, including but not limited to packing components, packing configuration, temperature control, and temperature monitoring.
+
+8.2Completion of applicable shipping validation studies is the responsibility of Semnur.
+
+8.3Shipment under quarantine is an exception that shall be permitted under the combination of the following conditions:
+
+(a)Lifecore has written procedures or Semnur approved nonconformance documentation for shipping under quarantine that comply with regulatory requirements under Applicable Law.
+
+(i)Semnur provides Lifecore with written instructions to ship the Lot under quarantine.
+
+(ii)Semnur shall supply Lifecore with a written certification stating Product will not be released to clinical trials or commerce until fully released.
+
+ARTICLE 9
+
+QUALIFICATION, VERIFICATION, AND VALIDATION
+
+9.1Lifecore shall qualify and validate Facilities, equipment, and test methods used for the Manufacturing the Product in accordance the Lifecore SOPs, Semnur requirements and Applicable Law. Semnur will approve Product specific qualification/validation protocols as agreed upon and documented in the CCD list per Section 6.2. Process Performance Qualification is not required for Clinical Phase 3 CTM production.
+
+9.2Lifecore will supply to Semnur in a mutually agreed upon format, upon request for Semnur files, or make available to regulatory authorities, copies of any Validation Master Plan or other development/validation/qualification protocols and reports in support of regulatory requirements and submissions.
+
+ARTICLE 10
+
+QUALITY COMPLAINTS; FIELD REPORTING
+
+10.1Semnur shall inform Lifecore of any complaints received by Semnur relating to the Product within five (5) business days after Semnur receipt of such complaint. Semnur and Lifecore shall cooperate closely in order to address any issues in connection with such complaints. Semnur will send complaint related samples to Lifecore to facilitate investigation in a timely manner.
+
+​
+
+9
+
+​
+
+10.2Lifecore will provide a written root cause investigation report to Semnur within thirty (30) calendar days of Lifecore receiving a complaint notification, unless medical and/or regulatory urgency requires resolution in less than thirty (30) calendar days. Semnur will notify Lifecore in writing in the event medical and/or regulatory urgency requires resolution in less than thirty (30) calendar days. If the complaint investigation requires more than thirty (30) calendar days to complete, Lifecore will provide a written update if requested by Semnur.
+
+10.3In the event Lifecore directly receives any patient or customer inquiries, complaint, or other notification of any nature, whether medical or non-medical, regarding Semnur Product by mail, email, phone, or otherwise, Lifecore will notify Semnur of such communication within or one business day. Following notification to Semnur, Semnur will assume responsibility of such communication.
+
+10.4Semnur will, as the manufacturer on the labeling of the Semnur Product, be responsible for adverse event reporting to Regulatory Authorities.
+
+ARTICLE 11
+
+RIGHT TO INSPECT
+
+11.1Lifecore agrees that Semnur or its agents (including QP auditors) shall have the right, per the terms of the Master Services Agreement, to inspect the Facility once per 12 month period, as well as observe the Manufacturing of the Product, including inspection of (a) the materials used in the Manufacture of the Product, (b) holding facilities for such materials, (c) the equipment used in the Manufacture of the Product, (d) analytical and microbiological testing laboratories, (e) all records relating to such Manufacture solely as they relate to the Product, and (f) procedures used in the stability testing as they relate to the Product. Additional inspections will require mutual agreement between Lifecore and Semnur.
+
+11.2Audits shall not exceed two (2) business days and shall have up to Three (3) auditors, unless mutual agreement between the parties allows for other conditions for a particular audit. Audit dates shall be scheduled upon reasonable advance notification from Semnur, with actual audit dates subject to mutual agreement, and with for-cause audits having a high priority level for both parties.
+
+11.3Facility visits by Semnur representatives, including person(s) in the plant (PIP), shall be permitted. Semnur representatives shall have access to observe and review Lifecore Facility and procedures, including all analytical, Manufacturing and Validation activities, and documentation related to the Product, during production of Semnur Product, upon reasonable notice to Lifecore.
+
+11.4Semnur representatives in the Lifecore Facility shall at all times comply with Lifecore rules and regulations.
+
+ARTICLE 12
+
+STABILITY
+
+12.1Semnur is responsible for defining stability requirements. Lifecore is responsible for creating and executing stability protocols, as well as issuing periodic stability reports. Semnur
+
+​
+
+10
+
+​
+
+will review and approve the stability protocols. Lifecore will summarize the status of stability results per the terms of the Master Services Agreement.
+
+12.2A Semnur Quality Contact will be notified within one (1) business day of becoming aware of a potential OOS involving product outside of Lifecore control, for example a stability OOS. If the potential OOS is appropriately invalidated by Lifecore within one (1) business day of becoming aware, notification to Semnur is not required.
+
+ARTICLE 13
+
+REGULATORY
+
+13.1Semnur is responsible for all required regulatory reports and filings and obtaining any required approvals from Regulatory Authorities applicable to the further processing and manufacture, clinical testing, and commercial sale of the Semnur Product, in all jurisdictions of the Territory. Lifecore will provide regulatory support as outlined in Section 13.2. Semnur will be responsible for complying with regulatory requirements applicable to the clinical use of the Product, as well as all other manufacturing and testing performed by Semnur or its other contractors. Semnur will communicate to Lifecore, in writing, any regulatory requirements other than those specified in this Master Quality Agreement or Master Services Agreement, per the terms of the Master Services Agreement.
+
+13.2Lifecore will provide Semnur with documents and information pertaining to the Manufacture and in-process, release and stability testing of the Product for Semnur files and formal regulatory applications and submissions. Lifecore will also provide, as requested by Semnur, access by reference to Lifecore’s Drug or Device Master Files and/or EDQM Certificate of Suitability for sodium hyaluronate.
+
+13.3Semnur will supply Lifecore a copy of the section or sections of any regulatory submission containing Lifecore-related content for review prior to submission.
+
+13.4Semnur will notify Lifecore within five (5) business days of comments relating to the Manufacture of the Product received from Regulatory Authorities as a result of Regulatory Authority review of regulatory submissions or applications.
+
+13.5Semnur will notify Lifecore of any Regulatory Authority inspection that specifically relates to the Product within one (1) business day of the initiation of the audit by the Regulatory Authority. Semnur will notify Lifecore of any Regulatory Authority findings associated with such inspection, as they pertain to the Product or Raw Materials covered by this Master Quality Agreement, within ten (10) business days.
+
+13.6Lifecore will allow all governmental authorities and certification agencies the reasonable right to inspect all facilities, including unannounced audits by European Notified Bodies, at which the Products are manufactured, handled, stored, tested, packaged, or shipped, and all records related to the Products. Lifecore will notify Semnur within one (1) business day of becoming aware of all such audits directly related to the Product, or within one (1) business day of the Product becoming part of an inspection scope after an inspection has started.
+
+​
+
+11
+
+​
+
+ARTICLE 14
+
+PRODUCT NOTICES AND RECALLS
+
+14.1Each Party shall have a standard operating procedure defining how to determine if a Product recall or voluntary withdrawal is necessary and how to conduct a Product recall or voluntary withdrawal.
+
+14.2In the event Lifecore has reason to believe that any Products should be recalled or withdrawn from distribution, Lifecore will inform Semnur in writing, one (1) business day of such knowledge.
+
+14.3Per the Master Services Agreement, if any Product must be recalled for failure to meet any regulatory requirements of law, Semnur shall have the sole responsibility to conduct the recall, provided that nothing herein shall restrict Lifecore’s ability to comply with applicable laws and regulations. Lifecore and Semnur will jointly confer and cooperate to resolve any issues with respect to any recall or withdrawal.
+
+14.4Once the decision to recall a lot of Product has been made, Semnur will direct the recall. Lifecore will provide all reasonable assistance necessary to affect the recall and will be given the opportunity to provide input through Semnur concerning the recall.
+
+ARTICLE 15
+
+ANNUAL PRODUCT REVIEWS
+
+15.1Annual Product Review will not be performed until Product is approved for commercial sale.
+
+ARTICLE 16
+
+RECORDS
+
+16.1Lifecore is responsible for assigning and tracking unique Lot Number identification to each Lot of Raw Material and Product. Lifecore shall document the Lot Numbers of all Raw Materials used to Manufacture a Batch of Product within the Manufacturing Batch Record.
+
+16.2Lifecore is responsible for assigning the date of manufacture to each Lot of Product in accordance with Lifecore’s SOPs and documenting the date of manufacture in the Manufacturing Batch Record.
+
+16.3Lifecore is responsible for retaining all raw data documentation (i.e., paper records, electronic data files, magnetic tape), original Manufacturing Batch Records, and all other original Batch documentation that is related to the Manufacture of Product as required by cGMP in a secure and safe environment until the end of Lifecore’s archiving period is reached for each Batch. Semnur will be notified prior to destruction of Product-specific documentation.
+
+​
+
+12
+
+​
+
+ARTICLE 17
+
+RETAINS
+
+17.1Lifecore is responsible for retaining samples from each lot of product in accordance with 21 CFR 211.170, EU GMP Annex 13, and EU GMP Annex 19. Lifecore shall store the retained samples under appropriate storage conditions and in a secure area.
+
+​
+
+Samples
+
+Materials/Products
+
+Retention Period
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+​
+
+17.2Lifecore is responsible for annual inspections of reference/retention samples.
+
+17.3Semnur will notify Lifecore of formal discontinuation or completion of clinical trials involving Lifecore-manufactured Product.
+
+​
+
+​
+
+13
+
+​
+
+Appendix A
+
+Product Description
+
+The Product is defined by the Lifecore controlled document listed below, as such document may be modified in accordance with the Quality Terms.
+
+[…***…]
+
+​
+
+​
+
+14
+
+​
+
+Appendix B
+
+Outline of Responsibilities – General
+
+​
+
+Category
+
+Responsibility
+
+Semnur
+
+Lifecore
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+[…***…]
+
+​
+
+​
+
+[…***…]
+
+​
+
+​
+
+15
+
+​
+
+Appendix C
+
+Quality Contacts
+
+​
+
+Semnur Contact
+
+Name
+
+Telephone Number/ E-mail
+Address
+
+CTO and SVP
+
+Suketu Desai, Ph.D.
+
+[…***…]
+
+Consultant
+
+Chitra Sharma
+
+[…***…]
+
+​
+
+​
+
+​
+
+Lifecore Contact
+
+Name
+
+Telephone Number / Email
+Address
+
+Vice President, Quality Assurance and Regulatory Affairs
+
+Jackie Klecker
+
+[…***…]
+
+Sr. Manager, Regulatory Affairs and Product Support
+
+Patrick Butler
+
+[…***…]
+
+Complaint Reporting – Responsible Person:
+
+Marty Neaton
+
+[…***…]
+
+​
+
+When names or contact information in this Appendix C need to be updated, each current contact must initial and date the page at the bottom and return it to be filed with the originally signed Agreement. An amendment to the Quality Agreement is not required.
+
+​
+
+16
+
+​
+
+Appendix D
+
+Lifecore Documentation Requiring Semnur Approval
+
+·
+
+[…***…]
+
+·
+
+[…***…]
+
+·
+
+[…***…]
+
+·
+
+[…***…]
+
+·
+
+[…***…]
+
+When information in this Appendix D needs to be updated, a current contact (Appendix C) from both parties must initial and date the page at the bottom and return it to be filed with the originally signed Agreement. An amendment to the Quality Agreement is not required.
+
+​
+
+17
+
+​
+
+Appendix E
+
+Definition of Lifecore Lot Number, Formulation Date, and Expiry Date
+
+The batch is identified as follows:
+
+Lifecore Lot numbers are 6 digits and are automatically generated, in sequential format, by its enterprise resource planning system (ERP) at the start of a batch.
+
+For example: 025123
+
+The definition of Manufacturing date is as follows:
+
+The Manufacturing date is the date that the product is formulated, in the format of dd/mm/yyyy.
+
+The formula for shelf life of the batch is as follows:
+
+[…***…]
+
+When information in this Appendix E needs to be updated, a current contact (Appendix C) from both parties must initial and date the page at the bottom and return it to be filed with the originally signed Agreement. An amendment to the Quality Agreement is not required.
+
+​
+
+18
+
+​
+
+Appendix F
+
+Product Shipping Requirements
+
+Incoterms:
+
+​
+
+Incoterms 2010
+
+Named Place
+
+FCA
+
+Chaska, MN
+
+​
+
+For All Shipments: TBD
+
+Shipment Requirements
+
+​
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+[…***…]
+
+​
+
+Documentation to be emailed to Semnur at the Time of Shipment
+
+·
+
+TBD
+
+When information in this Appendix F needs to be updated, a current contact (Appendix C) from both parties must initial and date the page at the bottom and return it to be filed with the originally signed Agreement. An amendment to the Quality Agreement is not required.
+
+​
+
+19
+
+​
+
+EXHIBIT B
+
+Statement of Work, Price and Payment Schedule
+
+​
+
+​
+
+​
+
+​
+
+EXHIBIT C
+
+Semnur owned equipment and supplies.
+
+The equipment and supplies listed below consists of equipment at the Facility or purchased by Lifecore as of the Agreement Date. The list will be reviewed periodically to update as necessary with the addition or removal of equipment or supplies. As updated, such list will become the new Exhibit C under the Agreement.
+
+Table 1. Equipment
+
+​
+
+Item/Description
+
+Equipment Number
+
+Invoice Amount
+
+Estimated Invoice
+Dates
+
+[…***…]
+
+​
+
+[…***…]
+
+April 2017
+
+[…***…]
+
+​
+
+[…***…]
+
+April 2017
+
+​
+
+Table 2. Supplies
+
+​
+
+Item/Description
+
+Part Number
+
+Invoice Amount
+
+Estimated Invoice
+Dates
+
+[…***…]
+
+​
+
+[…***…]
+
+January 2016
+
+​
+
+​

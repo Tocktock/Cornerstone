@@ -1,0 +1,918 @@
+from the date of the original invoice. Company shall not be required to reimburse Supplier if Company can demonstrate that it already paid taxes on Supplier’s fees or if the taxing jurisdiction has a policy in effect whereby it will assess
+taxes on such fees only against Company. Company and Supplier shall cooperate to accurately determine Company’s tax liability and to minimize such tax to the extent legally permissible. Each party shall provide and make available to the other
+any applicable resale or exemption certificates, information regarding out-of-state or nontaxable sales or use of goods or services provided by Supplier, and any other
+information reasonably requested by the other party. In the event that the appropriate tax authority determines that all or a portion of the taxes collected from Company is not due, Supplier shall, after good faith consideration of Company’s
+preference and applicable Laws, either (a) promptly remit to Company an amount equal to any refund, credit or offset received or (b) assign its right to a refund, credit or offset to Company.
+
+In the event Company is required under applicable Law to withhold taxes from fees, payments or other amounts due under this Agreement, Company shall deduct
+such taxes from sums payable to Supplier and remit such amounts to the relevant taxing authorities. Company shall (i) give Supplier reasonable notice before it withholds any taxes from payments due Supplier and (ii) give Supplier the
+opportunity to provide such applicable forms, information returns, or other documentation to establish an exemption from withholding under the Laws of the applicable taxing jurisdiction. Upon Supplier’s written request, Company shall provide
+Supplier with appropriate documentation or records of any taxes so withheld.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+4.
+
+Confidentiality
+
+4.1 Confidential Information. All Confidential Information (as defined in the NDA) of a party shall be used and disclosed by the other party only
+in accordance with the Mutual Confidentiality and Nondisclosure Agreement (“NDA”) between the parties dated October 31, 2018 (Agreement No.CW2279206), as may be amended or superseded from time to time. The NDA is made part of
+this Agreement and if the term of the NDA expires before the expiration or termination of this Agreement, then the term of the NDA shall be automatically extended to match the term of this Agreement. If the provisions of the NDA conflict with the
+provisions of this Agreement, the provisions of this Agreement shall control. Notwithstanding anything to the contrary in such NDA or this Agreement, (i) Company may disclose information about Supplier, the Agreement or the Services that is
+reasonably requested by prospective clients, current clients or their agents for the sole purpose and to the limited extent necessary for such third party to evaluate its use of the Expansion Services or the ESI Services, as applicable, or as
+otherwise approved by Supplier in writing, and (ii) Company understands that it will be infeasible for Supplier to return to destroy certain Company Data stored on encrypted back-up media in a secure
+location.
+
+4.2 Use of Name; Publicity. Neither party shall use or register the trademarks, service marks or trade names
+(“Marks”) of the other party (or, in the case of Company, of any Affiliated Company) or any Marks substantially similar to or derivations therefrom in connection with any products, services or publications, including publicity,
+advertising or marketing materials, without the party’s prior approval. Supplier shall not remove or alter without Company’s prior approval any Marks, copyright or other proprietary notices, or labels appearing on materials of Company or
+any Affiliated Company. Company may disclose to prospective or current clients that Supplier is a vendor of Company and a description of the Services.
+
+4.3 Data Privacy.
+
+(a) All
+Protected Health Information that Supplier creates, accesses or receives under this Agreement in its capacity as a business associate (as defined in 45 CFR 160.103) shall be used, disclosed and treated only in accordance with the Business Associate
+Agreement (“BAA”) between the parties entered into on or before the Effective Date or the effective date of the applicable Statement of Work. The BAA is made part of this Agreement and shall remain in effect for the duration of this
+Agreement. If the provisions of the BAA conflict with the general terms and conditions of this Agreement, the provisions of the BAA shall control.
+
+(b) All Company Information (as defined in the Exhibit 5 – Data Privacy Provisions) that Supplier creates, accesses or receives
+under this Agreement shall be used, disclosed and treated only in accordance with Exhibit 5.
+
+4.4 Freedom of Action. Subject to each
+party’s confidentiality obligations and other applicable obligations and restrictions with respect to the other party’s Materials and IP (as defined in the applicable Exhibit A or B), nothing in this Agreement shall prohibit Company either
+party from independently developing, acquiring, licensing, marketing or distributing products or services that compete with products or services offered by the other party.
+
+5.
+
+Information Protection
+
+5.1 Company Data. Definitions of Company Data and certain corresponding terms are set forth for the Expansion Services, the ESI Services, and the
+Services described in any other Statement of Work that indicates that Exhibit A shall apply in Section 3.1 of Exhibit A. Definitions of Company Data and certain corresponding terms are set forth for the Platform Services and the Services
+described in any other Statement of Work that indicates that Exhibit B shall apply in Section 4.1 of Exhibit B.
+
+5.2 Data Handling.
+Supplier acknowledges and agrees that (a) [***]. If any Supplier Personnel downloads, transmits, copies or otherwise takes or retains any Company Data, except as expressly permitted by this Agreement or the applicable Statement of Work, at any time
+during, or after termination of, this Agreement or any Statement of Work, Supplier shall [***], including the [***]. This Section 5.2 is in addition to, and shall in no way limit, Company’s other rights and remedies under this Agreement.
+
+5.3 Information Protection Requirements and Service Levels. Supplier shall protect the Supplier Service Locations and the Supplier Systems
+under the control of Supplier or its authorized agents from any unauthorized access. Supplier shall implement and follow at all of the Supplier Service Locations and for the Supplier Systems for which Supplier has security responsibility security
+controls, safeguards and procedures that meet or exceed the information protection requirements and Service Levels set forth, for the Expansion Services, the ESI Services, and any other Services for which Exhibit A applies, in Exhibit 1-A and Exhibit 2-A, respectively, and for
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+the Platform Services and any other Services for which Exhibit B applies, in Exhibit 1-B and Exhibit 2-B
+respectively (which may be finalized after the Effective Date and added to this Agreement by amendment), and in any applicable Statement of Work. If certain security controls, safeguards or procedures are not addressed by the information protection
+requirements, then Supplier shall implement and follow security controls, safeguards and procedures that are consistent with then existing generally accepted security controls, safeguards and procedures in the relevant industries. Without limiting
+its obligation to follow the agreed to change control process, Supplier shall not implement any change to its environment (whether shared or dedicated) that Supplier should reasonably expect would materially degrade Supplier’s security
+controls, safeguards and procedures without Company’s prior approval and Supplier shall be required to reverse any such change if implemented without Company’s prior approvals.
+
+5.4 Incident Response. For purposes of this Section 5.4, (i) “Security Incident” means any actual or suspected unauthorized
+incident or event with respect to the Supplier Systems, Supplier Services Locations, Technology Provider Locations, or Remote Locations that, in Supplier’s reasonable judgement, compromises or otherwise threatens the security of
+(x) Company Data or (y) for the Expansion Services, the ESI Services, and any other Services for which Exhibit A applies, Patient Data, and (ii) “Performance Issue” means a performance issue with respect to the Supplier Systems
+that, in Supplier’s reasonable judgment, results in a Security Incident. In accordance with this Agreement, Supplier shall monitor the Supplier Service Locations and the Supplier Systems under the control of Supplier or its authorized agents
+for any actual or potential Security Incidents or Performance Issues. Supplier shall [***] discovery of such actual or suspected Security Incident or Performance Issue, notify the Cigna Security Incident Response Team (CSIRT) and Company’s
+Vendor Delivery Management organization in order to provide Company with an opportunity to timely assess the risks of such Security Incident or Performance Issue and take action. Supplier shall [***] respond to and remediate such actual or suspected
+Security Incident or Performance Issue [***]. Supplier shall respond to Company’s request for information campaigns within [***] hours of an inquiry on global security threats regarding impact, response and mitigation plans. Company or one of
+its Affiliated Companies will initiate requests for information using an electronic online survey. This Section 5.4 does not limit any notification and remediation obligations required by applicable Laws or contained in any Business Associate
+Agreement between the parties or in the applicable Exhibit 5 – Data Privacy Provisions.
+
+5.5 Disaster Recovery/Business Continuity.
+
+(a) Definitions. For purposes of this Section 5.5, the following terms shall have the meanings indicated: (i)
+“Disaster” means any occurrence that results in an interruption in the Services for a [***] of time due to an event beyond Supplier’s control. Disasters may include but are not limited to [***], [***], regardless of size and
+scope of the occurrence. (ii) “Business Continuity Management” means the integration of disaster recovery planning, business continuity planning, and crisis management, where disaster recovery planning is the process of establishing
+and maintaining a disaster recovery and business continuity plan(s), business continuity planning is the process which occurs, based on risk evaluation and business analysis, to identify procedures, priorities, and resources for emergency response
+operations, business continuity strategies for the organization’s functions and supporting infrastructure, crisis communications; and coordination with external agencies.
+
+(b) Business Continuity Management Plan. As of the Effective Date or such later date as agreed by the parties, Supplier shall
+establish and maintain at [***] to Company a Business Continuity Management plan(s), documented in written form, designed to prevent, circumvent, and restore operations in the event of a Disaster. Such plan shall include consistent actions to be
+taken before, during and after a Disaster and shall be tested according to the procedures detailed for the Expansion Services, the ESI Services and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in
+Section 3.2 of Exhibit A and for the Platform Services and the Services described in any other Statement of Work that indicates that Exhibit B shall apply in Section 4.2 of Exhibit B. Supplier shall designate their own person(s) to lead
+the Business Continuity Management function. Person(s) designated to Business Continuity Management shall appoint response and recovery teams who shall execute the procedures described in the Business Continuity Management plan and shall meet with
+Company no more than [***] to review the plan at a time and place mutually agreed by the parties as of the Effective Date upon Company’s request.
+
+(c) Notification; Remedies. Upon its discovery of a Disaster affecting the Supplier’s performance or Company’s receipt
+of Services, Supplier shall notify Company [***] or as [***] and implement its Business Continuity Management plan. In the event Company notifies Supplier that Company has implemented or will implement its Business Continuity Management plan,
+Supplier shall reasonably cooperate with Company at [***] to Company to restore Company’s operations directly related to the Services. Without limiting any other rights or remedies of Company, and subject to Section 13.10, if and for so
+long as such Disaster or business interruption prevents, hinders or delays performance or receipt of the Services, Company may seek from Supplier [***] arising
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+from Supplier’s failure to perform such Services as required by this Agreement (other than failure to meet any service levels or Performance Guarantees, for which Performance Credits are the
+sole and exclusive remedy as set forth in this Agreement). If such Disaster prevents, hinders or delays performance or receipt of the Services beyond [***] consecutive days, Company may immediately terminate this Agreement or any Statement of Work
+and receive a refund of any prepaid amounts.
+
+(d) Disaster Recover Testing. Terms for Disaster recovery testing are set forth
+for the Expansion Services, the ESI Services, and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in Section 3.2 of Exhibit A and for the Platform Services and the Services described in any other
+Statement of Work that indicates that Exhibit B shall apply in Section 4.2 of Exhibit B.
+
+5.6 Data Backup. Supplier shall perform
+regular backups of Company Data and Patient Data in accordance with this Agreement. In addition, upon Company’s request and at [***], Supplier shall provide a backup of Company Data to Company in a mutually agreed format.
+
+5.7 Updates to Information Protection Requirements. Company may request, and Supplier may agree, to update the information protection
+requirements from time to time and Supplier shall implement and comply with any applicable requirements necessary to remain consistent with generally accepted industry standards and any other agreed-upon updates, subject to the following:
+
+(a) Supplier shall bear the cost of any such updates that are (i) [***]. If the changes described in (iii) above are implemented by
+Supplier for Company at an additional charge and then offered to its other customers at an additional charge, [***].
+
+(b) Except for
+the items covered by (i) through (iii) above and any other changes unique to Company that are not generally implemented for other customers of Supplier but are expressly set forth in the applicable Statement of Work or otherwise mutually agreed
+upon by the parties in writing as to be provided at Supplier’s cost, Company shall bear the cost of any updates if [***]. In the event of such an update, Supplier shall (i) provide a proposal to Company identifying the costs and
+implications of the change, and upon Company’s approval, make the change, or (ii) advise Company that Supplier will not make the change [***] and provide a proposal to Company identifying the costs of moving to [***] such change, and upon
+Company’s approval, make the change, or (iii) if Company does not wish to [***], provide a proposal to Company identifying the costs of implementing safeguards and practices that mitigate Company’s security concerns to Company’s
+reasonable satisfaction, and upon Company’s approval, implement such safeguards and practices.
+
+5.8 Security Contact Point. Supplier
+shall provide Company with a single point of contact in Supplier’s security organization as Company’s primary contact for information security issues. Such contact shall promptly inform Company by telephone at [***] of any conditions of
+which Supplier becomes aware that may negatively affect the confidentiality, integrity or availability of the Services or as otherwise required in any of the applicable Exhibits.
+
+5.9 Implementation of Corrective Action Plans. Supplier shall implement the information security corrective action plans agreed upon in writing
+by Supplier and Company as of the Effective Date (“Corrective Action Plan”) by no later than March 31, 2020 or such later date as is approved by Company in writing. Company will determine in its sole discretion whether the
+Corrective Action Plans have been implemented successfully. Until such time as Company confirms in writing that the Corrective Action Plans have been implemented successfully, except as expressly approved by Company in writing, no new Client
+Accounts (as defined in Statement of Work No. 1) shall be added to Statement of Work No. 1 (other than the [***] initial Client Accounts discussed by Company and Supplier as of the Effective Date).
+
+6. Intellectual Property. Certain terms concerning intellectual property are set forth for the Expansion Services, the ESI Services, and
+the Services described in any other Statement of Work that indicates that Exhibit A shall apply in Section 4 of Exhibit A and for the Platform Services and the Services described in any other Statement of Work that indicates that Exhibit B
+shall apply in Section 5 of Exhibit B.
+
+7.
+
+Services Review and Audit; Governance
+
+7.1 Services Review. Supplier shall meet with Company as often [***], but no less than [***], to discuss Supplier’s performance of the
+Services, including, as applicable, technical plans, financial matters, system performance, service levels, security controls, and improvement opportunities. Each party shall be responsible for its own expenses incurred in connection with
+participating in such meetings. In addition, Company may, upon prior notice to Supplier and [***], conduct onsite operational readiness reviews of the Supplier Service Locations and Supplier Systems approximately [***] weeks (or such other time
+period specified in the applicable Statement
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+of Work) prior to an event it determines to comprise live production of the Supplier Systems to validate Supplier’s ability to meet the operational requirements and Service Levels set forth
+in this Agreement and in any applicable Statement of Work. The parties shall jointly review the documented outcomes of such operational review within [***] of its completion (or such other time period agreed to by the parties) and Supplier shall
+implement any applicable mitigation activities in advance of production, subject to the agreed change control process. Supplier’s support of the review shall be [***] to Company. For clarity, Company’s access to Supplier Systems under this
+Section 7.1 shall be limited to those specific components of the Supplier System where Company Data is stored by Supplier.
+
+7.2 Audit
+Rights. Supplier shall keep and maintain, in accordance with U.S. industry standard accounting principles and practices, and make available for the inspection, examination, and audit by Company, its authorized employees, agents or
+representatives and auditors (collectively, the “Company Auditors”) at all reasonable times during the term of this Agreement and for [***] years after termination or expiration, complete and accurate books and records in connection with
+its provision of the Services as necessary to demonstrate the adequacy of Supplier’s internal controls over financial reporting, business operations, information technology, and vendor management and Supplier’s compliance with each of its
+obligations under this Agreement. In addition, Supplier shall (i) respond to all questionnaires submitted by Company, and (ii) provide attestations regarding Supplier’s obligations in this Agreement as requested by Company, in
+connection with any evaluation by Company of Supplier’s performance of the Services and compliance with each of its obligations under this Agreement. Supplier shall promptly (i) permit and cooperate with any inspection, examination or
+audit by Company Auditors [***] to Company for such cooperation and (ii) respond to questionnaires and attestation requests as described above [***] to Company for such responses, and shall ensure that Company’s rights and Supplier’s
+obligations in this Section 7.2 flow down and apply to any of its Subcontractors. In the case of Technology Providers, Supplier will allow Company audit rights to such Technology Providers under this Section 7.2 to the extent Supplier
+obtains such contractual rights from Technology Providers; provided, that if Supplier does not obtain any such audit rights from its Technology Providers, the parties will review Supplier’s Technology providers under this Section 7.2
+through a review of Supplier’s vendor management process. Any books, records, other information concerning Supplier’s business or operations, or other information received by Company or Company Auditors from Supplier or Supplier’s
+agents, in each case, in connection with any audit, services review, or access rights included in this Agreement, including any information provided in response to questionnaires or included in attestations, shall be considered Supplier’s
+Confidential Information, and Company shall ensure that each Company Auditor only uses and discloses such information and protects such information, in each case, in accordance with Company’s obligations under this Agreement.
+
+7.3 Audit Findings. Following an audit, Supplier shall participate at [***] in an exit conference conducted by Company or the Company Auditors to
+discuss findings identified in the audit, if any. Supplier shall notify Company of any audit findings identified by its internal or external auditors, consultants or regulators that affect the Services. Supplier and Company shall discuss the impact
+of the findings promptly after completion of the audit or notification of an audit finding and agree upon the appropriate plan, if any, by which to address any concerns or recommendations arising out of the audit report, inclusive of interim
+mitigating controls.
+
+7.4 SOC 2 Audit Reporting. During the term of this Agreement and any termination/expiration assistance period, Supplier
+shall conduct for itself, or obtain form its hosting provider subcontractor independently procured internal controls reporting, an annual audit, SOC (Service Organization Control) 2, Type 2 report, to test the adequacy of the design and operating
+effectiveness of Supplier’s and its hosting provider’s internal controls to support the Services and at a minimum, include business operations and related information technology supporting the Services and relevant control objectives and
+related activities governing Supplier’s vendor management program in accordance with the [***] or its successor and as may amend the same from time to time. Such audit shall cover the preceding [***]-month period and be completed by either a
+globally or nationally recognized firm qualified to perform such audits and be delivered to Company annually upon request. The cost of the audit shall be borne by [***]. Supplier agrees that provision of the SOC 2 Type 2 report shall be an ongoing
+requirement and be provided by Supplier to Company as indicated above. [Supplier’s failure to (a) perform an annual SOC 2, Type 2 report, or (b) provide Company upon request, as indicated above, with a copy of the SOC 2, Type 2
+report, shall [***].
+
+7.5 Affirmation. Supplier affirms and warrants that its responses to Company’s Standardized Information Gathering
+Questionnaires (“SIG”) and other business assessment documents are, as of the date of those assessments, accurate and that it shall maintain its controls to the level attested to Company in Supplier’s SIG responses and during
+Company security reviews. Supplier shall complete and submit to Company a completed SIG upon request.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+7.6 Security Controls Report; Security Reviews. As part of the Services and at a minimum on an
+annual basis, Supplier shall [***] provide Company a [***]. Company may, at any time, but not more than [***] annually (except in connection with a reasonably suspected Security Incident), and without limiting its rights in Section 7.2 (Audit
+Rights), perform a security review of the Services and Supplier’s security policies and procedures, including (a) post-implementation review of any major changes to the Services, Supplier Service Locations or security policies and
+procedures, (b) [***] reassessments, (c) [***] and (d) assessments following a security incident or breach. Supplier shall reasonably cooperate with any such security review and shall ensure that Company’s rights and Supplier’s
+obligations in this Section 7.6 flow down and apply to any of its Subcontractors. In the case of Technology Providers, Supplier will allow Company audit rights to such Technology Providers under this Section 7.6 to the extent Supplier
+obtains such contractual rights from such Technology Providers; provided, that if Supplier does not obtain any such audit rights from its Technology Providers, the parties will review Supplier’s Technology Providers under this Section 7.6
+through a review of Supplier’s vendor management process. Company’s right to perform such reviews shall not be limited by Company business processing that occurs on non-dedicated (i.e., shared)
+Supplier devices, or by work areas that are not dedicated and isolated to Company business; provided, however, that (x) Company’s access to the Supplier Systems, if any, under this Section 7.6 shall be limited to those specific
+components of the Supplier System where Company Data is stored or processed by Supplier apart from other sensitive data and (y) for any components of Supplier Systems where Company Data is stored or processed with other sensitive data, Supplier
+agrees to collaborate with Company in good faith and make other reasonable arrangements to facilitate Company’s reviews without violating applicable law or Supplier’s contractual obligations with third parties. Upon completion of a
+security review, whether performed by Supplier or Company, Supplier shall promptly mitigate any high-risk security issues identified during such review and put in place remediation plans to eliminate all security issues identified (and if not
+feasible to eliminate, minimize the risks [***]).
+
+7.7 Governance. To the extent included as part of this Agreement, the parties shall comply
+with Exhibit 6 (Governance), which sets forth the framework that shall govern the Parties’ high level interaction and the management of the Services.
+
+8.
+
+Representations and Warranties
+
+8.1 Professional Standards. Supplier represents and warrants that it possesses the necessary expertise to perform the Services consistent with
+[***] professional standards of the applicable industry and that it shall perform the Services with reasonable care and skill and in a workmanlike manner in accordance with such industry standards. Supplier further represents and warrants that, to
+its knowledge as of the Effective Date, it is either the owner of or has obtained the license rights and authorizations as necessary to provide the Services and the Supplier Systems.
+
+8.2 Supplier Personnel and Subcontractors. Supplier represents and warrants that prior to their respective performance of the Services each of
+the Supplier Personnel and any Subcontractors have entered into enforceable agreements with Supplier containing appropriate confidentiality and assignment of work product provisions as necessary to effectuate the provisions of this Agreement.
+Supplier further represents and warrants that Supplier has checked, and checks on a [***] basis, the following lists, and neither Supplier nor any of its Subcontractors or the Supplier Personnel is listed on the United States Excluded Parties List,
+the HHS Office of Inspector General List of Excluded Individuals/Entities, the United States Department of the Treasury’s Office of Foreign Assets Control’s (“OFAC”) list of Specially Designated Nationals and Blocked
+Persons, or any replacement lists, which Supplier shall certify to Company upon request, and that neither Supplier nor any of its Subcontractors shall conduct activities related to this Agreement in any country sanctioned by OFAC.
+
+8.3 Compliance with Laws. Each party represents and warrants that it shall comply with all applicable federal, state, local and other laws, rules
+and regulations, ordinances, decrees, orders, codes and requirements (“Laws”) that relate to the Services, including obtaining all licenses or permits that may be required in connection with its obligations under this Agreement.
+Without limiting the previous sentence, Supplier represents and warrants that it shall comply with, and require its Subcontractors to comply with, as applicable, the following:
+
+(a)  Equal Opportunity/Affirmative Action. As used in this section, Supplier is referred to as “contractor” and
+Subcontractors are referred to as “subcontractor.” This contractor and subcontractor shall abide by the requirements of 41 CFR §§ 60-1.4(a), 60-300.5(a) and 60-741.5(a). These regulations prohibit discrimination against qualified individuals based on their status as protected veterans or individuals with
+disabilities, and prohibit discrimination against all individuals based on their race, color, religion, sex, sexual orientation, gender identity or national origin. Moreover, these regulations require that covered prime contractors and
+subcontractors take affirmative action to employ and advance in employment individuals without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability or veteran status.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+(b) Notice of Employee Rights Under Federal Labor Laws. Company incorporates
+into this Agreement by reference, and Supplier shall comply with, as applicable, the obligations regarding the notice of employee rights under federal labor Laws found at 29 CFR Part 471, Appendix A to Subpart A, and Supplier shall likewise
+incorporate those obligations into all applicable subcontracts as required by 29 CFR Part 471.
+
+(c) Notice of the Obligation to
+Complete a VETS-4212 Report Under 41 CFR Part 61-300. For contracts of [***] or more, Supplier and Subcontractors shall file VETS-100A reports by September 30 of each year, or any applicable extension
+deadline that VETS announces.
+
+(d) Trafficking in Persons. The U.S. government has adopted a
+zero-tolerance policy regarding trafficking in persons. The nine prohibitions of 48 C.F.R. Section 52.222-50(b) are hereby incorporated by reference as if they were
+set out in full herein. If any Supplier or Subcontractor has a contract to provide Company or any of its Affiliated Companies with non-COTS supplies acquired outside the U.S., or is engaged to provide services
+to Company or its Affiliated Companies to be performed outside the U.S., and the contract has an estimated value that exceeds [***], the provisions of 48 C.F.R. Section 52.222-50(h) regarding a Compliance
+Plan are hereby incorporated by reference and Supplier and Subcontractors shall comply with such requirements.
+
+8.4 FACT Act/Red Flags Rule.
+Subject to the following sentence, Supplier represents and warrants that (a) it has created, implemented and shall continue to maintain, and update as necessary, a written Red Flags Rule Identity Theft Prevention Program designed to identify,
+detect and respond to “red flags” that could indicate identity theft, consistent with the requirements of the Fair and Accurate Credit Transactions Act of 2003 (as amended, “FACT Act”) and the Red Flags Rule based on the
+FACT Act (“Red Flags Rule”), and (b) it shall cooperate with and support Company’s and its Affiliated Companies’ compliance with the FACT Act and Red Flags Rule. Supplier’s obligations under subsection
+(a) in the previous sentence only apply if Supplier is a “financial institution” or a “creditor” and offers “covered accounts” (as such terms are defined in the FACT Act and Red Flags Rule) or if Supplier otherwise
+becomes subject to the FACT Act or Red Flags Rule.
+
+8.5 Anti-Corruption Laws. Each of Company and Supplier represents and warrants that it
+shall comply with the Foreign Corrupt Practices Act of 1977 (as amended), and any comparable Laws in any country from or to which it performs its obligations under this Agreement, including, for Supplier, the Services provided by Supplier, any of
+its Subcontractors, or their respective affiliates or agents (collectively, “Anti-Corruption Laws”) and that it has not and shall not pay, offer or promise to pay, or authorize the payment directly or indirectly of any monies or
+anything of value to any government official or employee, or any political party or candidate for political office for the purpose of influencing any act or decision of such official or of the government. A government official or employee includes
+employees of regulatory bodies, employees or officials of public international organizations, employees of partially or wholly government-owned institutions such as hospitals and clinics, universities, public utilities, partially or wholly
+government-owned corporations, schools, convention centers and stadiums. In carrying out its obligations under this Agreement, each party represents and warranties that no payments or transfers of anything of value shall be made which have the
+purpose or effect of unlawful public or private bribery, or acceptance of or acquiesce in extortion, kickbacks, or other unlawful or improper means of obtaining business. Each party agrees that in no event shall the other party be obligated under
+this Agreement to take any action or omit to take any action that the other party believes in good faith would cause it to be in violation of any applicable Laws, including any Anti-Corruption Laws.
+
+8.6 Code of Ethics. Supplier represents and warrants that Supplier, its Subcontractors and the Supplier Personnel shall comply with
+Supplier’s Company’s Code of Conduct. Without limiting the foregoing, Supplier shall comply with Supplier’s anti-discrimination policies as they relate to race, color, sex (including pregnancy), age, disability, veteran status,
+religion, national origin, ancestry, sexual orientation, gender identity, marital status, domestic partner status, genetic information or citizenship status.
+
+8.7 No Conflict of Interest. Supplier represents and warrants that (a) the performance of Supplier’s obligations under this Agreement
+does and will not conflict with or result in a breach of any other agreement to which Supplier is a party; (b) in connection with the Services Supplier, its Subcontractors or the Supplier Personnel have not and will not give to any of
+Company’s employees or agents and have not and will not receive from any third party recommended by Supplier to Company any commissions, payments, rebates, kickbacks, gifts or entertainment of significant value, or services or goods sold at
+less than full fair market value; and (c) neither Supplier, its Subcontractors nor the Supplier Personnel are a partner, partial owner, shareholder or holder of any beneficial interest in any such recommended third party except as disclosed to
+Company prior to making such recommendation.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+8.8 Supplier Systems. Any applicable representations and warranties regarding Supplier Systems
+are set forth for the Expansion Services, the ESI Services, and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in Section 5 of Exhibit A and for the Platform Services and the Services described
+in any other Statement of Work that indicates that Exhibit B shall apply in Section 6(a) of Exhibit B.
+
+8.9 Software Development. Any
+applicable representations and warranties regarding software development are set forth for the Expansion Services, the ESI Services, and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in
+Section 6 of Exhibit A and for the Platform Services and the Services described in any other Statement of Work that indicates that Exhibit B shall apply in Section 6(b) of Exhibit B.
+
+8.10 Organization and Qualification. Supplier represents and warrants that it is a corporation duly incorporated, validly existing and in good
+standing under the Laws of the State of Delaware. Supplier further represents and warrants that it is duly licensed, authorized or qualified to do business and is in good standing in every jurisdiction in which a license, authorization or
+qualification is required for the transaction of business of the character transacted by it.
+
+8.11 Covered Entity. Supplier represents and
+warrants that, as a provider of health care services included in the Expansion Services and the ESI Services only, it is a Covered Entity as defined by 45 CFR §160.103 and has the authority under applicable law to create, maintain, use,
+disclose, and transmit Protected Health Information in its capacity as a Covered Entity.
+
+8.12 Continuous Nature. Except as otherwise
+expressly stated in this Agreement, all representations and warranties shall be deemed first made on the Effective Date (except for any performance warranties) and shall run continuously thereafter until termination of this Agreement but not
+thereafter (notwithstanding any survival terms to the contrary). Supplier shall promptly notify Company if any change in circumstance makes any representation by Supplier inaccurate, or causes or is likely to cause Supplier to breach any warranty,
+and shall provide [***] and [***] reasonably requested by Company in connection therewith.
+
+8.13 Disclaimer. EXCEPT FOR THE EXPRESS LIMITED
+WARRANTIES SET FORTH IN THIS AGREEMENT, SUPPLIER MAKES NO WARRANTIES IN CONNECTION WITH THE SUBJECT MATTER OF THE AGREEMENT (INCLUDING, WITHOUT LIMITATION, THE SERVICES) AND HEREBY DISCLAIMS ANY AND ALL OTHER WARRANTIES, WHETHER EXPRESS, IMPLIED,
+STATUTORY OR OTHERWISE, INCLUDING ALL IMPLIED WARRANTIES OF NONINFRINGEMENT, MERCHANTABILITITY AND FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE OF DEALING OR USAGE OF TRADE, REGARDING SUCH SUBJECT MATTER. IN ADDITION, COMPANY
+UNDERSTANDS AND AGREES THAT, WHILE THE HEALTH CARE SERVICES INCLUDED IN THE EXPANSION SERVICES AND THE ESI SERVICES DO CONSTITUTE HEALTH CARE, NO SERVICES UNDER ANY STATEMENT OF WORK TO THIS AGREEMENT CONTAIN OR CONSTITUTE, AND THEY SHOULD NOT BE
+INTERPRETED AS, MEDICAL ADVICE, MEDICAL DIAGNOSIS OR TREATMENT.
+
+9.
+
+Indemnification
+
+9.1 Indemnification from Supplier. Supplier shall indemnify, defend and hold harmless Company and the Affiliated Companies, and their respective
+officers, directors, employees, agents, successors and assigns from and against any claims, causes of action, suits, investigations, and administrative or other proceedings brought by a third party (the “Claimant”), and any and all
+related demands, damages (direct or otherwise), liabilities, fines, penalties, assessments, costs and expenses (including legal fees), to the extent arising from or in connection with any of the following:
+
+(a) [***] by Supplier, its Subcontractors, Technology Providers, or the Supplier or Technology Provider personnel, and or any [***] obligations under
+this Agreement;
+
+(b) material breach of any representation or warranty made by Supplier under this Agreement (including any Statement of Work);
+
+(c) claims brought by a Subcontractor or Technology Provider of Supplier for material breach by Supplier of a subcontract entered into by Supplier or
+used by Supplier in fulfilling its obligations under this Agreement;
+
+(d) claims that the Supplier Personnel or Technology Provider personnel are
+employees of Company for any purpose whatsoever, including, without limitation, the withholding or payment of any federal, state, or local income or employment taxes;
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+(e) negligent acts or omissions or willful misconduct of Supplier, its Subcontractors, the Technology
+Providers, or the Supplier or Technology Provider personnel;
+
+(f) any damages to property or personal injury (including death) resulting from the
+negligent acts or omissions of its Subcontractors, Technology Providers, or the Supplier or Technology Provider personnel.
+
+9.2 Indemnification
+from Company. Company will indemnify, defend and hold harmless Supplier, its affiliates and their respective officers, directors, employees, agents, successors and assigns from and against any claims, causes of action, suits, investigations, and
+administrative or other proceedings brought by a third party, and any and all related demands, damages, liabilities, fines, penalties, assessments, costs and expenses (including attorneys’ fees) to the extent arising from or in connection with
+(a) [***] by Company, any Affiliated Company or their respective agents, (b) material breach of any representation or warranty made by Company or any Affiliated Company under this Agreement (including any Statement of Work) or
+(c) negligent acts or omissions or willful misconduct of Company, any Affiliated Company or their respective agents.
+
+9.3 Infringement
+Indemnity. Supplier shall indemnify, defend and hold harmless Company, the Affiliated Companies and their respective officers, directors, employees, agents, successors and assigns from and against any claims, causes of action, suits,
+investigations, and administrative or other proceedings brought by a third party, and any and all related demands, damages, liabilities, fines, penalties, assessments, costs and expenses (including legal fees) to the extent arising from or in
+connection with any third-party claim or allegation that the Services, any deliverable or other component of the Services (including Supplier Systems and any Work Product), or the provision, receipt or use thereof as contemplated by this Agreement
+infringes, misappropriates or otherwise violates a third party’s intellectual property, privacy, publicity or other rights. Notwithstanding the foregoing, Supplier will have no indemnification obligations to the extent the alleged infringement,
+misappropriation or other violation is based on, and would not exist but for Company’s or any Affiliated Company’s (a) combination, operation, or use of the Services (including Work Product) with products, services, information,
+materials, technologies, business methods or processes not furnished by Supplier, except as expressly contemplated by this Agreement, the applicable Statement of Work, or any applicable Documentation; (b) modification (other than by Supplier or
+as authorized by Supplier in writing) to the Supplier Systems or Services to the extent the infringement or misappropriation is based on such modification; (c) any Company Data or specifications or other material provided by Company or an
+Affiliated Company to Supplier or uploaded to the Supplier Systems or Services by Company, any Affiliated Company, or their employees, contractors or members granted access to the Supplier Systems or Services; or (d) Company’s or an
+Affiliated Company’s use of infringing or misappropriating Services (including Work Product) after Supplier has made Company aware of such infringing or misappropriating Services and made available to Company modifications which would have
+avoided the alleged infringement or misappropriation. Company shall indemnify, defend and hold harmless Supplier and its affiliates and their respective officers, directors, employees, agents, successors and assigns from and against any claims,
+causes of action, suits, investigations, and administrative or other proceedings brought by a third party, and any and all related demands, damages, liabilities, fines, penalties, assessments, costs and expenses (including legal fees) arising from
+any third-party claim or allegation that the (i) Company Data or other materials (including lesson materials and similar content) provided by Company or an Affiliated Company for Supplier’s use in connection with Supplier’s
+performance of the Services or used by Company or an Affiliated Company in connection with the Services or (ii) any specifications provided by Company or an Affiliated Company to Supplier for Work Product to be created by Supplier for Company
+or an Affiliated Company infringes, misappropriates or otherwise violates a third party’s intellectual property, privacy, publicity or other rights.
+
+9.4 Infringement Remedy. If any deliverable or other component of the Services (including any Work Product) (each, an “Infringing
+Item”) becomes or in its reasonable opinion is likely to become the subject of an infringement or misappropriation claim, Supplier shall, in addition to its indemnification obligations and to Company’s other rights, promptly take the
+following actions at no additional charge to Company at Supplier’s sole option and expense: (a) procure for Company the right to continue using such Infringing Item; or (b) replace or modify such Infringing Item to make it non-infringing, provided that the replacement or modification shall not degrade the capacity or performance of the Services; or (c) if neither (a) nor (b) is reasonably practicable as determined by
+Supplier in its sole discretion, remove the Infringing Item, discontinue providing the Services affected by such removal, adjust the corresponding fees payable by Company equitably, and refund all unused fees prepaid by Company for the affected
+Services, and for the avoidance of doubt, Company may seek any direct damages from Supplier’s failure to deliver the Infringing Item and corresponding Services.
+
+9.5 Indemnification Procedures. The indemnified party shall notify the indemnifying party as promptly as practicable of any claims for which the
+indemnifying party is obligated to provide indemnification (by this
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+Agreement or any attachments to this Agreement or any Statement of Work) and the indemnifying party shall confirm to the indemnified party no less than [***] days prior to the date on which a
+response to such claim is due, that the indemnifying party will control the defense and settlement (subject to the limitations below) of such claim. The indemnified party may, at its own expense, participate in the defense of such claim with its own
+counsel. No settlement of a claim that involves a remedy other than the payment of money by the indemnifying party or that requires any admission of fault on the party of the indemnified party shall be entered into without the prior written consent
+of the indemnified party.
+
+10.
+
+Insurance
+
+During the term of this Agreement and for the duration of any termination/expiration assistance period, Supplier shall carry and maintain at its own cost,
+insurance coverages as set forth in Exhibit 7.
+
+11.
+
+Limitation of Liability
+
+11.1 LIMITATION ON DIRECT DAMAGES. WITH THE EXCEPTION OF ANY LIABILITY ARISING FROM OR IN CONNECTION WITH [***] OF THIS AGREEMENT, NEITHER
+PARTY’S AGGREGATE AND CUMULATIVE LIABILITY FOR DAMAGES WITH RESPECT TO ANY INCIDENTS ARISING OUT OF OR RELATED TO THIS AGREEMENT WILL EXCEED [***]. FOR THE AVOIDANCE OF DOUBT, THE LIMITATION IN THIS SECTION 11.1 WILL NOT APPLY TO DIRECT DAMAGES
+TO THE EXTENT ARISING FROM OR IN CONNECTION WITH (A) THROUGH (D) ABOVE, WHICH SHALL NOT BE SUBJECT TO A MAXIMUM LIMITATION ON DIRECT DAMAGES.
+
+11.2 DISCLAIMED DAMAGES. IN ADDITION, NEITHER PARTY SHALL BE LIABLE TO THE OTHER FOR (A) ANY INDIRECT, INCIDENTAL, SPECIAL OR CONSEQUENTIAL
+DAMAGES OR LOST REVENUE, PROFITS OR SAVINGS ARISING OUT OF OR RELATING TO ITS PERFORMANCE OR NON-PERFORMANCE UNDER THIS AGREEMENT OR (B) ANY PUNITIVE DAMAGES (TO THE EXTENT SUCH EXCLUSION IS ALLOWED UNDER
+APPLICABLE LAW). NOTWISTHSTANDING THE FOREGOING, THE LIMITATION IN THIS SECTION WILL NOT APPLY TO ANY [***].
+
+11.3 THE LIMITATIONS OF LIABILITY IN
+SECTION 11.1 AND 11.2 SHALL APPLY TO ANY THEORY OF LIABILITY, WHETHER BASED ON WARRANTY, CONTRACT, STATUTE, TORT (INCLUDING NEGLIGENCE) OR OTHERWISE, AND WHETHER OR NOT THE LIABLE PARTY HAS BEEN INFORMED OF THE POSSIBILITY OF ANY SUCH DAMAGE, AND
+EVEN IF A REMEDY SET FORTH HEREIN IS FOUND TO HAVE FAILED OF ITS ESSENTIAL PURPOSE.
+
+12.
+
+Term and Termination
+
+12.1 Term. The term of this Agreement commences as of the Effective Date and, unless earlier terminated, shall continue in effect until the
+earlier of December 31, 2024 or the termination or expiration of all Statements of Work. Each Statement of Work will include the length of the initial term of such Statement of Work and the length of the renewal terms, if any. In the event that the
+term of a Statement of Work extends beyond the termination or expiration of this Agreement, this Agreement shall continue in full force and effect with respect to such Statement of Work until the termination or expiration thereof.
+
+12.2 Termination. If either party breaches in any material respect any of its obligations under this Agreement or a Statement of Work (or commits
+a series of non-material breaches that in the aggregate constitute such a material breach), the other party may terminate the applicable Statement of Work and any other Statement of Work reasonably likely to
+be affected by the material breach with 30 days’ notice if such breach is not cured within such 30 day period or immediately if such breach is not capable of cure. A Statement of Work may include additional termination rights as agreed by the
+parties and set forth therein. In addition, and except as otherwise set forth in the applicable Statement of Work, Company may terminate any Statement of Work (a) at any time and for any reason upon [***] days’ prior notice to Supplier;
+(b) immediately in the event of the filing of a petition in voluntary bankruptcy or an assignment for the benefit of Supplier’s creditors, or upon other action taken or suffered, voluntarily or involuntarily, under any Laws for the benefit
+of debtors by Supplier, except for the filing of a petition in involuntary bankruptcy that is dismissed within 30 days; and (c) immediately if Company reasonably believes that Supplier has breached Section 8.5 (Anti-Corruption Laws) or
+Supplier fails to cooperate with any audit or request by Company pursuant to Section 7.2 (Audit Rights).
+
+12.3 Wind-Down. Promptly
+following effectiveness of termination by either party, Supplier shall: a) cease or wind down performance of the Services as described in the applicable Statement of Work or attachment and b)
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+deliver to Company all Company assets, Confidential Information, Company Data, and Work Product (completed or then in process) in its possession or control and securely destroying all copies
+thereof; b) provide to Company a certificate of destruction evidencing the secure destruction of Company Data; c) issue a final invoice in respect of each terminated Statement of Work, which, in the event of partial performance, shall be limited to
+payment for Services rendered in compliance with the terms of this Agreement and approved expenses reasonably incurred under authorized project phases and milestones of the Statement of Work prior to the effectiveness of such termination; and d) in
+all cases, refund to Company a prorated amount of any prepaid fees for the Services (for the avoidance of doubt, [***]). Upon request by Supplier following effectiveness of termination by either party, Company will: x) promptly deliver to Supplier
+all Supplier assets and Confidential Information in its possession or control and securely destroy all copies thereof and provide to Supplier a certificate of destruction evidencing the return or secure destruction of any Supplier Confidential
+Information and y) pay Supplier undisputed amounts in full for all Services performed up to and including the effective date of termination.
+
+12.4 Termination/Expiration Assistance. Terms for Termination/Expiration Assistance are set forth for the Expansion Services, the ESI Services
+and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in Section 7 of Exhibit A and for the Platform Services and the Services described in any other Statement of Work that indicates that Exhibit B
+shall apply in Section 7 of Exhibit B.
+
+12.5 Survival. The provisions of (a) Section 1.2 (Service Recipients),
+Section 1.6 (with respect to Performance Credits accrued or owing to Company as of the date of expiration or termination), Section 1.7 (Source Code Escrow, solely to the extent set forth in the applicable Statement of Work) and
+Section 1.11 (CMS Flow-Down Requirements), Section 5.2 (Data Handling) (but only with respect to any Company Data maintained by Supplier following the date of expiration or termination for so long as such data is maintained),
+Section 5.3 (Information Protection Requirements and Service Levels) (but only with respect to any Company Data maintained by Supplier following the date of expiration or termination for so long as such data is maintained), Section 5.4
+(Incident Response) (but only with respect to any Company Data maintained by Supplier following the date of expiration or termination for so long as such data is maintained); (b) Articles 3 (Compensation), 4 (Confidentiality), 6 (Intellectual
+Property), 7 (Services Review and Audit; Governance) (excluding Sections 7.1, 7.6 and 7.7), 8 (Representations and Warranties), 9 (Indemnification), 10 (Insurance) (with regard to any tail or other coverages required to be maintained following
+termination/expiration), 11 (Limitation of Liability), 12 (Term and Termination) (excluding Sections 12.1 and 12.2) and 13 (Miscellaneous); (c) those provisions of Exhibit A and B identified as surviving in those Exhibits; (d) any other
+Exhibits referenced in the Sections and Articles cited in (a)-(c) (except for Exhibits A and B); and (d) such other provisions that should naturally survive shall survive the expiration or termination of this Agreement.
+
+13.
+
+Miscellaneous
+
+13.1 [***]. During the term of the applicable Statement of Work and [***], neither party (which shall include any Affiliated Company for purposes
+of this Section 13.1) shall, directly or indirectly, [***] under the applicable Statement of Work. For the avoidance of doubt, Company’s or any Affiliated Company’s obligation to comply with the foregoing [***] shall terminate upon
+Supplier’s bankruptcy/reorganization/receivership or dissolution, or Company’s termination of this Agreement as a result of Supplier’s uncured material breach of the Agreement. Notwithstanding the foregoing, this Agreement will not
+[***] by the other party upon the other party’s written request.
+
+13.2 Independent Contractor. The status of Supplier and the Supplier
+Personnel is that of an independent contractor and not that of a servant, agent, or employee of Company or any Affiliated Company. Neither Supplier nor the Supplier Personnel shall hold itself or themselves out as, or claim to be acting as, an
+employee, agent, or servant of Company or any Affiliated Company. Supplier is not authorized to and shall not make any agreements or representations on behalf of Company or any Affiliated Company.
+
+13.3 Assignment. Neither party shall transfer, assign or delegate this Agreement in whole or in part without the prior consent of the other
+party. Any attempted transfer, assignment or delegation in contravention of the preceding sentence shall be null and void from the beginning. Notwithstanding the foregoing but without limiting Company’s termination rights under
+Section 12.2, either party may, without the consent of the other party, assign the Agreement to any person that acquires all or substantially all of the assets of that party, provided, that such assignment shall not release such party from its
+obligations hereunder.
+
+13.4  Binding Effect; Third Party Beneficiaries.
+
+This Agreement shall be binding upon and inure to the benefit of the parties, including the Affiliated Companies, in accordance with Section 1.2, and
+their respective permitted successors and assigns. Except as expressly stated herein, this Agreement shall not confer any rights or benefits upon any third party.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+13.5 Notice. All notices, consents, approvals, and other communications required or permitted
+under this Agreement must be in writing and (with the exception of routine business communications directed to the appropriate representative of the other party) must be addressed to the other party as set forth below. Such communications shall be
+deemed received on the date (a) personally delivered, (b) confirmed on the return receipt for certified mail sent return receipt requested or (c) confirmed on the delivery confirmation for notices sent by a reliable overnight courier.
+
+If to Company:
+
+If to Supplier:
+
+Cigna
+
+Omada Health, Inc.
+
+900 Cottage Grove Road
+
+500 Sansome Street, Suite 200
+
+Hartford, CT 06152
+
+San Francisco, CA 94111
+
+Attn: Supply Chain Management [***]
+
+Attn: Legal Department
+
+With a copy to:
+
+N/A
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+13.6 Dispute Resolution. Without limiting their rights and remedies under this Agreement
+(including termination rights) or available to either party at Law or in equity, Supplier and Company shall attempt in good faith to promptly resolve by negotiation any dispute arising out of or relating to this Agreement. If any such dispute
+remains unresolved for a period of 60 days from when notice of such dispute was first provided by either party, then either party may file a legal action or proceeding in accordance with Section 13.7 below. Any claims that Supplier may have
+against an Affiliated Company shall be brought solely against Company and not against any Affiliated Company.
+
+13.7 Governing Law;
+Jurisdiction. This Agreement shall be governed by and interpreted in accordance with the Laws of the State of New York, without regard to its conflict of laws provisions. Each party irrevocably accepts the exclusive jurisdiction of the United
+States District Court for the Southern District of New York unless that Court declines or lacks jurisdiction, in which case the courts of the Supreme Court of the State of New York, New York County Manhattan, Commercial Division shall have exclusive
+jurisdiction. Supplier agrees that Company or any Affiliated Company may enforce a judgment, lien, injunction or other remedy or relief against Supplier in any court of competent jurisdiction, and Company agrees that Supplier may enforce a judgment,
+lien, injunction or other remedy or relief against Company in any court of competent jurisdiction.
+
+13.8 Waiver of Jury Trial. EACH PARTY
+IRREVOCABLY AND UNCONDITIONALLY WAIVES, TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, ANY RIGHT IT MAY HAVE TO A TRIAL BY JURY IN ANY LEGAL ACTION, PROCEEDING, CAUSE OF ACTION OR COUNTERCLAIM ARISING OUT OF OR RELATING TO THIS AGREEMENT OR THE
+TRANSACTIONS CONTEMPLATED HEREBY.
+
+EACH PARTY CERTIFIES AND ACKNOWLEDGES THAT (A) IT MAKES THIS WAIVER KNOWINGLY AND VOLUNTARILY, AND (B) IT HAS
+BEEN INDUCED TO ENTER INTO THIS AGREEMENT BY, AMONG OTHER THINGS, THE MUTUAL WAIVERS AND CERTIFICATIONS IN THIS SECTION.
+
+13.9 Remedies
+Cumulative. No right or remedy herein conferred upon or reserved to either party is intended to be exclusive of any other right or remedy, and each and every right and remedy shall be cumulative and in addition to any other right or remedy under
+this Agreement or applicable Laws.
+
+13.10 Force Majeure. Both parties shall be excused from performance under this Agreement for any period
+of time to the extent that a party is prevented from performing any obligation, in whole or in part, as a result of causes beyond its reasonable control and without its negligent or willful misconduct, including without limitation, acts of God,
+natural disasters, war or other hostilities, labor disputes, civil disturbances, governmental acts, orders or regulations, third-party nonperformance or failures or fluctuations in electrical power or telecommunications equipment.
+
+13.11 Waiver. No delay or failure by either party to exercise any of its rights or remedies under this Agreement shall operate as a waiver of
+such right or remedy. A waiver by any party of any breach shall not be construed to be a waiver of any subsequent breach.
+
+13.12 Headings.
+The headings used in this Agreement are for reference only and shall not limit or control any provision of this Agreement or its interpretation or construction.
+
+13.13 Counterparts. This Agreement and any Statement of Work may be signed in any number of counterparts all of which together shall constitute
+one and the same document. A signed copy of this Agreement or any Statement of Work transmitted via facsimile, email or other electronic means shall constitute an originally signed Agreement or Statement of Work and, together with all other required
+signed copies of this same Agreement or Statement of Work, shall constitute one and the same instrument.
+
+13.14 Contract Interpretation.
+Unless otherwise provided to the contrary, (i) all references to days, months, quarters or years shall be deemed references to calendar days, months, quarters or years, (ii) any reference to a “Section,” or “Exhibit”
+shall be deemed to refer to a section of the document containing the reference or an exhibit to the document containing the reference, (iii) any reference to a Section or subsection shall be deemed to include all subsections and paragraphs of
+such Section or subsection, and (iv) any reference to a Law shall be deemed to include any amendment or modification to such Law and any rules or regulations promulgated thereunder or any Law enacted in substitution or replacement therefor.
+Unless the context otherwise requires, as used in this Agreement, all terms used in the singular shall be deemed to refer to the plural as well, and vice versa, and each gender shall be deemed to refer to and include the other. The words
+“hereby,” “hereof,” “herein”
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+and “hereunder” and words of similar import referring to the document containing such words refer to the entire document in which they are contained and not to any particular provision
+of such document. Whenever the words “include,” “includes” or “including” are used in this Agreement, they shall be deemed to be followed by the words “without limitation.” Whenever the word “or” is
+used in this Agreement, it shall be deemed not to be exclusive. Whenever the term “good faith” is used with respect to a performance obligation of a party, it shall be deemed to mean that such party shall use commercially reasonable
+efforts on a diligent basis (and the party may act in its own self-interest). References to “$” or “dollars” shall be deemed a reference to United States dollars unless otherwise specified.
+
+13.15 Entire Agreement; Amendment; Severability. This Agreement, including any Statements of Work, constitutes the entire agreement between the
+parties with respect to the subject matter hereof and supersedes all prior communications and understandings, whether written or oral, relating to such subject matter, including any conflicting or supplemental terms included in any Supplier
+proposal, quote, acknowledgment or invoice or any Company order or similar document, all of which are expressly rejected. Supplier hereby agrees that, except for purposes of Statements of Work No. 1 and 2 for the Participant Agreements (as
+defined therein) applicable to participants in the programs, all shrink-wrap, click-wrap, browse-wrap, click-through, web-based, online or use agreements (“Click-Wrap”) that purport to be
+accepted or deemed accepted by download or online acknowledgment are hereby deemed ineffective with respect to the Services or Supplier Software which are governed solely by the terms of this Agreement. No change, amendment, modification or
+supplement to this Agreement shall be binding unless made in writing and executed by authorized representatives of both parties. If Supplier wishes to provide services or software pursuant to this Agreement other than Services or Supplier Software
+defined herein, the terms of this Agreement shall govern to the extent that they conflict with the terms of any Click-Wrap. If any provision of this Agreement is held by a competent adjudicator to be unenforceable, then the remaining provisions of
+this Agreement, if capable of substantial performance, shall continue in effect.
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+EXHIBIT A ADDITIONAL LEGAL TERMS
+
+The terms and conditions set forth in this Exhibit A apply only to the Services set forth in Statement of Work No. 1, Statement of Work No. 2,
+and the Services described in any other Statement of Work that indicates that Exhibit A shall apply and not to any other Services provided by Supplier under the Agreement.
+
+1.
+
+Supplier Systems.
+
+1.1
+
+Supplier or its Technology Providers or permitted Subcontractors shall operate (a) the software programs and
+programming, applications, operating systems, networks, utilities, hardware and interfaces that transmit any data (including voice data or video data, alone or in combination) or are otherwise used to provide the Services (collectively, the
+“Supplier Software”), (b) data, databases and information contained in or applicable thereto, and (c) any new versions, updates, upgrades, modifications, releases, corrections, improvements, patches or bug fixes no
+matter how numbered or named (collectively, “Updates”) to, and user manuals, training materials, guides, product descriptions, technical manuals, product specifications and supporting materials (collectively,
+“Documentation”) for, (a) and (b), all as more specifically described in the applicable Statement of Work ((a) – (c) collectively, “Supplier Systems”). Supplier shall implement and maintain at all
+of the Supplier Service Locations and for all Supplier Systems under the control of Supplier or its authorized agents information technology (IT) infrastructure, controls and procedures that meet or exceed the operational requirements and Service
+Levels set forth in Exhibit 3-A (IT Operational Requirements) and any Service Levels attached to the applicable Statement of Work.
+
+1.2
+
+Supplier shall own all rights to and interests in the Supplier Systems.
+
+2.
+
+Performance Credits. As set forth in the applicable Statement of Work, failure to meet certain clinical
+performance guarantees (the “Performance Guarantees”) regarding the Services as further detailed in the Statement of Work may result in monetary credits (“Performance Credits”) accruing to Company, which shall be
+set off against payments due Supplier for the Services or, if no further payments are due, paid by Supplier to Company within [***] days after such Performance Credits are calculated. Performance Credits are the sole and exclusive remedy for failure
+to meet the Performance Guarantees but will not limit Company’s other rights and remedies for any breach of any other term of the Agreement, including its termination rights. The parties shall review the Performance Guarantees no less than
+[***] and consider appropriate changes to the Performance Guarantees as further described in the Performance Guarantees.
+
+3.
+
+Information Protection Terms.
+
+3.1
+
+Company Data and Patient Data.
+
+(a) Patient Data. As between Company and Supplier, all data and other information collected or received by
+Supplier directly from the Supplier Systems or otherwise received by Supplier in its capacity as a covered entity (as defined under 45 CFR 160.103), including from individuals applying for, accessing, or using the Services contemplated by Statements
+of Work Nos. 1 and 2 and any other Statement of Work that indicates that Exhibit A shall apply (“Patient Data”) is and shall be owned exclusively by Supplier. Supplier shall [***]. Supplier acknowledges that (i) to the extent [***],
+such as one of [***], Company may [***] and (ii) to the extent [***], Company may [***].
+
+(b) Company Data. As between Company and Supplier, all data or
+other information in any medium (i) [***], (ii) [***] (except for Patient Data), or (iii) Supplier derives from the data and information described in (i) or (ii) (excluding, for clarity, any derivatives created by Supplier from Patient Data or other
+third- party data or information even if such data or information contains any of the same data or information supplied under (i) and (ii)) (collectively, “Company Data”) is and shall be owned exclusively by Company,
+and all rights to Company Data not expressly granted to Supplier in this Agreement are reserved to Company. For the sake of clarity, the term “Company Data” includes all [***] received by [***] in connection with this Agreement (that is
+not Patient Data) and Company Information, as previously defined. Company hereby grants to Supplier a nonexclusive, non-transferable (except as otherwise provided herein or in the Agreement), royalty- free, fully-paid, limited license during the
+term of the applicable Statement of Work to access, copy, use, store, transmit, and modify (as permitted), create derivative works of, and display the Company Data in accordance with the data privacy and information protection requirements set forth
+in this Agreement solely as required to provide the Services.
+
+(c) Upon the expiration or termination of any
+applicable Statement of Work or this Agreement, or upon Company’s earlier written demand, at no additional charge, Supplier shall destroy or return to Company all Company Data (unless a lesser portion is specifically requested by Company) and
+request Company’s written confirmation that Company has any copies of such Company Data that Company requires for its internal systems, records, and archives. In returning any Company Data, Supplier shall return Company Data in a secure manner
+and in an industry standard, non-proprietary format that satisfies Company’s record retention requirements and is suitable for Company’s use on its own systems or with another supplier of Company’s choice, all as reasonably specified
+by Company, and shall provide all information and assistance reasonably requested by Company in connection therewith.
+
+3.2
+
+Disaster Recovery Testing. Supplier shall test its Business Continuity Management plan(s) at least [***]
+per calendar year upon Company’s request or as required by applicable Services Levels, and Supplier shall promptly provide to Company a copy of a summary of Supplier’s test results upon Company’s request by sending them to the
+following Cigna mailbox: [***].
+
+4. Intellectual Property
+
+4.1
+
+Company IP. Company does and shall retain all rights, title and interest in and to all tools, reports,
+applications, information, data, concepts, plans, designs, specifications, systems, methods, algorithms, formulae, works of authorship, ideas (whether or not patentable), inventions, copyrights, patents, trademarks and other materials and
+intellectual property (collectively, “Materials and IP”) that it or any Affiliated Company (a) owned or licensed (other than from Supplier) prior to the Effective Date, or (b) subsequently authors, invents, creates or
+obtains (other than from Supplier) and without breaching its confidentiality obligations to Supplier or exceeding its rights to Supplier IP under this Agreement, whether within or outside of the scope or course of performance under this Agreement
+(collectively, “Company IP”). Subject to the terms and conditions of this Agreement, Company hereby grants Supplier a non-exclusive, non-transferable (except as set forth in Section 13.3 of the Agreement), fully-paid, royalty-free
+license, during the term of this Agreement to access, use, disclose, reproduce, distribute, display, modify and create derivative works of Company IP only as authorized by Company for the limited purpose of providing the Services under the
+corresponding Statement of Work. Supplier may not access, use or disclose Company IP for the benefit of Supplier or any third party. Company hereby grants Supplier a perpetual, irrevocable, worldwide, fully-paid, non-exclusive, sublicenseable
+license to use, disclose, reproduce, distribute, display, modify and create derivative works of any feedback or suggestions that Company or any Affiliated Companies provides to Supplier relating the Services without reference to the source of such
+feedback or suggestions.
+
+4.2
+
+Supplier IP. Supplier does and shall retain all rights, title and interest in and to all Materials and
+IP that it (a) owned or licensed prior to the Effective Date, (b) authors, invents, creates or obtains (other than from Company) on or after the Effective Date in the course of its performance of the Services during the term of this Agreement
+(excluding Work Product), or (c) creates independently of the Services performed for Company (collectively, “Supplier IP”), in each case without use of or reliance on any Company Data, Company IP, or Company Confidential
+Information. Supplier hereby grants to Company a perpetual, irrevocable, worldwide, fully-paid, royalty-free, nonexclusive license to, and to allow Company authorized users, including its employees, agents, contractors, members, customers or
+providers to, access, copy, modify, use and distribute such Supplier IP to the extent incorporated into or otherwise required to use Work Product. “Supplier IP” shall include, without limitation, (i) Supplier Systems, including without
+limitation the Supplier Software and all other software, algorithms and proprietary and technical information therein, and Documentation, (ii) any improvements, enhancements, derivative works, modifications, additional modules, results or features
+to or for the Supplier Systems, including the Supplier Software, developed or created during the term of this Agreement, whether created or developed solely or jointly by or for the parties, and (iii) all intellectual property rights in the
+foregoing. For the avoidance of doubt, none of the items in the foregoing sentence shall be considered Work Product.
+
+4.3
+
+Protection of Supplier Systems and Services. Company will not and will not allow any third party,
+directly or indirectly, to (i) reverse engineer, decompile, disassemble or otherwise attempt to discover the source code, object code or underlying structure, ideas or algorithms of the Supplier Systems and the Services or any materials and
+documentation related to the Supplier Systems and the Services, including the Documentation; (ii) modify, adapt, transform, translate, or create derivative works based on the Services or Documentation; (iii) rent, lease, distribute, sell, transfer
+or encumber rights to the Services or the Documentation to any third party; (iv) remove, alter or obscure in any way any proprietary notices or labels, copyright notices or any name, trademark, service mark, tagline or other designation within the
+Services or the Documentation; (v) copy any features, functions or graphics of the Services; or (vi) use Supplier’s Confidential Information to build software or a product competitive to the Supplier Systems or the Services.
+
+4.4
+
+Work Product. Company shall own all rights, title, and interest in and to all Materials and IP that is
+both (i) authored, invented, conceived, reduced to practice or otherwise created by Supplier for Company in the scope or course of Supplier’s performance of the Services, whether alone or with the participation of Company or others, and (ii)
+agreed in writing to be Work Product or a deliverable owned by the Company, or otherwise intended by the parties to be owned by the Company (including in the applicable Statement of Work) (collectively, “Work Product”). Without
+limiting Supplier’s rights under Section 4.2 of this Exhibit, Supplier hereby transfers, assigns and conveys to Company all rights, title and interest, vested and contingent, in and to the Work Product, in every form and medium, effective upon
+creation and without further consideration, whether or not such Work Product is deemed a “work made for hire” under the U.S. Copyright Act of 1976. Supplier shall (i) promptly disclose all Work Product to Company, (ii) enter into written,
+legally binding agreements with its Supplier Personnel that support Supplier’s assignment of the Work Product to Company, and (iii) provide Company all assistance reasonably required to perfect or enforce Company’s ownership and license
+rights hereunder.
+
+5.
+
+Representations and Warranties Concerning Supplier Systems. Supplier represents and warrants that:
+
+(a) it will use commercially reasonable efforts to ensure that the Supplier Systems, including all
+components thereof, do not contain any computer code, programming instruction or set of instructions (including self-replicating and self-propagating programming instructions commonly called viruses and worms) that are constructed with the ability
+to damage, interfere with, or otherwise adversely affect
+
+computer programs, data files or hardware without the consent or intent of the computer user or any code that could have the effect of disabling or otherwise shutting down the operation of the
+Supplier Systems or Company’s computing or network systems. In the event malicious or disabling code is found to have been introduced into the Supplier Systems or Company’s computing or network systems, Supplier shall provide reasonable
+assistance to Company at [***] in (i) reducing the effects of such malicious or disabling code and, (ii) if such malicious or disabling code causes a loss of operational efficiency or loss of data, in mitigating and restoring such losses.
+
+6. Representations and Warranties Concerning Software Development. Intentionally deleted.
+
+7. Termination/Expiration Assistance. Unless otherwise directed by Company, commencing [***] days prior to the expiration of the
+Agreement or applicable Statement of Work or commencing upon any notice of termination (except for notice of Company’s material breach for purposes of termination) or of non- renewal of the Agreement or applicable Statement of Work, in whole or
+in part, and continuing for the longer of [***] days after the effective date of expiration or termination or any longer period specified in the Statement of Work, Supplier shall at Company’s request (a) continue to provide the Services in
+accordance with this Agreement in order to facilitate Company’s transition of the Services to Company or its designee and (b) provide reasonable assistance to effectuate such transition. This Agreement and the applicable Statement of Work shall
+continue in full force and effect for the duration of such termination/expiration assistance. In consideration of such termination/expiration assistance, Company shall pay Supplier in accordance with the provisions of this Agreement.
+
+8. Survival. The provisions of Section 1.2 (Ownership of Supplier Systems), Section 2 (with respect to Performance Credits accrued
+or owing to Company as of the date of expiration or termination), Section 3.1 (Company Data and Patient Data), Section 4 (Intellectual Property), Section 5 (Representations and Warranties Concerning Supplier Systems), Section 7
+(Termination/Expiration Assistance) and this Section 8 (Survival), in each case, of this Exhibit A shall survive the expiration or termination of this Agreement.
+
+EXHIBIT B ADDITIONAL LEGAL TERMS
+
+[TO BE ADDED BY LATER AMENDMENT WHEN FINALIZED BY THE PARTIES]
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+EXHIBIT 1A
+
+INFORMATION PROTECTION REQUIREMENTS
+
+Exhibit 1A - Information
+Protection Requirements
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 1-2016
+
+EXHIBIT 2A
+
+INFORMATION PROTECTION SERVICE LEVELS
+
+Data Privacy Provisions
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 3A TO MASTER SERVICES AGREEMENT
+
+IT OPERATIONAL REQUIREMENTS
+
+Data Privacy Provisions
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 4 TO MASTER SERVICES AGREEMENT
+
+IT SERVICE LEVELS
+
+INTENTIONALLY DELETED
+
+Data Privacy Provisions
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 5 TO MASTER SERVICES AGREEMENT
+
+GENERAL DATA PRIVACY PROVISIONS
+
+Data Privacy Provisions
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 5A TO MASTER SERVICES AGREEMENT
+
+INTENTIONALLY DELETED.
+
+EXHIBIT 5A TO MASTER
+SERVICES AGREEMENT
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 6 TO MASTER SERVICES AGREEMENT
+
+GOVERNANCE
+
+GOVERNANCE
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 7 TO MASTER SERVICES AGREEMENT
+
+INSURANCE REQUIREMENTS
+
+INSURANCE REQUIREMENTS
+
+CIGNA PROPRIETARY AND CONFIDENTIAL
+
+Form Updated 8-2018
+
+EXHIBIT 8 TO MASTER SERVICES AGREEMENT
+
+PRE-PLACEMENT CHECKS
+
+33
+
+EXHIBIT 8-B
+
+DRUG TEST AND BACKGROUND CHECK CERTIFICATION
+
+FOR ON-SITE CONTRACTORS
+
+Supplier/Company Name
+
+Company Address
+
+(insert Supplier/Company
+name) (“Supplier”) has contracted with Express Scripts Holding Company or one of its wholly owned direct and indirect subsidiaries (collectively “Company”) to provide individual contract resources to perform certain services for
+Company under the Agreement.
+
+In support of Company’s policy of providing a drug free work environment, I, (insert name of Agent)
+, on behalf of Supplier, certify that (insert individual’s name)
+has successfully passed a background check consisting of the requirements in Exhibit 8 of the Agreement.
+
+Printed Name of Authorized Company Agent or Representative
+
+Signature of Authorized Company Agent or Representative
+
+Title
+
+Date
+
+The completion of this certification form is required prior to an individual being allowed unescorted access to
+an Company facility(ies). The individual must bring and provide this completed form to Company Security & Safety personnel on the first day of his/her assignment at an Company facility(ies).
+
+34
+
+Master Services Agreement No.: [***]
+
+EXHIBIT 8-C
+
+BASIC [***] YEAR BACKGROUND INVESTIGATION
+
+FOR ONSITE CONTRACTORS
+
+35
+
+Master Services Agreement No.: [***]
+
+EXHIBIT 8-D
+
+BASIC [***] YEAR BACKGROUND INVESTIGATION
+
+GUIDE FOR OFF-SITE CONTRACTORS
+
+36
+
+Master Services Agreement No.: [***]
+
+EXHIBIT 9 TO MASTER SERVICES AGREEMENT
+
+CIGNA CMS FLOW-DOWN REQUIREMENTS
+
+[TO BE ADDED BY LATER AMENDMENT WHEN FINALIZED BY THE PARTIES]
+
+37
+
+Master Services Agreement No.: [***]
+
+EXHIBIT 10 TO MASTER SERVICES AGREEMENT
+
+ACCREDITATION REQUIREMENTS; DELEGATED FUNCTIONS
+
+INTENTIONALLY DELETED
+
+38
+
+EXHIBIT 11 TO MASTER SERVICES AGREEMENT
+
+STATE PHARMACY LAWS RIDER
+
+INTENTIONALLY DELETED

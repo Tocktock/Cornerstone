@@ -1,0 +1,326 @@
+26
+tm2135648d1_ex10-26.htm
+EXHIBIT 10.26
+
+Exhibit 10.26
+
+CERTAIN CONFIDENTIAL PORTIONS OF THIS EXHIBIT HAVE BEEN OMITTED AND REPLACED WITH “[***]”. SUCH IDENTIFIED INFORMATION HAS
+BEEN EXCLUDED FROM THIS EXHIBIT BECAUSE IT IS (I) NOT MATERIAL AND (II) WOULD LIKELY CAUSE COMPETITIVE HARM TO THE COMPANY IF DISCLOSED.
+
+© AMERICAN EXPRESS
+
+PROPRIETARY & CONFIDENTIAL
+
+COMPOSECURE, LLC
+
+AMENDMENT NUMBER
+4 CW2481491
+
+TO
+
+MASTER SERVICES
+AGREEMENT CW139362
+
+PREAMBLE
+
+This Amendment Number 4 CW2481491 (“Amendment”)
+is made and entered into this July 1, 2019 (the “Amendment Effective Date”) between AMERICAN EXPRESS
+TRAVEL RELATED SERVICES COMPANY, INC. (“Amexco” or “AXP”) and COMPOSECURE, LLC, a Delaware limited
+liability company (“Service Provider”) with reference to the following:
+
+RECITALS
+
+A.
+
+Amexco and Service Provider entered into a Master Services Agreement, CW139362 (“Agreement”) for lamination and
+fabrication of the Centurion card executed by the parties on or about August 1, 2004; and
+
+B.
+
+Amexco and Service Provider wish to extend the term of the Agreement and amend certain of their understandings as set forth in the
+Agreement, specifically to address modifying the Agreement to comply with current AXP terms and conditions.
+
+NOW, THEREFORE, in consideration of the mutual
+promises and agreements set forth below, the parties agree as follows:
+
+AGREEMENT
+
+A.
+
+General
+
+1.
+
+Entire Agreement:
+
+The above-referenced Agreement and Amendments
+thereto, are each entirely incorporated herein. Together, they represent the entire agreement (“Entire Agreement”) between
+the parties with respect to the Services, and there are no other representations, understandings or agreements between the parties relative
+to the Services. All terms, conditions and covenants (“Provisions”) of the Agreement remain in full force and effect, except
+as otherwise provided in this Amendment. Any term not otherwise defined herein, shall have the meaning specified in the Agreement. The
+Agreement, except as otherwise provided in this Amendment, shall apply to all transactions authorized and undertaken by and between the
+parties pursuant to this Amendment, to the exclusion of all other representations, understandings or agreements and Provisions.
+
+2.
+
+Order of Precedence:
+
+In the event of conflict between the provisions
+of this Amendment and the provisions of the Agreement, this Amendment shall control if this Amendment expressly references the provisions
+of the Agreement with which they are inconsistent. This Amendment is good and sufficient notice of all matters herein.
+
+MSAA4 CW2481491 to_ CW139362
+
+AXP Internal
+
+Page 1 of 5
+
+© AMERICAN EXPRESS
+
+PROPRIETARY & CONFIDENTIAL
+
+3.
+
+Effective Date & Term:
+
+This Amendment shall be effective from the
+above-stated Amendment Effective Date through the Agreement expiration date or as it may be amended herein. Although the parties consider
+this Agreement effective as of July 1, 2019 (“Effective Date”), it was executed as of the last date signed below (“Execution
+Date”), and each party represents that it has taken no action or omission during the period between the Effective Date and Execution
+Date that would frustrate the purpose of this Agreement. Additionally, although the parties were not contractually bound between the Effective
+Date and Execution Date, each party represents that it acted as if it were so bound.
+
+4.
+
+Modifications to Amendment:
+
+This Amendment may only be modified or amended
+in a written document signed by both parties.
+
+5.
+
+General:
+
+Except as otherwise modified herein, the capitalized
+terms used in this Amendment shall have the meaning specified in the Agreement.
+
+Except as amended herein, the remaining terms
+and conditions of the Agreement shall remain in full force and effect.
+
+6.
+
+Amendments to the Agreement:
+
+6.1
+
+Section 9.1, Term, shall be replaced in its entirety with the following:
+
+“9.1 Term. This
+Agreement will commence as of the Effective Date and will expire on December 31, 2022 (the “Initial Term”).
+AXP shall have the option, upon notice to Service Provider of not less than thirty (30) days prior to the end of the Initial Term, to
+extend the Initial Term of this Agreement by written notice to Service Provider for up to one (1) additional year (the Initial Term and
+such additional term, if applicable, shall be the “Term”). In the event of any termination hereunder, and subject to
+continued compliance with applicable required minimum purchase obligations by AXP and other provisions set forth in any open Schedule
+or amendment thereto, AXP will pay Service Provider at the agreed-upon rates for Services performed up to the effective date of termination,
+subject to a refund of any unearned, prepaid fees, but will not be liable for any other termination-related charges.”
+
+6.2
+
+Section 9.2, Termination for Convenience, shall be replaced in its entirety with the following:
+
+“9.2 Termination
+for Convenience. Notwithstanding anything herein to the contrary, and subject to continued compliance with applicable
+required minimum purchase obligations by AXP and other provisions set forth in any open Schedule or amendment thereto, AXP may
+terminate, in whole or in part, this Agreement and/or any Schedule without cause upon five (5) days’ written notice. AXP
+agrees to comply with any such required minimum purchase obligations and to pay Service Provider for Services performed up to the
+effective date of termination, at the agreed upon rates. Notice of termination of any Schedule shall not be considered notice of
+termination of this Agreement unless specifically stated in the notice. Notice that purports to be notice of termination of the
+Agreement shall not be considered notice of termination of this Agreement unless such notice specifically states that each
+respective Services under each respective Schedule has been terminated and/or completed, as applicable.”
+
+MSAA4 CW2481491 to_ CW139362
+
+AXP Internal
+
+Page 2 of 5
+
+© AMERICAN EXPRESS
+
+PROPRIETARY & CONFIDENTIAL
+
+6.3
+
+Schedule, Exhibit A Statement of Work, Section III, Product Orders and Production, 4. Capacity Commitment and Purchase Commitment
+shall be amended to include the following:
+
+“For 2020, 2021 and 2022, Service
+Provider agrees to reserve up to [***] annual capacity for all products and for any future term extensions of the Agreement; provided
+that AXP provides to Service Provider an annual forecast 90 days prior to the 1st day of January of each such year. To reserve
+this capacity from Service Provider, AXP shall guaranty at least [***] of the forecast given for each such year. Therefore, AXP shall place
+with Service Provider purchase orders during each such year for not less than such quantity of cards. If AXP does not order at least such
+quantity of cards in each such year, AXP shall pay to Service Provider an amount equal to [***] per card price for all card quantities
+not ordered up to such guaranteed amount.
+
+For the avoidance of doubt, if AXP’s
+annual forecast for 2020 is [***] cards, and AXP orders [***] cards, AXP will have fulfilled its minimum order guaranty and no
+additional charges will be made by Service Provider under this provision. However, if for example, AXP’s annual forecast for 2020
+is [***] cards, and AXP only orders [***] cards, Service Provider shall invoice, and AXP shall pay to Service Provider an amount
+equal to [***] per card price for the [***] cards deficit (i.e., [***] forecasted and [***] of forecasted = [***] committed;
+the additional ordered above AXP ordered cards =[***]).
+
+[***] Cards: AXP guarantees
+to purchase [***] in card volume of the [***] product(s) over the term of the Agreement. If AXP does not order such quantity of cards
+during the term of the Agreement, AXP shall pay to Service Provider an amount equal to the per card price of $[***]/card for all card
+quantities not ordered over the term of the Agreement.”
+
+6.4
+
+Schedule, Exhibit A Statement of Work, Section V, Forecasting & Minimum Stock, 1. Quarterly Forecast shall be amended to include
+the following:
+
+“AXP will provide a non-binding
+annual forecast 90 days prior to the 1st day of January of each year during the term of the Agreement for planning purposes.”
+
+6.5
+
+Schedule, Exhibit A Statement of Work, Section VII, Pricing, Schedule of Prices shall be amended to include the following:
+
+“Subject to AXP’s compliance
+with the terms of this Schedule, Service Provider shall provide to AXP a one-time credit of up to [***] for services related to
+AXP-specific research and development project costs per Statements of Work as mutually agreed from time to time during the term of the
+Agreement; including but not limited to new research, industrialization, promotional items for colleagues, and destruction of raw materials
+related to development. Service Provider shall send AXP a quarterly report on the status of the credit until exhausted.
+
+MSAA4 CW2481491 to_ CW139362
+
+AXP Internal
+
+Page 3 of 5
+
+© AMERICAN EXPRESS
+
+PROPRIETARY & CONFIDENTIAL
+
+Unit cost pricing for New [***]
+Product(s) over the term and for any future extensions of the Agreement.
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+[***]
+
+6.6
+
+Schedule, Exhibit A Statement of Work, Section VII, Pricing, Schedule of Prices [***] rate
+for the Annual Volume Tier greater than [***] shall be deleted and replaced with the following for orders through December
+31st, 2019:
+
+Annual Volume Tier
+
+[***]
+
+[***]
+
+[***]
+
+6.7
+
+Schedule, Exhibit A Statement of Work, Section VII, Pricing, Schedule of Prices[***] rate for the Annual Volume Tier
+greater than [***] shall be deleted and replaced with the following for orders from January 1st, 2020 over the term and
+for any future extensions of the Agreement:
+
+Annual Volume Tier
+
+[***]
+
+[***]
+
+[***]
+
+6.8
+
+Schedule, Exhibit A Statement of Work, shall be amended to include the following new section:
+
+“XIII. Exclusivity
+
+Service Provider shall not sell the
+Products (defined as: any Service Provider financial card product comprised of [***]) to any customer of Service Provider, other than AXP, in any region across the world, from
+the Amendment Effective Date (defined above) until the expiration of the term of the Agreement (the “Exclusivity Period”).”
+
+MSAA4 CW2481491 to_ CW139362
+
+AXP Internal
+
+Page 4 of 5
+
+© AMERICAN EXPRESS
+
+PROPRIETARY & CONFIDENTIAL
+
+IN WITNESS WHEREOF, Service Provider and Amexco
+have caused this Amendment to be executed on their behalf by their duly authorized officers, all as of the Amendment Effective Date.
+
+AMERICAN EXPRESS
+TRAVEL RELATED SERVICES COMPANY, INC.
+
+COMPOSECURE,
+LLC
+
+By:
+
+/s/ Melanie
+Chung
+
+By:
+
+/s/ Jonathan
+C. Wilk
+
+Name:
+
+Melanie
+Chung
+
+Name:
+
+Jonathan
+C. Wilk
+
+Title:
+
+Director
+
+Title:
+
+CEO
+
+Date:
+
+October
+10, 2019
+
+Date:
+
+October
+10, 2019
+
+MSAA4 CW2481491 to_ CW139362
+
+AXP Internal
+
+Page 5 of 5

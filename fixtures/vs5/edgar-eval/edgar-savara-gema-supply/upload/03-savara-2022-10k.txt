@@ -1,0 +1,825 @@
+
+3http://fasb.org/us-gaap/2022#OtherAssetsNoncurrentfalse--12-31http://fasb.org/us-gaap/2022#OtherLiabilitiesNoncurrent0.50FYhttp://fasb.org/us-gaap/2022#AccruedLiabilitiesCurrent00011603080001160308svra:EmployeesMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-01-012022-12-310001160308srt:MaximumMembersvra:HCWainwrightAndCoLLCMember2018-07-130001160308svra:DecemberTwoThousandEighteenWarrantsMember2022-12-310001160308svra:ChiefFinancialOfficerAndChiefMedicalOfficerMember2022-01-012022-12-310001160308us-gaap:FairValueInputsLevel1Memberus-gaap:USTreasurySecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2022-12-310001160308svra:PublicOfferingMember2021-03-150001160308us-gaap:EmployeeStockOptionMember2022-01-012022-12-310001160308svra:TwoThousandSeventeenPreFundedWarrantsMember2021-12-310001160308svra:TwoThousandEightStockOptionPlanAndTwoThousandFifteenOmnibusIncentiveOptionPlanMembersvra:CliffVestingMemberus-gaap:RestrictedStockUnitsRSUMember2022-01-012022-12-310001160308us-gaap:CommercialPaperMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308svra:ActivePharmaceuticalIngredientsMember2022-01-012022-12-3100011603082019-12-242019-12-240001160308svra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-01-012022-12-310001160308srt:MaximumMember2022-01-012022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2022-01-012022-12-310001160308srt:ChiefExecutiveOfficerMember2022-01-012022-12-310001160308us-gaap:USGovernmentDebtSecuritiesMemberus-gaap:FairValueInputsLevel1Memberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308us-gaap:AccumulatedNetUnrealizedInvestmentGainLossMember2021-01-012021-12-310001160308us-gaap:AccumulatedTranslationAdjustmentMember2021-01-012021-12-310001160308svra:ClassOfWarrantFiveMember2022-01-012022-12-310001160308us-gaap:AccumulatedNetUnrealizedInvestmentGainLossMember2020-12-310001160308svra:NonEmployeesMember2022-01-012022-12-310001160308svra:SavaraApSMembersvra:ResearchAndDevelopmentTaxCreditReceivableMember2021-12-310001160308us-gaap:WarrantMember2021-01-012021-12-310001160308us-gaap:AccumulatedNetUnrealizedInvestmentGainLossMember2022-12-310001160308svra:ClassOfWarrantFourMember2022-12-310001160308us-gaap:DomesticCountryMemberus-gaap:InternalRevenueServiceIRSMember2022-01-012022-12-310001160308svra:BainCapitalLifeScienceInvestorsLLCMembersvra:PublicOfferingMember2021-03-152021-03-150001160308us-gaap:LeaseholdImprovementsMember2021-12-310001160308svra:TwoThousandTwentyOneInducementEquityIncentivePlanMemberus-gaap:RestrictedStockUnitsRSUMember2022-01-012022-12-310001160308srt:MinimumMembersvra:EmployeesMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-01-012022-12-310001160308us-gaap:AccumulatedTranslationAdjustmentMember2020-12-310001160308us-gaap:FairValueInputsLevel2Memberus-gaap:CommercialPaperMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308svra:MilestoneWarrantsMembersvra:WarrantRepurchaseMember2021-08-132021-08-130001160308us-gaap:SellingGeneralAndAdministrativeExpensesMember2021-01-012021-12-310001160308svra:TwoThousandAndEightStockOptionPlanMemberus-gaap:EmployeeStockOptionMember2022-01-012022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2022-04-210001160308srt:MaximumMembersvra:EvercoreGroupLLCMember2021-07-060001160308svra:AprilTwoThousandSeventeenWarrantsMember2022-12-310001160308svra:NonvestedRestrictedSharesAndRestrictedStockUnitsMember2021-01-012021-12-310001160308svra:ActivePharmaceuticalIngredientsMember2022-12-310001160308us-gaap:AccumulatedOtherComprehensiveIncomeMember2020-12-310001160308us-gaap:CommonStockMember2022-01-012022-12-310001160308us-gaap:RestrictedStockUnitsRSUMember2021-12-310001160308us-gaap:AccumulatedOtherComprehensiveIncomeMember2022-01-012022-12-310001160308svra:TwoThousandAndTwentyOnePreFundedWarrantsMember2021-12-310001160308svra:AprilTwoThousandSeventeenWarrantsMember2021-12-310001160308us-gaap:RestrictedStockUnitsRSUMember2022-01-012022-12-310001160308svra:JuneTwoThousandSeventeenWarrantsMember2021-12-310001160308us-gaap:DomesticCountryMember2022-01-012022-12-310001160308us-gaap:USTreasurySecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308us-gaap:AssetBackedSecuritiesMember2021-12-3100011603082021-01-012021-12-310001160308svra:MilestoneWarrantsMembersvra:WarrantRepurchaseMember2021-03-152021-03-150001160308svra:NebulizerMember2022-01-012022-12-310001160308svra:ClassOfWarrantOneMember2022-12-310001160308us-gaap:USTreasurySecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2022-12-310001160308svra:ClassOfWarrantTwoMember2022-12-310001160308svra:ClassOfWarrantTwoMember2022-01-012022-12-310001160308us-gaap:PrivatePlacementMember2019-12-240001160308us-gaap:EmployeeStockOptionMember2021-01-012021-12-310001160308us-gaap:CommonStockMember2020-12-310001160308svra:TwoThousandEightStockOptionPlanAndTwoThousandFifteenOmnibusIncentiveOptionPlanMemberus-gaap:EmployeeStockOptionMember2022-01-012022-12-310001160308svra:ClassOfWarrantThreeMember2022-01-012022-12-310001160308us-gaap:StateAndLocalJurisdictionMember2022-01-012022-12-310001160308svra:PALeaseMember2021-07-072021-07-070001160308us-gaap:FairValueInputsLevel2Memberus-gaap:CorporateDebtSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308stpr:TXus-gaap:InternalRevenueServiceIRSMember2022-01-012022-12-310001160308us-gaap:ProductMember2022-01-012022-12-310001160308us-gaap:RetainedEarningsMember2021-12-310001160308us-gaap:AccumulatedOtherComprehensiveIncomeMember2021-12-310001160308us-gaap:AccumulatedTranslationAdjustmentMember2021-12-310001160308us-gaap:CommercialPaperMember2021-12-310001160308us-gaap:CommonStockMember2021-01-012021-12-310001160308svra:TwoThousandTwentyOneInducementEquityIncentivePlanMemberus-gaap:EmployeeStockOptionMember2022-01-012022-12-310001160308svra:ClassOfWarrantFourMember2022-01-012022-12-310001160308us-gaap:AccumulatedTranslationAdjustmentMember2022-01-012022-12-310001160308svra:TwoThousandEightStockOptionPlanAndTwoThousandFifteenOmnibusIncentiveOptionPlanMemberus-gaap:RestrictedStockUnitsRSUMember2022-01-012022-12-310001160308us-gaap:RetainedEarningsMember2020-12-310001160308us-gaap:EquipmentMember2022-12-310001160308us-gaap:USGovernmentDebtSecuritiesMember2021-12-310001160308us-gaap:EmployeeStockOptionMember2021-12-310001160308svra:MilestoneWarrantsMember2019-12-242019-12-240001160308svra:SavaraApSMember2022-01-012022-12-310001160308us-gaap:AdditionalPaidInCapitalMember2021-01-012021-12-310001160308us-gaap:SellingGeneralAndAdministrativeExpensesMember2022-01-012022-12-310001160308srt:MaximumMembersvra:EmployeesMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2021-01-012021-12-310001160308svra:PreFundedPIPEWarrantsMembersvra:BainCapitalLifeScienceInvestorsLLCMembersvra:PublicOfferingMember2021-03-150001160308svra:WarrantRepurchaseMember2021-03-150001160308us-gaap:CommonStockMembersvra:HCWainwrightAndCoLLCMember2018-07-122018-07-130001160308us-gaap:AdditionalPaidInCapitalMember2020-12-310001160308svra:TwoThousandSeventeenPreFundedWarrantsMember2022-12-310001160308us-gaap:LeaseholdImprovementsMember2022-12-310001160308us-gaap:StateAndLocalJurisdictionMember2022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersrt:MaximumMembersvra:SiliconValleyBankMember2022-04-210001160308us-gaap:StockCompensationPlanMember2021-01-012021-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMembersvra:BeforeFirstAnniversaryClosingDateMember2022-04-212022-04-210001160308svra:NonEmployeesMember2021-01-012021-12-310001160308us-gaap:FairValueInputsLevel1Memberus-gaap:USTreasurySecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308us-gaap:CorporateDebtSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308us-gaap:AccumulatedOtherComprehensiveIncomeMember2022-12-310001160308us-gaap:USGovernmentDebtSecuritiesMemberus-gaap:FairValueInputsLevel1Memberus-gaap:FairValueMeasurementsRecurringMember2022-12-310001160308svra:NonvestedRestrictedSharesAndRestrictedStockUnitsMember2022-01-012022-12-310001160308svra:PublicOfferingMember2021-03-152021-03-150001160308svra:ClassOfWarrantOneMember2022-01-012022-12-310001160308svra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-12-310001160308us-gaap:AssetBackedSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-3100011603082022-12-310001160308svra:HCWainwrightAndCoLLCMember2018-07-1300011603082023-03-300001160308us-gaap:PrivatePlacementMembersvra:PreFundedPIPEWarrantsMember2019-12-240001160308us-gaap:EmployeeStockOptionMember2022-12-310001160308us-gaap:InternalRevenueServiceIRSMember2021-12-310001160308svra:TXLeaseMember2022-12-310001160308us-gaap:USGovernmentDebtSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308svra:TerminationOtherThanForCauseDeathOrDisabilityOrResignationForGoodReasonMembersrt:ChiefExecutiveOfficerMember2022-01-012022-12-310001160308us-gaap:RetainedEarningsMember2021-01-012021-12-310001160308us-gaap:PrivatePlacementMember2019-12-242019-12-240001160308us-gaap:FurnitureAndFixturesMember2022-12-310001160308svra:TXLeaseMember2021-06-032021-06-030001160308us-gaap:AdditionalPaidInCapitalMember2022-01-012022-12-310001160308us-gaap:RestrictedStockUnitsRSUMember2022-12-3100011603082022-01-012022-12-310001160308us-gaap:EmployeeStockOptionMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-01-012022-12-310001160308us-gaap:FairValueInputsLevel2Memberus-gaap:AssetBackedSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2021-12-310001160308svra:TwoThousandAndTwentyOnePreFundedWarrantsMember2022-01-012022-12-310001160308svra:PreFundedPIPEWarrantsMember2021-12-3100011603082021-12-310001160308svra:TXLeaseMember2021-08-010001160308svra:HCWainwrightAndCoLLCMember2021-07-122021-07-120001160308us-gaap:EquipmentMember2021-12-310001160308us-gaap:USGovernmentDebtSecuritiesMember2022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2017-04-262017-04-280001160308us-gaap:DomesticCountryMember2022-12-310001160308us-gaap:AdditionalPaidInCapitalMember2022-12-310001160308us-gaap:AccumulatedOtherComprehensiveIncomeMember2021-01-012021-12-310001160308us-gaap:ResearchAndDevelopmentExpenseMember2022-01-012022-12-3100011603082022-12-012022-12-310001160308svra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2017-04-262017-04-280001160308svra:SavaraApSMemberus-gaap:OtherNoncurrentAssetsMember2022-12-310001160308us-gaap:CorporateDebtSecuritiesMember2021-12-310001160308srt:MinimumMembersvra:EmployeesMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2021-01-012021-12-310001160308us-gaap:PrivatePlacementMemberus-gaap:CommonStockMember2019-12-242019-12-240001160308us-gaap:SubsequentEventMembersvra:PALeaseMember2023-02-280001160308srt:MaximumMemberus-gaap:SubsequentEventMembersvra:SiliconValleyBankMember2023-03-100001160308us-gaap:WarrantMember2022-01-012022-12-310001160308us-gaap:CommonStockMember2022-12-310001160308us-gaap:AccumulatedNetUnrealizedInvestmentGainLossMember2022-01-012022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2017-04-280001160308us-gaap:AccumulatedNetUnrealizedInvestmentGainLossMember2021-12-310001160308svra:PreFundedPIPEWarrantsMember2022-12-310001160308svra:EmployeesMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2021-01-012021-12-310001160308svra:TwoThousandAndTwentyOnePreFundedWarrantsMember2022-12-310001160308srt:MinimumMember2022-01-012022-12-310001160308svra:ResearchAndDevelopmentEquipmentMember2022-12-310001160308svra:EvercoreGroupLLCMember2021-07-162021-07-160001160308svra:ResearchAndDevelopmentEquipmentMember2021-12-310001160308svra:ClassOfWarrantFiveMember2022-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMembersvra:AfterFirstAndBeforeSecondAnniversaryClosingDateMember2022-04-212022-04-210001160308us-gaap:AccumulatedTranslationAdjustmentMember2022-12-310001160308svra:MilestoneWarrantsMemberus-gaap:PrivatePlacementMember2019-12-242019-12-240001160308us-gaap:StateAndLocalJurisdictionMember2021-12-310001160308us-gaap:CommonStockMember2021-12-310001160308svra:TwoThousandTwentyOneInducementEquityIncentivePlanMember2022-12-310001160308svra:EvercoreGroupLLCMember2022-01-012022-12-3100011603082021-03-052021-03-0500011603082021-10-012021-12-310001160308us-gaap:USGovernmentDebtSecuritiesMemberus-gaap:FairValueMeasurementsRecurringMember2022-12-310001160308svra:EvercoreGroupLLCMember2021-07-060001160308svra:OtherThanStockOptionsMembersvra:TwoThousandAndFifteenOmnibusIncentivePlanMember2022-01-012022-12-310001160308us-gaap:RetainedEarningsMember2022-12-310001160308us-gaap:ForeignCountryMemberus-gaap:InternalRevenueServiceIRSMember2022-01-012022-12-310001160308us-gaap:FurnitureAndFixturesMember2021-12-310001160308us-gaap:StockCompensationPlanMember2022-01-012022-12-3100011603082022-06-300001160308svra:CommonStockAndPreFundedPIPEWarrantsMember2019-12-242019-12-240001160308us-gaap:ResearchAndDevelopmentExpenseMember2021-01-012021-12-310001160308svra:DecemberTwoThousandEighteenWarrantsMember2021-12-310001160308svra:TermLoanMembersvra:LoanAndSecurityAgreementMembersvra:SiliconValleyBankMember2022-04-212022-04-210001160308us-gaap:PrivatePlacementMemberus-gaap:CommonStockMember2019-12-240001160308us-gaap:AdditionalPaidInCapitalMember2021-12-310001160308svra:MilestoneWarrantsMemberus-gaap:PrivatePlacementMember2019-12-240001160308svra:JuneTwoThousandSeventeenWarrantsMember2022-12-310001160308svra:ClassOfWarrantThreeMember2022-12-310001160308svra:PALeaseMember2021-07-0700011603082020-12-310001160308us-gaap:RetainedEarningsMember2022-01-012022-12-310001160308us-gaap:DomesticCountryMember2021-12-31svra:Segmentxbrli:pureutr:sqftxbrli:sharesiso4217:USDiso4217:USDxbrli:shares
+
+UNITED STATES
+
+SECURITIES AND EXCHANGE COMMISSION
+
+Washington, D.C. 20549
+
+FORM 10-K
+
+(Mark One)
+
+☒ ANNUAL REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934
+
+For the fiscal year ended December 31, 2022
+
+OR
+
+☐ TRANSITION REPORT PURSUANT TO SECTION 13 OR 15(d) OF THE SECURITIES EXCHANGE ACT OF 1934 FOR THE TRANSITION PERIOD FROM TO
+
+Commission File Number 001-32157
+
+Savara Inc.
+
+(Exact name of Registrant as specified in its Charter)
+
+Delaware
+
+84-1318182
+
+(State or other jurisdiction of
+
+incorporation or organization)
+
+(I.R.S. Employer
+Identification No.)
+
+6836 Bee Cave Road, Building 1, Suite 205
+
+Austin, TX
+
+78746
+
+(Address of principal executive offices)
+
+(Zip Code)
+
+Registrant’s telephone number, including area code: (512) 614-1848
+
+Securities registered pursuant to Section 12(b) of the Act:
+
+Title of each class
+
+Trading
+
+Symbol(s)
+
+Name of each exchange on which registered
+
+Common Stock, par value $0.001 per share
+
+SVRA
+
+The Nasdaq Global Select Market
+
+Securities registered pursuant to Section 12(g) of the Act: None
+
+Indicate by check mark if the Registrant is a well-known seasoned issuer, as defined in Rule 405 of the Securities Act. Yes ☐ No ☒
+
+Indicate by check mark if the Registrant is not required to file reports pursuant to Section 13 or 15(d) of the Act. Yes ☐ No ☒
+
+Indicate by check mark whether the Registrant: (1) has filed all reports required to be filed by Section 13 or 15(d) of the Securities Exchange Act of 1934 during the preceding 12 months (or for such shorter period that the Registrant was required to file such reports), and (2) has been subject to such filing requirements for the past 90 days. Yes ☒ No ☐
+
+Indicate by check mark whether the Registrant has submitted electronically every Interactive Data File required to be submitted pursuant to Rule 405 of Regulation S-T (§232.405 of this chapter) during the preceding 12 months (or for such shorter period that the Registrant was required to submit such files). Yes ☒ No ☐
+
+Indicate by check mark whether the registrant is a large accelerated filer, an accelerated filer, a non-accelerated filer, smaller reporting company, or an emerging growth company. See the definitions of “large accelerated filer,” “accelerated filer,” “smaller reporting company,” and “emerging growth company” in Rule 12b-2 of the Exchange Act.
+
+Large accelerated filer
+
+☐
+
+Accelerated filer
+
+☐
+
+Non-accelerated filer
+
+☒
+
+Smaller reporting company
+
+☒
+
+Emerging growth company
+
+☐
+
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. ☐
+
+Indicate by check mark whether the registrant has filed a report on and attestation to its management’s assessment of the effectiveness of its internal control over financial reporting under Section 404(b) of the Sarbanes-Oxley Act (15 U.S.C. 7262(b)) by the registered public accounting firm that prepared or issued its audit report. ☐
+
+If securities are registered pursuant to Section 12(b) of the Act, indicate by check mark whether the financial statements of the registrant included in the filing reflect the correction of an error to previously issued financial statements. ☐
+
+Indicate by check mark whether any of those error corrections are restatements that required a recovery analysis of incentive-based compensation received by any of the registrant’s executive officers during the relevant recovery period pursuant to §240.10D-1(b). ☐
+
+Indicate by check mark whether the Registrant is a shell company (as defined in Rule 12b-2 of the Exchange Act). Yes ☐ No ☒
+
+The aggregate market value of the voting and non-voting common equity held by non-affiliates of the Registrant, based on the closing price of the shares of common stock on The Nasdaq Global Select Market on June 30, 2022, (the last business day of the registrant’s most recently completed second fiscal quarter), was $159,286,465.
+
+The number of shares of Registrant’s Common Stock outstanding as of March 30, 2023 was 114,064,736.
+
+Portions of the Registrant’s Definitive Proxy Statement relating to the Annual Meeting of Shareholders, scheduled to be held on June 8, 2023, are incorporated by reference into Part III of this Report.
+
+Table of Contents
+
+Page
+
+PART I
+
+Item 1.
+
+Business
+
+5
+
+Item 1A.
+
+Risk Factors
+
+25
+
+Item 1B.
+
+Unresolved Staff Comments
+
+50
+
+Item 2.
+
+Properties
+
+50
+
+Item 3.
+
+Legal Proceedings
+
+50
+
+Item 4.
+
+Mine Safety Disclosures
+
+50
+
+PART II
+
+Item 5.
+
+Market for Registrant’s Common Equity, Related Stockholder Matters and Issuer Purchases of Equity Securities
+
+51
+
+Item 6.
+
+Reserved
+
+51
+
+Item 7.
+
+Management’s Discussion and Analysis of Financial Condition and Results of Operations
+
+52
+
+Item 7A.
+
+Quantitative and Qualitative Disclosures About Market Risk
+
+60
+
+Item 8.
+
+Financial Statements and Supplementary Data
+
+60
+
+Item 9.
+
+Changes in and Disagreements with Accountants on Accounting and Financial Disclosure
+
+60
+
+Item 9A.
+
+Controls and Procedures
+
+61
+
+Item 9B.
+
+Other Information
+
+61
+
+PART III
+
+Item 10.
+
+Directors, Executive Officers, and Corporate Governance
+
+62
+
+Item 11.
+
+Executive Compensation
+
+62
+
+Item 12.
+
+Security Ownership of Certain Beneficial Owners and Management and Related Stockholder Matters
+
+62
+
+Item 13.
+
+Certain Relationships and Related Transactions, and Director Independence
+
+63
+
+Item 14.
+
+Principal Accounting Fees and Services
+
+63
+
+PART IV
+
+Item 15.
+
+Exhibits, Financial Statement Schedules
+
+64
+
+Item 16.
+
+Form 10-K Summary
+
+64
+
+i
+
+Cautionary Statement Concerning Forward-Looking Statements
+
+This Annual Report on Form 10-K, particularly in Item 1. Business, and Item 7. Management’s Discussion and Analysis of Financial Condition and Results of Operations, and the information incorporated herein by reference, include forward-looking statements within the meaning of Section 27A of the Securities Act of 1933, as amended, and Section 21E of the Securities Exchange Act of 1934, as amended. These forward-looking statements are based on current expectations and beliefs and involve numerous risks and uncertainties that could cause actual results to differ materially from expectations. These forward-looking statements should not be relied upon as predictions of future events as we cannot assure you that the events or circumstances reflected in these statements will be achieved or will occur. When used in this report, the words “aim,” “anticipate,” “believe,” “continue,” “could,” “estimate,” “continue,” “expect,” “indicate,” “intend,” “may,” “plan,” “predict,” “seek,” “should,” “target,” “will,” “would,” and similar expressions are intended to identify forward-looking statements, though not all forward-looking statements contain these identifying words. All statements, other than statements of historical fact, are statements that could be deemed forward-looking statements. For example, forward-looking statements include, but are not limited to, statements about:
+
+•
+our plans, strategies, and objectives for future operations, including the execution and timing of those plans;
+
+•
+our future financial condition or performance, including the accuracy of our estimates regarding expenses, future revenues, capital requirements, and needs for additional funding;
+
+•
+the process, prospects, and timing for regulatory approval of our product candidate or any product candidates that we may develop;
+
+•
+the timing, progress and results of clinical trials for our product candidate;
+
+•
+our beliefs regarding the therapeutic benefits and efficacy of our product candidate;
+
+•
+our beliefs regarding the treatment of conditions related to the indications targeted by our product candidate;
+
+•
+our use of clinical research organizations and other contractors;
+
+•
+our ability to successfully commercialize our product candidates and prospects for market success;
+
+•
+our product candidate, including our ability to obtain and maintain intellectual property protection, third party payor coverage, and reimbursement;
+
+•
+the size and growth of the markets for our product candidate and our ability to serve those markets;
+
+•
+our competitive position, and developments and projections relating to both our competitors and our industry;
+
+•
+our ability to establish and/or maintain future collaborations or strategic relationships or obtain additional funding;
+
+•
+the impact of laws and regulations and/or regulatory developments in the United States and other countries;
+
+•
+the performance of our third-party suppliers and manufacturers; and
+
+•
+our ability to attract and retain key personnel.
+
+Summary Risk Factors
+
+The risk factors described below are a summary of the principal risk factors that may cause our actual results, performance, or achievements to differ materially from any future results, or performance or achievements expressed or implied in such forward-looking statements associated with an investment in us.
+
+Risks Related to Our Capital Requirements and Financial Condition
+
+•
+We have incurred significant losses since inception and expect that we will continue to incur losses for the foreseeable future, which makes it difficult to assess our future viability.
+
+•
+We may require additional financing to obtain regulatory approval for molgramostim and a failure to obtain this necessary capital could force us to delay, limit, reduce, or terminate our product development efforts or other operations.
+
+1
+
+•
+Our loan agreement contains covenants which may adversely impact our business; the failure to comply with such covenants could cause our outstanding debt to become immediately payable or accelerate principal payments.
+
+•
+Any future acquisitions that we make could disrupt our business and harm our financial condition.
+
+•
+We have in-process research and development costs (“IPR&D”) and future impairment of IPR&D may have an adverse impact on our future financial condition and results of operations.
+
+•
+Adverse developments affecting financial institutions, companies in the financial services industry, or the financial services industry generally, such as actual events or concerns involving liquidity, defaults, or non-performance, could adversely affect our operations and liquidity.
+
+Risks Related to Our Business Strategy and Operations
+
+•
+We are substantially dependent upon the clinical, regulatory, and commercial success of our product candidate, molgramostim.
+
+•
+If we fail to attract and retain senior management and key scientific personnel and develop and maintain relationships with service providers, consultants and advisers, we may be unable to successfully develop and commercialize our product candidate.
+
+•
+We do not have, and do not have plans to, establish commercial manufacturing facilities. We completely rely on third parties for the manufacture and supply of our clinical trial drug and delivery device supplies and, if approved, commercial product materials.
+
+•
+The company intends to establish a redundant supply chain with second sources of drug substance and drug product manufacture. If the product manufactured at the second sources of manufacture is not demonstrated to be comparable with materials used in the clinical program, we will not be able to commercialize from these second sources.
+
+•
+We rely significantly on third parties to conduct our nonclinical testing and clinical trials and other aspects of our molgramostim development program.
+
+•
+Our molgramostim product candidate may cause undesirable side effects or adverse events or have other properties that could delay or prevent our clinical development, regulatory approval, or commercialization.
+
+•
+We may not achieve our projected development goals in the time frames we have announced.
+
+•
+We are substantially dependent upon our primary contract research organization ("CRO"), Parexel, for conducting our IMPALA-2 clinical trial.
+
+•
+Our employees, independent contractors and consultants, principal investigators, CROs, contract manufacturing organizations ("CMOs"), other vendors, and any future commercial partners may engage in misconduct or other improper activities.
+
+•
+Our operations might be interrupted and financial results could be adversely impacted by the occurrence of a natural disaster, acts of war or terrorism, system malfunction, telecommunication and electrical failures or other catastrophic event, or public health crises, such as a pandemic (e.g. COVID-19).
+
+•
+We currently have limited marketing capabilities and no sales organization.
+
+•
+To establish a sales and marketing infrastructure and expand our manufacturing capabilities, we will need to increase the size of our organization, and we may experience difficulties in managing this growth.
+
+Risks Related to Information Technology and Data Privacy
+
+•
+Our business and operations would suffer in the event of third-party computer system failures, cyber-attacks on third-party systems, or deficiency in our cyber-security.
+
+•
+The Company’s remote working arrangements could significantly increase the Company’s digital and cybersecurity risks.
+
+•
+If we or our vendors fail to comply with data protection laws and regulations, we could be subject to government enforcement actions, private litigation, and/or adverse publicity.
+
+2
+
+Risks Related to Drug Development and Commercialization
+
+•
+We depend on the successful completion of clinical trials of our molgramostim product candidate, and any positive results in prior clinical trials do not ensure that ongoing or future clinical trials will be successful.
+
+•
+Molgramostim has received Orphan Drug Designation by the U.S. Food and Drug Administration ("FDA") and in Europe. While orphan designation provides certain benefits, there are also associated risks.
+
+•
+Delays in commencement and completion of clinical trials are common and have many causes.
+
+•
+Clinical trials are very expensive, difficult to design and implement, often take many years to complete, and the outcome is inherently uncertain.
+
+•
+There is significant uncertainty regarding the regulatory approval process for any investigational new drug, substantial further testing and validation of our product candidate and related manufacturing processes may be required.
+
+•
+Even if we receive regulatory approval for our product candidate, we may face regulatory difficulties that could materially and adversely affect our business, financial condition, and results of operations.
+
+•
+If our product candidate receives regulatory approval but fails to achieve significant market acceptance among the medical community, patients, or third-party payers, the revenue we generate from its sales will be limited and our business may never achieve profitability.
+
+•
+Even if we receive regulatory approval to market our product candidate in the United States, we may never receive approval or commercialize our product outside of the United States, which would limit our ability to realize our full commercial potential.
+
+•
+We must comply with the U.S. Foreign Corrupt Practices Act and similar foreign anti-corruption laws.
+
+Risks Related to Our Intellectual Property
+
+•
+Our success will depend on obtaining and maintaining effective patent and other intellectual property protection for our product candidate and proprietary technology.
+
+•
+Our success depends on our ability to prevent competitors from duplicating or developing and commercializing equivalent versions of our product candidate, but patent protection may be difficult to obtain and any issued claims may be limited.
+
+•
+Obtaining and maintaining patent protection depends on compliance with various procedural, document submission, fee payment, and other requirements imposed by governmental patent agencies.
+
+•
+Third parties may claim that our product, if approved, infringe on their proprietary rights and may challenge the approved use or uses of a product or its patent rights through litigation or administrative proceedings.
+
+Risks Related to Our Industry
+
+•
+We expect competition in the marketplace for our molgramostim product candidate.
+
+•
+We are subject to uncertainty relating to healthcare reform measures and reimbursement policies.
+
+•
+We face potential product liability exposure and, if successful claims are brought against us, we may incur substantial liability for a product or product candidate and may have to limit its commercialization.
+
+3
+
+Risks Related to our Common Stock
+
+•
+Our stock price is expected to continue to be volatile.
+
+•
+If we fail to satisfy all applicable Nasdaq continued listing requirements, including the $1.00 minimum closing bid price requirement, our common stock may be delisted from Nasdaq.
+
+•
+We will continue to incur costs and demands upon management as a result of complying with the laws and regulations affecting public companies.
+
+•
+We do not expect to pay any cash dividends in the foreseeable future.
+
+•
+We may be unable to use certain of our net operating losses and other tax assets.
+
+If any of these risks or uncertainties materialize or any of these assumptions proves incorrect, our results could differ materially from the forward-looking statements in this report. All forward-looking statements in this report are current only as of the date of this report. We do not undertake any obligation to publicly update any forward-looking statement to reflect events or circumstances after the date on which any statement is made or to reflect the occurrence of unanticipated events. Unless context requires otherwise, all references in this report to “Savara,” “our company,” “we,” “us,” “our,” or similar words refer to Savara Inc. together with its consolidated subsidiaries.
+
+4
+
+PART I
+
+Item 1. Business.
+
+Business Overview
+
+Savara Inc. (together with its subsidiaries “Savara,” the “Company,” “we,” “our” or “us”) is a clinical stage biopharmaceutical company focused on rare respiratory diseases. Our lead program, molgramostim nebulizer solution (“molgramostim"), is an inhaled biologic, specifically an inhaled granulocyte-macrophage colony-stimulating factor (GM-CSF) in Phase 3 development for autoimmune pulmonary alveolar proteinosis (“aPAP”). Molgramostim is delivered via an investigational eFlow® Nebulizer System (PARI Pharma GmbH). Our management team has significant experience in orphan drug development and pulmonary medicine, identifying unmet needs, and effectively advancing product candidates to approval and commercialization.
+
+Corporate Strategy
+
+Our goal is to become a leader in rare respiratory therapeutics through the development and commercialization of novel, best-in-class medicines that address unmet medical needs in this field. Key elements of our strategy include:
+
+•
+Continued advancement of the molgramostim aPAP program and the Phase 3 IMPALA-2 clinical trial. The IMPALA-2 trial design has been endorsed by regulatory authorities in the US (FDA), Europe (EMA), UK (MHRA), and Japan (PMDA), and regulatory and ethics committees in various countries and sites where the trial is being conducted. The dosing of the first patient was initiated on June 30, 2021, and we have continued to activate clinical trial sites and enroll patients in the trial.
+
+•
+Ensuring all aspects of our manufacturing are validated and can produce product at commercial scale. In additional to our primary drug substance manufacturer, GEMA Biotech S.A. ("GEMA"), in July 2022, we executed a master services agreement with an additional third-party biomanufacturing company, an integrated contract research and contract development company focused on cell- and gene-based therapies and large molecule biologics that provides a broad array of biologic manufacturing, analytical, and R&D services to pharmaceutical and biotech companies, to serve as a potential second source manufacturer of molgramostim drug substances to attain uninterrupted drug substance supply and mitigate approvability risk.
+
+•
+Outsourcing capital-intensive operations. We will continue to pursue the development and manufacturing of our product candidate by outsourcing most clinical development work and manufacturing operations. We believe our business model enables the effective and capital-efficient development of our pipeline through the use of high-quality specialist vendors and consultants.
+
+Molgramostim – aPAP
+
+Our lead product candidate is an inhaled biologic. Molgramostim is an inhaled formulation of recombinant human GM-CSF and is being developed for the treatment of aPAP. Pulmonary alveolar proteinosis (“PAP”) is a rare lung disease characterized by the accumulation of surfactant in the alveoli (or air sacs) of the lungs. There are different types of PAP, of which aPAP is the most common.
+
+In May 2019, the FDA granted Fast Track Designation to molgramostim for the treatment of aPAP. Fast Track Designation facilitates the development and expedites the review of new drugs or biologics intended to treat serious or life-threatening conditions that demonstrate the potential to address unmet medical needs. In December 2019, although the data from the IMPALA Phase 2/3 study, previously conducted by us and further described herein, did not meet the regulatory requirement for approval, the FDA granted a Breakthrough Therapy Designation (“BTD”) for molgramostim in aPAP based on data from the 24-week double-blind treatment period from our IMPALA trial. Additionally, molgramostim was granted Orphan Drug Designation for the treatment of aPAP in the United States and the European Union (“EU”), which allows for seven and ten years of exclusivity from approval, respectively. Savara has exclusive access to the PARI eFlow® Nebulizer System for this indication along with a proprietary cell bank for molgramostim, a non-glycosylated inhaled form of GM-CSF. Additionally, In the United Kingdom (UK) molgramostim nebulizer solution for the treatment of aPAP was granted Innovation Passport (June 2022) and Promising Innovative Medicine (August 2022) designations by the UK MHRA. These designations provide the opportunity for enhanced dialogue and input from the MHRA and the Health Technology Assessment bodies in England, Scotland, and Wales.
+
+5
+
+In 2019, we announced that IMPALA, the Phase 2/3 clinical trial of molgramostim for the treatment of aPAP, did not meet its primary endpoint of alveolar-arterial oxygen gradient, or (A-a)DO2, improvement compared to placebo. The totality of data from the IMPALA trial gives us confidence that molgramostim has the potential to address a significant unmet need in this rare disease. These data include:
+
+•
+multiple key secondary and exploratory endpoints that either achieved nominal statistical significance or trended in favor of the active drug arms;
+
+•
+results from the open-label period of the trial that demonstrated a sustained treatment effect, or continued improvement, after longer term exposure to molgramostim; additionally, patients who had been on placebo during the double-blind period of the trial and switched to treatment with molgramostim during the open-label period, showed improvements that eventually were generally similar to those seen in patients who received molgramostim during the double-blind period; and
+
+•
+molgramostim being generally well tolerated.
+
+In October 2020, results from the IMPALA trial were published in the New England Journal of Medicine. We consider molgramostim to have a favorable risk-benefit profile and remain confident in the future of the program, including the current Phase 3 IMPALA-2 trial.
+
+As of December 31, 2022, our Phase 3 IMPALA-2 trial, which builds on key learnings from the IMPALA trial remains on track. During 2021 and 2022, we activated many clinical trial sites and announced the dosing of our first patient occurred on June 30, 2021. Since that time, we have continued to enroll additional patients.
+
+We also received acceptance from the Pediatric Committee of the EMA for a proposed revised pediatric investigation plan (“PIP”) for molgramostim.
+
+Detailed Program Description
+
+Molgramostim
+
+Background on aPAP
+
+Autoimmune PAP, known as aPAP, is a specific disease belonging to a family of distinct rare lung diseases collectively referred to as PAP. aPAP represents about 90% of all patients with PAP and the estimated prevalence of PAP is six to seven cases per million people in the United States, with similar or higher prevalence reported elsewhere in the world. For example, Japan, a country that undertakes a more centralized approach to diagnosing and treating PAP, has seen a consistent increase in patients being diagnosed with the disease. It is now estimated the prevalence in Japan could be three to four times the original estimate of seven cases per million.
+
+aPAP is characterized by the accumulation of surfactant in the alveoli, or air sacs, of the lungs. The surfactant consists of proteins and lipids and is an important physiological substance that lines the inside of the alveoli to prevent the lungs from collapsing. The lungs continuously produce new active surfactant. In a healthy lung, the surfactant is cleared by immune cells called alveolar macrophages. However, in lungs of patients with aPAP, the macrophages fail to clear the surfactant from the alveoli, leading to gradual accumulation of surfactant in the alveoli. The root cause of aPAP is an autoimmune response against GM-CSF, a naturally occurring protein in the body. Pulmonary macrophages need to be stimulated by GM-CSF to function properly, but in aPAP, GM-CSF is neutralized by antibodies against GM-CSF, rendering the macrophages unable to perform their tasks, including the clearance of surfactant from the alveoli.
+
+aPAP most commonly affects men in early middle age, but both sexes and people of any age can be affected. As a result of the accumulation of surfactant, gas exchange in the lungs is obstructed, and patients start to experience shortness of breath, fatigue, and decreased exercise tolerance. Typically, shortness of breath is first observed upon exertion, but as the disease progresses, shortness of breath can be experienced even when a person is at rest. Patients may experience cough, sputum production, and episodes of fever, especially if secondary lung infection develops. In the long-term, the disease can lead to serious complications, including pulmonary fibrosis, and often potentially leading to the need for lung transplantation.
+
+Current treatment options for aPAP
+
+There is no approved medicine for the treatment of aPAP. The current standard-of-care for aPAP is a non-standardized procedure called Whole Lung Lavage (“WLL”), which entails washing out the lungs with saline, most commonly, one lung at a time, to physically remove excess surfactant from the lungs. The invasive and inconvenient procedure is performed under general anesthesia and involves:
+
+•
+insertion of a double-lumen endobronchial tube for lung separation;
+
+•
+repeated filling of the treated lung with up to 15-50 liters of saline;
+
+6
+
+•
+percussion of the lung to emulsify the surfactant sediment; and
+
+•
+draining the saline by gravity until the lavage fluid that is removed from the lung becomes clear.
+
+Potential complications from WLL include rib fracture, hypoxia, pneumothorax (collapsed lung), hydrothorax (fluid in pleural cavity), superimposed infection, and Acute Respiratory Distress Syndrome ("ARDS").
+
+WLLs are performed by highly experienced physicians at specialist sites and necessitate hospitalization. In most patients, WLL may only provide temporary symptomatic relief. Once the lungs refill with surfactant, the WLL procedure needs to be repeated.
+
+As there are no approved pharmaceutical treatments available for aPAP, there is an unmet need for a convenient and efficacious medicinal treatment. We believe that inhalation of molgramostim activates macrophages in the lung alveoli, thus potentially restoring the surfactant-clearing activity of the alveolar macrophages and considerably improving oxygenation and exercise tolerance. Sargramostim (Leukine®), an injectable form of GM-CSF, is approved in the United States for intravenous (“IV”) and subcutaneous administration (“SC”) treatment of neutropenia caused by cancer chemotherapy and other related indications. Currently, there are no approved inhalation formulations of GM-CSF. GM-CSF products administered systemically (e.g., by injection), including molgramostim, are unlikely to benefit patients with aPAP because aPAP patients have circulating antibodies against GM-CSF. These antibodies would likely neutralize systemically administered GM-CSF before reaching the alveolar space in the lung.
+
+The potential benefits of inhaled GM-CSF in aPAP, together with the availability of sargramostim (Leukine®) for off-label compounding, have prompted independent clinicians and academic researchers in the United States, Europe, and Japan to study the safety and efficacy of inhaled GM-CSF in aPAP patients. In addition to our Phase 2/3 IMPALA trial of molgramostim, the largest completed placebo-controlled trial in this patient population (n=138), several investigator-sponsored, open-label clinical trials and case studies of inhaled GM-CSF treatment have been published, with promising results on the efficacy and safety of the treatment. In total, treatment of nearly 150 aPAP patients with inhaled GM-CSF has been reported in open-label trials or retrospective cohorts, as well as several individual case reports. In PAGE, a randomized, double-blind, placebo-controlled, 25-week clinical trial of inhaled sargramostim (Leukine®) in 64 patients with mild-to-moderate disease, a significant effect was observed in the primary endpoint, which was change from baseline in (A-a)DO2. Secondary endpoints, including changes from baseline in diffusing capacity for carbon monoxide (“DLCO”), six-minute walk distance (“6MWD”), and aPAP serum biomarkers, showed directional, but in most cases not statistically significant, treatment effects over placebo. Overall, for the first time, the PAGE trial showed in a placebo-controlled setting, proof-of-concept for GM-CSF inhalation therapy in aPAP. Results from these investigator-sponsored clinical trials and case studies indicate that GM-CSF may have a positive impact on oxygenation and clinical symptoms in aPAP patients. For details on the results of the IMPALA trial, please see the Clinical Development of Molgramostim – aPAP: Phase 2/3 IMPALA Trial section included in this report.
+
+According to our review of published literature, few safety issues related with GM-CSF inhalation in patients with aPAP have been reported. However, there is still limited information available on the long-term safety of inhaled GM-CSF.
+
+Product Description
+
+Molgramostim is a non-glycosylated form of recombinant human GM-CSF that we are developing as an inhaled formulation for the treatment of aPAP. GM-CSF is an endogenous growth factor that stimulates the proliferation and differentiation of hematopoietic cells (blood immune cells), mainly granulocytic and monocytic cells, which defend against bacteria and viruses, and clear cellular debris and waste substances from the body. Molgramostim is produced in a strain of Escherichia coli bearing a genetically engineered plasmid containing a human GM-CSF gene.
+
+Our product is a drug-device combination consisting of molgramostim nebulizer solution (drug component) and a vibrating mesh nebulizer (device component). Molgramostim nebulizer solution is vialed as a sterile formulation containing 300 µg of molgramostim in 1.2 mL solution. Molgramostim nebulizer solution is administered once daily by inhalation via a high efficiency nebulizer, the eFlow® Nebulizer System (PARI Pharma GmbH). The eFlow® Nebulizer System is a reusable electronic inhalation system that has been optimized for administration of molgramostim nebulizer solution. The eFlow® consists of a controller unit (AC or battery powered), a nebulizer handset, and a connection cord. The controller unit's lifespan is multiple years and the handset is replaced monthly with a new unit.
+
+Molgramostim was granted Orphan Drug Designation by the FDA in October 2012 and by the EMA in July 2013 for the treatment of aPAP. It was also granted Fast Track Designation and Breakthrough Therapy Designation by the FDA in May 2019 and December 2019, respectively. Further it was granted Innovation Passport (June 2022) and Promising Innovative
+
+7
+
+Medicine (August 2022) designations in the UK. Since 2014, molgramostim has been available in several European countries for the treatment of aPAP for named patients following unsolicited physician requests.
+
+We anticipate that molgramostim will be used as a long-term treatment in patients with aPAP. Treatment with molgramostim is expected to reduce or eliminate the need for WLL in patients with aPAP. In the IMPALA trial, a reduced number of WLL procedures in the active treatment arms was seen compared to the placebo treatment arm, but the difference was not statistically significant.
+
+Molgramostim Key Advantages
+
+Based on data from the completed Phase 2/3 IMPALA trial and building upon the published investigator-sponsored treatment experience with inhaled GM-CSF, we believe molgramostim has the potential to become the treatment of choice for aPAP. The following characteristics of molgramostim may contribute to the clinical profile of the investigational product candidate, as well as facilitate potential regulatory approval and successful commercialization.
+
+Specifically, molgramostim offers:
+
+•
+a strong product foundation that applies both a previously approved active drug substance class and drug delivery technology;
+
+•
+GM-CSF delivered directly to the lungs, the primary site of macrophage function deficiency in aPAP, which could result in clinical efficacy with limited systemic adverse effects;
+
+•
+a high-efficiency nebulizer that provides a fast and convenient method of administration; this is highly desirable for long-term treatment in a chronic disease, such as aPAP;
+
+•
+A low patient impact therapy that can be carried out in the home in 3 to 5 minutes each day using the portable eFlow nebulizer.
+
+•
+eligibility for strong market protection via orphan drug status, potential eligibility for biologic exclusivity that provides twelve years of total market protection in the United States, and Fast Track and Breakthrough Therapy Designations;
+
+•
+a proprietary cell bank used in the production of the drug substance; and
+
+•
+an exclusive agreement for the specific device that is tailored for administration of molgramostim nebulizer solution.
+
+Clinical Development of Molgramostim – aPAP
+
+Phase 3 IMPALA-2 Trial
+
+IMPALA-2 is a Phase 3, 48-week, randomized, double-blind, placebo-controlled clinical trial designed to compare the efficacy and safety of molgramostim 300 µg administered once daily by inhalation with matching placebo in patients with aPAP. The primary endpoint is the change from baseline in percent predicted DLCO, a gas exchange measure. Three secondary endpoints will evaluate clinical measures of direct patient benefit: St. George’s Respiratory Questionnaire (“SGRQ”) Total Score, SGRQ Activity Component Score, and exercise capacity using a treadmill test. Other efficacy endpoints will include (A-a)DO2 (another gas exchange measure), supplemental oxygen use, WLL frequency, patient and clinician global impression of disease severity and disease change, chest computed tomography (“CT”) scan to assess lung opacity, and blood biomarkers. IMPALA-2 is expected to enroll a total of approximately160 patients who will be randomized to receive treatment for 48 weeks in one of two arms: molgramostim 300 µg administered once daily or inhaled placebo administered once daily. The primary time point for efficacy assessment will be at week 24, however, efficacy will be assessed through week 48 to show durability of effect. Safety will be assessed through week 48. Following the 48-week double-blind treatment period, patients will roll over to a 48-week open-label period and will receive molgramostim 300 µg administered once daily.
+
+8
+
+In January 2021, we engaged Parexel International Limited (“Parexel”), a global contract research organization (“CRO”) to support our IMPALA-2 clinical trial operational activities. The IMPALA-2 trial design has been endorsed by regulatory authorities in the USA (FDA), Europe (EMA), UK (MHRA), and Japan (PMDA), and also by regulatory bodies and ethics committees in individual countries in North America, Europe, Asia, and Australia where the trial is being conducted. We announced the first patient had been dosed on June 30, 2021, and since then we have continued to activate sites and enroll patients. The trial conduct is on track and projected top line data are expected by end of 2Q 2024. While we are working to complete the IMPALA-2 trial as quickly and as safely as possible, the impact of the COVID-19 pandemic and emerging variants, as well as supply chain issues and geopolitical unrest in certain geographies, continues to evolve and may adversely impact trial timelines in the future.
+
+Phase 2/3 IMPALA Trial
+
+IMPALA was a Phase 2/3 randomized, double-blind, placebo-controlled trial designed to evaluate the efficacy and safety of molgramostim in patients with aPAP. Conducted in 18 countries including the United States, Japan, and various European countries, it was the largest controlled clinical trial of molgramostim for the treatment of aPAP. Patients were randomized to receive treatment for up to 24 weeks in one of three treatment arms: 1) molgramostim 300 µg administered once daily (“continuous dosing arm”), 2) molgramostim 300 µg and matching placebo administered daily every other week (“intermittent dosing arm”), or 3) inhaled placebo administered once daily. At the end of the 24-week double-blind period, all patients received molgramostim 300 ug administered daily in every other week intermittent cycles in a 24-week open-label follow up period. The primary endpoint of the trial was (A-a)DO2, gas exchange measure. In addition, three key secondary endpoints – SGRQ, 6MWD, and time to/requirement for WLL – along with multiple other exploratory endpoints were assessed to determine improvement in the disease pathology, pathophysiology, clinical symptoms, and function.
+
+The pathogenesis of aPAP is well known and GM-CSF’s effect on the disease, as evaluated by (A-a)DO2, dyspnea, 6MWD, pulmonary function tests, CT scores, and biomarkers, is well documented through published clinical trials. While IMPALA did not meet its primary endpoint, when looking at the totality of evidence, we believe that data from the IMPALA trial demonstrated reversal of lung pathology and pathophysiology, improvement in clinical outcomes, and reduction of the need for rescue treatment, with a clear dose-frequency dependency in favor of the continuous dosing arm. Such results are detailed below:
+
+•
+Lung Pathology – Reversal of disease pathology and reduction of surfactant accumulation was demonstrated in the Full Analysis Set (“FAS”) population for (A-a)DO2 with improvement in CT scans as measured by Ground Glass Opacity scores. Results from IMPALA also demonstrated positive biomarker data, with improvements seen in most of the key biomarkers known to be associated with the severity of aPAP.
+
+•
+Lung Pathophysiology – In the FAS population, an average (A-a)DO2 improvement of 12.1 mmHg was observed in the continuous dosing arm, compared to an average (A-a)DO2 improvement of 8.8 mmHg in the placebo arm. With an estimated 4.6 mmHg treatment difference, the trial did not meet its primary endpoint. Notably, one-third of patients in IMPALA were prescribed supplemental oxygen, continuously or as necessary, during the trial. The trial protocol recommended that supplemental oxygen not be used immediately before or during arterial blood sampling to minimize influence on (A-a)DO2 values. The protocol did allow patients to remain on supplemental oxygen during blood sampling if they could not tolerate discontinuation due to the severity of their respiratory condition. This was conditionally allowed only if they received the same oxygen flow rate used at baseline at all subsequent visits (n=4 patients, two in the placebo arm and one in each of the active arms). In these four patients, (A-a)DO2 values distributed quite differently compared to the remaining trial population – ranging from highly negative to highly positive. In a revised analysis that excluded these four patients, a statistically significant average (A-a)DO2 improvement was observed in the continuous dosing arm compared with the placebo arm.
+
+9
+
+Impaired gas transfer and oxygenation are key pathophysiologic features of aPAP and are associated with symptoms of shortness of breath and limitations in exercise capacity. In addition to (A-a)DO2, DLCO was assessed as a secondary endpoint to evaluate the efficacy of molgramostim on gas transfer. Patients in the continuous dosing arm showed a mean improvement of 11.6% predicted in DLCO, whereas the intermittent dosing and placebo arms showed a 7.7% predicted and 3.9% predicted improvement, respectively. The estimated treatment difference of 7.9% predicted (p=0.007) between the continuous dosing arm and placebo was statistically significant, and in keeping with the (A-a)DO2 improvement, and suggests improved gas exchange in the lungs.
+
+•
+Clinical Outcomes – An average improvement of 12.3 points in the SGRQ, a patient-reported outcomes/health status measure and a key secondary endpoint, was observed in the continuous dosing arm compared to an average improvement of 4.7 points in the placebo arm. The estimated treatment difference was 7.6 points, which was statistically significant (p < 0.05). The 6MWD, another key secondary endpoint, was numerically in favor of the continuous dosing arm, but the difference to placebo was not statistically significant. Patients in the continuous dosing arm showed a mean improvement of 39.6 meters in the 6MWD, while the intermittent and placebo arms showed improvements of 11.3 meters and 6.0 meters, respectively. The third key secondary endpoint was the requirement for WLL. Four patients in each of the active arms and six patients in the placebo arm underwent at least one WLL procedure during the treatment period. Given that some patients received more than one WLL, the total number of WLLs observed in the continuous dosing arm was nine, with seven observed in the intermittent dosing arm and 17 in the placebo arm.
+
+•
+Consistency of Endpoints – A range of primary and secondary endpoints were selected to determine the potential treatment effect of molgramostim on aPAP. Patients in the continuous dosing arm demonstrated consistent improvements across all the key endpoints compared to placebo, with the majority of the measures achieving statistical significance. A dose-frequency dependency was observed, with continuous daily administration of molgramostim generally resulting in higher efficacy than intermittent dosing.
+
+•
+Safety and Tolerability – The percentage of patients with adverse events were similar in the treatment arms, except for the percentage of patients with chest pain, which was higher in the continuous dosing arm compared to placebo.
+
+Results from the open-label period of the IMPALA trial, announced in March 2020, demonstrated a sustained treatment effect, or continued improvement, after longer term exposure to molgramostim. A summary of the results is provided below.
+
+•
+Patients who had been in the continuous dosing group during the double-blind period:
+
+(A-a)DO2 improvement from baseline continued in these patients during the open-label period of the trial, with progressively larger improvements at weeks 48 and 72. Likewise, progressively larger improvements from baseline were observed in DLCO and SGRQ at weeks 48 and 72.
+
+•
+Patients who had been in the placebo group during the double-blind period:
+
+Placebo patients that transitioned to active drug showed similar average improvements in (A-a)DO2, DLCO, and SGRQ in the open-label period as compared to the continuous dosing group during the double-blind period, reaching similar levels of improvement to the continuous dosing group by week 72.
+
+Similar trends were seen in the 6MWD at weeks 48 and 72, but the data were less conclusive.
+
+During the double-blind period of the trial, 33 WLL procedures were required, with nine in the continuous group compared to 17 in the placebo group and 7 were observed in the intermittent dosing arm. By contrast, during the 48-week open-label period of the trial, during which time all patients received active drug, five WLL procedures were conducted.
+
+Manufacturing and Supply
+
+We do not own or operate manufacturing facilities to produce clinical or commercial quantities of our molgramostim product candidate. We have fee-for-service contracts with a drug substance manufacturer and drug product manufacturer that covers all steps of the manufacturing process of molgramostim. We expect to continue with this outsourcing model for the foreseeable future, and in July 2002, we engaged a second source manufacturer to reduce production risks and ensure drug substance supply. All of our manufacturing and supply vendors are certified by National Competent Authorities to operate under Good Manufacturing Practices (“cGMP”), a regulatory standard for the manufacture of pharmaceuticals; however, such manufacturing and supply vendors have not yet received an FDA inspection.
+
+10
+
+Molgramostim drug substance is currently manufactured by GEMA. All clinical and nonclinical trials to-date have used material sourced from GEMA and validation activities are ongoing to prepare for commercial manufacturing. Additionally, we have engaged an additional third-party as a second source for the manufacturing of molgramostim.
+
+Patheon UK Limited in Ferentino, Italy (“Patheon”), a division of Thermo Fisher Scientific Inc., was selected as the commercial drug product manufacturer and also produces drug product for clinical supply. Technology transfer and process validation activities with Patheon were completed but will be re-executed in 2023 as Patheon moves the manufacturing of molgramostim drug product to a new filling line in the same facility.
+
+Additionally, on December 21, 2022, we selected and engaged a third-party manufacturing services company as a second source to Patheon for the manufacturer of molgramostim. This third-party will provide a GMP Fill-Finish PPQ Campaign of the molgramostim drug product.
+
+Molgramostim is administered to the lungs using the eFlow® Nebulizer System, manufactured by PARI Pharma GmbH in Stamberg, Germany (“PARI”). The eFlow® Nebulizer System has been Conformité Européenne (“CE”) certified (CE 0123) according to the Medical Devices Directive 93/42/EEC (as amended by Directive 2007/47/EC) as a class IIa device. The device has a 510(k) approval in the United States as a general device. We have an exclusive license and a long-term supply agreement with PARI, as further discussed below, covering the eFlow® Nebulizer System for the administration of recombinant human GM-CSF.
+
+Commercialization
+
+Savara owns exclusive rights to molgramostim in the United States and all other major markets. We continue to pursue clinical and regulatory approvals for molgramostim. In doing so, we may engage with strategic partners to collaborate on implementing optimal sales and promotion activities. Our commercialization strategy will target key prescribing physicians and centers, as well as provide patients with support programs to ensure product access. Pending EMA approval, we expect to commercialize molgramostim in the EU and may engage with strategic partners to optimize sales and promotion activities in other EU territories.
+
+Key License and Other Agreements
+
+Parexel
+
+We entered into an MSA with Parexel on March 5, 2021, pursuant to which Parexel provides contract research services related to our clinical trials. The MSA has an initial term of five years. We may terminate the MSA and/or any work order without cause on 60 days’ prior written notice to Parexel. Either party may terminate the MSA or any work order, and Parexel may suspend the performance of services for a material uncured breach by the other party. In addition, either party may immediately terminate the Agreement and/or any individual work order on prior written notice if (a) continuation of the services would pose an undue risk to the health and/or wellbeing of a study participant, (b) any certificate, authorization, approval or exemption from a regulatory authority required for the conduct of the services is revoked, suspended, or expires without renewal, (c) in the reasonable opinion of such party, the continuation of the services would be in violation of applicable law, or (d) the other party becomes insolvent. Concurrent with entering the MSA, we executed a work order with Parexel, under which Parexel will provide services related to the IMPALA-2 trial. As of December 31, 2022, under that work order, we expect to pay Parexel service fees and pass-through expenses estimated to be approximately between $17 million and $20 million over the remainder of the IMPALA-2 clinical trial assuming no additional change orders or material changes to the MSA and statements of works.
+
+PARI Pharma GmbH
+
+We have a license and collaboration agreement related to molgramostim with PARI Pharma GmbH (the “PARI License Agreement”). Under the PARI License Agreement, we have a worldwide, exclusive license to commercialize PARI’s eFlow Nebulizer System for the pulmonary delivery of any liquid formulation containing human GM-CSF (“hGM-CSF”) as the sole active pharmaceutical ingredient for nebulization for aPAP. Additionally, we have the option to change the device, subject to certain conditions, to PARI’s eFlow Technology Nebulizer Closed System (“CS”) and, until marketing approval, the option to negotiate an extension to the license to cover commercialization of the drug for pulmonary delivery via the PARI eFlow Inline device for the treatment of certain other indications. Following an amendment in 2018 (the “PARI Amendment”), we have the option to add other pulmonary infections to the included indications in the future.
+
+Under the terms of the PARI License Agreement, Savara is not permitted to work with third parties to develop any inhalation device or nebulizer for the pulmonary delivery of a pharmaceutical product containing GM-CSF as the sole active ingredient. This restriction extends until (i) in the European Economic Area, marketing approval of the product in Europe or the United States, whichever is later, or (ii) in the rest of the world, the term of the PARI License Agreement.
+
+11
+
+In consideration of rights granted by PARI, our predecessor paid a one-time upfront fee and we pay an hourly rate for work performed by PARI. Additionally, we are obligated to make future milestone payments to PARI based upon (i) the successful completion of certain clinical trials, (ii) submissions for regulatory approval in the United States, the EU or Japan, and (iii) the first marketing approval for the product in the United States, EU or Japan. The PARI Amendment expanded the development milestones in the agreement to include any additional pulmonary indications for which we use the device.
+
+If we successfully commercialize any product candidate subject to the PARI License Agreement in a country, we are responsible for royalty payments equal to a percentage of net sales. We are obligated to make such royalty payments until the later of (i) the expiration of the last valid claim in an issued patent covering a portion of the PARI device in the applicable country or (ii) 15 years after the first commercial sale of molgramostim with the PARI device in that country (the “PARI Royalty Period”). If there is no such valid patent claim covering the applicable PARI device, the royalty owed to PARI will be decreased by a specified percentage.
+
+The license term extends on a country-by-country basis until the end of the PARI Royalty Period or until mutually agreed by the parties.
+
+We also have a commercial supply agreement with PARI (the “PARI Supply Agreement”) related to the supply of the PARI eFlow Nebulizer and related accessories for commercial use with our products after marketing approval is obtained. Pursuant to the PARI Supply Agreement, we are obligated to purchase from PARI (i) within the European Economic Area, (a) during the first five years from marketing approval, all of our requirements for the device and related accessories and (b) thereafter 80% and (ii) in the rest of the world, all of our requirements during the PARI Royalty Period. Pricing is on a per unit basis, with a reduction in price once certain purchasing volumes are met.
+
+GEMA Biotech S.A.
+
+In April 2019, we entered into a Manufacture and Supply Agreement with GEMA, which was amended on December 7, 2022 (the “GEMA Agreement”), pursuant to which GEMA will supply the active pharmaceutical ingredient (“API”) for molgramostim exclusively to us for commercial sale and continue to supply the API to us for clinical trials and research and development activities. Additionally, GEMA transferred and assigned to us all rights, titles, and interest in and to the master cell bank and working cell bank necessary to produce the API.
+
+Pursuant to the terms of the GEMA Agreement, GEMA agreed to undertake the actions required to comply with the requirements of the FDA and other similar regulatory authorities and obtain the approvals necessary to manufacture and supply the API to us for commercial sale.
+
+In addition to an agreed upon price of the API, we paid GEMA a milestone payment upon the effective date of the agreement and are required to make milestone payments upon (i) completion of certain developmental activities, (ii) successful completion of an audit by the FDA, and (iii) marketing approval of a product containing the API. If we successfully commercialize a product containing the API in a country, we must pay GEMA a single digit percentage royalty on annual net sales. We are obligated to make such royalty payments until the earlier of (i) 10 years after the first receipt of marketing approval for the product in that country or (ii) the date a biosimilar of such product is first sold in that country.
+
+The term of the GEMA Agreement, continues until the twentieth anniversary of the date of receipt of marketing approval for a product containing the API in any country and may be extended for additional twelve-month terms by the agreement of both parties. We may terminate the GEMA Agreement immediately if (i) products containing the API will not be sold or will be withdrawn from the market, (ii) the FDA or other regulatory authority withdraws marketing approval for or fails to approve products incorporating the API, (iii) three or more batches of API supplied in any six month period fail to conform to specifications, (iv) GEMA receives notice of deficiencies in its manufacturing and fails to adequately respond, or (v) GEMA fails to achieve compliance with the requirements of the FDA and other regulatory authorities necessary to manufacture and supply the API to us for commercial sale.
+
+Patheon UK Limited
+
+We have entered into an agreement and related work orders with Patheon under which Patheon manufactures our molgramostim product candidate for clinical trials. We may terminate the agreement at any time for any business reason.
+
+In June 2019, we entered into a Master Manufacturing Services Agreement (the “Master Manufacturing Agreement”) with Patheon and expect in the future to enter into one or more related Product Agreements (each a “Product Agreement) pursuant to the Master Manufacturing Agreement to govern the terms and conditions of Patheon’s manufacture of commercial supplies of molgramostim.
+
+The Master Manufacturing Agreement has an initial term ending December 31, 2024, and will automatically renew after the initial term for successive terms of two years each if there is a Product Agreement in effect, unless a party has given notice of termination. Either party may terminate the Master Manufacturing Agreement upon the other party’s uncured
+
+12
+
+material breach or insolvency. Patheon may terminate the Master Manufacturing Agreement if we assign such agreement to an assignee that is unacceptable to Patheon for certain reasons, for failure of our timely payment of invoices, or if we forecast zero volume for six months.
+
+Government Regulation
+
+The FDA and other regulatory authorities at federal, state, and local levels, as well as in foreign countries, extensively regulate, among other things, the research, development, testing, manufacture, quality control, import, export, safety, effectiveness, labeling, packaging, storage, distribution, record keeping, approval, advertising, promotion, marketing, post-approval monitoring, and post-approval reporting of drugs, such as those we are developing. We, along with third-party contractors, will be required to navigate the various preclinical, clinical and commercial approval requirements of the governing regulatory agencies of the countries in which we wish to conduct studies or seek approval or licensure of our product candidate. The process of obtaining regulatory approvals and the subsequent compliance with appropriate federal, state, local, and foreign statutes and regulations require the expenditure of substantial time and financial resources.
+
+Government Regulation of Drugs
+
+United States
+
+The process required by the FDA before drug product candidates, like ours, may be marketed in the United States generally involves the following:
+
+•
+completion of preclinical laboratory tests and animal studies performed in accordance with the FDA’s current Good Laboratory Practices (“GLP”) regulation;
+
+•
+submission to the FDA of an IND, which must become effective before clinical trials may begin and must be updated annually or when significant changes are made;
+
+•
+approval by an independent Institutional Review Board (“IRB”) or ethics committee for each clinical site before a clinical trial can begin;
+
+•
+performance of adequate and well-controlled human clinical trials to establish the safety, purity, and potency of the proposed product candidate for its intended purpose;
+
+•
+preparation of and submission to the FDA of a Biologics License Application (“BLA”), after completion of all required clinical trials;
+
+•
+a determination by the FDA within 60 days of its receipt of a BLA to file the application for review;
+
+•
+satisfactory completion of an FDA Advisory Committee review, if applicable;
+
+•
+satisfactory completion of an FDA pre-approval inspection of the manufacturing facility or facilities at which the proposed product is produced to assess compliance with cGMPs and to assure that the facilities, methods, and controls are adequate to preserve the product’s continued safety, purity and potency, and of selected clinical investigational sites to assess compliance with current Good Clinical Practices (“cGCP”); and
+
+•
+FDA review and approval of the BLA to permit commercial marketing of the product for particular indications for use in the United States, which must be updated annually and when significant changes are made.
+
+The testing and approval process requires substantial time, effort, and financial resources, and we cannot be certain that any approvals for our product candidate will be granted on a timely basis, if at all. Prior to beginning the first clinical trial with a product candidate, we must submit an Investigational New Drug Application (“IND”) to the FDA. An IND is a request for authorization from the FDA to administer an investigational new drug product to humans. The central focus of an IND submission is on the general investigational plan and the protocol(s) for clinical trials. The IND also includes results of animal and in vitro trials assessing the toxicology, pharmacokinetics, pharmacology, and pharmacodynamic characteristics of the product candidate; chemistry, manufacturing, and controls information; and any available human data or literature to support the use of the investigational product. An IND must become effective before human clinical trials may begin. The IND automatically becomes effective 30 days after receipt by the FDA unless the FDA, within the 30-day time period, raises safety concerns or questions about the proposed clinical trial. In such a case, the IND may be placed on clinical hold and the IND sponsor and the FDA must resolve any outstanding concerns or questions before the clinical trial can begin. Submission of an IND therefore may or may not result in FDA authorization to begin a clinical trial.
+
+Clinical trials involve the administration of the investigational product to human subjects under the supervision of qualified investigators in accordance with cGCPs, which include the requirement that all research subjects provide their informed consent for their participation in any clinical trial. Clinical trials are conducted under protocols detailing, among other
+
+13
+
+things, the objectives of the trial, the parameters to be used in monitoring safety and the effectiveness criteria to be evaluated. A separate submission to the existing IND must be made for each successive clinical trial conducted during product development and for any subsequent protocol amendments. Furthermore, an independent IRB, for each site proposing to conduct the clinical trial, must review and approve the plan for any clinical trial and its informed consent form before the clinical trial begins at that site, and must monitor the trial until completed. Regulatory authorities, the IRB, or the sponsor may suspend a clinical trial at any time on various grounds, including a finding that the subjects are being exposed to an unacceptable health risk or that the trial is unlikely to meet its stated objectives. Some trials also include oversight by an independent group of qualified experts organized by the clinical trial sponsor, known as a data safety monitoring board, which provides authorization for whether or not a trial may move forward at designated check points based on access to certain data from the trial and may halt the clinical trial if it determines that there is an unacceptable safety risk for subjects or other grounds, such as no demonstration of efficacy. There are also requirements governing the reporting of ongoing clinical trials and clinical trial results to public registries.
+
+For purposes of BLA approval, human clinical trials are typically conducted in three sequential phases that may overlap. Additionally, in certain instances, a fourth phase, post approval, may be necessary or required.
+
+•
+Phase 1. The drug product is initially introduced into healthy human subjects and tested for safety. In the case of some products for severe or life-threatening diseases, the initial human testing is often conducted in patients.
+
+•
+Phase 2. The drug product is evaluated in a limited patient population to identify possible adverse effects and safety risks, to preliminarily evaluate the efficacy of the product for specific targeted diseases and to determine dosage tolerance, optimal dosage and dosing schedule.
+
+•
+Phase 3. Clinical trials are undertaken to further evaluate dosage, clinical efficacy, potency, and safety in an expanded patient population at geographically dispersed clinical trial sites. These clinical trials are intended to establish the overall risk to benefit ratio of the product and provide an adequate basis for product labeling.
+
+•
+Phase 4. In some cases, the FDA may require, or companies may voluntarily pursue, additional clinical trials after a product is approved to gain more information about the product. Phase 4 trials may be required as a condition to approval of the BLA.
+
+Phase 1, Phase 2, and Phase 3 testing may not be completed successfully within a specified period, if at all, and there can be no assurance that the data collected will support FDA approval or licensure of the product. Concurrent with clinical trials, companies may complete additional animal studies and develop additional information about the drug characteristics of the product candidate and must finalize a process for manufacturing the product in commercial quantities in accordance with cGMP requirements. The manufacturing process must be capable of consistently producing quality batches of the product candidate. Additionally, appropriate packaging must be selected and tested and stability studies must be conducted to demonstrate that the product candidate does not undergo unacceptable deterioration over its shelf life.
+
+BLA Submission and Review by the FDA
+
+Assuming successful completion of all required testing in accordance with all applicable regulatory requirements, the results of product development, nonclinical studies, and clinical trials are submitted to the FDA as part of a BLA requesting approval to market the product for one or more indications. The BLA must include all relevant data available from pertinent preclinical and clinical studies, including negative or ambiguous results as well as positive findings, together with detailed information relating to the product’s chemistry, manufacturing, controls, and proposed labeling, among other things. Data can come from company-sponsored clinical trials intended to test the safety and effectiveness of a use of the product, or from a number of alternative sources, including trials initiated by investigators. The submission of a BLA requires payment of a substantial user fee to the FDA, and the sponsor of an approved BLA is also subject to annual product and establishment user fees. These fees are typically increased annually. As noted previously, molgramostim nebulizer solution for the treatment of aPAP has been granted Orphan Drug Designation, and as such is exempt from the payment of User Fees under current legislation.
+
+Within 60 days following submission of the application, the FDA reviews a BLA to determine if it is substantially complete before the agency accepts it for filing. The FDA may refuse to file any BLA that it deems incomplete or not properly reviewable at the time of submission and may request additional information. In this event, the BLA must be resubmitted with the additional information. Once a BLA has been filed, the FDA’s goal is to review the application within ten months after it accepts the application for filing, or, if the application relates to an unmet medical need in a serious or life-threatening indication, six months after the FDA accepts the application for filing. The review process is often significantly extended by FDA requests for additional information or clarification. The FDA reviews a BLA to determine, among other things, whether a product is safe and effective for the indication being pursued, and the facility in which it is manufactured,
+
+14
+
+processed, packed, or held meets standards designed to assure the product’s continued safety and effectiveness. The FDA may convene an advisory committee to provide clinical insight on application review questions. Before approving a BLA, the FDA will typically inspect the facility or facilities where the product is manufactured. The FDA will not approve an application unless it determines that the manufacturing processes and facilities are in compliance with cGMP requirements and adequate to assure consistent production of the product within required specifications. Additionally, before approving a BLA, the FDA will typically inspect one or more clinical sites to assure compliance with cGCP. If the FDA determines that the application, manufacturing process, or manufacturing facilities are not acceptable, it will outline the deficiencies in the submission and often will request additional testing or information. Notwithstanding the submission of any requested additional information, the FDA ultimately may decide that the application does not satisfy the regulatory criteria for approval.
+
+The testing and approval process requires substantial time, effort, and financial resources, and each may take several years to complete. The FDA may not grant approval on a timely basis, or at all, and we may encounter difficulties or unanticipated costs in our efforts to secure necessary governmental approvals, which could delay or preclude us from marketing our products. After the FDA evaluates a BLA and conducts inspections of manufacturing facilities where the investigational product and/or our drug substance will be produced, the FDA may issue an approval letter or a Complete Response Letter. An approval letter authorizes commercial marketing of the product with specific prescribing information for specific indications. A Complete Response Letter indicates that the review cycle of the application is complete and the application is not ready for approval. A Complete Response Letter may request additional information or clarification. The FDA may delay or refuse approval of a BLA if applicable regulatory criteria are not satisfied, require additional testing or information and/or require post-marketing testing and surveillance to monitor safety or efficacy of a product.
+
+If regulatory approval of a product is granted, such approval may entail limitations on the indicated uses for which such product may be marketed. For example, the FDA may approve the BLA with a Risk Evaluation and Mitigation Strategy (“REMS”) to mitigate risks, which could include medication guides, physician communication plans, or elements to assure safe use, such as restricted distribution methods, patient registries, and other risk minimization tools. The FDA also may condition approval on, among other things, changes to proposed labeling or the development of adequate controls and specifications. Once approved, the FDA may withdraw the product approval if compliance with pre- and post-marketing regulatory standards is not maintained or if problems occur after the product reaches the marketplace. The FDA may require one or more Phase 4 post-marketing trials and surveillance to further assess and monitor the product’s safety and effectiveness after commercialization and may limit further marketing of the product based on the results of these post-marketing trials. In addition, new government requirements, including those resulting from new legislation, may be established, or the FDA’s policies may change, which could delay or prevent regulatory approval of its products under development.
+
+A sponsor may seek approval of its product candidate under programs designed to accelerate the FDA’s review and approval of new drugs that meet certain criteria. Specifically, new drug products are eligible for Fast Track Designation if they are intended to treat a serious or life-threatening condition and demonstrate the potential to address unmet medical needs for the condition. For a fast track product, the FDA may consider sections of the BLA for review on a rolling basis before the complete application is submitted if relevant criteria are met. A fast track designated product candidate may also qualify for priority review, under which the FDA sets the target date for FDA action on the BLA at six months after the FDA accepts the application for filing. Priority review is granted when there is evidence that the proposed product would be a significant improvement in the safety or effectiveness of the treatment, diagnosis, or prevention of a serious condition. If criteria are not met for priority review, the application is subject to the standard FDA review period of 10 months after FDA accepts the application for filing. Priority review designation does not change the scientific/medical standard for approval or the quality of evidence necessary to support approval.
+
+Under the accelerated approval program, the FDA may approve a BLA on the basis of either a surrogate endpoint that is reasonably likely to predict clinical benefit, or on a clinical endpoint that can be measured earlier than irreversible morbidity or mortality, that is reasonably likely to predict an effect on irreversible morbidity or mortality or other clinical benefit, taking into account the severity, rarity, or prevalence of the condition and the availability or lack of alternative treatments. Post-marketing trials or completion of ongoing trials after marketing approval are generally required to verify the biologic’s clinical benefit in relationship to the surrogate endpoint or ultimate outcome in relationship to the clinical benefit. In addition, the U.S. Food and Drug Administration Safety and Innovation Act, which was enacted and signed into law in 2012, established breakthrough therapy designation. A sponsor may seek FDA designation of its product candidate as a breakthrough therapy if the product candidate is intended, alone or in combination with one or more other drugs or biologics, to treat a serious or life-threatening disease or condition and preliminary clinical evidence indicates that the therapy may demonstrate substantial improvement over existing therapies on one or more clinically significant endpoints, such as substantial treatment effects observed early in clinical development. Sponsors may request the FDA to designate a breakthrough therapy at the time of, or any time after, the submission of an IND, but ideally before an end-of-phase 2 meeting with the FDA. If the FDA designates a breakthrough therapy, it may take actions appropriate to expedite the
+
+15
+
+development and review of the application, which may include holding meetings with the sponsor and the review team throughout the development of the therapy; providing timely advice to, and interactive communication with, the sponsor regarding the development of the drug to ensure that the development program to gather the nonclinical and clinical data necessary for approval is as efficient as practicable; involving senior managers and experienced review staff, as appropriate, in a collaborative, cross-disciplinary review; assigning a cross-disciplinary project lead for the FDA review team to facilitate an efficient review of the development program and to serve as a scientific liaison between the review team and the sponsor; and considering alternative clinical trial designs when scientifically appropriate, which may result in smaller or more efficient clinical trials that require less time to complete and may minimize the number of patients exposed to a potentially less efficacious treatment. Breakthrough designation also allows the sponsor to file sections of the BLA for review on a rolling basis.
+
+Fast Track Designation, priority review and Breakthrough Therapy Designation do not change the standards for approval but may expedite the development or approval process.
+
+The review and approval process with respect to our drug candidate may also be significantly delayed in the event of government shutdowns, if any.
+
+Post-Approval Requirements
+
+Any products manufactured or distributed by us pursuant to FDA approvals are subject to pervasive and continuing regulation by the FDA, including, among other things, requirements relating to record keeping, reporting of adverse experiences, periodic reporting, distribution, and advertising and promotion of the product. After approval, most changes to the approved product, such as adding new indications or other labeling claims, are subject to prior FDA review and approval. There also are continuing, annual user fee requirements for any marketed products and the establishments at which such products are manufactured, as well as new application fees for supplemental applications with clinical data. Drug manufacturers and their subcontractors are required to register their establishments with the FDA and certain state agencies, and are subject to periodic unannounced inspections by the FDA and certain state agencies for compliance with cGMP, which impose certain procedural and documentation requirements upon us and our third-party manufacturers. Changes to the manufacturing process are strictly regulated and, depending on the significance of the change, may require prior FDA approval before being implemented. FDA regulations also require investigation and correction of any deviations from cGMP and impose reporting requirements upon us and any third-party manufacturers that we may decide to use. Accordingly, manufacturers must continue to expend time, money, and effort in the area of production and quality control to maintain compliance with cGMP and other aspects of regulatory compliance. We cannot be certain that we or our present or future suppliers will be able to comply with the cGMP regulations and other FDA regulatory requirements. If our present or future suppliers are not able to comply with these requirements, the FDA may, among other things, halt our clinical trials, require us to recall a product from distribution, or withdraw approval of the BLA.
+
+Future FDA and state inspections may identify compliance issues at our facilities or at the facilities of our contract manufacturers that may disrupt production or distribution, or potentially require substantial resources to correct. In addition, discovery of previously unknown problems with a product or the failure to comply with applicable requirements may result in restrictions on a product, manufacturer, or holder of an approved BLA, including withdrawal or recall of the product from the market or other voluntary, FDA-initiated, or judicial action that could delay or prohibit further marketing.
+
+The FDA may withdraw approval of a BLA if compliance with regulatory requirements and standards is not maintained or if problems occur after the product reaches the market. Later discovery of previously unknown problems with a product, including adverse events of unanticipated severity or frequency, or with manufacturing processes, or failure to comply with regulatory requirements, may result in revisions to the approved labeling to add new safety information; imposition of post-marketing trials or clinical trials to assess new safety risks; or imposition of distribution restrictions or other restrictions under a REMS program. Other potential consequences include, among other things:
+
+•
+restrictions on the marketing or manufacturing of the product, complete withdrawal of the product from the market or product recalls;
+
+•
+fines, warning letters or holds on post-approval clinical trials;
+
+•
+refusal of the FDA to approve pending applications or supplements to approved applications, or suspension or revocation of product license approvals;
+
+•
+product seizure or detention, or refusal to permit the import or export of products; or
+
+•
+injunctions or the imposition of civil or criminal penalties.
+
+The FDA closely regulates the marketing, labeling, advertising, and promotion of drugs and biologics. A company can make only those claims relating to safety and efficacy that are approved by the FDA and in accordance with the provisions
+
+16
+
+of the approved label. The FDA and other agencies actively enforce the laws and regulations prohibiting the promotion of off-label uses. Failure to comply with these requirements can result in, among other things, adverse publicity, warning letters, corrective advertising, and potential civil and criminal penalties. Physicians may prescribe legally available products for uses that are not described in the product’s labeling and that differ from those tested by us and approved by the FDA. Such off-label uses are common across medical specialties. Physicians may believe that such off-label uses are the best treatment for many patients in varied circumstances. The FDA does not regulate the behavior of physicians in their choice of treatments. The FDA does, however, restrict manufacturer’s communications on the subject of off-label use of their products.
+
+Government Regulation of Combination Products
+
+Our product candidate under development will be regulated as a combination product, which means that it is comprised of two or more different components that, if marketed individually, would be subject to different regulatory paths and would require approval of independent marketing applications by the FDA. A combination product, however, is assigned to a center within the FDA that will have primary jurisdiction over its regulation on a determination of the combination product’s primary mode of action, which is the single mode of action that provides the most important therapeutic action. We believe our product candidate includes both a drug and medical device component, and will be regulated as a drug, subject to the review of the FDA’s Center for Drug Evaluation and Research which will have primary jurisdiction over premarket development and approval. The FDA’s Center for Devices and Radiological Health will provide support and review of the nebulizer component of our product candidate.
+
+European Union
+
+MAA
+
+To obtain approval of a drug under the EU regulatory system, an application for a marketing authorization may be submitted under a centralized, a decentralized, or a national procedure. The centralized procedure, which is compulsory for medicines produced by certain biotechnological processes or for orphan drugs, provides for the grant of a single marketing authorization that is valid for all EU member states, which grants the same rights and obligations in each member state as a national marketing authorization. As a general rule, only one marketing authorization may be granted for drugs approved through the centralized procedure and the marketing authorization is also relevant for the EEA countries.
+
+Under the centralized procedure, the Committee for Medicinal Products for Human Use (“CHMP”) is required to adopt an opinion on a valid application within 210 days, excluding clock stops when additional information is to be provided by the applicant in response to questions. On day 120 of the procedure, once the CHMP has received the preliminary assessment reports and opinions from the Rapporteur and Co-Rapporteur designated by the CHMP, it adopts a list of questions, which are sent to the applicant together with the CHMP's overall conclusions. Applicants then have three months to respond (plus an additional three-month extension, if requested). The applicant's replies are assessed, and the assessment report is revised as necessary (and may include a prepared list of outstanding issues). By day 180 of the procedures, the revised assessment report and list of outstanding issues are sent to the applicant together with the CHMP's recommendation. Applicants then have one month to respond to the CHMP (and can request a one or two-month extension). The Rapporteur and Co-Rapporteur assess the applicant's replies and then submit them for review to the CHMP and prepare a final assessment report. Following their evaluation, the CHMP gives a favorable or unfavorable opinion as to whether to grant the marketing authorization. After the adoption of the CHMP opinion, a decision must be adopted by the European Commission, after consulting the Standing Committee of the Member States. The European Commission prepares a draft decision and circulates it to the member states; if the draft decision differs from the CHMP opinion, the Commission must provide detailed explanations. The European Commission adopts a decision within 15 days of the end of the consultation procedure.
+

@@ -1,0 +1,25 @@
+{
+  "schema_version": "cs.manual_review_corpus.v1",
+  "corpus_id": "geoje-livelihood-support-ordinance-2025",
+  "collected_at": "2026-07-12",
+  "language": "ko",
+  "purpose": "local_private_manual_ui_review",
+  "acceptance_corpus": false,
+  "supports_pass_claim": false,
+  "frozen_vs5_eval_corpus_modified": false,
+  "packets": [
+    {
+      "id": "packet-a-2025-06-30",
+      "as_of": "2025-06-30T12:32:59+09:00",
+      "decision_stage": "immediately_before_bill_519_vote",
+      "manifest": "packet-a-2025-06-30/packet.json"
+    },
+    {
+      "id": "packet-b-2025-09-19",
+      "as_of": "2025-09-19T11:40:59+09:00",
+      "decision_stage": "immediately_before_bill_584_vote",
+      "manifest": "packet-b-2025-09-19/packet.json"
+    }
+  ],
+  "reuse_status": "publicly_accessible_sources; redistribution_terms_not_confirmed; local_private_review_only"
+}

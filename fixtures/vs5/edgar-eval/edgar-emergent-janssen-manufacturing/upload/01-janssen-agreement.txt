@@ -1,0 +1,755 @@
+15
+a1016-janssenagreement.htm
+EX-10.16
+
+Document
+
+Exhibit 10.16
+
+Certain identified information has been excluded from the exhibit because it is both (i) not material and (ii) would likely cause competitive harm to the Company, if publicly disclosed. Double asterisks in brackets denote omissions.
+
+MANUFACTURING SERVICES AGREEMENT
+
+THIS MANUFACTURING SERVICES AGREEMENT is made and entered into July 1, 2020 (the “Effective Date”) by and between Janssen Pharmaceuticals, Inc., a corporation organized under the laws of the State of Pennsylvania, with corporate offices at 1125 Trenton-Harbourton Road, Titusville, NJ 08560 (“Buyer”), and Emergent Manufacturing Operations Baltimore, LLC, a limited liability company organized under the laws of the State of Delaware, with offices at 5901 E. Lombard Street, Baltimore, MD 21224 (“Manufacturer”).
+
+RECITALS:
+
+WHEREAS, pursuant to a Technology Transfer Letter Agreement between Buyer and Manufacturer dated April 20, 2020 (as amended from time to time, the “Technology Transfer Agreement”), the Parties agreed to work together to negotiate and enter into this Agreement; and
+
+WHEREAS, Buyer desires to engage Manufacturer to perform certain Manufacturing Services, on the terms and conditions set forth below, and Manufacturer desires to perform such Services for Buyer.
+
+AGREEMENT:
+
+NOW, THEREFORE, in consideration of the foregoing premises and the mutual covenants of all Parties set forth in this Agreement, all the Parties hereto agree as follows:
+
+1.Definitions. Unless this Agreement expressly provides to the contrary, the following terms, whether used in the singular or plural, have the respective meanings set forth below:
+
+1.1 “Affiliate” means, with respect to a party, any person or entity that controls, is controlled by or is under common control with such party. As used in this definition, “control” means (a) in the case of corporate entities, direct or indirect ownership of at least fifty percent (50%) of the stock or shares having the right to vote for the election of directors, and (b) in the case of non-corporate entities, the direct or indirect power to manage, direct or cause the direction of the management and policies of the non-corporate entity or the power to elect at least fifty percent (50%) of the members of the governing body of such non-corporate entity.
+
+1.2 “Agreement” means this Manufacturing Services Agreement, together with all Appendices attached hereto, as amended from time to time by all the Parties in accordance with Section 14.10.
+
+1.3 “Applicable Law” means all applicable ordinances, rules, regulations, laws, guidelines, guidances, requirements and court orders of any kind whatsoever of any Authority, as amended from time to time, including without limitation, cGMP (if applicable).
+
+1.4 “Authority” and “Authorities” means the FDA [**] and any other government or regulatory authority or agency responsible for granting approvals for the performance of Services under
+
+this Agreement or for issuing regulations pertaining to the Manufacture and/or use, distribution, sale, promotion or marketing of Product in the intended country of use as agreed to in writing by the Parties.
+
+1.5 “Background IP” means Intellectual Property existing as of the Effective Date or developed independently of the activities under this Agreement that is under the control of either Party 1 and that is reasonably necessary for performing the activities under this Agreement. For the purposes of this definition “control” means ownership and/or the right to grant access or licenses to Third Parties.
+
+1.6 “Batch” means a lot of bulk drug substance Product resulting from a single run of Product produced by a single execution of the instructions specified in the Master Batch Record.
+
+1.7 “Batch Documentation” means the following documents for each Batch of Product: (a) Batch Record; (b) the Certificate of Analysis; (c) Manufacturer’s deviation/investigation report(s); and (d) any other Batch documentation in Manufacturer’s possession or control reasonably requested by Buyer.
+
+1.8 “Batch Record” means the batch production and control record containing the set of detailed processing instructions which are to be followed by Manufacturer to produce one Batch of Product.
+
+1.9 “Business Day” means any day that the commercial banks of the United States are open for business.
+
+1.10 “Buyer Indemnitee” has the meaning set forth in Section 11.1.
+
+1.11 “Buyer Supplied Items” means those items supplied by Buyer to Manufacturer in connection with the Services as set forth in Appendix 1, including the Cell Line and Virus Seed.
+
+1.12 Cell Line” means the cell line supplied by Buyer to Manufacturer to perform the Services as identified in Appendix 1.
+
+1.13 “Certificate of Analysis” means a document, signed by an authorized representative of Manufacturer, listing Batch or Product description, Batch or Product number, the Specifications for, and Test Methods applied to, Product, the results thereof, a pass/fail indication and an attestation as to whether the Batch or Product is conforming or non-conforming with the Specifications.
+
+1.14 “cGMP” means current good manufacturing practices and regulations applicable to the Manufacture of Product that are promulgated by any Authority, including any guidance documents (including but not limited to advisory opinions, compliance policy guides and guidelines) as may be promulgated by any such Authority including, with respect to the United States, the Current Good Manufacturing Practice Regulations of the U.S. Code of Federal Regulations Title 21 (21 CFR §§ 210 and 211).
+
+1.15 “Change Order” means a document executed by authorized representatives of both Parties that changes the scope of the Services, the Specifications and/or the price of the Services and which references this Agreement.
+
+2
+
+1.16 “Confidential Information” has the meaning set forth in Section 9.1.
+
+1.17 “Defect” has the meaning set forth in Section 5.3.
+
+1.18 “Drug Product” means the sterile filled vial end product containing the Product.
+
+1.19 “[**]” means the [**].
+
+1.20 “Equipment” means any equipment or machinery used by Manufacturer in the Manufacturing of Product.
+
+1.21 “EXW” or “Ex Works” has the meaning set forth in INCOTERMS 2020.
+
+1.22 “Facility” means the facility of Manufacturer located at 5901 E. Lombard Street, Baltimore, Maryland (Bayview).
+
+1.23 “FDA” means the United States Food and Drug Administration, and any successor agency having substantially the same functions.
+
+1.24 “FDCA” means the United States Federal Food, Drug and Cosmetic Act, 21 U.S.C. §321 et seq., as amended from time to time.
+
+1.25 “Firm Order” shall have the meaning set forth in Section 2.7.
+
+1.26 “force majeure” has the meaning set forth in Section 14.5.
+
+1.27 “Forecast” shall have the meaning set forth in Section 2.6.
+
+1.28 “Foreground IP” means all Intellectual Property discovered or developed in the performance of the activities set forth herein solely by or on behalf of Manufacturer or jointly with Buyer.
+
+1.29 “IND” means an Investigational New Drug application filed with the FDA in accordance with Applicable Law.
+
+1.30 “Intellectual Property” means all patents, trademarks, utility certificates and models, inventors’ certificates, copyrights, database rights, designs, domain names, trade secrets, Know-How and any other proprietary rights, priority rights, prior user rights and all other rights of a like nature in each case whether registered or unregistered and in any jurisdiction.
+
+1.31 “Know-How” means all of the following: manufacturing protocols and methods, product specifications, analytical methods and assays, processes, formulations, product designs, product plans, trade secrets, flow diagrams, chemical data, pharmacological data, pharmacokinetic data, toxicological data, pharmaceutical data, physical and analytical data, safety data, quality assurance data, quality control and clinical data, techniques, practical knowledge, skills, technical information, proprietary information and materials in possession of or developed by a Party.
+
+3
+
+1.32 “Manufacture” and “Manufacturing” means any steps, processes and activities necessary to produce bulk drug substance Product, including without limitation, the manufacturing, processing, packaging, labeling, quality control testing, and release of bulk drug substance Product.
+
+1.33 “Manufacturer Indemnitee” has the meaning set forth in Section 11.2.
+
+1.34 “Manufacturing Process” means any and all processes and activities (or any step in any process or activity) used or planned to be used by Manufacturer to Manufacture bulk drug substance Product, as evidenced in the Master Batch Record.
+
+1.35 “Master Batch Record” means a master production and control record, mutually agreed upon by the Parties, containing a written description of the procedure to be followed for Manufacturing a Batch of Product including (but not limited to) the Specifications for the Product and all raw materials, ingredients and components there of (including Raw Materials and Buyer Supplied Items) and Test Methods.
+
+1.36 “[**]” has the meaning set forth in Section [**].
+
+1.37 “[**]” has the meaning set forth in Section [**].
+
+1.38 “Party” and “Parties” means Buyer and/or Manufacturer as applicable.
+
+1.39 “Product” means Ad26COVS1-JNJ-78436735, a recombinant, replication defective adenovirus type 26 (Ad26) vectored vaccine component encoding a SARS-CoV-2 produced in PER.C6® or PER.C6®[**] cells.
+
+1.40 “Quality Agreement” has the meaning set forth in Section 4.3(a).
+
+1.41 “Quality Review” means the review and disposition by Manufacturer’s Quality Assurance Department of a Batch and the associated Batch Documentation.
+
+1.42 “Raw Materials” means all cell banks, virus seeds, cell culturing media, single use equipment, chemicals, solvents, inactive ingredients, excipients, labels, bags, liners, tubing, filters and other single use or regularly replaced materials, and ingredients, solvents and other materials (including shipping components) required to be used in order to Manufacture the Product as set forth in the Master Batch Record, but excluding any Buyer Supplied Items.
+
+1.43 “Recall” has the meaning set forth in Section 5.6.
+
+1.44 “Records” has the meaning set forth in Section 4.4(a).
+
+1.45 “Release Date” means the date on which the applicable Batch Documentation documents have been signed by Manufacturer and submitted to Buyer in accordance with Section 6.1 and the Batch is finished and ready to deliver.
+
+1.46 “Services” means the Manufacturing services as described in this Agreement.
+
+4
+
+1.47 “Shipping Guidelines” means Manufacturer’s written procedures approved by Buyer in writing that describe the methods of packaging Batches for shipment.
+
+1.48 “Specifications” means the final release specifications for Product set forth in the Master Batch Record.
+
+1.49 “Storage Guidelines” means Manufacturer’s procedures approved by Buyer in writing that describe the methods of packaging, monitoring, and storing the Product, Raw Materials, Buyer Supplied Items and work-in-progress.
+
+1.50 “Supply Committee” has the meaning set forth in Section 2.3.
+
+1.51 “Technology Transfer Agreement” has the meaning set forth in the recitals.
+
+1.52 “Test Methods” means a list of quality control analytical assays to be performed by Manufacturer in connection with Manufacturing the Product, as mutually agreed up by the Parties.
+
+1.53 “Third Party” means any party other than the Parties.
+
+1.54 “Third Party Intellectual Property Right” means all patents, patent applications, trademarks, and trade names, service marks, design rights, utility models, rights in computer software, database rights, moral rights, copyright, rights in inventions, rights in know-how, confidential information and trade secrets, unfair competition rights, in each case whether registered or unregistered and including applications for and renewals or extensions of such rights and any other similar or analogous right or form of protection in any country in the world, together with the right to apply for registration of such rights, which are owned, controlled, or held by a Third Party.
+
+1.55 “Virus Seed” means the virus seed supplied by Buyer to Manufacturer to perform the Services as identified in Appendix 1.
+
+2.Services.
+
+2.1 Services. Manufacturer shall perform the Services in accordance with the terms of this Agreement and the Quality Agreement.
+
+2.2 Changes. Changes to the scope or pricing of the Services (other than adjustments described by Section 7.7) or to the Specifications may be made only in a Change Order. To the extent that any such change affects the relative obligations and rights of the Parties or affects the fees, expenses and/or timelines of the Services, then such effects shall be documented in the Change Order. Both Parties agree to act in good faith when considering a proposed Change Order from the other Party. Each Party agrees to take commercially reasonable efforts to respond to requested Change Orders within [**] of receipt.
+
+2.3 Supply Committee. Promptly following execution of this Agreement, a committee (the “Supply Committee”) shall be established with appropriate membership from each Party, which shall (at minimum) include the Parties’ respective project managers, which will convene on at least a [**] basis
+
+5
+
+during the [**] of the term of this Agreement and [**] thereafter, or at such intervals as the Parties may agree.
+
+The purpose of the Supply Committee shall be to facilitate timely, accurate, and complete communication of matters affecting the Services under this Agreement and informal resolution of issues, including discussion of:
+
+1. Forecasts (including deviations from prior Forecasts), trends and factors which have affected and may affect the accuracy of Forecasts;
+
+2. Issues and problems that may affect the ability of the Parties to perform as expected; and
+
+3. External factors which may affect the supply chain, such as material shortages, shipping delays, and the like.
+
+The Supply Committee shall be comprised of production, quality, compliance, planning, and process engineering representatives of both Parties, and/or such other representatives as a Party may reasonably determine appropriate. In any event, the Supply Committee shall consist of an equal number of representatives of Buyer and Manufacturer.
+
+In addition to the [**] meetings of the full Supply Committee, each Party’s quality representative(s) on the Supply Committee, as well as any other representatives as a Party may reasonably determine appropriate, shall convene on a [**] basis during the term of the Agreement, or at an alternate interval as the Parties may agree, to review and discuss quality performance and metrics.
+
+2.4 Sale and Purchase of Product. Subject to the terms and conditions of this Agreement, Manufacturer shall sell to Buyer, and Buyer shall purchase from Manufacturer, Product pursuant to Firm Orders as set forth in Section 2.7.
+
+2.5 No Exclusivity. This Agreement is non-exclusive and Buyer may at any time contract with any Third Party(ies) or use its Affiliates for the manufacture of Product and Manufacturer shall not have any exclusive rights to be the sole manufacturer of Product. The Parties further acknowledge and agree that [**], provided that [**].
+
+2.6 Forecasts. Commencing [**] prior to Contract Year 1 (as defined in Section 13.1 below) and thereafter on a [**] basis, Buyer shall submit to Manufacturer a written forecast of the quantity of Product that Buyer expects to order for [**] during the following [**] period, [**] (each, a “Forecast”). The parties agree that, subject to [**] as set forth below, (a) the quantity of Product [**] Forecast [**], and (b) [**] Forecast [**]. The [**] Forecast [**] in a Firm Order. Within [**] after receipt of each Forecast, [**], provided, however, that for Contract Years 3 through 5 [**].
+
+2.7 Firm Orders. All purchases of Services under this Agreement shall be effected solely pursuant to a purchase order or other form agreed by the Parties specifying the number of Batches ordered. [**], Buyer shall submit a purchase order [**] during such Contract Year, [**] as set forth in Section 2.6 above (each a “Firm Order”). The Parties acknowledge that, [**], Buyer is not [**], and
+
+6
+
+Manufacturer is not [**] Firm Orders. Except as otherwise agreed to by the Parties, Buyer [**] Firm Order.
+
+2.8 [**]. During the term of this Agreement Buyer shall [**], and Manufacturer is [**].
+
+3.Subcontracting; Materials and Equipment.
+
+3.1 Subcontracting. Manufacturer will not subcontract with any Third Party or Manufacturer Affiliate to perform any of its obligations under this Agreement without the prior written consent of Buyer, provided that no such written consent shall be required with respect to any allowed subcontractor under the Technology Transfer Agreement or to any subcontractor identified in Appendix 6 providing the services described therein. If Manufacturer subcontracts any of its obligations under this Agreement it will be solely responsible for the performance of any approved subcontractor, and for costs, expenses, damages, or losses of any nature arising out of such performance as if such performance had been provided by Manufacturer itself under this Agreement. Manufacturer will cause any approved subcontractors to comply with the terms of this Agreement, as applicable, including without limitation, all confidentiality, quality assurance, regulatory and other obligations and requirements of Manufacturer set forth in this Agreement, and for the avoidance of doubt, Manufacturer shall enter into a quality agreement reasonably acceptable to Buyer with any such approved subcontractor, which shall require, among other things, that such subcontractor perform its services at the approved facility, validate equipment, and secure for Buyer the right to audit and inspect such subcontractor in a manner consistent with Buyer’s right to audit and inspect Manufacturer.
+
+3.2 Raw Materials. Unless specifically agreed to otherwise by the Parties in writing, Manufacturer will purchase, in accordance with the relevant Raw Materials specifications all Raw Materials insofar as required for Manufacturer to complete the Manufacture and delivery of Batches in accordance with the terms of this Agreement. [**]. The Master Batch Record and/or the Quality Agreement set forth any testing to be performed by Manufacturer on such Raw Materials or Buyer Supplied Items. Manufacturer shall perform such testing. Subject to such testing obligations, [**]. For the avoidance of doubt, [**] of this Agreement, [**] Raw Material.
+
+3.3 Safety Stock. Within [**] following the Effective Date, or a later date mutually agreed to by the Parties, the Parties shall agree upon the types and amounts of safety stock and shall enter into an amendment to this Agreement to include such information in Appendix 1. After the date of such amendment and at all times during the term of this Agreement, Manufacturer shall maintain [**] safety stocks of those Raw Materials identified in Appendix 1 in the amount set forth in in Appendix 1. The Supply Committee shall discuss on a periodic basis the levels of safety stock to determine whether any adjustments with respect thereto are warranted, but no such adjustments may be made without the prior written consent of Manufacturer.
+
+3.4 Buyer Supplied Items and Required Documentation. At least [**] prior to the commencement date of Manufacture for a Firm Order, Buyer, [**], shall cause to be delivered to the Facility the following items: (a) the quantity of Buyer Supplied Items as necessary to Manufacture the quantity of Product identified in a given Firm Order; and (b) if required by the Quality Agreement, a certificate of analysis for the Buyer Supplied Items; (c) if not previously provided, a Safety Data Sheet for the Buyer Supplied Items and the Product; and (d) a signed Master Batch Record if not previously
+
+7
+
+provided. Buyer shall ensure that all Buyer Supplied Items have been manufactured in accordance with cGMP and the relevant specifications set forth in the Master Batch Record. Manufacturer shall be responsible for maintaining all Buyer Supplied Items in accordance with the Storage Guidelines, Applicable Laws and cGMP. Manufacturer shall not transfer, deliver or otherwise provide or make available the Buyer Supplied Items (or any component thereof) to any Third Party that is not specifically authorized in advance and in writing by Buyer. Manufacturer shall not use the Buyer Supplied Items (or any component thereof) for any purpose except as contemplated by this Agreement, or as otherwise authorized in writing by Buyer. Buyer shall at all times retain legal title to and, [**], the Buyer Supplied Items. Upon Buyer’s written request, [**], Manufacturer shall return any remaining Buyer Supplied Items in Manufacturer’s possession to Buyer or its designee, Ex Works the Facility.
+
+3.5 Additional Controls for Cell Line. Manufacturer shall implement the following controls and safeguards with respect to the Cell Line it receives:
+
+a.[**].
+
+b.[**].
+
+c.Buyer shall have the right during the term of this Agreement to conduct periodic audits no more frequently than [**] at a mutually agreed upon time and date during Manufacturer’s normal business hours to assess adherence to the Cell Line Procedures and Controls, and security controls, including, if applicable, review of inventory logs, access lists and related documentation; notwithstanding the foregoing, there shall be no limit on the number of for cause audits that may be performed by Buyer in a calendar year.
+
+d.Manufacturer shall, [**], implement such additional procedures and controls with respect to the Cell Line as may be reasonably requested by Buyer [**].
+
+e.[**] shall be set forth [**].
+
+3.6 Additional Controls for Virus Seed. Manufacturer shall implement the following controls and safeguards with respect to the Virus Seed it receives:
+
+a.[**].
+
+b.[**].
+
+c.Buyer shall have the right during the term of this Agreement to conduct periodic audits no more frequently than [**] at a mutually agreed upon time and date during Manufacturer’s normal business hours to assess adherence to the Virus Seed Procedures and Controls, and security controls, including, if applicable, review of inventory logs, access lists and related documentation; notwithstanding the foregoing, there shall be no limit on the number of for cause audits that may be performed by Buyer in a calendar year.
+
+d.Manufacturer shall, [**], implement such additional procedures and controls with respect to the Virus Seed as may be reasonably requested by Buyer [**].
+
+8
+
+e.[**] shall be set forth [**].
+
+3.7 Business Continuity Plan. Manufacturer shall allow Buyer to inspect its Business Continuity Plan for the Facility at Manufacturer’s location. Such plan shall be considered Confidential Information of Manufacturer.
+
+3.8 Import and Export. Buyer shall be responsible for performing all activities and procedures as may be necessary for the importation of the Buyer Supplied Items required to be provided by Buyer to Manufacturer hereunder, and for the exportation of Product. Buyer shall be solely responsible for, and shall pay, all associated duties, taxes, and costs and shall comply with all applicable import and export laws.
+
+3.9 Supply of Equipment.
+
+a.Except with respect to [**], Manufacturer will supply all Equipment necessary to perform the Services.
+
+b.The parties acknowledge and agree that [**]. The [**] Equipment and [**] Equipment are listed in Appendix 3 hereto. The Parties agree that Manufacturer shall [**] and Buyer shall [**], Manufacturer shall [**], Manufacturer shall [**], the Parties shall mutually determine, [**], whether Manufacturer [**]; provided, however, [**], the Parties agree that Manufacturer [**] of this Agreement [**].
+
+4.Manufacture of Product.
+
+4.1 Applicable Law. Manufacturer will comply with Applicable Law in performing Services.
+
+4.2 Facility.
+
+a.Performance of Services. Subject to Section 3.1, Manufacturer will perform all Services at the Facility, provide all staff necessary to perform the Services in accordance with the terms of this Agreement, hold at such Facility all Equipment and other items used in the Services, and will not change the location of the Facility or use any additional facility for the performance of Services under this Agreement without the prior written consent from Buyer. Manufacturer will maintain, at its own expense [**], the Facility and all Equipment required for the Manufacture of Product in a state of repair and operating efficiency consistent with the requirements of cGMP (if applicable) and Applicable Law.
+
+b.Validation. Manufacturer will be responsible for performing all validation of the Facility, Equipment and cleaning and maintenance processes employed in the Manufacturing Process in accordance with cGMP (if applicable), Manufacturer’s SOPs, the Quality Agreement, and Applicable Law. Manufacturer will also be responsible for ensuring that all such validated processes are carried out in accordance with their terms.
+
+c.Licenses and Permits. Manufacturer shall be responsible for obtaining and maintaining any and all licenses or permits required by Authorities for Manufacturer to perform the Services as set forth in this Agreement (including but not limited to the Quality Agreement).
+
+9
+
+At Buyer’s request, Manufacturer will provide Buyer with copies of all such licenses or permits, and Buyer will have the right to use any and all information contained in such licenses or permits in connection with regulatory approval of Product.
+
+d.Access to Facility. With reasonable advance notice to Manufacturer and on mutually agreed upon dates and during normal business hours, during the term of this Agreement, Buyer shall have the right to (a) observe and consult with Manufacturer during the performance of Services under this Agreement, including without limitation the Manufacturing of any Batch of Product, in accordance with the Quality Agreement, (b) perform, directly or, subject to a confidentiality agreement [**], through its representatives, one (1) general audit/inspection of the Facility per [**], and (c) perform “for cause” audit(s) of the Facility in accordance with the terms of the Quality Agreement. Such audits shall (i) be limited to a maximum of [**] Buyer personnel or representatives, (ii) not occur in areas of the Facility when Manufacturer is conducting activities for other customers, and (iii) [**]. All Product and/or Manufacturing Process specific audits or inspections by Authorities other than the FDA or [**] associated with the territories/countries in which Buyer has marketing/sales responsibility must be agreed upon in advance by Manufacturer and any such agreed upon audits will be invoiced to Buyer in the amounts set forth in a Change Order. [**]. Manufacturer may require all Buyer personnel or representatives visiting or having access to the Facility to agree in writing to abide by all relevant Manufacturer standard policies, operating procedures, and security procedures as established by Manufacturer and communicated to Buyer. Buyer will also have the right, [**], to conduct “mock” pre-approval audits at mutually convenient times as documented in a Change Order, and Manufacturer agrees to cooperate with Buyer in such “mock audits” prior to approval of the Drug Product by FDA or [**] in connection with such mock audits.
+
+e.Manufacturing Suite(s). [**], Manufacturer agrees that suites [**] in the Facility used to Manufacture the Product [**].
+
+4.3 Quality.
+
+a.Quality Agreement. Manufacturer and Buyer shall, within [**] following the Effective Date or a later date mutually agreed to by the Parties, enter into a global Quality Agreement regarding the quality assurance and control responsibilities of each Party with respect to the Product (“Quality Agreement”).
+
+b.Process/Specifications and Change Control. Any change or modification to the Manufacturing Process or Equipment or Specifications will be made only in accordance with the change control provisions of the Quality Agreement and pursuant to a Change Order. A Change Order shall detail the agreed upon changes and the cost or price associated therewith and shall only become effective when executed by both Parties. Both Parties agree to act in good faith and promptly when considering a Change Order request proposed by the other Party. Unless otherwise agreed to by the Parties, Manufacturer will continue performing the Services as set forth in this Agreement to the extent reasonably practicable and will not implement the Services as outlined in a Change Order request unless and until such Change Order is signed by both Parties. All mutually executed Change Orders will be implemented as soon as commercially practicable to do so. [**].
+
+10
+
+c.Improvements. Subject to subsections (a) and (b) above, throughout the term of this Agreement, either Party may submit to the other written proposals for the adoption, implementation, or development of any change, improvement or modification to the Manufacturing Process, Equipment or Specifications that would reduce costs or otherwise constitute an improvement in the Manufacture of Product. Any such written proposal shall be provided to all members of the Supply Committee of the other Party. If the parties mutually agree in writing to undertake to test or implement such improvement, the Parties shall enter into a Change Order with respect to such improvement which addresses issues, including but not limited to, regulatory matters, allocation of cost and expenses to test or implement, and any adjustment in price for Product that would result. If any such improvement, [**] of the Agreement [**] such improvement.
+
+4.4 Records, Sample Retention and Stability Testing.
+
+a.Records. Manufacturer shall keep complete and accurate records (including without limitation reports, Batch Documentation, data, and records of all information and results obtained from performance of Services) of the Services performed by it under this Agreement and the Quality Agreement (collectively, the “Records”). For the sake of clarity, Buyer shall own all information contained in the Master Batch Record and the information contained in the documents described in Section 1.7(a), (b) and (c), and all Product-specific information contained in the Records. Manufacturer will not transfer, deliver or otherwise provide any such Records to any Third Party, without the prior written approval of Buyer, unless otherwise required by Applicable Law. Records will be available at reasonable times for inspection, examination and copying by or on behalf of Buyer. Manufacturer shall retain and archive all of its respective original Records of the Manufacture of Product under this Agreement in accordance with cGMP (if applicable), the Quality Agreement, and Applicable Law, but in no case for less than a period of [**] following creation thereof. Upon Buyer’s request [**], Manufacturer will promptly provide Buyer with copies of such Records.
+
+b.Sample Retention. Manufacturer shall take and retain, for such period and in such quantities as may be required by cGMP (if applicable) and the Quality Agreement, samples of Product from the Manufacturing Process produced under this Agreement. Further, Manufacturer will submit such samples to Buyer, upon Buyer’s written request and at Buyer’s expense. Manufacturer shall label and store such samples in accordance with the Storage Guidelines, the Specifications, the Quality Agreement, cGMP and all Applicable Laws.
+
+c.Stability Testing. Unless otherwise agreed to in a Change Order, Buyer will be solely responsible for any stability testing of the Product.
+
+4.5 Regulatory Matters.
+
+a.Regulatory Approvals. Buyer will be responsible for preparing, submitting, and obtaining, at its expense, all regulatory and governmental approvals and permits necessary for Buyer or its Affiliates to market, use or sell any Product Manufactured under this Agreement, including, without limitation, IND submissions, new drug applications, and any analogous submissions filed with the appropriate Authority of a country. Manufacturer will be
+
+11
+
+responsible for providing Buyer with all supporting data and information relating to the Manufacture of Product at the Facility in Manufacturer’s possession, custody or control (including in the possession, custody or control of Manufacturer’s Affiliates or Third Parties (including subcontractors) which is necessary for obtaining such approvals, including, without limitation, all Records, raw data, reports, authorizations, certificates, methodologies, Batch Documentation, Raw Material specifications, SOPs, standard test methods, Certificates of Analysis, and other documentation in its possession or under its control relating to the Manufacture of Product (or any component thereof). For clarity, under no circumstance shall Manufacturer be required to sign, as an applicant or in any other capacity, any filing with any Authority in any country relating to the approval, sale, use, or distribution of Product.
+
+b.Drug Master Files. The parties agree that Buyer or its Affiliates shall, in Buyer’s sole discretion, file any Drug Master Files (“DMFs”) as necessary to support Buyer’s or its Affiliate’s or licensee’s applications for marketing authorizations of Product. Manufacturer shall provide Buyer with all supporting data and information in Manufacturer’s possession relating to the Manufacture of Product necessary for any DMF.
+
+c.Regulatory Inspections. Manufacturer will permit Buyer or its agents to be present at any visit or inspection by any Authority of a Facility to the extent it relates solely to the Product or the Manufacturing Process in accordance with the Quality Agreement. Manufacturer will give as much advance notice as possible to Buyer of any such visit or inspection.
+
+d.If Buyer requests documents or other work product that do not exist as of the date of such request, or makes other substantive requests for assistance in compiling any filing for an Authority, then the creation of such documents or work product shall be subject to a mutually acceptable Change Order setting forth such additional Services and the amounts payable by Buyer therefore.
+
+4.6 Waste Disposal. The generation, collection, storage, handling, transportation, movement and release of hazardous materials and waste generated in connection with the Services will be the responsibility of Manufacturer at Manufacturer’s sole cost and expense. Without limiting other applicable requirements, Manufacturer will prepare, execute and maintain, as the generator of waste, all licenses, registrations, approvals, authorizations, notices, shipping documents and waste manifests required under Applicable Law.
+
+4.7 Safety Procedures. Manufacturer will be solely responsible for implementing and maintaining health and safety procedures for the performance of Services and for the handling of any materials or hazardous waste used in or generated by the Services. Manufacturer, in consultation with Buyer, will develop safety and handling procedures for Product; provided, however, that Buyer will have no responsibility for Manufacturer’s health and safety program.
+
+4.8 Technology Transfer. The Parties agree that Buyer may, during the term of this Agreement or upon termination or expiration of this Agreement, designate and qualify a Third Party or its Affiliates to manufacture bulk drug substance Product. In connection therewith, Manufacturer shall provide the assistance and support described in this Section for a period not to exceed [**] from the
+
+12
+
+written request for assistance by Buyer. If Buyer, using commercially reasonable efforts, is unable to qualify a Third Party or its Affiliate without participation by Manufacturer, Manufacturer shall provide Buyer reasonable assistance and support (including providing Manufacturing information in Manufacturer’s possession and technical assistance and cooperation by the appropriate employees of Manufacturer) as necessary to assist in qualifying such Third Party or Affiliate. The Parties shall set forth in a Change Order or separate mutually acceptable written agreement executed by both Parties details with respect to the specific services to be provided by Manufacturer as well as the fees and expenses (if any) to be paid to Manufacturer by Buyer in connection therewith. [**].
+
+4.9 Duty to Notify. If Manufacturer, at any time during the term of this Agreement, determines that it will be unable or unwilling to perform or complete the Services, it will promptly notify Buyer thereof. Compliance by Manufacturer with this Section 4.9 will not relieve Manufacturer of any other obligation or liability it otherwise has under this Agreement.
+
+4.10 Failure to Supply. In the event that Manufacturer shall, or anticipates that it shall, fail to deliver [**] Product to be delivered [**], under one or more Firm Orders, [**] and Buyer elects to [**] Manufacturer shall promptly [**] of a Failure to Supply. For clarity, the Parties agree that [**] a Failure to Supply. [**] set forth in this Section 4.10 for a Failure to Supply [**].
+
+4.11 Storage. Manufacturer shall label and store all Product, Raw Materials, Buyer Supplied Items and work-in-progress in its possession from the time of receipt at the Facility until delivery of the Product in accordance with the Storage Guidelines, the Specifications, the Quality Agreement, cGMP and all Applicable Laws. Manufacturer shall use the first-in first-out (FIFO) method of material usage, subject to the prudent and appropriate usage of the first expiring, first-out (FEFO) method, or unless otherwise directed in writing by Buyer. Manufacturer will implement and enforce reasonable security precautions to prevent any loss or theft of, or damage or unauthorized access to, the Products, Buyer Supplied Items, work-in-progress and Raw Materials while in the control of Manufacturer and shall ensure that stocks of Product are kept separate from and clearly distinguished from other stocks and supplies held by Manufacturer. Manufacturer shall store at the Facility a maximum of [**] of Product in final containers (combination of finished Product, work-in-progress and rejected Batches) at one time. Manufacturer shall request an emergency meeting of the Supply Committee if it believes it may exceed any capacity constraints with respect to storing Batches. The Parties agree to meet and discuss in good faith ways to increase storage capacity at the Facility. [**].
+
+4.12 Substitution. In the event that the Parties mutually agree to substitute [**], the Parties shall enter into a written amendment to this Agreement to reflect such substitution, including but not limited to [**]. In such case, Manufacturer shall manufacture such [**] under this Agreement pursuant to any modified and/or additional terms that may be mutually agreed to by the parties in such written amendment.
+
+5.Testing and Latent Defects.
+
+5.1 Testing by Manufacturer. Manufacturer shall comply with cGMP, the Manufacturing Process, and the Quality Agreement in the Manufacture of the Product. Each Batch of Product will be sampled and tested by Manufacturer as set forth in the Master Batch Record using the Test Methods.
+
+13
+
+For the avoidance of doubt, the final decision and responsibility for use of Product in Drug Product shall remain with Buyer.
+
+5.2 Provision of Records. If, based upon the Test Methods, a Batch of Product is found to have conformed to the Specifications, then a Certificate of Analysis will be completed and issued by the quality assurance department of Manufacturer to Buyer in accordance with the Quality Agreement. The Batch Documentation for each Batch of Product will be made available to Buyer upon request. Upon request, Manufacturer will also make available to Buyer all raw data, reports, authorizations, certificates, methodologies, Raw Material specifications, SOPs, standard Test Methods, and other documentation in the possession or under the control of Manufacturer relating to the Manufacture of each Batch of Product. If Buyer has not received all such Batch Documentation at the time of receipt of the Batch, Buyer will notify Manufacturer in writing. If Buyer requires additional copies of such Batch Documentation, Manufacturer shall provide them to Buyer promptly.
+
+5.3 Latent Defects. Buyer shall notify Manufacturer in writing of any Product that fails to meet Specifications (a “Defect”) within [**] of discovery of such Defect by Buyer, but no later than [**] after delivery of such Product to Buyer. In such case, Buyer shall also provide Manufacturer with a reasonable opportunity to inspect and/or test such Product.
+
+5.4 Disputes Regarding Conformity. In case of any disagreement between Buyer and Manufacturer as to whether Product conforms to the applicable Specifications, the quality assurance representatives of Buyer and Manufacturer will attempt in good faith to resolve any such disagreement and Buyer and Manufacturer will follow their respective SOPs to determine the conformity of the Product to the Specifications. If the foregoing discussions do not resolve the disagreement in a reasonable time (which will not exceed [**]), a representative sample of such Product will be submitted to an independent testing laboratory mutually agreed upon by Buyer and Manufacturer for tests and final determination of whether such Product conforms with such Specifications. The laboratory must be of recognized standing in the industry, and consent to the appointment of such laboratory will not be unreasonably withheld or delayed by either Manufacturer or Buyer. Such laboratory will use the applicable Test Methods contained in the Master Batch Record. The determination of conformance by such laboratory with respect to all or part of such Product will be final and binding on all parties absent manifest error. The fees and expenses of the laboratory incurred in making such determination will be paid by Manufacturer, if the determination is made against Manufacturer, or by Buyer, if the determination is made against Buyer. The Parties agree that any dispute with respect to whether Product has been Manufactured in accordance with cGMP shall be subject to Section 14.12 (Governing Law and Dispute Resolution).
+
+5.5 Product Defects and Remedies. If it is determined that Product does not meet the Specifications [**], then Manufacturer shall, [**], and as soon as it is commercially practical to do so following receipt of any required Raw Materials and, [**] Buyer Supplied Items, at Manufacturer’s cost and expense, either (a) re-perform the Manufacturing Services for such Product at Manufacturer’s sole cost and expense other than the original price for such Services; or (b) provide Buyer a credit for the amounts paid by Buyer to Manufacturer for such Product. [**]. The Parties acknowledge that obtaining a specific quantity of Product with respect to any Batches is not guaranteed by Manufacturer. [**].
+
+14
+
+5.6 Product Recalls. In the event (a) any Authority issues a request, directive or order that Drug Product be recalled, (b) a court of competent jurisdiction orders such a recall, or (c) Buyer or an Affiliate [**] determines that Drug Product should be recalled (in each case, a “Recall”), then Buyer shall promptly inform Manufacturer of such Recall and shall be responsible for conducting or responding to all Recalls. [**]that is subject to a Recall [**]related to the Recall, [**]any Recalls [**]. The Parties shall, [**], take all appropriate corrective actions, and shall cooperate in any governmental investigations surrounding the Recall. Manufacturer’s obligation, if any, to provide replacement Product for recalled Batches is as set forth in Section 5.5.
+
+6.Product Release and Delivery.
+
+6.1 Release Documents. Manufacturer shall prepare the Batch Documentation specific to each Batch of Product, and shall submit them at Manufacturer’s cost to Buyer within a reasonable time following completion of Manufacturing. Batch Documentation and applicable test results and results of environmental monitoring shall not be considered final until completion of Quality Review.
+
+6.2 Delivery. Manufacturer shall deliver each shipment of Product hereunder Ex Works the Facility within [**] following the Release Date. Title to, and risk of loss of, the Product shall transfer to Buyer when Manufacturer makes the Batch available for pickup by Buyer’s designated carrier. Each shipment shall be packed, marked, sealed, and delivered in accordance with the Shipping Guidelines. The shipment shall be labeled with a traceable batch number. The bill of lading shall list the gross weight and net weight of the shipment. Concurrent with each delivery of Product, Manufacturer shall provide Buyer with an electronic copy of the Certificate of Analysis and notice that the Product has been made available for pick up by Buyer’s designated carrier, including the quantity of Product made available for shipment. For clarity, Batches delivered hereunder will be [**] the delivered Product.
+
+6.3 Wood Pallets. This clause applies to all Product and/or materials shipped or delivered to Buyer, its Affiliates or authorized locations on wood pallets. Wood pallets must be constructed from lumber sourced from countries that prohibit the treatment of wood with any form of halophenol based chemicals (including but not limited to [**]). Wood pallets used must have been heat treated only in accordance with the Heat Treatment standards set forth in International Standards for Phytosanitary Measures Publication No. 15, 2009 Revision (ISPM 15). Additionally, the sourced lumber or finished pallets shall not be shipped or stored with pallets or materials that may contain the chemicals mentioned above. While ISPM 15 currently provides for the use of Methyl Bromide (MB), the use of pallets fumigated with Methyl Bromide is also prohibited. All wood pallets must be labeled with the HT stamp in accordance with ISPM 15 Annex II. Failure to meet the above requirements of this paragraph may lead to rejection of shipments at Manufacturer’s expense.
+
+7.Price and Payments.
+
+7.1 Price. The prices to be paid by Buyer to Manufacturer during the term of this Agreement for Manufacturing each Batch of Product hereunder, and the fees and costs for any additional specified activities, shall be as set forth in Appendix 2 attached hereto, subject to adjustment only as expressly provided therein and in Section 7.7 below.
+
+15
+
+7.2 Invoice. All invoices must be submitted electronically by Manufacturer to Buyer or its designated Affiliate. Manufacturer shall invoice Buyer for each Batch as follows: [**]. If the Release Date is delayed solely due to the action(s) or inaction by Buyer, Buyer will be invoiced the any portion of the Batch price due to be invoiced on the Release Date when all requirements for release of such Batch which are within Manufacturer’s control are complete. [**], Manufacturer shall invoice Buyer [**]. All invoices shall include (i) a reference to this Agreement, (ii) a description of the services or Products to which the invoice relates, (iii) the price, (iv) the relevant purchase order number (v) expenses and pass-through costs and (vi) sales or use taxes, if applicable. Buyer shall pay all undisputed, invoiced amounts by wire transfer to the account designated by Manufacturer within [**] of Buyer’s receipt of the invoice.
+
+7.3 Payments. All payments under this Agreement will be made in United States Dollars.
+
+7.4 Invoice Records. Manufacturer will each keep accurate records of the invoice calculations for amounts invoiced by Manufacturer to Buyer for the Services, and, upon the request of Buyer, during the term of this Agreement will permit Buyer or, subject to execution of a confidentiality agreement acceptable to Manufacturer, its duly authorized agents to examine such records during normal business hours on a mutually agreed upon date for the purpose of verifying the correctness of all such invoiced amounts and related calculations.
+
+7.5 Taxes. Duty, sales, use or excise taxes imposed by any governmental entity that apply to the provision of Services will be borne by Buyer (other than taxes based upon the income of Manufacturer).
+
+7.6 Shipping. All prices are EXW the Facility. Buyer shall be solely responsible for all shipping costs and charges.
+
+7.7 Pricing Adjustments. Commencing the calendar year after Contract Year [**], the Batch price for the Product and the price for any additional specified activities may be increased upon mutual agreement of the Parties [**] Appendix 2.
+
+8.Intellectual Property Rights.
+
+8.1 Nothing in this Agreement shall affect a Party’s rights to its Intellectual Property nor imply grant of any license to a Party’s Intellectual Property unless expressly set forth herein. Each Party agrees not to decompile, disassemble or otherwise reverse engineer any or all of the other Party’s Background IP.
+
+8.2 Manufacturer acknowledges and agrees that all Foreground IP shall be and shall at all times remain the sole and exclusive property of Buyer. Manufacturer and/or its agents, consultants, subcontractors and employees shall, without delay, inform Buyer of any Foreground IP and hereby assign or shall cause to be assigned free of any restrictions and/or additional remuneration and charges, to Buyer or its designee all rights to the Foreground IP. In the event that such assignment is not possible, for whatever reason, Manufacturer hereby grants, or shall grant, or cause to be granted, as the case may be, to Buyer an exclusive, worldwide, perpetual, irrevocable, unlimited, royalty-free and transferable license, with a right to sublicense, to Foreground IP. [**].
+
+16
+
+8.3 Buyer hereby grants to Manufacturer the royalty-free right to use its Background IP and any Foreground IP to the extent such is reasonably required for performing Services under this Agreement.
+
+8.4 Manufacture shall not incorporate any Manufacturer Background IP into the Product or the Manufacturing Process. If, after the Effective Date, Manufacturer determines that it must incorporate any Manufacturer Background IP into the Product or the Manufacturing Process, it shall first notify Buyer in writing and obtain Buyer’s written consent. If Buyer provides its written consent, and Manufacturer incorporates Manufacturer Background IP into the Product or the Manufacturing Process, Manufacturer grants to Buyer a non-exclusive, perpetual, irrevocable, fully paid-up, worldwide license, with the right to sub-license, to use Manufacturer’s Background IP only to the extent necessary for Buyer to Manufacture Product or to have Product manufactured by a Third Party (including an Affiliate of Buyer) on Buyer’s behalf. Manufacturer acknowledges and agrees that any license granted to Buyer pursuant to this Section 8.4 shall survive the expiration or termination of this Agreement.
+
+8.5 Buyer will have the exclusive right and option, but not the obligation, to prepare, file, prosecute, maintain and defend at its sole expense, any patents that claim and/or cover the Foreground IP.
+
+8.6 Each Party shall promptly inform the other Party if it receives written notice of any claim or potential claim or allegation relating to infringement or alleged infringement of any Third Party Intellectual Property Right by virtue of Buyer’s or Manufacturer’s use of the Buyer Supplied Items or the Manufacture of Product.
+
+9.Confidentiality.
+
+9.1 Definition of Confidential Information. As used herein, “Confidential Information” includes all information given to one party (the “Receiving Party”) or its Affiliates by the other party or its Affiliates (the “Disclosing Party”) or otherwise acquired, whether orally, visually, electronically, in writing or otherwise, by the Receiving Party or its Affiliates, in connection with this Agreement, and all information derived or generated therefrom, including (a) information regarding any of the products of the Disclosing Party or any of its Affiliates, (b) information regarding costs, productivity or technological advances and (c) this Agreement, any services and any other information in connection therewith. Confidential Information also includes any information given to Manufacturer or its Affiliates by Buyer or its Affiliates with respect to any potential manufacturing or other services Manufacturer or its Affiliates may provide, regardless of whether Manufacturer or its Affiliates actually provides any such manufacturing or services, including any discussions between such entities with respect thereto and all information derived or generated therefrom.
+
+9.2 Exceptions. The Receiving Party has no obligation to protect the following categories of Disclosing Party information: (a) information that is or was independently developed by the Receiving Party without use of or reference to any of the Disclosing Party’s Confidential Information, (b) information that is or was lawfully received from a third party without any restriction on use; or (c) information that becomes or was a part of the public domain through no breach of this Section 9 (Confidentiality) by the Receiving Party.
+
+17
+
+9.3 Restrictions on Use and Disclosure. The Receiving Party shall not, except as otherwise provided below (a) use or reproduce the Disclosing Party’s Confidential Information for any purpose other than as required to perform the obligations or exercise the rights granted in connection with this Agreement or (b) disclose the Disclosing Party’s Confidential Information to any third party, without the prior written approval of the Disclosing Party, except to personnel, consultants, agents and representatives of the Receiving Party or its Affiliates who have a need to know such information in connection with the performance of this Agreement; provided the Receiving Party shall be responsible for any actions of such parties that would be in breach of this Agreement if done by the Receiving Party. Notwithstanding the foregoing, the Receiving Party may disclose the Disclosing Party’s Confidential Information to the extent such information is required to be disclosed by law, including a subpoena, or to respond to a regulatory request; provided that the Receiving Party promptly notifies the Disclosing Party in writing prior to any disclosure to allow the Disclosing Party to seek a protective order or similar relief in the Disclosing Party’s sole discretion.
+
+9.4 Protection of Confidential Information. The Receiving Party shall (a) use at least the same degree of care that the Receiving Party uses to protect its own proprietary information of a similar nature and value, but no less than reasonable care to protect and maintain the Disclosing Party’s Confidential Information and (b) as requested by the Disclosing Party, return or destroy all of the Disclosing Party’s Confidential Information in the Receiving Party’s possession or control. Nothing in this Section 9.4 shall require the destruction or alteration of computer back-up tapes or similar storage made in the ordinary course of the Receiving Party’s business that contain the Disclosing Party’s Confidential Information, provided that Receiving Party shall continue to comply with its obligations herein with respect to such Confidential Information. The obligations set forth in Sections 9.3, 9.4 and 9.6 shall survive for a period of [**] from the expiration or termination of this Agreement; provided however, that the obligations shall continue indefinitely for any Confidential Information that qualifies as a trade secret for so long as such information qualifies as a trade secret.
+
+9.5 Ownership of Confidential Information. The Receiving Party acknowledges that, except as otherwise provided below, and as between the Parties (a) the Disclosing Party is the exclusive owner of and has all rights to its Confidential Information, including all intellectual property rights therein, such as patents, copyrights, trade secrets, trademarks, moral rights and similar rights of any type under the laws of any governmental authority, and (b) no right, title, interest or license to the Receiving Party is either granted or implied under any rights outlined in subsection (a) of this Section 9.5 or any other intellectual property rights or other technical and proprietary materials, information and techniques by the disclosure of Confidential Information hereunder.
+
+9.6 Other Customers. Notwithstanding any provision to the contrary in this Agreement, Manufacturer shall not use Buyer’s or its Affiliates’ Confidential Information to produce (including, without limitation, manufacture, process, package, label, quality control test, stability test, release, store and/or supply) any product for any other customer of Manufacturer.
+
+9.7 No Publicity. Except where required by law, neither Party may originate any publicity, news release, technical article, advertising or other announcement, written or oral, whether made to the public press or others (each, an “Announcement”), relating to performance under this Agreement or the existence of this Agreement between the Parties without the prior written consent of the other Party,
+
+18
+
+such consent not to be unreasonably withheld or delayed. If required by law to make any Announcement, the Party required to do so shall, to the extent permitted by law (a) consult with the other Party in connection with said Announcement a reasonable time prior to its release to allow the other Party to comment thereon and to prevent its release if so permitted by law; and (b) promptly provide the other Party with a copy of the released Announcement and all materials relating thereto. Without limiting the foregoing, neither Party may use the names, logos or trademarks of the other Party or its affiliates for any advertising or promotional purposes.
+
+9.8 Publications. Notwithstanding any provision to the contrary in this Agreement (including Section 9.7 (No Publicity), Buyer shall have the right to publish or present the results of activities performed under this Agreement and the Technology Transfer Agreement; provided that any such publication or presentation shall not include any Manufacturer Confidential Information.
+
+10.Representations and Warranties.
+
+10.1 Manufacturer’s Representations and Warranties. Manufacturer represents and warrants to Buyer that:
+
+a.it has the full power and right to enter into this Agreement and that there are no outstanding agreements, assignments, licenses, encumbrances or rights of any kind held by other parties, private or public, inconsistent with the provisions of this Agreement;
+
+b.the Services will be performed using a customary professional standard of requisite care, skill and diligence, in accordance with Applicable Law, and by individuals who are appropriately trained and qualified;
+
+c.it will perform the Services in accordance with cGMP and the Quality Agreement;
+
+d.solely to the extent Manufacturer incorporates its Background IP into the Product or Manufacturing Process as contemplated in Section 8.4, to Manufacturer’s knowledge the Manufacturer Background IP does not infringe any Third Party Intellectual Property Right;
+
+e.at the time of delivery to Buyer, the Product Manufactured under this Agreement will not, due to the fault of Manufacturer, be adulterated or misbranded under the FDCA or other Applicable Law. Notwithstanding, Manufacturer disclaims any representation or warranty with respect to the Buyer Supplied Items and any components, materials, specifications and instructions provided by Buyer;
+
+f.neither Manufacturer, its Affiliates or approved subcontractors, nor any of their respective officers or any person used by Manufacturer, its Affiliates or approved subcontractors to perform Services under this Agreement, (i) has been debarred, or is subject to a pending debarment, or will use in any capacity in connection with the Services any person who has been debarred pursuant to section 306 of the FDCA, 21 U.S.C. § 335a, (ii) has been listed by any federal and/or state agencies, excluded, debarred, suspended or otherwise been made ineligible to participate in federal or state healthcare programs or federal procurement or non-
+
+19
+
+procurement programs (as that term is defined in 42 U.S.C. 1320a-7b(f)), (iii) has been convicted of a criminal offense related to the provision of healthcare items or services or (iv) is subject to any such pending action, or is the subject of a conviction or pending action described in such sections. Manufacturer agrees to notify Buyer in writing immediately if Manufacturer, its Affiliates or approved subcontractors, or any of their respective officers or any person used by Manufacturer, its Affiliates or approved subcontractors to perform Services under this Agreement is subject to any of the foregoing, or if any action, suit, claim, investigation, or proceeding relating to the foregoing is pending, or to the best of Manufacturer’s, its Affiliates’, or approved subcontractor’s knowledge, is threatened;
+
+g. it has, or shall obtain, and shall maintain all Facility licenses and permits (and Manufacturer shall provide Buyer with a copy of all such licenses, and permits upon request) with respect to its manufacturing, packaging and storing processes, facilities or otherwise, to permit the performance of its obligations hereunder in accordance with all Applicable Law;
+
+h. it shall comply with the obligations and requirements set forth in Appendix 5 (Data Safeguards); and
+
+i. in performing under this Agreement, Manufacturer agrees to adhere to the Johnson & Johnson Responsibility Standards for Suppliers which is in effect on the date of this Agreement (posted on JNJ.com: https://www.jnj.com/partners/responsibility-standards-for-suppliers).
+
+10.2 Buyer Representations and Warranties. Buyer represents and warrants to Manufacturer that:
+
+a.it has the full power and right to enter into this Agreement and that there are no outstanding agreements, assignments, licenses, encumbrances or rights held by other parties, private or public, inconsistent with the provisions of this Agreement;
+
+b.to the best of Buyer’s knowledge at the time of signature of this Agreement, the Buyer Background IP does not infringe any Third Party Intellectual Property Right; and
+
+(c)(i) no Third Party has filed, pursued, maintained, or threatened in writing to file, pursue, or maintain any claim, lawsuit, charge, complaint, or other action alleging infringement of any Third Party Intellectual Property Rights based on the Product or the Manufacture, use, import, export, offer for sale, sale, or distribution of the Product; (ii) its supply to Manufacturer of the Buyer Supplied Items, Buyer Confidential Information and Manufacturing Process, and Manufacturer’s use thereof in accordance with the terms of and in performance of its obligations under this Agreement, does not infringe any Third Party Intellectual Property Rights; and (iii) the Product, or the Manufacture, use, import, export, offer for sale, sale, or distribution thereof, does not and will not violate any Third Party Intellectual Property Rights, and Buyer is not engaged in the theft or misuse of any Third Party’s trade secret information regarding the Manufacture, use, import, export, offer for sale, sale, or distribution of Product. Subject to Buyer’s indemnification obligations hereunder, the Parties agree that
+
+20
+
+Manufacturer’s remedy for a breach of this representation by Buyer shall be limited to termination of this Agreement in accordance with Section 13.2(b)(ii); and
+
+d. as of the Effective Date, there is no action or proceeding by the FDA or any other Authority pending or threatened against Buyer relating to safety or efficacy of the Product.
+
+10.3 Disclaimer of Other Representations and Warranties. EXCEPT AS EXPRESSLY SET FORTH IN THIS SECTION 10, NEITHER PARTY MAKES ANY REPRESENTATIONS OR EXTENDS ANY WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT, WHETHER ARISING FROM A COURSE OF DEALING OR FROM CUSTOM IN THE TRADE. MANUFACTURER HAS NOT PARTICIPATED IN THE RESEARCH OR DEVELOPMENT OF THE PRODUCT AND HAS NOT, IN ANY WAY, EVALUATED THE PRODUCT’S SAFETY OR EFFICACY IN HUMANS OR ANIMALS.
+
+11.Indemnification/ Limitation of Liability.
+
+11.1 Indemnification by Manufacturer. Subject to the limitations set forth in Section 11.5, Manufacturer will indemnify, defend and hold harmless Buyer, its Affiliates, and their respective officers, directors, employees, and agents (each a “Buyer Indemnitee”) from and against any and all losses, damages, liabilities or expenses (including reasonable attorneys’ fees and other costs of defense (collectively “Losses”) resulting from any and all actions, suits, claims or demands that may be brought or instituted against any Buyer Indemnitee by any Third Party to the extent based on, arising out of, or resulting from, any (a) breach by Manufacturer of its agreements, representations, warranties or covenants under this Agreement, or (b) negligence or the willful misconduct of any Manufacturer Indemnitees in performing its obligations under this Agreement. Notwithstanding the foregoing, Manufacturer shall not be liable for Losses to the extent such Losses are caused by the negligence or willful misconduct of any Buyer Indemnitee or breach of any of the terms of this Agreement by Buyer.
+
+11.2 Indemnification by Buyer. Buyer will indemnify, defend and hold harmless Manufacturer, its Affiliates and their respective officers, directors, employees and agents (each a “Manufacturer Indemnitee”) from and against any and all Losses resulting from any and all actions, suits, claims or demands that may be brought or instituted against any Manufacturer Indemnitee by any Third Party to the extent based on, or arising out of, or resulting from (a) the promotion, handling, distribution, import and export, marketing, sale, or use of Product by Buyer or any Third Party, including without limitation any product liability claim; (b) any breach by Buyer of its agreements, representations, warranties or covenants under this Agreement, (c) negligence or the willful misconduct of any Buyer Indemnitees in performing obligations under this Agreement; (d) any alleged or actual infringement or misappropriation of Third Party Intellectual Property Rights in the performance of the Services, in the Product or any portion thereof, in the Manufacture of the Product, or resulting from the use of any Buyer Supplied Items, in the performance of this Agreement; [**]. Notwithstanding the foregoing, Buyer shall not be liable for Losses to the extent such Losses are caused by the negligence or willful misconduct of any Manufacturer Indemnitee or breach of any of the terms of this Agreement by Manufacturer.
+
+21
+
+11.3 Procedures. Each indemnifying party agrees to promptly notify the indemnified party (within no more than [**]) of receipt of any claims made for which the indemnifying party might be liable under Section 11.1 or 11.2, as the case may be, provided that the failure of such timely notice shall not bar any claim pursuant to Section 11.1 or 11.2 unless the indemnifying party shall be materially prejudiced by failure to receive such timely notice. Subject to Section 11.4, the indemnifying party will have the right to defend, negotiate, and settle such claims. The party seeking indemnification will provide the indemnifying party with such information and assistance as the indemnifying party may reasonably request, at the expense of the indemnifying party. The indemnified party shall be entitled to participate in the defense of such matter and to employ counsel at its own expense to assist therein; provided, however, that the indemnifying party shall have final decision-making authority regarding all aspects of the defense of any claim. The parties understand that no insurance deductible will be credited against losses for which an indemnifying party is responsible under this Section 11.
+
+11.4 Settlement. An indemnified party will not be responsible or bound by any settlement of any claim or suit made without its prior written consent; provided, however, that the indemnified party will not unreasonably withhold or delay such consent. If a settlement contains an absolute waiver of liability for the indemnified party, and the indemnified party and indemnifying party have acted in compliance with the other requirements of this Section 11, then the indemnified party’s consent will be deemed given. Notwithstanding the foregoing, (a) Manufacturer will not agree to settle any claim on such terms or conditions as would impair Buyer’s ability or right (or the ability or right of a Buyer Affiliate or Third Party) to Manufacture, market, sell or otherwise use Product; and (b) Buyer will not agree to settle any claim on such terms or conditions as would impair Manufacturer’s ability or right to perform manufacturing services for any Third Party or itself or its Affiliates.
+
+11.5 Limitation of Liability. NOTWITHSTANDING ANYTHING TO THE CONTRARY IN THIS AGREEMENT, TO THE MAXIMUM EXTENT PERMITTED BY LAW:
+
+a.IN NO EVENT [**] HAVE ANY LIABILITY FOR [**] EXCEPT TO THE EXTENT [**], IN WHICH EVENT [**] LIABILITY FOR [**] HEREUNDER [**]. WITHOUT LIMITING THE GENERALITY OF THE FOREGOING, [**] LIABILITY FOR [**], EXCEPT TO THE EXTENT [**] IN WHICH EVENT [**] WILL BE SUBJECT TO [**] THIS SECTION 11.5(a).
+
+b.IN NO EVENT SHALL [**] BE LIABLE UNDER THIS AGREEMENT [**] FOR [**], INCLUDING ANY [**]. FOR AVOIDANCE OF DOUBT, THE PARTIES AGREE THAT [**]. THE LIMITATIONS OF THIS SECTION 11.5(b) [**].
+
+c.EXCEPT TO THE EXTENT [**] SHALL BE BORNE BY [**].
+
+d.IN ADDITION TO THE FOREGOING, [**] TO [**] FOR [**] IS [**] TO [**].
+
+e.[**] TO [**] FOR [**] IS [**] TO [**].
+
+12.Insurance.
+
+22
+
+12.1 Manufacturer Insurance. Manufacturer will secure and maintain in full force and effect throughout the term of this Agreement (and for at least [**] thereafter for claims made coverage), insurance with coverage and minimum policy limits set forth as follows:
+
+a.Worker’s Compensation, including coverage for occupational disease, with benefits determined by statute;
+
+b.Comprehensive General Liability, including coverage for contractual liability assumed by Manufacturer and coverage for Manufacturer’s independent contractor(s), with per occurrence limits of [**] each and a general aggregate limit of [**];
+
+c.Products Liability, exclusive of the coverage provided by the Comprehensive General Liability policy, with an aggregate limit of [**]; and
+
+d.Comprehensive Automobile Liability, Employer’s Liability, and Umbrella Liability, in such amounts and under such terms as are customary for similar companies providing like services.
+
+12.2 Buyer Insurance. JANSSEN will maintain, at its sole cost, reasonable insurance against liability and other risks associated with its activities contemplated by this Agreement, including but not limited to commercial general liability and product liability consistent with the normal and customary practices of companies of similar size, nature and scope.
+
+12.3 Evidence of Insurance. Each Party will, upon request, furnish to the other Party evidence of insurance in the form of a certificate of insurance upon written request therefor and will provide [**] advance written notice in the event of any insurance cancellation.
+
+13.Term and Termination.
+
+13.1 Term. This Agreement will take effect as of the Effective Date and, unless earlier terminated [**] Appendix 2 [**] this Section 13, will expire at the conclusion of Contract Year 5. Each “Contract Year” is a twelve (12) month period. Contract Year 1 shall begin on [**]. The term of this Agreement may be extended by for an additional two (2) year period upon mutual agreement of the Parties as set forth in an amendment to this Agreement.
+
+13.2 Termination by Either Party.
+
+a.By Buyer. Buyer will have the right to terminate this Agreement by written notice to Manufacturer, upon the occurrence of any of the following:
+
+i.Manufacturer files a petition in bankruptcy, or enters into an agreement with its creditors, or applies for or consents to the appointment of a receiver or trustee, or makes an assignment for the benefit of creditors, or becomes subject to involuntary proceedings under any bankruptcy or insolvency law (which proceedings remain undismissed for [**]);
+
+23
+
+ii.Manufacturer fails to start and diligently pursue the cure of a material breach by it of this Agreement within [**] after receiving written notice from Buyer of such breach;
+
+iii.a force majeure event that will, or continues to, prevent performance (in whole or substantial part) by Manufacturer of any obligation owed by it under this Agreement for a period of at least [**];
+
+iv.the Drug Product fails to meet the primary endpoints of the [**] trials prior to Product approval by an Authority; provided that Buyer shall provide at least [**] prior written notice of any termination under this item (iv); or
+
+v.Buyer decides to withdraw the Drug Product from sale, whether because of Buyer’s decision to (partially or completely) stop the sale of the Drug Product or to sell the rights to the Drug Product to a Third Party or for any other reason, provided that Buyer shall provide at least [**] advance written notice of any termination under this item (v).
+
+b. By Manufacturer. Manufacturer will have the right to terminate this Agreement, by written notice by to Buyer, upon the occurrence of any of the following:
+
+i.Buyer files a petition in bankruptcy, or enters into an agreement with its creditors, or applies for or consents to the appointment of a receiver or trustee, or makes an assignment for the benefit of creditors, or becomes subject to involuntary proceedings under any bankruptcy or insolvency law (which proceedings remain undismissed for [**]);
+
+ii.Buyer fails to cure a material breach by it of this Agreement within [**] after receiving written notice from Manufacturer of such breach; or (ii) a force majeure event that will, or continues to, prevent performance (in whole or substantial part) by Buyer of any obligation owed by it under this Agreement for a period of at least [**].
+
+13.3 Effect of Termination. Upon notification of termination, Manufacturer will promptly cease performance of the Services and will take all reasonable steps to mitigate the out-of-pocket expenses incurred in connection therewith. In particular, Manufacturer will [**] to:
+
+a.immediately cancel, to the extent possible, any Third Party obligations (unless agreed by Buyer in writing);
+
+b.promptly inform Buyer of any irrevocable commitments made in connection with any pending Firm Order(s) prior to termination;
+
+c.promptly return to the vendor for a refund, to the extent possible, all unused, unopened Raw Materials in Manufacturer’s possession that are related to any pending Firm Order for which Manufacturer will not complete Services as of the effective date of the termination;
+
+d.promptly inform Buyer of the cost of any remaining unused, unreturnable Raw Materials ordered pursuant to any pending Firm Order(s);
+
+24
+
+e.perform only those services and activities mutually agreed upon by Buyer and Manufacturer as being necessary or advisable in connection with the close-out of any pending Firm Order(s); and
+
+f.as mutually agreed by the Parties, place orders for Raw Materials solely as necessary to close out any pending Firm Order.
+
+13.4 Payment upon Termination.
+
+13.4.1 Termination of this Agreement, for whatever reason, shall not affect the obligation of either Party to make any payments for which it is liable prior to or upon such termination.
+
+13.4.2 Upon expiration or termination of this Agreement, Buyer shall be responsible for (a) all amounts due for any Services completed as of the date of termination, including but not limited to the [**] for any Raw Materials purchased by Manufacturer pursuant to Section 3.2 prior to the notice of termination or pursuant to Section 13.3(f) prior to the date of expiration or termination of this Agreement and/or all non-cancelable orders for Raw Materials placed by Manufacturer pursuant to Section 3.2 prior to the notice of termination or pursuant to Section 13.3(f) prior to the date of expiration or termination of this Agreement; and (b) all amounts payable for additional specified activities that have been performed prior to the termination date or are in progress as of the termination date; [**] the Agreement is terminated. Additionally, subject to [**] shall pay to [**] terminates this Agreement [**] shall pay to [**]. For example, [**] terminates this Agreement pursuant to [**] would pay [**]. Manufacturer shall issue an invoice for any payment due under this Section 13.4 within [**] of the termination date and Buyer shall pay [**] within [**].
+
+13.5 Batches in Process; Storage. Batches that are in process as of the effective date of any expiration or termination hereunder shall not be cancelled without the mutual agreement of the Parties and this Agreement shall continue to survive with respect to those in-process Batches. Batches that have been fully Manufactured as of the date of such expiration or termination, but for which Quality Review has not been completed, shall remain subject to the terms of this Agreement. If any such Batches remains at the Facility for a period longer than [**] after its applicable Release Date, Buyer shall pay storage fees for such Batch(es) as set forth in Section 4.11.
+
+13.6 Return of Materials/Confidential Information/Equipment. Upon the expiration or termination of this Agreement, (i) each party will promptly return all Confidential Information of the disclosing party that it has received pursuant to this Agreement except that Manufacturer may retain Batch Documentation as required to comply with cGMP or other Applicable Law; and (ii) Manufacturer shall promptly deliver to Buyer all Specifications (and copies thereof) provided by Buyer except as otherwise required by Applicable Law, all remaining unused Raw Materials paid for by Buyer and Buyer Supplied Items, [**].
+
+13.7 Payment Reconciliation. Within [**] after the close-out of activities mutually agreed upon by the parties upon termination of this Agreement, Manufacturer will
+
+25
+
+provide to Buyer a written itemized statement of all work performed by Manufacturer in connection with such close-out activities, an itemized breakdown of the fees and costs associated with that work, and a final invoice. [**].
+
+13.8 Licenses and Bankruptcy. If this Agreement is terminated by a Party (the “Non-Bankrupt Party”) pursuant to Section 13.2(a)(i) or Section 13.2(b)(i) due to the rejection of this Agreement by or on behalf of the other Party (the “Bankrupt Party”) under Section 365 of the United States Bankruptcy Code (the “Bankruptcy Code”), all licenses and rights to licenses granted pursuant to this Agreement by the Bankrupt Party to the Non-Bankrupt Party are, and shall otherwise be deemed to be, for purposes of Section 365(n) of the Bankruptcy Code, licenses of rights to “intellectual property” as defined under Section 101(35A) of the Bankruptcy Code. All parties agree that the Non-Bankrupt Party, as a licensee of such rights under this Agreement, shall retain and may fully exercise all of its rights and elections under the Bankruptcy Code and that the foregoing provisions are without prejudice to any rights the Non-Bankrupt Party may have arising under the Bankruptcy Code or other applicable law.
+
+13.9 Survival. Any expiration or termination of this Agreement shall not release any Party from any liability which at such time had already accrued or thereafter accrues from a breach or default prior to such expiration or termination nor affect the survival of any right, duty or obligation of any Party that is stated to survive termination or expiration or by its nature survives termination or expiration. The following Sections shall survive termination or expiration of this Agreement: Sections 3.9(b), 4.8, 5.6, 7.2, 8 through 11, 12 (for the periods specified therein), 13.3 through 13.9, 14.6, 14.12 through 14.13, and 14.17 through 14.19, including the appendices referenced and incorporated therein.
+
+14.Miscellaneous.
+
+14.1 Currency. Unless otherwise indicated, all monetary amounts are expressed in this Agreement in the lawful currency of the United States of America.
+
+14.2 Independent Contractor. All Services will be rendered by Manufacturer as an independent contractor and this Agreement does not create an employer-employee relationship between Buyer and Manufacturer. Neither Party shall in any way represent itself to be a partner or joint venturer of or with the other Party.
+
+14.3 Key Performance Indicators. During the term of this Agreement, the Parties may track and monitor each Party’s performance under this Agreement against the “Key Performance Indicators” specified in Appendix 4 and shall use such data for discussion purposes at meetings of the Supply Committee, provided that neither Party shall provide any such data to Third Parties without the other Party’s prior written consent.
+
+14.4 Anti-Corruption Compliance. Neither Party shall perform any actions that are prohibited by local and other anti-corruption laws (including the U.S. Foreign Corrupt Practices Act, collectively “Anti-Corruption Laws”) that may be applicable to one or both Parties to the Agreement. Without limiting the foregoing, neither Party shall make any payments, or offer or transfer anything of value, to any government official or government employee, to any political party official or candidate
+
+26
+
+for political office or to any other Third Party related to the transaction in a manner that would violate Anti-Corruption Laws.
+
+14.5 Force Majeure. Except as otherwise expressly set forth in this Agreement, a Party will not have breached this Agreement for failure or delay in fulfilling or performing any term of this Agreement (other than payment obligations) when such failure or delay is caused by or results from causes beyond the reasonable control of the affected Party, including, without limitation, fire, floods, embargoes, shortages, epidemics or pandemics, quarantines, war, acts of war (whether war be declared or not), insurrections, riots, civil commotion, strikes, acts of God or acts, omissions, or delays in acting, by any governmental authority (“force majeure”). The Party affected by any event of force majeure will promptly notify the other Party, explaining the nature, details and expected duration thereof. Such Party will also notify the other Party from time to time as to when the affected Party reasonably expects to resume performance in whole or in part of its obligations under this Agreement, and to notify the other Party of the cessation of any such event. A Party affected by an event of force majeure will use its commercially reasonable efforts to remedy, remove, or mitigate such event and the effects thereof with all reasonable dispatch. Upon termination of the event of force majeure, the performance of any suspended obligation or duty will promptly recommence.
+
+14.6 Notices. All notices must be written and sent to the addresses or facsimile numbers identified below or in a subsequent notice. All notices must be given (a) by personal delivery, with receipt acknowledged, (b) by facsimile followed by hard copy delivered by the methods under (c) or (d), (c) by prepaid certified or registered mail, return receipt requested, or (d) by prepaid internationally recognized courier air delivery service (e.g., Federal Express). Notices will be effective upon receipt or at a later date stated in the notice.
+
+If to Buyer to:
+
+Janssen Pharmaceuticals, Inc.
+
+Attn: President, Janssen Supply Chain
+
+1125 Trenton-Harbourton Road
+
+Titusville, NJ 08560
+
+With a copy to:
+
+With a copy to:
+
+Johnson & Johnson
+
+Office of General Counsel
+
+Attn: Counsel for Janssen Supply Chain
+
+One Johnson & Johnson Plaza
+
+New Brunswick, NJ 08933
+
+Janssen Supply Group, LLC
+
+Attn: VP Partnership & External Supply
+
+1125 Trenton-Harbourton Road
+
+Titusville, NJ 08560
+
+If to Manufacturer:
+
+27
+
+Emergent BioSolutions Inc.
+
+400 Professional Drive, Suite 400
+
+Gaithersburg, Maryland 20879
+
+Attention: SVP, BU Head CDMO
+
+Email: [**]
+
+With a copy to:
+
+Emergent BioSolutions Inc.
+
+400 Professional Drive, Suite 400
+
+Gaithersburg, MD 20879
+
+Attention: General Counsel
+
+14.7 Assignment. This Agreement may not be assigned or otherwise transferred by a Party without the prior written consent of the other Party; provided, however, that either Party may, without such consent, but with notice to the other Party, assign this Agreement, in whole or in part, (a) in connection with the transfer or sale of all or substantially all of its assets or the line of business or Product to which this Agreement relates, (b) to a successor entity or acquirer in the event of a merger, consolidation or change of control, or (c) to any Affiliate. Any purported assignment in violation of the preceding sentence will be void. Any permitted assignee will assume the rights and obligations of its assignor under this Agreement. This Agreement shall be binding upon the successors and permitted assigns of the Parties.
+
+14.8 Entire Agreement. This Agreement, including the attached Appendices, each of which are incorporated herein, constitute the entire agreement between the Parties with respect to the specific subject matter hereof and all prior agreements with respect thereto are superseded except for the Technology Transfer Agreement. Each Party hereto confirms that it is not relying on any representations or warranties of the other Party except as specifically set forth herein. As of the Effective Date, (a) the terms of Section 9 (Confidentiality) shall supersede the Mutual Non-Disclosure Agreement by and between Janssen Supply Group, LLC and Emergent BioSolutions Inc. dated as of [**] and the confidentiality terms of the Technology Transfer Agreement; thus, any information disclosed pursuant to either of such agreements by a Party or its Affiliates that was deemed “Confidential Information” under either of such agreements shall be deemed Confidential Information of such Party under this Agreement; and (b) the intellectual property terms of the Technology Transfer Agreement shall be supersede by the terms in Section 8 (Intellectual Property Rights) of this Agreement.
+
+14.9 Conflict Between Documents. If there is any conflict, discrepancy, or inconsistency between the terms of this Agreement and any purchase order, or other form used by the Parties, the terms of this Agreement will control. Pre-printed or additional or conflicting terms on any purchase order or similar document shall have no effect. If this Agreement conflicts with the Quality Agreement with respect to matters related to quality assurance or quality control activities, then the Quality Agreement shall control. In all other matters, this Agreement shall control over the Quality Agreement.
+
+14.10 No Modification. This Agreement and Quality Agreement may be changed only by a writing signed by authorized representatives of all of the Parties.
+
+28
+
+14.11 Severability; Reformation. Each provision in this Agreement is independent and severable from the others, and no restriction will be rendered unenforceable because any other provision may be invalid or unenforceable in whole or in part. If the scope of any restrictive provision in this Agreement is too broad to permit enforcement to its full extent, then such restriction will be reformed to the maximum extent permitted by law.
+
+14.12 Governing Law and Dispute Resolution.
+
+a.Other than disputes arising under Section 5.4 (which shall be addressed as set forth in Section 5.4), the Parties shall first attempt in good faith to settle any dispute arising hereunder promptly by negotiations between representatives of Buyer and Manufacturer who have authority to settle the controversy. If the Parties are unable to resolve such dispute within [**] following the referral of the dispute to such representatives, such dispute shall be submitted to mediation using a professional mediator selected by agreement from the American Arbitration Association, the CPR Institute for Dispute Resolution or like organization, or absent agreement, through selection procedures administered by the CPR. Within a period of [**] after the request for mediation, the Parties agree to convene with the mediator, with business representatives present, for at least one session to attempt to resolve the matter. In the event that the Parties are unable to resolve the dispute through mediation, the dispute will be solely and finally settled by arbitration, which shall be conducted in New York, New York, by a single arbitrator (the “Arbitrator”) designated by the American Arbitration Association. The Parties hereby renounce all recourse to litigation and agree that the award of the Arbitrator shall be final and subject to no judicial review. The Arbitrator shall conduct the proceedings pursuant to the Commercial Arbitration Rules of the American Arbitration Association, as now or hereafter amended. All substantive questions of law shall be determined under the laws of the State of New York, USA (without regard to the principles of conflict of laws of such state). Judgment on the award of the Arbitrator may be entered into any court having jurisdiction over the Party against which enforcement of the award is being sought, and the Parties hereby irrevocably consent to the jurisdiction of any such court for the purpose of enforcing any such award. The Arbitrator shall divide all costs (including, without limitation, fees of counsel) incurred in conducting the arbitration in his/her final award in accordance with what he/she deems just and equitable under the circumstances.
+
+b.Rule 14 of the CPR Rules does not apply to this Agreement. All aspects of the mediation and arbitration shall be treated as confidential.
+
+c.EACH PARTY HERETO [**].
+
+14.13 Waiver. No waiver of any term, provision or condition of this Agreement in any one or more instances will be deemed to be or construed as a further or continuing waiver of any other term, provision or condition of this Agreement. Any such waiver, extension or amendment will be evidenced by an instrument in writing executed by an officer authorized to execute waivers, extensions or amendments.
+
+14.14 Allocations of Risk. Each provision of this Agreement that provides for a limitation of liability, disclaimer of warranties, or exclusion of damages is to allocate the risks of this Agreement
+
+29
+
+between the Parties and each Party acknowledges that such allocation of risk is reflected in the pricing offered by Manufacturer to Buyer and is an essential element of the basis of the bargain between the Parties.
+
+14.15 Compliance with Applicable Laws. In all activities undertaken pursuant to this Agreement, both Manufacturer and Buyer covenant and agree that each will in all material respects comply with all Applicable Laws, as may be in effect at the time of performance.
+
+14.16 Government Contracting. While not known with any particularity at this time, it is understood by the parties that some aspects of this Agreement may be funded by U.S. Government funding in the future. In such event, the parties agree during the term of this Agreement to consider in good faith and not unreasonably refuse to enter into an amendment to this Agreement to include any mutually agreed upon flowdown provisions required by the Buyer’s prime contract with the U.S. Government to be included in this Agreement.
+
+14.17 Counterparts. This Agreement may be executed in any number of counterparts, each of which will be deemed an original and all of which together will constitute one and the same instrument.
+
+14.18 Headings. This Agreement contains headings only for convenience and the headings do not constitute or form a part of this Agreement, and should not be used in the construction of this Agreement.
+
+14.19 No Benefit to Third Parties. The representations, warranties, covenants and agreements set forth in this Agreement are for the sole benefit of the parties hereto and their successors and permitted assigns, and they will not be construed as conferring any rights on any other persons.
+
+[Signature page follows]
+
+30
+
+IN WITNESS WHEREOF, the parties hereto have caused this Agreement to be executed by their duly authorized representatives as of the Effective Date.
+
+JANSSEN PHARMACEUTICALS, INC.
+
+By: /s/ Remo J. Colarusso Jr.
+
+Print Name: Remo J. Colarusso Jr.
+
+Title: VP, Janssen Supply Chain
+
+Date: 2 Jul 2020
+
+EMERGENT MANUFACTURING OPERATIONS BALTIMORE, LLC
+
+By: /s/ Syed T. Husain
+
+Print Name: Syed T. Husain
+
+Title: SVP and CDMO BU Head
+
+Date: Jul 1, 2020
+
+31
+
+Appendix 2
+
+Price [**]
+
+The price of each Batch during the relevant Contract Year [**] is as set forth in the table(s) below.
+
+Price Per Batch for Contract Year [**]:
+
+[**]
+
+[**]
+
+Total Price Per Batch
+
+[**]
+
+[**]
+
+[**]
+
+[**].
+
+Price Per Batch for Contract Year [**]:
+
+Fees
+
+[**]
+
+Total Price Per Batch
+
+[**]
+
+[**]
+
+[**]
+
+Price Per Batch for Contract Year [**]**
+
+[**]
+
+[**]
+
+Total Price Per Batch
+
+[**]
+
+[**]
+
+[**]
+
+** [**]
+
+[**] Contract Year:
+
+Contract Year
+
+[**]
+
+Contract Year 1
+
+[**]
+
+Contract Year 2
+
+[**]
+
+Contract Year 3
+
+[**]
+
+Contract Year 4
+
+[**]
+
+Contract Year 5
+
+[**]
+
+***[**].
+
+32
