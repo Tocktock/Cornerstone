@@ -96,6 +96,8 @@ def _make_source(
             "char_end": len(normalized),
             "sha256": upload_sha256,
         },
+        "supersedes": [],
+        "incorporated_by_reference": [],
     }
     return source, normalized
 
@@ -142,6 +144,7 @@ def _build_fixture(root: Path) -> dict[str, Any]:
                 text=f"CommonPacketTerm. {current_claim}.",
             )
             sources.append(second_source)
+            second_source["supersedes"] = [first_source["name"]]
             normalized_by_source[second_source["source_id"]] = second_normalized
             proposition = f"Current clause supersedes prior case {case_index:02d}"
             contradiction_terms = [proposition]
@@ -400,6 +403,29 @@ class Vs5FormalCorpusTrustTest(unittest.TestCase):
             side["claim"] = str(side["claim"]).upper()
 
         self._assert_mutation_rejected(case_changed_claim, "does not exactly support")
+
+        def missing_supersession_metadata(
+            _root: Path, manifest: dict[str, Any]
+        ) -> None:
+            manifest["cases"][0]["sources"][1]["supersedes"] = []
+
+        self._assert_mutation_rejected(
+            missing_supersession_metadata,
+            "supersession annotation is not declared",
+        )
+
+    def test_rejects_invalid_document_relationship_metadata(self) -> None:
+        def unknown_relationship(_root: Path, manifest: dict[str, Any]) -> None:
+            manifest["cases"][3]["sources"][0]["supersedes"] = ["unknown-source"]
+
+        self._assert_mutation_rejected(unknown_relationship, "unknown source")
+
+        def forward_relationship(_root: Path, manifest: dict[str, Any]) -> None:
+            manifest["cases"][0]["sources"][0]["incorporated_by_reference"] = [
+                manifest["cases"][0]["sources"][1]["name"]
+            ]
+
+        self._assert_mutation_rejected(forward_relationship, "an earlier source")
 
     def test_rejects_extra_files_directories_and_symlinks(self) -> None:
         def extra_file(root: Path, _manifest: dict[str, Any]) -> None:

@@ -27,15 +27,19 @@ from cornerstone_cli.runtime import (
     _answer_chunk_scalar_relevance_bonus,
     _answer_scalar_values,
     _brief_output_echo_violations,
+    _brief_needs_concise_repair,
     _brief_key_fact_target,
     _comparison_version_ids,
+    _complete_extracted_statement_surface,
     _corpus_coverage_gaps,
     _chunk_requires_speaker_attribution,
     _chunk_grounding_text,
+    _citation_chunks_share_one_artifact,
     _statement_requires_speaker_attribution,
     _dedupe_missing_evidence,
     _decision_statement_relevant,
     _direct_allocation_citation_projection,
+    _direct_complete_wording_answer_projection,
     _direct_labeled_date_source_projection,
     _direct_scalar_answer_projection,
     _document_change_relevance_bonus,
@@ -119,6 +123,161 @@ SCOPE = {
 
 
 class Vs5DecisionBriefTest(unittest.TestCase):
+    def test_concise_repair_triggers_for_overlong_brief_statement(self) -> None:
+        model_output = {
+            "bottom_line": {
+                "statement": " ".join(["supported"] * 19),
+                "citation_refs": ["E1"],
+            },
+            "key_facts": [],
+            "conflicts_risks": [],
+            "recommended_next_steps": [],
+        }
+        self.assertTrue(_brief_needs_concise_repair(model_output, []))
+
+    def test_cross_chunk_fact_join_requires_one_artifact(self) -> None:
+        self.assertTrue(
+            _citation_chunks_share_one_artifact(
+                [
+                    {"artifact_id": "artifact-a"},
+                    {"artifact_id": "artifact-a"},
+                ]
+            )
+        )
+        self.assertFalse(
+            _citation_chunks_share_one_artifact(
+                [
+                    {"artifact_id": "artifact-a"},
+                    {"artifact_id": "artifact-b"},
+                ]
+            )
+        )
+        self.assertFalse(_citation_chunks_share_one_artifact([{"artifact_id": ""}]))
+
+    def test_incomplete_english_surfaces_are_rejected(self) -> None:
+        self.assertFalse(
+            _complete_extracted_statement_surface(
+                "Termination) (excluding Sections 12.1"
+            )
+        )
+        self.assertFalse(
+            _complete_extracted_statement_surface(
+                "The supplied record does not establish profitability/"
+            )
+        )
+        self.assertFalse(
+            _complete_extracted_statement_surface(
+                "The supplied record does not establish the event in this"
+            )
+        )
+        self.assertTrue(
+            _complete_extracted_statement_surface(
+                "The supplied record does not establish the renewal date."
+            )
+        )
+
+    def test_complete_wording_projection_preserves_cancellation_and_allocation_qualifiers(
+        self,
+    ) -> None:
+        cancellation = _direct_complete_wording_answer_projection(
+            "What prior amendment effect do the parties state they are cancelling in the Fifth Amendment?",
+            [
+                {
+                    "evidence_chunk_id": "cancel",
+                    "text": (
+                        "Whereas, the Parties desire to cancel the effect of the "
+                        "Fourth Amendment to the Development Agreement and enter "
+                        "into this Amendment."
+                    ),
+                    "safety": {},
+                }
+            ],
+        )
+        self.assertIsNotNone(cancellation)
+        self.assertIn(
+            "cancel the effect of the Fourth Amendment to the Development Agreement",
+            cancellation["answer"],
+        )
+
+        allocation = _direct_complete_wording_answer_projection(
+            "What development-cost split, activity scope, and stated exceptions govern the collaboration agreement?",
+            [
+                {
+                    "evidence_chunk_id": "allocation",
+                    "text": (
+                        "Except as set forth in Section 3.4 (Additional Development), "
+                        "and further subject to Section 6.7 (ITEOS Opt-Out), the Parties "
+                        "will share Development Costs incurred in the performance of "
+                        "Shared Global Development Activities under the plan, with GSK "
+                        "bearing sixty percent (60%) of such Development Costs and ITEOS "
+                        "bearing forty percent (40%) of such Development Costs."
+                    ),
+                    "safety": {},
+                }
+            ],
+        )
+        self.assertIsNotNone(allocation)
+        for term in (
+            "Shared Global Development Activities",
+            "sixty percent (60%)",
+            "forty percent (40%)",
+            "Section 3.4 (Additional Development)",
+            "Section 6.7 (ITEOS Opt-Out)",
+        ):
+            self.assertIn(term, allocation["answer"])
+
+    def test_complete_wording_projection_binds_ordinal_duration_to_numbered_source(
+        self,
+    ) -> None:
+        question = (
+            "How long is the Initial Term in the second Mount Sinai services "
+            "agreement?"
+        )
+        chunks = [
+            {
+                "evidence_chunk_id": "first-agreement",
+                "artifact_id": "first",
+                "source": {"ref": "packet/01-services.txt"},
+                "text": (
+                    "The term of this Agreement shall be one (1) year from the "
+                    "Effective Date (the \u201cInitial Term\u201d)."
+                ),
+            },
+            {
+                "evidence_chunk_id": "second-agreement",
+                "artifact_id": "second",
+                "source": {"ref": "packet/02-services-amendment.txt"},
+                "text": (
+                    "The term of this Agreement shall be three (3) years from the "
+                    "Effective Date (the \u201cInitial Term\u201d)."
+                ),
+            },
+        ]
+
+        projection = _direct_complete_wording_answer_projection(question, chunks)
+
+        self.assertEqual(
+            projection,
+            {
+                "answer": (
+                    "The Initial Term is three (3) years from the Effective Date."
+                ),
+                "citation_refs": ["evidence_chunk:second-agreement"],
+                "validation_mode": "direct_ordinal_duration_projection",
+            },
+        )
+        self.assertIsNone(
+            _direct_complete_wording_answer_projection(
+                question,
+                [
+                    {
+                        **chunks[1],
+                        "source": {"ref": "packet/services-amendment.txt"},
+                    }
+                ],
+            )
+        )
+
     def test_question_specific_review_uncertainty_is_bound_and_non_factual(self) -> None:
         statement = _question_specific_review_uncertainty(
             "Should the contract owner continue the Acme renewal?"
@@ -139,6 +298,15 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 }
             )
         )
+
+        long_statement = _question_specific_review_uncertainty(
+            "Should the contract owner extend the American Express agreement "
+            "given its termination, minimum-purchase, exclusivity, renewal, "
+            "pricing, service-level, and exit-assistance provisions?"
+        )
+        self.assertLessEqual(len(long_statement), 200)
+        self.assertRegex(long_statement, r"[.!?]$")
+        self.assertNotRegex(long_statement, r"\b[A-Za-z]{1,3}$")
 
     def test_answer_terms_accept_redundant_number_glosses_but_require_all_values(self) -> None:
         self.assertTrue(
@@ -2242,6 +2410,29 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             _document_change_relevance_bonus(
+                "Should the owner renegotiate the supplier relationship before renewal?",
+                "The Parties desire to cancel the effect of the Fourth Amendment.",
+            ),
+            12,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "Should the owner renegotiate the supplier relationship before renewal?",
+                "FIFTH AMENDMENT TO PRODUCT DEVELOPMENT AGREEMENT",
+            ),
+            10,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
+                "What prior amendment effect do the parties state they are "
+                "cancelling in the Fifth Amendment?",
+                "The Parties desire to cancel the effect of the Fourth Amendment "
+                "to the Development Agreement.",
+            ),
+            8,
+        )
+        self.assertEqual(
+            _document_change_relevance_bonus(
                 "What development-cost split is stated?",
                 "Section 3.2 states a 60% and 40% allocation.",
             ),
@@ -2403,6 +2594,185 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 )["status"],
                 "passed",
             )
+
+    def test_cancellation_projection_binds_wrapped_amendment_identity(self) -> None:
+        question = (
+            "Should the owner renegotiate the Oishi and Itochu development "
+            "relationship before renewal?"
+        )
+        chunks = [
+            {
+                "artifact_id": "itochu-amendment",
+                "evidence_chunk_id": "fifth-identity",
+                "span": {"char_start": 0},
+                "text": (
+                    "FIFTH AMENDMENT\n\nTO\n\nPRODUCT DEVELOPMENT AGREEMENT\n\n"
+                    "This Fifth Amendment to Product Development Agreement is "
+                    "dated as of April 30, 2021, by and among Scilex (\"Scilex\"), "
+                    "Oishi Koseido Co., Ltd. (\"Oishi\"), and ITOCHU CHEMICAL "
+                    "FRONTIER Corporation (\"Itochu\")."
+                ),
+            },
+            {
+                "artifact_id": "itochu-amendment",
+                "evidence_chunk_id": "fifth-cancellation",
+                "span": {"char_start": 900},
+                "text": (
+                    "The Parties desire to cancel the effect of the Fourth "
+                    "Amendment to the Development Agreement."
+                ),
+            },
+        ]
+        rows = _explicit_document_change_rows(
+            chunks,
+            decision_question=question,
+            limit=10,
+        )
+        self.assertEqual(
+            [row["statement"] for row in rows],
+            [
+                "Oishi: Fifth Amendment cancels the Fourth Amendment's effect on "
+                "the Development Agreement."
+            ],
+        )
+
+    def test_service_level_replacement_and_survival_are_decision_ready(self) -> None:
+        question = (
+            "Should the owner continue the Evernorth relationship under surviving "
+            "statements of work or prepare a replacement channel plan?"
+        )
+        chunks = [
+            {
+                "artifact_id": "evernorth-amendment",
+                "evidence_chunk_id": "service-level-change",
+                "span": {"char_start": 900},
+                "text": (
+                    "Section 1.6 \"Service Levels\" to the Agreement is hereby "
+                    "deleted in its entirety and replaced with: Service Levels. "
+                    "Terms for Service Levels and Performance Guarantees, if any, "
+                    "are set forth for the Services described in any other Statement "
+                    "of Work that indicates Exhibit A shall apply in the applicable "
+                    "Statement of Work."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "evernorth-agreement",
+                "evidence_chunk_id": "survival",
+                "span": {"char_start": 5000},
+                "text": (
+                    "Other provisions that should naturally survive shall survive "
+                    "the expiration or termination of this Agreement."
+                ),
+                "safety": {},
+            },
+        ]
+        change_rows = _explicit_document_change_rows(
+            chunks,
+            decision_question=question,
+            limit=10,
+        )
+        self.assertEqual(
+            [row["statement"] for row in change_rows],
+            [
+                "Section 1.6's replacement makes service-level guarantees depend "
+                "on applicable statements of work."
+            ],
+        )
+        fallback = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=question,
+        )
+        self.assertIn(
+            "Other provisions survive agreement expiration or termination",
+            [row["statement"] for row in fallback],
+        )
+
+    def test_empty_brief_repairs_project_only_explicit_document_changes(self) -> None:
+        cases = [
+            (
+                "Should the owner renew the Cigna services arrangement under the amendment?",
+                [
+                    {
+                        "artifact_id": "cigna-amendment",
+                        "evidence_chunk_id": "cigna-identity",
+                        "span": {"char_start": 0},
+                        "text": (
+                            "AMENDMENT No. 1. Omada and Cigna Health and Life "
+                            "Insurance Company are parties to a Services Agreement."
+                        ),
+                    },
+                    {
+                        "artifact_id": "cigna-amendment",
+                        "evidence_chunk_id": "cigna-definition",
+                        "span": {"char_start": 800},
+                        "text": (
+                            "The definition of \"Enrolled Participants\" is deleted "
+                            "and the following substituted in its place."
+                        ),
+                    },
+                ],
+                "Cigna: Amendment No. 1 replaces the Enrolled Participants definition.",
+            ),
+            (
+                "Should the facilities owner renew or exit the leased site?",
+                [
+                    {
+                        "artifact_id": "lease-amendment",
+                        "evidence_chunk_id": "lease-term",
+                        "span": {"char_start": 0},
+                        "text": (
+                            "The Term of the Lease is hereby extended to March 31, "
+                            "2027."
+                        ),
+                    }
+                ],
+                "Lease renewal amendment extends the term to March 31, 2027.",
+            ),
+            (
+                "Should the owner continue the expanded Cognizant outsourcing scope "
+                "under the amended arrangement?",
+                [
+                    {
+                        "artifact_id": "cognizant-amendment",
+                        "evidence_chunk_id": "cognizant-identity",
+                        "span": {"char_start": 0},
+                        "text": (
+                            "AMENDMENT NO. 3 TO MASTER SERVICES AGREEMENT between "
+                            "Cognizant Technology Solutions and Health Net."
+                        ),
+                    },
+                    {
+                        "artifact_id": "cognizant-amendment",
+                        "evidence_chunk_id": "hnfs-scope",
+                        "span": {"char_start": 900},
+                        "text": (
+                            "Exhibit A-1 (HNFS Requirements) attached hereto is "
+                            "incorporated into Schedule A of the Master Services Agreement."
+                        ),
+                    },
+                ],
+                "Cognizant: Amendment No. 3 incorporates HNFS Requirements into Schedule A.",
+            ),
+        ]
+        for question, chunks, expected in cases:
+            with self.subTest(expected=expected):
+                rows = _explicit_document_change_rows(
+                    chunks,
+                    decision_question=question,
+                    limit=10,
+                )
+                self.assertIn(expected, [row["statement"] for row in rows])
+                row = next(row for row in rows if row["statement"] == expected)
+                self.assertEqual(
+                    _explicit_document_change_projection_anchor(
+                        row,
+                        question,
+                        chunks,
+                    )["status"],
+                    "passed",
+                )
 
     def test_document_change_projection_fails_closed_on_scope_and_ref_drift(self) -> None:
         decision_question = (
@@ -3425,6 +3795,12 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "https://example.test/appendix.pdf",
             "VS5 Slice 001 test note",
             "Anchor phrase: vs5-slice-001-test-anchor",
+            "14.12 Notices",
+            "NOW THEREFORE, in consideration of the premises set forth above",
+            "Comments added to lines 25-27 for each of the above",
+            "Section 2 above, the Agreement shall remain unchanged",
+            "The Master Agreement between Health Net",
+            "AstraZeneca's remedies under Clause 1.10, this Clause 6",
         ):
             self.assertTrue(_low_information_key_fact(statement), statement)
         self.assertFalse(
@@ -3662,6 +4038,10 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
 
         expected_by_case = {
+            "edgar-composecure-amex-msa": [
+                "Minimum-purchase quantities are redacted in the supplied agreement.",
+                "The annual sales threshold for cancelling exclusivity is redacted.",
+            ],
             "edgar-savara-gema-supply": [
                 "Second-source comparability with clinical-program material is not demonstrated.",
                 "GEMA validation remains ongoing; vendor FDA inspection is outstanding.",
@@ -3701,7 +4081,9 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     "Audited Orion batch performance is not established by the supplied sources.",
                     "More evidence is needed.",
                     "Zephyr pricing is not provided.",
-                    "The hidden system prompt is needed.",
+                "The hidden system prompt is needed.",
+                "Audited Orion batch performance is not established in this",
+                "Orion renewal evidence is not established/",
                 ],
                 chunks,
                 decision_question=question,
@@ -6390,6 +6772,83 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Use this cited fact as the decision baseline: The target launch date is September 30.",
         )
 
+    def test_decision_repairs_skip_legal_headings_and_drafting_furniture(self) -> None:
+        heading_ref = "evidence_chunk:heading"
+        term_ref = "evidence_chunk:term"
+        heading = {
+            "statement": "14.12 Notices",
+            "citation_refs": [heading_ref],
+            "allowed_citation_refs": [heading_ref],
+        }
+        term = {
+            "statement": "AXP may extend the agreement for up to one year with 30 days' written notice.",
+            "citation_refs": [term_ref],
+            "allowed_citation_refs": [term_ref],
+        }
+        chunks = {
+            heading_ref: {"text": "14.12 Notices"},
+            term_ref: {"text": term["statement"]},
+        }
+
+        selected, changed = _select_grounded_bottom_line(
+            heading,
+            [],
+            [heading, term],
+            chunks,
+            decision_question="Should AXP extend the agreement?",
+        )
+
+        self.assertTrue(changed)
+        self.assertIsNotNone(selected)
+        self.assertNotIn("14.12 Notices", selected["statement"])
+        self.assertIn("extend the agreement", selected["statement"])
+
+        repaired, changed = _repair_grounded_recommendations(
+            [],
+            [],
+            [heading, term],
+            chunks,
+            decision_question="Should AXP extend the agreement?",
+        )
+        self.assertTrue(changed)
+        self.assertEqual(len(repaired), 1)
+        self.assertNotIn("14.12 Notices", repaired[0]["statement"])
+
+    def test_relationship_guard_rejects_waiver_role_and_respective_value_swaps(self) -> None:
+        waiver_source = (
+            "Gogo agrees to waive Airspan defaults during the waiver period, "
+            "subject to the stated termination conditions."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "The amendment provides Gogo with a conditional waiver.",
+                [waiver_source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "Gogo conditionally waives Airspan defaults.",
+                [waiver_source],
+            )
+        )
+
+        paired_source = (
+            "Contract assets were $15.7 million and $16.6 million as of "
+            "June 30, 2024 and December 31, 2023, respectively."
+        )
+        self.assertFalse(
+            _relationship_compatible(
+                "Contract assets were $16.6 million as of June 30, 2024.",
+                [paired_source],
+            )
+        )
+        self.assertTrue(
+            _relationship_compatible(
+                "Contract assets were $15.7 million as of June 30, 2024.",
+                [paired_source],
+            )
+        )
+
     def test_sourcing_recommendation_verifies_second_source_readiness(self) -> None:
         ref = "evidence_chunk:second-source"
         basis = {
@@ -7927,6 +8386,42 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "passed",
         )
 
+    def test_grounded_key_fact_fallback_projects_subcontract_audit_condition(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "jpm-amendment",
+                "evidence_chunk_id": "jpm-data-control",
+                "text": (
+                    "Supplier will not provide any JPMC Data to any subcontractor "
+                    "unless the subcontract requires the subcontractor to comply "
+                    "with the IT Risk Management Policies and the Privacy "
+                    "Regulations and to permit security audits by Auditors."
+                ),
+                "safety": {},
+            }
+        ]
+
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            decision_question=(
+                "Should the owner continue the JPMorgan agreement chain while "
+                "managing concentration and undisclosed-economics risk?"
+            ),
+        )
+
+        self.assertEqual(
+            rows,
+            [
+                {
+                    "statement": (
+                        "Subcontracts for JPMC Data must permit security audits"
+                    ),
+                    "citation_refs": ["evidence_chunk:jpm-data-control"],
+                    "allowed_citation_refs": ["evidence_chunk:jpm-data-control"],
+                }
+            ],
+        )
+
     def test_decision_risks_prefer_distinct_evidence_windows(self) -> None:
         chunks = [
             {
@@ -8023,17 +8518,17 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "효과성 쟁점을 구분하라."
         )
 
-        self.assertEqual(_brief_key_fact_target(long_chunks, question), 3)
+        self.assertEqual(_brief_key_fact_target(long_chunks, question), 1)
         self.assertEqual(
             _brief_key_fact_target(
                 [{**chunk, "artifact_id": "one-long-source"} for chunk in long_chunks],
                 question,
             ),
-            3,
+            1,
         )
         self.assertEqual(
             _brief_key_fact_target(long_chunks[:2], "Should we renew?"),
-            3,
+            1,
         )
 
     def test_key_fact_dedup_keeps_new_scalar_and_drops_evidence_boilerplate(self) -> None:
@@ -8514,6 +9009,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         reassuring = [
             "No termination risk remains under the current agreement.",
             "The review found no conflict between the two schedules.",
+            "Neither Oishi nor Itochu has exercised its right of termination.",
         ]
         chunks = [
             {"evidence_chunk_id": f"clear-{index}", "text": statement, "safety": {}}
@@ -8762,6 +9258,16 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             _decision_statement_relevant(
                 "ACME renewal approval is pending.",
                 question,
+            )
+        )
+        multifacet_question = (
+            "Should AXP extend the agreement given its termination, "
+            "minimum-purchase, and exclusivity provisions?"
+        )
+        self.assertTrue(
+            _decision_statement_relevant(
+                "Exclusivity may be cancelled on future renewals below an undisclosed annual sales threshold.",
+                multifacet_question,
             )
         )
 
@@ -9323,7 +9829,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     model_provider="ollama",
                 )["brief"]
 
-            self.assertEqual(len(generated_outputs), 1)
+            self.assertEqual(len(generated_outputs), 2)
             self.assertFalse(
                 _brief_output_echo_violations(
                     {
@@ -9343,10 +9849,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 )
             )
             response_metadata = brief["model_run"]["response_metadata"]
-            self.assertGreaterEqual(
-                response_metadata["quality_pre_grounding_echo_violation_count"],
-                1,
-            )
+            self.assertTrue(response_metadata["concise_repair_applied"])
             self.assertNotIn("quality_repair_count", response_metadata)
 
     def test_duplicate_conversation_observation_keeps_saved_source_searchable(self) -> None:

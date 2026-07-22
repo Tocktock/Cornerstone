@@ -71,6 +71,8 @@ def _source(
     *,
     role: str = "contract_chain_document",
     exhibit_number: str = "",
+    supersedes: Sequence[str] = (),
+    incorporated_by_reference: Sequence[str] = (),
 ) -> dict[str, Any]:
     path_parts = urllib.parse.urlparse(url).path.split("/")
     try:
@@ -87,6 +89,8 @@ def _source(
         "role": role,
         "exhibit_number": exhibit_number,
         "filing_index_url": _filing_index_url(cik, accession),
+        "supersedes": tuple(supersedes),
+        "incorporated_by_reference": tuple(incorporated_by_reference),
     }
 
 
@@ -172,7 +176,7 @@ CASES: tuple[dict[str, Any], ...] = (
             _source("04-omada-s1", "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770ds1.htm", "0001193125-25-116907", "S-1", "Omada Health, Inc.", ("Evernorth",), role="issuer_disclosure"),
         ),
         fact_terms=("Evernorth", "March 31, 2020"), gap_terms=("pricing", "renewal"),
-        answerable_question="By what date did the agreement require the Corrective Action Plan?", answer_terms=("March 31, 2020",),
+        answerable_question="What complete deadline wording governs the Corrective Action Plan?", answer_terms=("March 31, 2020 or such later date as is approved by Company in writing",),
         unanswerable_question="What final unredacted price did both parties sign for the next renewal term?",
         relationships=("master agreement -> amendments -> issuer S-1 disclosure",),
     ),
@@ -249,13 +253,36 @@ CASES: tuple[dict[str, Any], ...] = (
         (
             _source("01-oishi-development", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-34.htm", "0001104659-22-081279", "EX-10.34", "Oishi Koseido Co., Ltd.", ("Oishi",), role="development_agreement", exhibit_number="10.34"),
             _source("02-itochu-agreement", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-38.htm", "0001104659-22-081279", "EX-10.38", "ITOCHU CHEMICAL FRONTIER Corporation", ("Itochu",), role="related_agreement", exhibit_number="10.38"),
-            _source("03-itochu-amendment", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-39.htm", "0001104659-22-081279", "EX-10.39", "ITOCHU CHEMICAL FRONTIER Corporation", ("Itochu",), role="amendment", exhibit_number="10.39"),
+            _source(
+                "03-itochu-amendment",
+                "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-39.htm",
+                "0001104659-22-081279",
+                "EX-10.39",
+                "ITOCHU CHEMICAL FRONTIER Corporation",
+                ("Itochu",),
+                role="amendment",
+                exhibit_number="10.39",
+                supersedes=("02-itochu-agreement",),
+                incorporated_by_reference=("01-oishi-development",),
+            ),
             _source("04-scilex-s4a", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm", "0001104659-22-081279", "S-4/A", "Scilex Holding Company", ("Oishi", "Itochu"), role="issuer_disclosure"),
         ),
-        fact_terms=("Oishi", "Itochu", "March 31, 2023", "five percent (5%)"), gap_terms=("alternate supply", "pricing", "renewal"),
-        answerable_question="On what quarter-ending date does the low-profit termination condition begin to be measured?", answer_terms=("March 31, 2023",),
+        fact_terms=("Oishi", "Itochu", "cancel the effect of the Fourth Amendment to the Development Agreement", "five percent (5%)"), gap_terms=("alternate supply",),
+        answerable_question="What prior amendment effect do the parties state they are cancelling in the Fifth Amendment?", answer_terms=("cancel the effect of the Fourth Amendment to the Development Agreement",),
         unanswerable_question="What signed commercial terms would an alternate supplier offer?",
-        relationships=("development agreement + related Itochu agreement and amendment; S-4/A supplies issuer context",),
+        contradictions=(
+            _contradiction(
+                "Fifth Amendment cancels the Fourth Amendment",
+                "supersession",
+                prior_source="02-itochu-agreement",
+                prior_claim="If at any time commencing with the quarter ending March 31, 2023",
+                current_source="03-itochu-amendment",
+                current_claim="If at any time during the Term",
+            ),
+        ),
+        relationships=(
+            "development agreement -> Fourth Amendment -> Fifth Amendment; Fifth Amendment cancels the Fourth Amendment; S-4/A supplies issuer context",
+        ),
     ),
     _case(
         "edgar-savara-gema-supply", "Savara Inc.", "1160308",
@@ -306,7 +333,14 @@ CASES: tuple[dict[str, Any], ...] = (
                 current_claim="Licensed Product does not include, and GSK is not granted right to, any pharmaceutical product that is comprised of or contains any compound, antibody, or other pharmaceutically active ingredient owned or Controlled by ITEOS or any of its Affiliates, in each case, that is not a Licensed Antibody.",
             ),
         ),
-        answerable_question="What development-cost split is stated in the collaboration agreement?", answer_terms=("sixty percent (60%)", "forty percent (40%)"),
+        answerable_question="What development-cost split, activity scope, and stated exceptions govern the collaboration agreement?",
+        answer_terms=(
+            "Shared Global Development Activities",
+            "sixty percent (60%)",
+            "forty percent (40%)",
+            "Section 3.4 (Additional Development)",
+            "Section 6.7 (ITEOS Opt-Out)",
+        ),
         unanswerable_question="Which future clinical milestones will ultimately succeed and on what dates?",
         relationships=("collaboration agreement -> amendments; 10-K supplies issuer disclosure",),
     ),
@@ -419,7 +453,7 @@ CASES: tuple[dict[str, Any], ...] = (
         "Should the contract owner continue the Bristol-Myers Squibb license under the amended scope and termination terms?",
         (
             _source("01-bms-license", "https://www.sec.gov/Archives/edgar/data/1567514/000119312513358382/d590040dex1011.htm", "0001193125-13-358382", "EX-10.11", "Bristol-Myers Squibb Company", ("Bristol-Myers",), role="license_agreement", exhibit_number="10.11"),
-            _source("02-bms-license-amendment", "https://www.sec.gov/Archives/edgar/data/1567514/000119312513358382/d590040dex1012.htm", "0001193125-13-358382", "EX-10.12", "Bristol-Myers Squibb Company", ("Bristol-Myers",), role="amendment", exhibit_number="10.12"),
+            _source("02-bms-license-amendment", "https://www.sec.gov/Archives/edgar/data/1567514/000119312513358382/d590040dex1012.htm", "0001193125-13-358382", "EX-10.12", "Bristol-Myers Squibb Company", ("Bristol-Myers",), role="amendment", exhibit_number="10.12", supersedes=("01-bms-license",)),
             _source("03-itci-8k", "https://www.sec.gov/Archives/edgar/data/1567514/000119312513358382/d590040d8k.htm", "0001193125-13-358382", "8-K", "Intra-Cellular Therapies, Inc.", ("Bristol-Myers",), role="issuer_disclosure"),
         ),
         fact_terms=("Bristol-Myers", "entered into effective November 3, 2010"), gap_terms=("territory", "scope", "termination"),
@@ -494,7 +528,7 @@ CASES: tuple[dict[str, Any], ...] = (
         "Should the contract owner continue Lifecore manufacturing and supply under the amendment-controlled obligations?",
         (
             _source("01-lifecore-msa", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922074469/vcka-20220331xex10d40.htm", "0001104659-22-074469", "EX-10.40", "Lifecore Biomedical, LLC", ("Lifecore",), role="manufacturing_agreement", exhibit_number="10.40"),
-            _source("02-lifecore-amendment", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922074469/vcka-20220331xex10d41.htm", "0001104659-22-074469", "EX-10.41", "Lifecore Biomedical, LLC", ("Lifecore",), role="amendment", exhibit_number="10.41"),
+            _source("02-lifecore-amendment", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922074469/vcka-20220331xex10d41.htm", "0001104659-22-074469", "EX-10.41", "Lifecore Biomedical, LLC", ("Lifecore",), role="amendment", exhibit_number="10.41", supersedes=("01-lifecore-msa",)),
             _source("03-scilex-s4a", "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm", "0001104659-22-081279", "S-4/A", "Scilex Holding Company", ("Lifecore",), role="issuer_disclosure"),
         ),
         fact_terms=("Lifecore", "December 31, 2022"), gap_terms=("capacity", "quality", "pricing"),
@@ -983,7 +1017,14 @@ def build_corpus(
 
     output_root.mkdir(parents=True, exist_ok=True)
     existing_manifest = _load_existing_manifest(output_root)
-    client = SecClient(user_agent=user_agent)
+    client: SecClient | None = None
+
+    def network_client() -> SecClient:
+        nonlocal client
+        if client is None:
+            client = SecClient(user_agent=user_agent)
+        return client
+
     manifest_cases: list[dict[str, Any]] = []
     filing_index_cache: dict[str, dict[str, Any]] = {}
 
@@ -1019,7 +1060,7 @@ def build_corpus(
             elif browser_cache is not None:
                 raw, response_metadata = _read_response_cache(browser_cache, str(source["url"]))
             else:
-                raw, response_metadata = client.get(str(source["url"]))
+                raw, response_metadata = network_client().get(str(source["url"]))
                 response_metadata["retrieved_at"] = datetime.now(UTC).isoformat()
                 response_metadata["transport"] = "python_urllib_https"
             if not response_metadata["retrieved_at"]:
@@ -1048,7 +1089,7 @@ def build_corpus(
                             browser_cache, filing_index_url
                         )
                     else:
-                        index_body, index_response = client.get(filing_index_url)
+                        index_body, index_response = network_client().get(filing_index_url)
                     filing_index_cache[accession] = {
                         "filing_date": _parse_filing_date(index_body, index_url=filing_index_url),
                         "http_status": int(index_response["http_status"]),

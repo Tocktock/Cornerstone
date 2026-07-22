@@ -55,9 +55,9 @@
         "renewal"
       ],
       "contradiction_terms": [],
-      "answerable_question": "By what date did the agreement require the Corrective Action Plan?",
+      "answerable_question": "What complete deadline wording governs the Corrective Action Plan?",
       "answer_terms": [
-        "March 31, 2020"
+        "March 31, 2020 or such later date as is approved by Company in writing"
       ],
       "unanswerable_question": "What final unredacted price did both parties sign for the next renewal term?",
       "document_relationships": [
@@ -120,15 +120,15 @@
         ],
         "contradictions": [],
         "answerable_question": {
-          "question": "By what date did the agreement require the Corrective Action Plan?",
+          "question": "What complete deadline wording governs the Corrective Action Plan?",
           "answer_terms": [
             {
-              "term": "March 31, 2020",
+              "term": "March 31, 2020 or such later date as is approved by Company in writing",
               "support_spans": [
                 {
                   "source_id": "edgar-omada-evernorth-msa-source-01",
                   "normalized_char_start": 45735,
-                  "normalized_char_end": 45749,
+                  "normalized_char_end": 45805,
                   "match_strategy": "case_insensitive_literal"
                 }
               ]
@@ -1902,22 +1902,22 @@
       "planted_fact_terms": [
         "Oishi",
         "Itochu",
-        "March 31, 2023",
+        "cancel the effect of the Fourth Amendment to the Development Agreement",
         "five percent (5%)"
       ],
       "gap_terms": [
-        "alternate supply",
-        "pricing",
-        "renewal"
+        "alternate supply"
       ],
-      "contradiction_terms": [],
-      "answerable_question": "On what quarter-ending date does the low-profit termination condition begin to be measured?",
+      "contradiction_terms": [
+        "Fifth Amendment cancels the Fourth Amendment"
+      ],
+      "answerable_question": "What prior amendment effect do the parties state they are cancelling in the Fifth Amendment?",
       "answer_terms": [
-        "March 31, 2023"
+        "cancel the effect of the Fourth Amendment to the Development Agreement"
       ],
       "unanswerable_question": "What signed commercial terms would an alternate supplier offer?",
       "document_relationships": [
-        "development agreement + related Itochu agreement and amendment; S-4/A supplies issuer context"
+        "development agreement -> Fourth Amendment -> Fifth Amendment; Fifth Amendment cancels the Fourth Amendment; S-4/A supplies issuer context"
       ],
       "annotations": {
         "facts": [
@@ -1980,12 +1980,12 @@
             ]
           },
           {
-            "term": "March 31, 2023",
+            "term": "cancel the effect of the Fourth Amendment to the Development Agreement",
             "support_spans": [
               {
-                "source_id": "edgar-scilex-oishi-itochu-development-source-02",
-                "normalized_char_start": 2358,
-                "normalized_char_end": 2372,
+                "source_id": "edgar-scilex-oishi-itochu-development-source-03",
+                "normalized_char_start": 1384,
+                "normalized_char_end": 1454,
                 "match_strategy": "case_insensitive_literal"
               }
             ]
@@ -2016,41 +2016,54 @@
             ],
             "full_normalized_occurrence_count": 0,
             "interpretation": "literal_absence"
-          },
-          {
-            "term": "pricing",
-            "full_packet_search_terms": [
-              "pricing"
-            ],
-            "full_normalized_occurrence_count": 80,
-            "interpretation": "topic_present_but_decision_evidence_incomplete"
-          },
-          {
-            "term": "renewal",
-            "full_packet_search_terms": [
-              "renewal"
-            ],
-            "full_normalized_occurrence_count": 12,
-            "interpretation": "topic_present_but_decision_evidence_incomplete"
           }
         ],
-        "contradictions": [],
+        "contradictions": [
+          {
+            "term": "Fifth Amendment cancels the Fourth Amendment",
+            "classification": "supersession",
+            "sides": [
+              {
+                "side": "prior",
+                "source_name": "02-itochu-agreement",
+                "claim": "If at any time commencing with the quarter ending March 31, 2023",
+                "support_span": {
+                  "source_id": "edgar-scilex-oishi-itochu-development-source-02",
+                  "normalized_char_start": 2308,
+                  "normalized_char_end": 2372,
+                  "match_strategy": "case_insensitive_literal"
+                }
+              },
+              {
+                "side": "current",
+                "source_name": "03-itochu-amendment",
+                "claim": "If at any time during the Term",
+                "support_span": {
+                  "source_id": "edgar-scilex-oishi-itochu-development-source-03",
+                  "normalized_char_start": 2378,
+                  "normalized_char_end": 2408,
+                  "match_strategy": "case_insensitive_literal"
+                }
+              }
+            ]
+          }
+        ],
         "answerable_question": {
-          "question": "On what quarter-ending date does the low-profit termination condition begin to be measured?",
+          "question": "What prior amendment effect do the parties state they are cancelling in the Fifth Amendment?",
           "answer_terms": [
             {
-              "term": "March 31, 2023",
+              "term": "cancel the effect of the Fourth Amendment to the Development Agreement",
               "support_spans": [
                 {
-                  "source_id": "edgar-scilex-oishi-itochu-development-source-02",
-                  "normalized_char_start": 2358,
-                  "normalized_char_end": 2372,
+                  "source_id": "edgar-scilex-oishi-itochu-development-source-03",
+                  "normalized_char_start": 1384,
+                  "normalized_char_end": 1454,
                   "match_strategy": "case_insensitive_literal"
                 }
               ]
             }
           ],
-          "unique_support_source_id": "edgar-scilex-oishi-itochu-development-source-02",
+          "unique_support_source_id": "edgar-scilex-oishi-itochu-development-source-03",
           "support_scope": "exactly_one_case_upload_source"
         },
         "unanswerable_question": {
@@ -2206,8 +2219,12 @@
             "Itochu"
           ],
           "sec_redaction_markers": [],
-          "supersedes": [],
-          "incorporated_by_reference": [],
+          "supersedes": [
+            "02-itochu-agreement"
+          ],
+          "incorporated_by_reference": [
+            "01-oishi-development"
+          ],
           "source_order": 3
         },
         {
@@ -2848,10 +2865,13 @@
       "contradiction_terms": [
         "Amendment No. 1 excludes products containing non-Licensed-Antibody ITEOS/Affiliate-owned or controlled ingredients from GSK's Licensed Product scope"
       ],
-      "answerable_question": "What development-cost split is stated in the collaboration agreement?",
+      "answerable_question": "What development-cost split, activity scope, and stated exceptions govern the collaboration agreement?",
       "answer_terms": [
+        "Shared Global Development Activities",
         "sixty percent (60%)",
-        "forty percent (40%)"
+        "forty percent (40%)",
+        "Section 3.4 (Additional Development)",
+        "Section 6.7 (ITEOS Opt-Out)"
       ],
       "unanswerable_question": "Which future clinical milestones will ultimately succeed and on what dates?",
       "document_relationships": [
@@ -2953,8 +2973,19 @@
           }
         ],
         "answerable_question": {
-          "question": "What development-cost split is stated in the collaboration agreement?",
+          "question": "What development-cost split, activity scope, and stated exceptions govern the collaboration agreement?",
           "answer_terms": [
+            {
+              "term": "Shared Global Development Activities",
+              "support_spans": [
+                {
+                  "source_id": "edgar-iteos-gsk-collaboration-source-01",
+                  "normalized_char_start": 25833,
+                  "normalized_char_end": 25869,
+                  "match_strategy": "case_insensitive_literal"
+                }
+              ]
+            },
             {
               "term": "sixty percent (60%)",
               "support_spans": [
@@ -2973,6 +3004,28 @@
                   "source_id": "edgar-iteos-gsk-collaboration-source-01",
                   "normalized_char_start": 89846,
                   "normalized_char_end": 89865,
+                  "match_strategy": "case_insensitive_literal"
+                }
+              ]
+            },
+            {
+              "term": "Section 3.4 (Additional Development)",
+              "support_spans": [
+                {
+                  "source_id": "edgar-iteos-gsk-collaboration-source-01",
+                  "normalized_char_start": 89477,
+                  "normalized_char_end": 89513,
+                  "match_strategy": "case_insensitive_literal"
+                }
+              ]
+            },
+            {
+              "term": "Section 6.7 (ITEOS Opt-Out)",
+              "support_spans": [
+                {
+                  "source_id": "edgar-iteos-gsk-collaboration-source-01",
+                  "normalized_char_start": 89538,
+                  "normalized_char_end": 89565,
                   "match_strategy": "case_insensitive_literal"
                 }
               ]
@@ -5568,7 +5621,9 @@
             "Bristol-Myers"
           ],
           "sec_redaction_markers": [],
-          "supersedes": [],
+          "supersedes": [
+            "01-bms-license"
+          ],
           "incorporated_by_reference": [],
           "source_order": 2
         },
@@ -6902,7 +6957,9 @@
             "Lifecore"
           ],
           "sec_redaction_markers": [],
-          "supersedes": [],
+          "supersedes": [
+            "01-lifecore-msa"
+          ],
           "incorporated_by_reference": [],
           "source_order": 2
         },

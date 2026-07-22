@@ -7,7 +7,7 @@
     "role": null,
     "is_owner": null
   },
-  "corpus_manifest_sha256": "9204cad035e4e1ad697c3a710fd39b95a90b24882619b10eeb24a796b7c493c2",
+  "corpus_manifest_sha256": "4f293e55439f043d46d40b0db223cedf70a2038e09c7219d8bc3128fe4c993db",
   "case_count": 25,
   "target_cohort_fit": null,
   "domain_specific_and_non_generic": null,
@@ -16,6 +16,6 @@
   "review_note": null,
   "decision": null,
   "decision_rule": "ACCEPT only when the reviewer confirms the frozen 25-case corpus is realistic for the VS5 decision-owner cohort, domain-specific enough to resist generic guessing, and representative of multi-source facts, conflicts, gaps, and answerable/unanswerable questions.",
-  "corpus_bundle_sha256": "4eca9a850d6ab8be26a1411f1b04614cfc19964a29901b50a92591dceecf7bdb",
+  "corpus_bundle_sha256": "dcac22c48891c734667359566872c62e7fa41c4878ff11badcb498acbb50a803",
   "corpus_source_manifest_sha256": "0217d66cd2a2105d745d612f89888a7a38cd06c9e08a26ee14d6771714dcab2d"
 }

@@ -2,7 +2,7 @@
   "schema_version": "cs.vs5_edgar_eval_freeze.v1",
   "corpus_id": "vs5-sec-edgar-commercial-contracts-2026-07-17",
   "manifest_path": "fixtures/vs5/edgar-eval/manifest.json",
-  "manifest_sha256": "9204cad035e4e1ad697c3a710fd39b95a90b24882619b10eeb24a796b7c493c2",
+  "manifest_sha256": "4f293e55439f043d46d40b0db223cedf70a2038e09c7219d8bc3128fe4c993db",
   "case_count": 25,
   "source_count": 82,
   "language": "en",

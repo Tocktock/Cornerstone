@@ -595,6 +595,76 @@ def _validate_contradiction_annotations(
             raise Vs5CorpusIntegrityError(
                 f"case {case_id} contradiction sides need distinct sources and claims"
             )
+        if contradiction.get("classification") == "supersession":
+            prior_source_name = str(sides[0]["source_name"])
+            current_source_name = str(sides[1]["source_name"])
+            current_source_id = source_id_by_name[current_source_name]
+            current_source = source_by_id[current_source_id]["source"]
+            if prior_source_name not in current_source["supersedes"]:
+                raise Vs5CorpusIntegrityError(
+                    f"case {case_id} supersession annotation is not declared by "
+                    "the current source metadata"
+                )
+
+
+def _validate_document_relationships(
+    *,
+    case_id: str,
+    source_by_id: dict[str, dict[str, Any]],
+) -> None:
+    source_id_by_name: dict[str, str] = {}
+    source_order_by_name: dict[str, int] = {}
+    for source_id, record in source_by_id.items():
+        source = record["source"]
+        source_name = _required_text(
+            source.get("name"),
+            field=f"case {case_id} source.name",
+        )
+        if source_name in source_id_by_name:
+            raise Vs5CorpusIntegrityError(f"case {case_id} source names must be unique")
+        source_order = _required_int(
+            source.get("source_order"),
+            field=f"case {case_id} source.source_order",
+            minimum=1,
+        )
+        if source_order in source_order_by_name.values():
+            raise Vs5CorpusIntegrityError(
+                f"case {case_id} source_order values must be unique"
+            )
+        source_id_by_name[source_name] = source_id
+        source_order_by_name[source_name] = source_order
+
+    for source_name, source_id in source_id_by_name.items():
+        source = source_by_id[source_id]["source"]
+        for field in ("supersedes", "incorporated_by_reference"):
+            relationships = source.get(field)
+            if not isinstance(relationships, list) or any(
+                not isinstance(target, str) or not target.strip()
+                for target in relationships
+            ):
+                raise Vs5CorpusIntegrityError(
+                    f"case {case_id} source {source_name} {field} must be a list "
+                    "of nonempty source names"
+                )
+            if len(relationships) != len(set(relationships)):
+                raise Vs5CorpusIntegrityError(
+                    f"case {case_id} source {source_name} {field} repeats a source"
+                )
+            for target in relationships:
+                if target == source_name:
+                    raise Vs5CorpusIntegrityError(
+                        f"case {case_id} source {source_name} {field} references itself"
+                    )
+                if target not in source_id_by_name:
+                    raise Vs5CorpusIntegrityError(
+                        f"case {case_id} source {source_name} {field} references "
+                        "an unknown source"
+                    )
+                if source_order_by_name[target] >= source_order_by_name[source_name]:
+                    raise Vs5CorpusIntegrityError(
+                        f"case {case_id} source {source_name} {field} must reference "
+                        "an earlier source"
+                    )
 
 
 def _validate_case_annotations(
@@ -617,6 +687,8 @@ def _validate_case_annotations(
         raise Vs5CorpusIntegrityError(
             f"case {case_id} annotation fields do not match the v1 schema"
         )
+
+    _validate_document_relationships(case_id=case_id, source_by_id=source_by_id)
 
     fact_terms = _required_term_list(
         case.get("planted_fact_terms"),

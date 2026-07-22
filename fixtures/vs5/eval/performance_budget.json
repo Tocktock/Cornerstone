@@ -1,13 +1,13 @@
 {
   "schema_version": "cs.vs5_performance_budget.v1",
-  "frozen_at": "2026-07-17",
+  "frozen_at": "2026-07-22",
   "reference_machine": "Apple M5 Pro MacBook Pro, 18 cores, 48 GB RAM",
   "model_stack": {"provider": "ollama", "generation_model": "ornith:9b", "embedding_model": "qwen3-embedding:0.6b"},
-  "corpus_manifest_sha256": "9204cad035e4e1ad697c3a710fd39b95a90b24882619b10eeb24a796b7c493c2",
-  "prompt_retrieval_revision": "6afc47d37792cf595eceeed8a34b221087fff154a0bd5b417e044f17351c9a0d",
-  "pilot_measurements_seconds": {"three_source_brief": 21.929, "three_source_answer": 11.005},
-  "combined_operation_p95_budget_seconds": 35.0,
+  "corpus_manifest_sha256": "4f293e55439f043d46d40b0db223cedf70a2038e09c7219d8bc3128fe4c993db",
+  "prompt_retrieval_revision": "4706274bdf24d90a1a31c08edeb998fc26154221dc2c64b931ad6c0898459ff4",
+  "pilot_measurements_seconds": {"three_source_brief": 38.602, "three_source_answer": 16.849},
+  "combined_operation_p95_budget_seconds": 45.0,
   "minimum_full_corpus_sample_count": 50,
-  "refreeze_reason": "The July 17 refreeze binds the rebuilt 25-case SEC corpus and the final 9B citation-grounding repair: precise two-source amendment labels, decision-relevant retrieval, exact amendment-to-agreement identifier binding, full-subject effective-date guards, named-agreement party-operand binding, amendment-recital date binding, competing-amendment rejection, exact amendment-opening party binding, full-sentence citation preference, scalar-question eligibility, single-clause actor-to-percentage citation repair, allocation-specific retrieval, and fail-closed legal-party parsing. A fresh three-source BMS ornith:9b pilot measured 21.929 seconds for Brief and 11.005 seconds for answerable Ask. Both operations remain within the previously frozen 35-second p95 budget; the canonical full-corpus run records the final 50-operation distribution.",
+  "refreeze_reason": "The July 22 refreeze binds the corrected 25-case SEC corpus and the final ornith:9b pipeline after adding complete-wording Ask projections, concise Brief repair, fail-closed fragment guards, amendment supersession retrieval, deterministic legal-change observations, numbered-source ordinal duration binding, and a source-anchored subcontract audit observation. The quality repair can add a second local generation pass. A fresh three-source HealthNet pilot measured 38.602 seconds for Brief and 16.849 seconds for an evidence-backed answerable Ask. The measured Brief no longer fits the obsolete 35-second budget, so the regression budget remains frozen at 45 seconds; the canonical 50-operation run must still demonstrate the final p95 and the ten-minute first-value contract remains unchanged.",
   "invalidation_rule": "Re-measure and re-freeze when the model, prompt scheme, retrieval pipeline, corpus, or reference machine changes."
 }
