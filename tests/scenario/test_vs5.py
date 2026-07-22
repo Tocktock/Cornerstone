@@ -66,6 +66,7 @@ from cornerstone_cli.runtime import (
     _low_information_key_fact,
     _map_brief_citation_aliases,
     _model_conflict_risk_semantics,
+    _model_statement_source_semantics_supported,
     _paired_version_binding_anchor,
     _paired_version_clause_rows,
     _question_requests_decision_direction,
@@ -2521,6 +2522,20 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         self.assertEqual(
             _answer_chunk_scalar_relevance_bonus(
+                "To what date does the lease amendment extend the Term?",
+                "The Term of the Lease is hereby extended to March 31, 2027.",
+            ),
+            12,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
+                "To what date does the lease amendment extend the Term?",
+                "Basic Rent changes on March 31, 2027.",
+            ),
+            0,
+        )
+        self.assertEqual(
+            _answer_chunk_scalar_relevance_bonus(
                 "What effective-date wording appears in Amendment No. 1?",
                 "Amendment No. 1 is entered into effective November 3, 2010.",
             ),
@@ -4124,6 +4139,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertNotIn("evidence for this decision", uncertainty.lower())
         self.assertIn("quality remediation", next_step.lower())
         self.assertIn("regulatory inspection", next_step.lower())
+        self.assertIn("acceptance thresholds", next_step.lower())
 
         contract_next_step = _question_specific_next_step(
             "Should the owner extend the agreement given its minimum-purchase "
@@ -4134,6 +4150,12 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "Calculate minimum-purchase and exclusivity exposure against forecast "
             "volume and pricing before deciding.",
         )
+
+        service_next_step = _question_specific_next_step(
+            "Should the owner extend the NTT services relationship?"
+        )
+        self.assertIn("thresholds", service_next_step.lower())
+        self.assertIn("extend only if", service_next_step.lower())
 
     def test_question_specific_review_need_names_decision_critical_dimensions(self) -> None:
         cases = [
@@ -4422,8 +4444,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "The annual sales threshold for cancelling exclusivity is redacted.",
             ],
             "edgar-savara-gema-supply": [
-                "FDA inspection remains outstanding for manufacturing and supply vendors.",
-                "Commercial-manufacturing validation remains ongoing for GEMA-sourced material.",
+                # Filing-date validation and inspection status are known historical
+                # facts, not proof that those gaps remain current.
             ]
         }
 
@@ -5865,6 +5887,45 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         wrong_amendment[0]["text"] = wrong_amendment[0]["text"].replace("4", "3")
         self.assertIsNone(
             _direct_labeled_date_source_projection(question, wrong_amendment)
+        )
+
+    def test_labeled_date_projection_binds_lease_term_extension(self) -> None:
+        question = "To what date does the lease amendment extend the Term?"
+        chunks = [
+            {
+                "artifact_id": "lease-amendment",
+                "evidence_chunk_id": "lease-term",
+                "span": {"char_start": 900, "char_end": 1250},
+                "text": (
+                    "The Term of the Lease is hereby extended to March 31, 2027. "
+                    "The Expiration Date shall mean March 31, 2027."
+                ),
+            }
+        ]
+
+        projection = _direct_labeled_date_source_projection(question, chunks)
+
+        self.assertEqual(projection["answer"], "March 31, 2027")
+        self.assertEqual(
+            projection["citation_refs"],
+            ["evidence_chunk:lease-term"],
+        )
+        unrelated = json.loads(json.dumps(chunks))
+        unrelated[0]["text"] = "Basic Rent changes on March 31, 2027."
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, unrelated)
+        )
+        conflicting = json.loads(json.dumps(chunks))
+        conflicting.append(
+            {
+                "artifact_id": "other-lease-amendment",
+                "evidence_chunk_id": "other-lease-term",
+                "span": {"char_start": 200, "char_end": 500},
+                "text": "The Term of the Lease is hereby extended to April 30, 2028.",
+            }
+        )
+        self.assertIsNone(
+            _direct_labeled_date_source_projection(question, conflicting)
         )
 
     def test_complete_wording_projection_preserves_initial_term_end_event(self) -> None:
@@ -7316,8 +7377,8 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         self.assertTrue(changed)
         self.assertEqual(
             repaired[0]["statement"],
-            "Verify quality remediation, validation, regulatory inspection, and usable "
-            "capacity before deciding.",
+            "Continue only after quality remediation, validation, regulatory "
+            "inspection, and usable capacity meet documented acceptance thresholds.",
         )
         self.assertNotIn(basis["statement"], repaired[0]["statement"])
         self.assertEqual(repaired[0]["proposal_basis_statement"], basis["statement"])
@@ -8979,6 +9040,98 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             "passed",
         )
 
+    def test_grounded_key_fact_fallback_projects_lease_term_and_as_is_condition(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "lease-amendment",
+                "evidence_chunk_id": "lease-amendment-term",
+                "text": (
+                    "The Term of the Lease is hereby extended to March 31, 2027. "
+                    "Tenant has inspected the Complex, the Building and the Demised "
+                    "Premises and agrees to take the same \u201cAS IS\u201d. Landlord shall "
+                    "have no obligation to complete any work to the Complex, the "
+                    "Building or the Demised Premises in connection with this "
+                    "Amendment and/or the extension of the Term."
+                ),
+                "safety": {},
+            }
+        ]
+
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=2,
+            decision_question=(
+                "Should the facilities owner renew or exit the leased site under "
+                "the amendment-controlled term and occupancy exposure?"
+            ),
+        )
+
+        self.assertEqual(
+            {row["statement"] for row in rows},
+            {
+                "The Term of the Lease is extended to March 31, 2027",
+                'Tenant accepts the premises "AS IS"; Landlord has no obligation '
+                "to complete work for the Term extension",
+            },
+        )
+
+    def test_amendment_range_facets_and_fallback_surface_each_material_change(self) -> None:
+        question = (
+            "Should the contract owner extend the NTT DATA services relationship "
+            "based on Amendments 4 through 6?"
+        )
+        facets = _evidence_query_facets(question)
+        for number in ("4", "5", "6"):
+            self.assertTrue(
+                any(number in facet and "amendment" in facet for facet in facets),
+                number,
+            )
+        chunks = [
+            {
+                "artifact_id": "amendment-4",
+                "evidence_chunk_id": "amendment-4-service-levels",
+                "text": (
+                    "Schedule A-3.2 Service Level Definitions and Measurement "
+                    "Methodology provides more detailed definitions and measurement "
+                    "methodology for the Critical Service Levels and Key Measurements "
+                    "listed in Schedule A-3.1 Service Level Matrix."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "amendment-5",
+                "evidence_chunk_id": "amendment-5-pc-refresh",
+                "text": (
+                    "Schedule A-3.1 Service Level Matrix: Updated Service Level "
+                    "Matrix to add Key Measure for PC refresh. Schedule A-3.2 "
+                    "Service Level Definitions and Measurement Methodology: Added "
+                    "Key Measure for PC Refresh and CSI Flags as appropriate."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "amendment-6",
+                "evidence_chunk_id": "amendment-6-fixed-fee",
+                "text": (
+                    "Added the following to Section 1.10.1 User Security "
+                    "Administration: As of the Amendment 6 Effective Date, this "
+                    "Resource Unit has been converted to a monthly fixed fee."
+                ),
+                "safety": {},
+            },
+        ]
+
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=question,
+        )
+
+        statements = {row["statement"] for row in rows}
+        self.assertTrue(any("Schedule A-3.2 provides detailed" in row for row in statements))
+        self.assertTrue(any("PC Refresh key measure" in row for row in statements))
+        self.assertTrue(any("monthly fixed fee" in row for row in statements))
+
     def test_relationship_guard_preserves_dated_status_and_trial_sourcing(self) -> None:
         dated_source = (
             "As of the date of this filing, Scilex's net profits have not exceeded "
@@ -9359,6 +9512,58 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                 "Should the owner continue the Tulex manufacturing relationship?",
                 "Tulex is responsible for developing, testing, and manufacturing "
                 "SP-104 clinical supplies",
+            ),
+            (
+                {
+                    "artifact_id": "mount-sinai-amendment",
+                    "evidence_chunk_id": "change-control-exit",
+                    "text": (
+                        "ISMMS may terminate effective immediately if Sema4 experiences "
+                        "a change of control event where the power to direct its policies "
+                        "changes, including if Mount Sinai’s ownership interest in Sema4 "
+                        "decreases to less than 51%."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner continue the Mount Sinai services arrangement after "
+                "applying the amendment effects?",
+                "ISMMS may terminate immediately if Sema4 experiences a change of "
+                "control, including if Mount Sinai ownership decreases below 51%",
+            ),
+            (
+                {
+                    "artifact_id": "illumina-amendment",
+                    "evidence_chunk_id": "revival-assignment",
+                    "text": (
+                        "The Parties inadvertently let the Agreement expire, but have "
+                        "continued to perform as if the Agreement has been in full force "
+                        "and effect. Original Customer wishes to assign the Agreement to "
+                        "New Customer. The Parties and New Customer desire to revive and "
+                        "amend the Agreement by entering into this First Amendment to add "
+                        "additional products and extend the term."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner continue the Illumina supply dependency given the "
+                "disclosed agreement and remaining continuity gaps?",
+                "The First Amendment revives the expired Agreement and extends its term",
+            ),
+            (
+                {
+                    "artifact_id": "illumina-supply",
+                    "evidence_chunk_id": "quarterly-minimum",
+                    "text": (
+                        "Minimum Purchase Commitment. Beginning in the [***] Customer "
+                        "launches an [***], Customer shall purchase and take delivery of "
+                        "no less than [***] during each calendar quarter of this Agreement "
+                        "during the Term."
+                    ),
+                    "safety": {},
+                },
+                "Should the owner continue the Illumina supply dependency given the "
+                "disclosed agreement and remaining continuity gaps?",
+                "Customer must purchase and take delivery of a redacted minimum during "
+                "each calendar quarter of the Term",
             ),
         ]
 
@@ -10085,6 +10290,122 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         ]
         self.assertEqual(_explicit_constraint_rows(chunks, limit=10), [])
 
+    def test_brief_surface_rejects_clause_tails_headings_and_dangling_parties(self) -> None:
+        for statement in (
+            "9-16 shall survive the termination or expiration of this Agreement",
+            "Effect of Amendment on other Documents",
+            "Amendment 6 is effective October 17, 2018 between CoreLogic",
+        ):
+            with self.subTest(statement=statement):
+                self.assertFalse(_complete_extracted_statement_surface(statement))
+
+    def test_model_statement_semantics_reject_scope_time_and_locator_expansion(self) -> None:
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "The Amendment was signed on the Amendment Effective Date.",
+                [
+                    "Each Party executed this Amendment as of the Amendment Effective Date."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "Scilex received worldwide exclusive distribution rights.",
+                [
+                    "Scilex received exclusive distribution rights for certain territories in the world."
+                ],
+            )
+        )
+        self.assertFalse(
+            _model_statement_source_semantics_supported(
+                "The Global Development Plan may be updated upon JSC approval per Section 3.2.2.",
+                [
+                    "The plan may be updated upon JSC approval.\n\n"
+                    "3.2.2\n\nPerformance under Global Development Plan."
+                ],
+            )
+        )
+        self.assertTrue(
+            _model_statement_source_semantics_supported(
+                "The Global Development Plan may be updated upon JSC approval per Section 3.2.1.",
+                [
+                    "3.2.1 Global Development Plan. The plan may be updated upon JSC approval."
+                ],
+            )
+        )
+
+    def test_named_agreement_exposure_does_not_cross_counterparties(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "itci-filing",
+                "evidence_chunk_id": "lonza-commitment",
+                "text": (
+                    "The Lonza Agreement was amended to provide minimum annual purchase "
+                    "commitments for the years 2025 through 2028 for delivery in 2026 "
+                    "through 2029."
+                ),
+                "safety": {},
+            },
+            {
+                "artifact_id": "itci-filing",
+                "evidence_chunk_id": "siegfried-term",
+                "text": (
+                    "The initial term of the Siegfried Agreement is three years until "
+                    "January 5, 2026."
+                ),
+                "safety": {},
+            },
+        ]
+        question = "Should the owner continue the Siegfried manufacturing and supply dependency?"
+
+        facts = _grounded_key_fact_fallback(
+            chunks,
+            limit=5,
+            decision_question=question,
+        )
+        risks = _grounded_decision_risk_rows(
+            [],
+            chunks,
+            {
+                f"evidence_chunk:{chunk['evidence_chunk_id']}": chunk
+                for chunk in chunks
+            },
+            decision_question=question,
+        )
+
+        self.assertFalse(
+            any("Lonza Agreement" in row["statement"] for row in [*facts, *risks])
+        )
+
+    def test_conditional_five_day_exit_preserves_purchase_obligations(self) -> None:
+        chunks = [
+            {
+                "artifact_id": "amex-amendment",
+                "evidence_chunk_id": "amex-exit",
+                "text": (
+                    "Notwithstanding anything herein to the contrary, and subject to "
+                    "continued compliance with applicable required minimum purchase "
+                    "obligations applicable to AXP with respect to any open Schedule, "
+                    "or such other provisions set forth in any open Schedule or amendment, "
+                    "AXP may terminate, in whole or in part, this Agreement and/or any "
+                    "Schedule without cause upon five (5) days' written notice."
+                ),
+                "safety": {},
+            }
+        ]
+        rows = _grounded_key_fact_fallback(
+            chunks,
+            limit=3,
+            decision_question=(
+                "Should the owner continue the AXP arrangement given minimum-purchase "
+                "and exclusivity exposure?"
+            ),
+        )
+
+        self.assertTrue(rows)
+        self.assertIn("Subject to applicable minimum-purchase", rows[0]["statement"])
+        self.assertIn("five days' written notice", rows[0]["statement"])
+
     def test_gema_readiness_gaps_are_specific_and_echo_safe(self) -> None:
         chunks = [
             {
@@ -10111,9 +10432,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
         )
         gaps = _explicit_missing_evidence(chunks, decision_question=question)
 
-        self.assertEqual(len(gaps), 1)
-        self.assertFalse(any("comparability" in gap.lower() for gap in gaps))
-        self.assertTrue(any("validation" in gap.lower() for gap in gaps))
+        self.assertEqual(gaps, [])
         self.assertEqual(
             _brief_output_echo_violations(
                 {"missing_evidence": gaps},
@@ -10134,9 +10453,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
             decision_question=question,
             limit=2,
         )
-        self.assertEqual(len(combined), 2)
-        self.assertTrue(any("validation" in gap.lower() for gap in combined))
-        self.assertTrue(any("inspection" in gap.lower() for gap in combined))
+        self.assertEqual(combined, [])
 
     def test_non_manufacturing_validation_gap_preserves_its_subject(self) -> None:
         cases = [
@@ -10158,10 +10475,7 @@ class Vs5DecisionBriefTest(unittest.TestCase):
                     [{"evidence_chunk_id": "validation", "text": source, "safety": {}}],
                     decision_question=question,
                 )
-                self.assertEqual(gaps, [source])
-                self.assertIn(expected_subject, gaps[0])
-                self.assertNotIn("Commercial-manufacturing", gaps[0])
-                self.assertNotIn("supplied material", gaps[0])
+                self.assertEqual(gaps, [])
 
     def test_question_relevance_rejects_unrelated_termination_risk(self) -> None:
         question = (

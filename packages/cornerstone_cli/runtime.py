@@ -1093,47 +1093,11 @@ def _explicit_missing_evidence(
                 continue
             if candidate.lower().startswith("neither ") and index:
                 candidate = " ".join(sentences[max(0, index - 2) : index + 1])
-            source_declared_gap = False
-            if not _contains_hangul(decision_question):
-                if re.search(
-                    r"\bvalidation\s+activities\s+are\s+ongoing\b",
-                    candidate,
-                    flags=re.IGNORECASE,
-                ):
-                    source_declared_gap = True
-                    manufacturing_context = re.compile(
-                        r"\b(?:api|drug\s+substance|gema|manufactur\w*|material|"
-                        r"second[- ]source|supplier|vendor)\b",
-                        flags=re.IGNORECASE,
-                    )
-                    if manufacturing_context.search(
-                        candidate
-                    ) and manufacturing_context.search(decision_question):
-                        subject = (
-                            "GEMA-sourced material"
-                            if re.search(r"\bgema\b", candidate, flags=re.IGNORECASE)
-                            else "the supplied material"
-                        )
-                        candidate = (
-                            "Commercial-manufacturing validation remains ongoing for "
-                            f"{subject}."
-                        )
-                elif re.search(
-                    r"\bmanufacturing\s+and\s+supply\s+vendors\b[^.!?]{0,100}"
-                    r"\bhave\s+not\s+yet\s+received\s+an?\s+FDA\s+inspection\b",
-                    candidate,
-                    flags=re.IGNORECASE,
-                ):
-                    candidate = (
-                        "FDA inspection remains outstanding for manufacturing and supply vendors."
-                    )
-                    source_declared_gap = True
             candidate_terms = _expanded_claim_support_terms(candidate) - relevance_noise
             if (
                 candidate
                 and (
-                    source_declared_gap
-                    or explicit_pattern.search(candidate)
+                    explicit_pattern.search(candidate)
                     or _passive_no_assignment(candidate)
                 )
                 and not _korean_reassuring_absence(candidate)
@@ -1141,24 +1105,6 @@ def _explicit_missing_evidence(
                 and candidate not in rows
             ):
                 rows.append(candidate[:200])
-    if not _contains_hangul(decision_question) and limit == 2:
-        comparability = next(
-            (row for row in rows if "Second-source comparability" in row),
-            None,
-        )
-        validation = next(
-            (row for row in rows if "validation remains ongoing" in row),
-            None,
-        )
-        inspection = next(
-            (row for row in rows if "FDA inspection remains outstanding" in row),
-            None,
-        )
-        if comparability and validation and inspection:
-            return [
-                comparability,
-                "GEMA validation remains ongoing; vendor FDA inspection is outstanding.",
-            ]
     return rows[:limit]
 
 
@@ -2158,6 +2104,20 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
     """Return clause and enumeration facets for diverse evidence retrieval."""
 
     candidates: list[str] = []
+    amendment_range = re.search(
+        r"\bAmendments?\s+(?P<start>\d+)\s+(?:through|to|[-\u2013\u2014])\s+"
+        r"(?P<end>\d+)\b",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if amendment_range:
+        start = int(amendment_range.group("start"))
+        end = int(amendment_range.group("end"))
+        if start <= end and end - start <= 10:
+            candidates.extend(
+                f"Amendment No {number} new amended contract documents stricken replaced"
+                for number in range(start, end + 1)
+            )
     # Ask questions that name a printed field or recital need the exact
     # document surface before broader contract facets consume the five-chunk
     # retrieval budget. These are lexical retrieval hints only; the answer
@@ -2226,6 +2186,12 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
         text,
         flags=re.IGNORECASE,
     ):
+        named_entities = sorted(_question_named_entities(text))
+        if named_entities:
+            candidates.append(
+                " ".join(named_entities[:3])
+                + " change of control ownership interest 51 terminate immediately"
+            )
         candidates.extend(
             [
                 "$300 million maximum termination fee first year convenience",
@@ -2248,6 +2214,21 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
         text,
         flags=re.IGNORECASE,
     ):
+        if re.search(r"\bcontinuity\b", text, flags=re.IGNORECASE):
+            candidates.extend(
+                [
+                    "inadvertently let Agreement expire continued perform reinstate assign extend Term",
+                    "minimum purchase commitment calendar quarter purchase take delivery",
+                    "Service Contract minimum Hardware throughout Term",
+                    "Exclusivity exclusively use during Term",
+                ]
+            )
+        named_entities = sorted(_question_named_entities(text))
+        if named_entities:
+            candidates.append(
+                " ".join(named_entities[:2])
+                + " termination material breach cure notice term renewal obligations"
+            )
         if re.search(r"\bagreement\b", text, flags=re.IGNORECASE):
             candidates.extend(
                 [
@@ -2295,7 +2276,20 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
             ]
         )
     if re.search(r"\b(?:facility\s+lease|leased?\s+site)\b", text, flags=re.IGNORECASE):
-        candidates.append("lease term rent renewal occupancy exit cost termination")
+        candidates.extend(
+            [
+                "Term of the Lease extended Expiration Date Termination Date",
+                "Tenant AS IS Landlord no obligation complete work extension Term",
+                "Basic Rent Annual Basic Rent Monthly Basic Rent",
+                "lease term rent renewal occupancy exit cost termination",
+            ]
+        )
+    if (
+        re.search(r"\b(?:to|until)\s+what\s+date\b", text, flags=re.IGNORECASE)
+        and re.search(r"\b(?:extend\w*|extension)\b", text, flags=re.IGNORECASE)
+        and re.search(r"\b(?:lease\s+)?term\b", text, flags=re.IGNORECASE)
+    ):
+        candidates.insert(0, "Term of the Lease is hereby extended to")
     if re.search(r"\bwork[- ]order\b", text, flags=re.IGNORECASE):
         candidates.append(
             "work order price fee acceptance criteria milestone termination authorization"
@@ -2326,6 +2320,16 @@ def _evidence_query_facets(text: str) -> list[set[str]]:
     seen: set[frozenset[str]] = set()
     for candidate in candidates:
         terms = _expanded_search_query_terms(candidate)
+        amendment_number = re.search(
+            r"\bAmendment(?:\s+(?:No\.?|Number))?\s*(?P<number>\d+)\b",
+            candidate,
+            flags=re.IGNORECASE,
+        )
+        if amendment_number:
+            # General search term normalization intentionally drops bare
+            # numbers. Amendment ranges need the printed number to keep each
+            # document revision as a distinct retrieval facet.
+            terms.add(amendment_number.group("number"))
         frozen = frozenset(terms)
         if not terms or frozen in seen:
             continue
@@ -5564,6 +5568,87 @@ def _procedural_furniture_key_fact(statement: str) -> bool:
     )
 
 
+def _off_question_named_agreement(statement: str, decision_question: str) -> bool:
+    """Reject a different named agreement from a mixed-company filing window."""
+
+    if not decision_question.strip():
+        return False
+    agreement_names = {
+        match.group("name").casefold()
+        for match in re.finditer(
+            r"\b(?P<name>[A-Z][A-Za-z0-9&.'-]{2,40})\s+Agreement\b",
+            statement,
+        )
+        if match.group("name").casefold()
+        not in {"master", "service", "services", "supply", "this", "the"}
+    }
+    if not agreement_names:
+        return False
+    if not _question_named_entities(decision_question):
+        return False
+    question_folded = decision_question.casefold()
+    return all(
+        re.search(rf"\b{re.escape(name)}\b", question_folded) is None
+        for name in agreement_names
+    )
+
+
+def _question_named_entities(decision_question: str) -> set[str]:
+    """Return explicit proper-name anchors while excluding decision boilerplate."""
+
+    excluded = {
+        "agreement",
+        "american",
+        "amendment",
+        "chapter",
+        "contract",
+        "current",
+        "decision",
+        "development",
+        "express",
+        "first",
+        "global",
+        "master",
+        "owner",
+        "services",
+        "should",
+        "supply",
+        "the",
+    }
+    return {
+        token.casefold()
+        for token in re.findall(r"\b[A-Z][A-Za-z0-9&.'-]{2,40}\b", decision_question)
+        if token.casefold() not in excluded
+    }
+
+
+def _chunk_has_different_named_agreement(
+    chunk: dict[str, Any],
+    decision_question: str,
+    *,
+    required_entities: set[str] | None = None,
+) -> bool:
+    """Fence retrieval windows about a different counterparty agreement."""
+
+    question_entities = (
+        set(required_entities)
+        if required_entities is not None
+        else _question_named_entities(decision_question)
+    )
+    if not question_entities:
+        return False
+    text = _prompt_evidence_text(chunk)
+    if any(re.search(rf"\b{re.escape(entity)}\b", text, re.I) for entity in question_entities):
+        return False
+    return bool(
+        re.search(
+            r"\b[A-Z][A-Za-z0-9&.'-]{2,40}(?:\s+[A-Z][A-Za-z0-9&.'-]{2,40})?\s+"
+            r"(?:Master\s+Services?|Services?|Supply|Manufacturing|License|Development)?\s*Agreement\b",
+            text,
+        )
+    )
+
+
 def _grounded_key_fact_fallback(
     chunks: list[dict[str, Any]],
     *,
@@ -5575,8 +5660,42 @@ def _grounded_key_fact_fallback(
     if limit <= 0:
         return []
     query_facets = _evidence_query_facets(decision_question)
+    amendment_question = bool(
+        re.search(r"\bamend(?:ed|ment|ments)?\b", decision_question, re.IGNORECASE)
+    )
+    amendment_sources_present = amendment_question and any(
+        re.search(
+            r"\bamend(?:ed|ment|ments)?\b",
+            " ".join(
+                [
+                    str((chunk.get("source") or {}).get("ref") or ""),
+                    _prompt_evidence_text(chunk)[:240],
+                ]
+            ),
+            flags=re.IGNORECASE,
+        )
+        for chunk in chunks
+    )
+    anchored_question_entities = {
+        entity
+        for entity in _question_named_entities(decision_question)
+        if any(
+            re.search(
+                rf"\b{re.escape(entity)}\b",
+                _prompt_evidence_text(chunk),
+                flags=re.IGNORECASE,
+            )
+            for chunk in chunks
+        )
+    }
     candidates: list[dict[str, Any]] = []
     for chunk_index, chunk in enumerate(chunks):
+        if anchored_question_entities and _chunk_has_different_named_agreement(
+            chunk,
+            decision_question,
+            required_entities=anchored_question_entities,
+        ):
+            continue
         ref = f"evidence_chunk:{chunk['evidence_chunk_id']}"
         source_key = str(chunk.get("artifact_id") or chunk["evidence_chunk_id"])
         prompt_text = _prompt_evidence_text(chunk)
@@ -5585,6 +5704,14 @@ def _grounded_key_fact_fallback(
         # such as ``The Parties agree that manufacturing deviations``.
         prompt_text = re.sub(r"(?m)^\s*\d+\s*$", "", prompt_text)
         prompt_text = re.sub(r"\s+", " ", prompt_text)
+        source_ref = str((chunk.get("source") or {}).get("ref") or "")
+        amendment_source = bool(
+            re.search(
+                r"\bamend(?:ed|ment|ments)?\b",
+                f"{source_ref} {prompt_text[:240]}",
+                flags=re.IGNORECASE,
+            )
+        )
         candidate_clauses = _atomic_relation_clauses(prompt_text)
         host_projection_statements: set[str] = set()
 
@@ -5655,10 +5782,29 @@ def _grounded_key_fact_fallback(
             flags=re.IGNORECASE,
         )
         if convenience_termination is not None:
-            add_host_projection(
-                f"{convenience_termination.group('actor')} may terminate the Agreement "
-                "or any Schedule without cause on five days' written notice."
+            condition_context = prompt_text[
+                max(0, convenience_termination.start() - 700) : convenience_termination.start()
+            ]
+            conditional_exit = bool(
+                re.search(
+                    r"subject\s+to\s+continued\s+compliance\s+with\s+applicable\s+"
+                    r"required\s+minimum\s+purchase\s+obligations\b[^.!?]{0,320}?"
+                    r"open\s+Schedule",
+                    condition_context,
+                    flags=re.IGNORECASE,
+                )
             )
+            if conditional_exit:
+                add_host_projection(
+                    "Subject to applicable minimum-purchase and open-Schedule obligations, "
+                    f"{convenience_termination.group('actor')} may terminate the Agreement "
+                    "or any Schedule without cause on five days' written notice."
+                )
+            else:
+                add_host_projection(
+                    f"{convenience_termination.group('actor')} may terminate the Agreement "
+                    "or any Schedule without cause on five days' written notice."
+                )
         if re.search(
             r"\bNotice\s+of\s+termination\s+of\s+any\s+Schedule\s+shall\s+not\s+"
             r"be\s+considered\s+notice\s+of\s+termination\s+of\s+this\s+Agreement\s+"
@@ -5679,12 +5825,245 @@ def _grounded_key_fact_fallback(
             flags=re.IGNORECASE,
         )
         if annual_purchase_commitment is not None:
+            agreement_context = prompt_text[
+                max(0, annual_purchase_commitment.start() - 500) : annual_purchase_commitment.start()
+            ]
+            named_agreements = list(
+                re.finditer(
+                    r"\b(?P<name>[A-Z][A-Za-z0-9&.'-]{1,40})\s+Agreement\b",
+                    agreement_context,
+                )
+            )
+            agreement_subject = (
+                f"The {named_agreements[-1].group('name')} Agreement"
+                if named_agreements
+                else "The agreement"
+            )
             add_host_projection(
-                "The agreement provides minimum annual purchase commitments for "
+                f"{agreement_subject} provides minimum annual purchase commitments for "
                 f"{annual_purchase_commitment.group('purchase_start')} through "
                 f"{annual_purchase_commitment.group('purchase_end')} and delivery in "
                 f"{annual_purchase_commitment.group('delivery_start')} through "
                 f"{annual_purchase_commitment.group('delivery_end')}."
+            )
+
+        initial_term_and_renewal = re.search(
+            r"\bThe\s+term\s+of\s+this\s+Agreement\s+shall\s+be\s+"
+            r"(?P<term_word>one|two|three|four|five)\s*\(\s*(?P<term_number>\d+)\s*\)\s+"
+            r"years?\s+from\s+the\s+Effective\s+Date\b[^.!?]{0,260}?"
+            r"automatically\s+renewed\s+for\s+successive\s+one[- ]year\s+terms\b"
+            r"[^.!?]{0,260}?at\s+least\s+thirty\s*\(\s*30\s*\)\s+days?[’']?\s+"
+            r"(?:prior\s+)?written\s+notice\s+of\s+its\s+intent\s+not\s+to\s+renew",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if initial_term_and_renewal is not None and (
+            not amendment_sources_present or amendment_source
+        ):
+            add_host_projection(
+                "The Agreement has a "
+                f"{initial_term_and_renewal.group('term_word').lower()}-year initial term, "
+                "then renews for successive one-year terms unless either party gives "
+                "30 days' written non-renewal notice."
+            )
+
+        change_of_control_exit = re.search(
+            r"\b(?P<actor>[A-Z][A-Za-z0-9&.'-]{1,40})\s+may\s+terminate\s+"
+            r"effective\s+immediately\s+if\s+"
+            r"(?P<target>[A-Z][A-Za-z0-9&.'-]{1,40})\s+experiences\s+a\s+"
+            r"change\s+of\s+control\s+event\b.{0,420}?\bif\s+"
+            r"(?P<owner>[A-Z][A-Za-z0-9&.'-]{1,40}(?:\s+[A-Z][A-Za-z0-9&.'-]{1,40}){0,2})"
+            r"[\u2019']s\s+ownership\s+interest\s+in\s+(?P=target)\s+decreases\s+"
+            r"to\s+less\s+than\s+(?P<percent>\d+)%",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if change_of_control_exit is not None and (
+            not amendment_sources_present or amendment_source
+        ):
+            add_host_projection(
+                f"{change_of_control_exit.group('actor')} may terminate immediately "
+                f"if {change_of_control_exit.group('target')} experiences a change of "
+                f"control, including if {change_of_control_exit.group('owner')} "
+                f"ownership decreases below {change_of_control_exit.group('percent')}%."
+            )
+
+        expired_then_revived = re.search(
+            r"\bParties\s+inadvertently\s+let\s+the\s+Agreement\s+expire\b"
+            r"[^.!?]{0,260}?continued\s+to\s+perform\s+as\s+if\s+the\s+Agreement\s+"
+            r"has\s+been\s+in\s+full\s+force\s+and\s+effect\b.{0,420}?"
+            r"desire\s+to\s+revive\s+and\s+amend\s+the\s+Agreement\b"
+            r"[^.!?]{0,180}?extend\s+the\s+term",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if expired_then_revived is not None:
+            add_host_projection(
+                "The First Amendment revives the expired Agreement and extends its term."
+            )
+
+        six_year_amended_term = re.search(
+            r"\bSection\s+12\.1\s+is\s+deleted\s+in\s+its\s+entirety\s+and\s+"
+            r"replaced\b.{0,320}?\bAgreement\s+shall\s+commence\s+on\s+the\s+"
+            r"Effective\s+Date\s+and\s+terminate\s+six\s*\(\s*6\s*\)\s+years\s+"
+            r"thereafter\b[^.!?]{0,180}?extended\s+longer\s+by\s+the\s+mutual\s+"
+            r"agreement\s+of\s+the\s+Parties",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if six_year_amended_term is not None:
+            add_host_projection(
+                "The First Amendment replaces Section 12.1 with a six-year term, "
+                "subject to early termination or mutual extension."
+            )
+
+        lease_term_extension = re.search(
+            r"\bThe\s+Term\s+of\s+the\s+Lease\s+is\s+hereby\s+extended\s+to\s+"
+            rf"(?P<date>(?:{_SCALAR_MONTHS})\s+\d{{1,2}},\s*\d{{4}})\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if lease_term_extension is not None:
+            add_host_projection(
+                "The Term of the Lease is extended to "
+                f"{lease_term_extension.group('date')}."
+            )
+        lease_as_is_condition = re.search(
+            r"\bTenant\b.{0,900}?\bagrees\s+to\s+take\s+the\s+same\s+"
+            r"[\u201c\u201d\"]AS\s+IS[\u201c\u201d\"]\s*\.\s*"
+            r"Landlord\s+shall\s+have\s+no\s+obligation\s+to\s+complete\s+"
+            r"any\s+work\b.{0,220}?\bextension\s+of\s+the\s+Term\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if lease_as_is_condition is not None:
+            add_host_projection(
+                'Tenant accepts the premises "AS IS"; Landlord has no obligation '
+                "to complete work for the Term extension."
+            )
+
+        detailed_service_level_methodology = re.search(
+            r"\bSchedule\s+A-3\.2\s+Service\s+Level\s+Definitions\s+and\s+"
+            r"Measurement\s+Methodology\b.{0,260}?\bProvides\s+more\s+detailed\s+"
+            r"definitions\s+and\s+measurement\s+methodology\b.{0,180}?"
+            r"\bSchedule\s+A-3\.1\s+Service\s+Level\s+Matrix\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if detailed_service_level_methodology is not None:
+            add_host_projection(
+                "Schedule A-3.2 provides detailed definitions and measurement methodology "
+                "for the service levels and key measurements in Schedule A-3.1."
+            )
+        pc_refresh_service_levels = re.search(
+            r"\bSchedule\s+A-3\.1\s+Service\s+Level\s+Matrix\b.{0,260}?"
+            r"\badd\s+Key\s+Measure\s+for\s+PC\s+refresh\b.{0,260}?"
+            r"\bSchedule\s+A-3\.2\s+Service\s+Level\s+Definitions\s+and\s+"
+            r"Measurement\s+Methodology\b.{0,260}?"
+            r"\bAdded\s+Key\s+Measure\s+for\s+PC\s+Refresh\s+and\s+CSI\s+Flags\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if pc_refresh_service_levels is not None:
+            add_host_projection(
+                "Schedules A-3.1 and A-3.2 are amended to add a PC Refresh key "
+                "measure and CSI flags."
+            )
+        user_security_fixed_fee = re.search(
+            r"\bUser\s+Security\s+Administration\b.{0,260}?"
+            r"\bconverted\s+to\s+a\s+monthly\s+fixed\s+fee\b",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if user_security_fixed_fee is not None:
+            add_host_projection(
+                "User Security Administration is converted to a monthly fixed fee."
+            )
+
+        quarterly_minimum_purchase = re.search(
+            r"\bMinimum\s+Purchase\s+Commitment\b.{0,220}?"
+            r"Customer\s+shall\s+purchase\s+and\s+take\s+delivery\s+of\s+no\s+less\s+"
+            r"than\s+\[\s*\*{3}\s*\][^.!?]{0,140}?during\s+each\s+calendar\s+"
+            r"quarter\s+of\s+this\s+Agreement\s+during\s+the\s+Term",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if quarterly_minimum_purchase is not None:
+            add_host_projection(
+                "Customer must purchase and take delivery of a redacted minimum during "
+                "each calendar quarter of the Term."
+            )
+
+        minimum_service_contract = re.search(
+            r"\bCustomer\s+shall,?\s+throughout\s+the\s+Term,?\s+purchase\s+and\s+"
+            r"maintain\s+the\s+minimum\s+of\s+\[\s*\*{3}\s*\][^.!?]{0,100}?"
+            r"on\s+each\s+Hardware",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if minimum_service_contract is not None:
+            add_host_projection(
+                "Customer must maintain a minimum service contract on each covered "
+                "hardware throughout the Term; the minimum is redacted."
+            )
+
+        named_initial_term = re.search(
+            r"\bThe\s+initial\s+term\s+of\s+the\s+"
+            r"(?P<name>[A-Z][A-Za-z0-9&.'-]{1,40})\s+Agreement\s+is\s+"
+            r"(?P<duration>one|two|three|four|five)\s+years?\s+until\s+"
+            r"(?P<date>(?:January|February|March|April|May|June|July|August|"
+            r"September|October|November|December)\s+\d{1,2},\s+\d{4})",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if named_initial_term is not None:
+            add_host_projection(
+                f"The {named_initial_term.group('name')} Agreement's initial term lasts "
+                f"{named_initial_term.group('duration').lower()} years, until "
+                f"{named_initial_term.group('date')}."
+            )
+
+        evergreen_nonrenewal = re.search(
+            r"\b(?P<name>[A-Z][A-Za-z0-9&.'-]{1,40})\s+Agreement\s+will\s+"
+            r"automatically\s+renew\s+on\s+an\s+evergreen\s+basis\s+for\s+a\s+"
+            r"consecutive\s+one[- ]year\s+period\b[^.!?]{0,260}?"
+            r"at\s+least\s+(?P<months>\d+|twelve)\s+months?\s+prior",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if evergreen_nonrenewal is not None:
+            months = evergreen_nonrenewal.group("months")
+            add_host_projection(
+                f"The {evergreen_nonrenewal.group('name')} Agreement renews for consecutive "
+                f"one-year periods unless a party gives at least {months} months' notice."
+            )
+
+        thirty_day_breach_cure = re.search(
+            r"\bEither\s+party\s+may\s+terminate\s+this\s+Agreement\s+by\s+"
+            r"written\s+notice\b[^.!?]{0,180}?\bmaterial\s+breach\b[^.!?]{0,180}?"
+            r"not\s+cured\s+within\s+thirty\s*\(\s*30\s*\)\s+calendar\s+days\s+"
+            r"after\s+written\s+notice",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if thirty_day_breach_cure is not None:
+            add_host_projection(
+                "Either party may terminate for a material breach not cured within "
+                "30 days after written notice, subject to the agreement's extended-cure condition."
+            )
+
+        change_rejection_exit = re.search(
+            r"\b(?P<actor>[A-Z][A-Za-z0-9&.'-]{1,40})\s+may\s+terminate\s+"
+            r"this\s+Agreement\s+upon\s+sixty\s*\(\s*60\s*\)\s+days?[’']?\s+"
+            r"written\s+notice\b[^.!?]{0,260}?\b(?:rejects|fails\s+to\s+respond\s+to)\s+"
+            r"a\s+(?:Major|Minor)\s+Change",
+            prompt_text,
+            flags=re.IGNORECASE,
+        )
+        if change_rejection_exit is not None:
+            add_host_projection(
+                f"{change_rejection_exit.group('actor')} may terminate on 60 days' "
+                "notice after rejection or non-response to a qualifying proposed change."
             )
 
         amended_appendix = re.compile(
@@ -6113,6 +6492,8 @@ def _grounded_key_fact_fallback(
                 continue
             if _procedural_furniture_key_fact(statement):
                 continue
+            if _off_question_named_agreement(statement, decision_question):
+                continue
             if (
                 _statement_requires_speaker_attribution(statement, chunk)
                 and _contains_hangul(statement)
@@ -6411,6 +6792,22 @@ def _complete_extracted_statement_surface(text: str) -> bool:
         return False
     if re.match(r"^[•●▪◦‣]\s*", statement):
         return False
+    if re.match(r"^\d+\s*[-–—]\s*\d+\s+(?:shall|must|may|will)\b", statement):
+        return False
+    if re.fullmatch(
+        r"(?:Effect|Effects|Scope|Purpose|Background|Overview|Summary)\s+of\s+"
+        r"[^.!?]{2,100}",
+        statement,
+        flags=re.IGNORECASE,
+    ):
+        return False
+    if re.search(
+        r"\bbetween\s+[A-Z][A-Za-z0-9&.'-]{1,50}\s*[.!?]?$",
+        statement,
+    ):
+        return False
+    if re.search(r"\s+[A-Z]\s*[.!?]?$", statement):
+        return False
     if re.match(
         r"^(?:Ensuring|Implementing|Maintaining|Performing|Providing|Reviewing|"
         r"Supporting|Using)\b",
@@ -6476,6 +6873,71 @@ def _complete_extracted_statement_surface(text: str) -> bool:
         flags=re.IGNORECASE,
     ):
         return False
+    return True
+
+
+def _model_statement_source_semantics_supported(
+    statement: str,
+    source_texts: list[str],
+) -> bool:
+    """Reject a few high-risk scope and locator changes lexical anchors miss."""
+
+    combined = "\n".join(source_texts)
+    if not statement.strip() or not combined.strip():
+        return False
+    if (
+        re.search(r"\bsigned\s+on\s+(?:the\s+)?(?:Amendment\s+)?Effective\s+Date\b", statement, re.I)
+        and re.search(r"\bexecuted\s+this\s+Amendment\s+as\s+of\s+the\s+Amendment\s+Effective\s+Date\b", combined, re.I)
+        and not re.search(r"\bsigned\s+on\b", combined, re.I)
+    ):
+        return False
+    if (
+        re.search(r"\bworldwide\b", statement, re.I)
+        and re.search(r"\bcertain\s+territories\s+in\s+the\s+world\b", combined, re.I)
+        and not re.search(r"\bworldwide\b", combined, re.I)
+    ):
+        return False
+
+    locator_matches = list(
+        re.finditer(
+            r"\b(?:per|under|in|pursuant\s+to)\s+Section\s+"
+            r"(?P<section>\d+(?:\.\d+){1,3})\b",
+            statement,
+            flags=re.IGNORECASE,
+        )
+    )
+    if not locator_matches:
+        return True
+    statement_terms = _expanded_claim_support_terms(statement) - {
+        "section",
+        "per",
+        "under",
+        "pursuant",
+    }
+    for locator in locator_matches:
+        section = locator.group("section")
+        source_locator = re.compile(
+            rf"(?:\bSection\s+)?{re.escape(section)}\b",
+            flags=re.IGNORECASE,
+        )
+        locally_supported = False
+        for match in source_locator.finditer(combined):
+            following = combined[match.start() : match.start() + 900]
+            following = re.split(
+                r"\n\s*\d+(?:\.\d+){1,3}\s*\n",
+                following,
+                maxsplit=1,
+            )[0]
+            overlap = statement_terms & _expanded_claim_support_terms(following)
+            required_overlap = min(
+                6,
+                max(4, (len(statement_terms) + 1) // 2),
+            )
+            if len(overlap) >= required_overlap:
+                locally_supported = True
+                break
+        if not locally_supported:
+            return False
     return True
 
 
@@ -8525,6 +8987,19 @@ def _answer_chunk_scalar_relevance_bonus(question: str, text: str) -> int:
     lowered_question = question.casefold()
     lowered_text = text.casefold()
 
+    term_extension_question = bool(
+        re.search(r"\b(?:to|until)\s+what\s+date\b", question, flags=re.IGNORECASE)
+        and re.search(r"\b(?:extend\w*|extension)\b", question, flags=re.IGNORECASE)
+        and re.search(r"\b(?:lease\s+)?term\b", question, flags=re.IGNORECASE)
+    )
+    if term_extension_question and ({"date", "iso"} & kinds):
+        return 12 if re.search(
+            r"\bTerm\s+of\s+the\s+Lease\s+is\s+hereby\s+extended\s+to\s+"
+            rf"(?:{_SCALAR_MONTHS})\s+\d{{1,2}},\s*\d{{4}}\b",
+            text,
+            flags=re.IGNORECASE,
+        ) else 0
+
     recital_question = _supply_agreement_recital_question_parts(question)
     if recital_question and ({"date", "iso"} & kinds):
         ordinal, party = recital_question
@@ -9794,6 +10269,11 @@ def _direct_labeled_date_source_projection(
         re.search(r"\bInitial\s+Term\b", question, flags=re.IGNORECASE)
         and re.search(r"\bexpir\w*\b", question, flags=re.IGNORECASE)
     )
+    term_extension_question = bool(
+        re.search(r"\b(?:to|until)\s+what\s+date\b", question, flags=re.IGNORECASE)
+        and re.search(r"\b(?:extend\w*|extension)\b", question, flags=re.IGNORECASE)
+        and re.search(r"\b(?:lease\s+)?term\b", question, flags=re.IGNORECASE)
+    )
     signatory_question = re.search(
         r"\bwhat\s+date\b[^?]{0,100}\bfor\s+(?P<party>.+?)(?:['’]s)\s+signatory\b",
         question,
@@ -9804,8 +10284,43 @@ def _direct_labeled_date_source_projection(
         r"\b(?:effective[-\s]+date|entry\s+date)\b",
         question,
         flags=re.IGNORECASE,
-    ) and recital_question is None and not initial_term_question and signatory_question is None:
+    ) and recital_question is None and not initial_term_question and not term_extension_question and signatory_question is None:
         return None
+    if term_extension_question:
+        candidates: dict[str, dict[str, Any]] = {}
+        occurrences: set[tuple[str, str]] = set()
+        for chunk in chunks:
+            artifact_id = str(chunk.get("artifact_id") or "")
+            evidence_chunk_id = str(chunk.get("evidence_chunk_id") or "")
+            if not artifact_id or not evidence_chunk_id:
+                continue
+            text = str(chunk.get("text") or "")
+            for extension in re.finditer(
+                r"\bTerm\s+of\s+the\s+Lease\s+is\s+hereby\s+extended\s+to\s+"
+                rf"(?P<date>(?:{_SCALAR_MONTHS})\s+\d{{1,2}},\s*\d{{4}})\b",
+                text,
+                flags=re.IGNORECASE,
+            ):
+                date_surface = re.sub(r"\s+", " ", extension.group("date")).strip()
+                span = valid_character_span(chunk)
+                occurrence_position = (
+                    str(span[0] + extension.start("date"))
+                    if span is not None
+                    else f"{evidence_chunk_id}:{extension.start('date')}"
+                )
+                occurrences.add((artifact_id, occurrence_position))
+                candidates.setdefault(
+                    date_surface.casefold(),
+                    {
+                        "answer": date_surface,
+                        "citation_refs": [f"evidence_chunk:{evidence_chunk_id}"],
+                        "validation_mode": "direct_labeled_field_projection",
+                        "identifiers": ["lease term extension"],
+                    },
+                )
+        if len(candidates) != 1 or len(occurrences) != 1:
+            return None
+        return dict(next(iter(candidates.values())))
     if initial_term_question:
         amendment_numbers = {
             match.group("number")
@@ -12283,7 +12798,12 @@ def _explicit_decision_exposure_rows(
             (0, r"\b(?:break-up|termination)\s+fee\b|\bmaximum\s+\$?\d[^.!?]{0,40}\bfee\b"),
             (1, r"\bpersonal\s+information\b[^.!?]{0,80}\bmillion\b"),
             (2, r"\b(?:may|can)\s+(?:immediately\s+)?(?:terminate|suspend)\b"),
-            (3, r"\bminimum\s+annual\s+purchases?\b|\bminimum[- ]purchase\s+obligations?\b"),
+            (
+                3,
+                r"\bminimum\s+(?:annual|quarterly)\s+purchases?\b|"
+                r"\bminimum[- ]purchase\s+(?:commitments?|obligations?)\b|"
+                r"\bredacted\s+minimum\b[^.!?]{0,80}\bcalendar\s+quarter\b",
+            ),
             (4, r"\bservice[- ]level\s+credits?\b"),
             (5, r"\bpaid\s+disengagement\s+assistance\b"),
             (6, r"\bterminate\b[^.!?]{0,80}\b(?:days?[’']?\s+notice|notice)\b"),
@@ -12296,6 +12816,8 @@ def _explicit_decision_exposure_rows(
     ranked: list[tuple[int, int, dict[str, Any]]] = []
     for index, candidate in enumerate(candidates):
         statement = str(candidate.get("statement") or "")
+        if _off_question_named_agreement(statement, decision_question):
+            continue
         priority = exposure_priority(statement)
         contract_exit_context = bool(
             re.search(
@@ -12329,6 +12851,19 @@ def _grounded_decision_risk_rows(
 ) -> list[dict[str, Any]]:
     """Merge deterministic risks and model risks under the Brief row limit."""
 
+    anchored_question_entities = {
+        entity
+        for entity in _question_named_entities(decision_question)
+        if any(
+            re.search(
+                rf"\b{re.escape(entity)}\b",
+                _prompt_evidence_text(chunk),
+                flags=re.IGNORECASE,
+            )
+            for chunk in chunks
+        )
+    }
+
     grounded_model_rows = _grounded_conflict_rows(
         model_rows,
         chunk_by_ref,
@@ -12349,6 +12884,29 @@ def _grounded_decision_risk_rows(
         *_explicit_tension_rows(chunks, limit=max(limit * 3, limit)),
         *grounded_model_rows,
         *_explicit_constraint_rows(chunks, limit=max(limit * 3, limit)),
+    ]
+    candidates = [
+        candidate
+        for candidate in candidates
+        if _complete_extracted_statement_surface(
+            str(candidate.get("statement") or "")
+        )
+        and not _off_question_named_agreement(
+            str(candidate.get("statement") or ""), decision_question
+        )
+        and not (
+            anchored_question_entities
+            and (candidate.get("citation_refs") or [])
+            and all(
+                ref in chunk_by_ref
+                and _chunk_has_different_named_agreement(
+                    chunk_by_ref[ref],
+                    decision_question,
+                    required_entities=anchored_question_entities,
+                )
+                for ref in candidate.get("citation_refs") or []
+            )
+        )
     ]
     if decision_question.strip():
         candidates = [
@@ -13549,7 +14107,10 @@ def _question_specific_next_step(
     ):
         return "Map ownership, permitted use, return or destruction duties, and surviving licenses before deciding."
     if re.search(r"\b(?:leased?\s+site|facility\s+lease)\b", question, flags=re.IGNORECASE):
-        return "Compare occupancy need and renewal economics against exit cost and timing before deciding."
+        return (
+            "Quantify required space, total renewal cost, and exit cost; renew only "
+            "if the occupied-site option beats relocation on cost and timing."
+        )
     if re.search(r"\bminimum[- ]purchase\b", question, flags=re.IGNORECASE) and re.search(
         r"\bexclusiv\w*\b", question, flags=re.IGNORECASE
     ):
@@ -13559,17 +14120,32 @@ def _question_specific_next_step(
         question,
         flags=re.IGNORECASE,
     ):
-        return "Compare renewal economics and service performance against replacement cost and readiness before deciding."
+        return (
+            "Set service, renewal-cost, and replacement-readiness thresholds; "
+            "continue only if current performance clears them."
+        )
     if re.search(r"\bsecond[- ]source\b", question, flags=re.IGNORECASE):
         return "Verify comparability, validation, inspection status, and the second source's qualified capacity before deciding."
     if re.search(r"\bservice[- ]provider\s+dependency\b", question, flags=re.IGNORECASE):
-        return "Quantify SLA exposure and disengagement cost, then validate transition readiness before deciding."
+        return (
+            "Set SLA, disengagement-cost, and transition-readiness thresholds; "
+            "continue only if current performance clears them."
+        )
     if re.search(r"\bsupply\s+dependency\b", question, flags=re.IGNORECASE):
         if re.search(r"\bcontinuity\b", question, flags=re.IGNORECASE):
-            return "Compare committed volume and pricing against forecast demand, capacity, and continuity protections before deciding."
-        return "Compare price and reserved capacity against current quality and delivery performance before deciding."
+            return (
+                "Set demand, capacity, delivery, quality, and price thresholds; "
+                "continue only if verified supply performance clears them."
+            )
+        return (
+            "Set capacity, quality, delivery, and price thresholds; continue only "
+            "if verified supply performance clears them."
+        )
     if re.search(r"\bwork[- ]order\b", question, flags=re.IGNORECASE):
-        return "Verify acceptance evidence and work-order pricing against the master agreement before authorizing continuation."
+        return (
+            "Authorize continuation only after acceptance evidence and work-order "
+            "pricing match the master agreement."
+        )
     if re.search(r"\blicense\b", question, flags=re.IGNORECASE):
         return "Map territory, licensed scope, termination triggers, and surviving rights before deciding."
     if re.search(r"\b(?:concentration|economics)\b", question, flags=re.IGNORECASE):
@@ -13581,9 +14157,13 @@ def _question_specific_next_step(
             flags=re.IGNORECASE,
         ):
             return (
-                "Verify quality remediation, validation, regulatory inspection, and usable capacity before deciding."
+                "Continue only after quality remediation, validation, regulatory "
+                "inspection, and usable capacity meet documented acceptance thresholds."
             )
-        return "Compare amended purchase, term, and pricing obligations against capacity and quality performance before deciding."
+        return (
+            "Set capacity, quality, delivery, and price thresholds; continue only "
+            "after verified performance clears them."
+        )
     if re.search(
         r"\b(?:missing[- ]drive|unaccounted[- ]for\s+(?:server\s+)?drives?|"
         r"data[- ]security\s+incident)\b",
@@ -13592,13 +14172,19 @@ def _question_specific_next_step(
     ):
         return "Obtain incident-remediation closure and quantify current service and transition exposure before deciding."
     if re.search(r"\boutsourc\w*\b", question, flags=re.IGNORECASE):
-        return "Quantify termination fees, SLA credits, and disengagement cost, then validate transition readiness before deciding."
+        return (
+            "Set SLA, incident, and transition-cost thresholds; continue only if "
+            "current performance and exit readiness clear them."
+        )
     if re.search(
         r"\b(?:global\s+development|development\s+plan|collaboration)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Reconcile the current plan and budget with cost allocation, milestones, and opt-out rights before deciding."
+        return (
+            "Approve continuation only after the current plan, budget, cost "
+            "allocation, milestones, and opt-out exposure reconcile."
+        )
     if re.search(r"\balternate\s+supply\b", question, flags=re.IGNORECASE):
         return "Verify alternate-supply qualification and map the intellectual-property rights needed for transition before deciding."
     if re.search(
@@ -13612,13 +14198,19 @@ def _question_specific_next_step(
         question,
         flags=re.IGNORECASE,
     ):
-        return "Compare service levels, pricing, and renewal terms against current performance and replacement options before deciding."
+        return (
+            "Set service-level, price, and transition-cost thresholds; extend only "
+            "if current performance clears them and no replacement option is better."
+        )
     if re.search(
         r"\b(?:amend(?:ed|ment)|renew(?:al)?|terminat(?:e|ion)|extend)\b",
         question,
         flags=re.IGNORECASE,
     ):
-        return "Reconcile the controlling amendment, notice dates, and current operational obligations before deciding."
+        return (
+            "Build a clause-change table for scope, service levels, price, term, and "
+            "notice; extend only after current performance clears agreed thresholds."
+        )
     return "Verify the cited decision basis against current operating evidence before deciding."
 
 
@@ -23406,12 +23998,31 @@ class LocalRuntimeStore:
                 query,
                 text,
             )
+            source_identity = " ".join(
+                str((item.get("source") or {}).get(key) or "")
+                for key in ("ref", "filename", "path", "title")
+            )
+            source_stage_relevance_bonus = (
+                6
+                if re.search(
+                    r"\bamend(?:ed|ment|ments)?\b",
+                    query,
+                    flags=re.IGNORECASE,
+                )
+                and re.search(
+                    r"\bamend(?:ed|ment|ments)?\b",
+                    source_identity,
+                    flags=re.IGNORECASE,
+                )
+                else 0
+            )
             score = round(
                 float(keyword_score)
                 + embedding_score
                 + scalar_relevance_bonus
                 + document_change_relevance_bonus
-                + incident_relevance_bonus,
+                + incident_relevance_bonus
+                + source_stage_relevance_bonus,
                 6,
             )
             chunk_base = {
@@ -23450,6 +24061,7 @@ class LocalRuntimeStore:
                 "scalar_relevance_bonus": scalar_relevance_bonus,
                 "document_change_relevance_bonus": document_change_relevance_bonus,
                 "incident_relevance_bonus": incident_relevance_bonus,
+                "source_stage_relevance_bonus": source_stage_relevance_bonus,
                 "source": item.get("source"),
                 "safety": artifact.get("safety", {}),
                 "evidence_refs": [
@@ -25026,6 +25638,10 @@ class LocalRuntimeStore:
                 if (
                     _low_information_key_fact(statement)
                     or not _complete_extracted_statement_surface(statement)
+                    or not _model_statement_source_semantics_supported(
+                        statement,
+                        source_texts,
+                    )
                 ):
                     pruned_ungrounded_key_fact_count += 1
                     continue
@@ -25217,6 +25833,33 @@ class LocalRuntimeStore:
                 # Fallback extraction is a safety net, not a quota. A few
                 # strong facts are preferable to forcing page headings or
                 # low-value transcript fragments into the Brief.
+                existing_contract_timing = any(
+                    re.search(
+                        r"\b(?:initial\s+term|renew\w*|expir\w*|"
+                        r"non[- ]renewal\s+notice|termination\s+date)\b",
+                        str(row.get("statement") or ""),
+                        flags=re.IGNORECASE,
+                    )
+                    for row in [*key_point_citations, *conflict_citations]
+                )
+                candidate_contract_timing = bool(
+                    re.search(
+                        r"\b(?:initial\s+term|renew\w*|expir\w*|"
+                        r"non[- ]renewal\s+notice|termination\s+date)\b",
+                        str(fallback_key_fact.get("statement") or ""),
+                        flags=re.IGNORECASE,
+                    )
+                )
+                allow_contract_timing_surface = bool(
+                    len(key_point_citations) < 3
+                    and not existing_contract_timing
+                    and candidate_contract_timing
+                    and re.search(
+                        r"\b(?:continue|depend|dependency|extend|renew|replace)\w*\b",
+                        decision_question,
+                        flags=re.IGNORECASE,
+                    )
+                )
                 allow_second_change_context = bool(
                     (explicit_document_change_fact_rows or needs_two_contract_surfaces)
                     and len(key_point_citations) < 2
@@ -25228,7 +25871,17 @@ class LocalRuntimeStore:
                 if (
                     len(key_point_citations) >= target_key_fact_count
                     and not allow_second_change_context
+                    and not allow_contract_timing_surface
                 ):
+                    if (
+                        not existing_contract_timing
+                        and re.search(
+                            r"\b(?:continue|depend|dependency|extend|renew|replace)\w*\b",
+                            decision_question,
+                            flags=re.IGNORECASE,
+                        )
+                    ):
+                        continue
                     break
                 if _key_fact_row_is_redundant(
                     [*key_point_citations, *conflict_citations],

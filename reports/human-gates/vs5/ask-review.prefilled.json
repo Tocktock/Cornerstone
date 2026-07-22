@@ -17,10 +17,10 @@
       "packages/cornerstone_cli/briefing.py",
       "packages/cornerstone_cli/product_access.py"
     ],
-    "pipeline_sha256": "5dabae252114900f1b24a3f9daf5a7b2c42e0cdeb9f0be86d66f3ac85e4e802d",
+    "pipeline_sha256": "3d8191e188682527357727abbdaa9742eca103b73271a9713e9a61dbf19a7d26",
     "provider": "ollama"
   },
-  "prompt_retrieval_revision": "5dabae252114900f1b24a3f9daf5a7b2c42e0cdeb9f0be86d66f3ac85e4e802d",
+  "prompt_retrieval_revision": "3d8191e188682527357727abbdaa9742eca103b73271a9713e9a61dbf19a7d26",
   "minimum_case_count": 10,
   "answer_reviews": [
     {
@@ -28,17 +28,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What complete deadline wording governs the Corrective Action Plan?",
-        "answer_id": "answer_d98a73ed399baf22",
-        "answer": "\"by no later than March 31, 2020 or such later date as is approved by Company in writing\"",
+        "answer_id": "answer_283aaf59bfe1b3d3",
+        "answer": "Supplier shall implement the information security corrective action plans agreed upon in writing by Supplier and Company as of the Effective Date ('Corrective Action Plan') by no later than March 31, 2020 or such later date as is approved by Company in writing.",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_4c4fc967ecade17308997ca896af3b60cbb8700ad55307eaf06696777f0faf77"
+          "evidence_chunk:chunk_609dba3789a3f98e44dcbcd338fdb8893bfc258bd4da28f7c74df0186ebb0601"
         ],
         "supporting_result_count": 4,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_4c4fc967ecade17308997ca896af3b60cbb8700ad55307eaf06696777f0faf77",
+            "citation_ref": "evidence_chunk:chunk_609dba3789a3f98e44dcbcd338fdb8893bfc258bd4da28f7c74df0186ebb0601",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/01-evernorth-msa.txt",
             "source_id": "edgar-omada-evernorth-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104a.htm",
@@ -66,7 +66,7 @@
       },
       "unanswerable": {
         "question": "What final unredacted price did both parties sign for the next renewal term?",
-        "answer_id": "answer_dc93e1d1fbda9c7f",
+        "answer_id": "answer_bf4a79642d1c290c",
         "answer": "The provided evidence does not answer the question \"What final unredacted price did both parties sign for the next renewal term?\".",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -74,7 +74,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_17eb4d27f3b6713b37e7f6046e1d7b57d58db9ceb55a25cfb98a1a75de439a6a",
+            "citation_ref": "evidence_chunk:chunk_03b69c20e489bd54345692a980bb30e7e7fa6bd0f877b55d61967258899df5fb",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/02-evernorth-amendment.txt",
             "source_id": "edgar-omada-evernorth-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104b.htm",
@@ -97,30 +97,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_26e52e904185dd8bb301219f959465a6aa30b235a2d70184084684c44e25f884",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/03-evernorth-amendment.txt",
-            "source_id": "edgar-omada-evernorth-msa-source-03",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104c.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/0001193125-25-116907-index.html",
-            "accession_number": "0001193125-25-116907",
-            "form_type": "EX-10.4C",
-            "filing_date": "2025-05-09",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/51c8d72537c47982b33a24c65dcaefc5c0b1c30797932eff79304250b98cc90b.html",
-            "raw_sha256": "51c8d72537c47982b33a24c65dcaefc5c0b1c30797932eff79304250b98cc90b",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/739f745450209391cab8ea24182635f23ce47e7dabdc46a039808ef3c4ea29b6.txt",
-            "normalized_sha256": "739f745450209391cab8ea24182635f23ce47e7dabdc46a039808ef3c4ea29b6",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/03-evernorth-amendment.txt",
-            "upload_sha256": "a99c78b2ab931c9fafe543202d8d002b6600eca07e543ec9548cb11b0a9d5f1c",
-            "artifact_id": "art_a99c78b2ab931c9fafe543202d8d002b6600eca07e543ec9548cb11b0a9d5f1c",
-            "span": {
-              "char_end": 2196,
-              "char_start": 1009
-            },
-            "source_excerpt": "WHEREAS, Company and Supplier wish to amend the Agreement to reflect certain changes to the obligations under the Agreement relating to Service Levels and\nService Level Agreements;\n\nNOW THEREFORE, in consideration of the foregoing premises and the agreements set forth below, and intending to be legally\nbound, the parties hereby agree as follows:\n\n1.  Interpretation. Capitalized terms used in this Amendment but not defined herein shall\nhave the respective meanings set forth in the Agreement.\n\n2.  Amendments.\n\n2.1  Section 1.6 “Service Levels” to the Agreement is hereby deleted in its entirety and replaced with:\n\nService Levels. Terms for Service Levels and Performance Guarantees, if any, are set forth for the Expansion Services, the ESI\nServices, and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in the applicable Statement of Work, Section 2 of Exhibit A (Performance Guarantees), Exhibit 2A (Information Protection Service\nLevels), Exhibit 3A (IT Operational Requirements) and Exhibit 4 (Service Level Agreements) of this Agreement.\n\n2.2  Exhibit 4 “Service\nLevel Agreements” attached herein is hereby added to this Agreement",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_b544a59324af7b677ee99a144e060ed45968b316b8cb4ea1246f83b62dca266e",
+            "citation_ref": "evidence_chunk:chunk_1c1880904eb7a5812860979810d0a896a928449e9c8faab18dcada9a0443aaf9",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/03-evernorth-amendment.txt",
             "source_id": "edgar-omada-evernorth-msa-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104c.htm",
@@ -143,7 +120,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_c215d551d59aff2b4fad469d0ee85df90e9828697bbc657c4ebbd9f8027514ac",
+            "citation_ref": "evidence_chunk:chunk_2cffc628645df8f8e1d32947e76a1ce8c44c0a04c5d1d1ae5500171ac59e614e",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/03-evernorth-amendment.txt",
+            "source_id": "edgar-omada-evernorth-msa-source-03",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104c.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/0001193125-25-116907-index.html",
+            "accession_number": "0001193125-25-116907",
+            "form_type": "EX-10.4C",
+            "filing_date": "2025-05-09",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/51c8d72537c47982b33a24c65dcaefc5c0b1c30797932eff79304250b98cc90b.html",
+            "raw_sha256": "51c8d72537c47982b33a24c65dcaefc5c0b1c30797932eff79304250b98cc90b",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/739f745450209391cab8ea24182635f23ce47e7dabdc46a039808ef3c4ea29b6.txt",
+            "normalized_sha256": "739f745450209391cab8ea24182635f23ce47e7dabdc46a039808ef3c4ea29b6",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/03-evernorth-amendment.txt",
+            "upload_sha256": "a99c78b2ab931c9fafe543202d8d002b6600eca07e543ec9548cb11b0a9d5f1c",
+            "artifact_id": "art_a99c78b2ab931c9fafe543202d8d002b6600eca07e543ec9548cb11b0a9d5f1c",
+            "span": {
+              "char_end": 2196,
+              "char_start": 1009
+            },
+            "source_excerpt": "WHEREAS, Company and Supplier wish to amend the Agreement to reflect certain changes to the obligations under the Agreement relating to Service Levels and\nService Level Agreements;\n\nNOW THEREFORE, in consideration of the foregoing premises and the agreements set forth below, and intending to be legally\nbound, the parties hereby agree as follows:\n\n1.  Interpretation. Capitalized terms used in this Amendment but not defined herein shall\nhave the respective meanings set forth in the Agreement.\n\n2.  Amendments.\n\n2.1  Section 1.6 “Service Levels” to the Agreement is hereby deleted in its entirety and replaced with:\n\nService Levels. Terms for Service Levels and Performance Guarantees, if any, are set forth for the Expansion Services, the ESI\nServices, and the Services described in any other Statement of Work that indicates that Exhibit A shall apply in the applicable Statement of Work, Section 2 of Exhibit A (Performance Guarantees), Exhibit 2A (Information Protection Service\nLevels), Exhibit 3A (IT Operational Requirements) and Exhibit 4 (Service Level Agreements) of this Agreement.\n\n2.2  Exhibit 4 “Service\nLevel Agreements” attached herein is hereby added to this Agreement",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_8bcb3fd9ae2c4abe6e9ac0aa3bf42eaf45bd9bef5df9ab42da25667e757bcb8d",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/01-evernorth-msa.txt",
             "source_id": "edgar-omada-evernorth-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104a.htm",
@@ -166,7 +166,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_e3009b001ce08c59214b21e1690a863ec80dba72052c6e9cbab48753b420c675",
+            "citation_ref": "evidence_chunk:chunk_bef674df9127b78560f5e6fa9d9570f17cbaffecf7c0b8bb0ebe9b6d71598635",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-omada-evernorth-msa/upload/01-evernorth-msa.txt",
             "source_id": "edgar-omada-evernorth-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1611115/000119312525116907/d785770dex104a.htm",
@@ -199,17 +199,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "On what date did Amendment 4 state that the Initial Term would expire?",
-        "answer_id": "answer_88d328e85b9f0bfa",
+        "answer_id": "answer_3fe1fcb4743cb133",
         "answer": "December 31, 2022",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_edb0db413a5073416c053e4b63966d707416e38569efc7924d4cdafe90d10eb2"
+          "evidence_chunk:chunk_40ec16ccca54b15f31fa664a35a0c8fb9dfd9377f2b50a39ad69dcb0b334f25f"
         ],
         "supporting_result_count": 3,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_edb0db413a5073416c053e4b63966d707416e38569efc7924d4cdafe90d10eb2",
+            "citation_ref": "evidence_chunk:chunk_40ec16ccca54b15f31fa664a35a0c8fb9dfd9377f2b50a39ad69dcb0b334f25f",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/02-amex-amendment.txt",
             "source_id": "edgar-composecure-amex-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-26.htm",
@@ -237,7 +237,7 @@
       },
       "unanswerable": {
         "question": "What are all unredacted minimum-purchase volumes and prices?",
-        "answer_id": "answer_81fdb8fa38f81c52",
+        "answer_id": "answer_900a073fce3badc8",
         "answer": "The provided evidence does not state all unredacted minimum-purchase volumes and prices.",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -245,7 +245,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_1fd2d6d9408bf36d2787a7e7dc6c33a5884225f29cd9bd70dc1f9d97bfb39757",
+            "citation_ref": "evidence_chunk:chunk_18487cd1535e1a6f20ee83233d8f544061085c4909c9fb068a0583ea20a0a35d",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/01-amex-agreement.txt",
             "source_id": "edgar-composecure-amex-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-22.htm",
@@ -268,7 +268,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_60bff8e3856fc9a60a4b2983b744d1dc463658c769029477a157a53e84e3cc7a",
+            "citation_ref": "evidence_chunk:chunk_431e15ddffac54e33901b56b9bbd9ab6ca3824da79c0f51c22d82857411dc74d",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/02-amex-amendment.txt",
             "source_id": "edgar-composecure-amex-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-26.htm",
@@ -291,7 +291,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_7cee8d9ac7488527404232124cb9b62d1f11534c267959d45dd35b2a7d2263be",
+            "citation_ref": "evidence_chunk:chunk_5535eee297dcf2dca438fc6a1d614b0b5658c87ae97eccefdbb562261c12780a",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/01-amex-agreement.txt",
             "source_id": "edgar-composecure-amex-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-22.htm",
@@ -314,30 +314,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_b409f87792ba561e330c59353f5aa2eb1afe8d1556abe8230417b50788196c19",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/03-amex-amendment.txt",
-            "source_id": "edgar-composecure-amex-msa-source-03",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-29.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/0001104659-21-154308-index.html",
-            "accession_number": "0001104659-21-154308",
-            "form_type": "EX-10.29",
-            "filing_date": "2021-12-29",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/955dbe921eaeb1e3ddd17dbb9dc6480ad043c44deb54a8534272b0cc622c2628.html",
-            "raw_sha256": "955dbe921eaeb1e3ddd17dbb9dc6480ad043c44deb54a8534272b0cc622c2628",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/c2bbf97f869380b6fd40d38db7969ae1d76f28a8a8112d3bef5f6d3e7b1c6a0a.txt",
-            "normalized_sha256": "c2bbf97f869380b6fd40d38db7969ae1d76f28a8a8112d3bef5f6d3e7b1c6a0a",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/03-amex-amendment.txt",
-            "upload_sha256": "44ff1a457d5270fa14b58ffa9d4ca91bc61bb13645aeb1905744a9defb46a486",
-            "artifact_id": "art_44ff1a457d5270fa14b58ffa9d4ca91bc61bb13645aeb1905744a9defb46a486",
-            "span": {
-              "char_end": 3023,
-              "char_start": 1861
-            },
-            "source_excerpt": "The following new Section XIII American Express [***] is added to the SOW\n\nAmerican Express [***]\n\nBusiness Points\n\nPricing:\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n16-Dec-2021\n\nAXP Internal\n\nPage 1 of 2\n\n© AMERICAN EXPRESS\n\nPROPRIETARY & CONFIDENTIAL\n\nAmexco will receive an exclusive for the following:\n\na.\n\nService Provider will not make any [***] or other [***] of [***] or [***] for any other\ncustomers.\n\nb.\n\nService Provider will not make [***] for any other customers.\n\nc.\n\nThis exclusivity will last the length of the current contract and any future renewals. Service Provider retains the right to cancel\nthe exclusivity on any future contract renewals to the extent that Service Provider total sales to Amexco fall below [***] annually.\n\n2.\n\nGENERAL\n\nA.\nIf there is a conflict between the Agreement, the SOW, and this Amendment, the terms of this Amendment will govern if this Amendment\nexpressly references the provisions of the Agreement or SOW with which they are inconsistent.\n\nB.\nExcept as otherwise modified herein, the capitalized terms used in this Amendment shall have the meaning specified in the Agreement\nand SOW.\n\nC.",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_bd4802eca6439340213d0b19e7cc5448f48bf86ea5c4d398694fac554ca34beb",
+            "citation_ref": "evidence_chunk:chunk_9a4f53521d1a53a17747463db0991fa2cf22480e5c34f0cf472a4ff9b432de7a",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/02-amex-amendment.txt",
             "source_id": "edgar-composecure-amex-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-26.htm",
@@ -358,6 +335,29 @@
             },
             "source_excerpt": "[***] Cards: AXP guarantees\nto purchase [***] in card volume of the [***] product(s) over the term of the Agreement. If AXP does not order such quantity of cards\nduring the term of the Agreement, AXP shall pay to Service Provider an amount equal to the per card price of $[***]/card for all card\nquantities not ordered over the term of the Agreement.”\n\n6.4\n\nSchedule, Exhibit A Statement of Work, Section V, Forecasting & Minimum Stock, 1. Quarterly Forecast shall be amended to include\nthe following:\n\n“AXP will provide a non-binding\nannual forecast 90 days prior to the 1st day of January of each year during the term of the Agreement for planning purposes.”\n\n6.5\n\nSchedule, Exhibit A Statement of Work, Section VII, Pricing, Schedule of Prices shall be amended to include the following:\n\n“Subject to AXP’s compliance\nwith the terms of this Schedule, Service Provider shall provide to AXP a one-time credit of up to [***] for services related to\nAXP-specific research and development project costs per Statements of Work as mutually agreed from time to time during the term of the",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_d43c6a98a3519b7512dc182f4331419c52735d961428219d714631773fec8713",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/03-amex-amendment.txt",
+            "source_id": "edgar-composecure-amex-msa-source-03",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/tm2135648d1_ex10-29.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1823144/000110465921154308/0001104659-21-154308-index.html",
+            "accession_number": "0001104659-21-154308",
+            "form_type": "EX-10.29",
+            "filing_date": "2021-12-29",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/955dbe921eaeb1e3ddd17dbb9dc6480ad043c44deb54a8534272b0cc622c2628.html",
+            "raw_sha256": "955dbe921eaeb1e3ddd17dbb9dc6480ad043c44deb54a8534272b0cc622c2628",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/c2bbf97f869380b6fd40d38db7969ae1d76f28a8a8112d3bef5f6d3e7b1c6a0a.txt",
+            "normalized_sha256": "c2bbf97f869380b6fd40d38db7969ae1d76f28a8a8112d3bef5f6d3e7b1c6a0a",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-composecure-amex-msa/upload/03-amex-amendment.txt",
+            "upload_sha256": "44ff1a457d5270fa14b58ffa9d4ca91bc61bb13645aeb1905744a9defb46a486",
+            "artifact_id": "art_44ff1a457d5270fa14b58ffa9d4ca91bc61bb13645aeb1905744a9defb46a486",
+            "span": {
+              "char_end": 3023,
+              "char_start": 1861
+            },
+            "source_excerpt": "The following new Section XIII American Express [***] is added to the SOW\n\nAmerican Express [***]\n\nBusiness Points\n\nPricing:\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n[***]\n\n16-Dec-2021\n\nAXP Internal\n\nPage 1 of 2\n\n© AMERICAN EXPRESS\n\nPROPRIETARY & CONFIDENTIAL\n\nAmexco will receive an exclusive for the following:\n\na.\n\nService Provider will not make any [***] or other [***] of [***] or [***] for any other\ncustomers.\n\nb.\n\nService Provider will not make [***] for any other customers.\n\nc.\n\nThis exclusivity will last the length of the current contract and any future renewals. Service Provider retains the right to cancel\nthe exclusivity on any future contract renewals to the extent that Service Provider total sales to Amexco fall below [***] annually.\n\n2.\n\nGENERAL\n\nA.\nIf there is a conflict between the Agreement, the SOW, and this Amendment, the terms of this Amendment will govern if this Amendment\nexpressly references the provisions of the Agreement or SOW with which they are inconsistent.\n\nB.\nExcept as otherwise modified herein, the capitalized terms used in this Amendment shall have the meaning specified in the Agreement\nand SOW.\n\nC.",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -370,17 +370,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What effective date is stated for Amendment 6?",
-        "answer_id": "answer_58973c7d43916e67",
+        "answer_id": "answer_1a1516795be47003",
         "answer": "October 17, 2018",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_e20fb99f2e08c699d271887ba8c485148e750da2248dfde1322efeb291aeff40"
+          "evidence_chunk:chunk_aff3bc1cdcc24f4397acd7c3843f68d705bbea9dbe2a4a1d856617b9a8fbec1b"
         ],
         "supporting_result_count": 3,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_e20fb99f2e08c699d271887ba8c485148e750da2248dfde1322efeb291aeff40",
+            "citation_ref": "evidence_chunk:chunk_aff3bc1cdcc24f4397acd7c3843f68d705bbea9dbe2a4a1d856617b9a8fbec1b",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/03-ntt-amendment-6.txt",
             "source_id": "edgar-corelogic-ntt-msa-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604719000086/clgx-63019xex10110q.htm",
@@ -408,7 +408,7 @@
       },
       "unanswerable": {
         "question": "What were the provider's actual service-level results in the latest measured quarter?",
-        "answer_id": "answer_14d348516ff5789f",
+        "answer_id": "answer_477ec7b983a0a326",
         "answer": "The provided evidence does not answer the question \"What were the provider's actual service-level results in the latest measured quarter?\".",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -416,7 +416,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_27d53d3c33e69b5325ed10de0b59d82e093f7e63200f211949634898b8478d0f",
+            "citation_ref": "evidence_chunk:chunk_0dcda4d77a0fa6c082dcda5fd48572b89e5e30ab17ea28ff9c3367c06d203bd9",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/01-ntt-amendment-4.txt",
             "source_id": "edgar-corelogic-ntt-msa-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000015/clgx-12312017xex104410k.htm",
@@ -439,30 +439,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_473a243d75f93e4d70f34af130ae1d7d10bd337f8680f64c7ed72b8440cef435",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/01-ntt-amendment-4.txt",
-            "source_id": "edgar-corelogic-ntt-msa-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000015/clgx-12312017xex104410k.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000015/0000036047-18-000015-index.html",
-            "accession_number": "0000036047-18-000015",
-            "form_type": "EX-10.44",
-            "filing_date": "2018-02-27",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/b5a8741a36bc68ce7d0cdfa0d1e2f02015454875ae725100c6dfde1a99e002ef.html",
-            "raw_sha256": "b5a8741a36bc68ce7d0cdfa0d1e2f02015454875ae725100c6dfde1a99e002ef",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/61e0362620636ae69e943832838e26056ca0657d850eff98c2d3cc29f82f3c78.txt",
-            "normalized_sha256": "61e0362620636ae69e943832838e26056ca0657d850eff98c2d3cc29f82f3c78",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/01-ntt-amendment-4.txt",
-            "upload_sha256": "80a0aed267e3e33dce006b9476695faabf0b767d82d2cd5ab06be5003f788042",
-            "artifact_id": "art_80a0aed267e3e33dce006b9476695faabf0b767d82d2cd5ab06be5003f788042",
-            "span": {
-              "char_end": 46023,
-              "char_start": 44895
-            },
-            "source_excerpt": "The intent of this Service Level is to measure CoreLogic Operation Managers customer satisfaction\n\nAssociated hours of Operation:\n\nBusiness Hours see 1.4.8 Time Definitions\n\nReporting Tools:\n\nManual Report\n\nExceptions:\n\nMinimum acceptable returned surveys: ***% of surveys returned\n\nSupplemental definition of terms:\n\nMeasures Supplier's performance through a jointly created *** (every *** and ***) survey to 'CoreLogic Operational Managers' (Measured on a *** scale). Expected survey set of *** individuals. Average of all the scores related to the single overall satisfaction question selected by an Operational Managers in such survey (on a scale of ***, with *** representing the highest level of satisfaction.\n\nLow Volume Eligible:\n\nNo\n\nThreshold parameters:\n\n>=***\n\nSLA Metrics and parameters:\n\n(field names in OPAS)\n\nSupporting Company\n\nSurvey Sampling and Survey Results\n\nLogical description of the SLA calculation:\n\nReport Criteria\n\nTotal Survey Feedback received >= ***% of Surveys Sent\n\nCalculations\n\nService Level Achievement = (Sum of score responses from Operational Managers/ Number of responses received) * 100%",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_60a6c757b3a924f6de07f086b2be03c0a5d195c98c31ec8982cac1b0a98007f2",
+            "citation_ref": "evidence_chunk:chunk_475d5f47f3ad29305d99627f98ce6928231daa013c49b795b5f4c5d70d3c5c36",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/02-ntt-amendment-5.txt",
             "source_id": "edgar-corelogic-ntt-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000094/ntt_amendmentxno5-ex106.htm",
@@ -485,7 +462,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_ac55debeece13b140c9479b723c9b8916230100361ed86ab287ed6a93ee63ef6",
+            "citation_ref": "evidence_chunk:chunk_8b56158b2b93d6d25eeff7c5e28547658f4c2535adb5bfb50a895ac0d206c3c7",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/03-ntt-amendment-6.txt",
             "source_id": "edgar-corelogic-ntt-msa-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604719000086/clgx-63019xex10110q.htm",
@@ -508,7 +485,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_fab38f2de9195ff75fc09f642131322d5530b9d98b2b96cdf15059fd57a92c8b",
+            "citation_ref": "evidence_chunk:chunk_9ee796e24a2644165819227509e81cade8558f73c35c9ea9393747ed98be469e",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/01-ntt-amendment-4.txt",
+            "source_id": "edgar-corelogic-ntt-msa-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000015/clgx-12312017xex104410k.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000015/0000036047-18-000015-index.html",
+            "accession_number": "0000036047-18-000015",
+            "form_type": "EX-10.44",
+            "filing_date": "2018-02-27",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/b5a8741a36bc68ce7d0cdfa0d1e2f02015454875ae725100c6dfde1a99e002ef.html",
+            "raw_sha256": "b5a8741a36bc68ce7d0cdfa0d1e2f02015454875ae725100c6dfde1a99e002ef",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/61e0362620636ae69e943832838e26056ca0657d850eff98c2d3cc29f82f3c78.txt",
+            "normalized_sha256": "61e0362620636ae69e943832838e26056ca0657d850eff98c2d3cc29f82f3c78",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/01-ntt-amendment-4.txt",
+            "upload_sha256": "80a0aed267e3e33dce006b9476695faabf0b767d82d2cd5ab06be5003f788042",
+            "artifact_id": "art_80a0aed267e3e33dce006b9476695faabf0b767d82d2cd5ab06be5003f788042",
+            "span": {
+              "char_end": 46023,
+              "char_start": 44895
+            },
+            "source_excerpt": "The intent of this Service Level is to measure CoreLogic Operation Managers customer satisfaction\n\nAssociated hours of Operation:\n\nBusiness Hours see 1.4.8 Time Definitions\n\nReporting Tools:\n\nManual Report\n\nExceptions:\n\nMinimum acceptable returned surveys: ***% of surveys returned\n\nSupplemental definition of terms:\n\nMeasures Supplier's performance through a jointly created *** (every *** and ***) survey to 'CoreLogic Operational Managers' (Measured on a *** scale). Expected survey set of *** individuals. Average of all the scores related to the single overall satisfaction question selected by an Operational Managers in such survey (on a scale of ***, with *** representing the highest level of satisfaction.\n\nLow Volume Eligible:\n\nNo\n\nThreshold parameters:\n\n>=***\n\nSLA Metrics and parameters:\n\n(field names in OPAS)\n\nSupporting Company\n\nSurvey Sampling and Survey Results\n\nLogical description of the SLA calculation:\n\nReport Criteria\n\nTotal Survey Feedback received >= ***% of Surveys Sent\n\nCalculations\n\nService Level Achievement = (Sum of score responses from Operational Managers/ Number of responses received) * 100%",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_a2b6beda3aed740fe0daead76b0957d16fee1427987240347924bea5f18a074c",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-corelogic-ntt-msa/upload/02-ntt-amendment-5.txt",
             "source_id": "edgar-corelogic-ntt-msa-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/36047/000003604718000094/ntt_amendmentxno5-ex106.htm",
@@ -541,17 +541,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "How much advance written notice does the renewal amendment require to terminate before a renewal date?",
-        "answer_id": "answer_182db7cdcacf86a0",
+        "answer_id": "answer_f3b65704b3877179",
         "answer": "At least 180 Days prior to the renewal date.",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_c383f201523a1c84b0406918302bd102b63dda68512ebce2be2aa4915940d4ae"
+          "evidence_chunk:chunk_154c85cd507df1a2708982ada5fb5da042c94daa6c7e0376d0ed49e958400c16"
         ],
         "supporting_result_count": 4,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_c383f201523a1c84b0406918302bd102b63dda68512ebce2be2aa4915940d4ae",
+            "citation_ref": "evidence_chunk:chunk_154c85cd507df1a2708982ada5fb5da042c94daa6c7e0376d0ed49e958400c16",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/02-airspan-amendment.txt",
             "source_id": "edgar-gogo-airspan-dependency-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/gogo-ex1016_111.htm",
@@ -579,7 +579,7 @@
       },
       "unanswerable": {
         "question": "What is the tested completion time for a fully independent replacement supply path?",
-        "answer_id": "answer_0318f7bcd8e9b0c7",
+        "answer_id": "answer_97d645f9c0c1bb7b",
         "answer": "The provided evidence does not state the tested completion time for a fully independent replacement supply path.",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -587,30 +587,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_1284d3b10749ccbcca4d953887c04cee3674c750f7f31904b3e0f2700be43073",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
-            "source_id": "edgar-gogo-airspan-dependency-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/gogo-ex1015_112.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/0001564590-21-012575-index.html",
-            "accession_number": "0001564590-21-012575",
-            "form_type": "EX-10.15",
-            "filing_date": "2021-03-11",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5.html",
-            "raw_sha256": "78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83.txt",
-            "normalized_sha256": "55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
-            "upload_sha256": "53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
-            "artifact_id": "art_53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
-            "span": {
-              "char_end": 14193,
-              "char_start": 12995
-            },
-            "source_excerpt": "If Gogo requests in writing that any Airspan employee or subcontractor be replaced for the reasons set forth in Section 2.2(b)(ii) within two weeks after such employee or subcontractor begins performing Services hereunder, Airspan shall have a reasonable opportunity to address Gogo’s concerns. Thereafter, if Airspan replaces such employee or subcontractor as requested, then Airspan shall not charge Gogo for any Services already performed by such replaced employee or subcontractor after Airspan’s receipt of Gogo’s written request for replacement where the Service has to be reperformed.\n\n2.4\n\nSubcontractors. Airspan may not use subcontractors to perform the Services without Gogo’s prior written consent; provided, however, Airspan shall remain responsible for the performance of the Services, for all of its obligations hereunder, and for all liabilities incurred by a subcontractor.\n\n2.5\n\nGogo Affiliates. During the term of this Agreement, if any Gogo Affiliate desires to engage Airspan to perform Services hereunder, such Gogo Affiliate may enter into a SOW hereunder.\n\n2.6\n\nSchedule. A SOW may contain a time schedule for completion of the Services required thereunder (the “Schedule”).",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_46143b16227bcd837c6ca7a0aebdfda58f4353bfa2329c46abc32f46be410446",
+            "citation_ref": "evidence_chunk:chunk_41e59395c690b8e3156b0eb5aa80dd95b46295fbf86d3c9489d90eef407f01c7",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/03-airspan-2024-amendment.txt",
             "source_id": "edgar-gogo-airspan-dependency-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000095017024092730/gogo-ex10_4.htm",
@@ -633,7 +610,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_c877b8b3b3aed88fa169a735e997b64d1da111bb8bde7fa9dd6c08bd79ac49e7",
+            "citation_ref": "evidence_chunk:chunk_ccc6de3549ad0a568a9db2c88b9fa8c2d1007025f0eb50a9241f5a8d4e6f3865",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/03-airspan-2024-amendment.txt",
             "source_id": "edgar-gogo-airspan-dependency-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000095017024092730/gogo-ex10_4.htm",
@@ -656,30 +633,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_d3f8ef992cc479b996cb52c97a271134b3f2961d214988035f1af98060ba5efe",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
-            "source_id": "edgar-gogo-airspan-dependency-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/gogo-ex1015_112.htm",
+            "citation_ref": "evidence_chunk:chunk_e106a79c190c1eda729c246acf0eb97c6e7936534ce6d5c06b882f65ee93a6e2",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/02-airspan-amendment.txt",
+            "source_id": "edgar-gogo-airspan-dependency-source-02",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/gogo-ex1016_111.htm",
             "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/0001564590-21-012575-index.html",
             "accession_number": "0001564590-21-012575",
-            "form_type": "EX-10.15",
+            "form_type": "EX-10.16",
             "filing_date": "2021-03-11",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5.html",
-            "raw_sha256": "78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83.txt",
-            "normalized_sha256": "55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
-            "upload_sha256": "53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
-            "artifact_id": "art_53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/eb9637e9d506e0b7c4703332d2aa3ebbda466690f325c1c25ebcc270422dc530.html",
+            "raw_sha256": "eb9637e9d506e0b7c4703332d2aa3ebbda466690f325c1c25ebcc270422dc530",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/d0ce334c8e000a7d122bad129b58e5a0b7dc39b1c1b907a64923dd7e88991f4f.txt",
+            "normalized_sha256": "d0ce334c8e000a7d122bad129b58e5a0b7dc39b1c1b907a64923dd7e88991f4f",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/02-airspan-amendment.txt",
+            "upload_sha256": "7b2e5e740dc6d2d961f8ad161bd7467e3635959a56f453e51050af71ab0e64d4",
+            "artifact_id": "art_7b2e5e740dc6d2d961f8ad161bd7467e3635959a56f453e51050af71ab0e64d4",
             "span": {
-              "char_end": 44542,
-              "char_start": 43442
+              "char_end": 27042,
+              "char_start": 25847
             },
-            "source_excerpt": "sures except in the case of a shared environment, and Airspan agrees to reasonably cooperate with such Gogo auditor regarding such inspections or audits.\n\n6.3\n\nAirspan shall notify Gogo promptly in the event of any disclosure of PII not authorized herein, or upon Airspan’s knowledge of any other Data Security Breach (but in no event later than three business days after such Data Security Breach). In the event of a Data Security Breach, Airspan shall (i) promptly provide to Gogo a detailed description of the incident, the data accessed, the identity of affected third parties, if any, and such other information as Gogo may request concerning the Data Security Breach; (ii) assist Gogo in investigating, remedying and taking any other action Gogo deems necessary regarding any Data Security Breach and any dispute, inquiry or claim that concerns the Data Security Breach; (iii) take prompt actions that such Data Security Breach or potential Data Security Breach will not recur; and (iv) cooperate with Gogo and any law enforcement or regulatory official investigating such Data Security Breach.",
+            "source_excerpt": "nment of or an arrangement or composition with or for the benefit of some or all of its creditors of all or substantially all of its debts, or for a moratorium in respect of or affecting all or substantially all of its debts; (ix) takes any step with a view to the administration, winding up or bankruptcy of the Party; or (x) takes any step to enforce security over, or a distress, execution or other similar process is levied or served against all or substantially all of the assets or undertaking of, the Party including the appointment of a receiver, administrative receiver, trustee in bankruptcy, manager or similar officer.\n\n(c)\n\nGogo may terminate this Agreement for any or no reason upon thirty (30) days written notice to Supplier.\n\n(d)\n\nGogo or Supplier may terminate this Agreement immediately upon written notice of termination, in the event of a material breach of this Agreement by the other Party, if such breach continues uncured for a period of thirty (30) days after written notice of such breach.\n\n(e)\n\nGogo may terminate this Agreement and all Orders hereunder in connection with the consummation of a Change of Control Transaction as set forth in Section 17.4(b)(iii).\n\n(f)",
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_f9cc09f0658c21053a7fdbbe496a54b1bad283b98f6284befb98abe822a7649b",
+            "citation_ref": "evidence_chunk:chunk_e9cd1379d95ac9861792d902bdf12223a2e930c1f18eef235c9d2067b8d71264",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/04-gogo-2024-10q.txt",
             "source_id": "edgar-gogo-airspan-dependency-source-04",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000095017024092730/gogo-20240630.htm",
@@ -700,6 +677,29 @@
             },
             "source_excerpt": "the economic environment and other trends that affect both business and leisure aviation travel;\n\n•\ndisruptions to supply chains in the aviation industry and installations of our equipment driven by, among other things, labor shortages;\n\n•\nthe extent of our customers’ adoption of our products and services, which is affected by, among other things, willingness to pay for the services that we provide, the quality and reliability of our products and services, changes in technology and competition from current competitors and new market entrants;\n\n•\nour ability to engage suppliers of equipment components and network services on a timely basis and on commercially reasonable terms;\n\n•\nour ability to fully utilize portions of our deferred income tax assets;\n\n•\nchanges in laws, regulations and interpretations affecting telecommunications services globally, including those affecting our ability to maintain our licenses for ATG spectrum in the United States, obtain sufficient rights to use additional ATG spectrum and/or other sources of broadband connectivity to deliver our services, including Gogo Galileo, expand our service offerings and manage our network; and\n\n•",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_ec88ab6665098e5014c8593cff0f9cdcd472ab58ba64967f36389c6885c043ba",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
+            "source_id": "edgar-gogo-airspan-dependency-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/gogo-ex1015_112.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1537054/000156459021012575/0001564590-21-012575-index.html",
+            "accession_number": "0001564590-21-012575",
+            "form_type": "EX-10.15",
+            "filing_date": "2021-03-11",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5.html",
+            "raw_sha256": "78476d4d78ad7d0fd22de1f06561c75cf4a04f50cf02c27bd136dd6293a6a1b5",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83.txt",
+            "normalized_sha256": "55d632bcf22ccb6c5f008cd73ea4cdac3d9ec880e6bf85fa612daddf2348ec83",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-gogo-airspan-dependency/upload/01-airspan-agreement.txt",
+            "upload_sha256": "53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
+            "artifact_id": "art_53eb2bfc71900777ab61e5c2407e8ef1e0dedfa28b8120af8918467dad76f791",
+            "span": {
+              "char_end": 44542,
+              "char_start": 43442
+            },
+            "source_excerpt": "sures except in the case of a shared environment, and Airspan agrees to reasonably cooperate with such Gogo auditor regarding such inspections or audits.\n\n6.3\n\nAirspan shall notify Gogo promptly in the event of any disclosure of PII not authorized herein, or upon Airspan’s knowledge of any other Data Security Breach (but in no event later than three business days after such Data Security Breach). In the event of a Data Security Breach, Airspan shall (i) promptly provide to Gogo a detailed description of the incident, the data accessed, the identity of affected third parties, if any, and such other information as Gogo may request concerning the Data Security Breach; (ii) assist Gogo in investigating, remedying and taking any other action Gogo deems necessary regarding any Data Security Breach and any dispute, inquiry or claim that concerns the Data Security Breach; (iii) take prompt actions that such Data Security Breach or potential Data Security Breach will not recur; and (iv) cooperate with Gogo and any law enforcement or regulatory official investigating such Data Security Breach.",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -712,17 +712,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What total is printed in the Product Schedule's Manufacturing Summary?",
-        "answer_id": "answer_95d4c02e8f412085",
+        "answer_id": "answer_f9b9172788b61fed",
         "answer": "$174,306,844",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_a90141bc648708a41571857b145387dca46132677a3a667879b7e27e560c91f9"
+          "evidence_chunk:chunk_8d9531ac9d762517c5ebf7c7fb1677e90712f0b3219f03913154fc5a1e7e48d6"
         ],
         "supporting_result_count": 4,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_a90141bc648708a41571857b145387dca46132677a3a667879b7e27e560c91f9",
+            "citation_ref": "evidence_chunk:chunk_8d9531ac9d762517c5ebf7c7fb1677e90712f0b3219f03913154fc5a1e7e48d6",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
             "source_id": "edgar-emergent-astrazeneca-manufacturing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/a1013-azproductschedule.htm",
@@ -750,7 +750,7 @@
       },
       "unanswerable": {
         "question": "What is the final regulator-approved remediation completion date for every affected batch?",
-        "answer_id": "answer_9dee5d36ff6235d2",
+        "answer_id": "answer_87680437b5450544",
         "answer": "The provided evidence does not state the final regulator-approved remediation completion date for every affected batch.",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -758,53 +758,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_0e067fda24b1ea1e51b233095d6dd8c339aff4ee922e970e647506827239c7be",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
-            "source_id": "edgar-emergent-astrazeneca-manufacturing-source-02",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/a1013-azproductschedule.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/0001367644-20-000163-index.html",
-            "accession_number": "0001367644-20-000163",
-            "form_type": "EX-10.13",
-            "filing_date": "2020-11-06",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f3758b6e56eb85b021c8b846a75b7cae0bdfd75b534b2ad48735c26a143c6ffe.html",
-            "raw_sha256": "f3758b6e56eb85b021c8b846a75b7cae0bdfd75b534b2ad48735c26a143c6ffe",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/718025739298145a6b9dbd46a452643dd7bc10488ac81d34a7e27f6209a24d46.txt",
-            "normalized_sha256": "718025739298145a6b9dbd46a452643dd7bc10488ac81d34a7e27f6209a24d46",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
-            "upload_sha256": "c61222aeea2663448431137aa8e09bf71c9698d2efeeff18ab12a60c91122e43",
-            "artifact_id": "art_c61222aeea2663448431137aa8e09bf71c9698d2efeeff18ab12a60c91122e43",
-            "span": {
-              "char_end": 4756,
-              "char_start": 3566
-            },
-            "source_excerpt": "ble).\n\n2.3 Approved Subcontractors: Approved non-Affiliate subcontractors Service Provider will and/or may use to perform Services include:\n\n[**]\n\n3.Timeline.\n\nThe Service Provider presents the following nonbinding estimated timeline to represent the currently expected duration of activities which is subject to change at the Service Provider’s sole discretion and/or due to the timing of events beyond the Service Provider’s control, including but not limited to (i) the timing of the receipt of this executed Product Schedule and valid purchase order, and/or (ii) acquisition of materials and receipt of AstraZeneca Materials. All timelines set forth in this Product Schedule are estimated and based on a number of assumptions and currently known information. AstraZeneca acknowledges that portions of the work to be performed are experimental in nature and may not have been fully validated within generally accepted standards of the pharmaceutical industry. To the extent assumptions or information change, or there are unexpected results or events or delays, including but not limited to delays in receipt of materials or information from AstraZeneca, timelines may be impacted.\n\n[**]",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_172390091072de9842dd49af3f1bbdfcd01407f9028c52c9b317a0f10b440b1e",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/04-ebs-2021-10q.txt",
-            "source_id": "edgar-emergent-astrazeneca-manufacturing-source-04",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/ebs-20210331.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/0001367644-21-000073-index.html",
-            "accession_number": "0001367644-21-000073",
-            "form_type": "10-Q",
-            "filing_date": "2021-04-30",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/0f6c9e7a75f7603e7f1143d685c6a97c613bf22d672815e894cfd32b2fadcf8e.html",
-            "raw_sha256": "0f6c9e7a75f7603e7f1143d685c6a97c613bf22d672815e894cfd32b2fadcf8e",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/968d7f64e9569e772cbe89efbf335c4889e182cf4d3a6e5a0ebd64cfe1b0d9cb.txt",
-            "normalized_sha256": "968d7f64e9569e772cbe89efbf335c4889e182cf4d3a6e5a0ebd64cfe1b0d9cb",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/04-ebs-2021-10q.txt",
-            "upload_sha256": "a9488ddf40c8652a8e038ac4c074b0c17d5a79636d95a23850a08a831e6ea325",
-            "artifact_id": "art_a9488ddf40c8652a8e038ac4c074b0c17d5a79636d95a23850a08a831e6ea325",
-            "span": {
-              "char_end": 29292,
-              "char_start": 28228
-            },
-            "source_excerpt": "Biological products and product candidates, otherwise referred to as our “Biologic Products,” can be affected by the approval and entry of “biosimilars” in the United States and other jurisdictions. Biologic Products in our current pipeline include AV7909, BioThrax, and ACAM2000. If a biosimilar version of one of our Biologic Products were approved, it could have a material adverse effect on the sales and gross profits of the affected Biologic Product and could adversely affect our business, financial condition, operating results and cash flows.\n\nNARCAN® Nasal Spray may be subject to potential competition.\n\nNARCAN® Nasal Spray is the first FDA-approved needle-free naloxone nasal spray for the emergency reversal of opioid overdoses. NARCAN® Nasal Spray faces branded competition from other injectable naloxone, auto-injectors and improvised nasal kits including Amphastar Pharmaceuticals, Inc.'s naloxone injection product and Kaléo's EVZIO™ (naloxone HCI injection) Auto-Injector. NARCAN®Nasal Spray may face additional branded competition in the future.",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_5106cacde79f1ecacb6797f22188ff72e737ca716d2d536fc65c0924ffc72840",
+            "citation_ref": "evidence_chunk:chunk_858346d03da34cb905115738dac7ea7a98d72495343fe679b32781c486ed6a3d",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/04-ebs-2021-10q.txt",
             "source_id": "edgar-emergent-astrazeneca-manufacturing-source-04",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/ebs-20210331.htm",
@@ -827,7 +781,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_7ce3990d372bc42e91cea70c05772771e3ab180099e3a8da6e4c0345230e20b3",
+            "citation_ref": "evidence_chunk:chunk_94e27e073421b852943c5889b589e94d08a3c6a0e4ad9832dd55b5b74a1aa5e2",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/03-az-amendment.txt",
             "source_id": "edgar-emergent-astrazeneca-manufacturing-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/emergentbiosolutionsazms.htm",
@@ -850,7 +804,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_9eea9b6cc71e6bb87693958a00abe941afeaabfebe2963ae94c79e8cb167e0aa",
+            "citation_ref": "evidence_chunk:chunk_9c5633e0902e5cb0df24c5e56f4e4b7eb2f5059461f1d8dd3a2aa63b2c88e33e",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
+            "source_id": "edgar-emergent-astrazeneca-manufacturing-source-02",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/a1013-azproductschedule.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/0001367644-20-000163-index.html",
+            "accession_number": "0001367644-20-000163",
+            "form_type": "EX-10.13",
+            "filing_date": "2020-11-06",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f3758b6e56eb85b021c8b846a75b7cae0bdfd75b534b2ad48735c26a143c6ffe.html",
+            "raw_sha256": "f3758b6e56eb85b021c8b846a75b7cae0bdfd75b534b2ad48735c26a143c6ffe",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/718025739298145a6b9dbd46a452643dd7bc10488ac81d34a7e27f6209a24d46.txt",
+            "normalized_sha256": "718025739298145a6b9dbd46a452643dd7bc10488ac81d34a7e27f6209a24d46",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
+            "upload_sha256": "c61222aeea2663448431137aa8e09bf71c9698d2efeeff18ab12a60c91122e43",
+            "artifact_id": "art_c61222aeea2663448431137aa8e09bf71c9698d2efeeff18ab12a60c91122e43",
+            "span": {
+              "char_end": 4756,
+              "char_start": 3566
+            },
+            "source_excerpt": "ble).\n\n2.3 Approved Subcontractors: Approved non-Affiliate subcontractors Service Provider will and/or may use to perform Services include:\n\n[**]\n\n3.Timeline.\n\nThe Service Provider presents the following nonbinding estimated timeline to represent the currently expected duration of activities which is subject to change at the Service Provider’s sole discretion and/or due to the timing of events beyond the Service Provider’s control, including but not limited to (i) the timing of the receipt of this executed Product Schedule and valid purchase order, and/or (ii) acquisition of materials and receipt of AstraZeneca Materials. All timelines set forth in this Product Schedule are estimated and based on a number of assumptions and currently known information. AstraZeneca acknowledges that portions of the work to be performed are experimental in nature and may not have been fully validated within generally accepted standards of the pharmaceutical industry. To the extent assumptions or information change, or there are unexpected results or events or delays, including but not limited to delays in receipt of materials or information from AstraZeneca, timelines may be impacted.\n\n[**]",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_caa1e2a552413635186adb8c6034ecfcf98592bbf0ae210733e36bbb161bf0b6",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/02-az-product-schedule.txt",
             "source_id": "edgar-emergent-astrazeneca-manufacturing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764420000163/a1013-azproductschedule.htm",
@@ -871,6 +848,29 @@
             },
             "source_excerpt": "Work Order #5997-01 only included, as pass-through costs, raw materials for [**] and “Process [**]” for [**] Batches in Area [**] and [**] Batches in Area [**]. Estimated pass-through costs shall be updated based on the change in scale, process and number of Batches.\n\n1.2 Drug Substance Manufacturing. The GMP Batches will be executed using a master batch record approved in writing by both Parties. The GMP Batches will be evaluated for release based upon the executed batch records, analytical release assays, and Product Specifications. Additionally, the drug substance manufacturing process will be scaled-up to [**] based upon Process [**].\n\n1.3 Drug Substance Testing. The GMP Batches will be characterized, tested for in-process quality attributes, quality assurance (“QA”) reviewed and evaluated for release using phase appropriate validated analytical methods. Analytical testing results will be provided as a Certificate of Analysis (CoA) after QA review and any associated deviation reports will be provided.\n\n2.Deliverables, AstraZeneca Materials and Subcontractors.",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_f570330db0a1d27ba3cceefc3dc47fdd70ed14dc5bcdcdacef2de95f885a261e",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/04-ebs-2021-10q.txt",
+            "source_id": "edgar-emergent-astrazeneca-manufacturing-source-04",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/ebs-20210331.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1367644/000136764421000073/0001367644-21-000073-index.html",
+            "accession_number": "0001367644-21-000073",
+            "form_type": "10-Q",
+            "filing_date": "2021-04-30",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/0f6c9e7a75f7603e7f1143d685c6a97c613bf22d672815e894cfd32b2fadcf8e.html",
+            "raw_sha256": "0f6c9e7a75f7603e7f1143d685c6a97c613bf22d672815e894cfd32b2fadcf8e",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/968d7f64e9569e772cbe89efbf335c4889e182cf4d3a6e5a0ebd64cfe1b0d9cb.txt",
+            "normalized_sha256": "968d7f64e9569e772cbe89efbf335c4889e182cf4d3a6e5a0ebd64cfe1b0d9cb",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-emergent-astrazeneca-manufacturing/upload/04-ebs-2021-10q.txt",
+            "upload_sha256": "a9488ddf40c8652a8e038ac4c074b0c17d5a79636d95a23850a08a831e6ea325",
+            "artifact_id": "art_a9488ddf40c8652a8e038ac4c074b0c17d5a79636d95a23850a08a831e6ea325",
+            "span": {
+              "char_end": 29292,
+              "char_start": 28228
+            },
+            "source_excerpt": "Biological products and product candidates, otherwise referred to as our “Biologic Products,” can be affected by the approval and entry of “biosimilars” in the United States and other jurisdictions. Biologic Products in our current pipeline include AV7909, BioThrax, and ACAM2000. If a biosimilar version of one of our Biologic Products were approved, it could have a material adverse effect on the sales and gross profits of the affected Biologic Product and could adversely affect our business, financial condition, operating results and cash flows.\n\nNARCAN® Nasal Spray may be subject to potential competition.\n\nNARCAN® Nasal Spray is the first FDA-approved needle-free naloxone nasal spray for the emergency reversal of opioid overdoses. NARCAN® Nasal Spray faces branded competition from other injectable naloxone, auto-injectors and improvised nasal kits including Amphastar Pharmaceuticals, Inc.'s naloxone injection product and Kaléo's EVZIO™ (naloxone HCI injection) Auto-Injector. NARCAN®Nasal Spray may face additional branded competition in the future.",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -883,17 +883,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What date wording does Amendment 1 use for its entry date?",
-        "answer_id": "answer_62fddbf772348cad",
-        "answer": "\"the 19 day of December 2022\"",
+        "answer_id": "answer_337c0290b3ff3ed7",
+        "answer": "19 day of December 2022",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_c95381295d1e65e9aa454027ab34190c5cc2114e12988ec27077678bce1dd5dd"
+          "evidence_chunk:chunk_6fd450a10d94ff68cc4f1755187c09d18480c9c0e6b77fc6ff9ccd533467dce3"
         ],
         "supporting_result_count": 3,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_c95381295d1e65e9aa454027ab34190c5cc2114e12988ec27077678bce1dd5dd",
+            "citation_ref": "evidence_chunk:chunk_6fd450a10d94ff68cc4f1755187c09d18480c9c0e6b77fc6ff9ccd533467dce3",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/02-lonza-amendment.txt",
             "source_id": "edgar-itci-lonza-manufacturing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/d436875dex1032.htm",
@@ -921,7 +921,7 @@
       },
       "unanswerable": {
         "question": "What was the manufacturer's audited on-time batch performance for the latest quarter?",
-        "answer_id": "answer_657fd6466eae2249",
+        "answer_id": "answer_61fc1b5cd4b2d505",
         "answer": "The provided evidence does not answer the question \"What was the manufacturer's audited on-time batch performance for the latest quarter?\".",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -929,30 +929,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_45e9a1e5b90ab238824626a8bdb2e8a343455341385be71304b695a5050e372c",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/01-lonza-agreement.txt",
-            "source_id": "edgar-itci-lonza-manufacturing-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312520288507/d18633dex101.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312520288507/0001193125-20-288507-index.html",
-            "accession_number": "0001193125-20-288507",
-            "form_type": "EX-10.1",
-            "filing_date": "2020-11-09",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/bba99785818790d03b98e175703fe4c0c93e55c040b6fe43b9058ab5423c9c4a.html",
-            "raw_sha256": "bba99785818790d03b98e175703fe4c0c93e55c040b6fe43b9058ab5423c9c4a",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/94bc9e2880f38d133656d7ac550efeba0d92499ec09ad6fc39a3789839bc28a5.txt",
-            "normalized_sha256": "94bc9e2880f38d133656d7ac550efeba0d92499ec09ad6fc39a3789839bc28a5",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/01-lonza-agreement.txt",
-            "upload_sha256": "0fe24f756e307e38edcd7d1f984395801c5d98e94458660f4be48f9fba01898e",
-            "artifact_id": "art_0fe24f756e307e38edcd7d1f984395801c5d98e94458660f4be48f9fba01898e",
-            "span": {
-              "char_end": 22798,
-              "char_start": 21693
-            },
-            "source_excerpt": "ent of cGMP manufacturing. Provisions regarding inspections by\nRegulatory Authorities and audits shall be set out in the Quality Agreement.\n\n5\n\nInsurance\n\n5.1\n\nEach Party shall, during the Term and [***] after delivery of the last Product manufactured or Services\nprovided under this Agreement, obtain and maintain at its own cost and expense from a qualified insurance company, comprehensive general liability insurance including, but not limited to product liability coverage in the amount of at least [***] per\nclaim in the case of a Lonza insurance policy and [***] in the case of a Customer insurance policy. Each Party shall provide the respective other Party with a certificate of such insurance upon reasonable request.\n\n6\n\nForecasting, Ordering and Cancellation\n\n6.1\n\nForecasting and Ordering. No later than [***], Customer shall supply Lonza with a written forecast\nshowing Customer’s good faith estimated quarterly requirements for Batches for the following [***] (the “Forecast”). No later than [***] following Lonza’s receipt of a Forecast, Lonza shall provide written notice to Customer with",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_49da83b9376d22c17b4866eec560ed8b8e187ca9de02999243fa58813218ffc3",
+            "citation_ref": "evidence_chunk:chunk_00d349d1ea81305783a0f5bd0242e04fc60053cc35ca8f573a16ee794e53c562",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/02-lonza-amendment.txt",
             "source_id": "edgar-itci-lonza-manufacturing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/d436875dex1032.htm",
@@ -975,7 +952,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_5806f2202716e7d52e9e847b68de88db4a63642f43b8e0b3f951a57df813f42b",
+            "citation_ref": "evidence_chunk:chunk_73e94ac9cbb1366470b5c3b9804e2e851b2908ce543fbc0d3905a7e4799e2ce4",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/01-lonza-agreement.txt",
             "source_id": "edgar-itci-lonza-manufacturing-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312520288507/d18633dex101.htm",
@@ -998,30 +975,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_5dba7a98f73c95a2fdd03e75c77cb0ab2f9b87b75cddfa0b46ec23b9348e28ed",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/03-itci-2022-10k.txt",
-            "source_id": "edgar-itci-lonza-manufacturing-source-03",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/d436875d10k.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/0001193125-23-055176-index.html",
-            "accession_number": "0001193125-23-055176",
-            "form_type": "10-K",
-            "filing_date": "2023-03-01",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/52e49d6899c764079ff1b8c9bbaec6d9365155837398a94523d8042c755278f6.html",
-            "raw_sha256": "52e49d6899c764079ff1b8c9bbaec6d9365155837398a94523d8042c755278f6",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/94c57cd1c4a6c91dee790cc3675649a9068908c27e7c4dd8b3ea66b50159a93e.txt",
-            "normalized_sha256": "94c57cd1c4a6c91dee790cc3675649a9068908c27e7c4dd8b3ea66b50159a93e",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/03-itci-2022-10k.txt",
-            "upload_sha256": "a95ec8821c2ddb4345a36a6418597aa5474ba43b746ae9e7a482a0399c5c5dc0",
-            "artifact_id": "art_a95ec8821c2ddb4345a36a6418597aa5474ba43b746ae9e7a482a0399c5c5dc0",
+            "citation_ref": "evidence_chunk:chunk_77ec1a2cb0e42a06d426fb18eb295b98354563385b6c230a8e519cc3573fe466",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/01-lonza-agreement.txt",
+            "source_id": "edgar-itci-lonza-manufacturing-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312520288507/d18633dex101.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312520288507/0001193125-20-288507-index.html",
+            "accession_number": "0001193125-20-288507",
+            "form_type": "EX-10.1",
+            "filing_date": "2020-11-09",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/bba99785818790d03b98e175703fe4c0c93e55c040b6fe43b9058ab5423c9c4a.html",
+            "raw_sha256": "bba99785818790d03b98e175703fe4c0c93e55c040b6fe43b9058ab5423c9c4a",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/94bc9e2880f38d133656d7ac550efeba0d92499ec09ad6fc39a3789839bc28a5.txt",
+            "normalized_sha256": "94bc9e2880f38d133656d7ac550efeba0d92499ec09ad6fc39a3789839bc28a5",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/01-lonza-agreement.txt",
+            "upload_sha256": "0fe24f756e307e38edcd7d1f984395801c5d98e94458660f4be48f9fba01898e",
+            "artifact_id": "art_0fe24f756e307e38edcd7d1f984395801c5d98e94458660f4be48f9fba01898e",
             "span": {
-              "char_end": 65145,
-              "char_start": 64065
+              "char_end": 53737,
+              "char_start": 52594
             },
-            "source_excerpt": "rce majeure event affecting the other party. Under the Siegfried Agreement, we have the right to and may purchase the API for lumateperone from other suppliers. As of December 31, 2022, the Company has committed to purchasing production campaigns of API and intermediate product from Siegfried that are expected to be delivered in 2023 and 2024.\n\nThe Lonza Manufacturing Services Agreement\n\nOn January 10, 2017, we entered into a manufacturing services agreement, as amended on December 19, 2022, or the Lonza Agreement, with Lonza Ltd., or Lonza. Under the Lonza Agreement, Lonza has agreed to manufacture and supply the API for lumateperone, with purchase prices specified based on the volume produced. We agreed to provide Lonza with a written forecast of our estimated quarterly requirements. On December 19, 2022, the Lonza Agreement was amended to, among other items, extend the current term of the agreement until December 31, 2028 and provide for certain minimum annual purchase commitments by the Company for the years 2025 through 2028 for delivery in 2026 through 2029.",
+            "source_excerpt": "This Agreement shall commence on the Effective Date and shall end on the seventh (7th) anniversary of the Effective Date, or the fifth (5th) anniversary of Approval, whichever is longer, unless terminated earlier as provided herein\nor extended by mutual written consent of the Parties (the “Term”). Notwithstanding the foregoing, each Project Plan may have separate term and termination provisions so long as the term of any Project Plan does not extend beyond the Term.\n\n14.2\n\nTermination. This Agreement may be terminated as follows:\n\n14.2.1\n\nby either Party for any reason upon twenty-four (24) months prior written notice to the other Party;\n\n14.2.2\n\nby either Party if the other Party breaches a material provision of this Agreement or a Project Plan and\nfails to cure such breach to the reasonable satisfaction of the non-breaching Party within [***] for non-payment) following written notification of such breach from the non-breaching party to the breaching party; provided, however, that such [***] period shall be extended as agreed by the Parties if the identified breach is incapable of cure within [***] and if the breaching Party",
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_8c873216949add76d4c6971b287a659b03c4c3b186ca16b118cb64d56835ec53",
+            "citation_ref": "evidence_chunk:chunk_8e9eda813f5f480b5aa124cc1d1acf3395172c385ba7209477d51f52f26335bd",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/03-itci-2022-10k.txt",
             "source_id": "edgar-itci-lonza-manufacturing-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/d436875d10k.htm",
@@ -1042,6 +1019,29 @@
             },
             "source_excerpt": "ining the safety or effectiveness of the product after clinical studies begin, or if the sponsor fails to follow the protocol that was agreed upon with the FDA. There is no guarantee that a study will ultimately be adequate to support an approval even if the study is subject to an SPA.\n\nConcurrent with clinical trials, companies usually complete additional animal safety studies and must also develop additional information about the chemistry and physical characteristics of the drug and finalize a process for manufacturing the product in accordance with cGMP requirements. The manufacturing process must be capable of consistently producing quality batches of the drug candidate and the manufacturer must develop methods for testing the quality, purity and potency of the final drugs. Additionally, appropriate packaging must be selected and tested and stability studies must be conducted to demonstrate that the drug candidate does not undergo unacceptable deterioration over its shelf life.",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_fea2acff4e0c285581585c994ce9352e12c263025e6153f10363520c0800b591",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/03-itci-2022-10k.txt",
+            "source_id": "edgar-itci-lonza-manufacturing-source-03",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/d436875d10k.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1567514/000119312523055176/0001193125-23-055176-index.html",
+            "accession_number": "0001193125-23-055176",
+            "form_type": "10-K",
+            "filing_date": "2023-03-01",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/52e49d6899c764079ff1b8c9bbaec6d9365155837398a94523d8042c755278f6.html",
+            "raw_sha256": "52e49d6899c764079ff1b8c9bbaec6d9365155837398a94523d8042c755278f6",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/94c57cd1c4a6c91dee790cc3675649a9068908c27e7c4dd8b3ea66b50159a93e.txt",
+            "normalized_sha256": "94c57cd1c4a6c91dee790cc3675649a9068908c27e7c4dd8b3ea66b50159a93e",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-itci-lonza-manufacturing/upload/03-itci-2022-10k.txt",
+            "upload_sha256": "a95ec8821c2ddb4345a36a6418597aa5474ba43b746ae9e7a482a0399c5c5dc0",
+            "artifact_id": "art_a95ec8821c2ddb4345a36a6418597aa5474ba43b746ae9e7a482a0399c5c5dc0",
+            "span": {
+              "char_end": 65145,
+              "char_start": 64065
+            },
+            "source_excerpt": "rce majeure event affecting the other party. Under the Siegfried Agreement, we have the right to and may purchase the API for lumateperone from other suppliers. As of December 31, 2022, the Company has committed to purchasing production campaigns of API and intermediate product from Siegfried that are expected to be delivered in 2023 and 2024.\n\nThe Lonza Manufacturing Services Agreement\n\nOn January 10, 2017, we entered into a manufacturing services agreement, as amended on December 19, 2022, or the Lonza Agreement, with Lonza Ltd., or Lonza. Under the Lonza Agreement, Lonza has agreed to manufacture and supply the API for lumateperone, with purchase prices specified based on the volume produced. We agreed to provide Lonza with a written forecast of our estimated quarterly requirements. On December 19, 2022, the Lonza Agreement was amended to, among other items, extend the current term of the agreement until December 31, 2028 and provide for certain minimum annual purchase commitments by the Company for the years 2025 through 2028 for delivery in 2026 through 2029.",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -1054,17 +1054,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What prior amendment effect do the parties state they are cancelling in the Fifth Amendment?",
-        "answer_id": "answer_27312f91f542120d",
+        "answer_id": "answer_dc98d635c514d933",
         "answer": "The Parties cancel the effect of the Fourth Amendment to the Development Agreement.",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_633d24c133ffa2ce15811e0c71311ba887ac594b7876b16f3e4c8a236750596e"
+          "evidence_chunk:chunk_647eedd38db14a7cc1eb91bd70854a5df479cd960a53178ad3414ac3b3f7a084"
         ],
         "supporting_result_count": 4,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_633d24c133ffa2ce15811e0c71311ba887ac594b7876b16f3e4c8a236750596e",
+            "citation_ref": "evidence_chunk:chunk_647eedd38db14a7cc1eb91bd70854a5df479cd960a53178ad3414ac3b3f7a084",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/03-itochu-amendment.txt",
             "source_id": "edgar-scilex-oishi-itochu-development-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-39.htm",
@@ -1092,7 +1092,7 @@
       },
       "unanswerable": {
         "question": "What signed commercial terms would an alternate supplier offer?",
-        "answer_id": "answer_24f4e11fa64624d7",
+        "answer_id": "answer_5f6475a9b31cd03d",
         "answer": "The provided evidence does not answer the question \"What signed commercial terms would an alternate supplier offer?\".",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -1100,30 +1100,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_022632cf98db346ac3cade2788944843b0932dc8c20520c15141850241e7dbed",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
-            "source_id": "edgar-scilex-oishi-itochu-development-source-04",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/0001104659-22-081279-index.html",
-            "accession_number": "0001104659-22-081279",
-            "form_type": "S-4/A",
-            "filing_date": "2022-07-21",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559.html",
-            "raw_sha256": "f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52.txt",
-            "normalized_sha256": "f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
-            "upload_sha256": "edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
-            "artifact_id": "art_edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
-            "span": {
-              "char_end": 3959,
-              "char_start": 2944
-            },
-            "source_excerpt": "bination. Moreover, the technology that was sold by Aardvark to Sorrento (and ultimately Scilex) is in early pre-market stages with little value assigned to it. The potential royalty and milestone payments Aardvark may receive in the future are not likely to be significant to Aardvark nor received for many years. Aardvark has no ownership interest in Scilex.\n\nThe Vickers Board also determined, without seeking a valuation from a financial advisor, that Scilex’s fair market value was at least 80% of Vickers’s net assets, excluding any deferred underwriting commissions and taxes payable on interest earned, at the time of signing the Merger Agreement. Accordingly, investors will be relying on the judgment of the Vickers Board as described above in valuing Scilex’s business and assuming the risk that the Vickers Board may not have properly valued such business.\n\nQ:\n\nDo any of Vickers’s directors or officers have interests that may conflict with my interests with respect to the Business Combination?\n\n​\n\nA:",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_68d799539adfacd3349542da1776c0253b0fc91cc2b427ff78e387af949bb168",
+            "citation_ref": "evidence_chunk:chunk_25e8cf128389ea4e175aa20e4333eb60f5a6a790753b855b269c08473769b7a6",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/01-oishi-development.txt",
             "source_id": "edgar-scilex-oishi-itochu-development-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-34.htm",
@@ -1146,30 +1123,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_797a2df40234ca1ea702b3efcd04fb22d274b7e44c4ab5503fa37ef333502581",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
-            "source_id": "edgar-scilex-oishi-itochu-development-source-04",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/0001104659-22-081279-index.html",
-            "accession_number": "0001104659-22-081279",
-            "form_type": "S-4/A",
-            "filing_date": "2022-07-21",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559.html",
-            "raw_sha256": "f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52.txt",
-            "normalized_sha256": "f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
-            "upload_sha256": "edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
-            "artifact_id": "art_edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
-            "span": {
-              "char_end": 65715,
-              "char_start": 64631
-            },
-            "source_excerpt": "ng Date in all material respects, unless the applicable obligation has a materiality qualifier in which case it shall be duly performed in all respects.\n\n​\n\n•\n\nAll of the representations and warranties of Scilex contained in the Merger Agreement disregarding all qualifications and exceptions contained herein relating to materiality or Material Adverse Effect (as such term is defined in the Merger Agreement) with respect to Scilex, regardless of whether it involved a known risk, shall be true and correct at and as of the date of the Merger Agreement, and be true and correct as of the Closing Date (other than, in each case, if the representations and warranties that speak as of a specific date, then such representations and warranties need only to be true and correct as of such date), other than as would not in the aggregate reasonably be expected to have a Material Adverse Effect with respect to Scilex.\n\n​\n\n•\n\nSince the date the Merger Agreement was signed, no Material Adverse Effect has occurred that is continuing, regardless of whether it involved a known risk.\n\n​\n\n•",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_98367e6241d46fc3533abdc4b1d50ce0f86958a5d2952fac323a480493cfd69a",
+            "citation_ref": "evidence_chunk:chunk_53f4feb74346fd4e3d30aef875df943f0cd44a67226fcd5bb2e87dab1c9e8b80",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/01-oishi-development.txt",
             "source_id": "edgar-scilex-oishi-itochu-development-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-34.htm",
@@ -1192,7 +1146,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_ba25c88f773c1120e090493e1106e3e6f1f3f1ce4ba2fbffb7177c915e1e94cc",
+            "citation_ref": "evidence_chunk:chunk_610bace9459ef32e3c4c34a8530fc9e3b7c9ff8471adbe035bc6203a731e7acc",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/03-itochu-amendment.txt",
             "source_id": "edgar-scilex-oishi-itochu-development-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659d7_ex10-39.htm",
@@ -1213,6 +1167,52 @@
             },
             "source_excerpt": "more consecutive quarters, or\n\n(b)\n\nthe Product’s economic viability is affected significantly as evidenced by documentation and substantial information by any\nexternal circumstance deemed to be detrimental to both Scilex and Developers and agreed to by both Parties,\n\nthen the Parties shall immediately, at\neither Party’s request, in good faith meet and discuss the terms of the Agreement in an attempt to resolve the Parties’ concerns\nin a mutually acceptable manner. If after a period of thirty (30) days of such good-faith discussions the Parties are unable to reach\nan agreement resolving such concerns, either Party shall have the right to immediately terminate the Agreement upon giving prior written\nnotice to the other Party and if Scilex shall terminate the Agreement, Scilex shall discontinue sales of the Product after all inventories\nare sold and such sales shall continue to be subject to the profit split provided in this Agreement.”\n\n3.              No\nOther Amendment. Except as expressly provided in this Amendment, all terms, conditions and provisions\nof the Development Agreement, as amended, shall apply and remain in full force and effect.",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_9b6cbd8606b83d7d1858618c592500aeeac4fa271fe3253b2999eb856f223b6f",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
+            "source_id": "edgar-scilex-oishi-itochu-development-source-04",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/0001104659-22-081279-index.html",
+            "accession_number": "0001104659-22-081279",
+            "form_type": "S-4/A",
+            "filing_date": "2022-07-21",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559.html",
+            "raw_sha256": "f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52.txt",
+            "normalized_sha256": "f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
+            "upload_sha256": "edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
+            "artifact_id": "art_edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
+            "span": {
+              "char_end": 73053,
+              "char_start": 71853
+            },
+            "source_excerpt": "Merger Sub is then in material breach of any representation, warranty, covenant, or obligation under the Merger Agreement, which breach has not been cured;\n\n•\n\nby Scilex, if any of the representations or warranties of Vickers or Merger Sub set forth in the Merger Agreement shall not be true and correct, or if Vickers or Merger Sub has failed to perform any covenant or agreement on its part set forth in the Merger Agreement (including an obligation to consummate the Closing), in each case such that the conditions to Scilex’s obligations to consummate the Business Combination with respect to the accuracy of Vickers’s and Merger Sub’s representations and warranties or compliance with their covenants and agreements, in each case, as set forth in the Merger Agreement, would not be satisfied and the breach or breaches causing such representations or warranties not to be true and correct, or the failure to perform any covenant or agreement, as applicable, are not cured (or waived by Scilex) by the earlier of (i) the Outside Date or (ii) 30 days after written notice thereof is delivered to Vickers; provided, however, that Scilex shall not have the right to terminate the Merger Agreement pu",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_ba6cd015644c96dfe1e28ce03d21d6bf3a0a1caa046e1069c308c2be1dc567ae",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
+            "source_id": "edgar-scilex-oishi-itochu-development-source-04",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/tm2214659-6_s4a.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1820190/000110465922081279/0001104659-22-081279-index.html",
+            "accession_number": "0001104659-22-081279",
+            "form_type": "S-4/A",
+            "filing_date": "2022-07-21",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559.html",
+            "raw_sha256": "f21deff99ccf8433d4b12e3bc2bf4c26c98a7af0f88073d7da12457326737559",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52.txt",
+            "normalized_sha256": "f287c6ddcb14f19edaf94d01c6df3d97158658d3663a3fabe75f85bb62516d52",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-scilex-oishi-itochu-development/upload/04-scilex-s4a.txt",
+            "upload_sha256": "edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
+            "artifact_id": "art_edc7143c03a4d16331b67ba04d9719405ec2a9c75579785b64780e5a3553808d",
+            "span": {
+              "char_end": 65715,
+              "char_start": 64631
+            },
+            "source_excerpt": "ng Date in all material respects, unless the applicable obligation has a materiality qualifier in which case it shall be duly performed in all respects.\n\n​\n\n•\n\nAll of the representations and warranties of Scilex contained in the Merger Agreement disregarding all qualifications and exceptions contained herein relating to materiality or Material Adverse Effect (as such term is defined in the Merger Agreement) with respect to Scilex, regardless of whether it involved a known risk, shall be true and correct at and as of the date of the Merger Agreement, and be true and correct as of the Closing Date (other than, in each case, if the representations and warranties that speak as of a specific date, then such representations and warranties need only to be true and correct as of such date), other than as would not in the aggregate reasonably be expected to have a Material Adverse Effect with respect to Scilex.\n\n​\n\n•\n\nSince the date the Merger Agreement was signed, no Material Adverse Effect has occurred that is continuing, regardless of whether it involved a known risk.\n\n​\n\n•",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -1225,17 +1225,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "According to Section 13.1, what event marks the end of the original GEMA Agreement's Initial Term?",
-        "answer_id": "answer_275a3d5f066fbf44",
+        "answer_id": "answer_eeff658351efb906",
         "answer": "twentieth (20th) anniversary of the date of receipt of approval by a Regulatory Authority of the first Regulatory Filing for the marketing and sale of the first Product in any country",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_8a0164fe598b836fe39f4854071fe4031ec45deb8f3ee071005a90cea42d5a7d"
+          "evidence_chunk:chunk_400b490eea1f33269d2b683d9909dd019aac878be97333aed52620208ec266dd"
         ],
         "supporting_result_count": 3,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_8a0164fe598b836fe39f4854071fe4031ec45deb8f3ee071005a90cea42d5a7d",
+            "citation_ref": "evidence_chunk:chunk_400b490eea1f33269d2b683d9909dd019aac878be97333aed52620208ec266dd",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
             "source_id": "edgar-savara-gema-supply-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/svra-ex101_531.htm",
@@ -1263,7 +1263,7 @@
       },
       "unanswerable": {
         "question": "Which second source has completed validation and demonstrated regulatory equivalence?",
-        "answer_id": "answer_61e09779acbab1e3",
+        "answer_id": "answer_a1654798c131b0ef",
         "answer": "The provided evidence does not identify which second source has completed validation and demonstrated regulatory equivalence.",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -1271,30 +1271,30 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_4ad2cf77de30ed27910cfbeee1fe6d67c36cf2fd6ad5fb814e7bb707ee3e80ee",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/03-savara-2022-10k.txt",
-            "source_id": "edgar-savara-gema-supply-source-03",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/svra-20221231.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/0000950170-23-010967-index.html",
-            "accession_number": "0000950170-23-010967",
-            "form_type": "10-K",
-            "filing_date": "2023-03-30",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/ad3b91401886e96f8b4b875f4fee986dc81d5b19ebe25758fb3b8f1ad4a58fd5.html",
-            "raw_sha256": "ad3b91401886e96f8b4b875f4fee986dc81d5b19ebe25758fb3b8f1ad4a58fd5",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/9f4c638cde7bcdffdc75eb11fc50f8cbf8f8b2064350f1ebdc9ea0a11be4ef2f.txt",
-            "normalized_sha256": "9f4c638cde7bcdffdc75eb11fc50f8cbf8f8b2064350f1ebdc9ea0a11be4ef2f",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/03-savara-2022-10k.txt",
-            "upload_sha256": "12707e2df8a64190415fe983a8c31e26eb4925df3e962f619e5072e31476f371",
-            "artifact_id": "art_12707e2df8a64190415fe983a8c31e26eb4925df3e962f619e5072e31476f371",
+            "citation_ref": "evidence_chunk:chunk_1c13faadf9cd34c4760e0af82b35d6db317dad4a1a96e88665d9e0c9fa07b9d2",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
+            "source_id": "edgar-savara-gema-supply-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/svra-ex101_531.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/0001564590-19-017983-index.html",
+            "accession_number": "0001564590-19-017983",
+            "form_type": "EX-10.1",
+            "filing_date": "2019-05-09",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/c0ff1ec66e67e916462caf849d88974a729a9c2fa9021bd5e76dc2180525559f.html",
+            "raw_sha256": "c0ff1ec66e67e916462caf849d88974a729a9c2fa9021bd5e76dc2180525559f",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/61c7fd2687bd8f37cd461159d339d1855e181fcd08b7d0bd2cfb96e79ad0ece3.txt",
+            "normalized_sha256": "61c7fd2687bd8f37cd461159d339d1855e181fcd08b7d0bd2cfb96e79ad0ece3",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
+            "upload_sha256": "4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
+            "artifact_id": "art_4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
             "span": {
-              "char_end": 25296,
-              "char_start": 24152
+              "char_end": 72134,
+              "char_start": 71082
             },
-            "source_excerpt": "volving liquidity, defaults, or non-performance, could adversely affect our operations and liquidity.\n\nRisks Related to Our Business Strategy and Operations\n\n•\nWe are substantially dependent upon the clinical, regulatory, and commercial success of our product candidate, molgramostim.\n\n•\nIf we fail to attract and retain senior management and key scientific personnel and develop and maintain relationships with service providers, consultants and advisers, we may be unable to successfully develop and commercialize our product candidate.\n\n•\nWe do not have, and do not have plans to, establish commercial manufacturing facilities. We completely rely on third parties for the manufacture and supply of our clinical trial drug and delivery device supplies and, if approved, commercial product materials.\n\n•\nThe company intends to establish a redundant supply chain with second sources of drug substance and drug product manufacture. If the product manufactured at the second sources of manufacture is not demonstrated to be comparable with materials used in the clinical program, we will not be able to commercialize from these second sources.\n\n•",
+            "source_excerpt": "determined under Section 14.3 to be in material breach of this Agreement and has failed to cure such breach within the time period provided in this Section13.2. It is understood and acknowledged that during the pendency of such a Dispute, all of the terms and conditions of this Agreement shall remain in effect and the Parties shall continue to perform all of their respective obligations hereunder.\n\n13.3Termination by SAVARA.\n\n13.3.1Non-Commercialization of Product. SAVARA may terminate this Agreement immediately upon written notice to GEMA if: (a) SAVARA, in its sole discretion, determines that API or Products incorporating API shall not be marketed or shall be withdrawn from the market; or (b) the FDA or other Regulatory Authority withdraws marketing approval for, or fails to approve, the Manufacturing or marketing of API or Products incorporating API or SAVARA reasonably believes that the FDA or other Regulatory Authority will take (or, as context requires, fail to take) any such action.\n\n13.3.2Failure to Meet Regulatory Requirements.",
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_9f0e4205a67937ca8d962d338bb3015348f0f402b95915084d71792eeff78214",
+            "citation_ref": "evidence_chunk:chunk_45959ba8545e040b723fe6a6171ed41e493f3971b8aa1dfdc116b818f6a42a14",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/03-savara-2022-10k.txt",
             "source_id": "edgar-savara-gema-supply-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/svra-20221231.htm",
@@ -1317,30 +1317,30 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_bcd0e0df9cc7b6b68d6b3407a59cfa385dd003f511b1884891ea4884d8211715",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
-            "source_id": "edgar-savara-gema-supply-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/svra-ex101_531.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/0001564590-19-017983-index.html",
-            "accession_number": "0001564590-19-017983",
-            "form_type": "EX-10.1",
-            "filing_date": "2019-05-09",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/c0ff1ec66e67e916462caf849d88974a729a9c2fa9021bd5e76dc2180525559f.html",
-            "raw_sha256": "c0ff1ec66e67e916462caf849d88974a729a9c2fa9021bd5e76dc2180525559f",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/61c7fd2687bd8f37cd461159d339d1855e181fcd08b7d0bd2cfb96e79ad0ece3.txt",
-            "normalized_sha256": "61c7fd2687bd8f37cd461159d339d1855e181fcd08b7d0bd2cfb96e79ad0ece3",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
-            "upload_sha256": "4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
-            "artifact_id": "art_4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
+            "citation_ref": "evidence_chunk:chunk_5e85fdbbb8874dd73a00d5f606c03ee1ca75ca8fbd5a13fc626fd19862575e4a",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/03-savara-2022-10k.txt",
+            "source_id": "edgar-savara-gema-supply-source-03",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/svra-20221231.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/0000950170-23-010967-index.html",
+            "accession_number": "0000950170-23-010967",
+            "form_type": "10-K",
+            "filing_date": "2023-03-30",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/ad3b91401886e96f8b4b875f4fee986dc81d5b19ebe25758fb3b8f1ad4a58fd5.html",
+            "raw_sha256": "ad3b91401886e96f8b4b875f4fee986dc81d5b19ebe25758fb3b8f1ad4a58fd5",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/9f4c638cde7bcdffdc75eb11fc50f8cbf8f8b2064350f1ebdc9ea0a11be4ef2f.txt",
+            "normalized_sha256": "9f4c638cde7bcdffdc75eb11fc50f8cbf8f8b2064350f1ebdc9ea0a11be4ef2f",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/03-savara-2022-10k.txt",
+            "upload_sha256": "12707e2df8a64190415fe983a8c31e26eb4925df3e962f619e5072e31476f371",
+            "artifact_id": "art_12707e2df8a64190415fe983a8c31e26eb4925df3e962f619e5072e31476f371",
             "span": {
-              "char_end": 42769,
-              "char_start": 42035
+              "char_end": 25296,
+              "char_start": 24152
             },
-            "source_excerpt": "For clarity, GEMA’s rights under this Section 7.2 shall be in addition to and shall not limit SAVARA’s right to conduct inspections and audits pursuant to Section 7.1.1 above.\n\n11\n\n7.3Records. GEMA shall generate and maintain complete and accurate records (including, files, certificates and authorizations) and samples as necessary to evidence compliance with this Agreement and all applicable Laws, Regulatory Requirements and other requirements of applicable governmental authorities relating to the Manufacture of API, including, all Validation data, stability testing data, certificates of analysis, batch records, quality control and laboratory testing, and any other data required under cGMPs and other Regulatory Requirements.",
+            "source_excerpt": "volving liquidity, defaults, or non-performance, could adversely affect our operations and liquidity.\n\nRisks Related to Our Business Strategy and Operations\n\n•\nWe are substantially dependent upon the clinical, regulatory, and commercial success of our product candidate, molgramostim.\n\n•\nIf we fail to attract and retain senior management and key scientific personnel and develop and maintain relationships with service providers, consultants and advisers, we may be unable to successfully develop and commercialize our product candidate.\n\n•\nWe do not have, and do not have plans to, establish commercial manufacturing facilities. We completely rely on third parties for the manufacture and supply of our clinical trial drug and delivery device supplies and, if approved, commercial product materials.\n\n•\nThe company intends to establish a redundant supply chain with second sources of drug substance and drug product manufacture. If the product manufactured at the second sources of manufacture is not demonstrated to be comparable with materials used in the clinical program, we will not be able to commercialize from these second sources.\n\n•",
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_cef6831fd8c0b6961a8e990315f6bae1997e5db59838b98686be6e2efb1d6e49",
+            "citation_ref": "evidence_chunk:chunk_70ddd4324056f49bb189e4bf2c75d5ddad13f6505a2b2617483e55c8fe2a1eb4",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/02-gema-amendment.txt",
             "source_id": "edgar-savara-gema-supply-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000095017023010967/svra-ex10_33.htm",
@@ -1363,7 +1363,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_efd68be174abe65252a91d76f84d044e002ad4643db46e8bd616ca98d1932cd9",
+            "citation_ref": "evidence_chunk:chunk_db240d192c0a213de1c9bed5f3d4e5d98b722d79e284a71c9cdfc875e84289a5",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-savara-gema-supply/upload/01-gema-agreement.txt",
             "source_id": "edgar-savara-gema-supply-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1160308/000156459019017983/svra-ex101_531.htm",
@@ -1379,10 +1379,10 @@
             "upload_sha256": "4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
             "artifact_id": "art_4a0b0dbfab244bed6abff19db5f18b42cfcd522ad740f500497ae461210f6741",
             "span": {
-              "char_end": 11904,
-              "char_start": 10767
+              "char_end": 42769,
+              "char_start": 42035
             },
-            "source_excerpt": "f invoices provided by GEMA with respect to such API, and testing and acceptance or rejection of such API.\n\nArticle 3\n\nMANUFACTURING AND PROCESSING aCTIVITIES\n\n3.1Commercial Compliance. GEMA shall take all actions and do all things necessary, proper or advisable to consummate, make effective, and comply with all Regulatory Requirements, including implementing the modifications to the Manufacturing Facilities set forth in Exhibit 3.1, and to obtain and maintain all governmental registrations, permits, licenses and approvals necessary for GEMA to Manufacture the API supplied under this Agreement (“Commercial Compliance”). SAVARA will use commercially reasonable efforts to respond to GEMA’s reasonable questions with respect to obtaining and maintaining such Commercial Compliance. GEMA shall complete the activities to achieve Commercial Compliance as soon as reasonably practical but in no event later than six (6) months prior to the Anticipated Launch Date. Prior to achievement of Commercial Compliance, GEMA shall continue to supply to SAVARA API in accordance with this Agreement.\n\n3.2Sourcing of Materials.\n\n3.2.1Materials.",
+            "source_excerpt": "For clarity, GEMA’s rights under this Section 7.2 shall be in addition to and shall not limit SAVARA’s right to conduct inspections and audits pursuant to Section 7.1.1 above.\n\n11\n\n7.3Records. GEMA shall generate and maintain complete and accurate records (including, files, certificates and authorizations) and samples as necessary to evidence compliance with this Agreement and all applicable Laws, Regulatory Requirements and other requirements of applicable governmental authorities relating to the Manufacture of API, including, all Validation data, stability testing data, certificates of analysis, batch records, quality control and laboratory testing, and any other data required under cGMPs and other Regulatory Requirements.",
             "retrieved_context_only": true
           }
         ],
@@ -1396,17 +1396,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "On what date does the Master Agreement state that its Initial Term expires?",
-        "answer_id": "answer_0592d9efc0d27cfd",
+        "answer_id": "answer_54ed5c35be4965f6",
         "answer": "February 14, 2014",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_16fc7f35457e0be66ecdd48324628780bf408e5ee65b11b6676883c0900215cd"
+          "evidence_chunk:chunk_d3b613b3d924aa3902943808ca6e8c1fe2a1f31537dd5082190241c72d249995"
         ],
         "supporting_result_count": 3,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_16fc7f35457e0be66ecdd48324628780bf408e5ee65b11b6676883c0900215cd",
+            "citation_ref": "evidence_chunk:chunk_d3b613b3d924aa3902943808ca6e8c1fe2a1f31537dd5082190241c72d249995",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/01-ibm-outsourcing-agreement.txt",
             "source_id": "edgar-healthnet-ibm-outsourcing-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312508230367/dex101.htm",
@@ -1434,7 +1434,7 @@
       },
       "unanswerable": {
         "question": "What independently verified root cause and completed remediation record closed the missing-drive incident?",
-        "answer_id": "answer_404536bc3c239154",
+        "answer_id": "answer_0ff7bba302482eb2",
         "answer": "The provided evidence does not answer the question \"What independently verified root cause and completed remediation record closed the missing-drive incident?\".",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -1442,7 +1442,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_0adbf5fa97869e03879b478645cbaafd5eeae7895b33d0b528c08a06b827146e",
+            "citation_ref": "evidence_chunk:chunk_206948e30db72f8ec0994d2bb340abc63a077f97d17e170bf2db8157d2b19012",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/03-healthnet-2012-10k.txt",
             "source_id": "edgar-healthnet-ibm-outsourcing-source-03",
             "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000091608513000004/hnt201210k.htm",
@@ -1465,53 +1465,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_55c74a4e18668fa0d40729887b8a203d89c9297491baa2cc06136981d1b703e0",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/01-ibm-outsourcing-agreement.txt",
-            "source_id": "edgar-healthnet-ibm-outsourcing-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312508230367/dex101.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312508230367/0001193125-08-230367-index.html",
-            "accession_number": "0001193125-08-230367",
-            "form_type": "EX-10.1",
-            "filing_date": "2008-11-10",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/7537592cb07c3f168d6b16dded64f16fc6af095c27e57b3512980839a158f6b2.html",
-            "raw_sha256": "7537592cb07c3f168d6b16dded64f16fc6af095c27e57b3512980839a158f6b2",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/22392feac3a85cc45a7ef0a52f6a49e454f2166e6b5e34dbd7e716658206ac3c.txt",
-            "normalized_sha256": "22392feac3a85cc45a7ef0a52f6a49e454f2166e6b5e34dbd7e716658206ac3c",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/01-ibm-outsourcing-agreement.txt",
-            "upload_sha256": "72127297ac5403fd059c8ac8a8003b40670156587e1c17979878a600c45fb462",
-            "artifact_id": "art_72127297ac5403fd059c8ac8a8003b40670156587e1c17979878a600c45fb462",
-            "span": {
-              "char_end": 85705,
-              "char_start": 84628
-            },
-            "source_excerpt": "Neither Health Net nor Supplier will be required to disclose to the Benchmarker actual performance against Service Levels or other actual performance comparison.\n\n(vii)\n\nDuring the thirty (30) day period after the Benchmarker completes the data gathering, but before the Benchmarker has concluded the Benchmark analysis, Health Net and Supplier\nwill have an opportunity to consult with the Benchmarker about how such data gathering activities conformed to the agreed Benchmark process.\n\nGeneral Terms and Conditions-\n\n26\n\nHealth Net / IBM Confidential\n\nFinal Execution Version\n\n(viii)\n\nHealth Net and Supplier agree to participate jointly in all discussions with the Benchmarker and to cooperate reasonably with the Benchmarker in the benchmark activities; provided,\nhowever, in no event will Supplier be required to provide the Benchmarker with Supplier data about Supplier’s underlying actual costs and/or cost structure (unless the charges are based on “cost-plus” or are for Managed As\nPass-Through or Pure Pass-Through pricing) or data from other Supplier customers.\n\n(ix)",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_89e24196da0538ca76350b904f5629e239ed70e05fc3e082c54bf89ff87ac3ca",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/03-healthnet-2012-10k.txt",
-            "source_id": "edgar-healthnet-ibm-outsourcing-source-03",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000091608513000004/hnt201210k.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/916085/000091608513000004/0000916085-13-000004-index.html",
-            "accession_number": "0000916085-13-000004",
-            "form_type": "10-K",
-            "filing_date": "2013-03-01",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/8dacb1e86b982846b6544cbbf34e9a52de9ed109fdd925a198f853e06f54d91b.html",
-            "raw_sha256": "8dacb1e86b982846b6544cbbf34e9a52de9ed109fdd925a198f853e06f54d91b",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f2532cfd821590dd7e43cc5585a19ba204ee9c67094cd46695e2d5ee24593a40.txt",
-            "normalized_sha256": "f2532cfd821590dd7e43cc5585a19ba204ee9c67094cd46695e2d5ee24593a40",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/03-healthnet-2012-10k.txt",
-            "upload_sha256": "1697aa0715ebe47eb98b5bfb18fd0f5b31979844a33be39b393fb709047a7cb2",
-            "artifact_id": "art_1697aa0715ebe47eb98b5bfb18fd0f5b31979844a33be39b393fb709047a7cb2",
-            "span": {
-              "char_end": 21240,
-              "char_start": 20261
-            },
-            "source_excerpt": "d obligations of HNL as set forth in the related Asset Purchase Agreement. We recognized a $132.8 million pretax gain on the sale, or $114.8 million net of tax. We are subject to certain post-closing obligations in connection with the sale, including a prohibition against offering stand-alone Medicare PDP plans for one year following the closing, subject to certain exceptions. In addition, we provide Medicare PDP transition-related services to CVS Caremark in connection with the transaction. We have completed the majority of these services, but certain transition-related services are being provided in 2013. Among the other risks discussed above, if we are unable to reduce our general and administrative or other functions for our remaining operations, it could have an adverse impact on our business and financial condition.\n\n45\n\nThe value of our intangible assets may become impaired.\n\nGoodwill and other intangible assets represent a significant portion of our assets.",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_b0d0505a83118ac1c08f13e6af721742e80fc62e1bcc748b5a6b5e037c610c23",
+            "citation_ref": "evidence_chunk:chunk_78fd0ca12167c0c5123727e48281d0959fab59d15e070573d10f20e627fbada8",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/02-healthnet-2008-10k.txt",
             "source_id": "edgar-healthnet-ibm-outsourcing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312509039486/d10k.htm",
@@ -1534,7 +1488,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_e3765763c7070aee23b035e546bc8a25019531189e3a9afe9a1d4f39ff51e254",
+            "citation_ref": "evidence_chunk:chunk_9d370b2fa4c84728b8e10346f8d62a8b6ec0c691f54cc0f779997bf673dd62a8",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/02-healthnet-2008-10k.txt",
             "source_id": "edgar-healthnet-ibm-outsourcing-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312509039486/d10k.htm",
@@ -1555,6 +1509,52 @@
             },
             "source_excerpt": "bility to compete in our industry. Similarly, given the complexity and scope\nof rescission lawsuits, their final outcome cannot be predicted with any certainty. It is possible that in a particular quarter or annual period our results of operations could be adversely affected by an ultimate unfavorable resolution of these\ncases.\n\nProceedings Relating to Claims Payment Practices\n\nOn March 13, 2008, we entered into a final settlement agreement with the plaintiffs in the McCoy, Wachtel and Scharfman lawsuits, which were nationwide class actions principally relating to\nour out-of-network claims payment practices. We are currently in the process of implementing the terms of the settlement agreement. We were also the subject of a regulatory investigation conducted by the New Jersey Department of Banking and\nInsurance (“DOBI”) related principally to the timeliness and accuracy of our claims payment practices for services rendered by out-of-network providers in New Jersey. On August 26, 2008, we entered into a consent order with DOBI and\nagreed to remediate certain claims and pay a $13 million fine. We completed the remediation of the claims as of August 1, 2008.",
             "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_ef0eed76927f12d23ea68696a6d36b140b8849f83bbf935f5008eecad8795faf",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/01-ibm-outsourcing-agreement.txt",
+            "source_id": "edgar-healthnet-ibm-outsourcing-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312508230367/dex101.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/916085/000119312508230367/0001193125-08-230367-index.html",
+            "accession_number": "0001193125-08-230367",
+            "form_type": "EX-10.1",
+            "filing_date": "2008-11-10",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/7537592cb07c3f168d6b16dded64f16fc6af095c27e57b3512980839a158f6b2.html",
+            "raw_sha256": "7537592cb07c3f168d6b16dded64f16fc6af095c27e57b3512980839a158f6b2",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/22392feac3a85cc45a7ef0a52f6a49e454f2166e6b5e34dbd7e716658206ac3c.txt",
+            "normalized_sha256": "22392feac3a85cc45a7ef0a52f6a49e454f2166e6b5e34dbd7e716658206ac3c",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/01-ibm-outsourcing-agreement.txt",
+            "upload_sha256": "72127297ac5403fd059c8ac8a8003b40670156587e1c17979878a600c45fb462",
+            "artifact_id": "art_72127297ac5403fd059c8ac8a8003b40670156587e1c17979878a600c45fb462",
+            "span": {
+              "char_end": 85705,
+              "char_start": 84628
+            },
+            "source_excerpt": "Neither Health Net nor Supplier will be required to disclose to the Benchmarker actual performance against Service Levels or other actual performance comparison.\n\n(vii)\n\nDuring the thirty (30) day period after the Benchmarker completes the data gathering, but before the Benchmarker has concluded the Benchmark analysis, Health Net and Supplier\nwill have an opportunity to consult with the Benchmarker about how such data gathering activities conformed to the agreed Benchmark process.\n\nGeneral Terms and Conditions-\n\n26\n\nHealth Net / IBM Confidential\n\nFinal Execution Version\n\n(viii)\n\nHealth Net and Supplier agree to participate jointly in all discussions with the Benchmarker and to cooperate reasonably with the Benchmarker in the benchmark activities; provided,\nhowever, in no event will Supplier be required to provide the Benchmarker with Supplier data about Supplier’s underlying actual costs and/or cost structure (unless the charges are based on “cost-plus” or are for Managed As\nPass-Through or Pure Pass-Through pricing) or data from other Supplier customers.\n\n(ix)",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_f966324b62251b48a60549b4773c5bd4db2f06dea82ae1e63793a47b15fbba75",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/03-healthnet-2012-10k.txt",
+            "source_id": "edgar-healthnet-ibm-outsourcing-source-03",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/916085/000091608513000004/hnt201210k.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/916085/000091608513000004/0000916085-13-000004-index.html",
+            "accession_number": "0000916085-13-000004",
+            "form_type": "10-K",
+            "filing_date": "2013-03-01",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/8dacb1e86b982846b6544cbbf34e9a52de9ed109fdd925a198f853e06f54d91b.html",
+            "raw_sha256": "8dacb1e86b982846b6544cbbf34e9a52de9ed109fdd925a198f853e06f54d91b",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/f2532cfd821590dd7e43cc5585a19ba204ee9c67094cd46695e2d5ee24593a40.txt",
+            "normalized_sha256": "f2532cfd821590dd7e43cc5585a19ba204ee9c67094cd46695e2d5ee24593a40",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-healthnet-ibm-outsourcing/upload/03-healthnet-2012-10k.txt",
+            "upload_sha256": "1697aa0715ebe47eb98b5bfb18fd0f5b31979844a33be39b393fb709047a7cb2",
+            "artifact_id": "art_1697aa0715ebe47eb98b5bfb18fd0f5b31979844a33be39b393fb709047a7cb2",
+            "span": {
+              "char_end": 21240,
+              "char_start": 20261
+            },
+            "source_excerpt": "d obligations of HNL as set forth in the related Asset Purchase Agreement. We recognized a $132.8 million pretax gain on the sale, or $114.8 million net of tax. We are subject to certain post-closing obligations in connection with the sale, including a prohibition against offering stand-alone Medicare PDP plans for one year following the closing, subject to certain exceptions. In addition, we provide Medicare PDP transition-related services to CVS Caremark in connection with the transaction. We have completed the majority of these services, but certain transition-related services are being provided in 2013. Among the other risks discussed above, if we are unable to reduce our general and administrative or other functions for our remaining operations, it could have an adverse impact on our business and financial condition.\n\n45\n\nThe value of our intangible assets may become impaired.\n\nGoodwill and other intangible assets represent a significant portion of our assets.",
+            "retrieved_context_only": true
           }
         ],
         "reviewer_note": null,
@@ -1567,17 +1567,17 @@
       "archetype": "vendor_contract_renewal",
       "answerable": {
         "question": "What development-cost split, activity scope, and stated exceptions govern the collaboration agreement?",
-        "answer_id": "answer_a2cd4d68c3ae1e9d",
+        "answer_id": "answer_99ceace80fc37777",
         "answer": "Shared Global Development Activities costs: GSK bears sixty percent (60%) and ITEOS bears forty percent (40%), except Section 3.4 (Additional Development) and subject to Section 6.7 (ITEOS Opt-Out).",
         "label": "evidence_backed",
         "citation_refs": [
-          "evidence_chunk:chunk_355ac9405d074341bee375fe6bae5d3af4f0175488c394a0586b87ca3c93d895"
+          "evidence_chunk:chunk_83e48eac4e16b3ca1a64375078a76bda6aa6b1dd69adb8185a3adcfbae63672b"
         ],
         "supporting_result_count": 4,
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_355ac9405d074341bee375fe6bae5d3af4f0175488c394a0586b87ca3c93d895",
+            "citation_ref": "evidence_chunk:chunk_83e48eac4e16b3ca1a64375078a76bda6aa6b1dd69adb8185a3adcfbae63672b",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
             "source_id": "edgar-iteos-gsk-collaboration-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/itos-ex101_116.htm",
@@ -1605,7 +1605,7 @@
       },
       "unanswerable": {
         "question": "Which future clinical milestones will ultimately succeed and on what dates?",
-        "answer_id": "answer_41e57018f09d5ba8",
+        "answer_id": "answer_f9b902348284ca19",
         "answer": "The provided evidence does not identify which future clinical milestones will ultimately succeed and on what dates.",
         "label": "insufficient_evidence",
         "citation_refs": [],
@@ -1613,53 +1613,7 @@
         "citation_resolution_errors": [],
         "source_evidence": [
           {
-            "citation_ref": "evidence_chunk:chunk_0a7d8990c88ae0f4b7a289be0a9cb37a2e5c7913bf72557cdf2f4e5281a800b0",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/04-iteos-2022-10k.txt",
-            "source_id": "edgar-iteos-gsk-collaboration-source-04",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/itos-20221231.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/0000950170-23-007971-index.html",
-            "accession_number": "0000950170-23-007971",
-            "form_type": "10-K",
-            "filing_date": "2023-03-15",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/3bc62984b05699be4a780dc9454d93fb521d46cd16ffbc37840c616fd9b19d71.html",
-            "raw_sha256": "3bc62984b05699be4a780dc9454d93fb521d46cd16ffbc37840c616fd9b19d71",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/c5b1171bcb9eaf7794125a3f11f406ea3464371b6aaeaf8ca0d9d788b86bec00.txt",
-            "normalized_sha256": "c5b1171bcb9eaf7794125a3f11f406ea3464371b6aaeaf8ca0d9d788b86bec00",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/04-iteos-2022-10k.txt",
-            "upload_sha256": "20d48023c45ca27d0921ea4dc16262ef6170b88bbfb738bf16b85084c26d3b18",
-            "artifact_id": "art_20d48023c45ca27d0921ea4dc16262ef6170b88bbfb738bf16b85084c26d3b18",
-            "span": {
-              "char_end": 27237,
-              "char_start": 26118
-            },
-            "source_excerpt": "ur current and future operations and financial condition will depend on future developments, which are highly uncertain and cannot be predicted with confidence. Disruptions to the global economy, disruption of global healthcare systems, and other significant impacts of the COVID-19 pandemic could have a material adverse effect on our business, financial condition, results of operations and growth prospects. See “Risk factors” for a discussion of the potential adverse impact of COVID-19 on our business, results of operations and financial condition.\n\nComponents of our results of operations\n\nRevenue\n\nTo date, our revenues have been derived from the upfront payment associated with the GSK Collaboration Agreement.\n\nFor all collaboration agreements, no development or commercial milestones were included in the transaction price at inception, as all milestone amounts were fully constrained. As part of our evaluation of the constraint, we considered numerous factors, including that receipt of the milestones is outside our control and contingent upon success in future clinical trials and the licensee’s efforts.",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_166bbbe35d9f8c81e4b2728ffc6010ee88336c9217562470d804991c1dcdc0f2",
-            "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
-            "source_id": "edgar-iteos-gsk-collaboration-source-01",
-            "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/itos-ex101_116.htm",
-            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/0001564590-21-043439-index.html",
-            "accession_number": "0001564590-21-043439",
-            "form_type": "EX-10.1",
-            "filing_date": "2021-08-11",
-            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/4badf51e0700b13d8adec478e95244ed2adc104a67e89c57e3e5f678bde0a065.html",
-            "raw_sha256": "4badf51e0700b13d8adec478e95244ed2adc104a67e89c57e3e5f678bde0a065",
-            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/4356d137c3b6df7ae840c109f5a7d02fff88249cc81ba415577cdfb7d4f90e7c.txt",
-            "normalized_sha256": "4356d137c3b6df7ae840c109f5a7d02fff88249cc81ba415577cdfb7d4f90e7c",
-            "upload_path": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
-            "upload_sha256": "7d8c6879ee7eac5417df61cda706b910f9ded7b4d442ad716fec286dac3f0728",
-            "artifact_id": "art_7d8c6879ee7eac5417df61cda706b910f9ded7b4d442ad716fec286dac3f0728",
-            "span": {
-              "char_end": 87899,
-              "char_start": 86993
-            },
-            "source_excerpt": "The Clinical Trials set forth in the initial Global Development Plan attached hereto (other than any GSK Sole Development Activities therein) are the Clinical Trials that the Parties are committing to conduct as of the Effective Date (the “Committed Studies”). The Parties also plan to add additional non-clinical Development activities to the Global Development Plan following the Effective Date. The Global Development Plan and Global Development Budget will be updated by the Parties and submitted to the JDC for review and comment not less frequently than annually during the Term, in November of each Calendar Year. In addition, either Party may propose updates to the Global Development Plan and corresponding Global Development Budget from time to time during the Term. Each updated Global Development Budget will be provided to the Financial Working Group prior to being reviewed by the JDC or JSC.",
-            "retrieved_context_only": true
-          },
-          {
-            "citation_ref": "evidence_chunk:chunk_256610d0629259343fd1e09ec7e9c0ead6f08ea1083ab579f9cb8244b4037f59",
+            "citation_ref": "evidence_chunk:chunk_538fd618bab8d6660db58c37b769976241db03a44bfcd9e925eb9e87f15f994e",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
             "source_id": "edgar-iteos-gsk-collaboration-source-01",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/itos-ex101_116.htm",
@@ -1682,7 +1636,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_3ea3dbdc73746b09806d7a530060c5a083da5cd12647b3918937b53fd417f8e9",
+            "citation_ref": "evidence_chunk:chunk_8728b525ccbbe15575e4242f0c4aa76510867402bded2f6267ca3595bf216237",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/02-gsk-amendment.txt",
             "source_id": "edgar-iteos-gsk-collaboration-source-02",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/itos-ex10_14.htm",
@@ -1705,7 +1659,7 @@
             "retrieved_context_only": true
           },
           {
-            "citation_ref": "evidence_chunk:chunk_96593e6acd90f8c88053d716c7fc3988895a9fe1a50d2fc45e2f9325b6f44085",
+            "citation_ref": "evidence_chunk:chunk_8eebc82f5fe4b3f21d72e0fdfb6858174ab1ee812ba78b9c2823e08f53d10a6b",
             "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/04-iteos-2022-10k.txt",
             "source_id": "edgar-iteos-gsk-collaboration-source-04",
             "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/itos-20221231.htm",
@@ -1725,6 +1679,52 @@
               "char_start": 27015
             },
             "source_excerpt": "As part of our evaluation of the constraint, we considered numerous factors, including that receipt of the milestones is outside our control and contingent upon success in future clinical trials and the licensee’s efforts. Any consideration related to sales-based milestones will be recognized when the related sales occur as they were determined to relate predominantly to the license granted to GSK and therefore have also been excluded from the transaction price. We are applying the royalty exception for sales-based royalties and will not recognize revenue until the subsequent sale of product occurs.\n\nResearch and development expenses\n\nResearch and development expenses consist primarily of costs incurred for the development of our product candidates, which include:\n\n•\ncosts to obtain licenses to intellectual property and related future payments should certain success, development and regulatory milestones be achieved;\n\n•\nemployee-related expenses, including salaries, benefits and stock-based compensation expense;\n\n•",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_9d4a8c19ddc59f4648b00466121914e5c667358af4d4d34a5e38c26e04d6474f",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
+            "source_id": "edgar-iteos-gsk-collaboration-source-01",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/itos-ex101_116.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1808865/000156459021043439/0001564590-21-043439-index.html",
+            "accession_number": "0001564590-21-043439",
+            "form_type": "EX-10.1",
+            "filing_date": "2021-08-11",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/4badf51e0700b13d8adec478e95244ed2adc104a67e89c57e3e5f678bde0a065.html",
+            "raw_sha256": "4badf51e0700b13d8adec478e95244ed2adc104a67e89c57e3e5f678bde0a065",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/4356d137c3b6df7ae840c109f5a7d02fff88249cc81ba415577cdfb7d4f90e7c.txt",
+            "normalized_sha256": "4356d137c3b6df7ae840c109f5a7d02fff88249cc81ba415577cdfb7d4f90e7c",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/01-gsk-collaboration.txt",
+            "upload_sha256": "7d8c6879ee7eac5417df61cda706b910f9ded7b4d442ad716fec286dac3f0728",
+            "artifact_id": "art_7d8c6879ee7eac5417df61cda706b910f9ded7b4d442ad716fec286dac3f0728",
+            "span": {
+              "char_end": 87899,
+              "char_start": 86993
+            },
+            "source_excerpt": "The Clinical Trials set forth in the initial Global Development Plan attached hereto (other than any GSK Sole Development Activities therein) are the Clinical Trials that the Parties are committing to conduct as of the Effective Date (the “Committed Studies”). The Parties also plan to add additional non-clinical Development activities to the Global Development Plan following the Effective Date. The Global Development Plan and Global Development Budget will be updated by the Parties and submitted to the JDC for review and comment not less frequently than annually during the Term, in November of each Calendar Year. In addition, either Party may propose updates to the Global Development Plan and corresponding Global Development Budget from time to time during the Term. Each updated Global Development Budget will be provided to the Financial Working Group prior to being reviewed by the JDC or JSC.",
+            "retrieved_context_only": true
+          },
+          {
+            "citation_ref": "evidence_chunk:chunk_d8d601cd20d1248e220a16eb3e962b54186791933c679e4e8fd43a0b2d2e6a4d",
+            "source_ref": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/04-iteos-2022-10k.txt",
+            "source_id": "edgar-iteos-gsk-collaboration-source-04",
+            "source_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/itos-20221231.htm",
+            "filing_index_url": "https://www.sec.gov/Archives/edgar/data/1808865/000095017023007971/0000950170-23-007971-index.html",
+            "accession_number": "0000950170-23-007971",
+            "form_type": "10-K",
+            "filing_date": "2023-03-15",
+            "raw_path": "fixtures/vs5/edgar-eval/_shared/raw/sha256/3bc62984b05699be4a780dc9454d93fb521d46cd16ffbc37840c616fd9b19d71.html",
+            "raw_sha256": "3bc62984b05699be4a780dc9454d93fb521d46cd16ffbc37840c616fd9b19d71",
+            "normalized_path": "fixtures/vs5/edgar-eval/_shared/normalized/sha256/c5b1171bcb9eaf7794125a3f11f406ea3464371b6aaeaf8ca0d9d788b86bec00.txt",
+            "normalized_sha256": "c5b1171bcb9eaf7794125a3f11f406ea3464371b6aaeaf8ca0d9d788b86bec00",
+            "upload_path": "fixtures/vs5/edgar-eval/edgar-iteos-gsk-collaboration/upload/04-iteos-2022-10k.txt",
+            "upload_sha256": "20d48023c45ca27d0921ea4dc16262ef6170b88bbfb738bf16b85084c26d3b18",
+            "artifact_id": "art_20d48023c45ca27d0921ea4dc16262ef6170b88bbfb738bf16b85084c26d3b18",
+            "span": {
+              "char_end": 27237,
+              "char_start": 26118
+            },
+            "source_excerpt": "ur current and future operations and financial condition will depend on future developments, which are highly uncertain and cannot be predicted with confidence. Disruptions to the global economy, disruption of global healthcare systems, and other significant impacts of the COVID-19 pandemic could have a material adverse effect on our business, financial condition, results of operations and growth prospects. See “Risk factors” for a discussion of the potential adverse impact of COVID-19 on our business, results of operations and financial condition.\n\nComponents of our results of operations\n\nRevenue\n\nTo date, our revenues have been derived from the upfront payment associated with the GSK Collaboration Agreement.\n\nFor all collaboration agreements, no development or commercial milestones were included in the transaction price at inception, as all milestone amounts were fully constrained. As part of our evaluation of the constraint, we considered numerous factors, including that receipt of the milestones is outside our control and contingent upon success in future clinical trials and the licensee’s efforts.",
             "retrieved_context_only": true
           }
         ],
